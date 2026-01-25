@@ -1361,14 +1361,16 @@
   <!-- Confetti Container -->
   <div class="confetti" id="confetti"></div>
 
+  <script>
     // Loading screen
     const hideLoader = () => {
-  const loader = document.getElementById('loader');
-  if (loader) loader.classList.add('hidden');
-};
-window.addEventListener('load', () => setTimeout(hideLoader, 1200));
-setTimeout(hideLoader, 3000);
-    
+      const loader = document.getElementById('loader');
+      if (loader) loader.classList.add('hidden');
+    };
+    window.addEventListener('load', () => setTimeout(hideLoader, 1200));
+    setTimeout(hideLoader, 3000);
+
+  
     // Scroll Progress Bar
     const scrollProgress = document.getElementById('scrollProgress');
     window.addEventListener('scroll', () => {
