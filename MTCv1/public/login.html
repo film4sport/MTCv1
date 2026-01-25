@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Login | Mono Tennis Club</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    @font-face {
+      font-family: 'Gotham Rounded';
+      src: url('Gotham_Rounded_Medium.otf') format('opentype');
+      font-weight: 500;
+      font-style: normal;
+    }
+    
+    * {
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #1a1f12;
+      min-height: 100vh;
+      min-height: -webkit-fill-available;
+    }
+    
+    html {
+      height: -webkit-fill-available;
+    }
+    
+    .headline-font {
+      font-family: 'Gotham Rounded', sans-serif;
+      font-weight: 500;
+    }
+    
+    /* Safe area padding for notched phones */
+    .safe-area-top {
+      padding-top: env(safe-area-inset-top, 0);
+    }
+    .safe-area-bottom {
+      padding-bottom: env(safe-area-inset-bottom, 0);
+    }
+    
+    /* Phone Mockup - Desktop */
+    .phone-mockup {
+      width: 280px;
+      height: 580px;
+      background: #000;
+      border-radius: 40px;
+      padding: 12px;
+      box-shadow: 0 50px 100px rgba(0,0,0,0.5), 0 0 0 2px #333;
+      position: relative;
+    }
+    .phone-screen {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(180deg, #5a7a5a 0%, #6b8b6b 100%);
+      border-radius: 32px;
+      overflow: hidden;
+      position: relative;
+    }
+    .phone-notch {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 120px;
+      height: 28px;
+      background: #000;
+      border-radius: 0 0 20px 20px;
+      z-index: 10;
+    }
+    
+    /* Mobile App Preview Card */
+    .mobile-app-preview {
+      background: linear-gradient(135deg, #2d331f 0%, #1a1f12 100%);
+      border-radius: 20px;
+      padding: 20px;
+      margin-bottom: 24px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .mobile-preview-header {
+      background: linear-gradient(180deg, #e07b3c 0%, #d4a054 100%);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+    .mobile-preview-card {
+      background: white;
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 8px;
+    }
+    .mobile-preview-court {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+    }
+    .mobile-preview-court-item {
+      background: #f9fafb;
+      border-radius: 8px;
+      padding: 8px;
+      font-size: 0.65rem;
+      border-left: 3px solid;
+    }
+    
+    .app-nav {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 8px 18px;
+      background: white;
+      border-top: 1px solid #e5e7eb;
+    }
+    .app-nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      color: #9ca3af;
+      font-size: 0.5rem;
+      font-weight: 500;
+    }
+    .app-nav-item.active {
+      color: #5a7a5a;
+    }
+    .app-nav-item svg {
+      width: 18px;
+      height: 18px;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    /* Floating elements */
+    .float-badge {
+      position: absolute;
+      background: linear-gradient(135deg, #e07b3c 0%, #d4a054 100%);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(224, 123, 60, 0.4);
+      animation: float 3s ease-in-out infinite;
+    }
+    .float-badge.badge-1 {
+      top: 15%;
+      left: -60px;
+      animation-delay: 0s;
+    }
+    .float-badge.badge-2 {
+      top: 45%;
+      right: -70px;
+      animation-delay: 1s;
+    }
+    .float-badge.badge-3 {
+      bottom: 20%;
+      left: -50px;
+      animation-delay: 2s;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    
+    /* Login form styles */
+    .login-input {
+      width: 100%;
+      padding: 1rem 1.25rem;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      color: #e8e4d9;
+      font-size: 1rem;
+      transition: all 0.2s ease;
+    }
+    .login-input::placeholder {
+      color: rgba(232, 228, 217, 0.4);
+    }
+    .login-input:focus {
+      outline: none;
+      border-color: #6b7a3d;
+      background: rgba(255,255,255,0.08);
+      box-shadow: 0 0 0 3px rgba(107, 122, 61, 0.2);
+    }
+    
+    .login-btn {
+      width: 100%;
+      padding: 1rem;
+      background: #d4e157;
+      color: #1a1f12;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      /* Better touch target */
+      min-height: 52px;
+    }
+    .login-btn:hover {
+      background: #c8d943;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(212, 225, 87, 0.3);
+    }
+    .login-btn:active {
+      transform: scale(0.97);
+      background: #bdd13a;
+      box-shadow: 0 2px 10px rgba(212, 225, 87, 0.2);
+    }
+    .login-btn:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .divider {
+      display: flex;
+      align-items: center;
+      margin: 1.5rem 0;
+      color: rgba(232, 228, 217, 0.3);
+      font-size: 0.875rem;
+    }
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(255,255,255,0.1);
+    }
+    .divider span {
+      padding: 0 1rem;
+    }
+    
+    .social-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      width: 100%;
+      padding: 0.875rem;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      color: #e8e4d9;
+      font-size: 0.9375rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      min-height: 52px;
+    }
+    .social-btn:hover {
+      background: rgba(255,255,255,0.1);
+      border-color: rgba(255,255,255,0.2);
+    }
+    .social-btn:active {
+      transform: scale(0.97);
+      background: rgba(255,255,255,0.15);
+      border-color: rgba(255,255,255,0.3);
+    }
+    
+    /* Back link */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: rgba(232, 228, 217, 0.6);
+      font-size: 0.875rem;
+      transition: all 0.2s;
+      padding: 0.5rem 0;
+    }
+    .back-link:hover {
+      color: #e8e4d9;
+    }
+    .back-link:active {
+      transform: translateX(-4px);
+      color: #d4e157;
+    }
+    
+    /* Mobile touch animations */
+    @media (hover: none) and (pointer: coarse) {
+      /* Preview cards tap effect */
+      .mobile-app-preview:active {
+        transform: scale(0.99);
+      }
+      
+      .mobile-preview-header:active {
+        opacity: 0.9;
+      }
+      
+      .mobile-preview-court-item:active {
+        transform: scale(0.95);
+        background: #f3f4f6;
+      }
+      
+      /* Install button pulse on tap */
+      a[href="#"]:active {
+        transform: scale(0.97);
+      }
+      
+      /* Input focus glow */
+      .login-input:focus {
+        box-shadow: 0 0 0 4px rgba(107, 122, 61, 0.3);
+      }
+    }
+    
+    /* Mobile responsive adjustments */
+    @media (max-width: 1023px) {
+      .login-input {
+        padding: 0.875rem 1rem;
+        font-size: 16px; /* Prevents iOS zoom */
+      }
+      .login-btn {
+        padding: 0.875rem;
+      }
+    }
+    
+    @media (max-width: 640px) {
+      .mobile-app-preview {
+        margin: 0 -0.5rem 1.5rem;
+        border-radius: 16px;
+        padding: 16px;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen safe-area-top safe-area-bottom">
+  
+  <div class="min-h-screen flex flex-col lg:flex-row">
+    
+    <!-- Left Side: App Preview -->
+    <div class="hidden lg:flex lg:w-1/2 xl:w-3/5 items-center justify-center p-12 relative overflow-hidden" style="background: linear-gradient(135deg, #2d331f 0%, #1a1f12 100%);">
+      
+      <!-- Background Pattern -->
+      <div class="absolute inset-0 opacity-5">
+        <svg width="100%" height="100%">
+          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" stroke-width="1"/>
+          </pattern>
+          <rect width="100%" height="100%" fill="url(#grid)"/>
+        </svg>
+      </div>
+      
+      <!-- Content -->
+      <div class="relative z-10 text-center">
+        <h2 class="headline-font text-3xl xl:text-4xl mb-4" style="color: #e8e4d9;">
+          The MTC App
+        </h2>
+        <p class="text-base mb-12 max-w-md mx-auto" style="color: rgba(232, 228, 217, 0.6);">
+          Live court status, book courts, find partners, and connect with members — all in one place.
+        </p>
+        
+        <!-- Phone Mockup -->
+        <div class="relative inline-block">
+          <div class="phone-mockup">
+            <div class="phone-screen">
+              <div class="phone-notch"></div>
+              
+              <!-- App Header - Orange/Amber Gradient like actual app -->
+              <div style="background: linear-gradient(180deg, #e07b3c 0%, #d4a054 50%, #c9b458 100%); padding: 40px 16px 16px; border-radius: 0 0 24px 24px; position: relative;">
+                <!-- Green side accent -->
+                <div style="position: absolute; left: 0; top: 0; bottom: 0; width: 8px; background: #5a7a5a; border-radius: 0 0 0 24px;"></div>
+                
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; padding-left: 8px;">
+                  <div>
+                    <p style="color: rgba(255,255,255,0.9); font-size: 0.65rem; margin-bottom: 2px;">👋 Good morning!</p>
+                    <p style="color: white; font-weight: 700; font-size: 1.1rem; text-shadow: 0 1px 2px rgba(0,0,0,0.1);">Alex Johnson</p>
+                  </div>
+                  <div style="display: flex; gap: 8px;">
+                    <div style="background: rgba(255,255,255,0.25); padding: 8px; border-radius: 10px; position: relative;">
+                      <svg width="16" height="16" fill="none" stroke="white" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 00-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                      </svg>
+                      <span style="position: absolute; top: -4px; right: -4px; min-width: 16px; height: 16px; background: #ef4444; border-radius: 50%; font-size: 0.5rem; color: white; display: flex; align-items: center; justify-content: center; font-weight: 700;">2</span>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.25); padding: 8px; border-radius: 10px;">
+                      <svg width="16" height="16" fill="none" stroke="white" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Stats Card - Golden Yellow -->
+                <div style="background: linear-gradient(135deg, #e8b84a 0%, #daa520 100%); border-radius: 16px; padding: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                  <p style="color: white; font-size: 0.65rem; margin-bottom: 8px; font-weight: 600; display: flex; align-items: center; gap: 4px;">🏆 Your Stats</p>
+                  <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+                    <div style="background: rgba(255,255,255,0.25); padding: 10px 6px; border-radius: 12px; text-align: center;">
+                      <div style="display: flex; align-items: center; justify-content: center; gap: 4px; margin-bottom: 4px;">
+                        <span style="font-size: 0.7rem;">⏱️</span>
+                        <p style="color: white; font-weight: 700; font-size: 1.2rem; text-shadow: 0 1px 2px rgba(0,0,0,0.1);">36</p>
+                      </div>
+                      <p style="color: rgba(255,255,255,0.9); font-size: 0.5rem;">Hours Played</p>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.25); padding: 10px 6px; border-radius: 12px; text-align: center;">
+                      <div style="display: flex; align-items: center; justify-content: center; gap: 4px; margin-bottom: 4px;">
+                        <span style="font-size: 0.7rem;">👥</span>
+                        <p style="color: white; font-weight: 700; font-size: 1.2rem; text-shadow: 0 1px 2px rgba(0,0,0,0.1);">24</p>
+                      </div>
+                      <p style="color: rgba(255,255,255,0.9); font-size: 0.5rem;">Matches</p>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.25); padding: 10px 6px; border-radius: 12px; text-align: center;">
+                      <div style="display: flex; align-items: center; justify-content: center; gap: 4px; margin-bottom: 4px;">
+                        <span style="font-size: 0.7rem;">🎯</span>
+                        <p style="color: white; font-weight: 700; font-size: 1.2rem; text-shadow: 0 1px 2px rgba(0,0,0,0.1);">67%</p>
+                      </div>
+                      <p style="color: rgba(255,255,255,0.9); font-size: 0.5rem;">Win Rate</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Weather Widget - White card -->
+              <div style="margin: 10px; background: #fafafa; border-radius: 16px; padding: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #e5e7eb;">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">☁️</span>
+                    <div>
+                      <p style="font-weight: 700; color: #1f2937; font-size: 1rem;">-9°C <span style="color: #6b7280; font-size: 0.75rem; font-weight: 400;">/ 16°F</span></p>
+                      <p style="color: #374151; font-size: 0.6rem; font-weight: 500;">Bundle up!</p>
+                    </div>
+                  </div>
+                  <div style="text-align: right; font-size: 0.55rem; color: #6b7280;">
+                    <p>💨 29 km/h</p>
+                    <p>💧 60%</p>
+                    <p style="color: #9ca3af; margin-top: 2px;">Toronto, ON</p>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Live Court Status - White card with green accent -->
+              <div style="margin: 0 10px 10px; background: #fafafa; border-radius: 16px; padding: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #e5e7eb; border-left: 4px solid #5a7a5a;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                  <p style="font-weight: 700; color: #1f2937; font-size: 0.75rem; display: flex; align-items: center; gap: 6px;">
+                    <span style="width: 8px; height: 8px; background: #22c55e; border-radius: 50%;"></span>
+                    Live Court Status
+                  </p>
+                  <span style="font-size: 0.5rem; color: #9ca3af;">Updated now</span>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px;">
+                  <div style="background: white; border: 1px solid #fecaca; border-left: 3px solid #ef4444; border-radius: 10px; padding: 10px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                      <span style="font-weight: 600; color: #1f2937; font-size: 0.7rem;">Court 1</span>
+                      <span style="width: 8px; height: 8px; background: #ef4444; border-radius: 50%;"></span>
+                    </div>
+                    <p style="color: #ef4444; font-size: 0.5rem; margin-top: 3px;">🔴 Until 3:00 PM</p>
+                  </div>
+                  <div style="background: white; border: 1px solid #bbf7d0; border-left: 3px solid #22c55e; border-radius: 10px; padding: 10px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                      <span style="font-weight: 600; color: #1f2937; font-size: 0.7rem;">Court 2</span>
+                      <span style="width: 8px; height: 8px; background: #22c55e; border-radius: 50%;"></span>
+                    </div>
+                    <p style="color: #22c55e; font-size: 0.5rem; margin-top: 3px;">🟢 Available now</p>
+                  </div>
+                  <div style="background: white; border: 1px solid #fef08a; border-left: 3px solid #ca8a04; border-radius: 10px; padding: 10px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                      <span style="font-weight: 600; color: #1f2937; font-size: 0.7rem;">Court 3</span>
+                      <span style="width: 8px; height: 8px; background: #ca8a04; border-radius: 50%;"></span>
+                    </div>
+                    <p style="color: #ca8a04; font-size: 0.5rem; margin-top: 3px;">🟡 Reserved</p>
+                  </div>
+                  <div style="background: white; border: 1px solid #bbf7d0; border-left: 3px solid #22c55e; border-radius: 10px; padding: 10px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                      <span style="font-weight: 600; color: #1f2937; font-size: 0.7rem;">Court 4</span>
+                      <span style="width: 8px; height: 8px; background: #22c55e; border-radius: 50%;"></span>
+                    </div>
+                    <p style="color: #22c55e; font-size: 0.5rem; margin-top: 3px;">🟢 Available</p>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Bottom Nav - 5 items -->
+              <div class="app-nav">
+                <div class="app-nav-item">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                  </svg>
+                  Home
+                </div>
+                <div class="app-nav-item">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                  </svg>
+                  Book
+                </div>
+                <div class="app-nav-item active">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                  Schedule
+                </div>
+                <div class="app-nav-item">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  </svg>
+                  Partners
+                </div>
+                <div class="app-nav-item" style="position: relative;">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                  </svg>
+                  <span style="position: absolute; top: -4px; right: 50%; transform: translateX(12px); min-width: 14px; height: 14px; background: #ef4444; border-radius: 50%; font-size: 9px; color: white; display: flex; align-items: center; justify-content: center; font-weight: 700;">1</span>
+                  Messages
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Floating Badges - Match app accent colors -->
+          <div class="float-badge badge-1">🎾 Book Courts</div>
+          <div class="float-badge badge-2">📅 Live Status</div>
+          <div class="float-badge badge-3">👥 Find Partners</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Right Side: Login Form -->
+    <div class="w-full lg:w-1/2 xl:w-2/5 flex flex-col justify-center px-6 sm:px-8 md:px-16 lg:px-12 xl:px-20 py-8 lg:py-12">
+      
+      <!-- Back Link -->
+      <a href="/" class="back-link mb-6 lg:mb-8">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+        </svg>
+        Back to Home
+      </a>
+      
+      <!-- Mobile App Preview (shows on mobile/tablet only) -->
+      <div class="lg:hidden mobile-app-preview">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <p class="text-xs uppercase tracking-wider" style="color: rgba(232, 228, 217, 0.5);">Preview</p>
+            <p class="font-semibold" style="color: #e8e4d9;">The MTC App</p>
+          </div>
+          <div class="flex gap-2">
+            <span class="px-3 py-1 rounded-full text-xs font-medium" style="background: linear-gradient(135deg, #e07b3c 0%, #d4a054 100%); color: white;">🎾 Book</span>
+            <span class="px-3 py-1 rounded-full text-xs font-medium" style="background: rgba(90, 122, 90, 0.3); color: #a3c9a3;">📊 Stats</span>
+          </div>
+        </div>
+        
+        <!-- Mini App Preview -->
+        <div class="mobile-preview-header">
+          <div class="flex justify-between items-center">
+            <div>
+              <p class="text-xs text-white/80">👋 Good morning!</p>
+              <p class="text-white font-bold">Alex Johnson</p>
+            </div>
+            <div class="flex gap-2">
+              <div class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center relative">
+                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 00-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                </svg>
+                <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[8px] text-white flex items-center justify-center font-bold">2</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="mobile-preview-card">
+          <p class="text-xs font-semibold text-gray-800 mb-2 flex items-center gap-1">
+            <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+            Live Court Status
+          </p>
+          <div class="mobile-preview-court">
+            <div class="mobile-preview-court-item" style="border-color: #ef4444;">
+              <span class="font-semibold text-gray-800">Court 1</span>
+              <p style="color: #ef4444;">🔴 In use</p>
+            </div>
+            <div class="mobile-preview-court-item" style="border-color: #22c55e;">
+              <span class="font-semibold text-gray-800">Court 2</span>
+              <p style="color: #22c55e;">🟢 Available</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Logo -->
+      <div class="mb-6 lg:mb-8">
+        <div class="headline-font text-2xl sm:text-3xl mb-2" style="color: #d4e157;">MTC</div>
+        <h1 class="text-xl sm:text-2xl font-semibold" style="color: #e8e4d9;">Welcome Back</h1>
+        <p class="mt-2 text-sm sm:text-base" style="color: rgba(232, 228, 217, 0.6);">Sign in to your Mono Tennis Club account</p>
+      </div>
+      
+      <!-- Login Form -->
+      <form id="loginForm" class="space-y-4">
+        <div>
+          <label class="block text-sm mb-2" style="color: rgba(232, 228, 217, 0.8);">Email</label>
+          <input type="email" class="login-input" placeholder="your@email.com" required autocomplete="email">
+        </div>
+        
+        <div>
+          <label class="block text-sm mb-2" style="color: rgba(232, 228, 217, 0.8);">Password</label>
+          <input type="password" class="login-input" placeholder="••••••••" required autocomplete="current-password">
+        </div>
+        
+        <div class="flex items-center justify-between text-sm">
+          <label class="flex items-center gap-2 cursor-pointer" style="color: rgba(232, 228, 217, 0.6);">
+            <input type="checkbox" class="w-5 h-5 rounded" style="accent-color: #6b7a3d;">
+            Remember me
+          </label>
+          <a href="#" style="color: #d4e157;" class="hover:underline">Forgot password?</a>
+        </div>
+        
+        <button type="submit" class="login-btn mt-6">
+          Sign In
+        </button>
+      </form>
+      
+      <div class="divider">
+        <span>or continue with</span>
+      </div>
+      
+      <!-- Social Login -->
+      <a href="https://clubspark.ca/monotennisclub/Account/SignIn" target="_blank" class="social-btn">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" style="color: #d4e157;">
+          <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/>
+          <path d="M12 6v6l4 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        Sign in with ClubSpark
+      </a>
+      
+      <!-- Register Link -->
+      <p class="mt-6 lg:mt-8 text-center text-sm sm:text-base" style="color: rgba(232, 228, 217, 0.6);">
+        Don't have an account? 
+        <a href="https://clubspark.ca/monotennisclub/Membership" target="_blank" style="color: #d4e157;" class="hover:underline font-medium">
+          Become a Member
+        </a>
+      </p>
+      
+      <!-- Mobile App Download CTA (shows on mobile only) -->
+      <div class="lg:hidden mt-8 p-5 rounded-2xl text-center" style="background: linear-gradient(135deg, rgba(224, 123, 60, 0.15) 0%, rgba(212, 160, 84, 0.1) 100%); border: 1px solid rgba(224, 123, 60, 0.2);">
+        <div class="flex items-center justify-center gap-3 mb-3">
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #e07b3c 0%, #d4a054 100%);">
+            <span class="text-lg">📱</span>
+          </div>
+          <div class="text-left">
+            <div class="font-semibold" style="color: #e8e4d9;">Get the MTC App</div>
+            <p class="text-xs" style="color: rgba(232, 228, 217, 0.6);">Live status, bookings & more</p>
+          </div>
+        </div>
+        <a href="#" class="inline-block w-full px-6 py-3 rounded-xl text-sm font-semibold transition-all hover:opacity-90" style="background: linear-gradient(135deg, #e07b3c 0%, #d4a054 100%); color: white;">
+          Install Web App
+        </a>
+      </div>
+      
+    </div>
+    
+  </div>
+  
+  <script>
+    // Handle form submission
+    document.getElementById('loginForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      // Show loading state
+      const btn = e.target.querySelector('button[type="submit"]');
+      const originalText = btn.textContent;
+      btn.textContent = 'Signing in...';
+      btn.disabled = true;
+      
+      // Simulate login then redirect to ClubSpark
+      setTimeout(() => {
+        window.location.href = '/app';
+        btn.textContent = originalText;
+        btn.disabled = false;
+      }, 1000);
+    });
+  </script>
+  
+</body>
+</html>

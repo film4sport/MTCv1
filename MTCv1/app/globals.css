@@ -1,0 +1,353 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Poppins:wght@600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Force light mode - prevent browser dark mode from changing colors */
+:root {
+  color-scheme: light only !important;
+  --forced-color-adjust: none;
+}
+
+html {
+  color-scheme: light only !important;
+  forced-color-adjust: none;
+  -webkit-filter: none !important;
+  filter: none !important;
+}
+
+/* Prevent Samsung Internet and other browsers from applying dark mode filters */
+html, body, #__next, main, div {
+  forced-color-adjust: none !important;
+}
+
+/* Override any dark mode media queries */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: light only !important;
+  }
+  
+  html, body {
+    background-color: #f9fafb !important;
+    color: #111827 !important;
+    filter: none !important;
+    -webkit-filter: none !important;
+  }
+}
+
+@layer base {
+  body {
+    @apply bg-gray-50 text-gray-900;
+    color-scheme: light only !important;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl active:scale-95;
+  }
+  
+  .btn-secondary {
+    @apply bg-white hover:bg-gray-50 text-green-700 font-semibold py-3 px-6 rounded-xl border-2 border-green-600 transition-all duration-200 active:scale-95;
+  }
+  
+  .btn-ghost {
+    @apply bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-lg transition-all duration-200 active:scale-95;
+  }
+  
+  .card {
+    @apply bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300;
+  }
+  
+  .input-field {
+    @apply w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-200 transition-all;
+  }
+  
+  .nav-link {
+    @apply flex flex-col items-center gap-1 text-gray-500 hover:text-green-600 transition-colors duration-200;
+  }
+  
+  .nav-link-active {
+    @apply flex flex-col items-center gap-1 text-green-600 font-semibold;
+  }
+
+  /* Realistic Tennis Court - Orange Theme */
+  .clay-court-view {
+    background: linear-gradient(135deg, #dc2626 0%, #ea580c 50%, #f97316 100%);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .clay-court-view::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: 
+      linear-gradient(white, white),
+      linear-gradient(white, white),
+      linear-gradient(to right, transparent 0%, transparent 15%, white 15%, white 85%, transparent 85%, transparent 100%),
+      linear-gradient(to right, transparent 0%, transparent 15%, white 15%, white 85%, transparent 85%, transparent 100%),
+      linear-gradient(white, white);
+    background-size:
+      3px 100%,
+      3px 100%,
+      100% 3px,
+      100% 3px,
+      3px 50%;
+    background-position:
+      15% 0,
+      85% 0,
+      0 25%,
+      0 75%,
+      50% 25%;
+    background-repeat: no-repeat;
+    opacity: 0.85;
+    pointer-events: none;
+  }
+
+  /* Net */
+  .clay-court-view::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: rgba(0,0,0,0.6);
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+
+  /* Realistic Tennis Court - Green Theme */
+  .grass-court-view {
+    background: linear-gradient(135deg, #15803d 0%, #16a34a 50%, #22c55e 100%);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .grass-court-view::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: 
+      linear-gradient(white, white),
+      linear-gradient(white, white),
+      linear-gradient(to right, transparent 0%, transparent 15%, white 15%, white 85%, transparent 85%, transparent 100%),
+      linear-gradient(to right, transparent 0%, transparent 15%, white 15%, white 85%, transparent 85%, transparent 100%),
+      linear-gradient(white, white),
+      repeating-linear-gradient(0deg, transparent, transparent 50px, rgba(0,0,0,0.03) 50px, rgba(0,0,0,0.03) 100px);
+    background-size:
+      3px 100%,
+      3px 100%,
+      100% 3px,
+      100% 3px,
+      3px 50%,
+      100% 100%;
+    background-position:
+      15% 0,
+      85% 0,
+      0 25%,
+      0 75%,
+      50% 25%,
+      0 0;
+    background-repeat: no-repeat;
+    opacity: 0.85;
+    pointer-events: none;
+  }
+
+  .grass-court-view::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: rgba(0,0,0,0.6);
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+
+  /* Realistic Tennis Court - Blue Theme */
+  .hard-court-view {
+    background: linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #3b82f6 100%);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hard-court-view::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: 
+      linear-gradient(white, white),
+      linear-gradient(white, white),
+      linear-gradient(to right, transparent 0%, transparent 15%, white 15%, white 85%, transparent 85%, transparent 100%),
+      linear-gradient(to right, transparent 0%, transparent 15%, white 15%, white 85%, transparent 85%, transparent 100%),
+      linear-gradient(white, white);
+    background-size:
+      3px 100%,
+      3px 100%,
+      100% 3px,
+      100% 3px,
+      3px 50%;
+    background-position:
+      15% 0,
+      85% 0,
+      0 25%,
+      0 75%,
+      50% 25%;
+    background-repeat: no-repeat;
+    opacity: 0.85;
+    pointer-events: none;
+  }
+
+  .hard-court-view::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: rgba(0,0,0,0.7);
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-100;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-green-500 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-green-500;
+}
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Loading animation */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-spinner {
+  animation: spin 1s linear infinite;
+}
+
+/* Fade in animation */
+.fade-in {
+  animation: fadeIn 0.3s ease-in;
+}
+
+/* Slide up animation */
+.slide-up {
+  animation: slideUp 0.5s ease-out;
+}
+
+/* Tennis Confetti Animation */
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(-100px) rotate(0deg) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(var(--rotate, 720deg)) scale(0.5);
+    opacity: 0;
+  }
+}
+
+.animate-confetti-fall {
+  animation: confetti-fall 3s ease-in forwards;
+}
+
+/* V2 Enhanced Styles - Soft shadows and hover effects */
+.card-v2 {
+  @apply bg-white rounded-2xl transition-all duration-300;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), 0 4px 16px rgba(0, 0, 0, 0.04);
+}
+
+.card-v2:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 8px 24px rgba(0, 0, 0, 0.06);
+  transform: translateY(-2px);
+}
+
+/* Button hover lift effect */
+.btn-lift {
+  @apply transition-all duration-200;
+}
+
+.btn-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-lift:active {
+  transform: translateY(0);
+}
+
+/* Smooth tab transitions */
+.tab-content {
+  animation: tabFadeIn 0.3s ease-out;
+}
+
+@keyframes tabFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Soft focus states */
+.soft-focus:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+}
+
+/* Scale in animation for modals */
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.3s ease-out;
+}
+
+/* Fade in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out;
+}
