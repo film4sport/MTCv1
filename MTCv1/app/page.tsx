@@ -3,7 +3,7 @@
 export default function LandingPage() {
   return (
     <iframe 
-      src="/public/landing.html" 
+      src="/landing.html" 
       title="Mono Tennis Club"
       style={{
         position: 'fixed',
