@@ -1261,7 +1261,7 @@
             <p class="text-sm text-gray-700">
               <strong>754883 Mono Centre Road</strong><br>
               Mono, Ontario L9W 6S3<br>
-              <a href="/cdn-cgi/l/email-protection#5b2b3a2f2f322b342c3e37371b363e75383436" class="hover:underline" style="color: #6b7a3d;"><span class="__cf_email__" data-cfemail="c6b6a7b2b2afb6a9b1a3aaaa86aba3e8a5a9ab">[email&#160;protected]</span></a>
+              <a href="mailto:info@monotennisclub.ca" class="hover:underline" style="color: #6b7a3d;">info@monotennisclub.ca</a>
             </p>
           </div>
         </div>
@@ -1320,7 +1320,7 @@
             Mono, Ontario<br>
             L9W 6S3
           </address>
-          <a href="/cdn-cgi/l/email-protection#cebeafbabaa7bea1b9aba2a28ea3abe0ada1a3" class="text-sm mt-3 inline-block hover:opacity-80 transition-opacity" style="color: #d4e157;"><span class="__cf_email__" data-cfemail="b6c6d7c2c2dfc6d9c1d3dadaf6dbd398d5d9db">[email&#160;protected]</span></a>
+          <a href="mailto:info@monotennisclub.ca" class="text-sm mt-3 inline-block hover:opacity-80 transition-opacity" style="color: #d4e157;">info@monotennisclub.ca</a>
         </div>
         
       </div>
@@ -1361,7 +1361,7 @@
   <!-- Confetti Container -->
   <div class="confetti" id="confetti"></div>
 
-  </script>
+  <script>
     // Loading screen
     const hideLoader = () => {
       const loader = document.getElementById('loader');
@@ -1369,9 +1369,7 @@
     };
     window.addEventListener('load', () => setTimeout(hideLoader, 1200));
     setTimeout(hideLoader, 3000);
-  </script>  
-</html>
-  
+
     // Scroll Progress Bar
     const scrollProgress = document.getElementById('scrollProgress');
     window.addEventListener('scroll', () => {
@@ -1544,21 +1542,20 @@
       const question = item.querySelector('.faq-question');
       
       question.addEventListener('click', () => {
-      const answer = item.querySelector('.faq-answer');
-      const icon = item.querySelector('.faq-icon');
-      
-      item.classList.toggle('active');
-      
-      if (item.classList.contains('active')) {
-        answer.style.maxHeight = answer.scrollHeight + 'px';
-        icon.style.transform = 'rotate(180deg)';
-      } else {
-        answer.style.maxHeight = '0';
-        icon.style.transform = 'rotate(0)';
-      }
+        const answer = item.querySelector('.faq-answer');
+        const icon = item.querySelector('svg');
+        
+        item.classList.toggle('active');
+        
+        if (item.classList.contains('active')) {
+          answer.style.maxHeight = answer.scrollHeight + 'px';
+          if (icon) icon.style.transform = 'rotate(180deg)';
+        } else {
+          answer.style.maxHeight = '0';
+          if (icon) icon.style.transform = 'rotate(0)';
+        }
+      });
     });
-  });
   </script>
 </body>
-</html>
 </html>
