@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>MTC</title>
-  <link rel="icon" href="/tennis-ball-clean.png" type="image/png" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="/tennis-ball-clean.png" type="image/png" />
   <style>
     @font-face {
       font-family: 'Gotham Rounded';
@@ -1292,7 +1292,7 @@
             <p class="text-sm text-gray-700">
               <strong>754883 Mono Centre Road</strong><br>
               Mono, Ontario L9W 6S3<br>
-              <a href="/cdn-cgi/l/email-protection#137a7d757c537e7c7d7c67767d7d7a60707f66713d7072" class="hover:underline" style="color: #6b7a3d;"><span class="__cf_email__" data-cfemail="9bf2f5fdf4dbf6f4f5f4effef5f5f2e8f8f7eef9b5f8fa">[email&#160;protected]</span></a>
+              <a href="/cdn-cgi/l/email-protection#91f8fff7fed1fcfefffee5f4fffff8e2f2fde4f3bff2f0" class="hover:underline" style="color: #6b7a3d;"><span class="__cf_email__" data-cfemail="4f262129200f222021203b2a2121263c2c233a2d612c2e">[email&#160;protected]</span></a>
             </p>
           </div>
         </div>
@@ -1351,7 +1351,7 @@
             Mono, Ontario<br>
             L9W 6S3
           </address>
-          <a href="/cdn-cgi/l/email-protection#83eaede5ecc3eeecedecf7e6ededeaf0e0eff6e1ade0e2" class="text-sm mt-3 inline-block hover:opacity-80 transition-opacity" style="color: #d4e157;"><span class="__cf_email__" data-cfemail="70191e161f301d1f1e1f04151e1e1903131c05125e1311">[email&#160;protected]</span></a>
+          <a href="/cdn-cgi/l/email-protection#f990979f96b9949697968d9c9797908a9a958c9bd79a98" class="text-sm mt-3 inline-block hover:opacity-80 transition-opacity" style="color: #d4e157;"><span class="__cf_email__" data-cfemail="a9c0c7cfc6e9c4c6c7c6ddccc7c7c0dacac5dccb87cac8">[email&#160;protected]</span></a>
         </div>
         
       </div>
@@ -1488,15 +1488,7 @@
     
     tiltCards.forEach(card => {
       card.addEventListener('mousemove', (e) => {
-        const rect = card.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        const centerX = rect.width / 2;
-        const centerY = rect.height / 2;
-        const rotateX = (y - centerY) / 20;
-        const rotateY = (centerX - x) / 20;
-        
-        card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-8px)`;
+        const rect = card.getBoundi;
       });
       
       card.addEventListener('mouseleave', () => {
@@ -1576,4 +1568,18 @@
         const answer = item.querySelector('.faq-answer');
         const icon = item.querySelector('svg');
         
-        item.cla
+        item.classList.toggle('active');
+        
+        if (item.classList.contains('active')) {
+          answer.style.maxHeight = answer.scrollHeight + 'px';
+          if (icon) icon.style.transform = 'rotate(180deg)';
+        } else {
+          answer.style.maxHeight = '0';
+          if (icon) icon.style.transform = 'rotate(0)';
+        }
+      });
+    });
+  </script>
+</body>
+</html>
+
