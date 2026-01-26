@@ -1224,6 +1224,14 @@ export default function MonoTennisApp() {
                 </button>
               )}
               <hr className={`my-2 ${darkMode ? 'border-slate-700' : ''}`} />
+              {/* Quick Dark Mode Toggle */}
+              <button 
+                onClick={() => { setDarkMode(!darkMode); }}
+                className={`w-full text-left px-4 py-3 ${darkMode ? 'hover:bg-slate-700 text-white' : 'hover:bg-purple-100 text-gray-800'} rounded-xl flex items-center gap-3 transition-colors`}
+              >
+                <span className="text-lg">{darkMode ? '☀️' : '🌙'}</span>
+                <span>{darkMode ? 'Light Mode' : 'Dark Mode'}</span>
+              </button>
               <button 
                 onClick={() => { setCurrentScreen('leagues'); setShowMenu(false) }}
                 className={`w-full text-left px-4 py-3 ${darkMode ? 'hover:bg-slate-700 text-white' : 'hover:bg-red-50 text-gray-800'} rounded-xl flex items-center gap-3 transition-colors`}
@@ -1433,7 +1441,7 @@ export default function MonoTennisApp() {
                 >
                   <div className="flex items-start gap-3">
                     <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center text-white flex-shrink-0 font-bold">
-                      {msg.from.split(' ').map((n: string) => n[0]).join('').slice(0,2)}
+                      {msg.from.split(' ').map(n => n[0]).join('').slice(0,2)}
                     </div>
                     <div className="flex-1">
                       <p className="font-semibold text-gray-800">New Message from {msg.from}</p>
@@ -1855,7 +1863,7 @@ export default function MonoTennisApp() {
     const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null)
     
     // Generate different availability based on court/date (simulated)
-    const getAvailability = (slot: string) => {
+    const getAvailability = (slot) => {
       const seed = selectedCourt?.id || 1
       const hash = slot.split(':')[0].charCodeAt(0) + seed
       return hash % 3 !== 0 // About 66% availability
@@ -2178,7 +2186,7 @@ export default function MonoTennisApp() {
           {/* Profile Header */}
           <div className="bg-white/25 backdrop-blur-xl border border-white/40 rounded-2xl p-6 shadow-xl text-center">
             <div className="w-24 h-24 bg-gradient-to-br from-mono-green-500 to-emerald-500 rounded-full flex items-center justify-center text-white text-4xl font-bold mx-auto mb-4">
-              {currentUser?.name.split(' ').map((n: string) => n[0]).join('')}
+              {currentUser?.name.split(' ').map(n => n[0]).join('')}
             </div>
             <h3 className="text-2xl font-bold text-white drop-shadow mb-1">{currentUser?.name}</h3>
             <p className="text-white/80">{currentUser?.email}</p>
@@ -2686,7 +2694,7 @@ export default function MonoTennisApp() {
                     </div>
                     <button
                       onClick={() => {
-                        setBlockedUsers(blockedUsers.filter((_: any, i: number) => i !== idx))
+                        setBlockedUsers(blockedUsers.filter((_, i) => i !== idx))
                         showToast(`${user} has been unblocked`)
                       }}
                       className="px-3 py-1 bg-red-500 text-white text-sm font-semibold rounded-lg hover:bg-red-600 transition-colors"
@@ -3081,8 +3089,10 @@ export default function MonoTennisApp() {
               </div>
               
               {myBookings.length === 0 ? (
-                <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl p-6 text-center">
-                  <p className="text-white/70">No bookings yet</p>
+                <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl p-8 text-center">
+                  <div className="text-6xl mb-4">📅</div>
+                  <p className="text-white font-semibold text-lg mb-2">No bookings yet</p>
+                  <p className="text-white/60 text-sm">Court reservations will appear here</p>
                 </div>
               ) : (
                 myBookings.map((booking, idx) => (
@@ -3231,8 +3241,10 @@ export default function MonoTennisApp() {
               {/* Member List */}
               <div className="space-y-2 max-h-[60vh] overflow-y-auto">
                 {filteredMembers.length === 0 ? (
-                  <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl p-6 text-center">
-                    <p className="text-white/70">No members found matching "{memberSearch}"</p>
+                  <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl p-8 text-center">
+                    <div className="text-6xl mb-4">🔍</div>
+                    <p className="text-white font-semibold text-lg mb-2">No members found</p>
+                    <p className="text-white/60 text-sm">No results for "{memberSearch}"</p>
                   </div>
                 ) : (
                   filteredMembers.map((member) => (
@@ -3240,7 +3252,7 @@ export default function MonoTennisApp() {
                       <div className="flex justify-between items-center">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center text-white font-bold">
-                            {member.name.split(' ').map((n: string) => n[0]).join('')}
+                            {member.name.split(' ').map(n => n[0]).join('')}
                           </div>
                           <div>
                             <h5 className="font-semibold text-white">{member.name}</h5>
@@ -3396,10 +3408,10 @@ export default function MonoTennisApp() {
               ))}
               
               {tournaments.length === 0 && (
-                <div className="bg-white/10 rounded-xl p-8 text-center">
-                  <Trophy className="w-12 h-12 text-white/40 mx-auto mb-3" />
-                  <p className="text-white/60">No tournaments yet</p>
-                  <p className="text-white/40 text-sm">Create your first tournament!</p>
+                <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl p-8 text-center">
+                  <div className="text-6xl mb-4">🏆</div>
+                  <p className="text-white font-semibold text-lg mb-2">No tournaments yet</p>
+                  <p className="text-white/60 text-sm">Create your first tournament to get started!</p>
                 </div>
               )}
             </div>
@@ -3959,7 +3971,7 @@ export default function MonoTennisApp() {
                           <span className="text-lg font-bold text-green-400">${order.total}</span>
                         </div>
                         <div className="text-white/70 text-sm mb-2">
-                          {order.items.map((item: { qty: number; name: string }, i: number) => (
+                          {order.items.map((item, i) => (
                             <span key={i}>{item.qty}x {item.name}{i < order.items.length - 1 ? ', ' : ''}</span>
                           ))}
                         </div>
@@ -4003,7 +4015,10 @@ export default function MonoTennisApp() {
               <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl p-4">
                 <h5 className="font-bold text-white mb-3">Completed Today ({proShopOrders.filter(o => o.status === 'completed').length})</h5>
                 {proShopOrders.filter(o => o.status === 'completed').length === 0 ? (
-                  <p className="text-white/60 text-center py-4">No completed orders yet</p>
+                  <div className="text-center py-6">
+                    <div className="text-4xl mb-3">✅</div>
+                    <p className="text-white/60">No completed orders yet</p>
+                  </div>
                 ) : (
                   <div className="space-y-2">
                     {proShopOrders.filter(o => o.status === 'completed').map(order => (
@@ -4284,7 +4299,7 @@ export default function MonoTennisApp() {
             <div className="flex justify-between items-start mb-4">
               <div className="flex items-center gap-3">
                 <div className="w-14 h-14 bg-purple-500 rounded-full flex items-center justify-center text-white text-xl font-bold">
-                  {selectedMember.name.split(' ').map((n: string) => n[0]).join('')}
+                  {selectedMember.name.split(' ').map(n => n[0]).join('')}
                 </div>
                 <div>
                   <h3 className="font-bold text-xl text-gray-800">{selectedMember.name}</h3>
@@ -4670,8 +4685,9 @@ export default function MonoTennisApp() {
             <div className="flex-1 overflow-y-auto space-y-2">
               {showParticipants.participants.length === 0 ? (
                 <div className="text-center py-8">
-                  <Users className="w-12 h-12 text-gray-300 mx-auto mb-2" />
-                  <p className="text-gray-500">No participants yet</p>
+                  <div className="text-5xl mb-3">👥</div>
+                  <p className="text-gray-500 font-medium">No participants yet</p>
+                  <p className="text-gray-400 text-sm">Be the first to sign up!</p>
                 </div>
               ) : (
                 showParticipants.participants.map((participant, idx) => (
@@ -5157,7 +5173,7 @@ export default function MonoTennisApp() {
                       skill: postSkill,
                       date: dateDisplay,
                       time: timeDisplay,
-                      avatar: currentUser?.name.split(' ').map((n: string) => n[0]).join('') || 'YO',
+                      avatar: currentUser?.name.split(' ').map(n => n[0]).join('') || 'YO',
                       message: postMessage
                     }
                     
@@ -5418,10 +5434,10 @@ export default function MonoTennisApp() {
               </h3>
               
               {upcomingMatches.length === 0 ? (
-                <div className="text-center py-6">
-                  <Trophy className="w-10 h-10 text-white/40 mx-auto mb-2" />
-                  <p className="text-white/60">No upcoming matches</p>
-                  <p className="text-white/40 text-sm">Check Club Schedule for new events</p>
+                <div className="text-center py-8">
+                  <div className="text-5xl mb-3">⚔️</div>
+                  <p className="text-white font-semibold mb-1">No upcoming matches</p>
+                  <p className="text-white/60 text-sm">Check Club Schedule for new events</p>
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -5623,7 +5639,7 @@ export default function MonoTennisApp() {
                   ← 
                 </button>
                 <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold">
-                  {selectedConvo.name.split(' ').map((n: string) => n[0]).join('').slice(0,2)}
+                  {selectedConvo.name.split(' ').map(n => n[0]).join('').slice(0,2)}
                 </div>
                 <div>
                   <h3 className="font-bold text-white">{selectedConvo.name}</h3>
@@ -5749,9 +5765,9 @@ export default function MonoTennisApp() {
           <div className="px-4 py-4 space-y-3">
             {conversations.length === 0 ? (
               <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-8 text-center">
-                <Mail className="w-12 h-12 text-white/60 mx-auto mb-3" />
-                <p className="text-white font-semibold">No conversations yet</p>
-                <p className="text-white/70 text-sm mt-1">Start a conversation with a club member!</p>
+                <div className="text-6xl mb-4">💬</div>
+                <p className="text-white font-semibold text-lg mb-2">No conversations yet</p>
+                <p className="text-white/60 text-sm">Start a conversation with a club member!</p>
               </div>
             ) : (
               conversations.map((convo) => (
@@ -5773,7 +5789,7 @@ export default function MonoTennisApp() {
                 >
                   <div className="flex items-start gap-3">
                     <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
-                      {convo.name.split(' ').map((n: string) => n[0]).join('').slice(0,2)}
+                      {convo.name.split(' ').map(n => n[0]).join('').slice(0,2)}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-start mb-1">
@@ -6172,7 +6188,7 @@ export default function MonoTennisApp() {
                 </button>
                 <div className="flex items-center gap-4 mb-4">
                   <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-                    {selectedCoach.name.split(' ').map((n: string) => n[0]).join('')}
+                    {selectedCoach.name.split(' ').map(n => n[0]).join('')}
                   </div>
                   <div>
                     <h3 className="font-bold text-xl text-gray-800">{selectedCoach.name}</h3>
@@ -7232,3 +7248,4 @@ export default function MonoTennisApp() {
     </div>
   )
 }
+
