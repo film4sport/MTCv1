@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Login</title>
+  <title>MTC</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="icon" href="/tennis-ball-clean.png" type="image/png" />
+  <link rel="icon" href="/favicon.png" type="image/png" />
   <style>
     @font-face {
       font-family: 'Gotham Rounded';
@@ -446,33 +446,37 @@
                   <span style="font-size: 0.5rem; color: #9ca3af;">Updated now</span>
                 </div>
                 <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px;">
-                  <div style="background: white; border: 1px solid #fecaca; border-left: 3px solid #ef4444; border-radius: 10px; padding: 10px;">
+                  <!-- Court 1 - In Use (Red background) -->
+                  <div style="background: #fef2f2; border: 1px solid #fecaca; border-left: 3px solid #ef4444; border-radius: 10px; padding: 10px;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                       <span style="font-weight: 600; color: #1f2937; font-size: 0.7rem;">Court 1</span>
                       <span style="width: 8px; height: 8px; background: #ef4444; border-radius: 50%;"></span>
                     </div>
                     <p style="color: #ef4444; font-size: 0.5rem; margin-top: 3px;">🔴 Until 3:00 PM</p>
                   </div>
-                  <div style="background: white; border: 1px solid #bbf7d0; border-left: 3px solid #22c55e; border-radius: 10px; padding: 10px;">
+                  <!-- Court 2 - Available (Green background) -->
+                  <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-left: 3px solid #22c55e; border-radius: 10px; padding: 10px;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                       <span style="font-weight: 600; color: #1f2937; font-size: 0.7rem;">Court 2</span>
                       <span style="width: 8px; height: 8px; background: #22c55e; border-radius: 50%;"></span>
                     </div>
                     <p style="color: #22c55e; font-size: 0.5rem; margin-top: 3px;">🟢 Available now</p>
                   </div>
-                  <div style="background: white; border: 1px solid #fef08a; border-left: 3px solid #ca8a04; border-radius: 10px; padding: 10px;">
+                  <!-- Court 3 - Reserved (Yellow background) -->
+                  <div style="background: #fefce8; border: 1px solid #fef08a; border-left: 3px solid #ca8a04; border-radius: 10px; padding: 10px;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                       <span style="font-weight: 600; color: #1f2937; font-size: 0.7rem;">Court 3</span>
                       <span style="width: 8px; height: 8px; background: #ca8a04; border-radius: 50%;"></span>
                     </div>
-                    <p style="color: #ca8a04; font-size: 0.5rem; margin-top: 3px;">🟡 Reserved</p>
+                    <p style="color: #ca8a04; font-size: 0.5rem; margin-top: 3px;">🟡 In 30 min</p>
                   </div>
-                  <div style="background: white; border: 1px solid #bbf7d0; border-left: 3px solid #22c55e; border-radius: 10px; padding: 10px;">
+                  <!-- Court 4 - Available (Green background) -->
+                  <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-left: 3px solid #22c55e; border-radius: 10px; padding: 10px;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                       <span style="font-weight: 600; color: #1f2937; font-size: 0.7rem;">Court 4</span>
                       <span style="width: 8px; height: 8px; background: #22c55e; border-radius: 50%;"></span>
                     </div>
-                    <p style="color: #22c55e; font-size: 0.5rem; margin-top: 3px;">🟢 Available</p>
+                    <p style="color: #22c55e; font-size: 0.5rem; margin-top: 3px;">🟢 Available now</p>
                   </div>
                 </div>
               </div>
@@ -570,11 +574,11 @@
             Live Court Status
           </p>
           <div class="mobile-preview-court">
-            <div class="mobile-preview-court-item" style="border-color: #ef4444;">
+            <div class="mobile-preview-court-item" style="border-color: #ef4444; background: #fef2f2;">
               <span class="font-semibold text-gray-800">Court 1</span>
               <p style="color: #ef4444;">🔴 In use</p>
             </div>
-            <div class="mobile-preview-court-item" style="border-color: #22c55e;">
+            <div class="mobile-preview-court-item" style="border-color: #22c55e; background: #f0fdf4;">
               <span class="font-semibold text-gray-800">Court 2</span>
               <p style="color: #22c55e;">🟢 Available</p>
             </div>
