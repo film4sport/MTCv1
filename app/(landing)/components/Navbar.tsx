@@ -29,7 +29,7 @@ export default function Navbar({ onOpenBooking }: NavbarProps) {
   return (
     <>
       <nav className={`navbar flex items-center justify-between${scrolled ? ' scrolled' : ''}`} id="navbar">
-        <div className="mtc-logo text-xl md:text-2xl font-bold tracking-wide" style={{ color: '#e8e4d9' }}>
+        <div className="mtc-logo headline-font text-xl md:text-2xl font-bold tracking-wide" style={{ color: '#e8e4d9' }}>
           <span className="mtc-letter">M</span>
           <span className="mtc-letter">T</span>
           <span className="mtc-letter">C</span>

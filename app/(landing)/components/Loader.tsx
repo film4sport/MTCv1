@@ -16,7 +16,7 @@ export default function Loader() {
 
   return (
     <div className={`loader${exitActive ? ' exit-active' : ''}`} id="loader">
-      <div className="loader-text">
+      <div className="loader-text headline-font">
         <span className="loader-letter">M</span>
         <span className="loader-letter">T</span>
         <span className="loader-letter">C</span>
