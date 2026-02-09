@@ -36,17 +36,12 @@ export default function Navbar({ onOpenBooking }: NavbarProps) {
         </div>
 
         {/* Desktop Nav */}
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden lg:flex items-center gap-6">
           <a href="#" className="nav-link text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9' }}>.Home</a>
-          <div className="nav-dropdown">
-            <span className="nav-link text-sm hover:opacity-80 transition-opacity cursor-pointer" style={{ color: '#e8e4d9' }}>.About</span>
-            <div className="nav-dropdown-menu">
-              <a href="#faq">.FAQ</a>
-              <a href="#directions">.Directions</a>
-            </div>
-          </div>
+          <a href="/info" className="nav-link text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9' }}>.About</a>
+          <a href="/info" className="nav-link text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9' }}>.Membership</a>
           <a href="#events" className="nav-link text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9' }}>.Events</a>
-          <a href="#gallery" className="nav-link text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9' }}>.Gallery</a>
+          <a href="#contact" className="nav-link text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9' }}>.Contact</a>
           <button
             onClick={onOpenBooking}
             className="nav-link text-sm hover:opacity-80 transition-opacity font-semibold bg-transparent border-none cursor-pointer"
@@ -54,11 +49,15 @@ export default function Navbar({ onOpenBooking }: NavbarProps) {
           >
             .Book
           </button>
-          <a href="/login" className="nav-link text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9' }}>.LOGIN</a>
+          <a href="/login" className="login-btn ml-2" style={{ color: '#e8e4d9' }}>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+          </a>
         </div>
 
         {/* Mobile Menu Button */}
-        <button className="md:hidden p-2 rounded-lg" onClick={openMobileMenu} style={{ color: '#e8e4d9' }} aria-label="Open menu">
+        <button className="lg:hidden p-2 rounded-lg" onClick={openMobileMenu} style={{ color: '#e8e4d9' }} aria-label="Open menu">
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
           </svg>
@@ -74,10 +73,10 @@ export default function Navbar({ onOpenBooking }: NavbarProps) {
             </svg>
           </button>
           <a href="#" className="mobile-menu-link" onClick={closeMobileMenu}>.Home</a>
-          <a href="#faq" className="mobile-menu-link" onClick={closeMobileMenu}>.FAQ</a>
-          <a href="#directions" className="mobile-menu-link" onClick={closeMobileMenu}>.Directions</a>
+          <a href="/info" className="mobile-menu-link" onClick={closeMobileMenu}>.About</a>
+          <a href="/info" className="mobile-menu-link" onClick={closeMobileMenu}>.Membership</a>
           <a href="#events" className="mobile-menu-link" onClick={closeMobileMenu}>.Events</a>
-          <a href="#gallery" className="mobile-menu-link" onClick={closeMobileMenu}>.Gallery</a>
+          <a href="#contact" className="mobile-menu-link" onClick={closeMobileMenu}>.Contact</a>
           <button
             onClick={() => { onOpenBooking(); closeMobileMenu(); }}
             className="mobile-menu-link bg-transparent border-none cursor-pointer"

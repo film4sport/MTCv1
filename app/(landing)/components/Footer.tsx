@@ -22,7 +22,7 @@ export default function Footer({ onOpenBooking }: FooterProps) {
   }, []);
 
   return (
-    <footer className="text-white py-16 fade-in texture-overlay" style={{ backgroundColor: '#1a1f12' }} ref={footerRef}>
+    <footer id="contact" className="text-white py-16 fade-in" style={{ backgroundColor: '#1a1f12' }} ref={footerRef}>
       <div className="max-w-7xl mx-auto px-8 lg:px-16">
         {/* Top Row */}
         <div className="grid md:grid-cols-4 gap-10 mb-16">
@@ -43,17 +43,17 @@ export default function Footer({ onOpenBooking }: FooterProps) {
             </h5>
             <ul className="space-y-2">
               <li>
-                <a href="#faq" className="text-sm hover:opacity-80 transition-opacity" style={{ color: 'rgba(232, 228, 217, 0.6)' }}>
+                <a href="/info" className="text-sm hover:opacity-80 transition-opacity" style={{ color: 'rgba(232, 228, 217, 0.6)' }}>
                   About
                 </a>
               </li>
               <li>
-                <a href="#faq" className="text-sm hover:opacity-80 transition-opacity" style={{ color: 'rgba(232, 228, 217, 0.6)' }}>
+                <a href="/info" className="text-sm hover:opacity-80 transition-opacity" style={{ color: 'rgba(232, 228, 217, 0.6)' }}>
                   Membership
                 </a>
               </li>
               <li>
-                <a href="#events" className="text-sm hover:opacity-80 transition-opacity" style={{ color: 'rgba(232, 228, 217, 0.6)' }}>
+                <a href="/info" className="text-sm hover:opacity-80 transition-opacity" style={{ color: 'rgba(232, 228, 217, 0.6)' }}>
                   News
                 </a>
               </li>
@@ -105,13 +105,6 @@ export default function Footer({ onOpenBooking }: FooterProps) {
               <br />
               L9W 6S3
             </address>
-            <a
-              href="mailto:pattipowell@me.com"
-              className="text-sm mt-3 inline-block hover:opacity-80 transition-opacity"
-              style={{ color: '#d4e157' }}
-            >
-              pattipowell@me.com
-            </a>
           </div>
         </div>
 

@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(npx vitest run)",
-      "Bash(npx playwright test:*)"
+      "Bash(npx playwright test:*)",
+      "Bash(npx next build)"
     ]
   }
 }
