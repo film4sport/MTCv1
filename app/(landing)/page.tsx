@@ -5,12 +5,12 @@ import './styles/landing.css';
 import Loader from './components/Loader';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
-import WhatWeOffer from './components/WhatWeOffer';
-import Schedule from './components/Schedule';
-import Membership from './components/Membership';
-import Partners from './components/Partners';
-import CTABanner from './components/CTABanner';
 import WaveDivider from './components/WaveDivider';
+import About from './components/About';
+import Events from './components/Events';
+import BookCourt from './components/BookCourt';
+import Partners from './components/Partners';
+import FAQ from './components/FAQ';
 import Footer from './components/Footer';
 import BookingOverlay from './components/BookingOverlay';
 import Lightbox from './components/Lightbox';
@@ -21,17 +21,6 @@ export default function LandingPage() {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [showBackToTop, setShowBackToTop] = useState(false);
   const confettiRef = useRef<HTMLDivElement>(null);
-
-  // Override body background for landing page (globals.css sets #f9fafb for PWA)
-  useEffect(() => {
-    const prev = document.body.style.backgroundColor;
-    document.body.style.setProperty('background-color', '#1a1f12', 'important');
-    document.documentElement.style.setProperty('background-color', '#1a1f12', 'important');
-    return () => {
-      document.body.style.backgroundColor = prev;
-      document.documentElement.style.backgroundColor = prev;
-    };
-  }, []);
 
   // Global IntersectionObserver for all fade-in elements (like original landing.html)
   useEffect(() => {
@@ -56,6 +45,38 @@ export default function LandingPage() {
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // 3D Tilt Effect for tilt-card elements
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      const card = (e.currentTarget as HTMLElement);
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      const rotateX = (y - centerY) / 20;
+      const rotateY = (centerX - x) / 20;
+      card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-8px)`;
+    };
+
+    const handleMouseLeave = (e: MouseEvent) => {
+      (e.currentTarget as HTMLElement).style.transform = 'perspective(1000px) rotateX(0) rotateY(0) translateY(0)';
+    };
+
+    const tiltCards = document.querySelectorAll('.tilt-card');
+    tiltCards.forEach((card) => {
+      card.addEventListener('mousemove', handleMouseMove as EventListener);
+      card.addEventListener('mouseleave', handleMouseLeave as EventListener);
+    });
+
+    return () => {
+      tiltCards.forEach((card) => {
+        card.removeEventListener('mousemove', handleMouseMove as EventListener);
+        card.removeEventListener('mouseleave', handleMouseLeave as EventListener);
+      });
+    };
   }, []);
 
   const openBooking = () => setBookingOpen(true);
@@ -91,27 +112,37 @@ export default function LandingPage() {
 
       <Navbar onOpenBooking={openBooking} />
 
+      {/* Hero Section (dark, parallax) */}
       <Hero onOpenBooking={() => { openBooking(); createConfetti(); }} onOpenLightbox={openLightbox} />
 
-      {/* "Play, Learn, Connect" — bg #1a1f12 */}
-      <WhatWeOffer />
+      {/* Wave Divider: Hero (black) → About (white) */}
+      <WaveDivider bgColor="#000" fillColor="#ffffff" />
 
-      {/* Events Calendar — bg #22271a */}
-      <Schedule />
+      {/* About Section (white bg) */}
+      <About />
 
-      {/* Membership & Info — bg #1a1f12 */}
-      <Membership />
+      {/* Wave Divider: About (white) → Events (gray) */}
+      <WaveDivider bgColor="#f9fafb" fillColor="#ffffff" flip />
 
-      {/* Partners — bg #22271a */}
+      {/* Events & Programs Section (gray bg, white cards) */}
+      <Events onOpenLightbox={openLightbox} />
+
+      {/* Wave Divider: Events (gray) → Book a Court (dark) */}
+      <WaveDivider bgColor="#f9fafb" fillColor="#1a1f12" />
+
+      {/* Book a Court Section (dark with bg image) */}
+      <BookCourt onOpenBooking={() => { openBooking(); createConfetti(); }} />
+
+      {/* Partners Section (white bg) */}
       <Partners />
 
-      {/* CTA Banner — bg #1a1f12 */}
-      <CTABanner onOpenBooking={() => { openBooking(); createConfetti(); }} />
+      {/* FAQ & Directions Section (gray bg) */}
+      <FAQ />
 
-      {/* Single wave divider (CTA to Footer — same color, visually invisible like original) */}
-      <WaveDivider bgColor="#1a1f12" fillColor="#1a1f12" variant="footer" />
+      {/* Wave Divider: FAQ (gray) → Footer (dark) */}
+      <WaveDivider bgColor="#f9fafb" fillColor="#1a1f12" />
 
-      {/* Footer — bg #1a1f12 */}
+      {/* Footer (dark) */}
       <Footer onOpenBooking={openBooking} />
 
       {/* Booking Overlay */}

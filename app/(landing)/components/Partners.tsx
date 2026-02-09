@@ -20,16 +20,16 @@ const partners = [
 
 export default function Partners() {
   return (
-    <section className="py-16 lg:py-20" style={{ backgroundColor: '#22271a' }}>
+    <section className="bg-white py-16 lg:py-20">
       <div className="max-w-7xl mx-auto px-8 lg:px-16">
         <div className="text-center mb-12 fade-in">
           <span className="section-label uppercase font-medium">// Our Partners</span>
-          <h3 className="headline-font text-2xl md:text-3xl mt-4" style={{ color: '#e8e4d9' }}>
+          <h3 className="headline-font text-2xl md:text-3xl mt-4 text-gray-900">
             Proudly Supported By
           </h3>
         </div>
 
-        <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12 fade-in">
+        <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 fade-in">
           {partners.map((p) => (
             <a key={p.name} href={p.url} target="_blank" rel="noopener noreferrer" className="partner-logo">
               <img

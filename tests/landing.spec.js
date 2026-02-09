@@ -85,17 +85,6 @@ test.describe('Hero Section', () => {
     await expect(heroContent).toHaveClass(/visible/);
   });
 
-  test('hero has simple styled buttons (no glass-btn)', async ({ page }) => {
-    // Should NOT have glass buttons
-    const glassBtn = await page.locator('.glass-btn').count();
-    expect(glassBtn).toBe(0);
-    const glassBtnSolid = await page.locator('.glass-btn-solid').count();
-    expect(glassBtnSolid).toBe(0);
-    // Should have btn-primary
-    const btnPrimary = page.locator('.btn-primary').first();
-    await expect(btnPrimary).toBeAttached();
-  });
-
   test('hero has Join Now and Book a Court buttons', async ({ page }) => {
     const joinBtn = page.locator('section').first().getByText('Join Now');
     await expect(joinBtn).toBeVisible();
@@ -108,103 +97,105 @@ test.describe('Hero Section', () => {
     const count = await previews.count();
     expect(count).toBeGreaterThanOrEqual(1);
   });
-
-  test('hero has no texture-overlay', async ({ page }) => {
-    const hero = page.locator('section').first();
-    await expect(hero).not.toHaveClass(/texture-overlay/);
-  });
 });
 
-test.describe('What We Offer Section', () => {
+test.describe('About Section', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/', { waitUntil: 'networkidle' });
     await page.waitForTimeout(4500);
   });
 
-  test('What We Offer section renders with heading', async ({ page }) => {
-    const heading = page.getByText('Play, Learn, Connect');
-    await expect(heading).toBeAttached();
+  test('about section renders with white background', async ({ page }) => {
+    const about = page.locator('#about');
+    await expect(about).toBeAttached();
+    await expect(about).toHaveClass(/bg-white/);
   });
 
-  test('has 3 offer items: Lessons, Programs, Events', async ({ page }) => {
-    const lessons = page.getByText('Lessons', { exact: true }).first();
-    const programs = page.getByText('Programs', { exact: true }).first();
-    const events = page.getByText('Events', { exact: true }).first();
-    await expect(lessons).toBeAttached();
-    await expect(programs).toBeAttached();
-    await expect(events).toBeAttached();
+  test('about section has images', async ({ page }) => {
+    const images = page.locator('#about img');
+    const count = await images.count();
+    expect(count).toBeGreaterThanOrEqual(1);
   });
 
-  test('has Learn More links', async ({ page }) => {
-    const learnMore = page.getByText('Learn More');
-    const count = await learnMore.count();
-    expect(count).toBe(3);
+  test('about section has amenity tags', async ({ page }) => {
+    const parking = page.locator('#about').getByText('Parking');
+    await expect(parking).toBeAttached();
+    const accessible = page.locator('#about').getByText('Wheelchair Accessible');
+    await expect(accessible).toBeAttached();
   });
 });
 
-test.describe('Schedule Section', () => {
+test.describe('Events Section', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/', { waitUntil: 'networkidle' });
     await page.waitForTimeout(4500);
-    await page.locator('#schedule').scrollIntoViewIfNeeded();
+    await page.locator('#events').scrollIntoViewIfNeeded();
     await page.waitForTimeout(500);
   });
 
-  test('calendar grid renders', async ({ page }) => {
-    const grid = page.locator('.cal-grid');
-    await expect(grid).toBeAttached();
+  test('events section renders with gray background', async ({ page }) => {
+    const events = page.locator('#events');
+    await expect(events).toBeAttached();
+    await expect(events).toHaveClass(/bg-gray-50/);
   });
 
-  test('calendar has day headers', async ({ page }) => {
-    const headers = page.locator('.cal-header');
-    const count = await headers.count();
-    expect(count).toBe(7);
+  test('filter buttons exist', async ({ page }) => {
+    const filters = page.locator('.filter-btn');
+    const count = await filters.count();
+    expect(count).toBe(4);
   });
 
-  test('month navigation works', async ({ page }) => {
-    const monthYear = page.locator('#schedule').getByRole('heading', { level: 3 }).first();
-    const initialText = await monthYear.textContent();
-    // Click next month
-    await page.locator('#schedule button').filter({ hasText: '' }).nth(1).click();
+  test('event cards are displayed', async ({ page }) => {
+    const cards = page.locator('.event-card');
+    const count = await cards.count();
+    expect(count).toBe(3);
+  });
+
+  test('event cards have white background', async ({ page }) => {
+    const card = page.locator('.event-card').first();
+    await expect(card).toHaveClass(/bg-white/);
+  });
+
+  test('filter buttons work', async ({ page }) => {
+    // Click Tournaments filter
+    await page.locator('.filter-btn').nth(1).click();
     await page.waitForTimeout(300);
-    const newText = await monthYear.textContent();
-    expect(newText).not.toBe(initialText);
-  });
-
-  test('clicking a day shows events for that day', async ({ page }) => {
-    const days = page.locator('.cal-day:not(.empty)');
-    const count = await days.count();
-    if (count > 0) {
-      await days.first().click();
-      await page.waitForTimeout(300);
-    }
+    const cards = page.locator('.event-card');
+    const count = await cards.count();
+    expect(count).toBe(1);
+    // Click All Events to restore
+    await page.locator('.filter-btn').first().click();
+    await page.waitForTimeout(300);
+    const allCards = page.locator('.event-card');
+    const allCount = await allCards.count();
+    expect(allCount).toBe(3);
   });
 });
 
-test.describe('Membership Section', () => {
+test.describe('Book a Court Section', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/', { waitUntil: 'networkidle' });
     await page.waitForTimeout(4500);
+    await page.locator('#book').scrollIntoViewIfNeeded();
+    await page.waitForTimeout(500);
   });
 
-  test('membership section renders with heading', async ({ page }) => {
-    const heading = page.getByText('Join the Club');
-    await expect(heading).toBeAttached();
+  test('book section renders with background image', async ({ page }) => {
+    const book = page.locator('#book');
+    await expect(book).toBeAttached();
+    const bgImg = page.locator('#book img').first();
+    await expect(bgImg).toBeAttached();
   });
 
-  test('has 3 membership cards', async ({ page }) => {
-    const howToJoin = page.getByText('How to Join').first();
-    const season = page.getByText('Season & Facilities').first();
-    const news = page.getByText('News & Updates').first();
-    await expect(howToJoin).toBeAttached();
-    await expect(season).toBeAttached();
-    await expect(news).toBeAttached();
+  test('glass cards are displayed', async ({ page }) => {
+    const cards = page.locator('.glass-card');
+    const count = await cards.count();
+    expect(count).toBe(4);
   });
 
-  test('membership cards have dark backgrounds (not light)', async ({ page }) => {
-    // All cards should be dark-themed
-    const lightBgSections = await page.locator('section[class*="bg-gray"]').count();
-    expect(lightBgSections).toBe(0);
+  test('book now button exists', async ({ page }) => {
+    const bookBtn = page.locator('#book').getByText('Book Now');
+    await expect(bookBtn).toBeAttached();
   });
 });
 
@@ -227,22 +218,47 @@ test.describe('Partners Section', () => {
   });
 });
 
-test.describe('CTA Banner', () => {
+test.describe('FAQ Section', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/', { waitUntil: 'networkidle' });
     await page.waitForTimeout(4500);
+    await page.locator('#faq').scrollIntoViewIfNeeded();
+    await page.waitForTimeout(500);
   });
 
-  test('CTA banner renders with heading', async ({ page }) => {
-    const heading = page.getByText('Join Mono Tennis Club Today');
-    await expect(heading).toBeAttached();
+  test('FAQ section renders with gray background', async ({ page }) => {
+    const faq = page.locator('#faq');
+    await expect(faq).toBeAttached();
+    await expect(faq).toHaveClass(/bg-gray-50/);
   });
 
-  test('CTA has Register Now and Book a Court buttons', async ({ page }) => {
-    const register = page.getByText('Register Now');
-    const book = page.getByText('Book a Court').last();
-    await expect(register).toBeAttached();
-    await expect(book).toBeAttached();
+  test('FAQ has accordion items', async ({ page }) => {
+    const items = page.locator('.faq-item');
+    const count = await items.count();
+    expect(count).toBe(6);
+  });
+
+  test('FAQ accordion opens on click', async ({ page }) => {
+    const firstQuestion = page.locator('.faq-question').first();
+    await firstQuestion.click();
+    await page.waitForTimeout(300);
+    const firstItem = page.locator('.faq-item').first();
+    await expect(firstItem).toHaveClass(/active/);
+  });
+
+  test('Google Maps iframe exists', async ({ page }) => {
+    const map = page.locator('#faq iframe');
+    await expect(map).toBeAttached();
+  });
+});
+
+test.describe('Wave Dividers', () => {
+  test('multiple wave dividers on the page', async ({ page }) => {
+    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.waitForTimeout(4500);
+    const dividers = page.locator('.wave-divider');
+    const count = await dividers.count();
+    expect(count).toBeGreaterThanOrEqual(3);
   });
 });
 
@@ -325,11 +341,6 @@ test.describe('Footer', () => {
     await page.waitForTimeout(500);
   });
 
-  test('footer has no texture overlay', async ({ page }) => {
-    const footer = page.locator('footer');
-    await expect(footer).not.toHaveClass(/texture-overlay/);
-  });
-
   test('footer has watermark text', async ({ page }) => {
     const watermark = page.locator('.footer-watermark');
     await expect(watermark).toBeAttached();
@@ -354,28 +365,6 @@ test.describe('Footer', () => {
     const text = await address.textContent();
     expect(text).toContain('754883 Mono Centre Road');
     expect(text).toContain('Mono, Ontario');
-  });
-});
-
-test.describe('Wave Dividers', () => {
-  test('only one wave divider on the page', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
-    await page.waitForTimeout(4500);
-    const dividers = page.locator('.wave-divider');
-    const count = await dividers.count();
-    expect(count).toBe(1);
-  });
-});
-
-test.describe('All Dark Backgrounds', () => {
-  test('no light gray background sections', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
-    await page.waitForTimeout(4500);
-    // No sections should have bg-gray-50 or bg-gray-100 classes
-    const lightGray50 = await page.locator('[class*="bg-gray-50"]').count();
-    const lightGray100 = await page.locator('[class*="bg-gray-100"]').count();
-    expect(lightGray50).toBe(0);
-    expect(lightGray100).toBe(0);
   });
 });
 
