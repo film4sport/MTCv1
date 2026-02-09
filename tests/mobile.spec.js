@@ -14,44 +14,34 @@ test.describe('Mobile Responsive', () => {
     await expect(mobileMenuBtn).toBeAttached();
   });
 
-  test('booking overlay is fullscreen on mobile', async ({ page }) => {
-    await page.locator('#book').scrollIntoViewIfNeeded();
+  test('booking overlay opens from mobile menu', async ({ page }) => {
+    // Open mobile menu
+    const menuBtn = page.locator('button[aria-label="Open menu"]');
+    await menuBtn.click();
+    await page.waitForTimeout(300);
+    // Click Book button in mobile menu
+    const bookBtn = page.locator('.mobile-menu').getByText('Book', { exact: false }).first();
+    await bookBtn.click();
     await page.waitForTimeout(500);
-    await page.locator('#book').getByText('Book Now').click();
-    await page.waitForTimeout(500);
-    const modal = page.locator('.booking-modal');
-    await expect(modal).toBeAttached();
+    const overlay = page.locator('.booking-overlay.active');
+    await expect(overlay).toBeAttached();
   });
 
-  test('gallery navigation arrows are hidden on mobile', async ({ page }) => {
-    await page.locator('#gallery').scrollIntoViewIfNeeded();
-    await page.waitForTimeout(500);
-    const prevBtn = page.locator('.gallery-nav.prev');
-    await expect(prevBtn).toBeHidden();
-  });
-
-  test('calendar day labels are hidden on mobile', async ({ page }) => {
+  test('calendar renders on mobile', async ({ page }) => {
     await page.locator('#schedule').scrollIntoViewIfNeeded();
     await page.waitForTimeout(500);
-    const eventLabels = page.locator('.cal-event-label');
-    const count = await eventLabels.count();
-    // On mobile, event labels should be hidden via CSS display:none
-    if (count > 0) {
-      const visible = await eventLabels.first().isVisible();
-      expect(visible).toBe(false);
-    }
-  });
-
-  test('filter tabs wrap properly on mobile', async ({ page }) => {
-    await page.locator('#events').scrollIntoViewIfNeeded();
-    await page.waitForTimeout(500);
-    const filterContainer = page.locator('#events .flex.flex-wrap').first();
-    await expect(filterContainer).toBeAttached();
+    const calGrid = page.locator('.cal-grid');
+    await expect(calGrid).toBeAttached();
   });
 
   test('page scrolls smoothly without horizontal overflow', async ({ page }) => {
     const bodyWidth = await page.evaluate(() => document.body.scrollWidth);
     const viewportWidth = await page.evaluate(() => window.innerWidth);
     expect(bodyWidth).toBeLessThanOrEqual(viewportWidth + 1);
+  });
+
+  test('no light background sections on mobile', async ({ page }) => {
+    const lightGray = await page.locator('[class*="bg-gray"]').count();
+    expect(lightGray).toBe(0);
   });
 });

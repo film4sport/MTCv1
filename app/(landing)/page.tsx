@@ -5,15 +5,14 @@ import './styles/landing.css';
 import Loader from './components/Loader';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
-import WaveDivider from './components/WaveDivider';
-import Events from './components/Events';
+import WhatWeOffer from './components/WhatWeOffer';
 import Schedule from './components/Schedule';
-import BookSection from './components/BookSection';
-import BookingOverlay from './components/BookingOverlay';
+import Membership from './components/Membership';
 import Partners from './components/Partners';
-import Gallery from './components/Gallery';
-import FAQ from './components/FAQ';
+import CTABanner from './components/CTABanner';
+import WaveDivider from './components/WaveDivider';
 import Footer from './components/Footer';
+import BookingOverlay from './components/BookingOverlay';
 import Lightbox from './components/Lightbox';
 
 export default function LandingPage() {
@@ -70,26 +69,25 @@ export default function LandingPage() {
 
       <Hero onOpenBooking={() => { openBooking(); createConfetti(); }} onOpenLightbox={openLightbox} />
 
-      <WaveDivider bgColor="#1a1f12" fillColor="#f9fafb" variant="standard" />
+      {/* "Play, Learn, Connect" — bg #1a1f12 */}
+      <WhatWeOffer />
 
-      <Events onOpenLightbox={openLightbox} />
-
-      <WaveDivider bgColor="#f9fafb" fillColor="#22271a" variant="transitional" />
-
+      {/* Events Calendar — bg #22271a */}
       <Schedule />
 
-      <WaveDivider bgColor="#22271a" fillColor="#1a1f12" variant="standard" />
+      {/* Membership & Info — bg #1a1f12 */}
+      <Membership />
 
-      <BookSection onOpenBooking={() => { openBooking(); createConfetti(); }} />
-
+      {/* Partners — bg #22271a */}
       <Partners />
 
-      <Gallery onOpenLightbox={openLightbox} />
+      {/* CTA Banner — bg #1a1f12 */}
+      <CTABanner onOpenBooking={() => { openBooking(); createConfetti(); }} />
 
-      <FAQ />
+      {/* Single wave divider (CTA to Footer — same color, visually invisible like original) */}
+      <WaveDivider bgColor="#1a1f12" fillColor="#1a1f12" variant="footer" />
 
-      <WaveDivider bgColor="#f9fafb" fillColor="#1a1f12" variant="standard" />
-
+      {/* Footer — bg #1a1f12 */}
       <Footer onOpenBooking={openBooking} />
 
       {/* Booking Overlay */}

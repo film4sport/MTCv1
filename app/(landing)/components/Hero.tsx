@@ -36,7 +36,7 @@ export default function Hero({ onOpenBooking, onOpenLightbox }: HeroProps) {
   ];
 
   return (
-    <section className="relative h-screen w-full overflow-hidden texture-overlay">
+    <section className="relative h-screen w-full overflow-hidden">
       {/* Background Image with Parallax */}
       <div className="absolute inset-0 parallax-bg" ref={heroBgRef}>
         <img
@@ -69,15 +69,20 @@ export default function Hero({ onOpenBooking, onOpenLightbox }: HeroProps) {
           </p>
 
           <div className="hero-buttons flex items-center gap-4 mb-10">
-            <a href="#faq" className="glass-btn px-8 py-3 rounded-full text-sm font-medium">
+            <a
+              href="/info"
+              className="px-8 py-3 rounded-full text-sm font-medium hover:opacity-90 transition-opacity"
+              style={{ backgroundColor: 'rgba(107, 122, 61, 0.7)', color: '#e8e4d9' }}
+            >
               Join Now
             </a>
             <button
               onClick={onOpenBooking}
-              className="glass-btn-solid px-5 py-3 rounded-full text-sm font-medium flex items-center gap-2 cursor-pointer"
+              className="btn-primary px-5 py-3 rounded-full text-sm font-medium flex items-center gap-2 cursor-pointer"
+              style={{ backgroundColor: '#d4e157', color: '#3b4229' }}
             >
               Book a Court
-              <span className="glass-icon w-6 h-6 rounded-full flex items-center justify-center">
+              <span className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: 'rgba(59, 66, 41, 0.15)' }}>
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M7 17L17 7M17 7H7M17 7V17" />
                 </svg>
