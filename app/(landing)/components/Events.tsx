@@ -1,0 +1,138 @@
+'use client';
+
+import { useState } from 'react';
+
+const events = [
+  {
+    category: 'tournament',
+    image: 'https://i.imgur.com/vqd926b.jpeg',
+    alt: '95+ Mixed Doubles Tournament',
+    badge: 'Tournament',
+    badgeStyle: { backgroundColor: 'rgba(107, 122, 61, 0.15)', color: '#4a5528' },
+    date: 'July 26-27, 2026',
+    title: '95+ Mixed Doubles Tournament',
+    description:
+      '$180/Team — 2 Matches Guaranteed. A+B Draw, Over 95 Mixed Doubles. Includes lunches at Mono Cliffs Inn and great prizes!',
+  },
+  {
+    category: 'camp',
+    image: 'https://i.imgur.com/YOdfHw6.jpeg',
+    alt: 'Summer Tennis Camp',
+    badge: 'Camp',
+    badgeStyle: { backgroundColor: 'rgba(212, 225, 87, 0.3)', color: '#3b4229' },
+    date: 'July 28 - Aug 1, 2026',
+    title: 'Summer Tennis Camp',
+    description:
+      '8:30am - 3:30pm daily. Make memories, build skills, gain confidence and have fun! Perfect for young players.',
+  },
+  {
+    category: 'social',
+    image: 'https://i.imgur.com/551fHj1.jpeg',
+    alt: 'Social Round Robin',
+    badge: 'Social',
+    badgeStyle: { backgroundColor: 'rgba(59, 66, 41, 0.1)', color: '#3b4229' },
+    date: 'Ongoing',
+    title: 'Social Round Robin',
+    description:
+      'Join our friendly social round robins! A great way to meet fellow members, play multiple matches, and enjoy the community atmosphere.',
+  },
+];
+
+interface EventsProps {
+  onOpenLightbox: (src: string, alt: string) => void;
+}
+
+export default function Events({ onOpenLightbox }: EventsProps) {
+  const [filter, setFilter] = useState('all');
+
+  const filters = [
+    { label: 'All Events', value: 'all' },
+    { label: 'Tournaments', value: 'tournament' },
+    { label: 'Camps', value: 'camp' },
+    { label: 'Social', value: 'social' },
+  ];
+
+  const filteredEvents = filter === 'all' ? events : events.filter((e) => e.category === filter);
+
+  return (
+    <section id="events" className="bg-gray-50 text-gray-900 py-20 lg:py-28">
+      <div className="max-w-7xl mx-auto px-8 lg:px-16">
+
+        {/* Section Header */}
+        <div className="text-center mb-12 fade-in">
+          <span className="section-label uppercase font-medium">// Events &amp; Programs</span>
+          <h2 className="headline-font text-3xl md:text-4xl lg:text-[2.75rem] leading-tight mt-4 text-gray-900">
+            Mono Tennis Club — Events &amp;<br />Programs for Every Player
+          </h2>
+        </div>
+
+        {/* Filter Tags */}
+        <div className="flex flex-wrap justify-center gap-3 mb-12 fade-in">
+          {filters.map((f) => (
+            <button
+              key={f.value}
+              className={`filter-btn px-5 py-2 rounded-full text-sm font-medium transition-colors${
+                filter === f.value ? ' active text-white' : ' text-gray-600 bg-white border border-gray-200 hover:border-gray-400'
+              }`}
+              style={filter === f.value ? { backgroundColor: '#6b7a3d' } : undefined}
+              onClick={() => setFilter(f.value)}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Events Grid */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+          {filteredEvents.map((event) => (
+            <div
+              key={event.title}
+              className="event-card tilt-card bg-white rounded-2xl overflow-hidden card-hover fade-in"
+              data-category={event.category}
+            >
+              <div
+                className="aspect-[4/3] overflow-hidden cursor-pointer"
+                onClick={() => onOpenLightbox(event.image, event.title)}
+              >
+                <img
+                  src={event.image}
+                  alt={event.alt}
+                  className="card-image w-full h-full object-cover"
+                  loading="lazy"
+                />
+              </div>
+              <div className="p-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <span
+                    className="px-3 py-1 rounded-full text-xs font-medium"
+                    style={event.badgeStyle}
+                  >
+                    {event.badge}
+                  </span>
+                  <span className="text-xs text-gray-400">{event.date}</span>
+                </div>
+                <h3 className="font-semibold text-lg mb-2">{event.title}</h3>
+                <p className="text-gray-600 text-sm leading-relaxed">{event.description}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* View All Link */}
+        <div className="text-center mt-10 fade-in">
+          <a
+            href="#events"
+            className="inline-flex items-center gap-2 text-sm font-medium hover:opacity-80 transition-opacity"
+            style={{ color: '#6b7a3d' }}
+          >
+            View All Events &amp; News
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </a>
+        </div>
+
+      </div>
+    </section>
+  );
+}
