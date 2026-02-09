@@ -3,9 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Login | Mono Tennis Club</title>
+  <title>MTC</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="/favicon.png" type="image/png" />
   <style>
     @font-face {
       font-family: 'Gotham Rounded';
@@ -30,7 +31,7 @@
     }
     
     .headline-font {
-      font-family: 'Gotham Rounded', sans-serif;
+      font-family: 'Gotham Rounded', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       font-weight: 500;
     }
     
@@ -161,8 +162,8 @@
       animation-delay: 1s;
     }
     .float-badge.badge-3 {
-      bottom: 20%;
-      left: -50px;
+      bottom: 8%;
+      left: -70px;
       animation-delay: 2s;
     }
     
@@ -190,6 +191,36 @@
       border-color: #6b7a3d;
       background: rgba(255,255,255,0.08);
       box-shadow: 0 0 0 3px rgba(107, 122, 61, 0.2);
+    }
+    .login-input.error {
+      border-color: #ef4444;
+      background: rgba(239, 68, 68, 0.08);
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+    }
+    .error-message {
+      color: #ef4444;
+      font-size: 0.75rem;
+      margin-top: 0.5rem;
+      display: none;
+    }
+    .error-message.show {
+      display: block;
+    }
+    
+    /* Spinner */
+    .spinner {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(26, 31, 18, 0.3);
+      border-radius: 50%;
+      border-top-color: #1a1f12;
+      animation: spin 0.8s linear infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
     
     .login-btn {
@@ -445,33 +476,37 @@
                   <span style="font-size: 0.5rem; color: #9ca3af;">Updated now</span>
                 </div>
                 <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px;">
-                  <div style="background: white; border: 1px solid #fecaca; border-left: 3px solid #ef4444; border-radius: 10px; padding: 10px;">
+                  <!-- Court 1 - In Use (Red background) -->
+                  <div style="background: #fef2f2; border: 1px solid #fecaca; border-left: 3px solid #ef4444; border-radius: 10px; padding: 10px;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                       <span style="font-weight: 600; color: #1f2937; font-size: 0.7rem;">Court 1</span>
                       <span style="width: 8px; height: 8px; background: #ef4444; border-radius: 50%;"></span>
                     </div>
                     <p style="color: #ef4444; font-size: 0.5rem; margin-top: 3px;">🔴 Until 3:00 PM</p>
                   </div>
-                  <div style="background: white; border: 1px solid #bbf7d0; border-left: 3px solid #22c55e; border-radius: 10px; padding: 10px;">
+                  <!-- Court 2 - Available (Green background) -->
+                  <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-left: 3px solid #22c55e; border-radius: 10px; padding: 10px;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                       <span style="font-weight: 600; color: #1f2937; font-size: 0.7rem;">Court 2</span>
                       <span style="width: 8px; height: 8px; background: #22c55e; border-radius: 50%;"></span>
                     </div>
                     <p style="color: #22c55e; font-size: 0.5rem; margin-top: 3px;">🟢 Available now</p>
                   </div>
-                  <div style="background: white; border: 1px solid #fef08a; border-left: 3px solid #ca8a04; border-radius: 10px; padding: 10px;">
+                  <!-- Court 3 - Reserved (Yellow background) -->
+                  <div style="background: #fefce8; border: 1px solid #fef08a; border-left: 3px solid #ca8a04; border-radius: 10px; padding: 10px;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                       <span style="font-weight: 600; color: #1f2937; font-size: 0.7rem;">Court 3</span>
                       <span style="width: 8px; height: 8px; background: #ca8a04; border-radius: 50%;"></span>
                     </div>
-                    <p style="color: #ca8a04; font-size: 0.5rem; margin-top: 3px;">🟡 Reserved</p>
+                    <p style="color: #ca8a04; font-size: 0.5rem; margin-top: 3px;">🟡 In 30 min</p>
                   </div>
-                  <div style="background: white; border: 1px solid #bbf7d0; border-left: 3px solid #22c55e; border-radius: 10px; padding: 10px;">
+                  <!-- Court 4 - Available (Green background) -->
+                  <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-left: 3px solid #22c55e; border-radius: 10px; padding: 10px;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                       <span style="font-weight: 600; color: #1f2937; font-size: 0.7rem;">Court 4</span>
                       <span style="width: 8px; height: 8px; background: #22c55e; border-radius: 50%;"></span>
                     </div>
-                    <p style="color: #22c55e; font-size: 0.5rem; margin-top: 3px;">🟢 Available</p>
+                    <p style="color: #22c55e; font-size: 0.5rem; margin-top: 3px;">🟢 Available now</p>
                   </div>
                 </div>
               </div>
@@ -569,11 +604,11 @@
             Live Court Status
           </p>
           <div class="mobile-preview-court">
-            <div class="mobile-preview-court-item" style="border-color: #ef4444;">
+            <div class="mobile-preview-court-item" style="border-color: #ef4444; background: #fef2f2;">
               <span class="font-semibold text-gray-800">Court 1</span>
               <p style="color: #ef4444;">🔴 In use</p>
             </div>
-            <div class="mobile-preview-court-item" style="border-color: #22c55e;">
+            <div class="mobile-preview-court-item" style="border-color: #22c55e; background: #f0fdf4;">
               <span class="font-semibold text-gray-800">Court 2</span>
               <p style="color: #22c55e;">🟢 Available</p>
             </div>
@@ -592,12 +627,14 @@
       <form id="loginForm" class="space-y-4">
         <div>
           <label class="block text-sm mb-2" style="color: rgba(232, 228, 217, 0.8);">Email</label>
-          <input type="email" class="login-input" placeholder="your@email.com" required autocomplete="email">
+          <input type="email" id="emailInput" class="login-input" placeholder="your@email.com" required autocomplete="email">
+          <p id="emailError" class="error-message">Please enter a valid email address</p>
         </div>
         
         <div>
           <label class="block text-sm mb-2" style="color: rgba(232, 228, 217, 0.8);">Password</label>
-          <input type="password" class="login-input" placeholder="••••••••" required autocomplete="current-password">
+          <input type="password" id="passwordInput" class="login-input" placeholder="••••••••" required autocomplete="current-password">
+          <p id="passwordError" class="error-message">Password is required</p>
         </div>
         
         <div class="flex items-center justify-between text-sm">
@@ -608,7 +645,7 @@
           <a href="#" style="color: #d4e157;" class="hover:underline">Forgot password?</a>
         </div>
         
-        <button type="submit" class="login-btn mt-6">
+        <button type="submit" id="submitBtn" class="login-btn mt-6">
           Sign In
         </button>
       </form>
@@ -655,24 +692,62 @@
   </div>
   
   <script>
+    // Form validation
+    const emailInput = document.getElementById('emailInput');
+    const passwordInput = document.getElementById('passwordInput');
+    const emailError = document.getElementById('emailError');
+    const passwordError = document.getElementById('passwordError');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    // Clear error on input
+    emailInput.addEventListener('input', () => {
+      emailInput.classList.remove('error');
+      emailError.classList.remove('show');
+    });
+    
+    passwordInput.addEventListener('input', () => {
+      passwordInput.classList.remove('error');
+      passwordError.classList.remove('show');
+    });
+    
+    // Email validation regex
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    
     // Handle form submission
     document.getElementById('loginForm').addEventListener('submit', (e) => {
       e.preventDefault();
       
-      // Show loading state
-      const btn = e.target.querySelector('button[type="submit"]');
-      const originalText = btn.textContent;
-      btn.textContent = 'Signing in...';
-      btn.disabled = true;
+      let isValid = true;
       
-      // Simulate login then redirect to ClubSpark
+      // Validate email
+      if (!emailInput.value || !emailRegex.test(emailInput.value)) {
+        emailInput.classList.add('error');
+        emailError.classList.add('show');
+        isValid = false;
+      }
+      
+      // Validate password
+      if (!passwordInput.value) {
+        passwordInput.classList.add('error');
+        passwordError.classList.add('show');
+        isValid = false;
+      }
+      
+      if (!isValid) return;
+      
+      // Show loading state with spinner
+      submitBtn.innerHTML = '<span class="spinner"></span>Signing in...';
+      submitBtn.disabled = true;
+      
+      // Simulate login then redirect
       setTimeout(() => {
         window.location.href = '/app';
-        btn.textContent = originalText;
-        btn.disabled = false;
+        submitBtn.innerHTML = 'Sign In';
+        submitBtn.disabled = false;
       }, 1000);
     });
   </script>
   
 </body>
 </html>
+
