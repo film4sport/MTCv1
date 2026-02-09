@@ -78,7 +78,7 @@ export default function Hero({ onOpenBooking, onOpenLightbox }: HeroProps) {
             </a>
             <button
               onClick={onOpenBooking}
-              className="btn-primary px-5 py-3 rounded-full text-sm font-medium flex items-center gap-2 cursor-pointer"
+              className="px-5 py-3 rounded-full text-sm font-medium flex items-center gap-2 cursor-pointer hover:opacity-90 transition-opacity"
               style={{ backgroundColor: '#d4e157', color: '#3b4229' }}
             >
               Book a Court

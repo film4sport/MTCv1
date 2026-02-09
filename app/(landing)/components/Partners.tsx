@@ -1,7 +1,5 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
-
 const partners = [
   {
     name: 'Canadian Tire',
@@ -21,22 +19,8 @@ const partners = [
 ];
 
 export default function Partners() {
-  const sectionRef = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) =>
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) entry.target.classList.add('visible');
-        }),
-      { threshold: 0.1 }
-    );
-    sectionRef.current?.querySelectorAll('.fade-in').forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
-  }, []);
-
   return (
-    <section className="py-16 lg:py-20" style={{ backgroundColor: '#22271a' }} ref={sectionRef}>
+    <section className="py-16 lg:py-20" style={{ backgroundColor: '#22271a' }}>
       <div className="max-w-7xl mx-auto px-8 lg:px-16">
         <div className="text-center mb-12 fade-in">
           <span className="section-label uppercase font-medium">// Our Partners</span>

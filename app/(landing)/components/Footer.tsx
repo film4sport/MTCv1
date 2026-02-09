@@ -1,28 +1,12 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
-
 interface FooterProps {
   onOpenBooking: () => void;
 }
 
 export default function Footer({ onOpenBooking }: FooterProps) {
-  const footerRef = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) =>
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) entry.target.classList.add('visible');
-        }),
-      { threshold: 0.1 }
-    );
-    footerRef.current?.querySelectorAll('.fade-in').forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
-  }, []);
-
   return (
-    <footer id="contact" className="text-white py-16 fade-in" style={{ backgroundColor: '#1a1f12' }} ref={footerRef}>
+    <footer id="contact" className="text-white py-16 fade-in" style={{ backgroundColor: '#1a1f12' }}>
       <div className="max-w-7xl mx-auto px-8 lg:px-16">
         {/* Top Row */}
         <div className="grid md:grid-cols-4 gap-10 mb-16">

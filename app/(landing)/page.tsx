@@ -22,6 +22,30 @@ export default function LandingPage() {
   const [showBackToTop, setShowBackToTop] = useState(false);
   const confettiRef = useRef<HTMLDivElement>(null);
 
+  // Override body background for landing page (globals.css sets #f9fafb for PWA)
+  useEffect(() => {
+    const prev = document.body.style.backgroundColor;
+    document.body.style.setProperty('background-color', '#1a1f12', 'important');
+    document.documentElement.style.setProperty('background-color', '#1a1f12', 'important');
+    return () => {
+      document.body.style.backgroundColor = prev;
+      document.documentElement.style.backgroundColor = prev;
+    };
+  }, []);
+
+  // Global IntersectionObserver for all fade-in elements (like original landing.html)
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) =>
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) entry.target.classList.add('visible');
+        }),
+      { threshold: 0.1 }
+    );
+    document.querySelectorAll('.fade-in, .fade-in-left, .fade-in-right').forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+
   // Scroll progress bar + back to top
   useEffect(() => {
     const handleScroll = () => {
