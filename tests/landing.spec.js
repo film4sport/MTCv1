@@ -420,7 +420,7 @@ test.describe('Info Page', () => {
   });
 
   test('info page has registration news', async ({ page }) => {
-    const registration = page.getByText('Registration Opens March 1st');
+    const registration = page.getByRole('heading', { name: 'Registration Opens March 1st' });
     await expect(registration).toBeAttached();
   });
 

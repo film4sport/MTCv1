@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 
 const MONTH_NAMES = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -78,19 +78,6 @@ export default function Schedule() {
   const [calYear, setCalYear] = useState(today.getFullYear());
   const [calMonth, setCalMonth] = useState(today.getMonth());
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
-  const sectionRef = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) =>
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) entry.target.classList.add('visible');
-        }),
-      { threshold: 0.1 }
-    );
-    sectionRef.current?.querySelectorAll('.fade-in').forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
-  }, []);
 
   const changeMonth = (delta: number) => {
     let newMonth = calMonth + delta;
@@ -121,7 +108,7 @@ export default function Schedule() {
   const selectedEvents = selectedDay ? getEventsForDate(calYear, calMonth, selectedDay) : [];
 
   return (
-    <section id="schedule" className="py-20 lg:py-28" style={{ backgroundColor: '#22271a' }} ref={sectionRef}>
+    <section id="schedule" className="py-20 lg:py-28" style={{ backgroundColor: '#22271a' }}>
       <div className="max-w-5xl mx-auto px-8 lg:px-16">
         <div className="text-center mb-12 fade-in">
           <span className="section-label uppercase font-medium">// Schedule</span>
