@@ -6,7 +6,7 @@ interface FooterProps {
 
 export default function Footer({ onOpenBooking }: FooterProps) {
   return (
-    <footer id="contact" className="text-white py-16 fade-in" style={{ backgroundColor: '#1a1f12' }}>
+    <footer id="contact" className="text-white py-16 fade-in texture-overlay" style={{ backgroundColor: '#1a1f12' }}>
       <div className="max-w-7xl mx-auto px-8 lg:px-16">
         {/* Top Row */}
         <div className="grid md:grid-cols-4 gap-10 mb-16">

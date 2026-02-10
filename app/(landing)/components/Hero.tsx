@@ -13,7 +13,7 @@ export default function Hero({ onOpenBooking }: HeroProps) {
   useEffect(() => {
     const timer = setTimeout(() => {
       heroContentRef.current?.classList.add('visible');
-    }, 3100);
+    }, 1200);
     return () => clearTimeout(timer);
   }, []);
 
@@ -83,7 +83,13 @@ export default function Hero({ onOpenBooking }: HeroProps) {
             </button>
           </div>
 
-          <div className="divider-line w-full max-w-2xl"></div>
+          <div className="flex items-center gap-6 text-xs tracking-wide" style={{ color: 'rgba(232, 228, 217, 0.5)' }}>
+            <span>EST. 1978</span>
+            <span className="w-1 h-1 rounded-full" style={{ backgroundColor: 'rgba(232, 228, 217, 0.3)' }} />
+            <span>200+ MEMBERS</span>
+            <span className="w-1 h-1 rounded-full" style={{ backgroundColor: 'rgba(232, 228, 217, 0.3)' }} />
+            <span>4 COURTS</span>
+          </div>
         </div>
       </div>
 

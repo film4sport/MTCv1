@@ -89,7 +89,7 @@ export default function Gallery({ onOpenLightbox }: GalleryProps) {
   }, []);
 
   return (
-    <section id="gallery" className="bg-gray-100 py-20 lg:py-28 overflow-hidden" ref={sectionRef}>
+    <section id="gallery" className="py-20 lg:py-28 overflow-hidden" style={{ backgroundColor: '#edeae3' }} ref={sectionRef}>
       <div className="max-w-7xl mx-auto px-8 lg:px-16">
         <div className="text-center mb-12 fade-in">
           <span className="section-label">// Gallery</span>
