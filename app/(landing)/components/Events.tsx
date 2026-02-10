@@ -61,7 +61,8 @@ export default function Events({ onOpenLightbox }: EventsProps) {
 
         {/* Section Header */}
         <div className="text-center mb-12 fade-in">
-          <h2 className="headline-font text-3xl md:text-4xl lg:text-[2.75rem] leading-tight text-gray-900">
+          <span className="section-label">// Featured Events</span>
+          <h2 className="headline-font text-3xl md:text-4xl lg:text-[2.75rem] leading-tight mt-4 text-gray-900">
             Upcoming Events &amp; Tournaments
           </h2>
         </div>

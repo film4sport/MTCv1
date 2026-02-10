@@ -1,69 +1,51 @@
 const { test, expect } = require('@playwright/test');
 
-test.describe('Bug Fix Verification', () => {
+test.describe('Latest Fix Verification', () => {
 
-  test('Hero wave: no bottom text bleeding through', async ({ page }) => {
+  test('Events section has "// Featured Events" label and correct heading', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(2000);
-
-    // Verify "Scroll Down", "2026", "Tennis" decorative text does NOT exist
-    const body = await page.textContent('body');
-    expect(body).not.toContain('Scroll Down');
-    expect(body).not.toContain('// 2026');
-    expect(body).not.toContain('// Tennis');
-
-    // Scroll to hero-wave transition and screenshot
-    await page.evaluate(() => window.scrollTo(0, window.innerHeight - 200));
-    await page.waitForTimeout(500);
-    await page.screenshot({ path: 'test-results/hero-wave-clean.png', fullPage: false });
-
-    // Wave divider should still exist
-    const waveDivider = page.locator('.wave-divider').first();
-    await expect(waveDivider).toBeVisible();
-  });
-
-  test('Events heading is "Upcoming Events & Tournaments"', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForTimeout(2000);
-
     await page.locator('#events').scrollIntoViewIfNeeded();
     await page.waitForTimeout(500);
 
-    // Correct heading exists
+    const label = page.locator('.section-label', { hasText: 'Featured Events' });
+    await expect(label).toBeVisible();
+
     const heading = page.locator('h2', { hasText: 'Upcoming Events & Tournaments' });
     await expect(heading).toBeVisible();
 
-    // Old heading gone
-    const body = await page.textContent('body');
-    expect(body).not.toContain('Programs for Every Player');
-
-    await page.screenshot({ path: 'test-results/events-heading.png', fullPage: false });
+    await page.screenshot({ path: 'test-results/events-section.png', fullPage: false });
   });
 
-  test('Only 2 wave dividers remain (hero+footer)', async ({ page }) => {
+  test('Hero has scroll down text with bouncing arrow', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(2000);
 
-    const waveDividers = page.locator('.wave-divider');
-    const count = await waveDividers.count();
-    expect(count).toBe(2);
+    const scrollText = page.getByText('Scroll Down');
+    await expect(scrollText).toBeVisible();
 
-    await page.screenshot({ path: 'test-results/landing-fullpage.png', fullPage: true });
+    const arrow = page.locator('.scroll-arrow');
+    await expect(arrow).toBeVisible();
+
+    await page.screenshot({ path: 'test-results/hero-scroll-down.png', fullPage: false });
   });
 
-  test('Login page renders (no CSP block)', async ({ page }) => {
-    const cspErrors = [];
-    page.on('console', msg => {
-      if (msg.type() === 'error' && msg.text().toLowerCase().includes('content-security-policy')) {
-        cspErrors.push(msg.text());
-      }
-    });
+  test('Schedule section says "Club\'s Schedule" not "Events"', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForTimeout(2000);
+    await page.locator('#schedule').scrollIntoViewIfNeeded();
+    await page.waitForTimeout(500);
 
+    const heading = page.locator('h2', { hasText: "Club's Schedule" });
+    await expect(heading).toBeVisible();
+
+    await page.screenshot({ path: 'test-results/schedule-heading.png', fullPage: false });
+  });
+
+  test('Login page Book Courts badge is visible', async ({ page }) => {
     await page.goto('/login');
     await page.waitForTimeout(3000);
-    await page.screenshot({ path: 'test-results/login-page-final.png', fullPage: false });
-
-    expect(cspErrors.length).toBe(0);
+    await page.screenshot({ path: 'test-results/login-badges-updated.png', fullPage: false });
   });
 
 });

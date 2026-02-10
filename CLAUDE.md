@@ -7,9 +7,10 @@
 - If no → ASK before choosing an approach
 - If a fix fails → the decision was right, my implementation was wrong. Debug the implementation, don't change the approach.
 
-## #2: DO EXACTLY WHAT'S ASKED
+## #2: DO EXACTLY WHAT'S ASKED — NOTHING MORE
 - Did user EXPLICITLY ask for this change? If not, DON'T DO IT
 - Don't "helpfully" add related things
+- **MINIMAL DIFF**: If asked to change ONE property, change ONLY that property. Don't touch surrounding values (positions, sizes, colors) unless explicitly told to.
 - If I think something else would be nice → ASK first
 
 ## #3: GREP BEFORE TOUCHING ANYTHING
@@ -60,18 +61,16 @@ When new project rules or conventions are established, add them to this file AND
 - Mobile-first design
 
 ## LANDING PAGE SECTION ORDER
-1. Hero (parallax bg, glass buttons)
-2. Wave Divider (black → gray)
-3. Events & Programs (filter tabs, 3D hover cards)
-4. Wave Divider (gray → dark)
-5. Schedule / Calendar (month grid, event dots)
-6. Wave Divider (dark → white)
-7. Partners (imgur logos)
-8. Wave Divider (white → gray)
-9. Gallery (carousel + lightbox, 15 photos)
-10. Wave Divider (gray → dark)
-11. Footer (watermark)
+1. Hero (parallax bg, glass buttons, scroll-down indicator)
+2. Wave Divider (hero → cream, overlapping)
+3. Events & Programs (// Featured Events label, filter tabs, 3D hover cards)
+4. Schedule / Calendar (dark bg, "Club's Schedule", month grid, event dots)
+5. Partners (imgur logos)
+6. Gallery (carousel + lightbox, 15 photos)
+7. Wave Divider (gallery → footer)
+8. Footer (watermark)
 + Booking Overlay (modal, hidden by default)
+Note: Sections 3→4→5→6 meet flush (no wave dividers between them)
 
 ## /INFO PAGE TABS
 - `/info?tab=about` — About Us (images, text, amenity tags)
