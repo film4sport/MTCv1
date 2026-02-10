@@ -5,7 +5,10 @@
       "Bash(npx playwright test:*)",
       "Bash(npx next build)",
       "Bash(curl:*)",
-      "Bash(git -C \"C:\\\\Users\\\\1337\\\\Documents\\\\GitHub\\\\MTCv1\" show 616b7fe:public/landing.html)"
+      "Bash(git -C \"C:\\\\Users\\\\1337\\\\Documents\\\\GitHub\\\\MTCv1\" show 616b7fe:public/landing.html)",
+      "Bash(npm install:*)",
+      "Bash(npx next:*)",
+      "Bash(npm audit:*)"
     ]
   }
 }

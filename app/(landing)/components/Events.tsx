@@ -44,6 +44,7 @@ interface EventsProps {
 
 export default function Events({ onOpenLightbox }: EventsProps) {
   const [filter, setFilter] = useState('all');
+  const [animKey, setAnimKey] = useState(0);
 
   const filters = [
     { label: 'All Events', value: 'all' },
@@ -75,7 +76,7 @@ export default function Events({ onOpenLightbox }: EventsProps) {
                 filter === f.value ? ' active text-white' : ' text-gray-600 border hover:border-gray-400'
               }`}
               style={filter === f.value ? { backgroundColor: '#6b7a3d' } : { backgroundColor: '#faf8f3', borderColor: '#e0dcd3' }}
-              onClick={() => setFilter(f.value)}
+              onClick={() => { setFilter(f.value); setAnimKey(k => k + 1); }}
             >
               {f.label}
             </button>
@@ -84,11 +85,11 @@ export default function Events({ onOpenLightbox }: EventsProps) {
 
         {/* Events Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-          {filteredEvents.map((event) => (
+          {filteredEvents.map((event, index) => (
             <div
-              key={event.title}
-              className="event-card tilt-card rounded-2xl overflow-hidden card-hover fade-in"
-              style={{ backgroundColor: '#faf8f3' }}
+              key={`${event.title}-${animKey}`}
+              className="event-card tilt-card rounded-2xl overflow-hidden card-hover event-card-stagger"
+              style={{ backgroundColor: '#faf8f3', animationDelay: `${index * 100}ms` }}
               data-category={event.category}
             >
               <div

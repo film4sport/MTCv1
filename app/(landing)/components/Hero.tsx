@@ -40,6 +40,7 @@ export default function Hero({ onOpenBooking }: HeroProps) {
         />
       </div>
       <div className="absolute inset-0 hero-overlay"></div>
+      <div className="absolute inset-0 hero-grain"></div>
 
       {/* Hero Content */}
       <div className="absolute inset-0 flex flex-col justify-center px-8 lg:px-16 z-10 pt-16">
@@ -81,14 +82,6 @@ export default function Hero({ onOpenBooking }: HeroProps) {
                 </svg>
               </span>
             </button>
-          </div>
-
-          <div className="flex items-center gap-6 text-xs tracking-wide" style={{ color: 'rgba(232, 228, 217, 0.5)' }}>
-            <span>EST. 1978</span>
-            <span className="w-1 h-1 rounded-full" style={{ backgroundColor: 'rgba(232, 228, 217, 0.3)' }} />
-            <span>200+ MEMBERS</span>
-            <span className="w-1 h-1 rounded-full" style={{ backgroundColor: 'rgba(232, 228, 217, 0.3)' }} />
-            <span>4 COURTS</span>
           </div>
         </div>
       </div>
