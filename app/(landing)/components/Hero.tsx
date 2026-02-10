@@ -29,7 +29,7 @@ export default function Hero({ onOpenBooking }: HeroProps) {
   }, []);
 
   return (
-    <section className="relative h-screen w-full overflow-hidden">
+    <section className="relative h-screen w-full overflow-hidden" style={{ zIndex: 0 }}>
       {/* Background Image with Parallax */}
       <div className="absolute inset-0 parallax-bg" ref={heroBgRef}>
         <img

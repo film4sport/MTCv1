@@ -22,7 +22,7 @@ export default function WaveDivider({ bgColor, fillColor, flip = false, height =
         marginTop: overlap ? `-${height}px` : flip ? undefined : '-1px',
         marginBottom: flip ? '-1px' : undefined,
         position: overlap ? 'relative' : undefined,
-        zIndex: overlap ? 2 : undefined,
+        zIndex: overlap ? 20 : undefined,
       }}
     >
       <svg viewBox={viewBox} preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" style={{ height: `${height}px` }}>

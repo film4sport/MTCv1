@@ -10,5 +10,5 @@ export default function LandingLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return <div style={{ backgroundColor: '#1a1f12', minHeight: '100vh' }}>{children}</div>;
 }
