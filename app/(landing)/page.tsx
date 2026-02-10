@@ -121,20 +121,12 @@ export default function LandingPage() {
       {/* Events & Programs Section */}
       <Events onOpenLightbox={openLightbox} />
 
-      {/* Wave Divider: Events (warm cream) → Schedule (dark) */}
-      <WaveDivider bgColor="#f5f2eb" fillColor="#22271a" />
-
       {/* Schedule / Calendar Section (dark bg) */}
       <Schedule />
-
-      {/* Wave Divider: Schedule (dark) → Partners (cream) */}
-      <WaveDivider bgColor="#22271a" fillColor="#faf8f3" />
 
       {/* Partners Section */}
       <Partners />
 
-      {/* Wave Divider: Partners (cream) → Gallery (warm gray) */}
-      <WaveDivider bgColor="#faf8f3" fillColor="#edeae3" />
 
       {/* Gallery Section */}
       <Gallery onOpenLightbox={openLightbox} />
