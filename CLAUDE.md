@@ -60,19 +60,23 @@ When new project rules or conventions are established, add them to this file AND
 - Mobile-first design
 
 ## LANDING PAGE SECTION ORDER
-1. Hero (texture overlay, parallax, glass buttons)
-2. Wave Divider (black → white)
+1. Hero (parallax bg, glass buttons)
+2. Wave Divider (black → gray)
 3. Events & Programs (filter tabs, 3D hover cards)
 4. Wave Divider (gray → dark)
-5. Schedule / Calendar
-6. Wave Divider (dark → dark)
-7. Book a Court (texture overlay, background photo, tilt/glass cards)
-8. Partners (imgur logos)
-9. Gallery (carousel + lightbox)
-10. FAQ & Directions (accordion, Google Maps)
-11. Wave Divider (gray → dark)
-12. Footer (texture overlay, watermark)
+5. Schedule / Calendar (month grid, event dots)
+6. Wave Divider (dark → white)
+7. Partners (imgur logos)
+8. Wave Divider (white → gray)
+9. Gallery (carousel + lightbox, 15 photos)
+10. Wave Divider (gray → dark)
+11. Footer (watermark)
 + Booking Overlay (modal, hidden by default)
+
+## /INFO PAGE TABS
+- `/info?tab=about` — About Us (images, text, amenity tags)
+- `/info?tab=membership` — Membership fees, facilities, news (default)
+- `/info?tab=faq` — FAQ accordion + Google Maps
 
 ## KEY FILES
 - `app/(landing)/page.tsx` - Landing page root

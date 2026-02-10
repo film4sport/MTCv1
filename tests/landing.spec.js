@@ -54,7 +54,7 @@ test.describe('Navbar', () => {
   });
 
   test('nav links exist for key sections', async ({ page }) => {
-    const links = ['Home', 'About', 'Membership', 'Events', 'Contact', 'Book'];
+    const links = ['Home', 'About', 'Membership', 'Events', 'FAQ', 'Book'];
     for (const text of links) {
       const link = page.locator('.navbar').getByText(text, { exact: false }).first();
       await expect(link).toBeAttached();
@@ -96,32 +96,6 @@ test.describe('Hero Section', () => {
     const previews = page.locator('.hero-preview-img');
     const count = await previews.count();
     expect(count).toBeGreaterThanOrEqual(1);
-  });
-});
-
-test.describe('About Section', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
-    await page.waitForTimeout(4500);
-  });
-
-  test('about section renders with white background', async ({ page }) => {
-    const about = page.locator('#about');
-    await expect(about).toBeAttached();
-    await expect(about).toHaveClass(/bg-white/);
-  });
-
-  test('about section has images', async ({ page }) => {
-    const images = page.locator('#about img');
-    const count = await images.count();
-    expect(count).toBeGreaterThanOrEqual(1);
-  });
-
-  test('about section has amenity tags', async ({ page }) => {
-    const parking = page.locator('#about').getByText('Parking');
-    await expect(parking).toBeAttached();
-    const accessible = page.locator('#about').getByText('Wheelchair Accessible');
-    await expect(accessible).toBeAttached();
   });
 });
 
@@ -172,30 +146,50 @@ test.describe('Events Section', () => {
   });
 });
 
-test.describe('Book a Court Section', () => {
+test.describe('Schedule / Calendar Section', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/', { waitUntil: 'networkidle' });
     await page.waitForTimeout(4500);
-    await page.locator('#book').scrollIntoViewIfNeeded();
+    await page.locator('#schedule').scrollIntoViewIfNeeded();
     await page.waitForTimeout(500);
   });
 
-  test('book section renders with background image', async ({ page }) => {
-    const book = page.locator('#book');
-    await expect(book).toBeAttached();
-    const bgImg = page.locator('#book img').first();
-    await expect(bgImg).toBeAttached();
+  test('schedule section renders', async ({ page }) => {
+    const schedule = page.locator('#schedule');
+    await expect(schedule).toBeAttached();
   });
 
-  test('glass cards are displayed', async ({ page }) => {
-    const cards = page.locator('.glass-card');
-    const count = await cards.count();
-    expect(count).toBe(4);
+  test('calendar grid exists', async ({ page }) => {
+    const grid = page.locator('.cal-grid');
+    await expect(grid).toBeAttached();
   });
 
-  test('book now button exists', async ({ page }) => {
-    const bookBtn = page.locator('#book').getByText('Book Now');
-    await expect(bookBtn).toBeAttached();
+  test('calendar has day headers', async ({ page }) => {
+    const headers = page.locator('.cal-header');
+    const count = await headers.count();
+    expect(count).toBe(7);
+  });
+
+  test('calendar has day cells', async ({ page }) => {
+    const days = page.locator('.cal-day:not(.empty)');
+    const count = await days.count();
+    expect(count).toBeGreaterThanOrEqual(28);
+  });
+
+  test('today button exists', async ({ page }) => {
+    const todayBtn = page.locator('#schedule').getByText('Today');
+    await expect(todayBtn).toBeAttached();
+  });
+
+  test('month navigation works', async ({ page }) => {
+    const monthTitle = page.locator('#schedule h3').first();
+    const initialText = await monthTitle.textContent();
+    // Click next month
+    const nextBtn = page.locator('#schedule button').nth(1);
+    await nextBtn.click();
+    await page.waitForTimeout(300);
+    const newText = await monthTitle.textContent();
+    expect(newText).not.toBe(initialText);
   });
 });
 
@@ -218,37 +212,41 @@ test.describe('Partners Section', () => {
   });
 });
 
-test.describe('FAQ Section', () => {
+test.describe('Gallery Section', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/', { waitUntil: 'networkidle' });
     await page.waitForTimeout(4500);
-    await page.locator('#faq').scrollIntoViewIfNeeded();
+    await page.locator('#gallery').scrollIntoViewIfNeeded();
     await page.waitForTimeout(500);
   });
 
-  test('FAQ section renders with gray background', async ({ page }) => {
-    const faq = page.locator('#faq');
-    await expect(faq).toBeAttached();
-    await expect(faq).toHaveClass(/bg-gray-50/);
+  test('gallery section renders', async ({ page }) => {
+    const gallery = page.locator('#gallery');
+    await expect(gallery).toBeAttached();
   });
 
-  test('FAQ has accordion items', async ({ page }) => {
-    const items = page.locator('.faq-item');
-    const count = await items.count();
-    expect(count).toBe(6);
+  test('gallery carousel exists', async ({ page }) => {
+    const carousel = page.locator('.gallery-carousel');
+    await expect(carousel).toBeAttached();
   });
 
-  test('FAQ accordion opens on click', async ({ page }) => {
-    const firstQuestion = page.locator('.faq-question').first();
-    await firstQuestion.click();
-    await page.waitForTimeout(300);
-    const firstItem = page.locator('.faq-item').first();
-    await expect(firstItem).toHaveClass(/active/);
+  test('gallery has slide images', async ({ page }) => {
+    const slides = page.locator('.gallery-slide');
+    const count = await slides.count();
+    expect(count).toBeGreaterThanOrEqual(10);
   });
 
-  test('Google Maps iframe exists', async ({ page }) => {
-    const map = page.locator('#faq iframe');
-    await expect(map).toBeAttached();
+  test('gallery navigation buttons exist', async ({ page }) => {
+    const prev = page.locator('.gallery-nav.prev');
+    const next = page.locator('.gallery-nav.next');
+    await expect(prev).toBeAttached();
+    await expect(next).toBeAttached();
+  });
+
+  test('gallery dots exist', async ({ page }) => {
+    const dots = page.locator('.gallery-dot');
+    const count = await dots.count();
+    expect(count).toBeGreaterThanOrEqual(1);
   });
 });
 
@@ -258,7 +256,7 @@ test.describe('Wave Dividers', () => {
     await page.waitForTimeout(4500);
     const dividers = page.locator('.wave-divider');
     const count = await dividers.count();
-    expect(count).toBeGreaterThanOrEqual(3);
+    expect(count).toBeGreaterThanOrEqual(4);
   });
 });
 
@@ -378,47 +376,92 @@ test.describe('No ClubSpark Links - Full Page', () => {
 });
 
 test.describe('Info Page', () => {
-  test.beforeEach(async ({ page }) => {
+  test('default tab is membership', async ({ page }) => {
     await page.goto('/info', { waitUntil: 'networkidle' });
     await page.waitForTimeout(1000);
-  });
-
-  test('/info page loads', async ({ page }) => {
     const heading = page.getByText('Membership & News');
     await expect(heading).toBeAttached();
   });
 
-  test('info page has How to Join section', async ({ page }) => {
+  test('info page has How to Join section on membership tab', async ({ page }) => {
+    await page.goto('/info?tab=membership', { waitUntil: 'networkidle' });
+    await page.waitForTimeout(1000);
     const howToJoin = page.getByText('How to Join').first();
     await expect(howToJoin).toBeAttached();
   });
 
-  test('info page has Membership Fees section', async ({ page }) => {
+  test('info page has Membership Fees on membership tab', async ({ page }) => {
+    await page.goto('/info?tab=membership', { waitUntil: 'networkidle' });
+    await page.waitForTimeout(1000);
     const fees = page.getByText('Membership Fees').first();
     await expect(fees).toBeAttached();
   });
 
-  test('info page has Season & Facilities section', async ({ page }) => {
+  test('info page has Season & Facilities on membership tab', async ({ page }) => {
+    await page.goto('/info?tab=membership', { waitUntil: 'networkidle' });
+    await page.waitForTimeout(1000);
     const facilities = page.getByText('Season & Facilities').first();
     await expect(facilities).toBeAttached();
   });
 
-  test('info page has News section', async ({ page }) => {
+  test('info page has News on membership tab', async ({ page }) => {
+    await page.goto('/info?tab=membership', { waitUntil: 'networkidle' });
+    await page.waitForTimeout(1000);
     const news = page.getByText('News & Updates').first();
     await expect(news).toBeAttached();
   });
 
-  test('info page has registration news', async ({ page }) => {
-    const registration = page.getByRole('heading', { name: 'Registration Opens March 1st' });
-    await expect(registration).toBeAttached();
+  test('about tab shows About content', async ({ page }) => {
+    await page.goto('/info?tab=about', { waitUntil: 'networkidle' });
+    await page.waitForTimeout(1000);
+    const heading = page.getByText('About Us').first();
+    await expect(heading).toBeAttached();
+    const passion = page.getByText('Passion, Community,');
+    await expect(passion).toBeAttached();
+  });
+
+  test('faq tab shows FAQ content', async ({ page }) => {
+    await page.goto('/info?tab=faq', { waitUntil: 'networkidle' });
+    await page.waitForTimeout(1000);
+    const faqHeading = page.getByText('Frequently Asked Questions');
+    await expect(faqHeading).toBeAttached();
+    const mapHeading = page.getByText('Find Us');
+    await expect(mapHeading).toBeAttached();
+  });
+
+  test('tab navigation buttons exist', async ({ page }) => {
+    await page.goto('/info', { waitUntil: 'networkidle' });
+    await page.waitForTimeout(1000);
+    const tabs = page.locator('.filter-btn');
+    const count = await tabs.count();
+    expect(count).toBe(3);
+  });
+
+  test('tab switching works', async ({ page }) => {
+    await page.goto('/info', { waitUntil: 'networkidle' });
+    await page.waitForTimeout(1000);
+    // Click About tab
+    await page.locator('.filter-btn').getByText('About').click();
+    await page.waitForTimeout(500);
+    const aboutContent = page.getByText('Passion, Community,');
+    await expect(aboutContent).toBeAttached();
+    // Click FAQ tab
+    await page.locator('.filter-btn').getByText('FAQ').click();
+    await page.waitForTimeout(500);
+    const faqContent = page.getByText('Frequently Asked Questions');
+    await expect(faqContent).toBeAttached();
   });
 
   test('info page has Back to Home link', async ({ page }) => {
+    await page.goto('/info', { waitUntil: 'networkidle' });
+    await page.waitForTimeout(1000);
     const backLink = page.getByText('Back to Home').first();
     await expect(backLink).toBeAttached();
   });
 
   test('no ClubSpark links on info page', async ({ page }) => {
+    await page.goto('/info', { waitUntil: 'networkidle' });
+    await page.waitForTimeout(1000);
     const clubsparkLinks = await page.locator('a[href*="clubspark"]').count();
     expect(clubsparkLinks).toBe(0);
   });

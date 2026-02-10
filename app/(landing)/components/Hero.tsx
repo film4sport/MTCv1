@@ -40,7 +40,7 @@ export default function Hero({ onOpenBooking, onOpenLightbox }: HeroProps) {
       {/* Background Image with Parallax */}
       <div className="absolute inset-0 parallax-bg" ref={heroBgRef}>
         <img
-          src="https://i.imgur.com/PsCEmg2.png"
+          src="https://i.imgur.com/JJiiQRQ.png"
           alt="Tennis court aerial view"
           className="w-full h-full object-cover scale-110"
           loading="eager"
