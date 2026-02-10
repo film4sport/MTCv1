@@ -20,9 +20,13 @@ const timeSlots = [
   '5:00 PM', '6:00 PM', '7:00 PM', '8:00 PM', '9:00 PM',
 ];
 
-function isTimeBooked(courtId: number, dateIdx: number, timeIdx: number): boolean {
+const mockMemberNames = ['Sarah M.', 'John D.', 'Mike R.', 'Lisa T.', 'Chris P.', 'Anna K.'];
+
+function getBookingInfo(courtId: number, dateIdx: number, timeIdx: number): { booked: boolean; memberName: string | null } {
   const hash = (courtId * 31 + dateIdx * 17 + timeIdx * 7) % 10;
-  return hash < 3;
+  const booked = hash < 3;
+  const memberName = booked ? mockMemberNames[hash % mockMemberNames.length] : null;
+  return { booked, memberName };
 }
 
 function getBookingDates() {
@@ -247,21 +251,21 @@ export default function BookingOverlay({ isOpen, onClose }: BookingOverlayProps)
             <div className="booking-screen active">
               <div className="time-grid">
                 {timeSlots.map((slot, i) => {
-                  const booked = isTimeBooked(selectedCourt!, selectedDate, i);
+                  const booking = getBookingInfo(selectedCourt!, selectedDate, i);
                   return (
                     <button
                       key={slot}
-                      className={`time-slot${booked ? ' booked' : ''}`}
-                      disabled={booked}
+                      className={`time-slot${booking.booked ? ' booked' : ''}`}
+                      disabled={booking.booked}
                       onClick={() => {
-                        if (!booked) {
+                        if (!booking.booked) {
                           setSelectedTime(slot);
                           setScreen(3);
                         }
                       }}
                     >
                       <span className="time-slot-time">{slot}</span>
-                      <span className="time-slot-label">{booked ? 'Booked' : 'Available'}</span>
+                      <span className="time-slot-label">{booking.booked ? booking.memberName : 'Available'}</span>
                     </button>
                   );
                 })}
@@ -332,6 +336,7 @@ export default function BookingOverlay({ isOpen, onClose }: BookingOverlayProps)
                     placeholder="Guest name"
                     value={guestName}
                     onChange={(e) => setGuestName(e.target.value)}
+                    maxLength={50}
                     style={{
                       width: '100%',
                       padding: '0.625rem 0.75rem',

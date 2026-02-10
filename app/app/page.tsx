@@ -496,7 +496,6 @@ export default function MonoTennisApp() {
       const savedEmail = localStorage.getItem('clubEtransferEmail')
       const savedBookings = localStorage.getItem('myBookings')
       const savedEvents = localStorage.getItem('clubEvents')
-      const savedPhoneNum = localStorage.getItem('savedPhone')
       const savedNotifications = localStorage.getItem('partnerNotifications')
       const savedAddToHome = localStorage.getItem('showAddToHomeScreen')
       const savedAnnouncements = localStorage.getItem('announcements')
@@ -513,7 +512,6 @@ export default function MonoTennisApp() {
       if (savedEmail) setClubEtransferEmail(savedEmail)
       if (savedBookings) setMyBookings(JSON.parse(savedBookings))
       // Note: Not loading savedEvents to ensure social icons are always correct
-      if (savedPhoneNum) setSavedPhone(savedPhoneNum)
       if (savedNotifications) setPartnerNotifications(JSON.parse(savedNotifications))
       if (savedAddToHome !== null) setShowAddToHomeScreen(savedAddToHome === 'true')
       if (savedAnnouncements) setAnnouncements(JSON.parse(savedAnnouncements))
@@ -563,12 +561,6 @@ export default function MonoTennisApp() {
       localStorage.setItem('partnerNotifications', JSON.stringify(partnerNotifications))
     }
   }, [partnerNotifications])
-
-  useEffect(() => {
-    if (typeof window !== 'undefined' && savedPhone) {
-      localStorage.setItem('savedPhone', savedPhone)
-    }
-  }, [savedPhone])
 
   useEffect(() => {
     if (typeof window !== 'undefined') {

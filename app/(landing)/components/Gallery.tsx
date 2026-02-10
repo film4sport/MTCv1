@@ -29,6 +29,7 @@ export default function Gallery({ onOpenLightbox }: GalleryProps) {
   const trackRef = useRef<HTMLDivElement>(null);
   const touchStartX = useRef(0);
   const sectionRef = useRef<HTMLElement>(null);
+  const headingRef = useRef<HTMLDivElement>(null);
 
   // Responsive: how many slides visible at once
   const [slidesPerView, setSlidesPerView] = useState(4);
@@ -88,15 +89,32 @@ export default function Gallery({ onOpenLightbox }: GalleryProps) {
     return () => observer.disconnect();
   }, []);
 
+  // Subtle parallax on heading
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!sectionRef.current || !headingRef.current) return;
+      const rect = sectionRef.current.getBoundingClientRect();
+      const windowHeight = window.innerHeight;
+      const sectionCenter = rect.top + rect.height / 2;
+      const viewportCenter = windowHeight / 2;
+      const offset = ((sectionCenter - viewportCenter) / windowHeight) * 20;
+      headingRef.current.style.transform = `translateY(${offset}px)`;
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
     <section id="gallery" className="py-20 lg:py-28 overflow-hidden" style={{ backgroundColor: '#edeae3' }} ref={sectionRef}>
       <div className="max-w-7xl mx-auto px-8 lg:px-16">
         <div className="text-center mb-12 fade-in">
-          <span className="section-label">// Gallery</span>
-          <h2 className="headline-font text-3xl md:text-4xl mt-4 text-gray-900">Life at Mono Tennis Club</h2>
-          <p className="text-gray-600 mt-4 max-w-2xl mx-auto">
-            Capturing the moments that make our community special
-          </p>
+          <div ref={headingRef} style={{ willChange: 'transform' }}>
+            <span className="section-label">// Gallery</span>
+            <h2 className="headline-font text-3xl md:text-4xl mt-4 text-gray-900">Life at Mono Tennis Club</h2>
+            <p className="text-gray-600 mt-4 max-w-2xl mx-auto">
+              Capturing the moments that make our community special
+            </p>
+          </div>
         </div>
 
         {/* Carousel */}
