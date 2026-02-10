@@ -38,10 +38,10 @@ export default function Navbar({ onOpenBooking }: NavbarProps) {
         {/* Desktop Nav */}
         <div className="hidden lg:flex items-center gap-6">
           <a href="#" className="nav-link text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9' }}>.Home</a>
-          <a href="/info" className="nav-link text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9' }}>.About</a>
-          <a href="/info" className="nav-link text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9' }}>.Membership</a>
+          <a href="/info?tab=about" className="nav-link text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9' }}>.About</a>
+          <a href="/info?tab=membership" className="nav-link text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9' }}>.Membership</a>
           <a href="#events" className="nav-link text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9' }}>.Events</a>
-          <a href="#contact" className="nav-link text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9' }}>.Contact</a>
+          <a href="/info?tab=faq" className="nav-link text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9' }}>.FAQ</a>
           <button
             onClick={onOpenBooking}
             className="nav-link text-sm hover:opacity-80 transition-opacity font-semibold bg-transparent border-none cursor-pointer"
@@ -73,10 +73,10 @@ export default function Navbar({ onOpenBooking }: NavbarProps) {
             </svg>
           </button>
           <a href="#" className="mobile-menu-link" onClick={closeMobileMenu}>.Home</a>
-          <a href="/info" className="mobile-menu-link" onClick={closeMobileMenu}>.About</a>
-          <a href="/info" className="mobile-menu-link" onClick={closeMobileMenu}>.Membership</a>
+          <a href="/info?tab=about" className="mobile-menu-link" onClick={closeMobileMenu}>.About</a>
+          <a href="/info?tab=membership" className="mobile-menu-link" onClick={closeMobileMenu}>.Membership</a>
           <a href="#events" className="mobile-menu-link" onClick={closeMobileMenu}>.Events</a>
-          <a href="#contact" className="mobile-menu-link" onClick={closeMobileMenu}>.Contact</a>
+          <a href="/info?tab=faq" className="mobile-menu-link" onClick={closeMobileMenu}>.FAQ</a>
           <button
             onClick={() => { onOpenBooking(); closeMobileMenu(); }}
             className="mobile-menu-link bg-transparent border-none cursor-pointer"

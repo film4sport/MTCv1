@@ -6,11 +6,10 @@ import Loader from './components/Loader';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import WaveDivider from './components/WaveDivider';
-import About from './components/About';
 import Events from './components/Events';
-import BookCourt from './components/BookCourt';
+import Schedule from './components/Schedule';
 import Partners from './components/Partners';
-import FAQ from './components/FAQ';
+import Gallery from './components/Gallery';
 import Footer from './components/Footer';
 import BookingOverlay from './components/BookingOverlay';
 import Lightbox from './components/Lightbox';
@@ -115,32 +114,32 @@ export default function LandingPage() {
       {/* Hero Section (dark, parallax) */}
       <Hero onOpenBooking={() => { openBooking(); createConfetti(); }} onOpenLightbox={openLightbox} />
 
-      {/* Wave Divider: Hero (black) → About (white) */}
-      <WaveDivider bgColor="#000" fillColor="#ffffff" />
-
-      {/* About Section (white bg) */}
-      <About />
-
-      {/* Wave Divider: About (white) → Events (gray) */}
-      <WaveDivider bgColor="#f9fafb" fillColor="#ffffff" flip />
+      {/* Wave Divider: Hero (black) → Events (gray) */}
+      <WaveDivider bgColor="#000" fillColor="#f9fafb" />
 
       {/* Events & Programs Section (gray bg, white cards) */}
       <Events onOpenLightbox={openLightbox} />
 
-      {/* Wave Divider: Events (gray) → Book a Court (dark) */}
-      <WaveDivider bgColor="#f9fafb" fillColor="#1a1f12" />
+      {/* Wave Divider: Events (gray) → Schedule (dark) */}
+      <WaveDivider bgColor="#f9fafb" fillColor="#22271a" />
 
-      {/* Book a Court Section (dark with bg image) */}
-      <BookCourt onOpenBooking={() => { openBooking(); createConfetti(); }} />
+      {/* Schedule / Calendar Section (dark bg) */}
+      <Schedule />
+
+      {/* Wave Divider: Schedule (dark) → Partners (white) */}
+      <WaveDivider bgColor="#22271a" fillColor="#ffffff" />
 
       {/* Partners Section (white bg) */}
       <Partners />
 
-      {/* FAQ & Directions Section (gray bg) */}
-      <FAQ />
+      {/* Wave Divider: Partners (white) → Gallery (gray) */}
+      <WaveDivider bgColor="#ffffff" fillColor="#f3f4f6" />
 
-      {/* Wave Divider: FAQ (gray) → Footer (dark) */}
-      <WaveDivider bgColor="#f9fafb" fillColor="#1a1f12" />
+      {/* Gallery Section (gray bg) */}
+      <Gallery onOpenLightbox={openLightbox} />
+
+      {/* Wave Divider: Gallery (gray) → Footer (dark) */}
+      <WaveDivider bgColor="#f3f4f6" fillColor="#1a1f12" />
 
       {/* Footer (dark) */}
       <Footer onOpenBooking={openBooking} />

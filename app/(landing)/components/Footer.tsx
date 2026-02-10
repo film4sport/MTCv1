@@ -27,23 +27,23 @@ export default function Footer({ onOpenBooking }: FooterProps) {
             </h5>
             <ul className="space-y-2">
               <li>
-                <a href="/info" className="text-sm hover:opacity-80 transition-opacity" style={{ color: 'rgba(232, 228, 217, 0.6)' }}>
+                <a href="/info?tab=about" className="text-sm hover:opacity-80 transition-opacity" style={{ color: 'rgba(232, 228, 217, 0.6)' }}>
                   About
                 </a>
               </li>
               <li>
-                <a href="/info" className="text-sm hover:opacity-80 transition-opacity" style={{ color: 'rgba(232, 228, 217, 0.6)' }}>
+                <a href="/info?tab=membership" className="text-sm hover:opacity-80 transition-opacity" style={{ color: 'rgba(232, 228, 217, 0.6)' }}>
                   Membership
                 </a>
               </li>
               <li>
-                <a href="/info" className="text-sm hover:opacity-80 transition-opacity" style={{ color: 'rgba(232, 228, 217, 0.6)' }}>
-                  News
+                <a href="/info?tab=faq" className="text-sm hover:opacity-80 transition-opacity" style={{ color: 'rgba(232, 228, 217, 0.6)' }}>
+                  FAQ
                 </a>
               </li>
               <li>
                 <a href="#events" className="text-sm hover:opacity-80 transition-opacity" style={{ color: 'rgba(232, 228, 217, 0.6)' }}>
-                  Teams
+                  Events
                 </a>
               </li>
             </ul>
