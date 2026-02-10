@@ -124,7 +124,7 @@ export default function Schedule() {
     <section id="schedule" className="py-20 lg:py-28" style={{ backgroundColor: '#22271a' }} ref={sectionRef}>
       <div className="max-w-5xl mx-auto px-8 lg:px-16">
         <div className="text-center mb-12 fade-in">
-          <span className="section-label uppercase font-medium">// Schedule</span>
+          <span className="section-label">// Schedule</span>
           <h2
             className="headline-font text-3xl md:text-4xl lg:text-[2.75rem] leading-tight mt-4 mb-6"
             style={{ color: '#e8e4d9' }}

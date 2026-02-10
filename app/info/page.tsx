@@ -87,7 +87,7 @@ function InfoPageContent() {
 
       {/* Hero Banner */}
       <section className="py-16 lg:py-24 px-8 lg:px-16 text-center fade-in">
-        <span className="section-label uppercase font-medium">// Club Information</span>
+        <span className="section-label">// Club Information</span>
         <h1 className="headline-font text-3xl md:text-4xl lg:text-[2.75rem] leading-tight mt-4 mb-6" style={{ color: '#e8e4d9' }}>
           {activeTab === 'about' ? 'About Us' : activeTab === 'faq' ? 'FAQ & Directions' : 'Membership & News'}
         </h1>
@@ -162,7 +162,7 @@ function InfoPageContent() {
 
                 {/* Right: Content */}
                 <div className="fade-in-right">
-                  <span className="section-label uppercase font-medium">// About Us</span>
+                  <span className="section-label">// About Us</span>
                   <h2 className="headline-font text-3xl md:text-4xl lg:text-[2.75rem] leading-tight mt-4 mb-6" style={{ color: '#e8e4d9' }}>
                     Mono Tennis Club — Empowering Your Tennis Journey with{' '}
                     <span style={{ color: '#d4e157' }}>Passion, Community,</span> and Dedication.
@@ -204,7 +204,7 @@ function InfoPageContent() {
           <section className="py-16 lg:py-20 px-8 lg:px-16" style={{ backgroundColor: '#22271a' }}>
             <div className="max-w-7xl mx-auto">
               <div className="text-center mb-12 fade-in">
-                <span className="section-label uppercase font-medium">// Membership</span>
+                <span className="section-label">// Membership</span>
                 <h2 className="headline-font text-2xl md:text-3xl lg:text-4xl leading-tight mt-4 mb-4" style={{ color: '#e8e4d9' }}>
                   How to Join
                 </h2>
@@ -269,7 +269,7 @@ function InfoPageContent() {
           <section className="py-16 lg:py-20 px-8 lg:px-16" style={{ backgroundColor: '#1a1f12' }}>
             <div className="max-w-7xl mx-auto">
               <div className="text-center mb-12 fade-in">
-                <span className="section-label uppercase font-medium">// Facilities</span>
+                <span className="section-label">// Facilities</span>
                 <h2 className="headline-font text-2xl md:text-3xl lg:text-4xl leading-tight mt-4 mb-4" style={{ color: '#e8e4d9' }}>
                   Season &amp; Facilities
                 </h2>
@@ -318,7 +318,7 @@ function InfoPageContent() {
           <section className="py-16 lg:py-20 px-8 lg:px-16" style={{ backgroundColor: '#22271a' }}>
             <div className="max-w-7xl mx-auto">
               <div className="text-center mb-12 fade-in">
-                <span className="section-label uppercase font-medium">// News</span>
+                <span className="section-label">// News</span>
                 <h2 className="headline-font text-2xl md:text-3xl lg:text-4xl leading-tight mt-4 mb-4" style={{ color: '#e8e4d9' }}>
                   News &amp; Updates
                 </h2>
