@@ -118,20 +118,6 @@ export default function Events({ onOpenLightbox }: EventsProps) {
           ))}
         </div>
 
-        {/* View All Link */}
-        <div className="text-center mt-10 fade-in">
-          <a
-            href="#events"
-            className="inline-flex items-center gap-2 text-sm font-medium hover:opacity-80 transition-opacity"
-            style={{ color: '#6b7a3d' }}
-          >
-            View All Events &amp; News
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-            </svg>
-          </a>
-        </div>
-
       </div>
     </section>
   );

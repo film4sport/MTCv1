@@ -63,7 +63,7 @@ export default function Hero({ onOpenBooking }: HeroProps) {
 
           <div className="hero-buttons flex items-center gap-4 mb-10">
             <a
-              href="/info"
+              href="/info?tab=membership"
               className="px-8 py-3 rounded-full text-sm font-medium hover:opacity-90 transition-opacity"
               style={{ backgroundColor: 'rgba(107, 122, 61, 0.7)', color: '#e8e4d9' }}
             >

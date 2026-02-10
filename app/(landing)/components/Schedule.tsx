@@ -133,6 +133,16 @@ export default function Schedule() {
           </h2>
         </div>
 
+        {/* Legend */}
+        <div className="flex flex-wrap justify-center gap-4 mb-8 fade-in">
+          {Object.entries(dotColors).map(([type, color]) => (
+            <div key={type} className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: color }} />
+              <span className="text-xs capitalize" style={{ color: 'rgba(232,228,217,0.5)' }}>{type}</span>
+            </div>
+          ))}
+        </div>
+
         {/* Calendar Navigation */}
         <div className="flex items-center justify-between mb-6 fade-in">
           <div className="flex items-center gap-4">

@@ -6,6 +6,28 @@
   font-style: normal;
 }
 
+/* Skip to Content — accessibility */
+.skip-to-content {
+  position: fixed;
+  top: -100%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100000;
+  padding: 0.75rem 1.5rem;
+  background: #d4e157;
+  color: #1a1f12;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 0 0 8px 8px;
+  text-decoration: none;
+  transition: top 0.2s ease;
+}
+.skip-to-content:focus {
+  top: 0;
+  outline: 3px solid #d4e157;
+  outline-offset: 2px;
+}
+
 /* Subtle noise texture overlay for dark sections */
 .texture-overlay {
   position: relative;
@@ -280,15 +302,23 @@
 }
 .event-card-enhanced:hover::before { opacity: 1; }
 
-/* Scroll Progress Bar */
+/* Scroll Progress Bar — animated multicolor light bar (matches PWA header) */
 .scroll-progress {
   position: fixed;
   top: 0;
   left: 0;
   height: 3px;
-  background: linear-gradient(90deg, #6b7a3d, #d4e157);
+  background: linear-gradient(90deg, #c8ff00, #00d4ff, #ff5a5f, #c8ff00);
+  background-size: 200% 100%;
   z-index: 10000;
   transition: width 0.1s ease-out;
+  animation: accentShimmer 8s linear infinite;
+  box-shadow: 0 0 10px rgba(200, 255, 0, 0.4), 0 0 20px rgba(200, 255, 0, 0.2);
+  border-radius: 0 2px 2px 0;
+}
+@keyframes accentShimmer {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
 }
 
 /* Wave Dividers */
@@ -397,24 +427,29 @@
 }
 .faq-answer p { color: #666; line-height: 1.7; }
 
-/* Login Button */
+/* Login Button — tennis-themed */
 .login-btn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 0.5rem 1rem;
+  gap: 5px;
+  padding: 0.4rem 0.9rem;
   border-radius: 9999px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  background-color: rgba(212, 225, 87, 0.15);
+  font-size: 0.8rem;
+  font-weight: 600;
+  background-color: rgba(232, 228, 217, 0.1);
   color: #e8e4d9;
-  border: 1px solid rgba(212, 225, 87, 0.3);
-  transition: all 0.2s ease;
+  border: 1px solid rgba(232, 228, 217, 0.2);
+  transition: all 0.25s ease;
   cursor: pointer;
+  text-decoration: none;
+  letter-spacing: 0.02em;
 }
-.login-btn:hover { background-color: rgba(212, 225, 87, 0.25); border-color: rgba(212, 225, 87, 0.5); }
-.login-btn:active { transform: scale(0.95); background-color: rgba(212, 225, 87, 0.35); }
-.login-btn svg { width: 18px; height: 18px; }
+.login-btn:hover {
+  background-color: rgba(212, 225, 87, 0.2);
+  border-color: rgba(212, 225, 87, 0.4);
+  box-shadow: 0 0 12px rgba(212, 225, 87, 0.25);
+}
+.login-btn:active { transform: scale(0.95); }
 
 /* Enhanced Loading Screen */
 .loader {
