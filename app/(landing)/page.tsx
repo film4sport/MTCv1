@@ -112,7 +112,7 @@ export default function LandingPage() {
       <Navbar onOpenBooking={openBooking} />
 
       {/* Hero Section (dark, parallax) */}
-      <Hero onOpenBooking={() => { openBooking(); createConfetti(); }} onOpenLightbox={openLightbox} />
+      <Hero onOpenBooking={() => { openBooking(); createConfetti(); }} />
 
       {/* Wave Divider: Hero (black) → Events (gray) */}
       <WaveDivider bgColor="#000" fillColor="#f9fafb" />
