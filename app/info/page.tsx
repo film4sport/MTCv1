@@ -249,7 +249,7 @@ function InfoPageContent() {
 
       {/* Tab Navigation */}
       <div className="px-8 lg:px-16 mb-8" style={{ backgroundColor: '#f5f2eb' }}>
-        <div className="max-w-7xl mx-auto flex flex-wrap justify-center gap-3">
+        <div className="max-w-7xl mx-auto flex justify-center gap-3 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}>
           {[
             { key: 'about', label: 'About' },
             { key: 'membership', label: 'Membership' },
@@ -260,7 +260,7 @@ function InfoPageContent() {
             <button
               key={t.key}
               onClick={() => switchTab(t.key)}
-              className="px-5 py-2 rounded-full text-sm font-medium transition-all"
+              className="px-5 py-2 rounded-full text-sm font-medium transition-all flex-shrink-0"
               style={
                 activeTab === t.key
                   ? { backgroundColor: '#6b7a3d', color: '#fff' }
