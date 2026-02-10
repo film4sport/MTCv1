@@ -92,7 +92,7 @@ export default function Gallery({ onOpenLightbox }: GalleryProps) {
     <section id="gallery" className="bg-gray-100 py-20 lg:py-28 overflow-hidden" ref={sectionRef}>
       <div className="max-w-7xl mx-auto px-8 lg:px-16">
         <div className="text-center mb-12 fade-in">
-          <span className="section-label uppercase font-medium">// Gallery</span>
+          <span className="section-label">// Gallery</span>
           <h2 className="headline-font text-3xl md:text-4xl mt-4 text-gray-900">Life at Mono Tennis Club</h2>
           <p className="text-gray-600 mt-4 max-w-2xl mx-auto">
             Capturing the moments that make our community special

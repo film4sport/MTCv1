@@ -23,7 +23,7 @@ export default function Partners() {
     <section className="bg-white py-16 lg:py-20">
       <div className="max-w-7xl mx-auto px-8 lg:px-16">
         <div className="text-center mb-12 fade-in">
-          <span className="section-label uppercase font-medium">// Our Partners</span>
+          <span className="section-label">// Our Partners</span>
           <h3 className="headline-font text-2xl md:text-3xl mt-4 text-gray-900">
             Proudly Supported By
           </h3>
