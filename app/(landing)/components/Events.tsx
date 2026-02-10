@@ -55,7 +55,7 @@ export default function Events({ onOpenLightbox }: EventsProps) {
   const filteredEvents = filter === 'all' ? events : events.filter((e) => e.category === filter);
 
   return (
-    <section id="events" className="bg-gray-50 text-gray-900 py-20 lg:py-28">
+    <section id="events" className="text-gray-900 py-20 lg:py-28" style={{ backgroundColor: '#f5f2eb' }}>
       <div className="max-w-7xl mx-auto px-8 lg:px-16">
 
         {/* Section Header */}
@@ -72,9 +72,9 @@ export default function Events({ onOpenLightbox }: EventsProps) {
             <button
               key={f.value}
               className={`filter-btn px-5 py-2 rounded-full text-sm font-medium transition-colors${
-                filter === f.value ? ' active text-white' : ' text-gray-600 bg-white border border-gray-200 hover:border-gray-400'
+                filter === f.value ? ' active text-white' : ' text-gray-600 border hover:border-gray-400'
               }`}
-              style={filter === f.value ? { backgroundColor: '#6b7a3d' } : undefined}
+              style={filter === f.value ? { backgroundColor: '#6b7a3d' } : { backgroundColor: '#faf8f3', borderColor: '#e0dcd3' }}
               onClick={() => setFilter(f.value)}
             >
               {f.label}
@@ -87,7 +87,8 @@ export default function Events({ onOpenLightbox }: EventsProps) {
           {filteredEvents.map((event) => (
             <div
               key={event.title}
-              className="event-card tilt-card bg-white rounded-2xl overflow-hidden card-hover fade-in"
+              className="event-card tilt-card rounded-2xl overflow-hidden card-hover fade-in"
+              style={{ backgroundColor: '#faf8f3' }}
               data-category={event.category}
             >
               <div

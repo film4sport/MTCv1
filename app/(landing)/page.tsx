@@ -115,32 +115,60 @@ export default function LandingPage() {
       {/* Hero Section (dark, parallax) */}
       <Hero onOpenBooking={() => { openBooking(); createConfetti(); }} />
 
-      {/* Wave Divider: Hero (black) → Events (gray) */}
-      <WaveDivider bgColor="#000" fillColor="#f9fafb" />
+      {/* Wave Divider: Hero (black) → Events (warm cream) */}
+      <WaveDivider bgColor="#000" fillColor="#f5f2eb" />
 
-      {/* Events & Programs Section (gray bg, white cards) */}
+      {/* Events & Programs Section */}
       <Events onOpenLightbox={openLightbox} />
 
-      {/* Wave Divider: Events (gray) → Schedule (dark) */}
-      <WaveDivider bgColor="#f9fafb" fillColor="#22271a" />
+      {/* Wave Divider: Events (warm cream) → Schedule (dark) */}
+      <WaveDivider bgColor="#f5f2eb" fillColor="#22271a" />
 
       {/* Schedule / Calendar Section (dark bg) */}
       <Schedule />
 
-      {/* Wave Divider: Schedule (dark) → Partners (white) */}
-      <WaveDivider bgColor="#22271a" fillColor="#ffffff" />
+      {/* Wave Divider: Schedule (dark) → Partners (cream) */}
+      <WaveDivider bgColor="#22271a" fillColor="#faf8f3" />
 
-      {/* Partners Section (white bg) */}
+      {/* Partners Section */}
       <Partners />
 
-      {/* Wave Divider: Partners (white) → Gallery (gray) */}
-      <WaveDivider bgColor="#ffffff" fillColor="#f3f4f6" />
+      {/* Wave Divider: Partners (cream) → Gallery (warm gray) */}
+      <WaveDivider bgColor="#faf8f3" fillColor="#edeae3" />
 
-      {/* Gallery Section (gray bg) */}
+      {/* Gallery Section */}
       <Gallery onOpenLightbox={openLightbox} />
 
-      {/* Wave Divider: Gallery (gray) → Footer (dark) */}
-      <WaveDivider bgColor="#f3f4f6" fillColor="#1a1f12" />
+      {/* CTA Banner */}
+      <section className="py-16 lg:py-20 px-8 lg:px-16 text-center" style={{ backgroundColor: '#edeae3' }}>
+        <div className="max-w-2xl mx-auto fade-in">
+          <h3 className="headline-font text-2xl md:text-3xl lg:text-4xl mb-4" style={{ color: '#2a2f1e' }}>
+            Ready to Play?
+          </h3>
+          <p className="text-sm md:text-base mb-8 leading-relaxed" style={{ color: '#6b7266' }}>
+            Join 200+ members on the courts this season. New members welcome.
+          </p>
+          <div className="flex items-center justify-center gap-4">
+            <a
+              href="/info?tab=membership"
+              className="px-8 py-3 rounded-full text-sm font-medium hover:opacity-90 transition-opacity"
+              style={{ backgroundColor: '#6b7a3d', color: '#e8e4d9' }}
+            >
+              Become a Member
+            </a>
+            <button
+              onClick={() => { openBooking(); createConfetti(); }}
+              className="px-6 py-3 rounded-full text-sm font-medium cursor-pointer hover:opacity-90 transition-opacity"
+              style={{ backgroundColor: '#d4e157', color: '#3b4229' }}
+            >
+              Book a Court
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Wave Divider: CTA (warm gray) → Footer (dark) */}
+      <WaveDivider bgColor="#edeae3" fillColor="#1a1f12" />
 
       {/* Footer (dark) */}
       <Footer onOpenBooking={openBooking} />

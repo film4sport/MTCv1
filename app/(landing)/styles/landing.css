@@ -6,6 +6,36 @@
   font-style: normal;
 }
 
+/* Custom Scrollbar — multicolor light bar (matches PWA header) */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #1a1f12;
+}
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #c8ff00, #00d4ff, #ff5a5f, #c8ff00);
+  background-size: 100% 200%;
+  border-radius: 4px;
+  animation: scrollbarShimmer 8s linear infinite;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #c8ff00, #00d4ff, #ff5a5f, #c8ff00);
+  background-size: 100% 200%;
+  animation: scrollbarShimmer 4s linear infinite;
+  box-shadow: 0 0 8px rgba(200, 255, 0, 0.4);
+}
+@keyframes scrollbarShimmer {
+  0% { background-position: 50% 0%; }
+  100% { background-position: 50% 200%; }
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #c8ff00 #1a1f12;
+}
+
 /* Skip to Content — accessibility */
 .skip-to-content {
   position: fixed;
@@ -427,29 +457,49 @@
 }
 .faq-answer p { color: #666; line-height: 1.7; }
 
-/* Login Button — tennis-themed */
+/* Login Button */
 .login-btn {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 0.4rem 0.9rem;
+  justify-content: center;
+  padding: 0.4rem 1.1rem;
   border-radius: 9999px;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  background-color: rgba(232, 228, 217, 0.1);
-  color: #e8e4d9;
-  border: 1px solid rgba(232, 228, 217, 0.2);
-  transition: all 0.25s ease;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: transparent;
+  color: #d4e157;
+  border: 1.5px solid rgba(212, 225, 87, 0.4);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   text-decoration: none;
-  letter-spacing: 0.02em;
+  position: relative;
+  overflow: hidden;
+}
+.login-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: #d4e157;
+  border-radius: 9999px;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: -1;
 }
 .login-btn:hover {
-  background-color: rgba(212, 225, 87, 0.2);
-  border-color: rgba(212, 225, 87, 0.4);
-  box-shadow: 0 0 12px rgba(212, 225, 87, 0.25);
+  color: #1a1f12;
+  border-color: #d4e157;
+  box-shadow: 0 0 20px rgba(212, 225, 87, 0.3), 0 0 40px rgba(212, 225, 87, 0.1);
 }
-.login-btn:active { transform: scale(0.95); }
+.login-btn:hover::before {
+  transform: scaleX(1);
+}
+.login-btn:active {
+  transform: scale(0.93);
+  transition: transform 0.1s ease;
+}
 
 /* Enhanced Loading Screen */
 .loader {
@@ -593,7 +643,7 @@
   .faq-item:active { background: rgba(107, 122, 61, 0.05); }
   a[href*="facebook"]:active, a[href*="instagram"]:active { transform: scale(0.85); }
   .back-to-top:active { transform: scale(0.9); }
-  .login-btn:active { transform: scale(0.92); background-color: rgba(212, 225, 87, 0.4); }
+  .login-btn:active { transform: scale(0.92); }
 }
 
 /* Ripple effect */
@@ -676,9 +726,11 @@
   font-weight: 500;
 }
 .section-label {
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   font-weight: 500;
   color: #374151;
+  letter-spacing: 0.05em;
+  font-family: 'SF Mono', 'Fira Code', 'Fira Mono', 'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 .section-label-light {
   color: rgba(232, 228, 217, 0.5);
@@ -869,8 +921,10 @@
 }
 
 /* Partners */
-.partner-logo { opacity: 1; transition: all 0.3s ease; }
-.partner-logo:hover { transform: translateY(-4px); opacity: 0.9; }
+.partner-logo { transition: all 0.4s ease; }
+.partner-logo img { filter: grayscale(100%) opacity(0.6); transition: filter 0.4s ease; }
+.partner-logo:hover img { filter: grayscale(0%) opacity(1); }
+.partner-logo:hover { transform: translateY(-4px); }
 .partner-logo:active { transform: scale(0.95); }
 
 /* Confetti */

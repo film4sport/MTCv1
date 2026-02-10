@@ -20,7 +20,7 @@ const partners = [
 
 export default function Partners() {
   return (
-    <section className="bg-white py-16 lg:py-20">
+    <section className="py-16 lg:py-20" style={{ backgroundColor: '#faf8f3' }}>
       <div className="max-w-7xl mx-auto px-8 lg:px-16">
         <div className="text-center mb-12 fade-in">
           <span className="section-label">// Our Partners</span>
