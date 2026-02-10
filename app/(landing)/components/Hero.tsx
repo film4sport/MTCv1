@@ -4,10 +4,9 @@ import { useEffect, useRef } from 'react';
 
 interface HeroProps {
   onOpenBooking: () => void;
-  onOpenLightbox: (src: string, alt: string) => void;
 }
 
-export default function Hero({ onOpenBooking, onOpenLightbox }: HeroProps) {
+export default function Hero({ onOpenBooking }: HeroProps) {
   const heroContentRef = useRef<HTMLDivElement>(null);
   const heroBgRef = useRef<HTMLDivElement>(null);
 
@@ -28,12 +27,6 @@ export default function Hero({ onOpenBooking, onOpenLightbox }: HeroProps) {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  const previewImages = [
-    { src: 'https://i.imgur.com/ZttBEXm.jpeg', alt: 'MTC Tennis', centered: false },
-    { src: 'https://i.imgur.com/fBkdZzT.jpeg', alt: 'Mono Tennis Club Logo', centered: true },
-    { src: 'https://i.imgur.com/2rgFCv4.jpeg', alt: 'MTC Tennis', centered: false },
-  ];
 
   return (
     <section className="relative h-screen w-full overflow-hidden">
@@ -96,32 +89,16 @@ export default function Hero({ onOpenBooking, onOpenLightbox }: HeroProps) {
 
       {/* Bottom Section */}
       <div className="absolute bottom-0 left-0 right-0 px-8 lg:px-16 pb-8 z-10">
-        <div className="flex items-end justify-between">
-          <div className="flex items-center gap-3 text-xs tracking-[0.2em]" style={{ color: 'rgba(232, 228, 217, 0.6)' }}>
-            <span>SCROLL TO EXPLORE</span>
-            <svg className="w-4 h-4 scroll-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-            </svg>
-          </div>
-
-          <div className="hidden md:flex items-center gap-3">
-            {previewImages.map((img, i) => (
-              <div
-                key={i}
-                className={`hero-preview-container w-32 h-20 rounded-lg overflow-hidden border-2 hero-preview-img${
-                  img.centered ? ' bg-white flex items-center justify-center' : ''
-                }`}
-                style={{ borderColor: 'rgba(232, 228, 217, 0.25)' }}
-                onClick={() => onOpenLightbox(img.src, img.alt)}
-              >
-                <img
-                  src={img.src}
-                  alt={img.alt}
-                  className={img.centered ? 'max-w-full max-h-full object-contain' : 'w-full h-full object-cover'}
-                  loading="lazy"
-                />
-              </div>
-            ))}
+        <div className="max-w-7xl mx-auto w-full">
+          <div className="flex items-center justify-between text-sm font-medium pt-6" style={{ color: 'rgba(255, 255, 255, 0.6)', borderTop: '1px solid rgba(255, 255, 255, 0.2)' }}>
+            <span className="flex items-center gap-2">
+              // Scroll Down
+              <svg className="w-4 h-4 scroll-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+              </svg>
+            </span>
+            <span className="hidden sm:inline">// Tennis</span>
+            <span>// 2026</span>
           </div>
         </div>
       </div>
