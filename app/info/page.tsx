@@ -121,6 +121,15 @@ function InfoPageContent() {
   const [signupData, setSignupData] = useState({ membershipType: '', name: '', email: '', rating: '' });
   const [waiverAccepted, setWaiverAccepted] = useState(false);
   const [waiverScrolled, setWaiverScrolled] = useState(false);
+  const [existingProfile, setExistingProfile] = useState<{ name: string; email: string; membershipType: string; rating: string; joinedDate: string } | null>(null);
+
+  // Load existing profile from localStorage
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('currentUser');
+      if (stored) setExistingProfile(JSON.parse(stored));
+    } catch { /* ignore */ }
+  }, [signupStep]);
 
   useEffect(() => {
     setActiveTab(tab);
@@ -317,6 +326,29 @@ function InfoPageContent() {
       {/* =================== MEMBERSHIP TAB =================== */}
       {activeTab === 'membership' && (
         <>
+          {/* Existing Member Profile Banner */}
+          {existingProfile && signupStep === 0 && (
+            <section className="py-8 px-8 lg:px-16" style={{ backgroundColor: '#f5f2eb' }}>
+              <div className="max-w-3xl mx-auto">
+                <div className="rounded-xl p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4" style={{ background: 'linear-gradient(135deg, rgba(107, 122, 61, 0.12), rgba(212, 225, 87, 0.06))', border: '1px solid rgba(107, 122, 61, 0.2)' }}>
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#6b7a3d', color: '#fff', fontSize: '1.1rem', fontWeight: 700 }}>
+                    {existingProfile.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-bold text-base" style={{ color: '#2a2f1e' }}>{existingProfile.name}</h4>
+                    <p className="text-sm" style={{ color: '#6b7266' }}>
+                      {membershipTypes.find(m => m.key === existingProfile.membershipType)?.label || existingProfile.membershipType} Member &middot; {existingProfile.rating}
+                    </p>
+                    <p className="text-xs mt-1" style={{ color: '#999' }}>{existingProfile.email}</p>
+                  </div>
+                  <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: 'rgba(107, 122, 61, 0.15)', color: '#4a5528' }}>
+                    Active
+                  </span>
+                </div>
+              </div>
+            </section>
+          )}
+
           {signupStep === 0 ? (
             <>
               <section className="py-16 lg:py-20 px-8 lg:px-16" style={{ backgroundColor: '#edeae3' }}>
@@ -654,11 +686,6 @@ function InfoPageContent() {
                         <div className="font-bold text-lg" style={{ color: '#2a2f1e' }}>monotennis.payment@gmail.com</div>
                       </div>
 
-                      <div className="rounded-lg p-4" style={{ backgroundColor: 'rgba(107, 122, 61, 0.08)', border: '1px solid rgba(107, 122, 61, 0.2)' }}>
-                        <p className="text-sm font-medium" style={{ color: '#4a5528' }}>
-                          Important: In the e-transfer message area, include your full name so we can match your payment.
-                        </p>
-                      </div>
                     </div>
 
                     <div className="flex items-center gap-4 mt-8">
