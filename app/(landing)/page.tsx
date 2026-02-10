@@ -104,6 +104,7 @@ export default function LandingPage() {
 
   return (
     <>
+      <a href="#events" className="skip-to-content">Skip to content</a>
       <Loader />
 
       {/* Scroll Progress Bar */}

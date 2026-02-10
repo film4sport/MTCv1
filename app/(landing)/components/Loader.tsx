@@ -6,8 +6,8 @@ export default function Loader() {
   const [exitActive, setExitActive] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => setExitActive(true), 2800);
-    const fallback = setTimeout(() => setExitActive(true), 4000);
+    const timer = setTimeout(() => setExitActive(true), 1000);
+    const fallback = setTimeout(() => setExitActive(true), 2000);
     return () => {
       clearTimeout(timer);
       clearTimeout(fallback);

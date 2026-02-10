@@ -89,6 +89,13 @@ export default function Footer({ onOpenBooking }: FooterProps) {
               <br />
               L9W 6S3
             </address>
+            <a
+              href="mailto:monotennis.payment@gmail.com"
+              className="text-sm hover:opacity-80 transition-opacity block mt-3"
+              style={{ color: 'rgba(232, 228, 217, 0.6)' }}
+            >
+              monotennis.payment@gmail.com
+            </a>
           </div>
         </div>
 
