@@ -88,7 +88,7 @@ export default function Hero({ onOpenBooking }: HeroProps) {
       </div>
 
       {/* Scroll Down Indicator — bottom right */}
-      <div className="absolute bottom-8 right-8 lg:right-16 z-10 flex items-center gap-2 text-sm font-medium" style={{ color: 'rgba(232, 228, 217, 0.5)' }}>
+      <div className="absolute bottom-[140px] right-8 lg:right-16 z-30 flex items-center gap-2 text-sm font-medium" style={{ color: 'rgba(232, 228, 217, 0.5)' }}>
         <span>Scroll Down</span>
         <svg className="w-4 h-4 scroll-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
