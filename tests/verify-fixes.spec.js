@@ -36,7 +36,7 @@ test.describe('Latest Fix Verification', () => {
     await page.locator('#schedule').scrollIntoViewIfNeeded();
     await page.waitForTimeout(500);
 
-    const heading = page.locator('h2', { hasText: "Club's Schedule" });
+    const heading = page.locator('h2', { hasText: "Club's Calendar" });
     await expect(heading).toBeVisible();
 
     await page.screenshot({ path: 'test-results/schedule-heading.png', fullPage: false });

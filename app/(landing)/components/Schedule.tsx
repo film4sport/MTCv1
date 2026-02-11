@@ -129,7 +129,7 @@ export default function Schedule() {
             className="headline-font text-3xl md:text-4xl lg:text-[2.75rem] leading-tight mt-4 mb-6"
             style={{ color: '#e8e4d9' }}
           >
-            Club&apos;s Schedule
+            Club&apos;s Calendar
           </h2>
         </div>
 

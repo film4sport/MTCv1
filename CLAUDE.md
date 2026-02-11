@@ -64,7 +64,7 @@ When new project rules or conventions are established, add them to this file AND
 1. Hero (parallax bg, glass buttons, scroll-down indicator)
 2. Wave Divider (hero → cream, overlapping)
 3. Events & Programs (// Featured Events label, filter tabs, 3D hover cards)
-4. Schedule / Calendar (dark bg, "Club's Schedule", month grid, event dots)
+4. Schedule / Calendar (dark bg, "Club's Calendar", month grid, event dots)
 5. Partners (imgur logos)
 6. Gallery (carousel + lightbox, 15 photos)
 7. Wave Divider (gallery → footer)
