@@ -3,7 +3,8 @@
     "allow": [
       "Bash(git -C \"C:\\\\Users\\\\1337\\\\Documents\\\\GitHub\\\\MTCv1\" status --short)",
       "Bash(git -C \"C:\\\\Users\\\\1337\\\\Documents\\\\GitHub\\\\MTCv1\" push)",
-      "Bash(npx next build)"
+      "Bash(npx next build)",
+      "Bash(grep:*)"
     ]
   }
 }
