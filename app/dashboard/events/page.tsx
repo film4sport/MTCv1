@@ -55,7 +55,6 @@ export default function EventsPage() {
         <div className="grid sm:grid-cols-2 gap-4">
           {filtered.map(ev => {
             const bc = badgeColors[ev.badge] || badgeColors['members'];
-            const spotsLeft = ev.spotsTotal - ev.spotsTaken;
             const attending = ev.attendees.includes(currentUser?.name || '');
             const isPast = new Date(ev.date) < new Date(new Date().setHours(0, 0, 0, 0));
 
@@ -89,14 +88,9 @@ export default function EventsPage() {
                 <p className="text-xs mb-3" style={{ color: '#6b7266' }}>{ev.location}</p>
 
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs" style={{ color: spotsLeft <= 3 ? '#ef4444' : '#6b7266' }}>
-                      {spotsLeft} spot{spotsLeft !== 1 ? 's' : ''} left
-                    </span>
-                    <span className="text-[0.65rem] px-2 py-0.5 rounded-full" style={{ background: '#f5f2eb', color: '#6b7266' }}>
-                      {typeLabels[ev.type] || ev.type}
-                    </span>
-                  </div>
+                  <span className="text-[0.65rem] px-2 py-0.5 rounded-full" style={{ background: '#f5f2eb', color: '#6b7266' }}>
+                    {typeLabels[ev.type] || ev.type}
+                  </span>
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -155,7 +149,7 @@ export default function EventsPage() {
 
             <div className="mb-6">
               <p className="text-sm font-medium mb-2" style={{ color: '#2a2f1e' }}>
-                Attendees ({detail.spotsTaken}/{detail.spotsTotal})
+                Attendees
               </p>
               <div className="flex flex-wrap gap-2">
                 {detail.attendees.map(name => (

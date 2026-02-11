@@ -108,16 +108,6 @@ export interface WeatherData {
   lastUpdated: string | null;
 }
 
-export interface PlayerStats {
-  matchesPlayed: number;
-  wins: number;
-  losses: number;
-  currentStreak: number;
-  streakType: 'win' | 'loss';
-  ntrp: number;
-  hoursPlayed: number;
-}
-
 export interface MemberPayment {
   memberId: string;
   memberName: string;

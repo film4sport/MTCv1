@@ -20,7 +20,7 @@ function DashboardGuard({ children }: { children: React.ReactNode }) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#f5f2eb' }}>
         <div className="text-center">
-          <img src="/mono-logo.png" alt="MTC" className="w-16 h-16 mx-auto mb-4 animate-pulse" />
+          <p className="headline-font text-2xl mb-4 animate-pulse" style={{ color: '#6b7a3d' }}>Mono Tennis Club</p>
           <p className="text-sm" style={{ color: '#6b7a3d' }}>Loading...</p>
         </div>
       </div>
