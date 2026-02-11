@@ -42,8 +42,8 @@ export interface ClubEvent {
   location: string;
   badge: 'free' | 'members' | 'paid';
   price: string;
-  spotsTotal: number;
-  spotsTaken: number;
+  spotsTotal?: number;
+  spotsTaken?: number;
   description: string;
   attendees: string[];
   type: 'social' | 'match' | 'roundrobin' | 'lesson' | 'tournament';
