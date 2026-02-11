@@ -33,10 +33,13 @@ export default function Sidebar() {
     >
       {/* Logo */}
       <div className="p-4 flex items-center gap-3 border-b" style={{ borderColor: 'rgba(232, 228, 217, 0.1)' }}>
-        <img src="/mono-logo.png" alt="MTC" className="w-10 h-10 rounded-lg flex-shrink-0" />
-        {!sidebarCollapsed && (
+        {sidebarCollapsed ? (
+          <span className="headline-font text-lg flex-shrink-0 w-10 text-center" style={{ color: '#d4e157' }}>
+            MTC
+          </span>
+        ) : (
           <span className="headline-font text-base truncate" style={{ color: '#e8e4d9' }}>
-            Mono Tennis
+            Mono Tennis Club
           </span>
         )}
       </div>

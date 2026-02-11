@@ -1,9 +1,9 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
-import type { User, Court, Booking, ClubEvent, Partner, Conversation, Announcement, Notification, WeatherData, PlayerStats, MemberPayment, AdminAnalytics } from './types';
+import type { User, Court, Booking, ClubEvent, Partner, Conversation, Announcement, Notification, WeatherData, MemberPayment, AdminAnalytics } from './types';
 import { CLUB_LOCATION } from './types';
-import { DEFAULT_MEMBERS, DEFAULT_COURTS, DEFAULT_BOOKINGS, DEFAULT_EVENTS, DEFAULT_PARTNERS, DEFAULT_CONVERSATIONS, DEFAULT_ANNOUNCEMENTS, DEFAULT_NOTIFICATIONS, DEFAULT_PLAYER_STATS, DEFAULT_PAYMENTS, DEFAULT_ANALYTICS } from './data';
+import { DEFAULT_MEMBERS, DEFAULT_COURTS, DEFAULT_BOOKINGS, DEFAULT_EVENTS, DEFAULT_PARTNERS, DEFAULT_CONVERSATIONS, DEFAULT_ANNOUNCEMENTS, DEFAULT_NOTIFICATIONS, DEFAULT_PAYMENTS, DEFAULT_ANALYTICS } from './data';
 
 interface AppState {
   // Auth
@@ -35,7 +35,6 @@ interface AppState {
   markNotificationRead: (id: string) => void;
   clearNotifications: () => void;
   weather: WeatherData;
-  playerStats: PlayerStats;
   payments: MemberPayment[];
   analytics: AdminAnalytics;
 
@@ -85,7 +84,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [weather, setWeather] = useState<WeatherData>({
     tempC: 0, tempF: 32, condition: 'sunny', wind: 0, humidity: 0, description: 'Loading...', lastUpdated: null,
   });
-  const [playerStats] = useState<PlayerStats>(DEFAULT_PLAYER_STATS);
   const [payments] = useState<MemberPayment[]>(DEFAULT_PAYMENTS);
   const [analytics] = useState<AdminAnalytics>(DEFAULT_ANALYTICS);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -243,7 +241,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       currentUser, login, logout, members, courts, setCourts, bookings, setBookings, addBooking, cancelBooking,
       events, setEvents, toggleRsvp, partners, setPartners, conversations, setConversations, sendMessage,
       announcements, setAnnouncements, dismissAnnouncement, notifications, setNotifications, markNotificationRead,
-      clearNotifications, weather, playerStats, payments, analytics, sidebarCollapsed, setSidebarCollapsed, isLoaded,
+      clearNotifications, weather, payments, analytics, sidebarCollapsed, setSidebarCollapsed, isLoaded,
     }}>
       {children}
     </AppContext.Provider>

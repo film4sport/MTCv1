@@ -1,7 +1,7 @@
 // Default mock data for the dashboard
 // In production, this will be replaced with Supabase queries
 
-import type { Court, Booking, ClubEvent, Partner, Conversation, Announcement, Notification, PlayerStats, MemberPayment, AdminAnalytics, User } from './types';
+import type { Court, Booking, ClubEvent, Partner, Conversation, Announcement, Notification, MemberPayment, AdminAnalytics, User } from './types';
 
 // ─── Members ────────────────────────────────────────────
 export const DEFAULT_MEMBERS: User[] = [
@@ -32,9 +32,10 @@ export const DEFAULT_BOOKINGS: Booking[] = [
 ];
 
 // ─── Club Events ────────────────────────────────────────
+// Matches landing page Schedule.tsx and mtc-app events.js
 export const DEFAULT_EVENTS: ClubEvent[] = [
   {
-    id: 'opening-day-bbq',
+    id: 'bbq',
     title: 'Opening Day BBQ & Meet the Pros',
     date: '2026-05-09',
     time: '1:00 PM - 3:00 PM',
@@ -76,11 +77,39 @@ export const DEFAULT_EVENTS: ClubEvent[] = [
     type: 'roundrobin',
   },
   {
-    id: 'friday-mixed',
-    title: 'Friday Night Mixed Doubles',
+    id: 'interclub',
+    title: 'Interclub Competitive League (A & B)',
+    date: '2026-05-14',
+    time: '7:00 PM - 9:30 PM',
+    location: 'Courts 1-2',
+    badge: 'members',
+    price: 'Team Only',
+    spotsTotal: 16,
+    spotsTaken: 10,
+    description: 'A & B teams interclub competitive league. RSVP required.',
+    attendees: ['Mike Chen', 'James Park', 'David Kim', "Ryan O'Connor"],
+    type: 'match',
+  },
+  {
+    id: 'ladies-round-robin',
+    title: "Ladies Round Robin",
     date: '2026-05-15',
-    time: '6:00 PM - 8:00 PM',
-    location: 'Courts 1-4',
+    time: '9:00 AM - 11:00 AM',
+    location: 'Courts 1-2',
+    badge: 'members',
+    price: 'Members',
+    spotsTotal: 16,
+    spotsTaken: 8,
+    description: "Weekly ladies round robin every Friday morning. All skill levels welcome.",
+    attendees: ['Sarah Wilson', 'Emily Rodriguez', 'Lisa Thompson'],
+    type: 'roundrobin',
+  },
+  {
+    id: 'friday-mixed',
+    title: 'Friday Night Mixed Round Robin',
+    date: '2026-05-15',
+    time: '6:00 PM - 9:00 PM',
+    location: 'All Courts',
     badge: 'members',
     price: 'Members',
     spotsTotal: 24,
@@ -90,60 +119,32 @@ export const DEFAULT_EVENTS: ClubEvent[] = [
     type: 'roundrobin',
   },
   {
-    id: 'junior-camp',
-    title: 'Junior Tennis Camp',
-    date: '2026-07-06',
-    time: '9:00 AM - 12:00 PM',
-    location: 'Courts 3-4',
-    badge: 'paid',
-    price: '$120/week',
-    spotsTotal: 20,
-    spotsTaken: 14,
-    description: 'Week-long junior camp for ages 8-16. Instruction, drills, and match play.',
-    attendees: [],
-    type: 'lesson',
-  },
-  {
-    id: 'inter-club-a',
-    title: 'Inter Club A Match',
-    date: '2026-05-17',
-    time: '2:00 PM - 5:00 PM',
-    location: 'Home - Courts 1-4',
-    badge: 'members',
-    price: 'Team Only',
-    spotsTotal: 8,
-    spotsTaken: 6,
-    description: 'Inter-club match vs Belfountain TC. Team members only.',
-    attendees: ['Mike Chen', 'James Park', 'David Kim', "Ryan O'Connor"],
-    type: 'match',
-  },
-  {
-    id: 'spring-championship',
-    title: 'Spring Singles Championship',
-    date: '2026-06-14',
-    time: '9:00 AM - 5:00 PM',
+    id: 'mixed-doubles-tournament',
+    title: '95+ Mixed Doubles Tournament',
+    date: '2026-07-26',
+    time: 'All Day',
     location: 'All Courts',
-    badge: 'paid',
-    price: '$25 entry',
+    badge: 'members',
+    price: 'Members',
     spotsTotal: 32,
-    spotsTaken: 20,
-    description: 'Annual spring championship. Singles format, round of 32. Prizes for top 3.',
-    attendees: ['Mike Chen', 'James Park', 'Sarah Wilson'],
+    spotsTaken: 16,
+    description: '95+ combined age mixed doubles tournament. Day 1 of 2 (continues July 27).',
+    attendees: [],
     type: 'tournament',
   },
   {
-    id: 'wimbledon-social',
-    title: 'Wimbledon Watch Party',
-    date: '2026-07-13',
-    time: '10:00 AM - 6:00 PM',
-    location: 'Clubhouse',
-    badge: 'free',
-    price: 'Free',
-    spotsTotal: 40,
+    id: 'summer-camp',
+    title: 'Summer Tennis Camp',
+    date: '2026-07-28',
+    time: '8:30 AM - 3:30 PM',
+    location: 'Courts 1-4',
+    badge: 'paid',
+    price: 'See Details',
+    spotsTotal: 30,
     spotsTaken: 12,
-    description: 'Watch the Wimbledon finals on the big screen. Dress code: all white!',
+    description: '5-day summer tennis camp (Jul 28 - Aug 1). Instruction, drills, and match play for all ages.',
     attendees: [],
-    type: 'social',
+    type: 'lesson',
   },
 ];
 
@@ -203,17 +204,6 @@ export const DEFAULT_NOTIFICATIONS: Notification[] = [
   { id: 'n2', type: 'event', title: 'Opening Day BBQ', body: 'Don\'t forget to RSVP for Opening Day BBQ on May 9th!', timestamp: '2026-02-09T12:00:00', read: false },
   { id: 'n3', type: 'message', title: 'New Message', body: 'Sarah Wilson sent you a message.', timestamp: '2026-02-10T10:30:00', read: false },
 ];
-
-// ─── Player Stats ───────────────────────────────────────
-export const DEFAULT_PLAYER_STATS: PlayerStats = {
-  matchesPlayed: 24,
-  wins: 16,
-  losses: 8,
-  currentStreak: 3,
-  streakType: 'win',
-  ntrp: 3.5,
-  hoursPlayed: 36,
-};
 
 // ─── Payments ───────────────────────────────────────────
 export const DEFAULT_PAYMENTS: MemberPayment[] = [

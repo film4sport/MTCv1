@@ -467,9 +467,9 @@ test.describe('Info Page', () => {
   });
 });
 
-test.describe('Mobile PWA route still works', () => {
-  test('/app route loads', async ({ page }) => {
-    await page.goto('/app', { waitUntil: 'networkidle' });
+test.describe('Dashboard route works', () => {
+  test('/dashboard route loads', async ({ page }) => {
+    await page.goto('/dashboard', { waitUntil: 'networkidle' });
     await page.waitForTimeout(2000);
     const body = page.locator('body');
     await expect(body).toBeAttached();
