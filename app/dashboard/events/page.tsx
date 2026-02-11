@@ -115,7 +115,7 @@ export default function EventsPage() {
       {/* Event Detail Modal */}
       {detail && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.4)' }} onClick={() => setSelectedEvent(null)}>
-          <div className="rounded-2xl p-6 w-full max-w-lg max-h-[80vh] overflow-y-auto" style={{ background: '#fff' }} onClick={e => e.stopPropagation()}>
+          <div className="rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto" style={{ background: '#fff' }} onClick={e => e.stopPropagation()}>
             <div className="flex items-start justify-between mb-4">
               <div>
                 <h3 className="font-semibold text-lg" style={{ color: '#2a2f1e' }}>{detail.title}</h3>

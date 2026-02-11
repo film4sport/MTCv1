@@ -192,7 +192,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return {
         ...e,
         attendees: attending ? e.attendees.filter(a => a !== userName) : [...e.attendees, userName],
-        spotsTaken: attending ? e.spotsTaken - 1 : e.spotsTaken + 1,
+        ...(e.spotsTaken != null ? { spotsTaken: attending ? e.spotsTaken - 1 : e.spotsTaken + 1 } : {}),
       };
     }));
   }, []);

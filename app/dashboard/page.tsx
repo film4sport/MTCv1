@@ -193,7 +193,7 @@ export default function DashboardHome() {
             <div className="space-y-3">
               {upcomingEvents.map(ev => {
                 const bc = badgeColors[ev.badge] || badgeColors['members'];
-                const spotsLeft = ev.spotsTotal - ev.spotsTaken;
+                const spotsLeft = ev.spotsTotal != null && ev.spotsTaken != null ? ev.spotsTotal - ev.spotsTaken : null;
                 const attending = ev.attendees.includes(currentUser?.name || '');
                 return (
                   <div key={ev.id} className="flex items-start gap-4 rounded-xl p-3 border" style={{ borderColor: '#f0ede6' }}>
@@ -214,9 +214,11 @@ export default function DashboardHome() {
                       </div>
                       <p className="text-xs mt-0.5" style={{ color: '#6b7266' }}>{ev.time} &bull; {ev.location}</p>
                       <div className="flex items-center gap-3 mt-1.5">
-                        <span className="text-xs" style={{ color: spotsLeft <= 3 ? '#ef4444' : '#6b7266' }}>
-                          {spotsLeft} spot{spotsLeft !== 1 ? 's' : ''} left
-                        </span>
+                        {spotsLeft != null && (
+                          <span className="text-xs" style={{ color: spotsLeft <= 3 ? '#ef4444' : '#6b7266' }}>
+                            {spotsLeft} spot{spotsLeft !== 1 ? 's' : ''} left
+                          </span>
+                        )}
                         {attending && (
                           <span className="text-[0.65rem] px-2 py-0.5 rounded-full font-medium" style={{ background: 'rgba(107, 122, 61, 0.1)', color: '#6b7a3d' }}>
                             Going
