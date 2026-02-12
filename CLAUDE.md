@@ -95,12 +95,17 @@ Note: Sections 3→4→5→6 meet flush (no wave dividers between them)
 - `/info?tab=faq` — FAQ accordion + Google Maps
 
 ## KEY FILES
+- `app/layout.tsx` - Root layout (fonts, PWA meta tags, service worker registration)
 - `app/(landing)/page.tsx` - Landing page root
 - `app/(landing)/components/` - All landing page components
 - `app/(landing)/styles/landing.css` - Landing page CSS
-- `app/app/page.tsx` - Mobile PWA
-- `app/globals.css` - Global styles
+- `app/dashboard/` - Dashboard PWA (layout, components, lib/store)
+- `app/globals.css` - Global styles (@font-face after @tailwind directives)
+- `public/sw.js` - Service worker
+- `public/manifest.json` - PWA manifest
 - `next.config.js` - Routes config
+- `playwright.config.js` - E2E test config
+- `vitest.config.js` - Unit test config
 
 ---
 
