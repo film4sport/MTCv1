@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 
 interface GalleryProps {
   onOpenLightbox: (src: string, alt: string) => void;
@@ -25,6 +25,16 @@ const slides = [
 ];
 
 export default function Gallery({ onOpenLightbox }: GalleryProps) {
+  // Shuffle slides on each page load so the gallery starts differently every time
+  const shuffledSlides = useMemo(() => {
+    const arr = [...slides];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }, []);
+
   const [currentSlide, setCurrentSlide] = useState(0);
   const trackRef = useRef<HTMLDivElement>(null);
   const touchStartX = useRef(0);
@@ -45,7 +55,7 @@ export default function Gallery({ onOpenLightbox }: GalleryProps) {
     return () => window.removeEventListener('resize', updateSlidesPerView);
   }, []);
 
-  const maxSlide = Math.max(0, slides.length - slidesPerView);
+  const maxSlide = Math.max(0, shuffledSlides.length - slidesPerView);
   const totalDots = maxSlide + 1;
 
   const goToSlide = useCallback(
@@ -137,7 +147,7 @@ export default function Gallery({ onOpenLightbox }: GalleryProps) {
 
           {/* Track */}
           <div className="gallery-track" ref={trackRef}>
-            {slides.map((slide, i) => (
+            {shuffledSlides.map((slide, i) => (
               <div key={i} className="gallery-slide" onClick={() => onOpenLightbox(slide.src, slide.alt)}>
                 <img src={slide.src} alt={slide.alt} loading="lazy" />
               </div>
