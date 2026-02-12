@@ -1,3 +1,8 @@
+/* Landing page body bg — prevents light-gray bleed at the bottom of the page */
+html, body {
+  background-color: #1a1f12;
+}
+
 /* Gotham Rounded Font */
 @font-face {
   font-family: 'Gotham Rounded';
@@ -669,7 +674,7 @@
 
 /* Safe area for notched phones */
 @supports (padding: env(safe-area-inset-bottom)) {
-  footer { padding-bottom: calc(4rem + env(safe-area-inset-bottom, 0px)); }
+  footer { padding-bottom: env(safe-area-inset-bottom, 0px); }
 }
 
 /* Back to Top Button */
