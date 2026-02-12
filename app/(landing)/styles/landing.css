@@ -61,7 +61,6 @@ html, body {
   z-index: 1;
 }
 .texture-overlay > * {
-  position: relative;
   z-index: 2;
 }
 
@@ -704,7 +703,7 @@ html, body {
 }
 
 .hero-overlay {
-  background: linear-gradient(to right, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.25) 50%, transparent 100%);
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.65) 0%, rgba(0, 0, 0, 0.4) 50%, rgba(0, 0, 0, 0.2) 100%);
 }
 /* Hero cinematic grain overlay */
 .hero-grain {

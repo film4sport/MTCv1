@@ -31,39 +31,39 @@ export default function Navbar({ onOpenBooking }: NavbarProps) {
       <nav className={`navbar flex items-center justify-between${scrolled ? ' scrolled' : ''}`} id="navbar">
         <div className="flex items-center gap-3">
           <div
-            className="w-10 h-10 rounded-full border-2 flex items-center justify-center"
+            className="w-11 h-11 rounded-full border-2 flex items-center justify-center"
             style={{ borderColor: '#e8e4d9' }}
           >
             <span
-              className="headline-font text-sm"
-              style={{ color: '#e8e4d9', fontFamily: "'Gotham Rounded', sans-serif", fontWeight: 500 }}
+              className="text-base font-bold tracking-wide"
+              style={{ color: '#e8e4d9' }}
             >
               MTC
             </span>
           </div>
           <span
-            className="headline-font text-lg tracking-wide"
-            style={{ color: '#e8e4d9', fontFamily: "'Gotham Rounded', sans-serif", fontWeight: 500 }}
+            className="text-xl font-bold tracking-wide"
+            style={{ color: '#e8e4d9' }}
           >
             Mono Tennis
           </span>
         </div>
 
         {/* Desktop Nav */}
-        <div className="hidden lg:flex items-center gap-6">
-          <a href="#" className="nav-link headline-font text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9', fontFamily: "'Gotham Rounded', sans-serif", fontWeight: 500 }}>.Home</a>
-          <a href="/info?tab=about" className="nav-link headline-font text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9', fontFamily: "'Gotham Rounded', sans-serif", fontWeight: 500 }}>.About</a>
-          <a href="/info?tab=membership" className="nav-link headline-font text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9', fontFamily: "'Gotham Rounded', sans-serif", fontWeight: 500 }}>.Membership</a>
-          <a href="#events" className="nav-link headline-font text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9', fontFamily: "'Gotham Rounded', sans-serif", fontWeight: 500 }}>.Events</a>
-          <a href="/info?tab=faq" className="nav-link headline-font text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9', fontFamily: "'Gotham Rounded', sans-serif", fontWeight: 500 }}>.FAQ</a>
+        <div className="hidden lg:flex items-center gap-8">
+          <a href="#" className="nav-link text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9' }}>.Home</a>
+          <a href="/info?tab=about" className="nav-link text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9' }}>.About</a>
+          <a href="/info?tab=membership" className="nav-link text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9' }}>.Membership</a>
+          <a href="#events" className="nav-link text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9' }}>.Events</a>
+          <a href="/info?tab=faq" className="nav-link text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9' }}>.FAQ</a>
           <button
             onClick={onOpenBooking}
-            className="nav-link headline-font text-sm hover:opacity-80 transition-opacity bg-transparent border-none cursor-pointer"
-            style={{ color: '#d4e157', fontFamily: "'Gotham Rounded', sans-serif", fontWeight: 500 }}
+            className="nav-link text-sm hover:opacity-80 transition-opacity bg-transparent border-none cursor-pointer"
+            style={{ color: '#d4e157' }}
           >
             .Book
           </button>
-          <a href="/login" className="login-btn headline-font ml-2" style={{ fontFamily: "'Gotham Rounded', sans-serif", fontWeight: 500 }}>
+          <a href="/login" className="login-btn ml-2">
             Login
           </a>
         </div>

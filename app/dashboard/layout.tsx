@@ -6,7 +6,7 @@ import { AppProvider, useApp } from './lib/store';
 import Sidebar from './components/Sidebar';
 
 function DashboardGuard({ children }: { children: React.ReactNode }) {
-  const { currentUser, isLoaded, sidebarCollapsed } = useApp();
+  const { currentUser, isLoaded, sidebarCollapsed, setMobileSidebarOpen } = useApp();
   const router = useRouter();
 
   useEffect(() => {
@@ -30,9 +30,20 @@ function DashboardGuard({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex" style={{ backgroundColor: '#f5f2eb' }}>
       <Sidebar />
+      {/* Mobile hamburger button */}
+      <button
+        className="lg:hidden fixed top-4 left-4 z-10 p-2 rounded-xl shadow-lg"
+        style={{ backgroundColor: '#1a1f12', color: '#e8e4d9' }}
+        onClick={() => setMobileSidebarOpen(true)}
+        aria-label="Open menu"
+      >
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
       <main
-        className={`flex-1 min-h-screen transition-all duration-300 ${
-          sidebarCollapsed ? 'ml-[72px]' : 'ml-[240px]'
+        className={`flex-1 min-h-screen transition-all duration-300 ml-0 ${
+          sidebarCollapsed ? 'lg:ml-[72px]' : 'lg:ml-[240px]'
         }`}
       >
         {children}

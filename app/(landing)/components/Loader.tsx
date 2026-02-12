@@ -23,15 +23,15 @@ export default function Loader() {
             style={{ borderColor: '#1a1f12' }}
           >
             <span
-              className="headline-font text-base"
-              style={{ color: '#1a1f12', fontFamily: "'Gotham Rounded', sans-serif", fontWeight: 500 }}
+              className="text-base font-bold tracking-wide"
+              style={{ color: '#1a1f12' }}
             >
               MTC
             </span>
           </div>
           <span
-            className="headline-font text-xl tracking-wide"
-            style={{ color: '#1a1f12', fontFamily: "'Gotham Rounded', sans-serif", fontWeight: 500 }}
+            className="text-xl font-bold tracking-wide"
+            style={{ color: '#1a1f12' }}
           >
             Mono Tennis
           </span>
