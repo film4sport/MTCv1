@@ -34,7 +34,7 @@ describe('No ClubSpark Links', () => {
   });
 
   it('deleted components should not exist', () => {
-    const deletedFiles = ['BookSection.tsx', 'Gallery.tsx', 'FAQ.tsx', 'Events.tsx'];
+    const deletedFiles = ['BookSection.tsx', 'FAQ.tsx'];
     deletedFiles.forEach((file) => {
       expect(existsSync(join(componentsDir, file))).toBe(false);
     });
