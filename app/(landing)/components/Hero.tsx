@@ -71,11 +71,17 @@ export default function Hero() {
         </div>
       </div>
 
+      {/* Bottom gradient for text readability */}
+      <div
+        className="absolute bottom-0 left-0 right-0 h-32 z-20 pointer-events-none"
+        style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.5), transparent)' }}
+      ></div>
+
       {/* Bottom Bar */}
       <div className="absolute bottom-0 left-0 right-0 z-30 px-8 pb-8">
         <div
           className="max-w-7xl mx-auto w-full flex items-center justify-between text-sm font-medium pt-6"
-          style={{ color: 'rgba(232, 228, 217, 0.4)', borderTop: '1px solid rgba(232, 228, 217, 0.2)' }}
+          style={{ color: 'rgba(232, 228, 217, 0.6)', borderTop: '1px solid rgba(232, 228, 217, 0.2)' }}
         >
           <span>// Tennis</span>
           <span>// 2026</span>

@@ -35,22 +35,22 @@ export default function Navbar({ onOpenBooking }: NavbarProps) {
             style={{ borderColor: '#e8e4d9' }}
           >
             <span
-              className="font-bold text-sm"
-              style={{ color: '#e8e4d9', fontFamily: "'Gotham Rounded', sans-serif" }}
+              className="headline-font text-sm"
+              style={{ color: '#e8e4d9' }}
             >
               MTC
             </span>
           </div>
           <span
-            className="font-semibold text-lg tracking-wide"
-            style={{ color: '#e8e4d9', fontFamily: "'Gotham Rounded', sans-serif" }}
+            className="headline-font text-lg tracking-wide"
+            style={{ color: '#e8e4d9' }}
           >
             Mono Tennis
           </span>
         </div>
 
         {/* Desktop Nav */}
-        <div className="hidden lg:flex items-center gap-6" style={{ fontFamily: "'Gotham Rounded', sans-serif" }}>
+        <div className="hidden lg:flex items-center gap-6">
           <a href="#" className="nav-link headline-font text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9' }}>.Home</a>
           <a href="/info?tab=about" className="nav-link headline-font text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9' }}>.About</a>
           <a href="/info?tab=membership" className="nav-link headline-font text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9' }}>.Membership</a>
@@ -58,7 +58,7 @@ export default function Navbar({ onOpenBooking }: NavbarProps) {
           <a href="/info?tab=faq" className="nav-link headline-font text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9' }}>.FAQ</a>
           <button
             onClick={onOpenBooking}
-            className="nav-link headline-font text-sm hover:opacity-80 transition-opacity font-semibold bg-transparent border-none cursor-pointer"
+            className="nav-link headline-font text-sm hover:opacity-80 transition-opacity bg-transparent border-none cursor-pointer"
             style={{ color: '#d4e157' }}
           >
             .Book
