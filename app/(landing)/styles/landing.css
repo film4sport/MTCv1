@@ -3,14 +3,6 @@ html, body {
   background-color: #1a1f12;
 }
 
-/* Gotham Rounded Font */
-@font-face {
-  font-family: 'Gotham Rounded';
-  src: url('/Gotham_Rounded_Medium.otf') format('opentype');
-  font-weight: 500;
-  font-style: normal;
-}
-
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
@@ -502,7 +494,7 @@ html, body {
 .loader {
   position: fixed;
   inset: 0;
-  background: #1a1f12;
+  background: #e8e4d9;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -519,7 +511,7 @@ html, body {
 .loader-text {
   font-size: 3rem;
   font-weight: 700;
-  color: #e8e4d9;
+  color: #1a1f12;
   display: flex;
   align-items: flex-end;
   gap: 4px;

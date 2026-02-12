@@ -29,14 +29,28 @@ export default function Navbar({ onOpenBooking }: NavbarProps) {
   return (
     <>
       <nav className={`navbar flex items-center justify-between${scrolled ? ' scrolled' : ''}`} id="navbar">
-        <div className="mtc-logo headline-font text-xl md:text-2xl font-bold tracking-wide" style={{ color: '#e8e4d9' }}>
-          <span className="mtc-letter">M</span>
-          <span className="mtc-letter">T</span>
-          <span className="mtc-letter">C</span>
+        <div className="flex items-center gap-3">
+          <div
+            className="w-10 h-10 rounded-full border-2 flex items-center justify-center"
+            style={{ borderColor: '#e8e4d9' }}
+          >
+            <span
+              className="font-bold text-sm"
+              style={{ color: '#e8e4d9', fontFamily: "'Gotham Rounded', sans-serif" }}
+            >
+              MTC
+            </span>
+          </div>
+          <span
+            className="font-semibold text-lg tracking-wide"
+            style={{ color: '#e8e4d9', fontFamily: "'Gotham Rounded', sans-serif" }}
+          >
+            Mono Tennis
+          </span>
         </div>
 
         {/* Desktop Nav */}
-        <div className="hidden lg:flex items-center gap-6">
+        <div className="hidden lg:flex items-center gap-6" style={{ fontFamily: "'Gotham Rounded', sans-serif" }}>
           <a href="#" className="nav-link headline-font text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9' }}>.Home</a>
           <a href="/info?tab=about" className="nav-link headline-font text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9' }}>.About</a>
           <a href="/info?tab=membership" className="nav-link headline-font text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9' }}>.Membership</a>

@@ -43,7 +43,7 @@ export default function Hero() {
         <div className="max-w-2xl hero-content" ref={heroContentRef}>
           <h1
             className="headline-font text-4xl md:text-5xl lg:text-[3.5rem] leading-[1.15] mb-6"
-            style={{ color: '#e8e4d9' }}
+            style={{ color: '#e8e4d9', fontFamily: "'Gotham Rounded', sans-serif" }}
           >
             <span>Welcome to</span>
             <br />
@@ -71,12 +71,21 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* Scroll Down Indicator — bottom right */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 text-sm font-medium" style={{ color: 'rgba(232, 228, 217, 0.5)' }}>
-        <span>Scroll Down</span>
-        <svg className="w-4 h-4 scroll-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-        </svg>
+      {/* Bottom Bar */}
+      <div className="absolute bottom-0 left-0 right-0 z-30 px-8 pb-8">
+        <div
+          className="max-w-7xl mx-auto w-full flex items-center justify-between text-sm font-medium pt-6"
+          style={{ color: 'rgba(232, 228, 217, 0.4)', borderTop: '1px solid rgba(232, 228, 217, 0.2)' }}
+        >
+          <span>// Tennis</span>
+          <span>// 2026</span>
+          <span className="flex items-center gap-2">
+            // Scroll Down
+            <svg className="w-4 h-4 scroll-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            </svg>
+          </span>
+        </div>
       </div>
     </section>
   );
