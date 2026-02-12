@@ -3,7 +3,7 @@
 @font-face {
   font-family: 'Gotham Rounded';
   src: url('/Gotham_Rounded_Medium.otf') format('opentype');
-  font-weight: 100 900;
+  font-weight: 500;
   font-style: normal;
   font-display: swap;
 }
