@@ -36,14 +36,14 @@ export default function Navbar({ onOpenBooking }: NavbarProps) {
           >
             <span
               className="headline-font text-sm"
-              style={{ color: '#e8e4d9' }}
+              style={{ color: '#e8e4d9', fontFamily: "'Gotham Rounded', sans-serif", fontWeight: 500 }}
             >
               MTC
             </span>
           </div>
           <span
             className="headline-font text-lg tracking-wide"
-            style={{ color: '#e8e4d9' }}
+            style={{ color: '#e8e4d9', fontFamily: "'Gotham Rounded', sans-serif", fontWeight: 500 }}
           >
             Mono Tennis
           </span>
@@ -51,19 +51,19 @@ export default function Navbar({ onOpenBooking }: NavbarProps) {
 
         {/* Desktop Nav */}
         <div className="hidden lg:flex items-center gap-6">
-          <a href="#" className="nav-link headline-font text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9' }}>.Home</a>
-          <a href="/info?tab=about" className="nav-link headline-font text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9' }}>.About</a>
-          <a href="/info?tab=membership" className="nav-link headline-font text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9' }}>.Membership</a>
-          <a href="#events" className="nav-link headline-font text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9' }}>.Events</a>
-          <a href="/info?tab=faq" className="nav-link headline-font text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9' }}>.FAQ</a>
+          <a href="#" className="nav-link headline-font text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9', fontFamily: "'Gotham Rounded', sans-serif", fontWeight: 500 }}>.Home</a>
+          <a href="/info?tab=about" className="nav-link headline-font text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9', fontFamily: "'Gotham Rounded', sans-serif", fontWeight: 500 }}>.About</a>
+          <a href="/info?tab=membership" className="nav-link headline-font text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9', fontFamily: "'Gotham Rounded', sans-serif", fontWeight: 500 }}>.Membership</a>
+          <a href="#events" className="nav-link headline-font text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9', fontFamily: "'Gotham Rounded', sans-serif", fontWeight: 500 }}>.Events</a>
+          <a href="/info?tab=faq" className="nav-link headline-font text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9', fontFamily: "'Gotham Rounded', sans-serif", fontWeight: 500 }}>.FAQ</a>
           <button
             onClick={onOpenBooking}
             className="nav-link headline-font text-sm hover:opacity-80 transition-opacity bg-transparent border-none cursor-pointer"
-            style={{ color: '#d4e157' }}
+            style={{ color: '#d4e157', fontFamily: "'Gotham Rounded', sans-serif", fontWeight: 500 }}
           >
             .Book
           </button>
-          <a href="/login" className="login-btn headline-font ml-2">
+          <a href="/login" className="login-btn headline-font ml-2" style={{ fontFamily: "'Gotham Rounded', sans-serif", fontWeight: 500 }}>
             Login
           </a>
         </div>
