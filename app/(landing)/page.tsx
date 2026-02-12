@@ -113,7 +113,7 @@ export default function LandingPage() {
       <Navbar onOpenBooking={openBooking} />
 
       {/* Hero Section (dark, parallax) */}
-      <Hero />
+      <Hero onOpenBooking={openBooking} />
 
       {/* Events & Programs Section */}
       <Events onOpenLightbox={openLightbox} />

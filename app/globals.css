@@ -1,15 +1,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Poppins:wght@600;700;800;900&display=swap');
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 @font-face {
   font-family: 'Gotham Rounded';
   src: url('/Gotham_Rounded_Medium.otf') format('opentype');
   font-weight: 500;
   font-style: normal;
 }
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
 /* Force light mode - prevent browser dark mode from changing colors */
 :root {
