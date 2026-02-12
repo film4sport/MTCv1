@@ -2,11 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 
-interface HeroProps {
-  onOpenBooking: () => void;
-}
-
-export default function Hero({ onOpenBooking }: HeroProps) {
+export default function Hero() {
   const heroContentRef = useRef<HTMLDivElement>(null);
   const heroBgRef = useRef<HTMLDivElement>(null);
 
@@ -70,25 +66,13 @@ export default function Hero({ onOpenBooking }: HeroProps) {
             >
               Join Now
             </a>
-            <button
-              onClick={onOpenBooking}
-              className="px-5 py-3 rounded-full text-sm font-medium flex items-center gap-2 cursor-pointer hover:opacity-90 transition-opacity"
-              style={{ backgroundColor: '#d4e157', color: '#3b4229' }}
-            >
-              Book a Court
-              <span className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: 'rgba(59, 66, 41, 0.15)' }}>
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M7 17L17 7M17 7H7M17 7V17" />
-                </svg>
-              </span>
-            </button>
           </div>
 
         </div>
       </div>
 
       {/* Scroll Down Indicator — bottom right */}
-      <div className="absolute bottom-[140px] left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 text-sm font-medium" style={{ color: 'rgba(232, 228, 217, 0.5)' }}>
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 text-sm font-medium" style={{ color: 'rgba(232, 228, 217, 0.5)' }}>
         <span>Scroll Down</span>
         <svg className="w-4 h-4 scroll-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
