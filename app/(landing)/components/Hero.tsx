@@ -54,7 +54,7 @@ export default function Hero({ onOpenBooking }: HeroProps) {
 
           {/* Subtext */}
           <p
-            className="hero-subtext text-base md:text-[17px] mb-8 leading-relaxed max-w-lg font-light"
+            className="hero-subtext text-[15px] md:text-base mb-8 leading-relaxed max-w-lg font-normal"
             style={{ color: 'rgba(232, 228, 217, 0.75)' }}
           >
             We promote the game of tennis in Mono by organizing tournaments, clinic round robins,

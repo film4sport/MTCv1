@@ -40,6 +40,22 @@ All external links to clubspark.ca have been removed. ClubSpark was only used as
 ## #8: ALWAYS UPDATE CLAUDE.md
 When new project rules or conventions are established, add them to this file AND MEMORY.md.
 
+## #9: VERIFY BEFORE REPORTING — USE BROWSER + PLAYWRIGHT
+**Never tell the user "it's done" without verifying visually.**
+- **Claude in Chrome (BDG)** — Use for real-time verification during active development:
+  - `javascript_tool` for computed styles, DOM queries, console.log
+  - `screenshot` to visually confirm changes look correct
+  - `read_console_messages` to catch runtime errors
+  - `read_network_requests` to verify API calls/asset loading
+  - Best for: UI/UX refinement, typography, contrast, animations, interactive elements
+  - If extension disconnects → reconnect via extension icon, keep browser tab focused
+- **Playwright** — Use for automated regression testing before deploys:
+  - `npm run test` (E2E), `npm run test:unit` (Vitest), `npm run test:all` (both)
+  - Config: `playwright.config.js`, tests in `tests/`, unit tests in `unit-tests/`
+  - 3 viewports tested: mobile (375x812), tablet (768x1024), desktop (1280x720)
+  - Best for: "did this change break something else?" checks
+- **Workflow**: BDG for active dev → Playwright before deploy to Railway
+
 ---
 
 ## PROJECT OVERVIEW
@@ -49,13 +65,14 @@ When new project rules or conventions are established, add them to this file AND
 
 ## ARCHITECTURE
 - Landing page: `app/(landing)/page.tsx` with React components (migrated from static HTML)
-- Mobile PWA: `app/app/page.tsx` (~7234 lines single component)
+- Dashboard PWA: `app/dashboard/` (componentized: Sidebar, DashboardHeader, WeatherWidget, etc.)
 - Login: `public/login.html` (static)
 - Root route `/` serves landing page via Next.js App Router
+- Service worker: `public/sw.js` (network-first caching, offline fallback)
 
 ## DESIGN SYSTEM
 - Dark green theme: #1a1f12 bg, #6b7a3d and #d4e157 accents, #e8e4d9 light text
-- Gotham Rounded font for headlines, Inter for body
+- Gotham Rounded Medium for headlines only (`headline-font` class), Inter for everything else (body font set on `<body>`)
 - Tailwind CSS with custom components
 - Glass morphism, parallax, texture overlays, confetti effects
 - Mobile-first design

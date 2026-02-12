@@ -4,8 +4,8 @@
   "description": "Book courts and find tennis partners at Mono Tennis Club",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#16a34a",
+  "background_color": "#e8e4d9",
+  "theme_color": "#1a1f12",
   "orientation": "portrait",
   "icons": [
     {

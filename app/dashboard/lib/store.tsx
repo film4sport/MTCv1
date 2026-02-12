@@ -41,6 +41,8 @@ interface AppState {
   // UI
   sidebarCollapsed: boolean;
   setSidebarCollapsed: (collapsed: boolean) => void;
+  mobileSidebarOpen: boolean;
+  setMobileSidebarOpen: (open: boolean) => void;
   isLoaded: boolean;
 }
 
@@ -87,6 +89,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [payments] = useState<MemberPayment[]>(DEFAULT_PAYMENTS);
   const [analytics] = useState<AdminAnalytics>(DEFAULT_ANALYTICS);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -241,7 +244,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       currentUser, login, logout, members, courts, setCourts, bookings, setBookings, addBooking, cancelBooking,
       events, setEvents, toggleRsvp, partners, setPartners, conversations, setConversations, sendMessage,
       announcements, setAnnouncements, dismissAnnouncement, notifications, setNotifications, markNotificationRead,
-      clearNotifications, weather, payments, analytics, sidebarCollapsed, setSidebarCollapsed, isLoaded,
+      clearNotifications, weather, payments, analytics, sidebarCollapsed, setSidebarCollapsed, mobileSidebarOpen, setMobileSidebarOpen, isLoaded,
     }}>
       {children}
     </AppContext.Provider>

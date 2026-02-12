@@ -19,101 +19,129 @@ const adminItem = { href: '/dashboard/admin', label: 'Admin Panel', icon: 'M9 12
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const { currentUser, sidebarCollapsed, setSidebarCollapsed, conversations } = useApp();
+  const { currentUser, sidebarCollapsed, setSidebarCollapsed, mobileSidebarOpen, setMobileSidebarOpen, conversations } = useApp();
   const isAdmin = currentUser?.role === 'admin';
 
   const unreadMessages = conversations.reduce((sum, c) => sum + c.unread, 0);
 
+  const closeMobileSidebar = () => setMobileSidebarOpen(false);
+
   return (
-    <aside
-      className={`fixed left-0 top-0 h-full z-30 transition-all duration-300 flex flex-col ${
-        sidebarCollapsed ? 'w-[72px]' : 'w-[240px]'
-      }`}
-      style={{ backgroundColor: '#1a1f12' }}
-    >
-      {/* Logo */}
-      <div className="p-4 flex items-center gap-3 border-b" style={{ borderColor: 'rgba(232, 228, 217, 0.1)' }}>
-        {sidebarCollapsed ? (
-          <span className="headline-font text-lg flex-shrink-0 w-10 text-center" style={{ color: '#d4e157' }}>
-            MTC
-          </span>
-        ) : (
-          <span className="headline-font text-base truncate" style={{ color: '#e8e4d9' }}>
-            Mono Tennis Club
-          </span>
-        )}
-      </div>
+    <>
+      {/* Mobile backdrop */}
+      {mobileSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-20 lg:hidden"
+          onClick={closeMobileSidebar}
+        />
+      )}
 
-      {/* Nav Links */}
-      <nav className="flex-1 py-4 px-2 overflow-y-auto">
-        <ul className="space-y-1">
-          {navItems.map((item) => {
-            const isActive = item.href === '/dashboard'
-              ? pathname === '/dashboard'
-              : pathname.startsWith(item.href);
-
-            return (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative ${
-                    isActive
-                      ? 'text-[#1a1f12] font-semibold'
-                      : 'hover:bg-white/5'
-                  }`}
-                  style={isActive ? { backgroundColor: '#d4e157', color: '#1a1f12' } : { color: 'rgba(232, 228, 217, 0.7)' }}
-                  title={sidebarCollapsed ? item.label : undefined}
-                >
-                  <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={isActive ? 2.5 : 2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
-                  </svg>
-                  {!sidebarCollapsed && <span className="text-sm">{item.label}</span>}
-                  {/* Unread badge for messages */}
-                  {item.label === 'Messages' && unreadMessages > 0 && (
-                    <span className={`${sidebarCollapsed ? 'absolute top-0 right-0' : 'ml-auto'} bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center`}>
-                      {unreadMessages}
-                    </span>
-                  )}
-                </Link>
-              </li>
-            );
-          })}
-
-          {/* Admin link */}
-          {isAdmin && (
-            <>
-              <li className="pt-2 mt-2" style={{ borderTop: '1px solid rgba(232, 228, 217, 0.1)' }}>
-                <Link
-                  href={adminItem.href}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${
-                    pathname.startsWith(adminItem.href)
-                      ? 'text-[#1a1f12] font-semibold'
-                      : 'hover:bg-white/5'
-                  }`}
-                  style={pathname.startsWith(adminItem.href) ? { backgroundColor: '#d4e157', color: '#1a1f12' } : { color: 'rgba(232, 228, 217, 0.7)' }}
-                  title={sidebarCollapsed ? adminItem.label : undefined}
-                >
-                  <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={pathname.startsWith(adminItem.href) ? 2.5 : 2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d={adminItem.icon} />
-                  </svg>
-                  {!sidebarCollapsed && <span className="text-sm">{adminItem.label}</span>}
-                </Link>
-              </li>
-            </>
-          )}
-        </ul>
-      </nav>
-
-      {/* Collapse toggle */}
-      <button
-        onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-        className="p-4 border-t hover:bg-white/5 transition-colors flex items-center justify-center"
-        style={{ borderColor: 'rgba(232, 228, 217, 0.1)', color: 'rgba(232, 228, 217, 0.5)' }}
+      {/* Sidebar */}
+      <aside
+        className={`fixed left-0 top-0 h-full z-30 transition-all duration-300 flex flex-col
+          ${sidebarCollapsed ? 'w-[72px]' : 'w-[240px]'}
+          ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+          lg:translate-x-0
+        `}
+        style={{ backgroundColor: '#1a1f12' }}
       >
-        <svg className={`w-5 h-5 transition-transform ${sidebarCollapsed ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-        </svg>
-      </button>
-    </aside>
+        {/* Mobile close button */}
+        <button
+          className="lg:hidden absolute top-4 right-4 p-1 rounded-lg hover:bg-white/10 transition-colors"
+          onClick={closeMobileSidebar}
+          style={{ color: 'rgba(232, 228, 217, 0.7)' }}
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+
+        {/* Logo */}
+        <div className="p-4 flex items-center gap-3 border-b" style={{ borderColor: 'rgba(232, 228, 217, 0.1)' }}>
+          {sidebarCollapsed ? (
+            <span className="headline-font text-lg flex-shrink-0 w-10 text-center" style={{ color: '#d4e157' }}>
+              MTC
+            </span>
+          ) : (
+            <span className="headline-font text-base truncate" style={{ color: '#e8e4d9' }}>
+              Mono Tennis Club
+            </span>
+          )}
+        </div>
+
+        {/* Nav Links */}
+        <nav className="flex-1 py-4 px-2 overflow-y-auto">
+          <ul className="space-y-1">
+            {navItems.map((item) => {
+              const isActive = item.href === '/dashboard'
+                ? pathname === '/dashboard'
+                : pathname.startsWith(item.href);
+
+              return (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    onClick={closeMobileSidebar}
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative ${
+                      isActive
+                        ? 'text-[#1a1f12] font-semibold'
+                        : 'hover:bg-white/5'
+                    }`}
+                    style={isActive ? { backgroundColor: '#d4e157', color: '#1a1f12' } : { color: 'rgba(232, 228, 217, 0.7)' }}
+                    title={sidebarCollapsed ? item.label : undefined}
+                  >
+                    <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={isActive ? 2.5 : 2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
+                    </svg>
+                    {!sidebarCollapsed && <span className="text-sm">{item.label}</span>}
+                    {/* Unread badge for messages */}
+                    {item.label === 'Messages' && unreadMessages > 0 && (
+                      <span className={`${sidebarCollapsed ? 'absolute top-0 right-0' : 'ml-auto'} bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center`}>
+                        {unreadMessages}
+                      </span>
+                    )}
+                  </Link>
+                </li>
+              );
+            })}
+
+            {/* Admin link */}
+            {isAdmin && (
+              <>
+                <li className="pt-2 mt-2" style={{ borderTop: '1px solid rgba(232, 228, 217, 0.1)' }}>
+                  <Link
+                    href={adminItem.href}
+                    onClick={closeMobileSidebar}
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${
+                      pathname.startsWith(adminItem.href)
+                        ? 'text-[#1a1f12] font-semibold'
+                        : 'hover:bg-white/5'
+                    }`}
+                    style={pathname.startsWith(adminItem.href) ? { backgroundColor: '#d4e157', color: '#1a1f12' } : { color: 'rgba(232, 228, 217, 0.7)' }}
+                    title={sidebarCollapsed ? adminItem.label : undefined}
+                  >
+                    <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={pathname.startsWith(adminItem.href) ? 2.5 : 2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d={adminItem.icon} />
+                    </svg>
+                    {!sidebarCollapsed && <span className="text-sm">{adminItem.label}</span>}
+                  </Link>
+                </li>
+              </>
+            )}
+          </ul>
+        </nav>
+
+        {/* Collapse toggle — desktop only */}
+        <button
+          onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+          className="hidden lg:flex p-4 border-t hover:bg-white/5 transition-colors items-center justify-center"
+          style={{ borderColor: 'rgba(232, 228, 217, 0.1)', color: 'rgba(232, 228, 217, 0.5)' }}
+        >
+          <svg className={`w-5 h-5 transition-transform ${sidebarCollapsed ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+          </svg>
+        </button>
+      </aside>
+    </>
   );
 }
