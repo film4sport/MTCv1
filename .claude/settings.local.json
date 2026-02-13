@@ -9,7 +9,8 @@
       "Bash(node:*)",
       "Bash(npx vitest run)",
       "Bash(PLAYWRIGHT_REUSE_SERVER=true npx playwright test:*)",
-      "Bash(npx playwright test:*)"
+      "Bash(npx playwright test:*)",
+      "Bash(npm run test:unit:*)"
     ]
   }
 }

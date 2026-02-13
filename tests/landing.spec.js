@@ -81,7 +81,7 @@ test.describe('Hero Section', () => {
   });
 
   test('hero content becomes visible after animation delay', async ({ page }) => {
-    const heroContent = page.locator('.hero-content');
+    const heroContent = page.locator('.hero-content').first();
     await expect(heroContent).toHaveClass(/visible/);
   });
 
