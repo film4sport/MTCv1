@@ -10,7 +10,12 @@
       "Bash(npx vitest run)",
       "Bash(PLAYWRIGHT_REUSE_SERVER=true npx playwright test:*)",
       "Bash(npx playwright test:*)",
-      "Bash(npm run test:unit:*)"
+      "Bash(npm run test:unit:*)",
+      "Bash(npx playwright:*)",
+      "Bash(timeout:*)",
+      "Bash(curl:*)",
+      "Bash(set PORT=3001)",
+      "Bash(npx cross-env:*)"
     ]
   }
 }
