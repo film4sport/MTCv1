@@ -25,15 +25,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [remember, setRemember] = useState(false);
 
-  // If already logged in, redirect to dashboard
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem('mtc-current-user');
-      if (saved && JSON.parse(saved)) {
-        router.replace('/dashboard');
-      }
-    } catch {}
-  }, [router]);
+  // No auto-redirect — always show login page so users can see it
 
   const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/;
 
@@ -406,7 +398,7 @@ export default function LoginPage() {
                 background: '#6b7a3d', color: '#fff', padding: '8px 16px', borderRadius: 20,
                 fontSize: '0.75rem', fontWeight: 600, boxShadow: '0 10px 30px rgba(107, 122, 61, 0.3)',
                 animation: 'float 3s ease-in-out infinite 1s', zIndex: 10,
-              }}>Live Status</div>
+              }}>Club Events</div>
               <div style={{
                 position: 'absolute', bottom: '8%', left: -70,
                 background: '#6b7a3d', color: '#fff', padding: '8px 16px', borderRadius: 20,

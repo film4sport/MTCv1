@@ -84,10 +84,10 @@ export default function Sidebar() {
                     onClick={closeMobileSidebar}
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative ${
                       isActive
-                        ? 'text-[#1a1f12] font-semibold'
+                        ? 'font-semibold'
                         : 'hover:bg-white/5'
                     }`}
-                    style={isActive ? { backgroundColor: '#d4e157', color: '#1a1f12' } : { color: 'rgba(232, 228, 217, 0.7)' }}
+                    style={isActive ? { backgroundColor: 'rgba(212, 225, 87, 0.15)', color: '#d4e157', borderLeft: '3px solid #d4e157' } : { color: 'rgba(232, 228, 217, 0.7)' }}
                     title={sidebarCollapsed ? item.label : undefined}
                   >
                     <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={isActive ? 2.5 : 2}>
@@ -114,10 +114,10 @@ export default function Sidebar() {
                     onClick={closeMobileSidebar}
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${
                       pathname.startsWith(adminItem.href)
-                        ? 'text-[#1a1f12] font-semibold'
+                        ? 'font-semibold'
                         : 'hover:bg-white/5'
                     }`}
-                    style={pathname.startsWith(adminItem.href) ? { backgroundColor: '#d4e157', color: '#1a1f12' } : { color: 'rgba(232, 228, 217, 0.7)' }}
+                    style={pathname.startsWith(adminItem.href) ? { backgroundColor: 'rgba(212, 225, 87, 0.15)', color: '#d4e157', borderLeft: '3px solid #d4e157' } : { color: 'rgba(232, 228, 217, 0.7)' }}
                     title={sidebarCollapsed ? adminItem.label : undefined}
                   >
                     <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={pathname.startsWith(adminItem.href) ? 2.5 : 2}>

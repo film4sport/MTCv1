@@ -5,7 +5,7 @@ import { useApp } from '../lib/store';
 import DashboardHeader from '../components/DashboardHeader';
 
 export default function MessagesPage() {
-  const { currentUser, conversations, members, sendMessage } = useApp();
+  const { currentUser, conversations, members, sendMessage, markConversationRead } = useApp();
   const [selectedConvo, setSelectedConvo] = useState<string | null>(null);
   const [messageText, setMessageText] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -13,6 +13,13 @@ export default function MessagesPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const activeConvo = conversations.find(c => c.memberId === selectedConvo);
+
+  // Mark conversation as read when selected
+  useEffect(() => {
+    if (selectedConvo) {
+      markConversationRead(selectedConvo);
+    }
+  }, [selectedConvo, markConversationRead]);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -56,15 +63,18 @@ export default function MessagesPage() {
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
+  // On mobile: show chat full-screen when a conversation is selected
+  const mobileShowChat = selectedConvo !== null;
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#f5f2eb' }}>
       <DashboardHeader title="Messages" />
 
-      <div className="p-6 lg:p-8 max-w-6xl mx-auto">
-        <div className="flex rounded-2xl border overflow-hidden" style={{ background: '#fff', borderColor: '#e0dcd3', height: 'calc(100vh - 180px)', minHeight: 500 }}>
+      <div className="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto">
+        <div className="flex rounded-2xl border overflow-hidden" style={{ background: '#fff', borderColor: '#e0dcd3', height: 'calc(100vh - 160px)', minHeight: 500 }}>
 
-          {/* Conversation List */}
-          <div className="w-80 shrink-0 border-r flex flex-col" style={{ borderColor: '#f0ede6' }}>
+          {/* Conversation List — hidden on mobile when chat is open */}
+          <div className={`w-full sm:w-80 shrink-0 border-r flex flex-col ${mobileShowChat ? 'hidden sm:flex' : 'flex'}`} style={{ borderColor: '#f0ede6' }}>
             <div className="p-4 border-b" style={{ borderColor: '#f0ede6' }}>
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-semibold text-sm" style={{ color: '#2a2f1e' }}>Conversations</h3>
@@ -121,7 +131,7 @@ export default function MessagesPage() {
                     <button
                       key={convo.memberId}
                       onClick={() => setSelectedConvo(convo.memberId)}
-                      className="w-full text-left px-4 py-3 border-b transition-colors"
+                      className="w-full text-left px-4 py-3 border-b transition-all duration-200"
                       style={{
                         borderColor: '#f0ede6',
                         background: selectedConvo === convo.memberId ? 'rgba(107, 122, 61, 0.06)' : 'transparent',
@@ -150,12 +160,12 @@ export default function MessagesPage() {
             </div>
           </div>
 
-          {/* Chat Area */}
-          <div className="flex-1 flex flex-col">
+          {/* Chat Area — full width on mobile when open */}
+          <div className={`flex-1 flex flex-col ${mobileShowChat ? 'flex' : 'hidden sm:flex'}`}>
             {!selectedConvo ? (
               <div className="flex-1 flex items-center justify-center">
                 <div className="text-center">
-                  <svg className="w-12 h-12 mx-auto mb-3" fill="none" stroke="#d1d5db" viewBox="0 0 24 24" strokeWidth="1">
+                  <svg className="w-12 h-12 mx-auto mb-3 opacity-30" fill="none" stroke="#6b7266" viewBox="0 0 24 24" strokeWidth="1">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
                   </svg>
                   <p className="text-sm" style={{ color: '#6b7266' }}>Select a conversation to start messaging</p>
@@ -163,8 +173,16 @@ export default function MessagesPage() {
               </div>
             ) : (
               <>
-                {/* Chat header */}
-                <div className="px-5 py-3 border-b flex items-center gap-3" style={{ borderColor: '#f0ede6' }}>
+                {/* Chat header with back button on mobile */}
+                <div className="px-4 sm:px-5 py-3 border-b flex items-center gap-3" style={{ borderColor: '#f0ede6' }}>
+                  <button
+                    onClick={() => setSelectedConvo(null)}
+                    className="sm:hidden p-1.5 -ml-1 rounded-lg hover:bg-black/5 transition-colors"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="#2a2f1e" viewBox="0 0 24 24" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                  </button>
                   <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: 'rgba(107, 122, 61, 0.1)', color: '#6b7a3d' }}>
                     {(activeConvo?.memberName || '').split(' ').map(n => n[0]).join('')}
                   </div>
@@ -175,13 +193,13 @@ export default function MessagesPage() {
                 </div>
 
                 {/* Messages */}
-                <div className="flex-1 overflow-y-auto p-5 space-y-3">
+                <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3">
                   {activeConvo?.messages.map(msg => {
                     const isMine = msg.fromId === currentUser?.id;
                     return (
-                      <div key={msg.id} className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>
+                      <div key={msg.id} className={`flex ${isMine ? 'justify-end' : 'justify-start'} animate-fadeIn`}>
                         <div
-                          className="max-w-[70%] rounded-2xl px-4 py-2.5"
+                          className="max-w-[80%] sm:max-w-[70%] rounded-2xl px-4 py-2.5 transition-all"
                           style={{
                             background: isMine ? '#6b7a3d' : '#f5f2eb',
                             color: isMine ? '#fff' : '#2a2f1e',
@@ -201,7 +219,7 @@ export default function MessagesPage() {
                 </div>
 
                 {/* Input */}
-                <div className="p-4 border-t" style={{ borderColor: '#f0ede6' }}>
+                <div className="p-3 sm:p-4 border-t" style={{ borderColor: '#f0ede6' }}>
                   <div className="flex gap-2">
                     <input
                       type="text"
@@ -209,13 +227,13 @@ export default function MessagesPage() {
                       onChange={(e) => setMessageText(e.target.value)}
                       onKeyDown={handleKeyDown}
                       placeholder="Type a message..."
-                      className="flex-1 px-4 py-2.5 rounded-xl text-sm border focus:outline-none focus:ring-2 focus:ring-[#6b7a3d]/20"
+                      className="flex-1 px-4 py-2.5 rounded-xl text-sm border focus:outline-none focus:ring-2 focus:ring-[#6b7a3d]/20 transition-shadow"
                       style={{ borderColor: '#e0dcd3', color: '#2a2f1e' }}
                     />
                     <button
                       onClick={handleSend}
                       disabled={!messageText.trim()}
-                      className="px-4 py-2.5 rounded-xl text-sm font-medium text-white transition-colors hover:opacity-90 disabled:opacity-50"
+                      className="px-4 py-2.5 rounded-xl text-sm font-medium text-white transition-all hover:opacity-90 disabled:opacity-50 active:scale-95"
                       style={{ background: '#6b7a3d' }}
                     >
                       Send

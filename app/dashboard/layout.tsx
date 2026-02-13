@@ -30,14 +30,14 @@ function DashboardGuard({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex" style={{ backgroundColor: '#f5f2eb' }}>
       <Sidebar />
-      {/* Mobile hamburger button */}
+      {/* Mobile hamburger button — positioned to not overlap title */}
       <button
-        className="lg:hidden fixed top-4 left-4 z-10 p-2 rounded-xl shadow-lg"
+        className="lg:hidden fixed top-3.5 left-3 z-10 p-2.5 rounded-xl shadow-lg"
         style={{ backgroundColor: '#1a1f12', color: '#e8e4d9' }}
         onClick={() => setMobileSidebarOpen(true)}
         aria-label="Open menu"
       >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
         </svg>
       </button>

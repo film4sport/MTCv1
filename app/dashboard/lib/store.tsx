@@ -27,6 +27,7 @@ interface AppState {
   conversations: Conversation[];
   setConversations: (conversations: Conversation[]) => void;
   sendMessage: (toId: string, text: string) => void;
+  markConversationRead: (memberId: string) => void;
   announcements: Announcement[];
   setAnnouncements: (announcements: Announcement[]) => void;
   dismissAnnouncement: (id: string) => void;
@@ -227,7 +228,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const existing = prev.find(c => c.memberId === toId);
       if (existing) {
         return prev.map(c => c.memberId === toId ? {
-          ...c, messages: [...c.messages, msg], lastMessage: text, lastTimestamp: msg.timestamp,
+          ...c, messages: [...c.messages, msg], lastMessage: text, lastTimestamp: msg.timestamp, unread: 0,
         } : c);
       }
       const member = members.find(m => m.id === toId);
@@ -236,6 +237,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }];
     });
   }, [currentUser, members]);
+
+  const markConversationRead = useCallback((memberId: string) => {
+    setConversations(prev => prev.map(c => c.memberId === memberId ? { ...c, unread: 0 } : c));
+  }, []);
 
   const dismissAnnouncement = useCallback((id: string) => {
     if (!currentUser) return;
@@ -253,7 +258,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   return (
     <AppContext.Provider value={{
       currentUser, login, logout, members, courts, setCourts, bookings, setBookings, addBooking, cancelBooking,
-      events, setEvents, toggleRsvp, partners, setPartners, conversations, setConversations, sendMessage,
+      events, setEvents, toggleRsvp, partners, setPartners, conversations, setConversations, sendMessage, markConversationRead,
       announcements, setAnnouncements, dismissAnnouncement, notifications, setNotifications, markNotificationRead,
       clearNotifications, weather, payments, analytics, sidebarCollapsed, setSidebarCollapsed, mobileSidebarOpen, setMobileSidebarOpen, isLoaded,
     }}>

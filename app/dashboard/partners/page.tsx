@@ -47,36 +47,39 @@ export default function PartnersPage() {
 
         {/* Filters + Post Button */}
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-          <div className="flex flex-wrap items-center gap-2">
-            {(['all', 'singles', 'doubles', 'mixed'] as FilterType[]).map(f => (
-              <button
-                key={f}
-                onClick={() => setFilter(f)}
-                className="px-3 py-1.5 rounded-full text-xs font-medium transition-colors"
-                style={{
-                  background: filter === f ? '#6b7a3d' : '#fff',
-                  color: filter === f ? '#fff' : '#2a2f1e',
-                  border: filter === f ? 'none' : '1px solid #e0dcd3',
-                }}
-              >
-                {f === 'all' ? 'All' : f.charAt(0).toUpperCase() + f.slice(1)}
-              </button>
-            ))}
-            <div className="w-px h-5 mx-1" style={{ background: '#e0dcd3' }} />
-            {(['all', 'beginner', 'intermediate', 'advanced'] as SkillFilter[]).map(s => (
-              <button
-                key={s}
-                onClick={() => setSkillFilter(s)}
-                className="px-3 py-1.5 rounded-full text-xs font-medium transition-colors"
-                style={{
-                  background: skillFilter === s ? '#6b7a3d' : '#fff',
-                  color: skillFilter === s ? '#fff' : '#2a2f1e',
-                  border: skillFilter === s ? 'none' : '1px solid #e0dcd3',
-                }}
-              >
-                {s === 'all' ? 'All Levels' : s.charAt(0).toUpperCase() + s.slice(1)}
-              </button>
-            ))}
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Match Type filters */}
+            <div className="flex items-center gap-1.5 p-1 rounded-xl" style={{ background: '#fff', border: '1px solid #e0dcd3' }}>
+              {(['all', 'singles', 'doubles', 'mixed'] as FilterType[]).map(f => (
+                <button
+                  key={f}
+                  onClick={() => setFilter(f)}
+                  className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200"
+                  style={{
+                    background: filter === f ? '#6b7a3d' : 'transparent',
+                    color: filter === f ? '#fff' : '#6b7266',
+                  }}
+                >
+                  {f === 'all' ? 'All' : f.charAt(0).toUpperCase() + f.slice(1)}
+                </button>
+              ))}
+            </div>
+            {/* Skill Level filters */}
+            <div className="flex items-center gap-1.5 p-1 rounded-xl" style={{ background: '#fff', border: '1px solid #e0dcd3' }}>
+              {(['all', 'beginner', 'intermediate', 'advanced'] as SkillFilter[]).map(s => (
+                <button
+                  key={s}
+                  onClick={() => setSkillFilter(s)}
+                  className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200"
+                  style={{
+                    background: skillFilter === s ? '#6b7a3d' : 'transparent',
+                    color: skillFilter === s ? '#fff' : '#6b7266',
+                  }}
+                >
+                  {s === 'all' ? 'All Levels' : s.charAt(0).toUpperCase() + s.slice(1)}
+                </button>
+              ))}
+            </div>
           </div>
           <button
             onClick={() => setShowPost(true)}
@@ -97,7 +100,7 @@ export default function PartnersPage() {
             {filtered.map(p => {
               const badge = getSkillBadge(p.ntrp);
               return (
-                <div key={p.id} className="rounded-2xl border p-5 transition-shadow hover:shadow-md" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+                <div key={p.id} className="rounded-2xl border p-5 card-hover" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold" style={{ background: 'rgba(107, 122, 61, 0.1)', color: '#6b7a3d' }}>
@@ -130,8 +133,8 @@ export default function PartnersPage() {
 
                   <Link
                     href={`/dashboard/messages`}
-                    className="block w-full text-center py-2.5 rounded-xl text-sm font-medium transition-colors"
-                    style={{ background: 'rgba(107, 122, 61, 0.1)', color: '#6b7a3d' }}
+                    className="block w-full text-center py-2.5 rounded-xl text-sm font-medium transition-all duration-200 hover:shadow-md btn-press"
+                    style={{ background: '#6b7a3d', color: '#fff' }}
                   >
                     Message
                   </Link>

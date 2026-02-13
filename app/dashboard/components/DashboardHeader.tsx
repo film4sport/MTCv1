@@ -28,9 +28,9 @@ export default function DashboardHeader({ title }: DashboardHeaderProps) {
   }, []);
 
   return (
-    <header className="h-16 flex items-center justify-between px-6 border-b" style={{ backgroundColor: '#faf8f3', borderColor: '#e0dcd3' }}>
+    <header className="h-16 flex items-center justify-between px-4 pl-14 sm:pl-6 lg:pl-6 border-b" style={{ backgroundColor: '#faf8f3', borderColor: '#e0dcd3' }}>
       {/* Page Title */}
-      <h1 className="headline-font text-xl" style={{ color: '#1a1f12' }}>{title}</h1>
+      <h1 className="headline-font text-xl truncate" style={{ color: '#1a1f12' }}>{title}</h1>
 
       {/* Right Side */}
       <div className="flex items-center gap-3">

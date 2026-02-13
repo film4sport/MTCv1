@@ -4,15 +4,9 @@ import { useApp } from './lib/store';
 import DashboardHeader from './components/DashboardHeader';
 import Link from 'next/link';
 
-const statusColors: Record<string, { bg: string; dot: string; label: string }> = {
-  'available': { bg: '#f0fdf4', dot: '#22c55e', label: 'Available' },
-  'in-use': { bg: '#fef2f2', dot: '#ef4444', label: 'In Use' },
-  'reserved': { bg: '#fffbeb', dot: '#f59e0b', label: 'Reserved' },
-  'maintenance': { bg: '#f3f4f6', dot: '#9ca3af', label: 'Maintenance' },
-};
 
 export default function DashboardHome() {
-  const { currentUser, courts, bookings, events, announcements, dismissAnnouncement } = useApp();
+  const { currentUser, bookings, events, announcements, dismissAnnouncement } = useApp();
 
   const myBookings = bookings
     .filter(b => b.userId === currentUser?.id && b.status === 'confirmed')
@@ -75,50 +69,8 @@ export default function DashboardHome() {
           </div>
         ))}
 
-        {/* Live Court Status */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold" style={{ color: '#2a2f1e' }}>Court Status</h2>
-            <div className="flex items-center gap-1.5 text-xs" style={{ color: '#6b7266' }}>
-              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-              Live
-            </div>
-          </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {courts.map(court => {
-              const s = statusColors[court.status] || statusColors['available'];
-              return (
-                <div
-                  key={court.id}
-                  className="rounded-2xl p-4 border transition-shadow hover:shadow-md"
-                  style={{ background: '#fff', borderColor: '#e0dcd3' }}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-semibold text-sm" style={{ color: '#2a2f1e' }}>{court.name}</span>
-                    <span className="w-2.5 h-2.5 rounded-full" style={{ background: s.dot, boxShadow: `0 0 6px ${s.dot}` }} />
-                  </div>
-                  <p className="text-xs font-medium mb-1" style={{ color: s.dot }}>{s.label}</p>
-                  {court.currentUser && (
-                    <p className="text-xs" style={{ color: '#6b7266' }}>{court.currentUser} &bull; Ends {court.endsAt}</p>
-                  )}
-                  {court.startsIn && (
-                    <p className="text-xs" style={{ color: '#6b7266' }}>Starts in {court.startsIn} min</p>
-                  )}
-                  <div className="flex items-center gap-1 mt-2">
-                    {court.floodlight && (
-                      <span className="text-[0.65rem] px-2 py-0.5 rounded-full" style={{ background: '#fffbeb', color: '#d97706' }}>
-                        Floodlight
-                      </span>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
         {/* Quick Actions */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 stagger-children">
           {[
             { label: 'Book Court', href: '/dashboard/book', icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z', bg: '#6b7a3d', color: '#fff' },
             { label: 'Find Partner', href: '/dashboard/partners', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z', bg: '#d4e157', color: '#2a2f1e' },
@@ -153,16 +105,21 @@ export default function DashboardHome() {
               <Link href="/dashboard/schedule" className="text-xs font-medium hover:underline" style={{ color: '#6b7a3d' }}>View All</Link>
             </div>
             {myBookings.length === 0 ? (
-              <div className="text-center py-8">
-                <p className="text-sm" style={{ color: '#6b7266' }}>No upcoming bookings</p>
-                <Link href="/dashboard/book" className="inline-block mt-3 text-sm font-medium hover:underline" style={{ color: '#6b7a3d' }}>
-                  Book a court
+              <div className="text-center py-8 animate-fadeIn">
+                <div className="w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center" style={{ background: 'rgba(107, 122, 61, 0.08)' }}>
+                  <svg className="w-6 h-6" fill="none" stroke="#6b7a3d" viewBox="0 0 24 24" strokeWidth="1.5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                  </svg>
+                </div>
+                <p className="text-sm mb-1" style={{ color: '#6b7266' }}>No upcoming bookings</p>
+                <Link href="/dashboard/book" className="inline-block mt-2 px-4 py-2 rounded-xl text-xs font-medium text-white btn-press" style={{ background: '#6b7a3d' }}>
+                  Book a Court
                 </Link>
               </div>
             ) : (
               <div className="space-y-3">
                 {myBookings.map(b => (
-                  <div key={b.id} className="flex items-center gap-4 rounded-xl p-3 border" style={{ borderColor: '#f0ede6' }}>
+                  <div key={b.id} className="flex items-center gap-4 rounded-xl p-3 border card-hover" style={{ borderColor: '#f0ede6' }}>
                     <div className="w-12 h-12 rounded-xl flex flex-col items-center justify-center" style={{ background: '#f5f2eb' }}>
                       <span className="text-[0.6rem] font-semibold uppercase" style={{ color: '#6b7266' }}>
                         {new Date(b.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short' })}
@@ -196,7 +153,7 @@ export default function DashboardHome() {
                 const spotsLeft = ev.spotsTotal != null && ev.spotsTaken != null ? ev.spotsTotal - ev.spotsTaken : null;
                 const attending = ev.attendees.includes(currentUser?.name || '');
                 return (
-                  <div key={ev.id} className="flex items-start gap-4 rounded-xl p-3 border" style={{ borderColor: '#f0ede6' }}>
+                  <div key={ev.id} className="flex items-start gap-4 rounded-xl p-3 border card-hover" style={{ borderColor: '#f0ede6' }}>
                     <div className="w-12 h-12 rounded-xl flex flex-col items-center justify-center" style={{ background: '#f5f2eb' }}>
                       <span className="text-[0.6rem] font-semibold uppercase" style={{ color: '#6b7266' }}>
                         {new Date(ev.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short' })}
