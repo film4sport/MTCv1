@@ -108,9 +108,18 @@ export default function SchedulePage() {
         {view === 'list' ? (
           <div>
             {grouped.length === 0 ? (
-              <div className="text-center py-16 rounded-2xl border" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
-                <p className="text-sm mb-2" style={{ color: '#6b7266' }}>No upcoming bookings or events</p>
-                <Link href="/dashboard/book" className="text-sm font-medium hover:underline" style={{ color: '#6b7a3d' }}>Book a court</Link>
+              <div className="text-center py-16 rounded-2xl border animate-scaleIn" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+                <div className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center" style={{ background: 'rgba(107, 122, 61, 0.08)' }}>
+                  <svg className="w-8 h-8" fill="none" stroke="#6b7a3d" viewBox="0 0 24 24" strokeWidth="1.5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                  </svg>
+                </div>
+                <p className="font-medium text-sm mb-1" style={{ color: '#2a2f1e' }}>Your schedule is clear!</p>
+                <p className="text-xs mb-4" style={{ color: '#6b7266' }}>Book a court or RSVP to an event to get started</p>
+                <div className="flex items-center justify-center gap-3">
+                  <Link href="/dashboard/book" className="px-4 py-2 rounded-xl text-sm font-medium text-white btn-press" style={{ background: '#6b7a3d' }}>Book a Court</Link>
+                  <Link href="/dashboard/events" className="px-4 py-2 rounded-xl text-sm font-medium btn-press" style={{ background: 'rgba(107, 122, 61, 0.1)', color: '#6b7a3d' }}>Browse Events</Link>
+                </div>
               </div>
             ) : (
               <div className="space-y-6">
