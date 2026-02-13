@@ -40,21 +40,16 @@ All external links to clubspark.ca have been removed. ClubSpark was only used as
 ## #8: ALWAYS UPDATE CLAUDE.md
 When new project rules or conventions are established, add them to this file AND MEMORY.md.
 
-## #9: VERIFY BEFORE REPORTING — USE BROWSER + PLAYWRIGHT
+## #9: VERIFY BEFORE REPORTING — USE PLAYWRIGHT ONLY
 **Never tell the user "it's done" without verifying visually.**
-- **Claude in Chrome (BDG)** — Use for real-time verification during active development:
-  - `javascript_tool` for computed styles, DOM queries, console.log
-  - `screenshot` to visually confirm changes look correct
-  - `read_console_messages` to catch runtime errors
-  - `read_network_requests` to verify API calls/asset loading
-  - Best for: UI/UX refinement, typography, contrast, animations, interactive elements
-  - If extension disconnects → reconnect via extension icon, keep browser tab focused
-- **Playwright** — Use for automated regression testing before deploys:
+- **DO NOT use Claude in Chrome (BDG)** — too unreliable (disconnects, stale state). Use Playwright for ALL verification.
+- **Playwright** — Use for all visual verification and regression testing:
   - `npm run test` (E2E), `npm run test:unit` (Vitest), `npm run test:all` (both)
   - Config: `playwright.config.js`, tests in `tests/`, unit tests in `unit-tests/`
   - 3 viewports tested: mobile (375x812), tablet (768x1024), desktop (1280x720)
-  - Best for: "did this change break something else?" checks
-- **Workflow**: BDG for active dev → Playwright before deploy to Railway
+  - For quick visual checks: write a small Playwright script to screenshot the page
+  - Best for: everything — visual verification, regression testing, pre-deploy checks
+- **Workflow**: Playwright for ALL verification
 
 ---
 

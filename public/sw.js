@@ -1,6 +1,5 @@
-const CACHE_NAME = 'mtc-v2';
+const CACHE_NAME = 'mtc-v3';
 const STATIC_ASSETS = [
-  '/',
   '/manifest.json',
   '/favicon.png',
   '/tennis-ball-clean.png',
@@ -8,7 +7,7 @@ const STATIC_ASSETS = [
   '/Gotham_Rounded_Medium.otf',
 ];
 
-// Install — cache static assets
+// Install — cache only truly static assets (images, fonts, manifest)
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
@@ -18,7 +17,7 @@ self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
 
-// Activate — clean old caches
+// Activate — clean ALL old caches immediately
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
@@ -30,38 +29,52 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Fetch — network first, fall back to cache
+// Fetch — only cache static assets, let everything else go to network
 self.addEventListener('fetch', (event) => {
   // Skip non-GET requests
   if (event.request.method !== 'GET') return;
 
-  // Skip chrome-extension, Next.js HMR, and external requests
   const url = new URL(event.request.url);
+
+  // Skip chrome-extension and HMR requests
   if (url.protocol === 'chrome-extension:') return;
   if (url.pathname.startsWith('/_next/webpack-hmr')) return;
 
-  event.respondWith(
-    fetch(event.request)
-      .then((response) => {
-        // Cache successful responses for same-origin
-        if (response.ok && url.origin === self.location.origin) {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, clone);
-          });
-        }
-        return response;
-      })
-      .catch(() => {
-        // Network failed — try cache
-        return caches.match(event.request).then((cached) => {
-          if (cached) return cached;
-          // Fallback to cached home page for navigation requests
-          if (event.request.mode === 'navigate') {
-            return caches.match('/');
+  // For Next.js pages, JS bundles, and API routes — ALWAYS go to network, no caching
+  // This prevents stale pages from being served after code changes
+  if (
+    event.request.mode === 'navigate' ||
+    url.pathname.startsWith('/_next/') ||
+    url.pathname.startsWith('/api/') ||
+    url.pathname.endsWith('.html') ||
+    url.pathname === '/'
+  ) {
+    // Network only — no cache fallback for pages/bundles
+    // This ensures users always get the latest version
+    return;
+  }
+
+  // For static assets (images, fonts, manifest) — cache-first strategy
+  const isStaticAsset = STATIC_ASSETS.some(asset => url.pathname === asset) ||
+    url.pathname.match(/\.(png|jpg|jpeg|gif|svg|ico|woff|woff2|otf|ttf|webp)$/);
+
+  if (isStaticAsset) {
+    event.respondWith(
+      caches.match(event.request).then((cached) => {
+        if (cached) return cached;
+        return fetch(event.request).then((response) => {
+          if (response.ok && url.origin === self.location.origin) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, clone);
+            });
           }
-          return new Response('Offline', { status: 503, statusText: 'Offline' });
+          return response;
         });
       })
-  );
+    );
+    return;
+  }
+
+  // Everything else — network only (don't intercept, let browser handle normally)
 });
