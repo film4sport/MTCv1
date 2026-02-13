@@ -14,7 +14,7 @@ module.exports = defineConfig({
     navigationTimeout: 60000,
   },
   webServer: {
-    command: 'npm run dev',
+    command: process.env.CI ? 'npm start' : 'npm run dev',
     port: 3000,
     timeout: 60000,
     reuseExistingServer: !process.env.CI,
