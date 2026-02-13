@@ -45,8 +45,8 @@
 
     /* Phone Mockup - Desktop */
     .phone-mockup {
-      width: 280px;
-      height: 580px;
+      width: 300px;
+      height: 640px;
       background: #000;
       border-radius: 40px;
       padding: 12px;
@@ -60,6 +60,8 @@
       border-radius: 32px;
       overflow: hidden;
       position: relative;
+      display: flex;
+      flex-direction: column;
     }
     .phone-notch {
       position: absolute;
@@ -418,127 +420,158 @@
               <div class="phone-notch"></div>
 
               <!-- Header: Theme pill | MTC COURT | Bell + Menu -->
-              <div style="display: flex; align-items: center; justify-content: space-between; padding: 36px 12px 10px; background: #f0f0f0; position: relative; z-index: 2;">
+              <div style="display: flex; align-items: center; justify-content: space-between; padding: 36px 12px 8px; background: #f0f0f0; position: relative; z-index: 2;">
                 <!-- Theme toggle pill -->
-                <div style="width: 28px; height: 28px; background: #e0e0e0; border-radius: 20px; display: flex; align-items: center; justify-content: center; box-shadow: 2px 2px 4px rgba(0,0,0,0.08), -2px -2px 4px rgba(255,255,255,0.8);">
-                  <svg width="12" height="12" fill="none" stroke="#444" viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+                <div style="display: flex; gap: 2px; background: #e8e8e8; border-radius: 20px; padding: 3px; box-shadow: 2px 2px 4px rgba(0,0,0,0.06), -2px -2px 4px rgba(255,255,255,0.8);">
+                  <div style="width: 22px; height: 22px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                    <svg width="10" height="10" fill="none" stroke="#f59e0b" viewBox="0 0 24 24" stroke-width="2.5"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+                  </div>
+                  <div style="width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                    <svg width="10" height="10" fill="none" stroke="#999" viewBox="0 0 24 24" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+                  </div>
                 </div>
                 <!-- Logo with multicolor bar -->
                 <div style="text-align: center; position: relative;">
-                  <div style="font-family: 'Bebas Neue', 'Inter', sans-serif; font-size: 18px; letter-spacing: 2px; color: #0a0a0a; font-weight: 400;">MTC <span style="color: #0a0a0a;">COURT</span></div>
+                  <div style="font-family: 'Bebas Neue', 'Inter', sans-serif; font-size: 18px; letter-spacing: 2px; color: #0a0a0a; font-weight: 400;">MTC COURT</div>
                   <div style="height: 2.5px; margin-top: 1px; background: linear-gradient(90deg, #c8ff00, #00d4ff, #ff5a5f, #c8ff00); background-size: 200% 100%; border-radius: 2px; animation: accentShimmer 8s linear infinite;"></div>
                 </div>
                 <!-- Bell + Menu -->
                 <div style="display: flex; gap: 5px;">
-                  <div style="width: 28px; height: 28px; background: #e0e0e0; border-radius: 20px; display: flex; align-items: center; justify-content: center; box-shadow: 2px 2px 4px rgba(0,0,0,0.08), -2px -2px 4px rgba(255,255,255,0.8); position: relative;">
-                    <svg width="12" height="12" fill="none" stroke="#444" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 00-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
-                    <span style="position: absolute; top: -2px; right: -2px; width: 8px; height: 8px; background: #ff5a5f; border-radius: 50%;"></span>
+                  <div style="width: 28px; height: 28px; background: #e8e8e8; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 2px 2px 4px rgba(0,0,0,0.06), -2px -2px 4px rgba(255,255,255,0.8); position: relative;">
+                    <svg width="13" height="13" fill="none" stroke="#444" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 00-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                    <span style="position: absolute; top: 0px; right: -1px; min-width: 13px; height: 13px; background: #ff5a5f; border-radius: 50%; font-size: 7px; color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; border: 1.5px solid #f0f0f0;">3</span>
                   </div>
-                  <div style="width: 28px; height: 28px; background: #e0e0e0; border-radius: 20px; display: flex; align-items: center; justify-content: center; box-shadow: 2px 2px 4px rgba(0,0,0,0.08), -2px -2px 4px rgba(255,255,255,0.8);">
-                    <svg width="12" height="12" fill="none" stroke="#444" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                  <div style="width: 28px; height: 28px; background: #e8e8e8; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 2px 2px 4px rgba(0,0,0,0.06), -2px -2px 4px rgba(255,255,255,0.8);">
+                    <svg width="13" height="13" fill="none" stroke="#444" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
                   </div>
                 </div>
               </div>
+
+              <!-- Scrollable content area -->
+              <div style="flex: 1; overflow-y: auto; padding-bottom: 58px; position: relative; z-index: 2;">
 
               <!-- Section: QUICK ACTIONS -->
-              <div style="padding: 2px 10px 6px; position: relative; z-index: 2;">
-                <p style="font-family: 'Bebas Neue', 'Inter', sans-serif; font-size: 0.65rem; letter-spacing: 1px; color: #444; margin-bottom: 6px;">QUICK ACTIONS</p>
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px;">
+              <div style="padding: 4px 10px 8px;">
+                <p style="font-family: 'Bebas Neue', 'Inter', sans-serif; font-size: 0.7rem; letter-spacing: 1px; color: #0a0a0a; margin-bottom: 6px; font-weight: 400;">QUICK ACTIONS</p>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 7px;">
                   <!-- Book Court - Volt -->
-                  <div style="background: #c8ff00; border-radius: 14px; height: 62px; padding: 10px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 3px 3px 6px rgba(0,0,0,0.08), -3px -3px 6px rgba(255,255,255,0.8);">
-                    <svg width="16" height="16" fill="none" stroke="#0a0a0a" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                    <p style="font-family: 'Bebas Neue', 'Inter', sans-serif; font-size: 0.6rem; letter-spacing: 0.5px; color: #0a0a0a; font-weight: 600;">BOOK COURT</p>
+                  <div style="background: #c8ff00; border-radius: 16px; height: 72px; padding: 10px 12px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 2px 8px rgba(200,255,0,0.2);">
+                    <svg width="18" height="18" fill="none" stroke="#0a0a0a" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    <p style="font-family: 'Bebas Neue', 'Inter', sans-serif; font-size: 0.7rem; letter-spacing: 0.5px; color: #0a0a0a; font-weight: 400;">BOOK COURT</p>
                   </div>
                   <!-- Find Partner - Coral -->
-                  <div style="background: #ff5a5f; border-radius: 14px; height: 62px; padding: 10px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 3px 3px 6px rgba(0,0,0,0.08), -3px -3px 6px rgba(255,255,255,0.8);">
-                    <svg width="16" height="16" fill="none" stroke="white" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                    <p style="font-family: 'Bebas Neue', 'Inter', sans-serif; font-size: 0.6rem; letter-spacing: 0.5px; color: #fff; font-weight: 600;">FIND PARTNER</p>
+                  <div style="background: #ff5a5f; border-radius: 16px; height: 72px; padding: 10px 12px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 2px 8px rgba(255,90,95,0.2);">
+                    <svg width="18" height="18" fill="none" stroke="white" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    <p style="font-family: 'Bebas Neue', 'Inter', sans-serif; font-size: 0.7rem; letter-spacing: 0.5px; color: #fff; font-weight: 400;">FIND PARTNER</p>
                   </div>
                   <!-- Club Events - Electric Blue -->
-                  <div style="background: #00d4ff; border-radius: 14px; height: 62px; padding: 10px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 3px 3px 6px rgba(0,0,0,0.08), -3px -3px 6px rgba(255,255,255,0.8);">
-                    <svg width="16" height="16" fill="none" stroke="#0a0a0a" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
-                    <p style="font-family: 'Bebas Neue', 'Inter', sans-serif; font-size: 0.6rem; letter-spacing: 0.5px; color: #0a0a0a; font-weight: 600;">CLUB EVENTS</p>
+                  <div style="background: #00d4ff; border-radius: 16px; height: 72px; padding: 10px 12px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,212,255,0.2);">
+                    <svg width="18" height="18" fill="none" stroke="#0a0a0a" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+                    <p style="font-family: 'Bebas Neue', 'Inter', sans-serif; font-size: 0.7rem; letter-spacing: 0.5px; color: #0a0a0a; font-weight: 400;">CLUB EVENTS</p>
                   </div>
                   <!-- My Schedule - Dark -->
-                  <div style="background: #0a0a0a; border-radius: 14px; height: 62px; padding: 10px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 3px 3px 6px rgba(0,0,0,0.08), -3px -3px 6px rgba(255,255,255,0.8);">
-                    <svg width="16" height="16" fill="none" stroke="white" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    <p style="font-family: 'Bebas Neue', 'Inter', sans-serif; font-size: 0.6rem; letter-spacing: 0.5px; color: #fff; font-weight: 600;">MY SCHEDULE</p>
+                  <div style="background: #0a0a0a; border-radius: 16px; height: 72px; padding: 10px 12px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+                    <svg width="18" height="18" fill="none" stroke="white" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    <p style="font-family: 'Bebas Neue', 'Inter', sans-serif; font-size: 0.7rem; letter-spacing: 0.5px; color: #fff; font-weight: 400;">MY SCHEDULE</p>
                   </div>
                 </div>
               </div>
 
-              <!-- Court Status Grid - Neumorphic cards -->
-              <div style="padding: 8px 10px 6px; position: relative; z-index: 2;">
+              <!-- Upcoming Events - 3 events with RSVP -->
+              <div style="padding: 6px 10px 8px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                  <p style="font-family: 'Bebas Neue', 'Inter', sans-serif; font-size: 0.6rem; letter-spacing: 1px; color: #444;">COURT STATUS</p>
-                  <span style="font-size: 0.45rem; color: #666; display: flex; align-items: center; gap: 3px;">
-                    <span style="width: 5px; height: 5px; background: #4ade80; border-radius: 50%; box-shadow: 0 0 6px #4ade80;"></span>
-                    Live
-                  </span>
+                  <p style="font-family: 'Bebas Neue', 'Inter', sans-serif; font-size: 0.7rem; letter-spacing: 1px; color: #0a0a0a; font-weight: 400;">UPCOMING EVENTS</p>
+                  <span style="font-family: 'Bebas Neue', 'Inter', sans-serif; font-size: 0.5rem; color: #0a0a0a; font-weight: 400; letter-spacing: 0.5px;">SEE ALL →</span>
                 </div>
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px;">
-                  <div style="background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 14px; padding: 8px; box-shadow: 3px 3px 6px rgba(0,0,0,0.06), -3px -3px 6px rgba(255,255,255,0.8);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                      <span style="font-weight: 600; color: #0a0a0a; font-size: 0.6rem;">Court 1</span>
-                      <span style="width: 7px; height: 7px; background: #4ade80; border-radius: 50%; box-shadow: 0 0 6px #4ade80;"></span>
-                    </div>
-                    <p style="color: #666; font-size: 0.45rem;">Hard Court</p>
+                <!-- Event 1: Opening Day BBQ -->
+                <div style="background: #fff; border: 1px solid rgba(0,0,0,0.06); border-radius: 14px; padding: 10px; display: flex; align-items: center; gap: 8px; margin-bottom: 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
+                  <div style="background: #c8ff00; border-radius: 10px; padding: 5px 7px; text-align: center; min-width: 36px;">
+                    <div style="font-size: 0.4rem; color: #0a0a0a; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">MAY</div>
+                    <div style="font-family: 'Bebas Neue', sans-serif; font-size: 0.95rem; color: #0a0a0a; font-weight: 400; line-height: 1;">9</div>
                   </div>
-                  <div style="background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 14px; padding: 8px; box-shadow: 3px 3px 6px rgba(0,0,0,0.06), -3px -3px 6px rgba(255,255,255,0.8);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                      <span style="font-weight: 600; color: #0a0a0a; font-size: 0.6rem;">Court 2</span>
-                      <span style="width: 7px; height: 7px; background: #ff5a5f; border-radius: 50%; box-shadow: 0 0 6px #ff5a5f;"></span>
-                    </div>
-                    <p style="color: #666; font-size: 0.45rem;">Hard Court</p>
+                  <div style="flex: 1; min-width: 0;">
+                    <p style="font-size: 0.55rem; font-weight: 600; color: #0a0a0a;">Opening Day BBQ</p>
+                    <p style="font-size: 0.42rem; color: #666;">1:00 PM • All Courts • Free</p>
                   </div>
-                  <div style="background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 14px; padding: 8px; box-shadow: 3px 3px 6px rgba(0,0,0,0.06), -3px -3px 6px rgba(255,255,255,0.8);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                      <span style="font-weight: 600; color: #0a0a0a; font-size: 0.6rem;">Court 3</span>
-                      <span style="width: 7px; height: 7px; background: #fbbf24; border-radius: 50%; box-shadow: 0 0 6px #fbbf24;"></span>
-                    </div>
-                    <p style="color: #666; font-size: 0.45rem;">Hard Court</p>
+                  <div style="background: #c8ff00; border-radius: 8px; padding: 4px 10px; font-size: 0.5rem; font-weight: 700; color: #0a0a0a; white-space: nowrap;">RSVP</div>
+                </div>
+                <!-- Event 2: Men's Round Robin -->
+                <div style="background: #fff; border: 1px solid rgba(0,0,0,0.06); border-radius: 14px; padding: 10px; display: flex; align-items: center; gap: 8px; margin-bottom: 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
+                  <div style="background: #c8ff00; border-radius: 10px; padding: 5px 7px; text-align: center; min-width: 36px;">
+                    <div style="font-size: 0.4rem; color: #0a0a0a; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">MAY</div>
+                    <div style="font-family: 'Bebas Neue', sans-serif; font-size: 0.95rem; color: #0a0a0a; font-weight: 400; line-height: 1;">12</div>
                   </div>
-                  <div style="background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 14px; padding: 8px; box-shadow: 3px 3px 6px rgba(0,0,0,0.06), -3px -3px 6px rgba(255,255,255,0.8);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                      <span style="font-weight: 600; color: #0a0a0a; font-size: 0.6rem;">Court 4</span>
-                      <span style="width: 7px; height: 7px; background: #4ade80; border-radius: 50%; box-shadow: 0 0 6px #4ade80;"></span>
-                    </div>
-                    <p style="color: #666; font-size: 0.45rem;">Hard Court</p>
+                  <div style="flex: 1; min-width: 0;">
+                    <p style="font-size: 0.55rem; font-weight: 600; color: #0a0a0a;">Men's Round Robin</p>
+                    <p style="font-size: 0.42rem; color: #666;">Tue 9:00 AM • Courts 1-2</p>
                   </div>
+                  <div style="background: #c8ff00; border-radius: 8px; padding: 4px 10px; font-size: 0.5rem; font-weight: 700; color: #0a0a0a; white-space: nowrap;">RSVP</div>
+                </div>
+                <!-- Event 3: Friday Night Mixed -->
+                <div style="background: #fff; border: 1px solid rgba(0,0,0,0.06); border-radius: 14px; padding: 10px; display: flex; align-items: center; gap: 8px; margin-bottom: 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
+                  <div style="background: #c8ff00; border-radius: 10px; padding: 5px 7px; text-align: center; min-width: 36px;">
+                    <div style="font-size: 0.4rem; color: #0a0a0a; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">MAY</div>
+                    <div style="font-family: 'Bebas Neue', sans-serif; font-size: 0.95rem; color: #0a0a0a; font-weight: 400; line-height: 1;">15</div>
+                  </div>
+                  <div style="flex: 1; min-width: 0;">
+                    <p style="font-size: 0.55rem; font-weight: 600; color: #0a0a0a;">Friday Night Mixed</p>
+                    <p style="font-size: 0.42rem; color: #666;">Fri 6:00 PM • All Courts</p>
+                  </div>
+                  <div style="background: #c8ff00; border-radius: 8px; padding: 4px 10px; font-size: 0.5rem; font-weight: 700; color: #0a0a0a; white-space: nowrap;">RSVP</div>
                 </div>
               </div>
 
-              <!-- Upcoming Events snippet -->
-              <div style="padding: 6px 10px 60px; position: relative; z-index: 2;">
+              <!-- Looking for Partners section -->
+              <div style="padding: 4px 10px 12px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                  <p style="font-family: 'Bebas Neue', 'Inter', sans-serif; font-size: 0.6rem; letter-spacing: 1px; color: #444;">UPCOMING EVENTS</p>
-                  <span style="font-size: 0.45rem; color: #0a0a0a; font-weight: 600;">See All →</span>
+                  <p style="font-family: 'Bebas Neue', 'Inter', sans-serif; font-size: 0.7rem; letter-spacing: 1px; color: #0a0a0a; font-weight: 400;">LOOKING FOR PARTNERS</p>
+                  <span style="font-family: 'Bebas Neue', 'Inter', sans-serif; font-size: 0.5rem; color: #0a0a0a; font-weight: 400; letter-spacing: 0.5px;">SEE ALL →</span>
                 </div>
-                <div style="background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 14px; padding: 10px; display: flex; align-items: center; gap: 8px; box-shadow: 3px 3px 6px rgba(0,0,0,0.06), -3px -3px 6px rgba(255,255,255,0.8);">
-                  <div style="background: #c8ff00; border-radius: 10px; padding: 6px 8px; text-align: center; min-width: 36px;">
-                    <div style="font-size: 0.4rem; color: #0a0a0a; font-weight: 600; text-transform: uppercase;">Jul</div>
-                    <div style="font-size: 0.85rem; color: #0a0a0a; font-weight: 700; line-height: 1;">26</div>
+                <!-- Partner 1: James Park -->
+                <div style="background: #fff; border: 1px solid rgba(0,0,0,0.06); border-radius: 14px; padding: 10px; display: flex; align-items: center; gap: 8px; margin-bottom: 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
+                  <div style="width: 34px; height: 34px; border-radius: 50%; background: #f5e6d0; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;">
+                    <svg width="34" height="34" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#f5e6d0"/><circle cx="50" cy="38" r="16" fill="#d4a574"/><ellipse cx="50" cy="80" rx="24" ry="20" fill="#4a90d9"/></svg>
                   </div>
-                  <div>
-                    <p style="font-size: 0.55rem; font-weight: 600; color: #0a0a0a;">Mixed Doubles Tournament</p>
-                    <p style="font-size: 0.45rem; color: #666;">1:00 PM • All Courts</p>
+                  <div style="flex: 1; min-width: 0;">
+                    <p style="font-size: 0.55rem; font-weight: 600; color: #0a0a0a;">James Park</p>
+                    <div style="display: flex; align-items: center; gap: 4px;">
+                      <span style="font-size: 0.42rem; color: #666;">Today 4PM</span>
+                      <span style="font-size: 0.38rem; background: #00d4ff; color: #0a0a0a; padding: 1px 5px; border-radius: 6px; font-weight: 600;">Intermediate</span>
+                    </div>
                   </div>
+                  <div style="background: #c8ff00; border-radius: 8px; padding: 4px 10px; font-size: 0.5rem; font-weight: 700; color: #0a0a0a; white-space: nowrap;">Join</div>
+                </div>
+                <!-- Partner 2: Emily Rodriguez -->
+                <div style="background: #fff; border: 1px solid rgba(0,0,0,0.06); border-radius: 14px; padding: 10px; display: flex; align-items: center; gap: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
+                  <div style="width: 34px; height: 34px; border-radius: 50%; background: #fce4ec; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;">
+                    <svg width="34" height="34" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#fce4ec"/><circle cx="50" cy="38" r="16" fill="#f5c6a0"/><ellipse cx="50" cy="28" rx="18" ry="10" fill="#d4a030"/><ellipse cx="50" cy="80" rx="24" ry="20" fill="#e91e63"/></svg>
+                  </div>
+                  <div style="flex: 1; min-width: 0;">
+                    <p style="font-size: 0.55rem; font-weight: 600; color: #0a0a0a;">Emily Rodriguez</p>
+                    <div style="display: flex; align-items: center; gap: 4px;">
+                      <span style="font-size: 0.42rem; color: #666;">Tomorrow 10AM</span>
+                      <span style="font-size: 0.38rem; background: #ff5a5f; color: #fff; padding: 1px 5px; border-radius: 6px; font-weight: 600;">Advanced</span>
+                    </div>
+                  </div>
+                  <div style="background: #c8ff00; border-radius: 8px; padding: 4px 10px; font-size: 0.5rem; font-weight: 700; color: #0a0a0a; white-space: nowrap;">Join</div>
                 </div>
               </div>
 
-              <!-- Bottom Nav - Liquid glass floating bar -->
+              </div><!-- end scrollable content -->
+
+              <!-- Bottom Nav - Glass floating bar -->
               <div class="app-nav">
                 <div class="app-nav-item active">
                   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
                   </svg>
-                  Home
+                  HOME
                 </div>
                 <div class="app-nav-item">
                   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                   </svg>
-                  Schedule
+                  SCHEDULE
                 </div>
                 <!-- Center Book button - raised volt circle -->
                 <div class="app-nav-book">
@@ -550,14 +583,14 @@
                   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
                   </svg>
-                  Partners
+                  PARTNERS
                 </div>
                 <div class="app-nav-item" style="position: relative;">
                   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
                   </svg>
-                  <span style="position: absolute; top: -2px; right: 50%; transform: translateX(10px); min-width: 12px; height: 12px; background: #ff5a5f; border-radius: 50%; font-size: 7px; color: white; display: flex; align-items: center; justify-content: center; font-weight: 700;">2</span>
-                  Messages
+                  <span style="position: absolute; top: -2px; right: 50%; transform: translateX(12px); min-width: 14px; height: 14px; background: #ff5a5f; border-radius: 50%; font-size: 7px; color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; border: 1.5px solid rgba(255,255,255,0.8);">2</span>
+                  MESSAGES
                 </div>
               </div>
             </div>
