@@ -2,11 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 
-interface HeroProps {
-  onOpenBooking: () => void;
-}
-
-export default function Hero({ onOpenBooking }: HeroProps) {
+export default function Hero() {
   const heroContentRef = useRef<HTMLDivElement>(null);
   const heroBgRef = useRef<HTMLDivElement>(null);
 
@@ -42,8 +38,8 @@ export default function Hero({ onOpenBooking }: HeroProps) {
       <div className="absolute inset-0 hero-overlay"></div>
 
       {/* Hero Content */}
-      <div className="absolute inset-0 flex flex-col justify-center px-8 lg:px-16 z-10 pt-16">
-        <div className="max-w-2xl hero-content" ref={heroContentRef}>
+      <div className="absolute inset-0 flex flex-col lg:flex-row lg:items-center justify-center px-8 lg:px-16 z-10 pt-16">
+        <div className="max-w-2xl hero-content flex-1" ref={heroContentRef}>
           {/* Main Headline */}
           <h1
             className="headline-font text-4xl md:text-5xl lg:text-[3.5rem] leading-[1.15] mb-6"
@@ -69,21 +65,114 @@ export default function Hero({ onOpenBooking }: HeroProps) {
             >
               Join Now
             </a>
-            <button
-              onClick={onOpenBooking}
+            <a
+              href="/login"
               className="glass-btn-solid px-5 py-3 rounded-full text-sm font-medium flex items-center gap-2"
             >
-              Book a Court
+              Member Login
               <span className="glass-icon w-6 h-6 rounded-full flex items-center justify-center">
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M7 17L17 7M17 7H7M17 7V17" />
                 </svg>
               </span>
-            </button>
+            </a>
           </div>
 
           {/* Divider Line */}
           <div className="divider-line w-full max-w-2xl"></div>
+        </div>
+
+        {/* Booking Preview — Desktop Only */}
+        <div className="hidden lg:block flex-shrink-0 ml-8 xl:ml-16 hero-content" style={{ width: 300 }}>
+          <div
+            className="rounded-2xl p-5"
+            style={{
+              background: 'rgba(26, 31, 18, 0.6)',
+              backdropFilter: 'blur(16px)',
+              WebkitBackdropFilter: 'blur(16px)',
+              border: '1px solid rgba(232, 228, 217, 0.12)',
+              boxShadow: '0 16px 48px rgba(0, 0, 0, 0.3)',
+            }}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-xs font-medium tracking-wider uppercase" style={{ color: 'rgba(232, 228, 217, 0.5)' }}>
+                Member Feature
+              </span>
+              <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(212, 225, 87, 0.15)', color: '#d4e157' }}>
+                Live
+              </span>
+            </div>
+
+            {/* Mini date chips */}
+            <div className="flex gap-2 mb-4">
+              {['Today', 'Sat', 'Sun'].map((day, i) => (
+                <div
+                  key={day}
+                  className="flex-1 text-center py-2 rounded-lg text-xs"
+                  style={
+                    i === 0
+                      ? { background: '#d4e157', color: '#1a1f12', fontWeight: 600 }
+                      : { background: 'rgba(232, 228, 217, 0.06)', color: 'rgba(232, 228, 217, 0.5)', border: '1px solid rgba(232, 228, 217, 0.08)' }
+                  }
+                >
+                  {day}
+                </div>
+              ))}
+            </div>
+
+            {/* Mini court cards */}
+            <div className="space-y-2.5 mb-4">
+              {[
+                { name: 'Court 1', available: true, hasLights: true },
+                { name: 'Court 3', available: false, isNew: true },
+              ].map((court) => (
+                <div
+                  key={court.name}
+                  className="rounded-xl p-3"
+                  style={{
+                    background: 'rgba(232, 228, 217, 0.04)',
+                    border: '1px solid rgba(232, 228, 217, 0.08)',
+                    opacity: court.available ? 1 : 0.5,
+                  }}
+                >
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-sm font-medium" style={{ color: '#e8e4d9' }}>{court.name}</span>
+                    <span className="text-sm font-semibold" style={{ color: '#d4e157' }}>
+                      $5<span style={{ color: 'rgba(232,228,217,0.4)', fontSize: '0.65rem' }}>/hr</span>
+                    </span>
+                  </div>
+                  <div className="flex gap-1.5">
+                    {court.hasLights && (
+                      <span className="text-[0.6rem] px-2 py-0.5 rounded-full font-medium" style={{ background: 'rgba(245, 158, 11, 0.2)', color: '#fbbf24' }}>Lit</span>
+                    )}
+                    {court.isNew && (
+                      <span className="text-[0.6rem] px-2 py-0.5 rounded-full font-medium" style={{ background: 'rgba(59, 130, 246, 0.2)', color: '#93c5fd' }}>New</span>
+                    )}
+                    <span
+                      className="text-[0.6rem] px-2 py-0.5 rounded-full font-medium"
+                      style={
+                        court.available
+                          ? { background: 'rgba(34, 197, 94, 0.2)', color: '#86efac' }
+                          : { background: 'rgba(239, 68, 68, 0.2)', color: '#fca5a5' }
+                      }
+                    >
+                      {court.available ? 'Available' : 'Booked'}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* CTA */}
+            <a
+              href="/login"
+              className="block w-full text-center py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-90"
+              style={{ background: '#d4e157', color: '#1a1f12' }}
+            >
+              Login to Book &rarr;
+            </a>
+          </div>
         </div>
       </div>
 

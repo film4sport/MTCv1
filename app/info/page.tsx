@@ -118,7 +118,7 @@ function InfoPageContent() {
 
   // Signup flow state
   const [signupStep, setSignupStep] = useState(0);
-  const [signupData, setSignupData] = useState({ membershipType: '', name: '', email: '', rating: '' });
+  const [signupData, setSignupData] = useState({ membershipType: '', name: '', email: '', rating: '', password: '' });
   const [waiverAccepted, setWaiverAccepted] = useState(false);
   const [waiverScrolled, setWaiverScrolled] = useState(false);
   const [existingProfile, setExistingProfile] = useState<{ name: string; email: string; membershipType: string; rating: string; joinedDate: string } | null>(null);
@@ -172,13 +172,36 @@ function InfoPageContent() {
   };
 
   const completeSignup = () => {
+    const joinedDate = new Date().toISOString();
+
+    // Legacy profile for info page
     const profile = {
       ...signupData,
       membershipType: signupData.membershipType,
       waiverAccepted: true,
-      joinedDate: new Date().toISOString(),
+      joinedDate,
     };
     localStorage.setItem('currentUser', JSON.stringify(profile));
+
+    // Dashboard-compatible user (auto-login)
+    const dashboardUser = {
+      id: signupData.email.split('@')[0],
+      name: signupData.name,
+      email: signupData.email,
+      role: 'member',
+      memberSince: joinedDate.slice(0, 7),
+    };
+    localStorage.setItem('mtc-current-user', JSON.stringify(dashboardUser));
+
+    // Store credentials for future logins
+    const storedAccounts = JSON.parse(localStorage.getItem('mtc-accounts') || '{}');
+    storedAccounts[signupData.email] = {
+      password: signupData.password,
+      name: signupData.name,
+      role: 'member',
+    };
+    localStorage.setItem('mtc-accounts', JSON.stringify(storedAccounts));
+
     setSignupStep(5);
   };
 
@@ -583,6 +606,18 @@ function InfoPageContent() {
                         />
                       </div>
                       <div>
+                        <label className="block text-sm font-medium mb-2" style={{ color: '#6b7266' }}>Password</label>
+                        <input
+                          type="password"
+                          value={signupData.password}
+                          onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
+                          maxLength={100}
+                          placeholder="Create a password (min. 6 characters)"
+                          className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors"
+                          style={{ backgroundColor: '#faf8f3', border: '1px solid #e0dcd3', color: '#2a2f1e' }}
+                        />
+                      </div>
+                      <div>
                         <label className="block text-sm font-medium mb-2" style={{ color: '#6b7266' }}>Player Rating</label>
                         <div className="grid grid-cols-2 gap-3">
                           {['Beginner', 'Intermediate', 'Advanced', 'Competitive'].map((r) => (
@@ -612,10 +647,10 @@ function InfoPageContent() {
                       </button>
                       <button
                         onClick={() => setSignupStep(3)}
-                        disabled={!signupData.name.trim() || !signupData.email.trim() || !signupData.rating}
+                        disabled={!signupData.name.trim() || !signupData.email.trim() || !signupData.rating || signupData.password.length < 6}
                         className="flex-1 px-6 py-3 rounded-full text-sm font-semibold transition-all"
                         style={
-                          signupData.name.trim() && signupData.email.trim() && signupData.rating
+                          signupData.name.trim() && signupData.email.trim() && signupData.rating && signupData.password.length >= 6
                             ? { backgroundColor: '#6b7a3d', color: '#fff' }
                             : { backgroundColor: '#e0dcd3', color: '#999', cursor: 'not-allowed' }
                         }
@@ -740,9 +775,14 @@ function InfoPageContent() {
                       </div>
                     </div>
 
-                    <a href="/" className="inline-block mt-8 px-8 py-3 rounded-full text-sm font-semibold transition-all hover:opacity-90" style={{ backgroundColor: '#6b7a3d', color: '#fff' }}>
-                      Back to Home
-                    </a>
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8">
+                      <a href="/dashboard" className="inline-block px-8 py-3 rounded-full text-sm font-semibold transition-all hover:opacity-90" style={{ backgroundColor: '#6b7a3d', color: '#fff' }}>
+                        Go to Dashboard
+                      </a>
+                      <a href="/" className="inline-block px-8 py-3 rounded-full text-sm font-semibold transition-all hover:opacity-90" style={{ backgroundColor: '#faf8f3', color: '#6b7a3d', border: '1px solid #e0dcd3' }}>
+                        Back to Home
+                      </a>
+                    </div>
                   </div>
                 )}
               </div>

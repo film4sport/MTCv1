@@ -24,8 +24,8 @@ test.describe('Latest Fix Verification', () => {
     const scrollText = page.getByText('Scroll Down');
     await expect(scrollText).toBeVisible();
 
-    const arrow = page.locator('.scroll-arrow');
-    await expect(arrow).toBeVisible();
+    const arrow = page.locator('svg.animate-bounce');
+    await expect(arrow).toBeAttached();
 
     await page.screenshot({ path: 'test-results/hero-scroll-down.png', fullPage: false });
   });

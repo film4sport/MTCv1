@@ -158,6 +158,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       'coach@mtc.ca': { password: 'coach123', role: 'coach', name: 'Mark Taylor' },
       'admin@mtc.ca': { password: 'admin123', role: 'admin', name: 'Admin' },
     };
+    // 1. Check hardcoded credentials
     const entry = creds[email];
     if (entry && entry.password === password) {
       const user: User = { id: email.split('@')[0], name: entry.name, email, role: entry.role, memberSince: '2025-01' };
@@ -165,7 +166,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
       saveJSON('mtc-current-user', user);
       return true;
     }
-    // Allow any email/password as member (demo mode)
+    // 2. Check localStorage signup accounts
+    let storedAccounts: Record<string, { password: string; name: string; role: string }> = {};
+    try { storedAccounts = JSON.parse(localStorage.getItem('mtc-accounts') || '{}'); } catch {}
+    const stored = storedAccounts[email];
+    if (stored && stored.password === password) {
+      const user: User = { id: email.split('@')[0], name: stored.name, email, role: (stored.role as User['role']) || 'member', memberSince: new Date().toISOString().slice(0, 7) };
+      setCurrentUser(user);
+      saveJSON('mtc-current-user', user);
+      return true;
+    }
+    // 3. Demo mode: accept any email/password as member
     const user: User = { id: 'member', name: email.split('@')[0], email, role: 'member', memberSince: '2025-01' };
     setCurrentUser(user);
     saveJSON('mtc-current-user', user);
