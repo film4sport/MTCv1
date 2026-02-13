@@ -547,28 +547,6 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Demo Credentials */}
-          <div className="mt-4 rounded-xl border p-4" style={{ background: '#faf8f3', borderColor: '#e0dcd3' }}>
-            <p className="text-xs font-medium mb-3" style={{ color: '#6b7266' }}>Demo Accounts</p>
-            <div className="space-y-2">
-              {[
-                { email: 'member@mtc.ca', password: 'member123', role: 'Member', color: '#6b7a3d' },
-                { email: 'coach@mtc.ca', password: 'coach123', role: 'Coach', color: '#d97706' },
-                { email: 'admin@mtc.ca', password: 'admin123', role: 'Admin', color: '#dc2626' },
-              ].map(cred => (
-                <button
-                  key={cred.email}
-                  type="button"
-                  onClick={() => { setEmail(cred.email); setPassword(cred.password); setEmailError(false); setPasswordError(false); }}
-                  className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-left transition-colors hover:bg-black/[0.03]"
-                >
-                  <span className="text-xs" style={{ color: '#2a2f1e' }}>{cred.email}</span>
-                  <span className="text-[0.65rem] font-semibold px-2 py-0.5 rounded-full" style={{ background: `${cred.color}15`, color: cred.color }}>{cred.role}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
           {/* Divider */}
           <div className="flex items-center my-6" style={{ color: '#999', fontSize: '0.875rem' }}>
             <div className="flex-1 h-px" style={{ background: '#e0dcd3' }} />
