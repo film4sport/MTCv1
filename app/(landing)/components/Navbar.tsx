@@ -2,11 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
-interface NavbarProps {
-  onOpenBooking: () => void;
-}
-
-export default function Navbar({ onOpenBooking }: NavbarProps) {
+export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -29,9 +25,9 @@ export default function Navbar({ onOpenBooking }: NavbarProps) {
   return (
     <>
       <nav className={`navbar flex items-center justify-between${scrolled ? ' scrolled' : ''}`} id="navbar">
-        <div className="flex items-center gap-3">
+        <div className="logo-group">
           <div
-            className="w-11 h-11 rounded-full border-2 flex items-center justify-center"
+            className="logo-circle w-11 h-11 rounded-full border-2 flex items-center justify-center"
             style={{ borderColor: '#e8e4d9' }}
           >
             <span
@@ -42,7 +38,7 @@ export default function Navbar({ onOpenBooking }: NavbarProps) {
             </span>
           </div>
           <span
-            className="text-xl font-bold tracking-wide"
+            className="logo-text text-xl font-bold tracking-wide"
             style={{ color: '#e8e4d9' }}
           >
             Mono Tennis
@@ -56,13 +52,6 @@ export default function Navbar({ onOpenBooking }: NavbarProps) {
           <a href="/info?tab=membership" className="nav-link text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9' }}>.Membership</a>
           <a href="#events" className="nav-link text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9' }}>.Events</a>
           <a href="/info?tab=faq" className="nav-link text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9' }}>.FAQ</a>
-          <button
-            onClick={onOpenBooking}
-            className="nav-link text-sm hover:opacity-80 transition-opacity bg-transparent border-none cursor-pointer"
-            style={{ color: '#d4e157' }}
-          >
-            .Book
-          </button>
           <a href="/login" className="login-btn ml-2">
             Login
           </a>
@@ -89,13 +78,6 @@ export default function Navbar({ onOpenBooking }: NavbarProps) {
           <a href="/info?tab=membership" className="mobile-menu-link" onClick={closeMobileMenu}>.Membership</a>
           <a href="#events" className="mobile-menu-link" onClick={closeMobileMenu}>.Events</a>
           <a href="/info?tab=faq" className="mobile-menu-link" onClick={closeMobileMenu}>.FAQ</a>
-          <button
-            onClick={() => { onOpenBooking(); closeMobileMenu(); }}
-            className="mobile-menu-link bg-transparent border-none cursor-pointer"
-            style={{ color: '#d4e157' }}
-          >
-            .Book
-          </button>
           <a href="/login" className="mobile-menu-link" onClick={closeMobileMenu}>.LOGIN</a>
         </div>
       </div>

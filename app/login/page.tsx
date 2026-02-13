@@ -42,14 +42,22 @@ export default function LoginPage() {
 
     setLoading(true);
 
-    // Check credentials
+    // 1. Check hardcoded credentials
     const entry = CREDENTIALS[email];
     let user: User;
     if (entry && entry.password === password) {
       user = { id: email.split('@')[0], name: entry.name, email, role: entry.role, memberSince: '2025-01' };
     } else {
-      // Demo mode: accept any email/password as member
-      user = { id: 'member', name: email.split('@')[0], email, role: 'member', memberSince: '2025-01' };
+      // 2. Check localStorage signup accounts
+      let storedAccounts: Record<string, { password: string; name: string; role: string }> = {};
+      try { storedAccounts = JSON.parse(localStorage.getItem('mtc-accounts') || '{}'); } catch {}
+      const stored = storedAccounts[email];
+      if (stored && stored.password === password) {
+        user = { id: email.split('@')[0], name: stored.name, email, role: (stored.role as User['role']) || 'member', memberSince: new Date().toISOString().slice(0, 7) };
+      } else {
+        // 3. Demo mode: accept any email/password as member
+        user = { id: 'member', name: email.split('@')[0], email, role: 'member', memberSince: '2025-01' };
+      }
     }
 
     localStorage.setItem('mtc-current-user', JSON.stringify(user));

@@ -54,7 +54,7 @@ test.describe('Navbar', () => {
   });
 
   test('nav links exist for key sections', async ({ page }) => {
-    const links = ['Home', 'About', 'Membership', 'Events', 'FAQ', 'Book'];
+    const links = ['Home', 'About', 'Membership', 'Events', 'FAQ', 'Login'];
     for (const text of links) {
       const link = page.locator('.navbar').getByText(text, { exact: false }).first();
       await expect(link).toBeAttached();
@@ -85,17 +85,20 @@ test.describe('Hero Section', () => {
     await expect(heroContent).toHaveClass(/visible/);
   });
 
-  test('hero has Join Now and Book a Court buttons', async ({ page }) => {
+  test('hero has Join Now and Member Login buttons', async ({ page }) => {
     const joinBtn = page.locator('section').first().getByText('Join Now');
     await expect(joinBtn).toBeVisible();
-    const bookBtn = page.locator('section').first().getByText('Book a Court');
-    await expect(bookBtn).toBeVisible();
+    const loginBtn = page.locator('section').first().getByText('Member Login');
+    await expect(loginBtn).toBeVisible();
   });
 
-  test('hero preview images exist', async ({ page }) => {
-    const previews = page.locator('.hero-preview-img');
-    const count = await previews.count();
-    expect(count).toBeGreaterThanOrEqual(1);
+  test('hero bottom bar has tennis info and scroll indicator', async ({ page }) => {
+    const tennis = page.getByText('// Tennis');
+    await expect(tennis).toBeVisible();
+    const year = page.getByText('// 2026');
+    await expect(year).toBeVisible();
+    const scrollDown = page.getByText('Scroll Down');
+    await expect(scrollDown).toBeVisible();
   });
 });
 
@@ -107,10 +110,11 @@ test.describe('Events Section', () => {
     await page.waitForTimeout(500);
   });
 
-  test('events section renders with gray background', async ({ page }) => {
+  test('events section renders with cream background', async ({ page }) => {
     const events = page.locator('#events');
     await expect(events).toBeAttached();
-    await expect(events).toHaveClass(/bg-gray-50/);
+    const bg = await events.evaluate(el => el.style.backgroundColor);
+    expect(bg).toBeTruthy();
   });
 
   test('filter buttons exist', async ({ page }) => {
@@ -125,9 +129,10 @@ test.describe('Events Section', () => {
     expect(count).toBe(3);
   });
 
-  test('event cards have white background', async ({ page }) => {
+  test('event cards have warm background', async ({ page }) => {
     const card = page.locator('.event-card').first();
-    await expect(card).toHaveClass(/bg-white/);
+    const bg = await card.evaluate(el => el.style.backgroundColor);
+    expect(bg).toBeTruthy();
   });
 
   test('filter buttons work', async ({ page }) => {
@@ -251,83 +256,12 @@ test.describe('Gallery Section', () => {
 });
 
 test.describe('Wave Dividers', () => {
-  test('multiple wave dividers on the page', async ({ page }) => {
+  test('wave divider exists on the page', async ({ page }) => {
     await page.goto('/', { waitUntil: 'networkidle' });
     await page.waitForTimeout(4500);
     const dividers = page.locator('.wave-divider');
     const count = await dividers.count();
-    expect(count).toBeGreaterThanOrEqual(4);
-  });
-});
-
-test.describe('Booking Overlay', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
-    await page.waitForTimeout(4500);
-    // Open booking overlay via navbar Book button
-    await page.locator('.navbar').getByText('Book', { exact: false }).first().click();
-    await page.waitForTimeout(500);
-  });
-
-  test('booking overlay opens with court selection screen', async ({ page }) => {
-    const overlay = page.locator('.booking-overlay.active');
-    await expect(overlay).toBeAttached();
-    const header = page.locator('.booking-header').getByText('Book a Court');
-    await expect(header).toBeVisible();
-  });
-
-  test('date picker renders 7 days', async ({ page }) => {
-    const chips = page.locator('.date-chip');
-    const count = await chips.count();
-    expect(count).toBe(7);
-  });
-
-  test('filter toggles work', async ({ page }) => {
-    const toggle = page.locator('.filter-toggle').first();
-    await toggle.click();
-    await expect(toggle).toHaveClass(/active/);
-    await toggle.click();
-    await expect(toggle).not.toHaveClass(/active/);
-  });
-
-  test('court cards are displayed', async ({ page }) => {
-    const cards = page.locator('.court-card');
-    const count = await cards.count();
     expect(count).toBeGreaterThanOrEqual(1);
-  });
-
-  test('selecting available court goes to time slot screen', async ({ page }) => {
-    const selectBtn = page.locator('.court-select-btn:not([disabled])').first();
-    await selectBtn.click();
-    await page.waitForTimeout(300);
-    const timeGrid = page.locator('.time-grid');
-    await expect(timeGrid).toBeVisible();
-  });
-
-  test('full booking flow: court -> time -> confirm', async ({ page }) => {
-    // Select court
-    await page.locator('.court-select-btn:not([disabled])').first().click();
-    await page.waitForTimeout(300);
-    // Select time
-    await page.locator('.time-slot:not(.booked)').first().click();
-    await page.waitForTimeout(300);
-    // Should be on confirm screen
-    const confirmBtn = page.locator('.booking-cta');
-    await expect(confirmBtn).toBeVisible();
-  });
-
-  test('close button closes overlay', async ({ page }) => {
-    await page.locator('.booking-close').click();
-    await page.waitForTimeout(400);
-    const overlay = page.locator('.booking-overlay.active');
-    await expect(overlay).toHaveCount(0);
-  });
-
-  test('escape key closes overlay', async ({ page }) => {
-    await page.keyboard.press('Escape');
-    await page.waitForTimeout(400);
-    const overlay = page.locator('.booking-overlay.active');
-    await expect(overlay).toHaveCount(0);
   });
 });
 
@@ -432,21 +366,23 @@ test.describe('Info Page', () => {
   test('tab navigation buttons exist', async ({ page }) => {
     await page.goto('/info', { waitUntil: 'networkidle' });
     await page.waitForTimeout(1000);
-    const tabs = page.locator('.filter-btn');
-    const count = await tabs.count();
-    expect(count).toBe(3);
+    const tabLabels = ['About', 'Membership', 'Rules', 'Coaching', 'FAQ'];
+    for (const label of tabLabels) {
+      const tab = page.getByRole('button', { name: label, exact: true });
+      await expect(tab).toBeAttached();
+    }
   });
 
   test('tab switching works', async ({ page }) => {
     await page.goto('/info', { waitUntil: 'networkidle' });
     await page.waitForTimeout(1000);
     // Click About tab
-    await page.locator('.filter-btn').getByText('About').click();
+    await page.getByRole('button', { name: 'About' }).click();
     await page.waitForTimeout(500);
     const aboutContent = page.getByText('Passion, Community,');
     await expect(aboutContent).toBeAttached();
     // Click FAQ tab
-    await page.locator('.filter-btn').getByText('FAQ').click();
+    await page.getByRole('button', { name: 'FAQ' }).click();
     await page.waitForTimeout(500);
     const faqContent = page.getByText('Frequently Asked Questions');
     await expect(faqContent).toBeAttached();

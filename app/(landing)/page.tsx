@@ -11,11 +11,9 @@ import Schedule from './components/Schedule';
 import Partners from './components/Partners';
 import Gallery from './components/Gallery';
 import Footer from './components/Footer';
-import BookingOverlay from './components/BookingOverlay';
 import Lightbox from './components/Lightbox';
 
 export default function LandingPage() {
-  const [bookingOpen, setBookingOpen] = useState(false);
   const [lightbox, setLightbox] = useState<{ src: string; alt: string } | null>(null);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [showBackToTop, setShowBackToTop] = useState(false);
@@ -78,8 +76,6 @@ export default function LandingPage() {
     };
   }, []);
 
-  const openBooking = () => setBookingOpen(true);
-  const closeBooking = () => setBookingOpen(false);
   const openLightbox = (src: string, alt: string) => setLightbox({ src, alt });
   const closeLightbox = () => setLightbox(null);
 
@@ -110,10 +106,10 @@ export default function LandingPage() {
       {/* Scroll Progress Bar */}
       <div className="scroll-progress" style={{ width: `${scrollProgress}%` }} />
 
-      <Navbar onOpenBooking={openBooking} />
+      <Navbar />
 
       {/* Hero Section (dark, parallax) */}
-      <Hero onOpenBooking={openBooking} />
+      <Hero />
 
       {/* Events & Programs Section */}
       <Events onOpenLightbox={openLightbox} />
@@ -132,10 +128,7 @@ export default function LandingPage() {
       <WaveDivider bgColor="#edeae3" fillColor="#1a1f12" />
 
       {/* Footer (dark) */}
-      <Footer onOpenBooking={openBooking} />
-
-      {/* Booking Overlay */}
-      <BookingOverlay isOpen={bookingOpen} onClose={closeBooking} />
+      <Footer />
 
       {/* Lightbox */}
       <Lightbox

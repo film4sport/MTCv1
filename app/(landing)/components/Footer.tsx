@@ -1,10 +1,6 @@
 'use client';
 
-interface FooterProps {
-  onOpenBooking: () => void;
-}
-
-export default function Footer({ onOpenBooking }: FooterProps) {
+export default function Footer() {
   return (
     <footer id="contact" className="text-white py-16 fade-in texture-overlay" style={{ backgroundColor: '#1a1f12' }}>
       <div className="max-w-7xl mx-auto px-8 lg:px-16">
@@ -66,13 +62,9 @@ export default function Footer({ onOpenBooking }: FooterProps) {
                 </a>
               </li>
               <li>
-                <button
-                  onClick={onOpenBooking}
-                  className="text-sm hover:opacity-80 transition-opacity text-left"
-                  style={{ color: 'rgba(232, 228, 217, 0.6)', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
-                >
-                  Book a Court
-                </button>
+                <a href="/login" className="text-sm hover:opacity-80 transition-opacity" style={{ color: 'rgba(232, 228, 217, 0.6)' }}>
+                  Member Login
+                </a>
               </li>
             </ul>
           </div>
