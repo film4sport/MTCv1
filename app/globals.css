@@ -418,3 +418,51 @@ html {
 .btn-press:active {
   transform: scale(0.97);
 }
+
+/* Section card hover — subtle lift on white section cards */
+.section-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.section-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+}
+
+/* Toast animation */
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(16px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes toastOut {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to { opacity: 0; transform: translateY(16px) scale(0.95); }
+}
+.toast-enter { animation: toastIn 0.3s ease-out both; }
+.toast-exit { animation: toastOut 0.2s ease-in both; }
+
+/* Sidebar active indicator slide */
+.sidebar-indicator {
+  transition: top 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.15s ease;
+}
+
+/* Overscroll bounce on mobile */
+.overscroll-bounce {
+  -webkit-overflow-scrolling: touch;
+}
+@media (max-width: 1023px) {
+  .overscroll-bounce {
+    overscroll-behavior-y: auto;
+  }
+}
+
+/* Skeleton shimmer */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, #f0ede6 25%, #e8e4d9 50%, #f0ede6 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 8px;
+}

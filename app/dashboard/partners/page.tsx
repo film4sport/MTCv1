@@ -43,7 +43,7 @@ export default function PartnersPage() {
     <div className="min-h-screen" style={{ backgroundColor: '#f5f2eb' }}>
       <DashboardHeader title="Find a Partner" />
 
-      <div className="p-6 lg:p-8 max-w-5xl mx-auto">
+      <div className="p-6 lg:p-8 max-w-5xl mx-auto animate-slideUp">
 
         {/* Filters + Post Button */}
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">

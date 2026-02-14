@@ -5,7 +5,7 @@ import { useApp } from '../lib/store';
 import DashboardHeader from '../components/DashboardHeader';
 
 export default function MessagesPage() {
-  const { currentUser, conversations, members, sendMessage, markConversationRead } = useApp();
+  const { currentUser, conversations, members, sendMessage, markConversationRead, showToast } = useApp();
   const [selectedConvo, setSelectedConvo] = useState<string | null>(null);
   const [messageText, setMessageText] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -30,6 +30,7 @@ export default function MessagesPage() {
     if (!messageText.trim() || !selectedConvo) return;
     sendMessage(selectedConvo, messageText.trim());
     setMessageText('');
+    showToast('Message sent');
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -164,11 +165,21 @@ export default function MessagesPage() {
           <div className={`flex-1 flex flex-col ${mobileShowChat ? 'flex' : 'hidden sm:flex'}`}>
             {!selectedConvo ? (
               <div className="flex-1 flex items-center justify-center">
-                <div className="text-center">
-                  <svg className="w-12 h-12 mx-auto mb-3 opacity-30" fill="none" stroke="#6b7266" viewBox="0 0 24 24" strokeWidth="1">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-                  </svg>
-                  <p className="text-sm" style={{ color: '#6b7266' }}>Select a conversation to start messaging</p>
+                <div className="text-center animate-fadeIn">
+                  <div className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center" style={{ background: 'rgba(107, 122, 61, 0.08)' }}>
+                    <svg className="w-8 h-8" fill="none" stroke="#6b7a3d" viewBox="0 0 24 24" strokeWidth="1.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                    </svg>
+                  </div>
+                  <p className="font-medium text-sm mb-1" style={{ color: '#2a2f1e' }}>No conversation selected</p>
+                  <p className="text-xs mb-4" style={{ color: '#6b7266' }}>Pick a chat or start a new one</p>
+                  <button
+                    onClick={() => setShowNewConvo(true)}
+                    className="px-4 py-2 rounded-xl text-sm font-medium text-white btn-press"
+                    style={{ background: '#6b7a3d' }}
+                  >
+                    New Message
+                  </button>
                 </div>
               </div>
             ) : (
