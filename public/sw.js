@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mtc-v3';
+const CACHE_NAME = 'mtc-v4';
 const STATIC_ASSETS = [
   '/manifest.json',
   '/favicon.png',

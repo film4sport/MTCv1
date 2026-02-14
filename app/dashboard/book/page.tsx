@@ -8,7 +8,7 @@ import { TIME_SLOTS, COURTS_CONFIG, COURT_HOURS, FEES } from '../lib/types';
 type ViewMode = 'week' | 'calendar';
 
 export default function BookCourtPage() {
-  const { currentUser, bookings, addBooking, cancelBooking } = useApp();
+  const { currentUser, bookings, addBooking, cancelBooking, showToast } = useApp();
   const [view, setView] = useState<ViewMode>('week');
   const [weekStart, setWeekStart] = useState(() => {
     const d = new Date();
@@ -79,6 +79,7 @@ export default function BookCourtPage() {
     if (mine) {
       if (confirm(`Cancel booking for ${courtName} on ${date} at ${time}?`)) {
         cancelBooking(mine.id);
+        showToast('Booking cancelled');
       }
       return;
     }
@@ -106,6 +107,7 @@ export default function BookCourtPage() {
     };
     addBooking(booking);
     setShowModal(false);
+    showToast(`Court booked for ${modalData.time}`);
   };
 
   const myUpcoming = bookings
@@ -147,7 +149,7 @@ export default function BookCourtPage() {
     <div className="min-h-screen" style={{ backgroundColor: '#f5f2eb' }}>
       <DashboardHeader title="Book Court" />
 
-      <div className="p-6 lg:p-8 max-w-[1400px] mx-auto">
+      <div className="p-6 lg:p-8 max-w-[1400px] mx-auto animate-slideUp">
 
         {/* Controls */}
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
@@ -263,8 +265,8 @@ export default function BookCourtPage() {
                                           key={court.id}
                                           onClick={() => handleSlotClick(court.id, court.name, dateStr, time)}
                                           disabled={(!mine && booked !== undefined && !!booked) || past || closed}
-                                          className="flex-1 rounded text-[0.5rem] font-medium py-1 px-0.5 transition-colors truncate"
-                                          style={{ background: bg, border: `1px solid ${border}`, cursor, minHeight: 24, color: mine ? '#6b7a3d' : booked ? '#9ca3af' : past || closed ? '#d1d5db' : '#16a34a' }}
+                                          className="flex-1 rounded text-[0.55rem] font-medium py-1.5 px-1 transition-colors truncate"
+                                          style={{ background: bg, border: `1px solid ${border}`, cursor, minHeight: 28, color: mine ? '#6b7a3d' : booked ? '#9ca3af' : past || closed ? '#d1d5db' : '#16a34a' }}
                                           title={`${court.name} - ${time} - ${mine ? 'Your booking (click to cancel)' : booked ? 'Booked' : past ? 'Past' : closed ? 'Closed' : 'Available'}`}
                                         >
                                           {courtsToShow.length > 1 ? `C${court.id}` : (mine ? 'Mine' : booked ? '—' : '')}

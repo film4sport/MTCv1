@@ -8,7 +8,7 @@ type EventFilter = 'all' | 'social' | 'match' | 'roundrobin' | 'lesson' | 'tourn
 type ViewMode = 'calendar' | 'list';
 
 export default function EventsPage() {
-  const { currentUser, events, toggleRsvp } = useApp();
+  const { currentUser, events, toggleRsvp, showToast } = useApp();
   const [filter, setFilter] = useState<EventFilter>('all');
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('calendar');
@@ -75,7 +75,7 @@ export default function EventsPage() {
     <div className="min-h-screen" style={{ backgroundColor: '#f5f2eb' }}>
       <DashboardHeader title="Club Events" />
 
-      <div className="p-6 lg:p-8 max-w-5xl mx-auto">
+      <div className="p-6 lg:p-8 max-w-5xl mx-auto animate-slideUp">
 
         {/* View Toggle + Filter pills */}
         <div className="flex items-center justify-between mb-4">
@@ -267,7 +267,10 @@ export default function EventsPage() {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        if (!isPast) toggleRsvp(ev.id, currentUser?.name || '');
+                        if (!isPast) {
+                          toggleRsvp(ev.id, currentUser?.name || '');
+                          showToast(attending ? 'RSVP cancelled' : `RSVP'd to ${ev.title}`);
+                        }
                       }}
                       disabled={isPast}
                       className="px-4 py-1.5 rounded-lg text-xs font-medium transition-colors"
@@ -338,7 +341,11 @@ export default function EventsPage() {
             </div>
 
             <button
-              onClick={() => toggleRsvp(detail.id, currentUser?.name || '')}
+              onClick={() => {
+                const wasAttending = detail.attendees.includes(currentUser?.name || '');
+                toggleRsvp(detail.id, currentUser?.name || '');
+                showToast(wasAttending ? 'RSVP cancelled' : `RSVP'd to ${detail.title}`);
+              }}
               className="w-full py-3 rounded-xl text-sm font-medium transition-colors"
               style={{
                 background: detail.attendees.includes(currentUser?.name || '') ? '#ef4444' : '#6b7a3d',

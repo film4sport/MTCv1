@@ -71,7 +71,22 @@ export default function Sidebar() {
 
         {/* Nav Links */}
         <nav className="flex-1 py-4 px-2 overflow-y-auto">
-          <ul className="space-y-1">
+          <ul className="space-y-1 relative">
+            {/* Sliding active indicator */}
+            {(() => {
+              const activeIdx = navItems.findIndex(item =>
+                item.href === '/dashboard' ? pathname === '/dashboard' : pathname.startsWith(item.href)
+              );
+              if (activeIdx === -1) return null;
+              // Each li is ~44px tall (py-2.5 + content + space-y-1 gap)
+              const top = activeIdx * 44;
+              return (
+                <div
+                  className="absolute left-0 w-[3px] h-[36px] rounded-r-full sidebar-indicator"
+                  style={{ top, backgroundColor: '#d4e157' }}
+                />
+              );
+            })()}
             {navItems.map((item) => {
               const isActive = item.href === '/dashboard'
                 ? pathname === '/dashboard'
@@ -87,7 +102,7 @@ export default function Sidebar() {
                         ? 'font-semibold'
                         : 'hover:bg-white/5'
                     }`}
-                    style={isActive ? { backgroundColor: 'rgba(212, 225, 87, 0.15)', color: '#d4e157', borderLeft: '3px solid #d4e157' } : { color: 'rgba(232, 228, 217, 0.7)' }}
+                    style={isActive ? { backgroundColor: 'rgba(212, 225, 87, 0.15)', color: '#d4e157' } : { color: 'rgba(232, 228, 217, 0.7)' }}
                     title={sidebarCollapsed ? item.label : undefined}
                   >
                     <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={isActive ? 2.5 : 2}>
@@ -117,7 +132,7 @@ export default function Sidebar() {
                         ? 'font-semibold'
                         : 'hover:bg-white/5'
                     }`}
-                    style={pathname.startsWith(adminItem.href) ? { backgroundColor: 'rgba(212, 225, 87, 0.15)', color: '#d4e157', borderLeft: '3px solid #d4e157' } : { color: 'rgba(232, 228, 217, 0.7)' }}
+                    style={pathname.startsWith(adminItem.href) ? { backgroundColor: 'rgba(212, 225, 87, 0.15)', color: '#d4e157' } : { color: 'rgba(232, 228, 217, 0.7)' }}
                     title={sidebarCollapsed ? adminItem.label : undefined}
                   >
                     <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={pathname.startsWith(adminItem.href) ? 2.5 : 2}>

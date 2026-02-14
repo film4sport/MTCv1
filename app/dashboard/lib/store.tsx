@@ -45,6 +45,10 @@ interface AppState {
   mobileSidebarOpen: boolean;
   setMobileSidebarOpen: (open: boolean) => void;
   isLoaded: boolean;
+
+  // Toasts
+  toasts: { id: string; message: string; type: 'success' | 'error' | 'info'; exiting?: boolean }[];
+  showToast: (message: string, type?: 'success' | 'error' | 'info') => void;
 }
 
 const AppContext = createContext<AppState | null>(null);
@@ -91,6 +95,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [analytics] = useState<AdminAnalytics>(DEFAULT_ANALYTICS);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [toasts, setToasts] = useState<{ id: string; message: string; type: 'success' | 'error' | 'info'; exiting?: boolean }[]>([]);
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -255,12 +260,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
   }, []);
 
+  const showToast = useCallback((message: string, type: 'success' | 'error' | 'info' = 'success') => {
+    const id = `toast-${Date.now()}`;
+    setToasts(prev => [...prev, { id, message, type }]);
+    setTimeout(() => {
+      setToasts(prev => prev.map(t => t.id === id ? { ...t, exiting: true } : t));
+      setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 200);
+    }, 2500);
+  }, []);
+
   return (
     <AppContext.Provider value={{
       currentUser, login, logout, members, courts, setCourts, bookings, setBookings, addBooking, cancelBooking,
       events, setEvents, toggleRsvp, partners, setPartners, conversations, setConversations, sendMessage, markConversationRead,
       announcements, setAnnouncements, dismissAnnouncement, notifications, setNotifications, markNotificationRead,
       clearNotifications, weather, payments, analytics, sidebarCollapsed, setSidebarCollapsed, mobileSidebarOpen, setMobileSidebarOpen, isLoaded,
+      toasts, showToast,
     }}>
       {children}
     </AppContext.Provider>

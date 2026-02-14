@@ -48,7 +48,7 @@ export default function DashboardHome() {
         className="pointer-events-none select-none absolute inset-0"
         style={{
           backgroundColor: '#f5f2eb',
-          backgroundImage: `url(${Math.random() > 0.5 ? '/tennis-silhouette-1.jpg' : '/tennis-silhouette-2.png'})`,
+          backgroundImage: `url(${Math.random() > 0.5 ? '/tennis-silhouette-1.png' : '/tennis-silhouette-2.png'})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
@@ -59,6 +59,13 @@ export default function DashboardHome() {
       />
 
       <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-6 relative z-[1]">
+
+        {/* Welcome Greeting */}
+        <div className="animate-slideUp">
+          <h2 className="headline-font text-xl sm:text-2xl" style={{ color: '#2a2f1e' }}>
+            {new Date().getHours() < 12 ? 'Good morning' : new Date().getHours() < 17 ? 'Good afternoon' : 'Good evening'}, {currentUser?.name.split(' ')[0]}
+          </h2>
+        </div>
 
         {/* Announcements */}
         {activeAnnouncements.map(a => (
@@ -114,7 +121,7 @@ export default function DashboardHome() {
         <div className="grid lg:grid-cols-2 gap-6">
 
           {/* Upcoming Bookings */}
-          <div className="rounded-2xl border p-5" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+          <div className="rounded-2xl border p-5 section-card" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold" style={{ color: '#2a2f1e' }}>Upcoming Bookings</h3>
               <Link href="/dashboard/schedule" className="text-xs font-medium hover:underline" style={{ color: '#6b7a3d' }}>View All</Link>
@@ -157,7 +164,7 @@ export default function DashboardHome() {
           </div>
 
           {/* Upcoming Events */}
-          <div className="rounded-2xl border p-5" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+          <div className="rounded-2xl border p-5 section-card" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold" style={{ color: '#2a2f1e' }}>Upcoming Events</h3>
               <Link href="/dashboard/events" className="text-xs font-medium hover:underline" style={{ color: '#6b7a3d' }}>View All</Link>

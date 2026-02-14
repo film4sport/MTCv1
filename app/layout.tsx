@@ -32,24 +32,14 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
               if ('serviceWorker' in navigator) {
+                // Reload when a new SW takes control (covers all pages)
+                var refreshing = false;
+                navigator.serviceWorker.addEventListener('controllerchange', function() {
+                  if (!refreshing) { refreshing = true; window.location.reload(); }
+                });
                 window.addEventListener('load', function() {
                   navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' })
-                    .then(function(reg) {
-                      // Check for updates every page load
-                      reg.update();
-                      // When a new SW is found, activate it immediately
-                      reg.addEventListener('updatefound', function() {
-                        var newWorker = reg.installing;
-                        if (newWorker) {
-                          newWorker.addEventListener('statechange', function() {
-                            if (newWorker.state === 'activated') {
-                              // New SW active — reload to get fresh content
-                              window.location.reload();
-                            }
-                          });
-                        }
-                      });
-                    });
+                    .then(function(reg) { reg.update(); });
                 });
               }
             `,

@@ -6,7 +6,7 @@ import DashboardHeader from '../components/DashboardHeader';
 import Link from 'next/link';
 
 export default function SchedulePage() {
-  const { currentUser, bookings, events, cancelBooking } = useApp();
+  const { currentUser, bookings, events, cancelBooking, showToast } = useApp();
   const [view, setView] = useState<'list' | 'calendar'>('list');
   const [calMonth, setCalMonth] = useState(() => new Date());
 
@@ -85,7 +85,7 @@ export default function SchedulePage() {
     <div className="min-h-screen" style={{ backgroundColor: '#f5f2eb' }}>
       <DashboardHeader title="My Schedule" />
 
-      <div className="p-6 lg:p-8 max-w-4xl mx-auto">
+      <div className="p-6 lg:p-8 max-w-4xl mx-auto animate-slideUp">
 
         {/* View toggle */}
         <div className="flex items-center gap-2 mb-6">
@@ -145,7 +145,7 @@ export default function SchedulePage() {
                             </span>
                             {item.type === 'booking' && (
                               <button
-                                onClick={() => cancelBooking(item.id)}
+                                onClick={() => { cancelBooking(item.id); showToast('Booking cancelled'); }}
                                 className="text-xs px-2 py-1 rounded-lg hover:bg-red-50 transition-colors"
                                 style={{ color: '#ef4444' }}
                               >
