@@ -1,32 +1,72 @@
 {
   "name": "Mono Tennis Club",
   "short_name": "Mono Tennis",
-  "description": "Book courts and find tennis partners at Mono Tennis Club",
-  "start_url": "/",
+  "description": "Book courts, find partners, and connect with the tennis community at Mono Tennis Club — serving Caledon, Dufferin & Mono since 1980.",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "id": "/",
   "display": "standalone",
   "background_color": "#e8e4d9",
   "theme_color": "#1a1f12",
   "orientation": "portrait",
+  "lang": "en-CA",
+  "dir": "ltr",
+  "categories": ["sports", "lifestyle"],
   "icons": [
     {
       "src": "/tennis-ball-clean.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/tennis-ball-clean.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
     },
     {
       "src": "/tennis-ball-clean.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/tennis-ball-clean.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
-  "categories": ["sports", "lifestyle"],
+  "shortcuts": [
+    {
+      "name": "Book a Court",
+      "short_name": "Book",
+      "description": "Reserve a tennis court",
+      "url": "/dashboard?action=book",
+      "icons": [{ "src": "/tennis-ball-clean.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Club Events",
+      "short_name": "Events",
+      "description": "View upcoming events and tournaments",
+      "url": "/#events",
+      "icons": [{ "src": "/tennis-ball-clean.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Club Info",
+      "short_name": "Info",
+      "description": "Membership, FAQ, and directions",
+      "url": "/info",
+      "icons": [{ "src": "/tennis-ball-clean.png", "sizes": "192x192" }]
+    }
+  ],
   "screenshots": [
     {
       "src": "/screenshot-1.png",
       "sizes": "750x1334",
       "type": "image/png",
+      "form_factor": "narrow",
       "label": "Book tennis courts easily"
     }
   ]

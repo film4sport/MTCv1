@@ -672,8 +672,8 @@ html, body {
 /* Back to Top Button */
 .back-to-top {
   position: fixed;
-  bottom: 2rem;
-  right: 2rem;
+  bottom: calc(2rem + var(--sab, 0px));
+  right: calc(2rem + var(--sar, 0px));
   width: 50px;
   height: 50px;
   background: #d4e157;

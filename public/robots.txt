@@ -1,0 +1,9 @@
+# Mono Tennis Club — robots.txt
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /login
+Disallow: /api/
+
+# Sitemap
+Sitemap: https://monotennisclub.ca/sitemap.xml
