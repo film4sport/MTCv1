@@ -16,7 +16,18 @@
       "Bash(curl:*)",
       "Bash(set PORT=3001)",
       "Bash(npx cross-env:*)",
-      "Bash(powershell:*)"
+      "Bash(powershell:*)",
+      "Bash(taskkill:*)",
+      "Bash(netstat:*)",
+      "Bash(tasklist:*)",
+      "Bash(wmic process where processid=37096 get commandline)",
+      "Bash(wmic process where \"name=''node.exe''\" get processid,commandline)",
+      "Bash(for pid in 40564 4848 45884 39412 31920 7732 20060 21792 19864 37096)",
+      "Bash(do taskkill /F /PID $pid)",
+      "Bash(done)",
+      "Bash(cmd.exe /c \"taskkill /F /PID 4848 /PID 39412 /PID 7732 /PID 21792 /PID 37096 /PID 40564 /PID 45884 /PID 31920 /PID 20060 /PID 19864\")",
+      "Bash(wc:*)",
+      "Bash(sort:*)"
     ]
   }
 }
