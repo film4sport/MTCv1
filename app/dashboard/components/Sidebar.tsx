@@ -17,11 +17,13 @@ const navItems = [
 ];
 
 const adminItem = { href: '/dashboard/admin', label: 'Admin Panel', icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z' };
+const coachItem = { href: '/dashboard/coaching', label: 'Coaching Panel', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01' };
 
 export default function Sidebar() {
   const pathname = usePathname();
   const { currentUser, sidebarCollapsed, setSidebarCollapsed, mobileSidebarOpen, setMobileSidebarOpen, conversations } = useApp();
   const isAdmin = currentUser?.role === 'admin';
+  const isCoach = currentUser?.role === 'coach';
 
   const unreadMessages = conversations.reduce((sum, c) => sum + c.unread, 0);
 
@@ -120,6 +122,28 @@ export default function Sidebar() {
                 </li>
               );
             })}
+
+            {/* Coach link */}
+            {isCoach && (
+              <li className="pt-2 mt-2" style={{ borderTop: '1px solid rgba(232, 228, 217, 0.1)' }}>
+                <Link
+                  href={coachItem.href}
+                  onClick={closeMobileSidebar}
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${
+                    pathname.startsWith(coachItem.href)
+                      ? 'font-semibold'
+                      : 'hover:bg-white/5'
+                  }`}
+                  style={pathname.startsWith(coachItem.href) ? { backgroundColor: 'rgba(212, 225, 87, 0.15)', color: '#d4e157' } : { color: 'rgba(232, 228, 217, 0.7)' }}
+                  title={sidebarCollapsed ? coachItem.label : undefined}
+                >
+                  <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={pathname.startsWith(coachItem.href) ? 2.5 : 2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d={coachItem.icon} />
+                  </svg>
+                  {!sidebarCollapsed && <span className="text-sm">{coachItem.label}</span>}
+                </Link>
+              </li>
+            )}
 
             {/* Admin link */}
             {isAdmin && (

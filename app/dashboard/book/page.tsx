@@ -4,11 +4,13 @@ import { useState, useMemo } from 'react';
 import { useApp } from '../lib/store';
 import DashboardHeader from '../components/DashboardHeader';
 import { TIME_SLOTS, COURTS_CONFIG, COURT_HOURS, FEES } from '../lib/types';
+import { downloadICS } from '../lib/calendar';
 
 type ViewMode = 'week' | 'calendar';
 
 export default function BookCourtPage() {
   const { currentUser, bookings, addBooking, cancelBooking, showToast } = useApp();
+  const [bookingSuccess, setBookingSuccess] = useState<{ courtName: string; date: string; time: string } | null>(null);
   const [view, setView] = useState<ViewMode>('week');
   const [weekStart, setWeekStart] = useState(() => {
     const d = new Date();
@@ -107,6 +109,7 @@ export default function BookCourtPage() {
     };
     addBooking(booking);
     setShowModal(false);
+    setBookingSuccess({ courtName: modalData.courtName, date: modalData.date, time: modalData.time });
     showToast(`Court booked for ${modalData.time}`);
   };
 
@@ -252,11 +255,13 @@ export default function BookCourtPage() {
                                       const mine = isSlotMine(court.id, dateStr, time);
                                       const closed = isCourtClosed(court.id, time);
 
+                                      const isProgram = booked?.type === 'program';
                                       let bg = '#f0fdf4';
                                       let border = '#bbf7d0';
                                       let cursor = 'pointer';
 
                                       if (mine) { bg = 'rgba(107, 122, 61, 0.15)'; border = '#6b7a3d'; }
+                                      else if (isProgram) { bg = 'rgba(245, 158, 11, 0.1)'; border = '#fbbf24'; cursor = 'default'; }
                                       else if (booked) { bg = '#f3f4f6'; border = '#d1d5db'; cursor = 'default'; }
                                       else if (past || closed) { bg = '#fafafa'; border = '#e5e7eb'; cursor = 'default'; }
 
@@ -266,10 +271,10 @@ export default function BookCourtPage() {
                                           onClick={() => handleSlotClick(court.id, court.name, dateStr, time)}
                                           disabled={(!mine && booked !== undefined && !!booked) || past || closed}
                                           className="flex-1 rounded text-[0.55rem] font-medium py-1.5 px-1 transition-colors truncate"
-                                          style={{ background: bg, border: `1px solid ${border}`, cursor, minHeight: 28, color: mine ? '#6b7a3d' : booked ? '#9ca3af' : past || closed ? '#d1d5db' : '#16a34a' }}
-                                          title={`${court.name} - ${time} - ${mine ? 'Your booking (click to cancel)' : booked ? 'Booked' : past ? 'Past' : closed ? 'Closed' : 'Available'}`}
+                                          style={{ background: bg, border: `1px solid ${border}`, cursor, minHeight: 28, color: mine ? '#6b7a3d' : isProgram ? '#d97706' : booked ? '#9ca3af' : past || closed ? '#d1d5db' : '#16a34a' }}
+                                          title={`${court.name} - ${time} - ${mine ? 'Your booking (click to cancel)' : isProgram ? 'Program' : booked ? 'Booked' : past ? 'Past' : closed ? 'Closed' : 'Available'}`}
                                         >
-                                          {courtsToShow.length > 1 ? `C${court.id}` : (mine ? 'Mine' : booked ? '—' : '')}
+                                          {courtsToShow.length > 1 ? (isProgram ? 'P' : `C${court.id}`) : (mine ? 'Mine' : isProgram ? 'Prog' : booked ? '—' : '')}
                                         </button>
                                       );
                                     })}
@@ -289,6 +294,7 @@ export default function BookCourtPage() {
                   <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded border" style={{ background: '#f0fdf4', borderColor: '#bbf7d0' }} /> Available</div>
                   <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded border" style={{ background: 'rgba(107, 122, 61, 0.15)', borderColor: '#6b7a3d' }} /> My Booking</div>
                   <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded border" style={{ background: '#f3f4f6', borderColor: '#d1d5db' }} /> Booked</div>
+                  <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded border" style={{ background: 'rgba(245, 158, 11, 0.1)', borderColor: '#fbbf24' }} /> Program</div>
                   <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded border" style={{ background: '#fafafa', borderColor: '#e5e7eb' }} /> Past / Closed</div>
                 </div>
               </>
@@ -494,6 +500,52 @@ export default function BookCourtPage() {
                 style={{ background: '#6b7a3d' }}
               >
                 Confirm Booking
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Booking Success + Add to Calendar */}
+      {bookingSuccess && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.4)' }} onClick={() => setBookingSuccess(null)}>
+          <div className="rounded-2xl p-6 w-full max-w-sm text-center" style={{ background: '#fff' }} onClick={e => e.stopPropagation()}>
+            <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ background: 'rgba(34, 197, 94, 0.1)' }}>
+              <svg className="w-8 h-8" fill="none" stroke="#16a34a" viewBox="0 0 24 24" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h3 className="font-semibold text-lg mb-1" style={{ color: '#2a2f1e' }}>Booked!</h3>
+            <p className="text-sm mb-6" style={{ color: '#6b7266' }}>
+              {bookingSuccess.courtName} on{' '}
+              {new Date(bookingSuccess.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}{' '}
+              at {bookingSuccess.time}
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  downloadICS([{
+                    title: `Tennis — ${bookingSuccess.courtName}`,
+                    date: bookingSuccess.date,
+                    time: bookingSuccess.time,
+                    duration: 60,
+                    location: `${bookingSuccess.courtName} — Mono Tennis Club`,
+                  }], 'mtc-booking.ics');
+                }}
+                className="flex-1 py-3 rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                style={{ background: 'rgba(107, 122, 61, 0.1)', color: '#6b7a3d' }}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                Add to Calendar
+              </button>
+              <button
+                onClick={() => setBookingSuccess(null)}
+                className="flex-1 py-3 rounded-xl text-sm font-medium text-white"
+                style={{ background: '#6b7a3d' }}
+              >
+                Done
               </button>
             </div>
           </div>

@@ -3,17 +3,23 @@
 import { useState } from 'react';
 import { useApp } from '../lib/store';
 import DashboardHeader from '../components/DashboardHeader';
+import { downloadICS } from '../lib/calendar';
 
 type EventFilter = 'all' | 'social' | 'match' | 'roundrobin' | 'lesson' | 'tournament';
 type ViewMode = 'calendar' | 'list';
+type PageView = 'events' | 'programs';
 
 export default function EventsPage() {
-  const { currentUser, events, toggleRsvp, showToast } = useApp();
+  const { currentUser, events, toggleRsvp, showToast, programs, enrollInProgram, withdrawFromProgram, members } = useApp();
+  const [pageView, setPageView] = useState<PageView>('events');
   const [filter, setFilter] = useState<EventFilter>('all');
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('calendar');
   const [calendarDate, setCalendarDate] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
+  const [selectedProgram, setSelectedProgram] = useState<string | null>(null);
+  const [enrollConfirm, setEnrollConfirm] = useState<string | null>(null);
+  const [justEnrolled, setJustEnrolled] = useState<string | null>(null);
 
   const filtered = events
     .filter(e => filter === 'all' || e.type === filter)
@@ -76,6 +82,26 @@ export default function EventsPage() {
       <DashboardHeader title="Club Events" />
 
       <div className="p-6 lg:p-8 max-w-5xl mx-auto animate-slideUp">
+
+        {/* Events / Programs toggle */}
+        <div className="flex gap-1 p-1 rounded-xl mb-6" style={{ background: '#fff', border: '1px solid #e0dcd3' }}>
+          <button
+            onClick={() => setPageView('events')}
+            className="flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+            style={{ background: pageView === 'events' ? '#6b7a3d' : 'transparent', color: pageView === 'events' ? '#fff' : '#6b7266' }}
+          >
+            Events
+          </button>
+          <button
+            onClick={() => setPageView('programs')}
+            className="flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+            style={{ background: pageView === 'programs' ? '#6b7a3d' : 'transparent', color: pageView === 'programs' ? '#fff' : '#6b7266' }}
+          >
+            Programs
+          </button>
+        </div>
+
+        {pageView === 'events' && (<>
 
         {/* View Toggle + Filter pills */}
         <div className="flex items-center justify-between mb-4">
@@ -287,7 +313,278 @@ export default function EventsPage() {
             })}
           </div>
         )}
+        </>)}
+
+        {/* Programs View */}
+        {pageView === 'programs' && (
+          <div className="space-y-4">
+            {programs.filter(p => p.status === 'active').length === 0 ? (
+              <div className="text-center py-12 rounded-2xl border" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+                <p className="text-sm" style={{ color: '#6b7266' }}>No programs available right now</p>
+              </div>
+            ) : (
+              <div className="grid sm:grid-cols-2 gap-4 stagger-children">
+                {programs.filter(p => p.status === 'active').map(prog => {
+                  const isEnrolled = prog.enrolledMembers.includes(currentUser?.id || '');
+                  const spotsFull = prog.enrolledMembers.length >= prog.spotsTotal;
+                  return (
+                    <div
+                      key={prog.id}
+                      className="rounded-2xl border p-5 card-hover cursor-pointer"
+                      style={{ background: '#fff', borderColor: '#e0dcd3' }}
+                      onClick={() => setSelectedProgram(prog.id)}
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: prog.type === 'clinic' ? 'rgba(107, 122, 61, 0.1)' : 'rgba(245, 158, 11, 0.1)' }}>
+                            <svg className="w-5 h-5" fill="none" stroke={prog.type === 'clinic' ? '#6b7a3d' : '#d97706'} viewBox="0 0 24 24" strokeWidth="1.5">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                            </svg>
+                          </div>
+                          <div>
+                            <p className="font-medium text-sm" style={{ color: '#2a2f1e' }}>{prog.title}</p>
+                            <p className="text-xs" style={{ color: '#6b7266' }}>{prog.coachName}</p>
+                          </div>
+                        </div>
+                        <span className="text-[0.65rem] px-2 py-0.5 rounded-full font-medium shrink-0" style={{
+                          background: prog.type === 'clinic' ? 'rgba(107, 122, 61, 0.1)' : 'rgba(245, 158, 11, 0.1)',
+                          color: prog.type === 'clinic' ? '#6b7a3d' : '#d97706',
+                        }}>
+                          {prog.type === 'clinic' ? 'Clinic' : 'Camp'}
+                        </span>
+                      </div>
+
+                      <p className="text-xs mb-3" style={{ color: '#6b7266' }}>
+                        {prog.sessions.length} sessions &bull; {prog.courtName} &bull; ${prog.fee}
+                      </p>
+
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs" style={{ color: spotsFull ? '#ef4444' : '#6b7266' }}>
+                          {prog.spotsTotal - prog.enrolledMembers.length} spot{prog.spotsTotal - prog.enrolledMembers.length !== 1 ? 's' : ''} left
+                        </span>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (isEnrolled) {
+                              withdrawFromProgram(prog.id, currentUser?.id || '');
+                              showToast('Withdrawn from program');
+                            } else if (!spotsFull) {
+                              setEnrollConfirm(prog.id);
+                            }
+                          }}
+                          className="px-4 py-1.5 rounded-lg text-xs font-medium transition-colors"
+                          style={{
+                            background: isEnrolled ? '#6b7a3d' : 'rgba(107, 122, 61, 0.1)',
+                            color: isEnrolled ? '#fff' : '#6b7a3d',
+                          }}
+                        >
+                          {isEnrolled ? 'Enrolled' : 'Enroll'}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
       </div>
+
+      {/* Enrollment Confirmation Modal */}
+      {enrollConfirm && (() => {
+        const prog = programs.find(p => p.id === enrollConfirm);
+        if (!prog) return null;
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.4)' }} onClick={() => { setEnrollConfirm(null); setJustEnrolled(null); }}>
+            <div className="rounded-2xl p-6 w-full max-w-md" style={{ background: '#fff' }} onClick={e => e.stopPropagation()}>
+              {justEnrolled === enrollConfirm ? (
+                // Success state
+                <div className="text-center">
+                  <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ background: 'rgba(34, 197, 94, 0.1)' }}>
+                    <svg className="w-8 h-8" fill="none" stroke="#16a34a" viewBox="0 0 24 24" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <h3 className="font-semibold text-lg mb-1" style={{ color: '#2a2f1e' }}>Enrolled!</h3>
+                  <p className="text-sm mb-6" style={{ color: '#6b7266' }}>You&apos;re signed up for {prog.title}</p>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => {
+                        downloadICS(
+                          prog.sessions.map(s => ({
+                            title: prog.title,
+                            date: s.date,
+                            time: s.time,
+                            duration: s.duration,
+                            location: `${prog.courtName} — Mono Tennis Club`,
+                            description: `Coach: ${prog.coachName}`,
+                          })),
+                          `${prog.title.replace(/\s+/g, '-').toLowerCase()}.ics`
+                        );
+                      }}
+                      className="flex-1 py-3 rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                      style={{ background: 'rgba(107, 122, 61, 0.1)', color: '#6b7a3d' }}
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      Add to Calendar
+                    </button>
+                    <button
+                      onClick={() => { setEnrollConfirm(null); setJustEnrolled(null); }}
+                      className="flex-1 py-3 rounded-xl text-sm font-medium text-white"
+                      style={{ background: '#6b7a3d' }}
+                    >
+                      Done
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                // Confirm state
+                <>
+                  <h3 className="font-semibold text-lg mb-2" style={{ color: '#2a2f1e' }}>Confirm Enrollment</h3>
+                  <p className="text-sm mb-4" style={{ color: '#6b7266' }}>
+                    Enroll in <strong>{prog.title}</strong> with {prog.coachName}?
+                  </p>
+                  <div className="space-y-2 mb-6 p-4 rounded-xl" style={{ background: '#faf8f3' }}>
+                    <div className="flex justify-between text-sm">
+                      <span style={{ color: '#6b7266' }}>Sessions</span>
+                      <span className="font-medium" style={{ color: '#2a2f1e' }}>{prog.sessions.length}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span style={{ color: '#6b7266' }}>Court</span>
+                      <span className="font-medium" style={{ color: '#2a2f1e' }}>{prog.courtName}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span style={{ color: '#6b7266' }}>Fee</span>
+                      <span className="font-medium" style={{ color: '#2a2f1e' }}>${prog.fee}</span>
+                    </div>
+                  </div>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => { setEnrollConfirm(null); }}
+                      className="flex-1 py-3 rounded-xl text-sm font-medium transition-colors hover:bg-gray-100"
+                      style={{ background: '#f5f2eb', color: '#2a2f1e' }}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => {
+                        enrollInProgram(prog.id, currentUser?.id || '', currentUser?.name || '');
+                        showToast(`Enrolled in ${prog.title}`);
+                        setJustEnrolled(prog.id);
+                      }}
+                      className="flex-1 py-3 rounded-xl text-sm font-medium text-white transition-colors hover:opacity-90"
+                      style={{ background: '#6b7a3d' }}
+                    >
+                      Confirm — ${prog.fee}
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Program Detail Modal */}
+      {selectedProgram && (() => {
+        const prog = programs.find(p => p.id === selectedProgram);
+        if (!prog) return null;
+        const isEnrolled = prog.enrolledMembers.includes(currentUser?.id || '');
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.4)' }} onClick={() => setSelectedProgram(null)}>
+            <div className="rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto" style={{ background: '#fff' }} onClick={e => e.stopPropagation()}>
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-semibold text-lg" style={{ color: '#2a2f1e' }}>{prog.title}</h3>
+                    <span className="text-[0.65rem] px-2 py-0.5 rounded-full font-medium" style={{
+                      background: prog.type === 'clinic' ? 'rgba(107, 122, 61, 0.1)' : 'rgba(245, 158, 11, 0.1)',
+                      color: prog.type === 'clinic' ? '#6b7a3d' : '#d97706',
+                    }}>
+                      {prog.type === 'clinic' ? 'Clinic' : 'Camp'}
+                    </span>
+                  </div>
+                  <p className="text-sm mt-1" style={{ color: '#6b7266' }}>Coach: {prog.coachName}</p>
+                </div>
+                <button onClick={() => setSelectedProgram(null)} className="p-1 rounded-lg hover:bg-gray-100">
+                  <svg className="w-5 h-5" fill="none" stroke="#6b7266" viewBox="0 0 24 24" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                </button>
+              </div>
+
+              <p className="text-sm mb-4" style={{ color: '#2a2f1e' }}>{prog.description}</p>
+
+              <div className="space-y-3 mb-4">
+                <div className="flex gap-2 text-sm" style={{ color: '#6b7266' }}>
+                  <svg className="w-4 h-4 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  </svg>
+                  {prog.courtName} &bull; ${prog.fee}
+                </div>
+              </div>
+
+              {/* Sessions list */}
+              <div className="mb-4">
+                <p className="text-sm font-medium mb-2" style={{ color: '#2a2f1e' }}>Sessions</p>
+                <div className="space-y-1.5">
+                  {prog.sessions.map((s, i) => (
+                    <div key={i} className="flex items-center gap-2 text-xs px-3 py-2 rounded-lg" style={{ background: '#faf8f3' }}>
+                      <span className="font-medium" style={{ color: '#2a2f1e' }}>
+                        {new Date(s.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                      </span>
+                      <span style={{ color: '#6b7266' }}>{s.time} &bull; {s.duration}min</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Enrolled members */}
+              <div className="mb-6">
+                <p className="text-sm font-medium mb-2" style={{ color: '#2a2f1e' }}>
+                  Enrolled ({prog.enrolledMembers.length}/{prog.spotsTotal})
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {prog.enrolledMembers.map(mId => {
+                    const member = members.find(m => m.id === mId);
+                    return (
+                      <span key={mId} className="text-xs px-3 py-1 rounded-full" style={{ background: '#f5f2eb', color: '#2a2f1e' }}>
+                        {member?.name || mId}
+                      </span>
+                    );
+                  })}
+                  {prog.enrolledMembers.length === 0 && (
+                    <p className="text-xs" style={{ color: '#6b7266' }}>No members enrolled yet</p>
+                  )}
+                </div>
+              </div>
+
+              <button
+                onClick={() => {
+                  if (isEnrolled) {
+                    withdrawFromProgram(prog.id, currentUser?.id || '');
+                    showToast('Withdrawn from program');
+                    setSelectedProgram(null);
+                  } else {
+                    setSelectedProgram(null);
+                    setEnrollConfirm(prog.id);
+                  }
+                }}
+                className="w-full py-3 rounded-xl text-sm font-medium transition-colors"
+                style={{
+                  background: isEnrolled ? '#ef4444' : '#6b7a3d',
+                  color: '#fff',
+                }}
+              >
+                {isEnrolled ? 'Withdraw' : `Enroll — $${prog.fee}`}
+              </button>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Event Detail Modal */}
       {detail && (

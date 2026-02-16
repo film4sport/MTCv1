@@ -1,7 +1,7 @@
 // Default mock data for the dashboard
 // In production, this will be replaced with Supabase queries
 
-import type { Court, Booking, ClubEvent, Partner, Conversation, Announcement, Notification, MemberPayment, AdminAnalytics, User } from './types';
+import type { Court, Booking, ClubEvent, Partner, Conversation, Announcement, Notification, MemberPayment, AdminAnalytics, User, CoachingProgram } from './types';
 
 // ─── Members ────────────────────────────────────────────
 export const DEFAULT_MEMBERS: User[] = [
@@ -25,10 +25,66 @@ export const DEFAULT_COURTS: Court[] = [
   { id: 4, name: 'Court 4', floodlight: false, status: 'available' },
 ];
 
+// ─── Coaching Programs ──────────────────────────────────
+export const DEFAULT_PROGRAMS: CoachingProgram[] = [
+  {
+    id: 'prog-clinic-1',
+    title: 'Beginner Group Clinic',
+    type: 'clinic',
+    coachId: 'mark',
+    coachName: 'Mark Taylor',
+    description: 'A 4-week beginner clinic covering grips, strokes, footwork, and match play basics. Perfect for new players looking to build a solid foundation.',
+    courtId: 3,
+    courtName: 'Court 3',
+    sessions: [
+      { date: '2026-03-01', time: '10:00 AM', duration: 90 },
+      { date: '2026-03-08', time: '10:00 AM', duration: 90 },
+      { date: '2026-03-15', time: '10:00 AM', duration: 90 },
+      { date: '2026-03-22', time: '10:00 AM', duration: 90 },
+    ],
+    fee: 120,
+    spotsTotal: 8,
+    enrolledMembers: ['emily', 'lisa'],
+    status: 'active',
+  },
+  {
+    id: 'prog-camp-1',
+    title: 'Junior Summer Camp Week 1',
+    type: 'camp',
+    coachId: 'mark',
+    coachName: 'Mark Taylor',
+    description: '5-day intensive camp for juniors aged 8-14. Daily drills, match play, fitness, and fun activities. All skill levels welcome.',
+    courtId: 1,
+    courtName: 'Court 1',
+    sessions: [
+      { date: '2026-07-06', time: '9:30 AM', duration: 180 },
+      { date: '2026-07-07', time: '9:30 AM', duration: 180 },
+      { date: '2026-07-08', time: '9:30 AM', duration: 180 },
+      { date: '2026-07-09', time: '9:30 AM', duration: 180 },
+      { date: '2026-07-10', time: '9:30 AM', duration: 180 },
+    ],
+    fee: 250,
+    spotsTotal: 12,
+    enrolledMembers: [],
+    status: 'active',
+  },
+];
+
 // ─── Bookings ───────────────────────────────────────────
 export const DEFAULT_BOOKINGS: Booking[] = [
   { id: 'b1', courtId: 2, courtName: 'Court 2', date: new Date().toISOString().split('T')[0], time: '4:00 PM', userId: 'alex', userName: 'Alex Thompson', status: 'confirmed', type: 'court' },
   { id: 'b2', courtId: 1, courtName: 'Court 1', date: new Date(Date.now() + 86400000).toISOString().split('T')[0], time: '10:00 AM', userId: 'alex', userName: 'Alex Thompson', status: 'confirmed', type: 'court' },
+  // Program-blocked bookings (Beginner Clinic — Court 3)
+  { id: 'bp1', courtId: 3, courtName: 'Court 3', date: '2026-03-01', time: '10:00 AM', userId: 'mark', userName: 'Mark Taylor', status: 'confirmed', type: 'program', programId: 'prog-clinic-1' },
+  { id: 'bp2', courtId: 3, courtName: 'Court 3', date: '2026-03-08', time: '10:00 AM', userId: 'mark', userName: 'Mark Taylor', status: 'confirmed', type: 'program', programId: 'prog-clinic-1' },
+  { id: 'bp3', courtId: 3, courtName: 'Court 3', date: '2026-03-15', time: '10:00 AM', userId: 'mark', userName: 'Mark Taylor', status: 'confirmed', type: 'program', programId: 'prog-clinic-1' },
+  { id: 'bp4', courtId: 3, courtName: 'Court 3', date: '2026-03-22', time: '10:00 AM', userId: 'mark', userName: 'Mark Taylor', status: 'confirmed', type: 'program', programId: 'prog-clinic-1' },
+  // Program-blocked bookings (Junior Camp — Court 1)
+  { id: 'bp5', courtId: 1, courtName: 'Court 1', date: '2026-07-06', time: '9:30 AM', userId: 'mark', userName: 'Mark Taylor', status: 'confirmed', type: 'program', programId: 'prog-camp-1' },
+  { id: 'bp6', courtId: 1, courtName: 'Court 1', date: '2026-07-07', time: '9:30 AM', userId: 'mark', userName: 'Mark Taylor', status: 'confirmed', type: 'program', programId: 'prog-camp-1' },
+  { id: 'bp7', courtId: 1, courtName: 'Court 1', date: '2026-07-08', time: '9:30 AM', userId: 'mark', userName: 'Mark Taylor', status: 'confirmed', type: 'program', programId: 'prog-camp-1' },
+  { id: 'bp8', courtId: 1, courtName: 'Court 1', date: '2026-07-09', time: '9:30 AM', userId: 'mark', userName: 'Mark Taylor', status: 'confirmed', type: 'program', programId: 'prog-camp-1' },
+  { id: 'bp9', courtId: 1, courtName: 'Court 1', date: '2026-07-10', time: '9:30 AM', userId: 'mark', userName: 'Mark Taylor', status: 'confirmed', type: 'program', programId: 'prog-camp-1' },
 ];
 
 // ─── Club Events ────────────────────────────────────────

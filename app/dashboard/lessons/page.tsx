@@ -16,7 +16,6 @@ const coaches = [
       'Tennis Canada — Coach 2 (2011)',
       'Tennis Professionals Association (TPA) member',
     ],
-    specialties: ['Private Lessons', 'Group Clinics', 'Summer Camps', 'Junior Development', 'Competitive Training'],
   },
   {
     name: 'Adrian Shelley',
@@ -26,7 +25,6 @@ const coaches = [
     email: null,
     bio: 'Adrian brings over 40 years of experience as a player, instructor, and coach. He was a provincially ranked junior who competed nationally, and played varsity tennis at Brock University for 5 years before serving as Assistant Coach. He coached high school tennis at North Park S.S. for over 23 years, advancing his team to OFSAA 5 times. Adrian has taught at Olympia Sports Camp, Deerhurst Resort, St. Catharines Tennis Club, and White Oaks Tennis Club. His focus is helping players of all abilities improve their skills, fitness, and enjoyment of the game.',
     certifications: [],
-    specialties: ['All Skill Levels', 'Fitness & Fundamentals', 'Round Robins', 'Club Programs'],
   },
 ];
 
@@ -92,18 +90,6 @@ export default function LessonsPage() {
                 </div>
               </div>
             )}
-
-            {/* Specialties */}
-            <div className="mb-5">
-              <p className="text-xs font-medium mb-2" style={{ color: '#999' }}>Specialties</p>
-              <div className="flex flex-wrap gap-2">
-                {coach.specialties.map((s) => (
-                  <span key={s} className="text-xs px-2.5 py-1 rounded-full font-medium" style={{ background: 'rgba(107, 122, 61, 0.08)', color: '#6b7a3d' }}>
-                    {s}
-                  </span>
-                ))}
-              </div>
-            </div>
 
             {/* Contact */}
             {coach.email && (
