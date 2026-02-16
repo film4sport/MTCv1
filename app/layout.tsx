@@ -39,7 +39,18 @@ export default function RootLayout({
                 });
                 window.addEventListener('load', function() {
                   navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' })
-                    .then(function(reg) { reg.update(); });
+                    .then(function(reg) {
+                      // Immediate update check on load
+                      reg.update();
+                      // Check for SW updates when user returns to the tab
+                      document.addEventListener('visibilitychange', function() {
+                        if (document.visibilityState === 'visible') {
+                          reg.update();
+                        }
+                      });
+                      // Periodic update check every 60s (catches long-open tabs)
+                      setInterval(function() { reg.update(); }, 60 * 1000);
+                    });
                 });
               }
             `,

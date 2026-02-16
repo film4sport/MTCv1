@@ -24,6 +24,42 @@ const nextConfig = {
         ],
       },
       {
+        // Prevent browser from caching HTML pages — always fetch fresh
+        // Covers all page routes (/, /info, /dashboard/*, /login, etc.)
+        source: '/:path*',
+        has: [
+          {
+            type: 'header',
+            key: 'accept',
+            value: '(.*text/html.*)',
+          },
+        ],
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-cache, no-store, must-revalidate',
+          },
+          {
+            key: 'Pragma',
+            value: 'no-cache',
+          },
+          {
+            key: 'Expires',
+            value: '0',
+          },
+        ],
+      },
+      {
+        // Prevent caching of RSC data payloads (client-side navigation)
+        source: '/:path*.rsc',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-cache, no-store, must-revalidate',
+          },
+        ],
+      },
+      {
         source: '/(.*)',
         headers: [
           {

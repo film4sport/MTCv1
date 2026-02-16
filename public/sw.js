@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mtc-v4';
+const CACHE_NAME = 'mtc-v5';
 const STATIC_ASSETS = [
   '/manifest.json',
   '/favicon.png',
@@ -40,8 +40,10 @@ self.addEventListener('fetch', (event) => {
   if (url.protocol === 'chrome-extension:') return;
   if (url.pathname.startsWith('/_next/webpack-hmr')) return;
 
-  // For Next.js pages, JS bundles, and API routes — ALWAYS go to network, no caching
-  // This prevents stale pages from being served after code changes
+  // For Next.js pages, JS bundles, and API routes — ALWAYS go to network
+  // IMPORTANT: We use event.respondWith(fetch()) instead of bare return;
+  // A bare return; falls through to the browser's HTTP cache, which can serve stale HTML.
+  // fetch() inside a SW always goes to the network, bypassing the HTTP cache.
   if (
     event.request.mode === 'navigate' ||
     url.pathname.startsWith('/_next/') ||
@@ -49,8 +51,19 @@ self.addEventListener('fetch', (event) => {
     url.pathname.endsWith('.html') ||
     url.pathname === '/'
   ) {
-    // Network only — no cache fallback for pages/bundles
-    // This ensures users always get the latest version
+    event.respondWith(
+      fetch(event.request).catch(function() {
+        // If network fails (offline), return a basic offline response for navigation
+        if (event.request.mode === 'navigate') {
+          return new Response(
+            '<html><body style="font-family:sans-serif;text-align:center;padding:4rem"><h1>Offline</h1><p>Please check your connection and try again.</p></body></html>',
+            { status: 503, headers: { 'Content-Type': 'text/html' } }
+          );
+        }
+        // For non-navigate requests (_next bundles, API), propagate the error
+        return new Response('Network error', { status: 503 });
+      })
+    );
     return;
   }
 
