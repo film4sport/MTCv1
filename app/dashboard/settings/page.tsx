@@ -97,6 +97,38 @@ export default function SettingsPage() {
           </button>
         </div>
 
+        {/* Legal */}
+        <div className="rounded-2xl border p-6 section-card" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+          <h3 className="font-semibold mb-4" style={{ color: '#2a2f1e' }}>Legal</h3>
+          <div className="space-y-3">
+            <a
+              href="/info?tab=privacy"
+              className="flex items-center justify-between py-2 group"
+            >
+              <div>
+                <p className="text-sm font-medium group-hover:underline" style={{ color: '#2a2f1e' }}>Privacy Policy</p>
+                <p className="text-xs" style={{ color: '#6b7266' }}>How we collect and use your data</p>
+              </div>
+              <svg className="w-4 h-4" fill="none" stroke="#6b7266" viewBox="0 0 24 24" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </a>
+            <div style={{ borderTop: '1px solid #f0ede6' }} />
+            <a
+              href="/info?tab=terms"
+              className="flex items-center justify-between py-2 group"
+            >
+              <div>
+                <p className="text-sm font-medium group-hover:underline" style={{ color: '#2a2f1e' }}>Terms of Service</p>
+                <p className="text-xs" style={{ color: '#6b7266' }}>Rules governing use of our services</p>
+              </div>
+              <svg className="w-4 h-4" fill="none" stroke="#6b7266" viewBox="0 0 24 24" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </a>
+          </div>
+        </div>
+
         {/* Logout */}
         <button
           onClick={handleLogout}

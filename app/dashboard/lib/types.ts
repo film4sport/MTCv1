@@ -129,7 +129,10 @@ export interface AdminAnalytics {
   revenueThisMonth: number;
   revenueChange: number;
   peakTimes: { day: string; time: string; bookings: number }[];
-  courtUtilization: { court: string; utilization: number }[];
+  courtUsage: { today: number; thisWeek: number; thisMonth: number };
+  revenueBreakdown: { category: string; amount: number; percentage: number }[];
+  memberActivity: { mostActive: { name: string; bookings: number }[]; newMembersThisMonth: number; avgBookingsPerMember: number };
+  monthlyTrends: { month: string; bookings: number; revenue: number }[];
 }
 
 // Config constants

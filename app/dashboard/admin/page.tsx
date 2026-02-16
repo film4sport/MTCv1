@@ -7,7 +7,7 @@ import DashboardHeader from '../components/DashboardHeader';
 type AdminTab = 'dashboard' | 'members' | 'courts' | 'payments' | 'announcements';
 
 export default function AdminPage() {
-  const { currentUser, members, courts, setCourts, payments, analytics, announcements, setAnnouncements } = useApp();
+  const { currentUser, members, bookings, courts, setCourts, payments, analytics, announcements, setAnnouncements } = useApp();
   const [tab, setTab] = useState<AdminTab>('dashboard');
   const [memberSearch, setMemberSearch] = useState('');
   const [newAnnouncement, setNewAnnouncement] = useState('');
@@ -21,6 +21,38 @@ export default function AdminPage() {
       </div>
     );
   }
+
+  const exportToCsv = (filename: string, headers: string[], rows: string[][]) => {
+    const csv = [headers.join(','), ...rows.map(r => r.map(c => `"${c}"`).join(','))].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const exportBookings = () => {
+    exportToCsv('mtc-bookings.csv',
+      ['ID', 'Court', 'Date', 'Time', 'Member', 'Status', 'Type'],
+      bookings.map(b => [b.id, b.courtName, b.date, b.time, b.userName, b.status, b.type])
+    );
+  };
+
+  const exportMembers = () => {
+    exportToCsv('mtc-members.csv',
+      ['Name', 'Email', 'Role', 'NTRP', 'Member Since'],
+      members.map(m => [m.name, m.email, m.role, String(m.ntrp || ''), m.memberSince || ''])
+    );
+  };
+
+  const exportRevenue = () => {
+    exportToCsv('mtc-revenue.csv',
+      ['Category', 'Amount', 'Percentage'],
+      analytics.revenueBreakdown.map(r => [r.category, `$${r.amount}`, `${r.percentage}%`])
+    );
+  };
 
   const filteredMembers = members.filter(m =>
     m.name.toLowerCase().includes(memberSearch.toLowerCase()) ||
@@ -82,6 +114,27 @@ export default function AdminPage() {
         {/* Dashboard Tab */}
         {tab === 'dashboard' && (
           <div className="space-y-6">
+            {/* Export Buttons */}
+            <div className="flex flex-wrap gap-3">
+              {[
+                { label: 'Export Bookings', onClick: exportBookings },
+                { label: 'Export Members', onClick: exportMembers },
+                { label: 'Export Revenue', onClick: exportRevenue },
+              ].map(btn => (
+                <button
+                  key={btn.label}
+                  onClick={btn.onClick}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-medium transition-colors hover:bg-white"
+                  style={{ background: '#faf8f3', border: '1px solid #e0dcd3', color: '#2a2f1e' }}
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  {btn.label}
+                </button>
+              ))}
+            </div>
+
             {/* Analytics Cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {[
@@ -119,22 +172,105 @@ export default function AdminPage() {
               </div>
             </div>
 
-            {/* Court Utilization */}
+            {/* Court Usage */}
             <div className="rounded-2xl border p-5" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
-              <h4 className="font-medium text-sm mb-4" style={{ color: '#2a2f1e' }}>Court Utilization</h4>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                {analytics.courtUtilization.map(cu => (
-                  <div key={cu.court} className="text-center">
-                    <div className="relative inline-flex items-center justify-center w-20 h-20">
-                      <svg className="w-20 h-20 -rotate-90">
-                        <circle cx="40" cy="40" r="34" fill="none" stroke="#f0ede6" strokeWidth="6" />
-                        <circle cx="40" cy="40" r="34" fill="none" stroke="#6b7a3d" strokeWidth="6" strokeDasharray={`${2 * Math.PI * 34}`} strokeDashoffset={`${2 * Math.PI * 34 * (1 - cu.utilization / 100)}`} strokeLinecap="round" />
-                      </svg>
-                      <span className="absolute text-sm font-bold" style={{ color: '#2a2f1e' }}>{cu.utilization}%</span>
-                    </div>
-                    <p className="text-xs mt-2" style={{ color: '#6b7266' }}>{cu.court}</p>
+              <h4 className="font-medium text-sm mb-4" style={{ color: '#2a2f1e' }}>Court Usage</h4>
+              <div className="grid grid-cols-3 gap-4">
+                {[
+                  { label: 'Today', value: analytics.courtUsage.today },
+                  { label: 'This Week', value: analytics.courtUsage.thisWeek },
+                  { label: 'This Month', value: analytics.courtUsage.thisMonth },
+                ].map(stat => (
+                  <div key={stat.label} className="text-center rounded-xl p-4" style={{ background: '#f5f2eb' }}>
+                    <p className="text-2xl font-bold" style={{ color: '#2a2f1e' }}>{stat.value}</p>
+                    <p className="text-xs mt-1" style={{ color: '#6b7266' }}>{stat.label}</p>
                   </div>
                 ))}
+              </div>
+            </div>
+
+            {/* Revenue Breakdown */}
+            <div className="rounded-2xl border p-5" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+              <h4 className="font-medium text-sm mb-4" style={{ color: '#2a2f1e' }}>Revenue Breakdown</h4>
+              {/* Stacked bar */}
+              <div className="h-6 rounded-full overflow-hidden flex mb-4" style={{ background: '#f5f2eb' }}>
+                {analytics.revenueBreakdown.map((item, i) => {
+                  const colors = ['#6b7a3d', '#d4e157', '#a3b356'];
+                  return (
+                    <div
+                      key={item.category}
+                      className="h-full"
+                      style={{ width: `${item.percentage}%`, background: colors[i % colors.length] }}
+                      title={`${item.category}: $${item.amount}`}
+                    />
+                  );
+                })}
+              </div>
+              <div className="space-y-2">
+                {analytics.revenueBreakdown.map((item, i) => {
+                  const colors = ['#6b7a3d', '#d4e157', '#a3b356'];
+                  return (
+                    <div key={item.category} className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full" style={{ background: colors[i % colors.length] }} />
+                        <span style={{ color: '#2a2f1e' }}>{item.category}</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="font-medium" style={{ color: '#2a2f1e' }}>${item.amount}</span>
+                        <span className="text-xs w-10 text-right" style={{ color: '#6b7266' }}>{item.percentage}%</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Member Activity */}
+            <div className="rounded-2xl border p-5" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+              <h4 className="font-medium text-sm mb-4" style={{ color: '#2a2f1e' }}>Member Activity</h4>
+              <div className="grid grid-cols-2 gap-4 mb-5">
+                <div className="rounded-xl p-4" style={{ background: '#f5f2eb' }}>
+                  <p className="text-2xl font-bold" style={{ color: '#2a2f1e' }}>{analytics.memberActivity.newMembersThisMonth}</p>
+                  <p className="text-xs mt-1" style={{ color: '#6b7266' }}>New Members This Month</p>
+                </div>
+                <div className="rounded-xl p-4" style={{ background: '#f5f2eb' }}>
+                  <p className="text-2xl font-bold" style={{ color: '#2a2f1e' }}>{analytics.memberActivity.avgBookingsPerMember}</p>
+                  <p className="text-xs mt-1" style={{ color: '#6b7266' }}>Avg Bookings / Member</p>
+                </div>
+              </div>
+              <p className="text-xs font-medium mb-3" style={{ color: '#6b7266' }}>Most Active Members</p>
+              <div className="space-y-2">
+                {analytics.memberActivity.mostActive.map((m, i) => {
+                  const maxBookings = analytics.memberActivity.mostActive[0].bookings;
+                  return (
+                    <div key={m.name} className="flex items-center gap-3">
+                      <span className="text-xs w-4 text-right font-medium" style={{ color: '#6b7266' }}>{i + 1}</span>
+                      <span className="text-sm w-32 truncate" style={{ color: '#2a2f1e' }}>{m.name}</span>
+                      <div className="flex-1 h-3 rounded-full overflow-hidden" style={{ background: '#f5f2eb' }}>
+                        <div className="h-full rounded-full" style={{ background: '#6b7a3d', width: `${(m.bookings / maxBookings) * 100}%` }} />
+                      </div>
+                      <span className="text-xs font-medium w-6 text-right" style={{ color: '#2a2f1e' }}>{m.bookings}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Monthly Trends */}
+            <div className="rounded-2xl border p-5" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+              <h4 className="font-medium text-sm mb-4" style={{ color: '#2a2f1e' }}>Monthly Trends</h4>
+              <div className="flex items-end justify-between gap-2" style={{ height: '160px' }}>
+                {analytics.monthlyTrends.map(month => {
+                  const maxBookings = Math.max(...analytics.monthlyTrends.map(m => m.bookings));
+                  const heightPct = (month.bookings / maxBookings) * 100;
+                  return (
+                    <div key={month.month} className="flex-1 flex flex-col items-center gap-1">
+                      <span className="text-xs font-medium" style={{ color: '#2a2f1e' }}>{month.bookings}</span>
+                      <div className="w-full rounded-t-lg" style={{ background: '#6b7a3d', height: `${heightPct}%`, minHeight: '8px' }} />
+                      <span className="text-xs" style={{ color: '#6b7266' }}>{month.month}</span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>

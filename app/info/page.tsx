@@ -4,6 +4,72 @@ import { useEffect, useRef, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import '../(landing)/styles/landing.css';
 
+const privacySections = [
+  {
+    title: 'What We Collect',
+    content: 'We collect personal information you provide when registering: name, email address, phone number, and player rating. We also collect booking history and payment records to manage your membership.',
+  },
+  {
+    title: 'How We Use Your Information',
+    content: 'Your information is used to manage your membership, process court bookings, communicate club news and events, and improve our services. We may use your email to send seasonal updates and event notifications.',
+  },
+  {
+    title: 'Sharing Your Information',
+    content: 'We do not sell or share your personal information with third parties. Information may be shared with club coaches for lesson scheduling, or with payment processors to handle membership fees. We may disclose information if required by law.',
+  },
+  {
+    title: 'Your Rights Under PIPEDA',
+    content: 'Under Canada\'s Personal Information Protection and Electronic Documents Act (PIPEDA), you have the right to access your personal information, request corrections, and withdraw consent for its use. To exercise these rights, contact us at info@monotennisclub.ca.',
+  },
+  {
+    title: 'Data Security',
+    content: 'We implement reasonable security measures to protect your personal information, including encrypted storage and secure access controls. However, no method of electronic transmission or storage is 100% secure.',
+  },
+  {
+    title: 'Data Retention',
+    content: 'We retain your personal information for as long as your membership is active, plus two years after cancellation for record-keeping purposes. Payment records are retained for seven years as required by tax regulations.',
+  },
+  {
+    title: 'Contact Us',
+    content: 'For privacy-related questions or concerns, contact our Privacy Officer at info@monotennisclub.ca or write to: Mono Tennis Club, 754883 Mono Centre Road, Mono, Ontario, L9W 6S3.',
+  },
+];
+
+const termsSections = [
+  {
+    title: 'Acceptance of Terms',
+    content: 'By accessing or using the Mono Tennis Club website and services, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.',
+  },
+  {
+    title: 'Account Responsibilities',
+    content: 'You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account. You must provide accurate and complete information during registration.',
+  },
+  {
+    title: 'Booking & Cancellation Policy',
+    content: 'Court bookings can be made up to 7 days in advance. Cancellations must be made at least 24 hours before the booked time. Repeated no-shows may result in booking restrictions. Guest fees are non-refundable.',
+  },
+  {
+    title: 'Code of Conduct',
+    content: 'Members must conduct themselves in a respectful and sportsmanlike manner at all times. The club reserves the right to revoke membership for behaviour deemed detrimental to the club, its members, or its facilities.',
+  },
+  {
+    title: 'Intellectual Property',
+    content: 'All content on the Mono Tennis Club website, including text, graphics, logos, and software, is the property of Mono Tennis Club and is protected by Canadian copyright law. You may not reproduce or distribute this content without permission.',
+  },
+  {
+    title: 'Limitation of Liability',
+    content: 'Mono Tennis Club shall not be liable for any indirect, incidental, or consequential damages arising from your use of our facilities or services. All members must sign a waiver of liability before participating in club activities.',
+  },
+  {
+    title: 'Governing Law',
+    content: 'These Terms of Service are governed by and construed in accordance with the laws of the Province of Ontario and the federal laws of Canada applicable therein. Any disputes shall be resolved in the courts of Ontario.',
+  },
+  {
+    title: 'Changes to Terms',
+    content: 'We reserve the right to modify these Terms of Service at any time. Changes will be posted on this page with an updated effective date. Continued use of our services after changes constitutes acceptance of the new terms.',
+  },
+];
+
 const faqItems = [
   {
     question: 'How do I become a member?',
@@ -115,6 +181,8 @@ function InfoPageContent() {
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [faqSearch, setFaqSearch] = useState('');
   const [activeConstitution, setActiveConstitution] = useState<number | null>(null);
+  const [activePrivacy, setActivePrivacy] = useState<number | null>(null);
+  const [activeTerms, setActiveTerms] = useState<number | null>(null);
 
   // Signup flow state
   const [signupStep, setSignupStep] = useState(0);
@@ -236,6 +304,14 @@ function InfoPageContent() {
       title: 'FAQ & Directions',
       subtitle: 'Find answers to common questions and directions to the club.',
     },
+    privacy: {
+      title: 'Privacy Policy',
+      subtitle: 'How Mono Tennis Club collects, uses, and protects your personal information.',
+    },
+    terms: {
+      title: 'Terms of Service',
+      subtitle: 'The terms and conditions governing your use of Mono Tennis Club services.',
+    },
   };
 
   const currentHero = heroTitles[activeTab] || heroTitles.membership;
@@ -279,6 +355,8 @@ function InfoPageContent() {
             { key: 'rules', label: 'Rules' },
             { key: 'coaching', label: 'Coaching' },
             { key: 'faq', label: 'FAQ' },
+            { key: 'privacy', label: 'Privacy' },
+            { key: 'terms', label: 'Terms' },
           ].map((t) => (
             <button
               key={t.key}
@@ -1038,6 +1116,74 @@ function InfoPageContent() {
                   </p>
                 </div>
               </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* =================== PRIVACY TAB =================== */}
+      {activeTab === 'privacy' && (
+        <section className="py-16 lg:py-20 px-8 lg:px-16" style={{ backgroundColor: '#edeae3' }}>
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-12 fade-in">
+              <span className="section-label">// Privacy Policy</span>
+              <h2 className="headline-font text-2xl md:text-3xl lg:text-4xl leading-tight mt-4 mb-4" style={{ color: '#2a2f1e' }}>
+                Your Privacy Matters
+              </h2>
+              <p className="max-w-2xl mx-auto text-sm leading-relaxed" style={{ color: '#6b7266' }}>
+                Mono Tennis Club is committed to protecting your personal information in accordance with PIPEDA.
+              </p>
+              <p className="text-xs mt-3" style={{ color: '#999' }}>Last updated: February 2026</p>
+            </div>
+
+            <div className="space-y-3 fade-in">
+              {privacySections.map((section, i) => (
+                <div key={i} className={`faq-item${activePrivacy === i ? ' active' : ''}`} style={{ borderColor: '#e0dcd3' }}>
+                  <button className="faq-question" onClick={() => setActivePrivacy(activePrivacy === i ? null : i)} style={{ color: '#2a2f1e' }}>
+                    {section.title}
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  <div className="faq-answer" style={{ maxHeight: activePrivacy === i ? '300px' : '0', color: '#666' }}>
+                    <p>{section.content}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* =================== TERMS TAB =================== */}
+      {activeTab === 'terms' && (
+        <section className="py-16 lg:py-20 px-8 lg:px-16" style={{ backgroundColor: '#edeae3' }}>
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-12 fade-in">
+              <span className="section-label">// Terms of Service</span>
+              <h2 className="headline-font text-2xl md:text-3xl lg:text-4xl leading-tight mt-4 mb-4" style={{ color: '#2a2f1e' }}>
+                Terms &amp; Conditions
+              </h2>
+              <p className="max-w-2xl mx-auto text-sm leading-relaxed" style={{ color: '#6b7266' }}>
+                Please review the following terms governing the use of Mono Tennis Club services and facilities.
+              </p>
+              <p className="text-xs mt-3" style={{ color: '#999' }}>Last updated: February 2026</p>
+            </div>
+
+            <div className="space-y-3 fade-in">
+              {termsSections.map((section, i) => (
+                <div key={i} className={`faq-item${activeTerms === i ? ' active' : ''}`} style={{ borderColor: '#e0dcd3' }}>
+                  <button className="faq-question" onClick={() => setActiveTerms(activeTerms === i ? null : i)} style={{ color: '#2a2f1e' }}>
+                    {section.title}
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  <div className="faq-answer" style={{ maxHeight: activeTerms === i ? '300px' : '0', color: '#666' }}>
+                    <p>{section.content}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </section>
