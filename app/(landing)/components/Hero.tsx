@@ -29,7 +29,7 @@ export default function Hero() {
       {/* Background Image with Parallax */}
       <div className="absolute inset-0 parallax-bg" ref={heroBgRef}>
         <img
-          src="https://i.imgur.com/JJiiQRQ.png"
+          src="https://cdn.jsdelivr.net/gh/film4sport/my-webapp-images@main/mtc-images/hero-aerial-court.png"
           alt="Tennis court aerial view"
           className="w-full h-full object-cover scale-110"
           loading="eager"

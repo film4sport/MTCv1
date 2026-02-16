@@ -6,22 +6,24 @@ interface GalleryProps {
   onOpenLightbox: (src: string, alt: string) => void;
 }
 
+const CDN = 'https://cdn.jsdelivr.net/gh/film4sport/my-webapp-images@main/mtc-images';
+
 const slides = [
-  { src: 'https://i.imgur.com/oUXRO9q.jpeg', alt: 'MTC Community' },
-  { src: 'https://i.imgur.com/R6uCKGT.jpeg', alt: 'MTC Tennis' },
-  { src: 'https://i.imgur.com/61Oedpq.jpeg', alt: 'MTC Tennis' },
-  { src: 'https://i.imgur.com/Sj4RXbc.jpeg', alt: 'MTC Tennis' },
-  { src: 'https://i.imgur.com/pKQ18yG.jpeg', alt: 'MTC Tennis' },
-  { src: 'https://i.imgur.com/QJKlTrO.jpeg', alt: 'MTC Tennis' },
-  { src: 'https://i.imgur.com/kxyHcPA.jpeg', alt: 'MTC Tennis' },
-  { src: 'https://i.imgur.com/XNkCRSG.jpeg', alt: 'MTC Tennis' },
-  { src: 'https://i.imgur.com/fweARCL.jpeg', alt: 'MTC Tennis' },
-  { src: 'https://i.imgur.com/YpFcnrH.jpeg', alt: 'MTC Tennis' },
-  { src: 'https://i.imgur.com/t6oQV1W.jpeg', alt: 'MTC Tennis' },
-  { src: 'https://i.imgur.com/NhUzINn.png', alt: 'MTC Tennis' },
-  { src: 'https://i.imgur.com/GBtCUwe.jpeg', alt: 'MTC Tennis' },
-  { src: 'https://i.imgur.com/skzy9Or.jpeg', alt: 'MTC Tennis' },
-  { src: 'https://i.imgur.com/uFMUXdW.jpeg', alt: 'MTC Tennis' },
+  { src: `${CDN}/gallery-01-community.jpeg`, alt: 'MTC Community' },
+  { src: `${CDN}/gallery-02-doubles-match.jpeg`, alt: 'MTC Tennis' },
+  { src: `${CDN}/gallery-03-court-action.jpeg`, alt: 'MTC Tennis' },
+  { src: `${CDN}/gallery-04-players-net.jpeg`, alt: 'MTC Tennis' },
+  { src: `${CDN}/gallery-05-serve.jpeg`, alt: 'MTC Tennis' },
+  { src: `${CDN}/gallery-06-group-photo.jpeg`, alt: 'MTC Tennis' },
+  { src: `${CDN}/gallery-07-rally.jpeg`, alt: 'MTC Tennis' },
+  { src: `${CDN}/gallery-08-court-overview.jpeg`, alt: 'MTC Tennis' },
+  { src: `${CDN}/gallery-09-warmup.jpeg`, alt: 'MTC Tennis' },
+  { src: `${CDN}/gallery-10-forehand.jpeg`, alt: 'MTC Tennis' },
+  { src: `${CDN}/gallery-11-celebration.jpeg`, alt: 'MTC Tennis' },
+  { src: `${CDN}/gallery-12-clubhouse.png`, alt: 'MTC Tennis' },
+  { src: `${CDN}/gallery-13-backhand.jpeg`, alt: 'MTC Tennis' },
+  { src: `${CDN}/gallery-14-sunset-court.jpeg`, alt: 'MTC Tennis' },
+  { src: `${CDN}/gallery-15-team-spirit.jpeg`, alt: 'MTC Tennis' },
 ];
 
 export default function Gallery({ onOpenLightbox }: GalleryProps) {

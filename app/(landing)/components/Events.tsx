@@ -2,10 +2,12 @@
 
 import { useState } from 'react';
 
+const CDN = 'https://cdn.jsdelivr.net/gh/film4sport/my-webapp-images@main/mtc-images';
+
 const events = [
   {
     category: 'tournament',
-    image: 'https://i.imgur.com/vqd926b.jpeg',
+    image: `${CDN}/event-mixed-doubles-tournament.jpeg`,
     alt: '95+ Mixed Doubles Tournament',
     badge: 'Tournament',
     badgeStyle: { backgroundColor: 'rgba(107, 122, 61, 0.15)', color: '#4a5528' },
@@ -16,7 +18,7 @@ const events = [
   },
   {
     category: 'camp',
-    image: 'https://i.imgur.com/YOdfHw6.jpeg',
+    image: `${CDN}/event-summer-camp.jpeg`,
     alt: 'Summer Tennis Camp',
     badge: 'Camp',
     badgeStyle: { backgroundColor: 'rgba(212, 225, 87, 0.3)', color: '#3b4229' },
@@ -27,7 +29,7 @@ const events = [
   },
   {
     category: 'social',
-    image: 'https://i.imgur.com/551fHj1.jpeg',
+    image: `${CDN}/event-social-round-robin.jpeg`,
     alt: 'Social Round Robin',
     badge: 'Social',
     badgeStyle: { backgroundColor: 'rgba(59, 66, 41, 0.1)', color: '#3b4229' },

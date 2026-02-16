@@ -37,7 +37,7 @@ export default function Loader() {
           </span>
         </div>
         <div className="tennis-ball-wrapper">
-          <img className="tennis-ball" src="https://i.imgur.com/XuIfpq8.png" alt="" />
+          <img className="tennis-ball" src="https://cdn.jsdelivr.net/gh/film4sport/my-webapp-images@main/mtc-images/loader-tennis-ball.png" alt="" />
         </div>
       </div>
     </div>
