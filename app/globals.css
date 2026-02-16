@@ -11,6 +11,14 @@
   font-style: normal;
 }
 
+/* Safe area insets for notched phones (iPhone X+, etc.) */
+:root {
+  --sat: env(safe-area-inset-top, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+}
+
 /* Force light mode - prevent browser dark mode from changing colors */
 :root {
   color-scheme: light only !important;
@@ -49,7 +57,21 @@ html, body, #__next, main, div {
     @apply bg-gray-50 text-gray-900;
     color-scheme: light only !important;
     overflow-x: hidden;
+    padding-left: var(--sal);
+    padding-right: var(--sar);
   }
+}
+
+/* Accessible focus-visible outlines for keyboard navigation */
+*:focus-visible {
+  outline: 2px solid #6b7a3d;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Remove default focus ring for mouse users */
+*:focus:not(:focus-visible) {
+  outline: none;
 }
 
 @layer components {

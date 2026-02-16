@@ -132,6 +132,9 @@ export default function Gallery({ onOpenLightbox }: GalleryProps) {
         {/* Carousel */}
         <div
           className="gallery-carousel fade-in"
+          role="region"
+          aria-label="Photo gallery carousel"
+          aria-roledescription="carousel"
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
         >
@@ -158,13 +161,15 @@ export default function Gallery({ onOpenLightbox }: GalleryProps) {
         </div>
 
         {/* Dots */}
-        <div className="gallery-dots">
+        <div className="gallery-dots" role="tablist" aria-label="Gallery slides">
           {Array.from({ length: totalDots }, (_, i) => (
             <button
               key={i}
+              role="tab"
               className={`gallery-dot${i === currentSlide ? ' active' : ''}`}
               onClick={() => goToSlide(i)}
               aria-label={`Go to slide ${i + 1}`}
+              aria-selected={i === currentSlide}
             />
           ))}
         </div>
