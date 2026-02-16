@@ -79,7 +79,7 @@ function DashboardGuard({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen flex" style={{ backgroundColor: '#f5f2eb' }}>
+    <div className="min-h-screen flex overflow-x-hidden" style={{ backgroundColor: '#f5f2eb' }}>
       <Sidebar />
       {/* Mobile hamburger button — positioned to not overlap title */}
       <button

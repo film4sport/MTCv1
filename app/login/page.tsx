@@ -482,6 +482,7 @@ export default function LoginPage() {
                 onChange={(e) => { setEmail(e.target.value); setEmailError(false); }}
                 placeholder="your@email.com"
                 autoComplete="email"
+                maxLength={100}
                 className="w-full px-5 py-4 rounded-xl text-base transition-all focus:outline-none"
                 style={{
                   background: '#fff',
@@ -503,6 +504,7 @@ export default function LoginPage() {
                 onChange={(e) => { setPassword(e.target.value); setPasswordError(false); }}
                 placeholder="••••••••"
                 autoComplete="current-password"
+                maxLength={128}
                 className="w-full px-5 py-4 rounded-xl text-base transition-all focus:outline-none"
                 style={{
                   background: '#fff',
