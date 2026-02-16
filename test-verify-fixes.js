@@ -12,7 +12,7 @@ const { chromium } = require('playwright');
   const mobilePage = await mobileCtx.newPage();
 
   // Set up localStorage for dashboard access
-  await mobilePage.goto('http://localhost:3004/login');
+  await mobilePage.goto('http://localhost:3005/login', { waitUntil: 'networkidle' });
   await mobilePage.evaluate(() => {
     localStorage.setItem('mtc_current_user', JSON.stringify({
       id: 'test1', name: 'Test User', email: 'test@test.com', role: 'member',
@@ -22,7 +22,8 @@ const { chromium } = require('playwright');
 
   const mobileDashPages = ['/dashboard', '/dashboard/book', '/dashboard/messages', '/dashboard/partners', '/dashboard/events'];
   for (const path of mobileDashPages) {
-    await mobilePage.goto('http://localhost:3004' + path, { waitUntil: 'networkidle' });
+    await mobilePage.goto('http://localhost:3005' + path, { waitUntil: 'domcontentloaded' });
+    await mobilePage.waitForTimeout(2000);
     await mobilePage.waitForTimeout(500);
     const scrollWidth = await mobilePage.evaluate(() => document.documentElement.scrollWidth);
     const clientWidth = await mobilePage.evaluate(() => document.documentElement.clientWidth);
@@ -39,7 +40,7 @@ const { chromium } = require('playwright');
   console.log('\n=== TEST 2: Tablet Landing Page Overflow ===');
   const tabletCtx = await browser.newContext({ viewport: { width: 768, height: 1024 } });
   const tabletPage = await tabletCtx.newPage();
-  await tabletPage.goto('http://localhost:3004', { waitUntil: 'networkidle' });
+  await tabletPage.goto('http://localhost:3005', { waitUntil: 'networkidle' });
   await tabletPage.waitForTimeout(1000);
 
   // Scroll through the whole page to trigger all sections
@@ -62,7 +63,7 @@ const { chromium } = require('playwright');
   console.log('\n=== TEST 3: Login Input maxLength ===');
   const loginCtx = await browser.newContext({ viewport: { width: 1280, height: 720 } });
   const loginPage = await loginCtx.newPage();
-  await loginPage.goto('http://localhost:3004/login', { waitUntil: 'networkidle' });
+  await loginPage.goto('http://localhost:3005/login', { waitUntil: 'networkidle' });
 
   // Check email maxLength
   const emailMaxLength = await loginPage.evaluate(() => {
@@ -97,7 +98,7 @@ const { chromium } = require('playwright');
   const headerCtx = await browser.newContext();
   const headerPage = await headerCtx.newPage();
 
-  const response = await headerPage.goto('http://localhost:3004', { waitUntil: 'networkidle' });
+  const response = await headerPage.goto('http://localhost:3005', { waitUntil: 'networkidle' });
   const cacheControl = response.headers()['cache-control'] || '';
   const hasNoCache = cacheControl.includes('no-cache') && cacheControl.includes('no-store');
   console.log(`  Cache-Control: "${cacheControl}" ${hasNoCache ? '✅' : '❌'}`);
