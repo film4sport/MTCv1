@@ -40,16 +40,17 @@ All external links to clubspark.ca have been removed. ClubSpark was only used as
 ## #8: ALWAYS UPDATE CLAUDE.md
 When new project rules or conventions are established, add them to this file AND MEMORY.md.
 
-## #9: VERIFY BEFORE REPORTING — USE PLAYWRIGHT ONLY
+## #9: VERIFY BEFORE REPORTING — PLAYWRIGHT + BDG COMBO
 **Never tell the user "it's done" without verifying visually.**
-- **DO NOT use Claude in Chrome (BDG)** — too unreliable (disconnects, stale state). Use Playwright for ALL verification.
-- **Playwright** — Use for all visual verification and regression testing:
+- **Playwright** — Primary tool for visual verification and regression testing:
   - `npm run test` (E2E), `npm run test:unit` (Vitest), `npm run test:all` (both)
   - Config: `playwright.config.js`, tests in `tests/`, unit tests in `unit-tests/`
   - 3 viewports tested: mobile (375x812), tablet (768x1024), desktop (1280x720)
   - For quick visual checks: write a small Playwright script to screenshot the page
-  - Best for: everything — visual verification, regression testing, pre-deploy checks
-- **Workflow**: Playwright for ALL verification
+  - Best for: automated screenshots, regression testing, pre-deploy checks
+- **Claude in Chrome (BDG)** — Use for live visual verification and interactive checks:
+  - Best for: real-time page inspection, verifying hover states, checking interactive elements
+- **Workflow**: Playwright for automated screenshots + BDG for live visual spot-checks
 
 ---
 

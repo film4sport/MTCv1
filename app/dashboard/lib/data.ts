@@ -261,10 +261,29 @@ export const DEFAULT_ANALYTICS: AdminAnalytics = {
     { day: 'Sunday', time: '9:00 AM', bookings: 22 },
     { day: 'Wednesday', time: '6:00 PM', bookings: 18 },
   ],
-  courtUtilization: [
-    { court: 'Court 1', utilization: 78 },
-    { court: 'Court 2', utilization: 82 },
-    { court: 'Court 3', utilization: 45 },
-    { court: 'Court 4', utilization: 61 },
+  courtUsage: { today: 12, thisWeek: 68, thisMonth: 156 },
+  revenueBreakdown: [
+    { category: 'Membership Fees', amount: 520, percentage: 67 },
+    { category: 'Guest Fees', amount: 150, percentage: 19 },
+    { category: 'Lesson Fees', amount: 110, percentage: 14 },
+  ],
+  memberActivity: {
+    mostActive: [
+      { name: 'Mike Chen', bookings: 18 },
+      { name: 'James Park', bookings: 15 },
+      { name: 'Sarah Wilson', bookings: 14 },
+      { name: "Ryan O'Connor", bookings: 12 },
+      { name: 'David Kim', bookings: 10 },
+    ],
+    newMembersThisMonth: 3,
+    avgBookingsPerMember: 5.2,
+  },
+  monthlyTrends: [
+    { month: 'Sep', bookings: 142, revenue: 680 },
+    { month: 'Oct', bookings: 98, revenue: 490 },
+    { month: 'Nov', bookings: 45, revenue: 220 },
+    { month: 'Dec', bookings: 28, revenue: 140 },
+    { month: 'Jan', bookings: 38, revenue: 190 },
+    { month: 'Feb', bookings: 156, revenue: 780 },
   ],
 };
