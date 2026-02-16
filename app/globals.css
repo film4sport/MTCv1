@@ -22,6 +22,7 @@ html {
   forced-color-adjust: none;
   -webkit-filter: none !important;
   filter: none !important;
+  overflow-x: hidden;
 }
 
 /* Prevent Samsung Internet and other browsers from applying dark mode filters */
