@@ -31,7 +31,8 @@ export interface Booking {
   userName: string;
   guestName?: string;
   status: 'confirmed' | 'cancelled';
-  type: 'court' | 'partner' | 'ball-machine';
+  type: 'court' | 'partner' | 'ball-machine' | 'program';
+  programId?: string;
 }
 
 export interface ClubEvent {
@@ -133,6 +134,22 @@ export interface AdminAnalytics {
   revenueBreakdown: { category: string; amount: number; percentage: number }[];
   memberActivity: { mostActive: { name: string; bookings: number }[]; newMembersThisMonth: number; avgBookingsPerMember: number };
   monthlyTrends: { month: string; bookings: number; revenue: number }[];
+}
+
+export interface CoachingProgram {
+  id: string;
+  title: string;
+  type: 'clinic' | 'camp';
+  coachId: string;
+  coachName: string;
+  description: string;
+  courtId: number;
+  courtName: string;
+  sessions: { date: string; time: string; duration: number }[];
+  fee: number;
+  spotsTotal: number;
+  enrolledMembers: string[];
+  status: 'active' | 'cancelled' | 'completed';
 }
 
 // Config constants

@@ -1,9 +1,9 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
-import type { User, Court, Booking, ClubEvent, Partner, Conversation, Announcement, Notification, WeatherData, MemberPayment, AdminAnalytics } from './types';
+import type { User, Court, Booking, ClubEvent, Partner, Conversation, Announcement, Notification, WeatherData, MemberPayment, AdminAnalytics, CoachingProgram } from './types';
 import { CLUB_LOCATION } from './types';
-import { DEFAULT_MEMBERS, DEFAULT_COURTS, DEFAULT_BOOKINGS, DEFAULT_EVENTS, DEFAULT_PARTNERS, DEFAULT_CONVERSATIONS, DEFAULT_ANNOUNCEMENTS, DEFAULT_NOTIFICATIONS, DEFAULT_PAYMENTS, DEFAULT_ANALYTICS } from './data';
+import { DEFAULT_MEMBERS, DEFAULT_COURTS, DEFAULT_BOOKINGS, DEFAULT_EVENTS, DEFAULT_PARTNERS, DEFAULT_CONVERSATIONS, DEFAULT_ANNOUNCEMENTS, DEFAULT_NOTIFICATIONS, DEFAULT_PAYMENTS, DEFAULT_ANALYTICS, DEFAULT_PROGRAMS } from './data';
 
 interface AppState {
   // Auth
@@ -37,7 +37,14 @@ interface AppState {
   clearNotifications: () => void;
   weather: WeatherData;
   payments: MemberPayment[];
+  setPayments: (payments: MemberPayment[]) => void;
   analytics: AdminAnalytics;
+  programs: CoachingProgram[];
+  setPrograms: (programs: CoachingProgram[]) => void;
+  addProgram: (program: CoachingProgram) => void;
+  cancelProgram: (programId: string) => void;
+  enrollInProgram: (programId: string, memberId: string, memberName: string) => void;
+  withdrawFromProgram: (programId: string, memberId: string) => void;
 
   // UI
   sidebarCollapsed: boolean;
@@ -91,8 +98,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [weather, setWeather] = useState<WeatherData>({
     tempC: 0, tempF: 32, condition: 'sunny', wind: 0, humidity: 0, description: 'Loading...', lastUpdated: null,
   });
-  const [payments] = useState<MemberPayment[]>(DEFAULT_PAYMENTS);
+  const [payments, setPayments] = useState<MemberPayment[]>(DEFAULT_PAYMENTS);
   const [analytics] = useState<AdminAnalytics>(DEFAULT_ANALYTICS);
+  const [programs, setPrograms] = useState<CoachingProgram[]>(DEFAULT_PROGRAMS);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [toasts, setToasts] = useState<{ id: string; message: string; type: 'success' | 'error' | 'info'; exiting?: boolean }[]>([]);
@@ -105,6 +113,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setConversations(loadJSON('mtc-conversations', DEFAULT_CONVERSATIONS));
     setAnnouncements(loadJSON('mtc-announcements', DEFAULT_ANNOUNCEMENTS));
     setNotifications(loadJSON('mtc-notifications', DEFAULT_NOTIFICATIONS));
+    setPrograms(loadJSON('mtc-programs', DEFAULT_PROGRAMS));
+    setPayments(loadJSON('mtc-payments', DEFAULT_PAYMENTS));
     setIsLoaded(true);
   }, []);
 
@@ -113,6 +123,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => { if (isLoaded) saveJSON('mtc-conversations', conversations); }, [conversations, isLoaded]);
   useEffect(() => { if (isLoaded) saveJSON('mtc-announcements', announcements); }, [announcements, isLoaded]);
   useEffect(() => { if (isLoaded) saveJSON('mtc-notifications', notifications); }, [notifications, isLoaded]);
+  useEffect(() => { if (isLoaded) saveJSON('mtc-programs', programs); }, [programs, isLoaded]);
+  useEffect(() => { if (isLoaded) saveJSON('mtc-payments', payments); }, [payments, isLoaded]);
 
   // Fetch weather
   useEffect(() => {
@@ -167,7 +179,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     // 1. Check hardcoded credentials
     const entry = creds[email];
     if (entry && entry.password === password) {
-      const user: User = { id: email.split('@')[0], name: entry.name, email, role: entry.role, memberSince: '2025-01' };
+      const knownMember = DEFAULT_MEMBERS.find(m => m.email === email);
+      const user: User = knownMember || { id: email.split('@')[0], name: entry.name, email, role: entry.role, memberSince: '2025-01' };
       setCurrentUser(user);
       saveJSON('mtc-current-user', user);
       return true;
@@ -183,7 +196,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return true;
     }
     // 3. Demo mode: accept any email/password as member
-    const user: User = { id: 'member', name: email.split('@')[0], email, role: 'member', memberSince: '2025-01' };
+    const knownMember2 = DEFAULT_MEMBERS.find(m => m.email === email);
+    const user: User = knownMember2 || { id: email.split('@')[0], name: email.split('@')[0], email, role: 'member', memberSince: '2025-01' };
     setCurrentUser(user);
     saveJSON('mtc-current-user', user);
     return true;
@@ -199,11 +213,106 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // Actions
   const addBooking = useCallback((booking: Booking) => {
     setBookings(prev => [...prev, booking]);
+    // Create notification for booking
+    if (booking.type === 'court') {
+      const notif: Notification = {
+        id: `n-${Date.now()}`,
+        type: 'booking',
+        title: 'Booking Confirmed',
+        body: `${booking.courtName} booked for ${booking.date} at ${booking.time}.`,
+        timestamp: new Date().toISOString(),
+        read: false,
+      };
+      setNotifications(prev => [notif, ...prev]);
+    }
   }, []);
 
   const cancelBooking = useCallback((id: string) => {
     setBookings(prev => prev.map(b => b.id === id ? { ...b, status: 'cancelled' as const } : b));
   }, []);
+
+  // Program CRUD
+  const addProgram = useCallback((program: CoachingProgram) => {
+    setPrograms(prev => [...prev, program]);
+    // Auto-generate blocked bookings for each session
+    const newBookings: Booking[] = program.sessions.map((s, i) => ({
+      id: `bp-${program.id}-${i}`,
+      courtId: program.courtId,
+      courtName: program.courtName,
+      date: s.date,
+      time: s.time,
+      userId: program.coachId,
+      userName: program.coachName,
+      status: 'confirmed' as const,
+      type: 'program' as const,
+      programId: program.id,
+    }));
+    setBookings(prev => [...prev, ...newBookings]);
+  }, []);
+
+  const cancelProgram = useCallback((programId: string) => {
+    setPrograms(prev => prev.map(p => p.id === programId ? { ...p, status: 'cancelled' as const } : p));
+    setBookings(prev => prev.map(b => b.programId === programId ? { ...b, status: 'cancelled' as const } : b));
+  }, []);
+
+  const enrollInProgram = useCallback((programId: string, memberId: string, memberName: string) => {
+    const program = programs.find(p => p.id === programId);
+    if (!program) return;
+    // Add member to enrolled list
+    setPrograms(prev => prev.map(p => p.id === programId ? { ...p, enrolledMembers: [...p.enrolledMembers, memberId] } : p));
+    // Charge fee
+    setPayments(prev => {
+      const existing = prev.find(p => p.memberId === memberId);
+      const entry = { id: `pay-${Date.now()}`, date: new Date().toISOString().split('T')[0], description: `Program: ${program.title}`, amount: program.fee, type: 'charge' as const };
+      if (existing) {
+        return prev.map(p => p.memberId === memberId ? { ...p, balance: p.balance + program.fee, history: [...p.history, entry] } : p);
+      }
+      return [...prev, { memberId, memberName, balance: program.fee, history: [entry] }];
+    });
+    // Create notification
+    const notif: Notification = {
+      id: `n-${Date.now()}`,
+      type: 'event',
+      title: `Enrolled in ${program.title}`,
+      body: `${program.sessions.length} sessions starting ${program.sessions[0]?.date}. Fee: $${program.fee}.`,
+      timestamp: new Date().toISOString(),
+      read: false,
+    };
+    setNotifications(prev => [notif, ...prev]);
+    // Send message from coach
+    const coachMsg = {
+      id: `msg-${Date.now()}`,
+      from: program.coachName,
+      fromId: program.coachId,
+      to: memberName,
+      toId: memberId,
+      text: `Welcome to ${program.title}! Your enrollment is confirmed. ${program.sessions.length} sessions starting ${new Date(program.sessions[0]?.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}. See you on the court!`,
+      timestamp: new Date().toISOString(),
+      read: false,
+    };
+    setConversations(prev => {
+      const existing = prev.find(c => c.memberId === program.coachId);
+      if (existing) {
+        return prev.map(c => c.memberId === program.coachId ? { ...c, messages: [...c.messages, coachMsg], lastMessage: coachMsg.text, lastTimestamp: coachMsg.timestamp, unread: c.unread + 1 } : c);
+      }
+      return [...prev, { memberId: program.coachId, memberName: program.coachName, lastMessage: coachMsg.text, lastTimestamp: coachMsg.timestamp, unread: 1, messages: [coachMsg] }];
+    });
+  }, [programs]);
+
+  const withdrawFromProgram = useCallback((programId: string, memberId: string) => {
+    const program = programs.find(p => p.id === programId);
+    if (!program) return;
+    setPrograms(prev => prev.map(p => p.id === programId ? { ...p, enrolledMembers: p.enrolledMembers.filter(m => m !== memberId) } : p));
+    // Credit refund
+    setPayments(prev => {
+      const existing = prev.find(p => p.memberId === memberId);
+      if (existing) {
+        const entry = { id: `pay-${Date.now()}`, date: new Date().toISOString().split('T')[0], description: `Refund: ${program.title}`, amount: -program.fee, type: 'payment' as const };
+        return prev.map(p => p.memberId === memberId ? { ...p, balance: p.balance - program.fee, history: [...p.history, entry] } : p);
+      }
+      return prev;
+    });
+  }, [programs]);
 
   const toggleRsvp = useCallback((eventId: string, userName: string) => {
     setEvents(prev => prev.map(e => {
@@ -274,7 +383,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       currentUser, login, logout, members, courts, setCourts, bookings, setBookings, addBooking, cancelBooking,
       events, setEvents, toggleRsvp, partners, setPartners, conversations, setConversations, sendMessage, markConversationRead,
       announcements, setAnnouncements, dismissAnnouncement, notifications, setNotifications, markNotificationRead,
-      clearNotifications, weather, payments, analytics, sidebarCollapsed, setSidebarCollapsed, mobileSidebarOpen, setMobileSidebarOpen, isLoaded,
+      clearNotifications, weather, payments, setPayments, analytics,
+      programs, setPrograms, addProgram, cancelProgram, enrollInProgram, withdrawFromProgram,
+      sidebarCollapsed, setSidebarCollapsed, mobileSidebarOpen, setMobileSidebarOpen, isLoaded,
       toasts, showToast,
     }}>
       {children}

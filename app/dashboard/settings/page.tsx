@@ -12,6 +12,7 @@ export default function SettingsPage() {
   const [notifPayments, setNotifPayments] = useState(true);
   const [notifPartners, setNotifPartners] = useState(true);
   const [notifMessages, setNotifMessages] = useState(true);
+  const [notifPrograms, setNotifPrograms] = useState(true);
 
   const handleLogout = () => {
     logout();
@@ -33,6 +34,7 @@ export default function SettingsPage() {
               { label: 'Payments & Billing', desc: 'Charges, payments, balance alerts', checked: notifPayments, onChange: setNotifPayments },
               { label: 'Partner Requests', desc: 'New partner matches and requests', checked: notifPartners, onChange: setNotifPartners },
               { label: 'Messages', desc: 'New messages from members', checked: notifMessages, onChange: setNotifMessages },
+              { label: 'Programs', desc: 'Enrollment confirmations, session reminders', checked: notifPrograms, onChange: setNotifPrograms },
             ].map(item => (
               <label key={item.label} className="flex items-center justify-between cursor-pointer py-2">
                 <div>

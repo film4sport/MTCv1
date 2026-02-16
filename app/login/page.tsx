@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import type { User } from '../dashboard/lib/types';
 import { CREDENTIALS } from '../dashboard/lib/types';
+import { DEFAULT_MEMBERS } from '../dashboard/lib/data';
 
 // Load Bebas Neue for phone mockup
 const bebasLink = typeof document !== 'undefined' ? (() => {
@@ -45,11 +46,14 @@ export default function LoginPage() {
 
     setLoading(true);
 
+    // Look up known member by email first
+    const knownMember = DEFAULT_MEMBERS.find(m => m.email === email);
+
     // 1. Check hardcoded credentials
     const entry = CREDENTIALS[email];
     let user: User;
     if (entry && entry.password === password) {
-      user = { id: email.split('@')[0], name: entry.name, email, role: entry.role, memberSince: '2025-01' };
+      user = knownMember || { id: email.split('@')[0], name: entry.name, email, role: entry.role, memberSince: '2025-01' };
     } else {
       // 2. Check localStorage signup accounts
       let storedAccounts: Record<string, { password: string; name: string; role: string }> = {};
@@ -59,7 +63,7 @@ export default function LoginPage() {
         user = { id: email.split('@')[0], name: stored.name, email, role: (stored.role as User['role']) || 'member', memberSince: new Date().toISOString().slice(0, 7) };
       } else {
         // 3. Demo mode: accept any email/password as member
-        user = { id: 'member', name: email.split('@')[0], email, role: 'member', memberSince: '2025-01' };
+        user = knownMember || { id: email.split('@')[0], name: email.split('@')[0], email, role: 'member', memberSince: '2025-01' };
       }
     }
 

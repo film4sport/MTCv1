@@ -6,7 +6,7 @@ import DashboardHeader from '../components/DashboardHeader';
 import Link from 'next/link';
 
 export default function SchedulePage() {
-  const { currentUser, bookings, events, cancelBooking, showToast } = useApp();
+  const { currentUser, bookings, events, cancelBooking, showToast, programs } = useApp();
   const [view, setView] = useState<'list' | 'calendar'>('list');
   const [calMonth, setCalMonth] = useState(() => new Date());
 
@@ -18,9 +18,14 @@ export default function SchedulePage() {
     .filter(e => e.attendees.includes(currentUser?.name || ''))
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-  // Combine bookings and events into a unified list
+  // Programs the current user is enrolled in
+  const myPrograms = programs.filter(p =>
+    p.status === 'active' && p.enrolledMembers.includes(currentUser?.id || '')
+  );
+
+  // Combine bookings, events, and program sessions into a unified list
   const allItems = useMemo(() => {
-    const items: { id: string; type: 'booking' | 'event'; date: string; time: string; title: string; subtitle: string; extra?: string }[] = [];
+    const items: { id: string; type: 'booking' | 'event' | 'program'; date: string; time: string; title: string; subtitle: string; extra?: string }[] = [];
     myBookings.forEach(b => items.push({
       id: b.id, type: 'booking', date: b.date, time: b.time,
       title: b.courtName, subtitle: b.time,
@@ -30,8 +35,15 @@ export default function SchedulePage() {
       id: e.id, type: 'event', date: e.date, time: e.time,
       title: e.title, subtitle: `${e.time} • ${e.location}`,
     }));
+    myPrograms.forEach(p => {
+      p.sessions.forEach((s, i) => items.push({
+        id: `${p.id}-${i}`, type: 'program', date: s.date, time: s.time,
+        title: p.title, subtitle: `${s.time} • ${p.courtName}`,
+        extra: `Coach: ${p.coachName}`,
+      }));
+    });
     return items.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  }, [myBookings, myEvents]);
+  }, [myBookings, myEvents, myPrograms]);
 
   const isToday = (d: Date) => {
     const now = new Date();
@@ -78,6 +90,7 @@ export default function SchedulePage() {
     return {
       booking: myBookings.some(b => b.date === dateStr),
       event: myEvents.some(e => e.date === dateStr),
+      program: myPrograms.some(p => p.sessions.some(s => s.date === dateStr)),
     };
   };
 
@@ -129,9 +142,9 @@ export default function SchedulePage() {
                     <div className="space-y-2">
                       {items.map(item => (
                         <div key={item.id} className="flex items-center gap-4 rounded-xl p-4 border" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
-                          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: item.type === 'booking' ? 'rgba(107, 122, 61, 0.1)' : 'rgba(212, 225, 87, 0.2)' }}>
-                            <svg className="w-5 h-5" fill="none" stroke={item.type === 'booking' ? '#6b7a3d' : '#8b8f24'} viewBox="0 0 24 24" strokeWidth="1.5">
-                              <path strokeLinecap="round" strokeLinejoin="round" d={item.type === 'booking' ? 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' : 'M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z'} />
+                          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: item.type === 'booking' ? 'rgba(107, 122, 61, 0.1)' : item.type === 'program' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(212, 225, 87, 0.2)' }}>
+                            <svg className="w-5 h-5" fill="none" stroke={item.type === 'booking' ? '#6b7a3d' : item.type === 'program' ? '#d97706' : '#8b8f24'} viewBox="0 0 24 24" strokeWidth="1.5">
+                              <path strokeLinecap="round" strokeLinejoin="round" d={item.type === 'booking' ? 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' : item.type === 'program' ? 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253' : 'M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z'} />
                             </svg>
                           </div>
                           <div className="flex-1 min-w-0">
@@ -140,8 +153,8 @@ export default function SchedulePage() {
                             {item.extra && <p className="text-xs mt-0.5" style={{ color: '#d97706' }}>{item.extra}</p>}
                           </div>
                           <div className="flex items-center gap-2">
-                            <span className="text-[0.65rem] px-2 py-0.5 rounded-full font-medium" style={{ background: item.type === 'booking' ? 'rgba(107, 122, 61, 0.1)' : 'rgba(212, 225, 87, 0.15)', color: item.type === 'booking' ? '#6b7a3d' : '#8b8f24' }}>
-                              {item.type === 'booking' ? 'Court' : 'Event'}
+                            <span className="text-[0.65rem] px-2 py-0.5 rounded-full font-medium" style={{ background: item.type === 'booking' ? 'rgba(107, 122, 61, 0.1)' : item.type === 'program' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(212, 225, 87, 0.15)', color: item.type === 'booking' ? '#6b7a3d' : item.type === 'program' ? '#d97706' : '#8b8f24' }}>
+                              {item.type === 'booking' ? 'Court' : item.type === 'program' ? 'Program' : 'Event'}
                             </span>
                             {item.type === 'booking' && (
                               <button
@@ -187,6 +200,7 @@ export default function SchedulePage() {
                     <div className="flex gap-0.5">
                       {items.booking && <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#6b7a3d' }} />}
                       {items.event && <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#d4e157' }} />}
+                      {items.program && <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#f59e0b' }} />}
                     </div>
                   </div>
                 );
@@ -195,6 +209,7 @@ export default function SchedulePage() {
             <div className="flex gap-4 mt-4 pt-4 border-t text-xs" style={{ borderColor: '#f0ede6', color: '#6b7266' }}>
               <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full" style={{ background: '#6b7a3d' }} /> Booking</div>
               <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full" style={{ background: '#d4e157' }} /> Event</div>
+              <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full" style={{ background: '#f59e0b' }} /> Program</div>
             </div>
           </div>
         )}
