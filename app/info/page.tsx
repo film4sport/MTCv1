@@ -382,14 +382,14 @@ function InfoPageContent() {
               <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
                 <div className="relative fade-in-left">
                   <div className="aspect-[4/3] rounded-2xl overflow-hidden">
-                    <img src="https://i.imgur.com/JJiiQRQ.png" alt="Mono Tennis Club Courts" className="w-full h-full object-cover" loading="lazy" />
+                    <img src="https://cdn.jsdelivr.net/gh/film4sport/my-webapp-images@main/mtc-images/hero-aerial-court.png" alt="Mono Tennis Club Courts" className="w-full h-full object-cover" loading="lazy" />
                   </div>
                   <div className="hidden lg:grid grid-cols-2 gap-3 mt-3">
                     <div className="aspect-video rounded-lg overflow-hidden">
-                      <img src="https://i.imgur.com/C9D3kXQ.jpeg" alt="Mono Tennis Club Opening Day" className="w-full h-full object-cover" loading="lazy" />
+                      <img src="https://cdn.jsdelivr.net/gh/film4sport/my-webapp-images@main/mtc-images/info-opening-day.jpeg" alt="Mono Tennis Club Opening Day" className="w-full h-full object-cover" loading="lazy" />
                     </div>
                     <div className="aspect-video rounded-lg overflow-hidden">
-                      <img src="https://i.imgur.com/OtUfWsL.jpeg" alt="Tennis Court" className="w-full h-full object-cover" loading="lazy" />
+                      <img src="https://cdn.jsdelivr.net/gh/film4sport/my-webapp-images@main/mtc-images/info-tennis-court.jpeg" alt="Tennis Court" className="w-full h-full object-cover" loading="lazy" />
                     </div>
                   </div>
                 </div>

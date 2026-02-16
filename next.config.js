@@ -84,7 +84,7 @@ const nextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https://i.imgur.com; frame-src 'self' https://www.google.com; connect-src 'self' https://api.open-meteo.com; font-src 'self' https://fonts.gstatic.com",
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https://cdn.jsdelivr.net; frame-src 'self' https://www.google.com; connect-src 'self' https://api.open-meteo.com; font-src 'self' https://fonts.gstatic.com",
           },
         ],
       },

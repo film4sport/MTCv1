@@ -1,19 +1,21 @@
 'use client';
 
+const CDN = 'https://cdn.jsdelivr.net/gh/film4sport/my-webapp-images@main/mtc-images';
+
 const partners = [
   {
     name: 'Canadian Tire',
-    logo: 'https://i.imgur.com/gr5hLFh.png',
+    logo: `${CDN}/partner-canadian-tire.png`,
     url: 'https://www.canadiantire.ca/en/store-details/on/orangeville-on-73.html',
   },
   {
     name: 'Mono Cliffs Inn',
-    logo: 'https://i.imgur.com/Uffmlof.jpeg',
+    logo: `${CDN}/partner-mono-cliffs-inn.jpeg`,
     url: 'https://www.monocliffsinn.ca/',
   },
   {
     name: 'Dawn Bennett Realty',
-    logo: 'https://i.imgur.com/noYDGIC.png',
+    logo: `${CDN}/partner-dawn-bennett-realty.png`,
     url: 'https://www.realtor.ca/agent/1416101/dawn-bennett-12612-highway-50-ste-1-bolton-ontario-l7e1t6',
   },
 ];
