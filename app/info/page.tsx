@@ -7,7 +7,7 @@ import '../(landing)/styles/landing.css';
 const privacySections = [
   {
     title: 'What We Collect',
-    content: 'We collect personal information you provide when registering: name, email address, and phone number. We also collect booking history and payment records to manage your membership.',
+    content: 'We collect personal information you provide when registering: name and email address. We also collect booking history and payment records to manage your membership.',
   },
   {
     title: 'How We Use Your Information',
@@ -164,6 +164,28 @@ In consideration of being permitted to participate in the activities of the Mono
 
 By clicking "I Agree" below, I acknowledge that I have read this Agreement, fully understand its terms, and understand that I am giving up substantial rights, including my right to sue. I acknowledge that I am signing this Agreement freely and voluntarily, and intend my acceptance to be a complete and unconditional release of all liability to the greatest extent allowed by law.`;
 
+const acknowledgementText = `MONO TENNIS CLUB — ACKNOWLEDGEMENT AGREEMENT
+
+By becoming a member of the Mono Tennis Club, I acknowledge and agree to the following:
+
+1. CLUB RULES: I have read, understood, and agree to abide by all Club rules and regulations as posted and as amended from time to time by the Board of Directors. I understand that failure to comply may result in suspension or termination of my membership.
+
+2. COURT ETIQUETTE: I will conduct myself in a sportsmanlike manner at all times, respect other members and guests, and follow proper court etiquette including timely completion of booked sessions, appropriate attire, and non-marking footwear.
+
+3. FACILITY CARE: I will treat the Club's facilities, courts, and equipment with care and respect. I will report any damage or maintenance issues to the Board. I understand that I may be held financially responsible for any damage I cause through negligence or misuse.
+
+4. GUEST POLICY: I understand that guests must be accompanied by a member at all times, that guest fees apply, and that I am responsible for my guests' conduct and adherence to Club rules.
+
+5. COMMUNICATION: I agree to receive Club communications regarding schedules, events, rule changes, and other Club-related matters via the in-app messaging system and email provided during registration.
+
+6. PHOTOGRAPHY & MEDIA: I consent to the use of photographs or videos taken during Club events and activities for Club promotional purposes, unless I notify the Board in writing of my objection.
+
+7. PRIVACY: I acknowledge that the Club collects and uses my personal information in accordance with its Privacy Policy and in compliance with PIPEDA. I consent to the collection and use of my information as described therein.
+
+8. CONSTITUTION: I have read and agree to be bound by the Club's Constitution, which governs the operation, membership, and administration of the Mono Tennis Club.
+
+By clicking "I Agree" below, I confirm that I have read and understood this Acknowledgement Agreement and voluntarily agree to its terms as a condition of my membership in the Mono Tennis Club.`;
+
 const membershipTypes = [
   { key: 'adult', label: 'Adult (Single)', price: 100 },
   { key: 'family', label: 'Family', price: 200 },
@@ -176,6 +198,7 @@ function InfoPageContent() {
   const router = useRouter();
   const pageRef = useRef<HTMLDivElement>(null);
   const waiverRef = useRef<HTMLDivElement>(null);
+  const ackRef = useRef<HTMLDivElement>(null);
   const tab = searchParams.get('tab') || 'membership';
   const [activeTab, setActiveTab] = useState(tab);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
@@ -189,6 +212,7 @@ function InfoPageContent() {
   const [signupData, setSignupData] = useState({ membershipType: '', name: '', email: '', password: '' });
   const [waiverAccepted, setWaiverAccepted] = useState(false);
   const [waiverScrolled, setWaiverScrolled] = useState(false);
+  const [ackScrolled, setAckScrolled] = useState(false);
   const [existingProfile, setExistingProfile] = useState<{ name: string; email: string; membershipType: string; joinedDate: string } | null>(null);
 
   // Load existing profile from localStorage
@@ -235,6 +259,15 @@ function InfoPageContent() {
       const { scrollTop, scrollHeight, clientHeight } = waiverRef.current;
       if (scrollTop + clientHeight >= scrollHeight - 10) {
         setWaiverScrolled(true);
+      }
+    }
+  };
+
+  const handleAckScroll = () => {
+    if (ackRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = ackRef.current;
+      if (scrollTop + clientHeight >= scrollHeight - 10) {
+        setAckScrolled(true);
       }
     }
   };
@@ -758,21 +791,53 @@ function InfoPageContent() {
                 {/* Step 3: Waiver */}
                 {signupStep === 3 && (
                   <div className="fade-in">
-                    <h3 className="headline-font text-2xl mb-2 text-center" style={{ color: '#2a2f1e' }}>Waiver & Release</h3>
-                    <p className="text-sm text-center mb-8" style={{ color: '#6b7266' }}>Please read the waiver carefully. Scroll to the bottom to proceed.</p>
+                    <h3 className="headline-font text-2xl mb-2 text-center" style={{ color: '#2a2f1e' }}>Waiver & Acknowledgement</h3>
+                    <p className="text-sm text-center mb-8" style={{ color: '#6b7266' }}>Please read both documents carefully. Scroll to the bottom of each to proceed.</p>
+
+                    {/* Waiver */}
+                    <p className="text-xs font-semibold mb-2" style={{ color: '#4a5528' }}>1. Waiver & Release of Liability</p>
                     <div
                       ref={waiverRef}
                       onScroll={handleWaiverScroll}
                       className="rounded-xl p-6 text-sm leading-relaxed overflow-y-auto"
-                      style={{ backgroundColor: '#faf8f3', border: '1px solid #e0dcd3', color: '#555', maxHeight: '350px', whiteSpace: 'pre-wrap' }}
+                      style={{ backgroundColor: '#faf8f3', border: `1px solid ${waiverScrolled ? '#6b7a3d' : '#e0dcd3'}`, color: '#555', maxHeight: '280px', whiteSpace: 'pre-wrap' }}
                     >
                       {waiverText}
                     </div>
                     {!waiverScrolled && (
-                      <p className="text-xs text-center mt-3" style={{ color: '#6b7a3d' }}>
-                        Scroll to the bottom of the waiver to enable the agree button
+                      <p className="text-xs text-center mt-2" style={{ color: '#6b7a3d' }}>
+                        ↓ Scroll to the bottom of the waiver
                       </p>
                     )}
+                    {waiverScrolled && (
+                      <p className="text-xs text-center mt-2 flex items-center justify-center gap-1" style={{ color: '#6b7a3d' }}>
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                        Waiver read
+                      </p>
+                    )}
+
+                    {/* Acknowledgement Agreement */}
+                    <p className="text-xs font-semibold mb-2 mt-6" style={{ color: '#4a5528' }}>2. Acknowledgement Agreement</p>
+                    <div
+                      ref={ackRef}
+                      onScroll={handleAckScroll}
+                      className="rounded-xl p-6 text-sm leading-relaxed overflow-y-auto"
+                      style={{ backgroundColor: '#faf8f3', border: `1px solid ${ackScrolled ? '#6b7a3d' : '#e0dcd3'}`, color: '#555', maxHeight: '280px', whiteSpace: 'pre-wrap' }}
+                    >
+                      {acknowledgementText}
+                    </div>
+                    {!ackScrolled && (
+                      <p className="text-xs text-center mt-2" style={{ color: '#6b7a3d' }}>
+                        ↓ Scroll to the bottom of the acknowledgement
+                      </p>
+                    )}
+                    {ackScrolled && (
+                      <p className="text-xs text-center mt-2 flex items-center justify-center gap-1" style={{ color: '#6b7a3d' }}>
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                        Acknowledgement read
+                      </p>
+                    )}
+
                     <div className="flex items-center gap-4 mt-6">
                       <button
                         onClick={() => setSignupStep(2)}
@@ -783,10 +848,10 @@ function InfoPageContent() {
                       </button>
                       <button
                         onClick={() => { setWaiverAccepted(true); setSignupStep(4); }}
-                        disabled={!waiverScrolled}
+                        disabled={!waiverScrolled || !ackScrolled}
                         className="flex-1 px-6 py-3 rounded-full text-sm font-semibold transition-all"
                         style={
-                          waiverScrolled
+                          waiverScrolled && ackScrolled
                             ? { backgroundColor: '#6b7a3d', color: '#fff' }
                             : { backgroundColor: '#e0dcd3', color: '#999', cursor: 'not-allowed' }
                         }
@@ -1048,7 +1113,11 @@ function InfoPageContent() {
                 <div className="rounded-lg p-5" style={{ backgroundColor: 'rgba(107, 122, 61, 0.08)', border: '1px solid rgba(107, 122, 61, 0.2)' }}>
                   <p className="text-sm font-medium mb-1" style={{ color: '#4a5528' }}>Register for Coaching & Camps</p>
                   <p className="text-sm" style={{ color: '#6b7266' }}>
-                    To register for Mark Taylor&apos;s classes including summer camps, contact Mark directly at{' '}
+                    To register for classes and summer camps,{' '}
+                    <a href="/dashboard/events" className="font-semibold hover:underline" style={{ color: '#6b7a3d' }}>
+                      log in to your member dashboard
+                    </a>
+                    {' '}and visit the Programs tab. For questions, email Mark at{' '}
                     <a href="mailto:Taylor.Mark.Tennis@gmail.com" className="font-semibold hover:underline" style={{ color: '#6b7a3d' }}>
                       Taylor.Mark.Tennis@gmail.com
                     </a>

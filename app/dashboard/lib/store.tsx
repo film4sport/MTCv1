@@ -202,7 +202,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       saveJSON('mtc-current-user', user);
       return true;
     }
-    // 3. Demo mode: accept any email/password as member
+    // ⚠️ DEMO MODE — REMOVE WHEN SUPABASE AUTH IS INTEGRATED ⚠️
+    // This fallback accepts ANY email/password as a member login.
+    // It exists only for demo/development purposes. When Supabase auth
+    // is wired up, DELETE this entire block (lines below through `return true`)
+    // so that unrecognized credentials are rejected.
     const knownMember2 = DEFAULT_MEMBERS.find(m => m.email === email);
     const user: User = knownMember2 || { id: email.split('@')[0], name: email.split('@')[0], email, role: 'member', memberSince: '2025-01' };
     setCurrentUser(user);
@@ -269,8 +273,43 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const cancelBooking = useCallback((id: string) => {
+    const booking = bookings.find(b => b.id === id);
     setBookings(prev => prev.map(b => b.id === id ? { ...b, status: 'cancelled' as const } : b));
-  }, []);
+
+    // Notify participants when a booking is cancelled
+    if (booking && booking.participants && booking.participants.length > 0) {
+      const cancelNotifs: Notification[] = booking.participants.map((p, i) => ({
+        id: `n-${Date.now()}-cancel-${i}`,
+        type: 'booking' as const,
+        title: 'Booking Cancelled',
+        body: `${booking.userName} cancelled the booking: ${booking.courtName} on ${booking.date} at ${booking.time}.`,
+        timestamp: new Date().toISOString(),
+        read: false,
+      }));
+      setNotifications(prev => [...cancelNotifs, ...prev]);
+
+      // Send cancellation message to each participant
+      booking.participants.forEach((participant, i) => {
+        const msg = {
+          id: `msg-${Date.now()}-cancel-${i}`,
+          from: booking.userName,
+          fromId: booking.userId,
+          to: participant.name,
+          toId: participant.id,
+          text: `A court booking you were part of has been cancelled.\n${booking.courtName} — ${new Date(booking.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} at ${booking.time}.`,
+          timestamp: new Date().toISOString(),
+          read: false,
+        };
+        setConversations(prev => {
+          const existing = prev.find(c => c.memberId === booking.userId);
+          if (existing) {
+            return prev.map(c => c.memberId === booking.userId ? { ...c, messages: [...c.messages, msg], lastMessage: msg.text, lastTimestamp: msg.timestamp, unread: c.unread + 1 } : c);
+          }
+          return [...prev, { memberId: booking.userId, memberName: booking.userName, lastMessage: msg.text, lastTimestamp: msg.timestamp, unread: 1, messages: [msg] }];
+        });
+      });
+    }
+  }, [bookings]);
 
   // Program CRUD
   const addProgram = useCallback((program: CoachingProgram) => {
