@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import DashboardHeader from '../components/DashboardHeader';
 
 const coaches = [
@@ -106,6 +107,24 @@ export default function LessonsPage() {
             )}
           </div>
         ))}
+
+        {/* Ready to Enroll CTA */}
+        <div className="rounded-2xl border p-6 text-center" style={{ background: 'linear-gradient(135deg, rgba(107, 122, 61, 0.12), rgba(212, 225, 87, 0.06))', borderColor: 'rgba(107, 122, 61, 0.2)' }}>
+          <h3 className="font-semibold text-lg mb-2" style={{ color: '#2a2f1e' }}>Ready to Enroll?</h3>
+          <p className="text-sm mb-4" style={{ color: '#6b7266' }}>
+            Browse available clinics, camps, and coaching programs and sign up directly.
+          </p>
+          <Link
+            href="/dashboard/events"
+            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-medium transition-all hover:opacity-90"
+            style={{ background: '#6b7a3d', color: '#fff' }}
+          >
+            View Programs
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+          </Link>
+        </div>
 
         {/* Note */}
         <div className="rounded-xl p-4 text-center" style={{ background: 'rgba(107, 122, 61, 0.06)', border: '1px solid rgba(107, 122, 61, 0.12)' }}>

@@ -87,8 +87,12 @@ Note: Sections 3→4→5→6 meet flush (no wave dividers between them)
 
 ## /INFO PAGE TABS
 - `/info?tab=about` — About Us (images, text, amenity tags)
-- `/info?tab=membership` — Membership fees, facilities, news (default)
+- `/info?tab=membership` — Membership fees, facilities, news, signup flow (default)
+- `/info?tab=coaching` — Mark Taylor's classes, summer camps, dashboard enrollment link
 - `/info?tab=faq` — FAQ accordion + Google Maps
+- `/info?tab=rules` — Constitution articles, regulations
+- `/info?tab=privacy` — Privacy policy (PIPEDA)
+- `/info?tab=terms` — Terms of service
 
 ## KEY FILES
 - `app/layout.tsx` - Root layout (fonts, PWA meta tags, service worker registration)
