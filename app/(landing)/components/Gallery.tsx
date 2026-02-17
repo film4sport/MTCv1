@@ -24,6 +24,8 @@ const slides = [
   { src: `${CDN}/gallery-13-backhand.jpeg`, alt: 'MTC Tennis' },
   { src: `${CDN}/gallery-14-sunset-court.jpeg`, alt: 'MTC Tennis' },
   { src: `${CDN}/gallery-15-team-spirit.jpeg`, alt: 'MTC Tennis' },
+  { src: `${CDN}/info-opening-day.jpeg`, alt: 'MTC Opening Day' },
+  { src: `${CDN}/info-tennis-court.jpeg`, alt: 'MTC Tennis Court' },
 ];
 
 export default function Gallery({ onOpenLightbox }: GalleryProps) {
