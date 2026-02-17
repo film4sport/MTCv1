@@ -24,16 +24,10 @@ const nextConfig = {
         ],
       },
       {
-        // Prevent browser from caching HTML pages — always fetch fresh
-        // Covers all page routes (/, /info, /dashboard/*, /login, etc.)
-        source: '/:path*',
-        has: [
-          {
-            type: 'header',
-            key: 'accept',
-            value: '(.*text/html.*)',
-          },
-        ],
+        // Prevent browser from caching ALL dynamic content — pages, RSC payloads, API.
+        // No 'has' condition (the old Accept header check was unreliable).
+        // Excludes only truly static files (Next.js hashed assets, fonts, images).
+        source: '/((?!_next/static|_next/image).*)',
         headers: [
           {
             key: 'Cache-Control',
@@ -46,16 +40,6 @@ const nextConfig = {
           {
             key: 'Expires',
             value: '0',
-          },
-        ],
-      },
-      {
-        // Prevent caching of RSC data payloads (client-side navigation)
-        source: '/:path*.rsc',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'no-cache, no-store, must-revalidate',
           },
         ],
       },

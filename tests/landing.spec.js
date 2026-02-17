@@ -85,8 +85,8 @@ test.describe('Hero Section', () => {
     await expect(heroContent).toHaveClass(/visible/);
   });
 
-  test('hero has Join Now and Member Login buttons', async ({ page }) => {
-    const joinBtn = page.locator('section').first().getByText('Join Now');
+  test('hero has Become a Member and Member Login buttons', async ({ page }) => {
+    const joinBtn = page.locator('section').first().getByText('Become a Member');
     await expect(joinBtn).toBeVisible();
     const loginBtn = page.locator('section').first().getByText('Member Login');
     await expect(loginBtn).toBeVisible();

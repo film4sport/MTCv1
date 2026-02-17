@@ -74,12 +74,6 @@ export default function LoginPage() {
     }, 600);
   };
 
-  const handleGuest = () => {
-    const guest: User = { id: 'guest', name: 'Guest', email: 'guest@mtc.ca', role: 'guest', memberSince: '' };
-    localStorage.setItem('mtc-current-user', JSON.stringify(guest));
-    router.push('/dashboard');
-  };
-
   return (
     <>
       <style jsx global>{`
@@ -553,24 +547,26 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Divider */}
-          <div className="flex items-center my-6" style={{ color: '#999', fontSize: '0.875rem' }}>
-            <div className="flex-1 h-px" style={{ background: '#e0dcd3' }} />
-            <span className="px-4">or</span>
-            <div className="flex-1 h-px" style={{ background: '#e0dcd3' }} />
+          {/* Demo Credentials */}
+          <div className="mt-6 rounded-xl p-4 space-y-2" style={{ background: 'rgba(107, 122, 61, 0.06)', border: '1px solid rgba(107, 122, 61, 0.15)' }}>
+            <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: '#6b7a3d' }}>Test Accounts</p>
+            {[
+              { label: 'Member', email: 'member@mtc.ca', pass: 'member123' },
+              { label: 'Coach', email: 'coach@mtc.ca', pass: 'coach123' },
+              { label: 'Admin', email: 'admin@mtc.ca', pass: 'admin123' },
+            ].map(cred => (
+              <button
+                key={cred.label}
+                type="button"
+                onClick={() => { setEmail(cred.email); setPassword(cred.pass); setEmailError(false); setPasswordError(false); }}
+                className="flex items-center justify-between w-full px-3 py-2 rounded-lg text-xs transition-colors hover:bg-white/60"
+                style={{ color: '#2a2f1e' }}
+              >
+                <span className="font-medium">{cred.label}</span>
+                <span style={{ color: '#6b7266' }}>{cred.email}</span>
+              </button>
+            ))}
           </div>
-
-          {/* Continue as Guest */}
-          <button
-            onClick={handleGuest}
-            className="flex items-center justify-center gap-3 w-full py-3.5 rounded-xl text-[0.9375rem] transition-all hover:bg-[#f0ede6] active:scale-[0.97]"
-            style={{ background: '#faf8f3', border: '1px solid #e0dcd3', color: '#2a2f1e', minHeight: 52 }}
-          >
-            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="#6b7a3d" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-            </svg>
-            Continue as Guest
-          </button>
 
           {/* Register Link */}
           <p className="mt-6 lg:mt-8 text-center text-sm sm:text-base" style={{ color: '#6b7266' }}>

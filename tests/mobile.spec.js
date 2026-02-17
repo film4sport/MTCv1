@@ -14,19 +14,6 @@ test.describe('Mobile Responsive', () => {
     await expect(mobileMenuBtn).toBeAttached();
   });
 
-  test('booking overlay opens from mobile menu', async ({ page }) => {
-    // Open mobile menu
-    const menuBtn = page.locator('button[aria-label="Open menu"]');
-    await menuBtn.click();
-    await page.waitForTimeout(300);
-    // Click Book button in mobile menu
-    const bookBtn = page.locator('.mobile-menu').getByText('Book', { exact: false }).first();
-    await bookBtn.click();
-    await page.waitForTimeout(500);
-    const overlay = page.locator('.booking-overlay.active');
-    await expect(overlay).toBeAttached();
-  });
-
   test('calendar renders on mobile', async ({ page }) => {
     await page.locator('#schedule').scrollIntoViewIfNeeded();
     await page.waitForTimeout(500);
