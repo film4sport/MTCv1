@@ -347,14 +347,14 @@ function InfoPageContent() {
       </section>
 
       {/* Tab Navigation */}
-      <div className="px-8 lg:px-16 mb-8" style={{ backgroundColor: '#f5f2eb' }}>
-        <div className="max-w-7xl mx-auto flex justify-center gap-3 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}>
+      <div className="sticky top-[61px] z-40 px-8 lg:px-16 py-3" style={{ backgroundColor: '#f5f2eb', borderBottom: '1px solid #e0dcd3' }}>
+        <div className="max-w-7xl mx-auto flex justify-center gap-3 overflow-x-auto" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}>
           {[
             { key: 'about', label: 'About' },
             { key: 'membership', label: 'Membership' },
-            { key: 'rules', label: 'Rules' },
             { key: 'coaching', label: 'Coaching' },
             { key: 'faq', label: 'FAQ' },
+            { key: 'rules', label: 'Rules' },
             { key: 'privacy', label: 'Privacy' },
             { key: 'terms', label: 'Terms' },
           ].map((t) => (
@@ -382,14 +382,14 @@ function InfoPageContent() {
               <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
                 <div className="relative fade-in-left">
                   <div className="aspect-[4/3] rounded-2xl overflow-hidden">
-                    <img src="https://cdn.jsdelivr.net/gh/film4sport/my-webapp-images@main/mtc-images/hero-aerial-court.png" alt="Mono Tennis Club Courts" className="w-full h-full object-cover" loading="lazy" />
+                    <img src="https://cdn.jsdelivr.net/gh/film4sport/my-webapp-images@main/mtc-images/gallery-05-serve.jpeg" alt="Tennis serve at Mono Tennis Club" className="w-full h-full object-cover" loading="lazy" />
                   </div>
                   <div className="hidden lg:grid grid-cols-2 gap-3 mt-3">
                     <div className="aspect-video rounded-lg overflow-hidden">
-                      <img src="https://cdn.jsdelivr.net/gh/film4sport/my-webapp-images@main/mtc-images/info-opening-day.jpeg" alt="Mono Tennis Club Opening Day" className="w-full h-full object-cover" loading="lazy" />
+                      <img src="https://cdn.jsdelivr.net/gh/film4sport/my-webapp-images@main/mtc-images/gallery-01-community.jpeg" alt="Mono Tennis Club Community" className="w-full h-full object-cover" loading="lazy" />
                     </div>
                     <div className="aspect-video rounded-lg overflow-hidden">
-                      <img src="https://cdn.jsdelivr.net/gh/film4sport/my-webapp-images@main/mtc-images/info-tennis-court.jpeg" alt="Tennis Court" className="w-full h-full object-cover" loading="lazy" />
+                      <img src="https://cdn.jsdelivr.net/gh/film4sport/my-webapp-images@main/mtc-images/MTC%20logo.jpg" alt="Mono Tennis Club Logo" className="w-full h-full object-cover" loading="lazy" />
                     </div>
                   </div>
                 </div>
@@ -1198,12 +1198,12 @@ function InfoPageContent() {
                 Ready to Play?
               </h2>
               <p className="mt-3 text-sm text-center md:text-left" style={{ color: '#6b7266' }}>
-                Head back to the home page to book a court or view the schedule.
+                Join Mono Tennis Club and get access to courts, events, and more.
               </p>
             </div>
             <div className="flex items-center gap-4">
-              <a href="/" className="px-8 py-3 rounded-full text-sm font-medium transition-all hover:opacity-90 hover:shadow-lg" style={{ backgroundColor: '#6b7a3d', color: '#fff' }}>
-                Back to Home
+              <a href="/info?tab=membership" className="px-8 py-3 rounded-full text-sm font-medium transition-all hover:opacity-90 hover:shadow-lg" style={{ backgroundColor: '#6b7a3d', color: '#fff' }}>
+                Become a Member
               </a>
             </div>
           </div>
