@@ -1,18 +1,16 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useApp } from '../lib/store';
 import DashboardHeader from '../components/DashboardHeader';
 
 export default function SettingsPage() {
-  const { currentUser, logout } = useApp();
+  const { currentUser, logout, notificationPreferences, setNotificationPreferences } = useApp();
   const router = useRouter();
-  const [notifEvents, setNotifEvents] = useState(true);
-  const [notifPayments, setNotifPayments] = useState(true);
-  const [notifPartners, setNotifPartners] = useState(true);
-  const [notifMessages, setNotifMessages] = useState(true);
-  const [notifPrograms, setNotifPrograms] = useState(true);
+
+  const togglePref = (key: keyof typeof notificationPreferences) => {
+    setNotificationPreferences({ ...notificationPreferences, [key]: !notificationPreferences[key] });
+  };
 
   const handleLogout = () => {
     logout();
@@ -29,21 +27,22 @@ export default function SettingsPage() {
         <div className="rounded-2xl border p-6 section-card" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
           <h3 className="font-semibold mb-4" style={{ color: '#2a2f1e' }}>Notification Preferences</h3>
           <div className="space-y-4">
-            {[
-              { label: 'Events & Tournaments', desc: 'New events, RSVP reminders', checked: notifEvents, onChange: setNotifEvents },
-              { label: 'Payments & Billing', desc: 'Charges, payments, balance alerts', checked: notifPayments, onChange: setNotifPayments },
-              { label: 'Partner Requests', desc: 'New partner matches and requests', checked: notifPartners, onChange: setNotifPartners },
-              { label: 'Messages', desc: 'New messages from members', checked: notifMessages, onChange: setNotifMessages },
-              { label: 'Programs', desc: 'Enrollment confirmations, session reminders', checked: notifPrograms, onChange: setNotifPrograms },
-            ].map(item => (
+            {([
+              { label: 'Bookings', desc: 'Court booking confirmations and participant alerts', key: 'bookings' as const },
+              { label: 'Events & Tournaments', desc: 'New events, RSVP reminders', key: 'events' as const },
+              { label: 'Payments & Billing', desc: 'Charges, payments, balance alerts', key: 'payments' as const },
+              { label: 'Partner Requests', desc: 'New partner matches and requests', key: 'partners' as const },
+              { label: 'Messages', desc: 'New messages from members', key: 'messages' as const },
+              { label: 'Programs', desc: 'Enrollment confirmations, session reminders', key: 'programs' as const },
+            ]).map(item => (
               <label key={item.label} className="flex items-center justify-between cursor-pointer py-2">
                 <div>
                   <p className="text-sm font-medium" style={{ color: '#2a2f1e' }}>{item.label}</p>
                   <p className="text-xs" style={{ color: '#6b7266' }}>{item.desc}</p>
                 </div>
                 <div className="relative">
-                  <input type="checkbox" className="sr-only peer" checked={item.checked} onChange={(e) => item.onChange(e.target.checked)} />
-                  <div className="w-11 h-6 rounded-full peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all" style={{ background: item.checked ? '#6b7a3d' : '#d1d5db' }} />
+                  <input type="checkbox" className="sr-only peer" checked={notificationPreferences[item.key]} onChange={() => togglePref(item.key)} />
+                  <div className="w-11 h-6 rounded-full peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all" style={{ background: notificationPreferences[item.key] ? '#6b7a3d' : '#d1d5db' }} />
                 </div>
               </label>
             ))}

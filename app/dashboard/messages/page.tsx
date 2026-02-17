@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useApp } from '../lib/store';
 import DashboardHeader from '../components/DashboardHeader';
+import { downloadICS } from '../lib/calendar';
 
 export default function MessagesPage() {
   const { currentUser, conversations, members, sendMessage, markConversationRead, showToast } = useApp();
@@ -207,6 +208,9 @@ export default function MessagesPage() {
                 <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3">
                   {activeConvo?.messages.map(msg => {
                     const isMine = msg.fromId === currentUser?.id;
+                    // Detect booking calendar marker [booking:courtName:date:time]
+                    const bookingMatch = msg.text.match(/\[booking:([^:]+):(\d{4}-\d{2}-\d{2}):([^\]]+)\]/);
+                    const displayText = bookingMatch ? msg.text.replace(bookingMatch[0], '').trim() : msg.text;
                     return (
                       <div key={msg.id} className={`flex ${isMine ? 'justify-end' : 'justify-start'} animate-fadeIn`}>
                         <div
@@ -218,7 +222,30 @@ export default function MessagesPage() {
                             borderBottomLeftRadius: isMine ? 16 : 4,
                           }}
                         >
-                          <p className="text-sm">{msg.text}</p>
+                          <p className="text-sm whitespace-pre-line">{displayText}</p>
+                          {bookingMatch && (
+                            <button
+                              onClick={() => {
+                                downloadICS([{
+                                  title: `Tennis — ${bookingMatch[1]}`,
+                                  date: bookingMatch[2],
+                                  time: bookingMatch[3],
+                                  duration: 60,
+                                  location: `${bookingMatch[1]} — Mono Tennis Club`,
+                                }], 'mtc-booking.ics');
+                              }}
+                              className="mt-2 flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
+                              style={{
+                                background: isMine ? 'rgba(255,255,255,0.15)' : 'rgba(107, 122, 61, 0.1)',
+                                color: isMine ? '#fff' : '#6b7a3d',
+                              }}
+                            >
+                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                              </svg>
+                              Add to Calendar
+                            </button>
+                          )}
                           <p className="text-[0.6rem] mt-1 opacity-60">
                             {new Date(msg.timestamp).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
                           </p>

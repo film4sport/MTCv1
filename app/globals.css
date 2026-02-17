@@ -30,7 +30,7 @@ html {
   forced-color-adjust: none;
   -webkit-filter: none !important;
   filter: none !important;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 /* Prevent Samsung Internet and other browsers from applying dark mode filters */
@@ -56,7 +56,7 @@ html, body, #__next, main, div {
   body {
     @apply bg-gray-50 text-gray-900;
     color-scheme: light only !important;
-    overflow-x: hidden;
+    overflow-x: clip;
     padding-left: var(--sal);
     padding-right: var(--sar);
   }
