@@ -26,11 +26,16 @@ export default function SchedulePage() {
   // Combine bookings, events, and program sessions into a unified list
   const allItems = useMemo(() => {
     const items: { id: string; type: 'booking' | 'event' | 'program'; date: string; time: string; title: string; subtitle: string; extra?: string }[] = [];
-    myBookings.forEach(b => items.push({
-      id: b.id, type: 'booking', date: b.date, time: b.time,
-      title: b.courtName, subtitle: b.time,
-      extra: b.guestName ? `Guest: ${b.guestName}` : undefined,
-    }));
+    myBookings.forEach(b => {
+      const extras: string[] = [];
+      if (b.guestName) extras.push(`Guest: ${b.guestName}`);
+      if (b.participants && b.participants.length > 0) extras.push(`With: ${b.participants.map(p => p.name).join(', ')}`);
+      items.push({
+        id: b.id, type: 'booking', date: b.date, time: b.time,
+        title: b.courtName, subtitle: b.time,
+        extra: extras.length > 0 ? extras.join(' • ') : undefined,
+      });
+    });
     myEvents.forEach(e => items.push({
       id: e.id, type: 'event', date: e.date, time: e.time,
       title: e.title, subtitle: `${e.time} • ${e.location}`,

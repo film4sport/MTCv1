@@ -27,7 +27,10 @@
       "Bash(done)",
       "Bash(cmd.exe /c \"taskkill /F /PID 4848 /PID 39412 /PID 7732 /PID 21792 /PID 37096 /PID 40564 /PID 45884 /PID 31920 /PID 20060 /PID 19864\")",
       "Bash(wc:*)",
-      "Bash(sort:*)"
+      "Bash(sort:*)",
+      "WebFetch(domain:clubspark.ca)",
+      "mcp__plugin_playwright_playwright__browser_navigate",
+      "mcp__plugin_playwright_playwright__browser_install"
     ]
   }
 }

@@ -7,7 +7,7 @@ import '../(landing)/styles/landing.css';
 const privacySections = [
   {
     title: 'What We Collect',
-    content: 'We collect personal information you provide when registering: name, email address, phone number, and player rating. We also collect booking history and payment records to manage your membership.',
+    content: 'We collect personal information you provide when registering: name, email address, and phone number. We also collect booking history and payment records to manage your membership.',
   },
   {
     title: 'How We Use Your Information',
@@ -114,7 +114,7 @@ const clubRules = [
 const constitutionArticles = [
   {
     title: 'Article 1 — Name',
-    content: 'The organization shall be known as the Mono Tennis Club (hereinafter referred to as "the Club").',
+    content: 'The organization is called the Mono Tennis Club, located at 754483 Mono Centre Road, Mono, Ontario L9W 5W9, beside the Mono Community Centre.',
   },
   {
     title: 'Article 2 — Purpose',
@@ -122,11 +122,11 @@ const constitutionArticles = [
   },
   {
     title: 'Article 3 — Membership',
-    content: 'Membership is open to all persons who pay the prescribed fees. Membership types include Adult (Single), Family, Student (18 & under), and Guest Pass. All members must sign a waiver of liability before participating in any club activities. The Executive may revoke membership for conduct detrimental to the Club.',
+    content: 'Court access requires either full Club membership or non-club membership through the Town\'s Recreation Department. Members must pay fees and complete registration before playing. Adults are 18+ at calendar year start; juniors are 17 or younger. Only paid-up Club members are permitted to play on Club teams.',
   },
   {
     title: 'Article 4 — Executive Officers',
-    content: 'The Executive shall consist of President, Vice-President, Treasurer, Secretary, and up to three Directors at Large. Officers are elected at the Annual General Meeting for a term of one year. The Executive shall manage the affairs of the Club between general meetings.',
+    content: 'The Board comprises five Executive Officers (President, Vice-President, Secretary, Treasurer, Past President) plus Members-At-Large, elected annually at the AGM. No term limits apply. The Board oversees all Club activities, maintenance, and must prioritize transparency in decision-making.',
   },
   {
     title: 'Article 5 — Activity Coordinators',
@@ -134,15 +134,15 @@ const constitutionArticles = [
   },
   {
     title: 'Article 6 — Meetings',
-    content: 'The Annual General Meeting shall be held before the start of each season. Special meetings may be called by the President or by written request of ten or more members. A quorum shall consist of fifteen members or 25% of the membership, whichever is less.',
+    content: 'Board meetings occur regularly April through October; off-season meetings as needed. The AGM is held in September or October. Members vote in person or by proxy. AGM notice and nominations must be sent a minimum of 21 days in advance. Quorum requires four Board members. Constitutional amendments require a two-thirds majority of members attending in person or by proxy.',
   },
   {
     title: 'Article 7 — Finances & Budget',
-    content: 'Membership fees shall be set by the Executive and ratified at the AGM. The Treasurer shall maintain accurate records of all financial transactions. The fiscal year runs from January 1 to December 31. An annual financial statement shall be presented at the AGM.',
+    content: 'Club funds support facility improvements, programs, and tennis promotion. Commitments under $1,000 are at individual Board member discretion with President consultation. Commitments $1,000–$5,000 require Board majority. Commitments exceeding $5,000 require a membership vote. The fiscal year runs September 1 to August 31 unless the Board specifies otherwise.',
   },
   {
     title: 'Article 8 — Solicitation',
-    content: 'No member shall solicit funds, advertise products, or conduct business on Club premises without prior written approval of the Executive. Sponsorship arrangements must be approved by the Executive.',
+    content: 'Members cannot canvass, solicit, or exhibit services or products on premises or at Club events without Executive authorization. Members cannot use the membership list for solicitation or canvassing for any product, service, or political party.',
   },
 ];
 
@@ -168,7 +168,7 @@ const membershipTypes = [
   { key: 'adult', label: 'Adult (Single)', price: 100 },
   { key: 'family', label: 'Family', price: 200 },
   { key: 'student', label: 'Student (18 & under)', price: 50 },
-  { key: 'guest', label: 'Guest Pass', price: 5 },
+  { key: 'guest', label: 'Guest Pass', price: 10 },
 ];
 
 function InfoPageContent() {
@@ -186,10 +186,10 @@ function InfoPageContent() {
 
   // Signup flow state
   const [signupStep, setSignupStep] = useState(0);
-  const [signupData, setSignupData] = useState({ membershipType: '', name: '', email: '', rating: '', password: '' });
+  const [signupData, setSignupData] = useState({ membershipType: '', name: '', email: '', password: '' });
   const [waiverAccepted, setWaiverAccepted] = useState(false);
   const [waiverScrolled, setWaiverScrolled] = useState(false);
-  const [existingProfile, setExistingProfile] = useState<{ name: string; email: string; membershipType: string; rating: string; joinedDate: string } | null>(null);
+  const [existingProfile, setExistingProfile] = useState<{ name: string; email: string; membershipType: string; joinedDate: string } | null>(null);
 
   // Load existing profile from localStorage
   useEffect(() => {
@@ -421,6 +421,41 @@ function InfoPageContent() {
               </div>
             </div>
           </section>
+
+          {/* Board of Directors */}
+          <section className="py-12 lg:py-16 px-8 lg:px-16" style={{ backgroundColor: '#f5f2eb' }}>
+            <div className="max-w-7xl mx-auto fade-in">
+              <div className="text-center mb-8">
+                <span className="section-label">// Leadership</span>
+                <h2 className="headline-font text-2xl md:text-3xl leading-tight mt-3" style={{ color: '#2a2f1e' }}>
+                  Board of Directors
+                </h2>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                {[
+                  { name: 'Patti Powell', role: 'President' },
+                  { name: 'Peter Gibson', role: 'Past President' },
+                  { name: 'Jan Howard', role: 'Treasurer' },
+                  { name: 'Kelly Kamstra-Lloyd', role: 'Member at Large' },
+                  { name: 'Patrick Minshall', role: 'Member at Large' },
+                  { name: 'Phil Primmer', role: 'Member at Large' },
+                  { name: 'Michael Horton', role: 'Member at Large' },
+                ].map((member) => (
+                  <div key={member.name} className="rounded-xl p-4 text-center" style={{ background: '#faf8f3', border: '1px solid #e0dcd3' }}>
+                    <div className="w-10 h-10 rounded-full mx-auto mb-2 flex items-center justify-center text-sm font-bold" style={{ backgroundColor: '#6b7a3d', color: '#fff' }}>
+                      {member.name.split(' ').map(n => n[0]).join('')}
+                    </div>
+                    <p className="text-sm font-semibold" style={{ color: '#2a2f1e' }}>{member.name}</p>
+                    <p className="text-xs mt-0.5" style={{ color: '#6b7266' }}>{member.role}</p>
+                  </div>
+                ))}
+              </div>
+              <p className="text-center text-xs mt-4" style={{ color: '#999' }}>
+                Vice-President and Secretary positions are currently open.
+              </p>
+            </div>
+          </section>
+
         </>
       )}
 
@@ -438,7 +473,7 @@ function InfoPageContent() {
                   <div className="flex-1">
                     <h4 className="font-bold text-base" style={{ color: '#2a2f1e' }}>{existingProfile.name}</h4>
                     <p className="text-sm" style={{ color: '#6b7266' }}>
-                      {membershipTypes.find(m => m.key === existingProfile.membershipType)?.label || existingProfile.membershipType} Member &middot; {existingProfile.rating}
+                      {membershipTypes.find(m => m.key === existingProfile.membershipType)?.label || existingProfile.membershipType} Member
                     </p>
                     <p className="text-xs mt-1" style={{ color: '#999' }}>{existingProfile.email}</p>
                   </div>
@@ -473,7 +508,7 @@ function InfoPageContent() {
                       </div>
                       <h3 className="font-bold text-xl mb-4" style={{ color: '#2a2f1e' }}>How to Join</h3>
                       <ul className="space-y-3 text-sm leading-relaxed" style={{ color: '#6b7266' }}>
-                        {['Registration opens March 1st each year', 'Pay by Interac e-transfer or credit/debit card', 'Guest passes available for $5 per visit', 'All members must sign a waiver'].map((item, i) => (
+                        {['Registration opens March 1st each year', 'Pay by Interac e-transfer or credit/debit card', 'Guest passes available for $10 per visit', 'All members must sign a waiver'].map((item, i) => (
                           <li key={i} className="flex items-start gap-2">
                             <svg className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: '#6b7a3d' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -695,25 +730,6 @@ function InfoPageContent() {
                           style={{ backgroundColor: '#faf8f3', border: '1px solid #e0dcd3', color: '#2a2f1e' }}
                         />
                       </div>
-                      <div>
-                        <label className="block text-sm font-medium mb-2" style={{ color: '#6b7266' }}>Player Rating</label>
-                        <div className="grid grid-cols-2 gap-3">
-                          {['Beginner', 'Intermediate', 'Advanced', 'Competitive'].map((r) => (
-                            <button
-                              key={r}
-                              onClick={() => setSignupData({ ...signupData, rating: r })}
-                              className="px-4 py-3 rounded-xl text-sm font-medium transition-all"
-                              style={
-                                signupData.rating === r
-                                  ? { backgroundColor: '#6b7a3d', color: '#fff' }
-                                  : { backgroundColor: '#faf8f3', color: '#6b7266', border: '1px solid #e0dcd3' }
-                              }
-                            >
-                              {r}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
                     </div>
                     <div className="flex items-center gap-4 mt-8">
                       <button
@@ -725,10 +741,10 @@ function InfoPageContent() {
                       </button>
                       <button
                         onClick={() => setSignupStep(3)}
-                        disabled={!signupData.name.trim() || !signupData.email.trim() || !signupData.rating || signupData.password.length < 6}
+                        disabled={!signupData.name.trim() || !signupData.email.trim() || signupData.password.length < 6}
                         className="flex-1 px-6 py-3 rounded-full text-sm font-semibold transition-all"
                         style={
-                          signupData.name.trim() && signupData.email.trim() && signupData.rating && signupData.password.length >= 6
+                          signupData.name.trim() && signupData.email.trim() && signupData.password.length >= 6
                             ? { backgroundColor: '#6b7a3d', color: '#fff' }
                             : { backgroundColor: '#e0dcd3', color: '#999', cursor: 'not-allowed' }
                         }
@@ -842,10 +858,9 @@ function InfoPageContent() {
                           { label: 'Name', value: signupData.name },
                           { label: 'Email', value: signupData.email },
                           { label: 'Membership', value: getMembershipLabel() },
-                          { label: 'Player Rating', value: signupData.rating },
                           { label: 'Waiver', value: 'Signed' },
                         ].map((row, i) => (
-                          <div key={i} className="flex items-center justify-between py-2" style={i < 4 ? { borderBottom: '1px solid #e0dcd3' } : {}}>
+                          <div key={i} className="flex items-center justify-between py-2" style={i < 3 ? { borderBottom: '1px solid #e0dcd3' } : {}}>
                             <span className="text-sm" style={{ color: '#999' }}>{row.label}</span>
                             <span className="text-sm font-medium" style={{ color: '#2a2f1e' }}>{row.value}</span>
                           </div>

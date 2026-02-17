@@ -30,6 +30,7 @@ export interface Booking {
   userId: string;
   userName: string;
   guestName?: string;
+  participants?: { id: string; name: string }[];
   status: 'confirmed' | 'cancelled';
   type: 'court' | 'partner' | 'ball-machine' | 'program';
   programId?: string;
@@ -98,6 +99,24 @@ export interface Notification {
   timestamp: string;
   read: boolean;
 }
+
+export interface NotificationPreferences {
+  bookings: boolean;
+  events: boolean;
+  payments: boolean;
+  partners: boolean;
+  messages: boolean;
+  programs: boolean;
+}
+
+export const DEFAULT_NOTIFICATION_PREFS: NotificationPreferences = {
+  bookings: true,
+  events: true,
+  payments: true,
+  partners: true,
+  messages: true,
+  programs: true,
+};
 
 export interface WeatherData {
   tempC: number;

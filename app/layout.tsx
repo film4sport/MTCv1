@@ -52,7 +52,12 @@ export default function RootLayout({
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              if ('serviceWorker' in navigator) {
+              if ('serviceWorker' in navigator && location.hostname === 'localhost') {
+                // Dev mode: unregister any existing SW to prevent stale cache issues
+                navigator.serviceWorker.getRegistrations().then(function(regs) {
+                  regs.forEach(function(r) { r.unregister(); });
+                });
+              } else if ('serviceWorker' in navigator) {
                 // Reload when a new SW takes control (covers all pages)
                 var refreshing = false;
                 navigator.serviceWorker.addEventListener('controllerchange', function() {

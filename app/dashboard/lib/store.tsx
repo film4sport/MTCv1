@@ -1,8 +1,8 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
-import type { User, Court, Booking, ClubEvent, Partner, Conversation, Announcement, Notification, WeatherData, MemberPayment, AdminAnalytics, CoachingProgram } from './types';
-import { CLUB_LOCATION } from './types';
+import type { User, Court, Booking, ClubEvent, Partner, Conversation, Announcement, Notification, WeatherData, MemberPayment, AdminAnalytics, CoachingProgram, NotificationPreferences } from './types';
+import { CLUB_LOCATION, DEFAULT_NOTIFICATION_PREFS } from './types';
 import { DEFAULT_MEMBERS, DEFAULT_COURTS, DEFAULT_BOOKINGS, DEFAULT_EVENTS, DEFAULT_PARTNERS, DEFAULT_CONVERSATIONS, DEFAULT_ANNOUNCEMENTS, DEFAULT_NOTIFICATIONS, DEFAULT_PAYMENTS, DEFAULT_ANALYTICS, DEFAULT_PROGRAMS } from './data';
 
 interface AppState {
@@ -45,6 +45,10 @@ interface AppState {
   cancelProgram: (programId: string) => void;
   enrollInProgram: (programId: string, memberId: string, memberName: string) => void;
   withdrawFromProgram: (programId: string, memberId: string) => void;
+
+  // Notification preferences
+  notificationPreferences: NotificationPreferences;
+  setNotificationPreferences: (prefs: NotificationPreferences) => void;
 
   // UI
   sidebarCollapsed: boolean;
@@ -101,6 +105,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [payments, setPayments] = useState<MemberPayment[]>(DEFAULT_PAYMENTS);
   const [analytics] = useState<AdminAnalytics>(DEFAULT_ANALYTICS);
   const [programs, setPrograms] = useState<CoachingProgram[]>(DEFAULT_PROGRAMS);
+  const [notificationPreferences, setNotificationPreferences] = useState<NotificationPreferences>(DEFAULT_NOTIFICATION_PREFS);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [toasts, setToasts] = useState<{ id: string; message: string; type: 'success' | 'error' | 'info'; exiting?: boolean }[]>([]);
@@ -115,6 +120,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setNotifications(loadJSON('mtc-notifications', DEFAULT_NOTIFICATIONS));
     setPrograms(loadJSON('mtc-programs', DEFAULT_PROGRAMS));
     setPayments(loadJSON('mtc-payments', DEFAULT_PAYMENTS));
+    setNotificationPreferences(loadJSON('mtc-notification-prefs', DEFAULT_NOTIFICATION_PREFS));
     setIsLoaded(true);
   }, []);
 
@@ -125,6 +131,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => { if (isLoaded) saveJSON('mtc-notifications', notifications); }, [notifications, isLoaded]);
   useEffect(() => { if (isLoaded) saveJSON('mtc-programs', programs); }, [programs, isLoaded]);
   useEffect(() => { if (isLoaded) saveJSON('mtc-payments', payments); }, [payments, isLoaded]);
+  useEffect(() => { if (isLoaded) saveJSON('mtc-notification-prefs', notificationPreferences); }, [notificationPreferences, isLoaded]);
 
   // Fetch weather
   useEffect(() => {
@@ -213,7 +220,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // Actions
   const addBooking = useCallback((booking: Booking) => {
     setBookings(prev => [...prev, booking]);
-    // Create notification for booking
+    // Create notification for booker
     if (booking.type === 'court') {
       const notif: Notification = {
         id: `n-${Date.now()}`,
@@ -224,6 +231,40 @@ export function AppProvider({ children }: { children: ReactNode }) {
         read: false,
       };
       setNotifications(prev => [notif, ...prev]);
+
+      // Notify each participant with a notification + message
+      if (booking.participants && booking.participants.length > 0) {
+        const participantNotifs: Notification[] = booking.participants.map((p, i) => ({
+          id: `n-${Date.now()}-p${i}`,
+          type: 'booking' as const,
+          title: 'Added to Booking',
+          body: `${booking.userName} added you to a booking: ${booking.courtName} on ${booking.date} at ${booking.time}.`,
+          timestamp: new Date().toISOString(),
+          read: false,
+        }));
+        setNotifications(prev => [...participantNotifs, ...prev]);
+
+        // Send message to each participant with calendar marker
+        booking.participants.forEach((participant, i) => {
+          const msg = {
+            id: `msg-${Date.now()}-p${i}`,
+            from: booking.userName,
+            fromId: booking.userId,
+            to: participant.name,
+            toId: participant.id,
+            text: `You've been added to a court booking!\n${booking.courtName} — ${new Date(booking.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} at ${booking.time}.\n[booking:${booking.courtName}:${booking.date}:${booking.time}]`,
+            timestamp: new Date().toISOString(),
+            read: false,
+          };
+          setConversations(prev => {
+            const existing = prev.find(c => c.memberId === booking.userId);
+            if (existing) {
+              return prev.map(c => c.memberId === booking.userId ? { ...c, messages: [...c.messages, msg], lastMessage: msg.text, lastTimestamp: msg.timestamp, unread: c.unread + 1 } : c);
+            }
+            return [...prev, { memberId: booking.userId, memberName: booking.userName, lastMessage: msg.text, lastTimestamp: msg.timestamp, unread: 1, messages: [msg] }];
+          });
+        });
+      }
     }
   }, []);
 
@@ -385,6 +426,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       announcements, setAnnouncements, dismissAnnouncement, notifications, setNotifications, markNotificationRead,
       clearNotifications, weather, payments, setPayments, analytics,
       programs, setPrograms, addProgram, cancelProgram, enrollInProgram, withdrawFromProgram,
+      notificationPreferences, setNotificationPreferences,
       sidebarCollapsed, setSidebarCollapsed, mobileSidebarOpen, setMobileSidebarOpen, isLoaded,
       toasts, showToast,
     }}>

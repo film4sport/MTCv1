@@ -9,13 +9,23 @@ interface DashboardHeaderProps {
 }
 
 export default function DashboardHeader({ title }: DashboardHeaderProps) {
-  const { currentUser, logout, notifications, clearNotifications, markNotificationRead } = useApp();
+  const { currentUser, logout, notifications, clearNotifications, markNotificationRead, notificationPreferences } = useApp();
   const [menuOpen, setMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  // Map notification type to preference key; announcements always show
+  const prefMap: Record<string, keyof typeof notificationPreferences> = {
+    booking: 'bookings', event: 'events', payment: 'payments',
+    partner: 'partners', message: 'messages',
+  };
+  const filteredNotifications = notifications.filter(n => {
+    if (n.type === 'announcement') return true;
+    const key = prefMap[n.type];
+    return key ? notificationPreferences[key] : true;
+  });
+  const unreadCount = filteredNotifications.filter(n => !n.read).length;
 
   // Close dropdowns on outside click
   useEffect(() => {
@@ -60,10 +70,10 @@ export default function DashboardHeader({ title }: DashboardHeaderProps) {
                 )}
               </div>
               <div className="max-h-80 overflow-y-auto">
-                {notifications.length === 0 ? (
+                {filteredNotifications.length === 0 ? (
                   <div className="p-6 text-center text-sm" style={{ color: '#6b7a3d' }}>No notifications</div>
                 ) : (
-                  notifications.map(n => (
+                  filteredNotifications.map(n => (
                     <button
                       key={n.id}
                       onClick={() => markNotificationRead(n.id)}
