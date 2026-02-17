@@ -88,44 +88,8 @@ export const DEFAULT_BOOKINGS: Booking[] = [
 ];
 
 // ─── Club Events ────────────────────────────────────────
-// Matches landing page Schedule.tsx and mtc-app events.js
+// REAL club events only — matches landing page Schedule.tsx
 export const DEFAULT_EVENTS: ClubEvent[] = [
-  {
-    id: 'feb-social-mixer',
-    title: 'Winter Social Mixer',
-    date: '2026-02-15',
-    time: '2:00 PM - 4:00 PM',
-    location: 'Clubhouse',
-    badge: 'free',
-    price: 'Free',
-    description: 'Indoor social mixer with food and drinks. Great way to meet new members before the season!',
-    attendees: ['Sarah Wilson', 'Mike Chen', 'Emily Rodriguez'],
-    type: 'social',
-  },
-  {
-    id: 'feb-indoor-rr',
-    title: 'Indoor Round Robin',
-    date: '2026-02-21',
-    time: '10:00 AM - 12:00 PM',
-    location: 'Courts 1-2',
-    badge: 'members',
-    price: 'Members',
-    description: 'Pre-season indoor round robin. All skill levels welcome.',
-    attendees: ['James Park', "Ryan O'Connor"],
-    type: 'roundrobin',
-  },
-  {
-    id: 'feb-agm',
-    title: 'Annual General Meeting',
-    date: '2026-02-28',
-    time: '7:00 PM - 9:00 PM',
-    location: 'Clubhouse',
-    badge: 'members',
-    price: 'Members',
-    description: 'Annual general meeting to review the 2025 season and plan for 2026.',
-    attendees: [],
-    type: 'social',
-  },
   {
     id: 'opening-day-bbq',
     title: 'Opening Day BBQ & Meet the Pros',

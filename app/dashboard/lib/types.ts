@@ -4,7 +4,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: 'member' | 'coach' | 'admin' | 'guest';
+  role: 'member' | 'coach' | 'admin';
   phone?: string;
   ntrp?: number; // skill rating 1.0 - 7.0
   memberSince?: string;

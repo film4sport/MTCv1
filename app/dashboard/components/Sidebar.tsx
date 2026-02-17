@@ -27,6 +27,13 @@ export default function Sidebar() {
 
   const unreadMessages = conversations.reduce((sum, c) => sum + c.unread, 0);
 
+  // Role-based nav filtering
+  const filteredNavItems = navItems.filter(item => {
+    if (isCoach && (item.label === 'Partners' || item.label === 'Lessons')) return false;
+    if (isAdmin && item.label === 'Lessons') return false;
+    return true;
+  });
+
   const closeMobileSidebar = () => setMobileSidebarOpen(false);
 
   return (
@@ -77,7 +84,7 @@ export default function Sidebar() {
           <ul className="space-y-1 relative">
             {/* Sliding active indicator */}
             {(() => {
-              const activeIdx = navItems.findIndex(item =>
+              const activeIdx = filteredNavItems.findIndex(item =>
                 item.href === '/dashboard' ? pathname === '/dashboard' : pathname.startsWith(item.href)
               );
               if (activeIdx === -1) return null;
@@ -90,7 +97,7 @@ export default function Sidebar() {
                 />
               );
             })()}
-            {navItems.map((item) => {
+            {filteredNavItems.map((item) => {
               const isActive = item.href === '/dashboard'
                 ? pathname === '/dashboard'
                 : pathname.startsWith(item.href);
@@ -145,10 +152,28 @@ export default function Sidebar() {
               </li>
             )}
 
-            {/* Admin link */}
+            {/* Admin links — admin sees both Coaching Panel and Admin Panel */}
             {isAdmin && (
               <>
                 <li className="pt-2 mt-2" style={{ borderTop: '1px solid rgba(232, 228, 217, 0.1)' }}>
+                  <Link
+                    href={coachItem.href}
+                    onClick={closeMobileSidebar}
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${
+                      pathname.startsWith(coachItem.href)
+                        ? 'font-semibold'
+                        : 'hover:bg-white/5'
+                    }`}
+                    style={pathname.startsWith(coachItem.href) ? { backgroundColor: 'rgba(212, 225, 87, 0.15)', color: '#d4e157' } : { color: 'rgba(232, 228, 217, 0.7)' }}
+                    title={sidebarCollapsed ? coachItem.label : undefined}
+                  >
+                    <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={pathname.startsWith(coachItem.href) ? 2.5 : 2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d={coachItem.icon} />
+                    </svg>
+                    {!sidebarCollapsed && <span className="text-sm">{coachItem.label}</span>}
+                  </Link>
+                </li>
+                <li>
                   <Link
                     href={adminItem.href}
                     onClick={closeMobileSidebar}
