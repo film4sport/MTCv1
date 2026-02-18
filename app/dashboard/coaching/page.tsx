@@ -5,6 +5,7 @@ import { useApp } from '../lib/store';
 import DashboardHeader from '../components/DashboardHeader';
 import { COURTS_CONFIG, TIME_SLOTS } from '../lib/types';
 import type { CoachingProgram } from '../lib/types';
+import { generateId } from '../lib/utils';
 
 type Tab = 'programs' | 'create' | 'enrollments';
 
@@ -89,7 +90,7 @@ export default function CoachingPanelPage() {
     }
 
     const program: CoachingProgram = {
-      id: `prog-${Date.now()}`,
+      id: generateId('prog'),
       title: title.trim(),
       type: programType,
       coachId: currentUser?.id || '',

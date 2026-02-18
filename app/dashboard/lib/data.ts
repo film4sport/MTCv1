@@ -5,7 +5,7 @@ import type { Court, Booking, ClubEvent, Partner, Conversation, Announcement, No
 
 // ─── Members ────────────────────────────────────────────
 export const DEFAULT_MEMBERS: User[] = [
-  { id: 'alex', name: 'Alex Thompson', email: 'member@mtc.ca', role: 'member', ntrp: 3.5, memberSince: '2025-03', phone: '+1 (555) 123-4567' },
+  { id: 'alex', name: 'Alex Thompson', email: 'member@mtc.ca', role: 'member', ntrp: 3.5, memberSince: '2025-03' },
   { id: 'mike', name: 'Mike Chen', email: 'mike.chen@mtc.ca', role: 'member', ntrp: 4.0, memberSince: '2024-12' },
   { id: 'sarah', name: 'Sarah Wilson', email: 'sarah.w@mtc.ca', role: 'member', ntrp: 3.5, memberSince: '2024-06' },
   { id: 'james', name: 'James Park', email: 'james.p@mtc.ca', role: 'member', ntrp: 4.5, memberSince: '2024-09' },

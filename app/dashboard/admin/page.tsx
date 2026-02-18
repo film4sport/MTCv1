@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useApp } from '../lib/store';
 import DashboardHeader from '../components/DashboardHeader';
+import { generateId } from '../lib/utils';
 
 type AdminTab = 'dashboard' | 'members' | 'courts' | 'payments' | 'announcements';
 
@@ -66,7 +67,7 @@ export default function AdminPage() {
   const addAnnouncement = () => {
     if (!newAnnouncement.trim()) return;
     const ann = {
-      id: `a-${Date.now()}`,
+      id: generateId('a'),
       text: newAnnouncement.trim(),
       type: newAnnouncementType,
       date: new Date().toISOString().split('T')[0],

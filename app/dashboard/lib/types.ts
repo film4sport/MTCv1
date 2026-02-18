@@ -5,7 +5,6 @@ export interface User {
   name: string;
   email: string;
   role: 'member' | 'coach' | 'admin';
-  phone?: string;
   ntrp?: number; // skill rating 1.0 - 7.0
   memberSince?: string;
   avatar?: string;
@@ -205,9 +204,3 @@ export const CLUB_LOCATION = {
   lon: -80.0667,
   name: 'Mono, Ontario',
 } as const;
-
-export const CREDENTIALS: Record<string, { password: string; role: User['role']; name: string }> = {
-  'member@mtc.ca': { password: 'member123', role: 'member', name: 'Alex Thompson' },
-  'coach@mtc.ca': { password: 'coach123', role: 'coach', name: 'Mark Taylor' },
-  'admin@mtc.ca': { password: 'admin123', role: 'admin', name: 'Admin' },
-};

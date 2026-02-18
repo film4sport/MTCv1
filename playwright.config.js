@@ -9,10 +9,23 @@ module.exports = defineConfig({
   reporter: 'list',
   use: {
     baseURL: 'http://localhost:3000',
-    viewport: { width: 1280, height: 720 },
     actionTimeout: 15000,
     navigationTimeout: 60000,
   },
+  projects: [
+    {
+      name: 'desktop',
+      use: { viewport: { width: 1280, height: 720 } },
+    },
+    {
+      name: 'tablet',
+      use: { viewport: { width: 768, height: 1024 } },
+    },
+    {
+      name: 'mobile',
+      use: { viewport: { width: 375, height: 812 } },
+    },
+  ],
   webServer: {
     command: process.env.CI ? 'npm start' : 'npm run dev',
     port: 3000,

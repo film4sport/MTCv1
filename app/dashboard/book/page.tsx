@@ -5,6 +5,7 @@ import { useApp } from '../lib/store';
 import DashboardHeader from '../components/DashboardHeader';
 import { TIME_SLOTS, COURTS_CONFIG, COURT_HOURS, FEES } from '../lib/types';
 import { downloadICS } from '../lib/calendar';
+import { generateId } from '../lib/utils';
 
 type ViewMode = 'week' | 'calendar';
 
@@ -100,7 +101,7 @@ export default function BookCourtPage() {
     if (!modalData || !currentUser) return;
     if (isGuest && !guestName.trim()) return;
     const booking = {
-      id: `b-${Date.now()}`,
+      id: generateId('b'),
       courtId: modalData.courtId,
       courtName: modalData.courtName,
       date: modalData.date,

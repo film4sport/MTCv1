@@ -40,6 +40,9 @@ self.addEventListener('fetch', (event) => {
   if (url.protocol === 'chrome-extension:') return;
   if (url.pathname.startsWith('/_next/webpack-hmr')) return;
 
+  // Skip Supabase API calls — always go direct to network
+  if (url.hostname.endsWith('.supabase.co')) return;
+
   // For Next.js pages, JS bundles, and API routes — ALWAYS go to network
   // IMPORTANT: We use event.respondWith(fetch()) instead of bare return;
   // A bare return; falls through to the browser's HTTP cache, which can serve stale HTML.
