@@ -4,11 +4,13 @@ import { createContext, useContext, useState, useEffect, useCallback, type React
 import type { User, Court, Booking, ClubEvent, Partner, Conversation, Announcement, Notification, WeatherData, MemberPayment, AdminAnalytics, CoachingProgram, NotificationPreferences } from './types';
 import { CLUB_LOCATION, DEFAULT_NOTIFICATION_PREFS } from './types';
 import { DEFAULT_MEMBERS, DEFAULT_COURTS, DEFAULT_BOOKINGS, DEFAULT_EVENTS, DEFAULT_PARTNERS, DEFAULT_CONVERSATIONS, DEFAULT_ANNOUNCEMENTS, DEFAULT_NOTIFICATIONS, DEFAULT_PAYMENTS, DEFAULT_ANALYTICS, DEFAULT_PROGRAMS } from './data';
+import { generateId } from './utils';
+import { signIn, signOut, getCurrentUser } from './auth';
 
 interface AppState {
   // Auth
   currentUser: User | null;
-  login: (email: string, password: string) => boolean;
+  login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
 
   // Data
@@ -110,10 +112,25 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [toasts, setToasts] = useState<{ id: string; message: string; type: 'success' | 'error' | 'info'; exiting?: boolean }[]>([]);
 
-  // Load from localStorage on mount
+  // Load user from Supabase session on mount (localStorage as instant fallback)
   useEffect(() => {
+    // Instant hydration from localStorage cache
     const savedUser = loadJSON<User | null>('mtc-current-user', null);
     if (savedUser) setCurrentUser(savedUser);
+
+    // Then verify against Supabase session
+    getCurrentUser().then(user => {
+      if (user) {
+        setCurrentUser(user);
+        saveJSON('mtc-current-user', user);
+      } else if (savedUser) {
+        // Supabase session expired — clear cached user
+        setCurrentUser(null);
+        localStorage.removeItem('mtc-current-user');
+      }
+    });
+
+    // Load other data from localStorage (will be migrated to Supabase in db.ts)
     setBookings(loadJSON('mtc-bookings', DEFAULT_BOOKINGS));
     setConversations(loadJSON('mtc-conversations', DEFAULT_CONVERSATIONS));
     setAnnouncements(loadJSON('mtc-announcements', DEFAULT_ANNOUNCEMENTS));
@@ -176,45 +193,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return () => clearInterval(interval);
   }, []);
 
-  // Auth
-  const login = useCallback((email: string, password: string): boolean => {
-    const creds: Record<string, { password: string; role: User['role']; name: string }> = {
-      'member@mtc.ca': { password: 'member123', role: 'member', name: 'Alex Thompson' },
-      'coach@mtc.ca': { password: 'coach123', role: 'coach', name: 'Mark Taylor' },
-      'admin@mtc.ca': { password: 'admin123', role: 'admin', name: 'Admin' },
-    };
-    // 1. Check hardcoded credentials
-    const entry = creds[email];
-    if (entry && entry.password === password) {
-      const knownMember = DEFAULT_MEMBERS.find(m => m.email === email);
-      const user: User = knownMember || { id: email.split('@')[0], name: entry.name, email, role: entry.role, memberSince: '2025-01' };
-      setCurrentUser(user);
-      saveJSON('mtc-current-user', user);
-      return true;
-    }
-    // 2. Check localStorage signup accounts
-    let storedAccounts: Record<string, { password: string; name: string; role: string }> = {};
-    try { storedAccounts = JSON.parse(localStorage.getItem('mtc-accounts') || '{}'); } catch {}
-    const stored = storedAccounts[email];
-    if (stored && stored.password === password) {
-      const user: User = { id: email.split('@')[0], name: stored.name, email, role: (stored.role as User['role']) || 'member', memberSince: new Date().toISOString().slice(0, 7) };
-      setCurrentUser(user);
-      saveJSON('mtc-current-user', user);
-      return true;
-    }
-    // ⚠️ DEMO MODE — REMOVE WHEN SUPABASE AUTH IS INTEGRATED ⚠️
-    // This fallback accepts ANY email/password as a member login.
-    // It exists only for demo/development purposes. When Supabase auth
-    // is wired up, DELETE this entire block (lines below through `return true`)
-    // so that unrecognized credentials are rejected.
-    const knownMember2 = DEFAULT_MEMBERS.find(m => m.email === email);
-    const user: User = knownMember2 || { id: email.split('@')[0], name: email.split('@')[0], email, role: 'member', memberSince: '2025-01' };
+  // Auth — uses Supabase signIn from auth.ts
+  const login = useCallback(async (email: string, password: string): Promise<boolean> => {
+    const user = await signIn(email, password);
+    if (!user) return false;
     setCurrentUser(user);
     saveJSON('mtc-current-user', user);
     return true;
   }, []);
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    await signOut();
     setCurrentUser(null);
     if (typeof window !== 'undefined') {
       localStorage.removeItem('mtc-current-user');
@@ -227,7 +216,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     // Create notification for booker
     if (booking.type === 'court') {
       const notif: Notification = {
-        id: `n-${Date.now()}`,
+        id: generateId('n'),
         type: 'booking',
         title: 'Booking Confirmed',
         body: `${booking.courtName} booked for ${booking.date} at ${booking.time}.`,
@@ -239,7 +228,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       // Notify each participant with a notification + message
       if (booking.participants && booking.participants.length > 0) {
         const participantNotifs: Notification[] = booking.participants.map((p, i) => ({
-          id: `n-${Date.now()}-p${i}`,
+          id: generateId('n'),
           type: 'booking' as const,
           title: 'Added to Booking',
           body: `${booking.userName} added you to a booking: ${booking.courtName} on ${booking.date} at ${booking.time}.`,
@@ -251,7 +240,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         // Send message to each participant with calendar marker
         booking.participants.forEach((participant, i) => {
           const msg = {
-            id: `msg-${Date.now()}-p${i}`,
+            id: generateId('msg'),
             from: booking.userName,
             fromId: booking.userId,
             to: participant.name,
@@ -279,7 +268,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     // Notify participants when a booking is cancelled
     if (booking && booking.participants && booking.participants.length > 0) {
       const cancelNotifs: Notification[] = booking.participants.map((p, i) => ({
-        id: `n-${Date.now()}-cancel-${i}`,
+        id: generateId('n'),
         type: 'booking' as const,
         title: 'Booking Cancelled',
         body: `${booking.userName} cancelled the booking: ${booking.courtName} on ${booking.date} at ${booking.time}.`,
@@ -291,7 +280,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       // Send cancellation message to each participant
       booking.participants.forEach((participant, i) => {
         const msg = {
-          id: `msg-${Date.now()}-cancel-${i}`,
+          id: generateId('msg'),
           from: booking.userName,
           fromId: booking.userId,
           to: participant.name,
@@ -343,7 +332,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     // Charge fee
     setPayments(prev => {
       const existing = prev.find(p => p.memberId === memberId);
-      const entry = { id: `pay-${Date.now()}`, date: new Date().toISOString().split('T')[0], description: `Program: ${program.title}`, amount: program.fee, type: 'charge' as const };
+      const entry = { id: generateId('pay'), date: new Date().toISOString().split('T')[0], description: `Program: ${program.title}`, amount: program.fee, type: 'charge' as const };
       if (existing) {
         return prev.map(p => p.memberId === memberId ? { ...p, balance: p.balance + program.fee, history: [...p.history, entry] } : p);
       }
@@ -351,7 +340,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
     // Create notification
     const notif: Notification = {
-      id: `n-${Date.now()}`,
+      id: generateId('n'),
       type: 'event',
       title: `Enrolled in ${program.title}`,
       body: `${program.sessions.length} sessions starting ${program.sessions[0]?.date}. Fee: $${program.fee}.`,
@@ -361,7 +350,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setNotifications(prev => [notif, ...prev]);
     // Send message from coach
     const coachMsg = {
-      id: `msg-${Date.now()}`,
+      id: generateId('msg'),
       from: program.coachName,
       fromId: program.coachId,
       to: memberName,
@@ -387,7 +376,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setPayments(prev => {
       const existing = prev.find(p => p.memberId === memberId);
       if (existing) {
-        const entry = { id: `pay-${Date.now()}`, date: new Date().toISOString().split('T')[0], description: `Refund: ${program.title}`, amount: -program.fee, type: 'payment' as const };
+        const entry = { id: generateId('pay'), date: new Date().toISOString().split('T')[0], description: `Refund: ${program.title}`, amount: -program.fee, type: 'payment' as const };
         return prev.map(p => p.memberId === memberId ? { ...p, balance: p.balance - program.fee, history: [...p.history, entry] } : p);
       }
       return prev;
@@ -409,7 +398,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const sendMessage = useCallback((toId: string, text: string) => {
     if (!currentUser) return;
     const msg = {
-      id: `msg-${Date.now()}`,
+      id: generateId('msg'),
       from: currentUser.name,
       fromId: currentUser.id,
       to: members.find(m => m.id === toId)?.name || '',
@@ -450,7 +439,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const showToast = useCallback((message: string, type: 'success' | 'error' | 'info' = 'success') => {
-    const id = `toast-${Date.now()}`;
+    const id = generateId('toast');
     setToasts(prev => [...prev, { id, message, type }]);
     setTimeout(() => {
       setToasts(prev => prev.map(t => t.id === id ? { ...t, exiting: true } : t));

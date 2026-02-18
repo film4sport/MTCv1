@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import { signUp } from '../dashboard/lib/auth';
 import '../(landing)/styles/landing.css';
 
 const privacySections = [
@@ -272,36 +273,20 @@ function InfoPageContent() {
     }
   };
 
-  const completeSignup = () => {
-    const joinedDate = new Date().toISOString();
+  const [signupError, setSignupError] = useState('');
 
-    // Legacy profile for info page
-    const profile = {
-      ...signupData,
-      membershipType: signupData.membershipType,
-      waiverAccepted: true,
-      joinedDate,
-    };
-    localStorage.setItem('currentUser', JSON.stringify(profile));
+  const completeSignup = async () => {
+    setSignupError('');
 
-    // Dashboard-compatible user (auto-login)
-    const dashboardUser = {
-      id: signupData.email.split('@')[0],
-      name: signupData.name,
-      email: signupData.email,
-      role: 'member',
-      memberSince: joinedDate.slice(0, 7),
-    };
-    localStorage.setItem('mtc-current-user', JSON.stringify(dashboardUser));
+    // Create Supabase auth user + profile
+    const { user, error } = await signUp(signupData.email, signupData.password, signupData.name);
+    if (error || !user) {
+      setSignupError(error || 'Signup failed. Please try again.');
+      return;
+    }
 
-    // Store credentials for future logins
-    const storedAccounts = JSON.parse(localStorage.getItem('mtc-accounts') || '{}');
-    storedAccounts[signupData.email] = {
-      password: signupData.password,
-      name: signupData.name,
-      role: 'member',
-    };
-    localStorage.setItem('mtc-accounts', JSON.stringify(storedAccounts));
+    // Cache user for instant dashboard access
+    localStorage.setItem('mtc-current-user', JSON.stringify(user));
 
     setSignupStep(5);
   };
@@ -882,6 +867,9 @@ function InfoPageContent() {
 
                     </div>
 
+                    {signupError && (
+                      <p className="text-sm mt-4 text-center" style={{ color: '#ef4444' }}>{signupError}</p>
+                    )}
                     <div className="flex items-center gap-4 mt-8">
                       <button
                         onClick={() => setSignupStep(3)}

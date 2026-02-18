@@ -2,20 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import type { User } from '../dashboard/lib/types';
-import { CREDENTIALS } from '../dashboard/lib/types';
-import { DEFAULT_MEMBERS } from '../dashboard/lib/data';
-
-// Load Bebas Neue for phone mockup
-const bebasLink = typeof document !== 'undefined' ? (() => {
-  const existing = document.querySelector('link[href*="Bebas+Neue"]');
-  if (!existing) {
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = 'https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap';
-    document.head.appendChild(link);
-  }
-})() : null;
+import { signIn } from '../dashboard/lib/auth';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -26,13 +13,26 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [remember, setRemember] = useState(false);
 
+  // Load Bebas Neue for phone mockup
+  useEffect(() => {
+    if (!document.querySelector('link[href*="Bebas+Neue"]')) {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = 'https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap';
+      document.head.appendChild(link);
+    }
+  }, []);
+
   // No auto-redirect — always show login page so users can see it
 
   const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [loginError, setLoginError] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     let valid = true;
+    setLoginError('');
 
     if (!email || !emailRegex.test(email)) {
       setEmailError(true);
@@ -46,27 +46,15 @@ export default function LoginPage() {
 
     setLoading(true);
 
-    // Look up known member by email first
-    const knownMember = DEFAULT_MEMBERS.find(m => m.email === email);
-
-    // 1. Check hardcoded credentials
-    const entry = CREDENTIALS[email];
-    let user: User;
-    if (entry && entry.password === password) {
-      user = knownMember || { id: email.split('@')[0], name: entry.name, email, role: entry.role, memberSince: '2025-01' };
-    } else {
-      // 2. Check localStorage signup accounts
-      let storedAccounts: Record<string, { password: string; name: string; role: string }> = {};
-      try { storedAccounts = JSON.parse(localStorage.getItem('mtc-accounts') || '{}'); } catch {}
-      const stored = storedAccounts[email];
-      if (stored && stored.password === password) {
-        user = { id: email.split('@')[0], name: stored.name, email, role: (stored.role as User['role']) || 'member', memberSince: new Date().toISOString().slice(0, 7) };
-      } else {
-        // 3. Demo mode: accept any email/password as member
-        user = knownMember || { id: email.split('@')[0], name: email.split('@')[0], email, role: 'member', memberSince: '2025-01' };
-      }
+    const user = await signIn(email, password);
+    if (!user) {
+      setLoginError('Invalid email or password');
+      setPasswordError(true);
+      setLoading(false);
+      return;
     }
 
+    // Cache user in localStorage for instant hydration
     localStorage.setItem('mtc-current-user', JSON.stringify(user));
 
     setTimeout(() => {
@@ -509,7 +497,7 @@ export default function LoginPage() {
                 onFocus={(e) => { if (!passwordError) e.currentTarget.style.borderColor = '#6b7a3d'; e.currentTarget.style.boxShadow = passwordError ? '0 0 0 3px rgba(239,68,68,0.1)' : '0 0 0 3px rgba(107,122,61,0.15)'; }}
                 onBlur={(e) => { if (!passwordError) { e.currentTarget.style.borderColor = '#e0dcd3'; e.currentTarget.style.boxShadow = 'none'; } }}
               />
-              {passwordError && <p className="text-xs mt-2" style={{ color: '#ef4444' }}>Password is required</p>}
+              {passwordError && <p className="text-xs mt-2" style={{ color: '#ef4444' }}>{loginError || 'Password is required'}</p>}
             </div>
 
             <div className="flex items-center justify-between text-sm">
