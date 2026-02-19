@@ -4,12 +4,13 @@ import { useState } from 'react';
 import { useApp } from '../lib/store';
 import DashboardHeader from '../components/DashboardHeader';
 import Link from 'next/link';
+import { generateId } from '../lib/utils';
 
 type FilterType = 'all' | 'singles' | 'doubles' | 'mixed';
 type SkillFilter = 'all' | 'beginner' | 'intermediate' | 'advanced';
 
 export default function PartnersPage() {
-  const { partners, currentUser } = useApp();
+  const { partners, currentUser, addPartner, removePartner, showToast } = useApp();
   const [filter, setFilter] = useState<FilterType>('all');
   const [skillFilter, setSkillFilter] = useState<SkillFilter>('all');
   const [showPost, setShowPost] = useState(false);
@@ -131,13 +132,26 @@ export default function PartnersPage() {
                     </div>
                   </div>
 
-                  <Link
-                    href={`/dashboard/messages`}
-                    className="block w-full text-center py-2.5 rounded-xl text-sm font-medium transition-all duration-200 hover:shadow-md btn-press"
-                    style={{ background: '#6b7a3d', color: '#fff' }}
-                  >
-                    Message
-                  </Link>
+                  {p.userId === currentUser?.id ? (
+                    <button
+                      onClick={() => {
+                        removePartner(p.id);
+                        showToast('Partner request removed');
+                      }}
+                      className="block w-full text-center py-2.5 rounded-xl text-sm font-medium transition-all duration-200 hover:shadow-md btn-press"
+                      style={{ background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca' }}
+                    >
+                      Cancel Request
+                    </button>
+                  ) : (
+                    <Link
+                      href={`/dashboard/messages?to=${p.userId}`}
+                      className="block w-full text-center py-2.5 rounded-xl text-sm font-medium transition-all duration-200 hover:shadow-md btn-press"
+                      style={{ background: '#6b7a3d', color: '#fff' }}
+                    >
+                      Message
+                    </Link>
+                  )}
                 </div>
               );
             })}
@@ -190,7 +204,37 @@ export default function PartnersPage() {
 
             <div className="flex gap-3">
               <button onClick={() => setShowPost(false)} className="flex-1 py-3 rounded-xl text-sm font-medium" style={{ background: '#f5f2eb', color: '#2a2f1e' }}>Cancel</button>
-              <button onClick={() => setShowPost(false)} className="flex-1 py-3 rounded-xl text-sm font-medium text-white" style={{ background: '#6b7a3d' }}>Post Request</button>
+              <button
+                onClick={() => {
+                  if (!postDate || !postTime) {
+                    showToast('Please select a date and time', 'error');
+                    return;
+                  }
+                  if (!currentUser) return;
+                  const partner: import('../lib/types').Partner = {
+                    id: generateId('p'),
+                    userId: currentUser.id,
+                    name: currentUser.name,
+                    ntrp: currentUser.ntrp ?? 3.0,
+                    availability: new Date(postDate + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) + ' at ' + postTime,
+                    matchType: postType,
+                    date: postDate,
+                    time: postTime,
+                    status: 'available',
+                  };
+                  addPartner(partner);
+                  setShowPost(false);
+                  setPostDate('');
+                  setPostTime('');
+                  setPostType('any');
+                  showToast('Partner request posted!');
+                }}
+                disabled={!postDate || !postTime}
+                className="flex-1 py-3 rounded-xl text-sm font-medium text-white disabled:opacity-50"
+                style={{ background: '#6b7a3d' }}
+              >
+                Post Request
+              </button>
             </div>
           </div>
         </div>

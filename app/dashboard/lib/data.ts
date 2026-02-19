@@ -194,11 +194,11 @@ export const DEFAULT_EVENTS: ClubEvent[] = [
 
 // ─── Partner Requests ───────────────────────────────────
 export const DEFAULT_PARTNERS: Partner[] = [
-  { id: 'p1', name: 'Sarah Wilson', ntrp: 3.5, availability: 'Tomorrow, 10am', matchType: 'singles', date: 'Tomorrow', time: '10:00 AM', status: 'available' },
-  { id: 'p2', name: 'Mike Chen', ntrp: 4.0, availability: 'Saturday, 2pm', matchType: 'doubles', date: 'Saturday', time: '2:00 PM', status: 'available' },
-  { id: 'p3', name: 'Emily Rodriguez', ntrp: 3.0, availability: 'Sunday, 9am', matchType: 'any', date: 'Sunday', time: '9:00 AM', status: 'available' },
-  { id: 'p4', name: 'David Kim', ntrp: 4.0, availability: 'Monday, 6pm', matchType: 'singles', date: 'Monday', time: '6:00 PM', status: 'available' },
-  { id: 'p5', name: "Ryan O'Connor", ntrp: 3.5, availability: 'Wednesday, 4pm', matchType: 'mixed', date: 'Wednesday', time: '4:00 PM', status: 'available' },
+  { id: 'p1', userId: 'sarah', name: 'Sarah Wilson', ntrp: 3.5, availability: 'Tomorrow, 10am', matchType: 'singles', date: 'Tomorrow', time: '10:00 AM', status: 'available' },
+  { id: 'p2', userId: 'mike', name: 'Mike Chen', ntrp: 4.0, availability: 'Saturday, 2pm', matchType: 'doubles', date: 'Saturday', time: '2:00 PM', status: 'available' },
+  { id: 'p3', userId: 'emily', name: 'Emily Rodriguez', ntrp: 3.0, availability: 'Sunday, 9am', matchType: 'any', date: 'Sunday', time: '9:00 AM', status: 'available' },
+  { id: 'p4', userId: 'david', name: 'David Kim', ntrp: 4.0, availability: 'Monday, 6pm', matchType: 'singles', date: 'Monday', time: '6:00 PM', status: 'available' },
+  { id: 'p5', userId: 'ryan', name: "Ryan O'Connor", ntrp: 3.5, availability: 'Wednesday, 4pm', matchType: 'mixed', date: 'Wednesday', time: '4:00 PM', status: 'available' },
 ];
 
 // ─── Conversations ──────────────────────────────────────

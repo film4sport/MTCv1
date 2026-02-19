@@ -17,6 +17,10 @@ export async function fetchMembers(): Promise<User[]> {
   }));
 }
 
+export async function updateProfile(userId: string, updates: { ntrp?: number; name?: string }): Promise<void> {
+  await supabase.from('profiles').update(updates).eq('id', userId);
+}
+
 // ─── Bookings ───────────────────────────────────────────
 
 export async function fetchBookings(): Promise<Booking[]> {
@@ -122,6 +126,7 @@ export async function fetchPartners(): Promise<Partner[]> {
   if (!data) return [];
   return data.map(p => ({
     id: p.id,
+    userId: p.user_id,
     name: p.name,
     ntrp: p.ntrp,
     availability: p.availability,
@@ -131,6 +136,34 @@ export async function fetchPartners(): Promise<Partner[]> {
     avatar: p.avatar ?? undefined,
     status: p.status as Partner['status'],
   }));
+}
+
+export async function createPartner(partner: Partner): Promise<void> {
+  await supabase.from('partners').insert({
+    id: partner.id,
+    user_id: partner.userId,
+    name: partner.name,
+    ntrp: partner.ntrp,
+    availability: partner.availability,
+    match_type: partner.matchType,
+    date: partner.date,
+    time: partner.time,
+    avatar: partner.avatar || null,
+    status: partner.status,
+  });
+}
+
+export async function deletePartner(partnerId: string): Promise<void> {
+  await supabase.from('partners').delete().eq('id', partnerId);
+}
+
+export async function markMessagesRead(conversationId: number, userId: string): Promise<void> {
+  await supabase
+    .from('messages')
+    .update({ read: true })
+    .eq('conversation_id', conversationId)
+    .eq('to_id', userId)
+    .eq('read', false);
 }
 
 // ─── Conversations & Messages ───────────────────────────

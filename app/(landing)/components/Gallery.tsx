@@ -13,7 +13,7 @@ const slides = [
   { src: `${CDN}/gallery-02-doubles-match.jpeg`, alt: 'MTC Tennis' },
   { src: `${CDN}/gallery-03-court-action.jpeg`, alt: 'MTC Tennis' },
   { src: `${CDN}/gallery-04-players-net.jpeg`, alt: 'MTC Tennis' },
-  { src: `${CDN}/gallery-05-serve.jpeg`, alt: 'MTC Tennis' },
+  { src: `${CDN}/gallery-05-serve.png`, alt: 'MTC Tennis' },
   { src: `${CDN}/gallery-06-group-photo.jpeg`, alt: 'MTC Tennis' },
   { src: `${CDN}/gallery-07-rally.jpeg`, alt: 'MTC Tennis' },
   { src: `${CDN}/gallery-08-court-overview.jpeg`, alt: 'MTC Tennis' },

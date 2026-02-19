@@ -3,17 +3,34 @@
 import { useState } from 'react';
 import { useApp } from '../lib/store';
 import DashboardHeader from '../components/DashboardHeader';
+import * as db from '../lib/db';
+
+const NTRP_OPTIONS = [1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0];
 
 export default function ProfilePage() {
-  const { currentUser } = useApp();
+  const { currentUser, showToast } = useApp();
   const [notifBooking, setNotifBooking] = useState(true);
   const [notifPartners, setNotifPartners] = useState(true);
   const [notifClub, setNotifClub] = useState(true);
   const [notifCoaching, setNotifCoaching] = useState(false);
   const [notifPush, setNotifPush] = useState(true);
+  const [editingNtrp, setEditingNtrp] = useState(false);
+  const [ntrpValue, setNtrpValue] = useState(currentUser?.ntrp ?? 3.5);
 
   const ntrp = currentUser?.ntrp ?? 3.5;
   const skillLevel = ntrp <= 2.5 ? 'Beginner' : ntrp <= 4.0 ? 'Intermediate' : ntrp <= 5.5 ? 'Advanced' : 'Expert';
+
+  const saveNtrp = async () => {
+    if (!currentUser) return;
+    await db.updateProfile(currentUser.id, { ntrp: ntrpValue });
+    // Update the cached user with new ntrp
+    const updated = { ...currentUser, ntrp: ntrpValue };
+    localStorage.setItem('mtc-current-user', JSON.stringify(updated));
+    setEditingNtrp(false);
+    showToast('NTRP rating updated');
+    // Reload page to pick up the updated user
+    window.location.reload();
+  };
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#f5f2eb' }}>
@@ -76,14 +93,33 @@ export default function ProfilePage() {
             <div className="flex items-center justify-between py-2">
               <div>
                 <p className="text-xs" style={{ color: '#6b7266' }}>Player Rating</p>
-                <div className="flex items-center gap-2 mt-0.5">
-                  <p className="text-sm font-medium" style={{ color: '#2a2f1e' }}>NTRP {ntrp}</p>
-                  <span className="text-[0.65rem] px-2 py-0.5 rounded-full font-medium" style={{ background: 'rgba(107, 122, 61, 0.1)', color: '#6b7a3d' }}>{skillLevel}</span>
-                </div>
+                {editingNtrp ? (
+                  <div className="flex items-center gap-2 mt-1">
+                    <select
+                      value={ntrpValue}
+                      onChange={(e) => setNtrpValue(parseFloat(e.target.value))}
+                      className="px-2 py-1 rounded-lg text-sm border focus:outline-none focus:ring-2 focus:ring-[#6b7a3d]/20"
+                      style={{ borderColor: '#e0dcd3', color: '#2a2f1e' }}
+                    >
+                      {NTRP_OPTIONS.map(v => (
+                        <option key={v} value={v}>{v}</option>
+                      ))}
+                    </select>
+                    <button onClick={saveNtrp} className="text-xs px-3 py-1 rounded-lg font-medium text-white" style={{ background: '#6b7a3d' }}>Save</button>
+                    <button onClick={() => setEditingNtrp(false)} className="text-xs px-2 py-1 rounded-lg" style={{ color: '#6b7266' }}>Cancel</button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <p className="text-sm font-medium" style={{ color: '#2a2f1e' }}>NTRP {ntrp}</p>
+                    <span className="text-[0.65rem] px-2 py-0.5 rounded-full font-medium" style={{ background: 'rgba(107, 122, 61, 0.1)', color: '#6b7a3d' }}>{skillLevel}</span>
+                  </div>
+                )}
               </div>
-              <svg className="w-4 h-4" fill="none" stroke="#6b7266" viewBox="0 0 24 24" strokeWidth="1.5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/>
-              </svg>
+              <button onClick={() => { setNtrpValue(ntrp); setEditingNtrp(!editingNtrp); }}>
+                <svg className="w-4 h-4" fill="none" stroke="#6b7266" viewBox="0 0 24 24" strokeWidth="1.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125"/>
+                </svg>
+              </button>
             </div>
           </div>
         </div>
