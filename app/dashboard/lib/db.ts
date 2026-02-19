@@ -278,6 +278,27 @@ export async function dismissAnnouncement(announcementId: string, userId: string
   });
 }
 
+export async function createAnnouncement(announcement: Announcement): Promise<void> {
+  await supabase.from('announcements').insert({
+    id: announcement.id,
+    text: announcement.text,
+    type: announcement.type,
+    date: announcement.date,
+  });
+}
+
+export async function deleteAnnouncement(id: string): Promise<void> {
+  // Delete dismissals first (FK), then the announcement
+  await supabase.from('announcement_dismissals').delete().eq('announcement_id', id);
+  await supabase.from('announcements').delete().eq('id', id);
+}
+
+// ─── Courts ─────────────────────────────────────────────
+
+export async function updateCourtStatus(courtId: number, status: string): Promise<void> {
+  await supabase.from('courts').update({ status }).eq('id', courtId);
+}
+
 // ─── Notifications ──────────────────────────────────────
 
 export async function fetchNotifications(userId: string): Promise<Notification[]> {

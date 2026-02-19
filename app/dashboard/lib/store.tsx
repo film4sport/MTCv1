@@ -407,14 +407,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setNotifications(prev => [notif, ...prev]);
     // Persist enrollment notification to Supabase
     db.createNotification(memberId, notif).catch(() => {});
-    // Send message from coach
+    // Send message from coach (persist to Supabase)
+    const coachMsgText = `Welcome to ${program.title}! Your enrollment is confirmed. ${program.sessions.length} sessions starting ${new Date(program.sessions[0]?.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}. See you on the court!`;
     const coachMsg = {
       id: generateId('msg'),
       from: program.coachName,
       fromId: program.coachId,
       to: memberName,
       toId: memberId,
-      text: `Welcome to ${program.title}! Your enrollment is confirmed. ${program.sessions.length} sessions starting ${new Date(program.sessions[0]?.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}. See you on the court!`,
+      text: coachMsgText,
       timestamp: new Date().toISOString(),
       read: false,
     };
@@ -425,6 +426,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
       return [...prev, { memberId: program.coachId, memberName: program.coachName, lastMessage: coachMsg.text, lastTimestamp: coachMsg.timestamp, unread: 1, messages: [coachMsg] }];
     });
+    db.sendMessageByUsers({
+      id: coachMsg.id, fromId: program.coachId, fromName: program.coachName,
+      toId: memberId, toName: memberName, text: coachMsgText,
+    }).catch(() => {});
   }, [programs]);
 
   const withdrawFromProgram = useCallback((programId: string, memberId: string) => {
@@ -522,7 +527,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const dismissAnnouncement = useCallback((id: string) => {
     if (!currentUser) return;
-    setAnnouncements(prev => prev.map(a => a.id === id ? { ...a, dismissedBy: [...a.dismissedBy, currentUser.email] } : a));
+    setAnnouncements(prev => prev.map(a => a.id === id ? { ...a, dismissedBy: [...a.dismissedBy, currentUser.id] } : a));
     // Persist to Supabase
     db.dismissAnnouncement(id, currentUser.id).catch(() => {});
   }, [currentUser]);

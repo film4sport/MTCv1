@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import { useApp } from '../lib/store';
 import DashboardHeader from '../components/DashboardHeader';
+import { FEES } from '../lib/types';
 import Link from 'next/link';
 
 export default function SchedulePage() {
@@ -161,15 +162,36 @@ export default function SchedulePage() {
                             <span className="text-[0.65rem] px-2 py-0.5 rounded-full font-medium" style={{ background: item.type === 'booking' ? 'rgba(107, 122, 61, 0.1)' : item.type === 'program' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(212, 225, 87, 0.15)', color: item.type === 'booking' ? '#6b7a3d' : item.type === 'program' ? '#d97706' : '#8b8f24' }}>
                               {item.type === 'booking' ? 'Court' : item.type === 'program' ? 'Program' : 'Event'}
                             </span>
-                            {item.type === 'booking' && (
-                              <button
-                                onClick={() => { cancelBooking(item.id); showToast('Booking cancelled'); }}
-                                className="text-xs px-2 py-1 rounded-lg hover:bg-red-50 transition-colors"
-                                style={{ color: '#ef4444' }}
-                              >
-                                Cancel
-                              </button>
-                            )}
+                            {item.type === 'booking' && (() => {
+                              const match = item.time.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+                              let canCancelSlot = true;
+                              if (match) {
+                                let hour = parseInt(match[1]);
+                                const minute = parseInt(match[2]);
+                                const isPM = match[3].toUpperCase() === 'PM';
+                                if (isPM && hour !== 12) hour += 12;
+                                if (!isPM && hour === 12) hour = 0;
+                                const slotDate = new Date(item.date + 'T00:00:00');
+                                slotDate.setHours(hour, minute, 0, 0);
+                                canCancelSlot = (slotDate.getTime() - Date.now()) / (1000 * 60 * 60) >= FEES.cancelWindowHours;
+                              }
+                              return (
+                                <button
+                                  onClick={() => {
+                                    if (!canCancelSlot) {
+                                      showToast(`Cannot cancel within ${FEES.cancelWindowHours}h of booking`, 'error');
+                                      return;
+                                    }
+                                    cancelBooking(item.id);
+                                    showToast('Booking cancelled');
+                                  }}
+                                  className="text-xs px-2 py-1 rounded-lg hover:bg-red-50 transition-colors"
+                                  style={{ color: canCancelSlot ? '#ef4444' : '#d1d5db' }}
+                                >
+                                  Cancel
+                                </button>
+                              );
+                            })()}
                           </div>
                         </div>
                       ))}

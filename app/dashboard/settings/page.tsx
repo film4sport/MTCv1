@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useApp } from '../lib/store';
 import DashboardHeader from '../components/DashboardHeader';
 
@@ -102,7 +103,7 @@ export default function SettingsPage() {
         <div className="rounded-2xl border p-6 section-card" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
           <h3 className="font-semibold mb-4" style={{ color: '#2a2f1e' }}>Legal</h3>
           <div className="space-y-3">
-            <a
+            <Link
               href="/info?tab=privacy"
               className="flex items-center justify-between py-2 group"
             >
@@ -113,9 +114,9 @@ export default function SettingsPage() {
               <svg className="w-4 h-4" fill="none" stroke="#6b7266" viewBox="0 0 24 24" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
               </svg>
-            </a>
+            </Link>
             <div style={{ borderTop: '1px solid #f0ede6' }} />
-            <a
+            <Link
               href="/info?tab=terms"
               className="flex items-center justify-between py-2 group"
             >
@@ -126,7 +127,7 @@ export default function SettingsPage() {
               <svg className="w-4 h-4" fill="none" stroke="#6b7266" viewBox="0 0 24 24" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
               </svg>
-            </a>
+            </Link>
           </div>
         </div>
 
