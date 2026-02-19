@@ -529,6 +529,83 @@ export default function LoginPage() {
             </button>
           </form>
 
+          {/* Forgot Password Modal */}
+          {showForgotPassword && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowForgotPassword(false)}>
+              <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm mx-4" onClick={(e) => e.stopPropagation()}>
+                <h2 className="text-lg font-semibold mb-1" style={{ color: '#2a2f1e' }}>Reset Password</h2>
+                <p className="text-sm mb-4" style={{ color: '#6b7266' }}>
+                  Enter your email and we&apos;ll send a reset link.
+                </p>
+                {resetSent ? (
+                  <div className="text-center py-4">
+                    <div className="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center" style={{ background: 'rgba(107, 122, 61, 0.1)' }}>
+                      <svg className="w-6 h-6" style={{ color: '#6b7a3d' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <p className="text-sm font-medium" style={{ color: '#2a2f1e' }}>Check your email</p>
+                    <p className="text-xs mt-1" style={{ color: '#6b7266' }}>We sent a reset link to {resetEmail}</p>
+                    <button
+                      type="button"
+                      onClick={() => setShowForgotPassword(false)}
+                      className="mt-4 px-6 py-2 rounded-xl text-sm font-medium text-white"
+                      style={{ background: '#6b7a3d' }}
+                    >
+                      Done
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <input
+                      type="email"
+                      value={resetEmail}
+                      onChange={(e) => { setResetEmail(e.target.value); setResetError(''); }}
+                      placeholder="your@email.com"
+                      className="w-full px-4 py-3 rounded-xl text-sm focus:outline-none mb-3"
+                      style={{ background: '#f5f2eb', border: '1px solid #e0dcd3', color: '#2a2f1e' }}
+                      onFocus={(e) => { e.currentTarget.style.borderColor = '#6b7a3d'; }}
+                      onBlur={(e) => { e.currentTarget.style.borderColor = '#e0dcd3'; }}
+                    />
+                    {resetError && <p className="text-xs mb-3" style={{ color: '#ef4444' }}>{resetError}</p>}
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setShowForgotPassword(false)}
+                        className="flex-1 py-2.5 rounded-xl text-sm font-medium"
+                        style={{ color: '#6b7266', border: '1px solid #e0dcd3' }}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        disabled={resetLoading}
+                        onClick={async () => {
+                          if (!resetEmail || !emailRegex.test(resetEmail)) {
+                            setResetError('Please enter a valid email');
+                            return;
+                          }
+                          setResetLoading(true);
+                          const err = await resetPassword(resetEmail);
+                          setResetLoading(false);
+                          if (err) {
+                            setResetError(err);
+                          } else {
+                            setResetSent(true);
+                          }
+                        }}
+                        className="flex-1 py-2.5 rounded-xl text-sm font-medium text-white disabled:opacity-60"
+                        style={{ background: '#6b7a3d' }}
+                      >
+                        {resetLoading ? 'Sending...' : 'Send Reset Link'}
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Demo Credentials */}
           <div className="mt-6 rounded-xl p-4 space-y-2" style={{ background: 'rgba(107, 122, 61, 0.06)', border: '1px solid rgba(107, 122, 61, 0.15)' }}>
             <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: '#6b7a3d' }}>Test Accounts</p>
