@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mtc-v7';
+const CACHE_NAME = 'mtc-v8';
 const STATIC_ASSETS = [
   '/manifest.json',
   '/favicon.png',
@@ -92,5 +92,15 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Everything else — network only (don't intercept, let browser handle normally)
+  // Everything else (RSC payloads, JSON, etc.) — force network fetch.
+  // A bare `return;` would let the browser's HTTP cache serve stale content.
+  // Using event.respondWith(fetch()) bypasses the HTTP cache from within the SW.
+  if (url.origin === self.location.origin) {
+    event.respondWith(
+      fetch(event.request).catch(function() {
+        return new Response('Network error', { status: 503 });
+      })
+    );
+    return;
+  }
 });
