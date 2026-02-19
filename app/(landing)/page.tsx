@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react';
 import './styles/landing.css';
-import Loader from './components/Loader';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import WaveDivider from './components/WaveDivider';
@@ -101,7 +100,6 @@ export default function LandingPage() {
   return (
     <>
       <a href="#events" className="skip-to-content">Skip to content</a>
-      <Loader />
 
       {/* Scroll Progress Bar */}
       <div className="scroll-progress" style={{ width: `${scrollProgress}%` }} />

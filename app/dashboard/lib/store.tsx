@@ -243,6 +243,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setCurrentUser(null);
     if (typeof window !== 'undefined') {
       localStorage.removeItem('mtc-current-user');
+      // Hard redirect to login — avoids race condition with middleware cookie cleanup
+      window.location.href = '/login';
     }
   }, []);
 
