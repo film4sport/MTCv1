@@ -68,6 +68,17 @@ export async function signOut(): Promise<void> {
 }
 
 /**
+ * Send a password reset email via Supabase Auth.
+ * Returns an error message or null on success.
+ */
+export async function resetPassword(email: string): Promise<string | null> {
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${window.location.origin}/login`,
+  });
+  return error ? error.message : null;
+}
+
+/**
  * Get the currently authenticated user's profile.
  * Returns null if not authenticated.
  */

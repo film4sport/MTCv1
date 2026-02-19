@@ -171,10 +171,32 @@ export async function fetchConversations(userId: string): Promise<Conversation[]
   });
 }
 
-export async function sendMessage(conversationId: number, message: {
+export async function sendMessageByUsers(message: {
   id: string; fromId: string; fromName: string; toId: string; toName: string; text: string;
 }): Promise<void> {
   const timestamp = new Date().toISOString();
+
+  // Find existing conversation between these two users (order-agnostic)
+  const { data: conv } = await supabase
+    .from('conversations')
+    .select('id')
+    .or(`and(member_a.eq.${message.fromId},member_b.eq.${message.toId}),and(member_a.eq.${message.toId},member_b.eq.${message.fromId})`)
+    .single();
+
+  let conversationId: number;
+
+  if (conv) {
+    conversationId = conv.id;
+  } else {
+    // Create new conversation
+    const { data: newConv } = await supabase
+      .from('conversations')
+      .insert({ member_a: message.fromId, member_b: message.toId, last_message: message.text, last_timestamp: timestamp })
+      .select('id')
+      .single();
+    if (!newConv) return;
+    conversationId = newConv.id;
+  }
 
   await supabase.from('messages').insert({
     id: message.id,
