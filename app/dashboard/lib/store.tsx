@@ -262,10 +262,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
         read: false,
       };
       setNotifications(prev => [notif, ...prev]);
+      // Persist booker notification to Supabase
+      db.createNotification(booking.userId, notif).catch(() => {});
 
       // Notify each participant with a notification + message
       if (booking.participants && booking.participants.length > 0) {
-        const participantNotifs: Notification[] = booking.participants.map((p, i) => ({
+        const participantNotifs: Notification[] = booking.participants.map((p) => ({
           id: generateId('n'),
           type: 'booking' as const,
           title: 'Added to Booking',
@@ -274,6 +276,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
           read: false,
         }));
         setNotifications(prev => [...participantNotifs, ...prev]);
+        // Persist participant notifications to Supabase
+        booking.participants.forEach((p, i) => {
+          db.createNotification(p.id, participantNotifs[i]).catch(() => {});
+        });
 
         // Send message to each participant with calendar marker
         booking.participants.forEach((participant, i) => {
@@ -300,45 +306,55 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const cancelBooking = useCallback((id: string) => {
-    const booking = bookings.find(b => b.id === id);
-    setBookings(prev => prev.map(b => b.id === id ? { ...b, status: 'cancelled' as const } : b));
-    // Persist to Supabase
-    db.cancelBooking(id).catch(() => {});
+    // Use functional update to read current bookings without stale closure
+    setBookings(prev => {
+      const booking = prev.find(b => b.id === id);
 
-    // Notify participants when a booking is cancelled
-    if (booking && booking.participants && booking.participants.length > 0) {
-      const cancelNotifs: Notification[] = booking.participants.map((p, i) => ({
-        id: generateId('n'),
-        type: 'booking' as const,
-        title: 'Booking Cancelled',
-        body: `${booking.userName} cancelled the booking: ${booking.courtName} on ${booking.date} at ${booking.time}.`,
-        timestamp: new Date().toISOString(),
-        read: false,
-      }));
-      setNotifications(prev => [...cancelNotifs, ...prev]);
-
-      // Send cancellation message to each participant
-      booking.participants.forEach((participant, i) => {
-        const msg = {
-          id: generateId('msg'),
-          from: booking.userName,
-          fromId: booking.userId,
-          to: participant.name,
-          toId: participant.id,
-          text: `A court booking you were part of has been cancelled.\n${booking.courtName} — ${new Date(booking.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} at ${booking.time}.`,
+      // Notify participants when a booking is cancelled
+      if (booking && booking.participants && booking.participants.length > 0) {
+        const cancelNotifs: Notification[] = booking.participants.map((p) => ({
+          id: generateId('n'),
+          type: 'booking' as const,
+          title: 'Booking Cancelled',
+          body: `${booking.userName} cancelled the booking: ${booking.courtName} on ${booking.date} at ${booking.time}.`,
           timestamp: new Date().toISOString(),
           read: false,
-        };
-        setConversations(prev => {
-          const existing = prev.find(c => c.memberId === booking.userId);
-          if (existing) {
-            return prev.map(c => c.memberId === booking.userId ? { ...c, messages: [...c.messages, msg], lastMessage: msg.text, lastTimestamp: msg.timestamp, unread: c.unread + 1 } : c);
-          }
-          return [...prev, { memberId: booking.userId, memberName: booking.userName, lastMessage: msg.text, lastTimestamp: msg.timestamp, unread: 1, messages: [msg] }];
+        }));
+        setNotifications(prev => [...cancelNotifs, ...prev]);
+        // Persist participant notifications to Supabase
+        cancelNotifs.forEach(n => {
+          booking.participants!.forEach(p => {
+            db.createNotification(p.id, n).catch(() => {});
+          });
         });
-      });
-    }
-  }, [bookings]);
+
+        // Send cancellation message to each participant
+        booking.participants.forEach((participant) => {
+          const msg = {
+            id: generateId('msg'),
+            from: booking.userName,
+            fromId: booking.userId,
+            to: participant.name,
+            toId: participant.id,
+            text: `A court booking you were part of has been cancelled.\n${booking.courtName} — ${new Date(booking.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} at ${booking.time}.`,
+            timestamp: new Date().toISOString(),
+            read: false,
+          };
+          setConversations(prev => {
+            const existing = prev.find(c => c.memberId === booking.userId);
+            if (existing) {
+              return prev.map(c => c.memberId === booking.userId ? { ...c, messages: [...c.messages, msg], lastMessage: msg.text, lastTimestamp: msg.timestamp, unread: c.unread + 1 } : c);
+            }
+            return [...prev, { memberId: booking.userId, memberName: booking.userName, lastMessage: msg.text, lastTimestamp: msg.timestamp, unread: 1, messages: [msg] }];
+          });
+        });
+      }
+
+      return prev.map(b => b.id === id ? { ...b, status: 'cancelled' as const } : b);
+    });
+    // Persist to Supabase
+    db.cancelBooking(id).catch(() => {});
+  }, []);
 
   // Program CRUD
   const addProgram = useCallback((program: CoachingProgram) => {
@@ -394,6 +410,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       read: false,
     };
     setNotifications(prev => [notif, ...prev]);
+    // Persist enrollment notification to Supabase
+    db.createNotification(memberId, notif).catch(() => {});
     // Send message from coach
     const coachMsg = {
       id: generateId('msg'),
@@ -447,11 +465,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const sendMessage = useCallback((toId: string, text: string) => {
     if (!currentUser) return;
+    const toName = members.find(m => m.id === toId)?.name || '';
     const msg = {
       id: generateId('msg'),
       from: currentUser.name,
       fromId: currentUser.id,
-      to: members.find(m => m.id === toId)?.name || '',
+      to: toName,
       toId,
       text,
       timestamp: new Date().toISOString(),
@@ -469,6 +488,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
         memberId: toId, memberName: member?.name || '', lastMessage: text, lastTimestamp: msg.timestamp, unread: 0, messages: [msg],
       }];
     });
+    // Persist message to Supabase
+    db.sendMessageByUsers({
+      id: msg.id, fromId: currentUser.id, fromName: currentUser.name,
+      toId, toName, text,
+    }).catch(() => {});
   }, [currentUser, members]);
 
   const markConversationRead = useCallback((memberId: string) => {

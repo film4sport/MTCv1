@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { signIn } from '../dashboard/lib/auth';
+import { signIn, resetPassword } from '../dashboard/lib/auth';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -28,6 +28,11 @@ export default function LoginPage() {
   const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/;
 
   const [loginError, setLoginError] = useState('');
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetSent, setResetSent] = useState(false);
+  const [resetError, setResetError] = useState('');
+  const [resetLoading, setResetLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,17 +70,6 @@ export default function LoginPage() {
   return (
     <>
       <style jsx global>{`
-        @font-face {
-          font-family: 'Gotham Rounded';
-          src: url('/Gotham_Rounded_Medium.otf') format('opentype');
-          font-weight: 500;
-          font-style: normal;
-        }
-        .headline-font {
-          font-family: 'Gotham Rounded', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-          font-weight: 500;
-        }
-
         @keyframes accentShimmer {
           0% { background-position: 200% 0; }
           100% { background-position: -200% 0; }
@@ -511,7 +505,7 @@ export default function LoginPage() {
                 />
                 Remember me
               </label>
-              <a href="#" className="font-medium hover:underline" style={{ color: '#6b7a3d' }}>Forgot password?</a>
+              <button type="button" onClick={() => { setShowForgotPassword(true); setResetEmail(email); setResetSent(false); setResetError(''); }} className="font-medium hover:underline" style={{ color: '#6b7a3d', background: 'none', border: 'none', cursor: 'pointer' }}>Forgot password?</button>
             </div>
 
             <button
