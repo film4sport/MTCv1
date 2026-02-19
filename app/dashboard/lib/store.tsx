@@ -6,6 +6,7 @@ import { CLUB_LOCATION, DEFAULT_NOTIFICATION_PREFS } from './types';
 import { DEFAULT_MEMBERS, DEFAULT_COURTS, DEFAULT_BOOKINGS, DEFAULT_EVENTS, DEFAULT_PARTNERS, DEFAULT_CONVERSATIONS, DEFAULT_ANNOUNCEMENTS, DEFAULT_NOTIFICATIONS, DEFAULT_PAYMENTS, DEFAULT_ANALYTICS, DEFAULT_PROGRAMS } from './data';
 import { generateId } from './utils';
 import { signIn, signOut, getCurrentUser } from './auth';
+import { supabase } from '../../lib/supabase';
 import * as db from './db';
 
 interface AppState {
@@ -27,6 +28,8 @@ interface AppState {
   toggleRsvp: (eventId: string, userName: string) => void;
   partners: Partner[];
   setPartners: (partners: Partner[]) => void;
+  addPartner: (partner: Partner) => void;
+  removePartner: (partnerId: string) => void;
   conversations: Conversation[];
   setConversations: (conversations: Conversation[]) => void;
   sendMessage: (toId: string, text: string) => void;
@@ -139,15 +142,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
           db.fetchNotificationPreferences(user.id),
         ]);
 
-        // Update state with Supabase data (fall back to defaults if empty)
-        if (members.length) setMembers(members);
-        if (bookings.length) setBookings(bookings);
-        if (events.length) setEvents(events);
-        if (partners.length) setPartners(partners);
-        if (conversations.length) setConversations(conversations);
-        if (announcements.length) setAnnouncements(announcements);
-        setNotifications(notifications); // Can be empty legitimately
-        if (programs.length) setPrograms(programs);
+        // Overwrite state with Supabase data (source of truth)
+        setMembers(members.length ? members : DEFAULT_MEMBERS);
+        setBookings(bookings);
+        setEvents(events.length ? events : DEFAULT_EVENTS);
+        setPartners(partners);
+        setConversations(conversations);
+        setAnnouncements(announcements);
+        setNotifications(notifications);
+        setPrograms(programs);
         if (payment) setPayments(prev => {
           const idx = prev.findIndex(p => p.memberId === user.id);
           if (idx >= 0) return prev.map((p, i) => i === idx ? payment : p);
@@ -284,7 +287,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         });
 
         // Send message to each participant with calendar marker
-        booking.participants.forEach((participant, i) => {
+        booking.participants.forEach((participant) => {
           const msg = {
             id: generateId('msg'),
             from: booking.userName,
@@ -295,13 +298,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
             timestamp: new Date().toISOString(),
             read: false,
           };
-          setConversations(prev => {
-            const existing = prev.find(c => c.memberId === booking.userId);
-            if (existing) {
-              return prev.map(c => c.memberId === booking.userId ? { ...c, messages: [...c.messages, msg], lastMessage: msg.text, lastTimestamp: msg.timestamp, unread: c.unread + 1 } : c);
-            }
-            return [...prev, { memberId: booking.userId, memberName: booking.userName, lastMessage: msg.text, lastTimestamp: msg.timestamp, unread: 1, messages: [msg] }];
-          });
+          // Persist to Supabase
+          db.sendMessageByUsers({ id: msg.id, fromId: booking.userId, fromName: booking.userName, toId: participant.id, toName: participant.name, text: msg.text }).catch(() => {});
         });
       }
     }
@@ -323,11 +321,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
           read: false,
         }));
         setNotifications(prev => [...cancelNotifs, ...prev]);
-        // Persist participant notifications to Supabase
-        cancelNotifs.forEach(n => {
-          booking.participants!.forEach(p => {
-            db.createNotification(p.id, n).catch(() => {});
-          });
+        // Persist participant notifications to Supabase (1:1 mapping)
+        booking.participants.forEach((p, i) => {
+          db.createNotification(p.id, cancelNotifs[i]).catch(() => {});
         });
 
         // Send cancellation message to each participant
@@ -342,13 +338,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
             timestamp: new Date().toISOString(),
             read: false,
           };
-          setConversations(prev => {
-            const existing = prev.find(c => c.memberId === booking.userId);
-            if (existing) {
-              return prev.map(c => c.memberId === booking.userId ? { ...c, messages: [...c.messages, msg], lastMessage: msg.text, lastTimestamp: msg.timestamp, unread: c.unread + 1 } : c);
-            }
-            return [...prev, { memberId: booking.userId, memberName: booking.userName, lastMessage: msg.text, lastTimestamp: msg.timestamp, unread: 1, messages: [msg] }];
-          });
+          // Persist to Supabase
+          db.sendMessageByUsers({ id: msg.id, fromId: booking.userId, fromName: booking.userName, toId: participant.id, toName: participant.name, text: msg.text }).catch(() => {});
         });
       }
 
@@ -377,6 +368,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       programId: program.id,
     }));
     setBookings(prev => [...prev, ...newBookings]);
+    // Persist program bookings to Supabase
+    newBookings.forEach(b => db.createBooking(b).catch(() => {}));
   }, []);
 
   const cancelProgram = useCallback((programId: string) => {
@@ -451,6 +444,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
   }, [programs]);
 
+  const addPartner = useCallback((partner: Partner) => {
+    setPartners(prev => [partner, ...prev]);
+    db.createPartner(partner).catch(() => {});
+  }, []);
+
+  const removePartner = useCallback((partnerId: string) => {
+    setPartners(prev => prev.filter(p => p.id !== partnerId));
+    db.deletePartner(partnerId).catch(() => {});
+  }, []);
+
   const toggleRsvp = useCallback((eventId: string, userName: string) => {
     setEvents(prev => prev.map(e => {
       if (e.id !== eventId) return e;
@@ -498,8 +501,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [currentUser, members]);
 
   const markConversationRead = useCallback((memberId: string) => {
-    setConversations(prev => prev.map(c => c.memberId === memberId ? { ...c, unread: 0 } : c));
-  }, []);
+    setConversations(prev => prev.map(c => {
+      if (c.memberId === memberId && c.unread > 0) {
+        return { ...c, unread: 0, messages: c.messages.map(m => m.toId === currentUser?.id ? { ...m, read: true } : m) };
+      }
+      return c;
+    }));
+    // Persist read status to Supabase — find conversation and mark messages read
+    if (currentUser) {
+      supabase
+        .from('conversations')
+        .select('id')
+        .or(`and(member_a.eq.${currentUser.id},member_b.eq.${memberId}),and(member_a.eq.${memberId},member_b.eq.${currentUser.id})`)
+        .single()
+        .then(({ data: conv }) => {
+          if (conv) db.markMessagesRead(conv.id, currentUser.id).catch(() => {});
+        });
+    }
+  }, [currentUser]);
 
   const dismissAnnouncement = useCallback((id: string) => {
     if (!currentUser) return;
@@ -532,7 +551,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   return (
     <AppContext.Provider value={{
       currentUser, login, logout, members, courts, setCourts, bookings, setBookings, addBooking, cancelBooking,
-      events, setEvents, toggleRsvp, partners, setPartners, conversations, setConversations, sendMessage, markConversationRead,
+      events, setEvents, toggleRsvp, partners, setPartners, addPartner, removePartner, conversations, setConversations, sendMessage, markConversationRead,
       announcements, setAnnouncements, dismissAnnouncement, notifications, setNotifications, markNotificationRead,
       clearNotifications, weather, payments, setPayments, analytics,
       programs, setPrograms, addProgram, cancelProgram, enrollInProgram, withdrawFromProgram,

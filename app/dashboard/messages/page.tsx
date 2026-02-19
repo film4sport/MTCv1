@@ -1,13 +1,29 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useApp } from '../lib/store';
 import DashboardHeader from '../components/DashboardHeader';
 import { downloadICS } from '../lib/calendar';
 
 export default function MessagesPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen" style={{ backgroundColor: '#f5f2eb' }} />}>
+      <MessagesContent />
+    </Suspense>
+  );
+}
+
+function MessagesContent() {
+  const searchParams = useSearchParams();
   const { currentUser, conversations, members, sendMessage, markConversationRead, showToast } = useApp();
   const [selectedConvo, setSelectedConvo] = useState<string | null>(null);
+
+  // Auto-open conversation from query param (e.g. from Partners page)
+  useEffect(() => {
+    const toId = searchParams.get('to');
+    if (toId) setSelectedConvo(toId);
+  }, [searchParams]);
   const [messageText, setMessageText] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [showNewConvo, setShowNewConvo] = useState(false);
@@ -265,6 +281,7 @@ export default function MessagesPage() {
                       onChange={(e) => setMessageText(e.target.value)}
                       onKeyDown={handleKeyDown}
                       placeholder="Type a message..."
+                      maxLength={500}
                       className="flex-1 px-4 py-2.5 rounded-xl text-sm border focus:outline-none focus:ring-2 focus:ring-[#6b7a3d]/20 transition-shadow"
                       style={{ borderColor: '#e0dcd3', color: '#2a2f1e' }}
                     />

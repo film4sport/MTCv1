@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { signUp } from '../dashboard/lib/auth';
+import { signUp, signIn } from '../dashboard/lib/auth';
 import '../(landing)/styles/landing.css';
 
 const privacySections = [
@@ -194,6 +194,9 @@ const membershipTypes = [
   { key: 'guest', label: 'Guest Pass', price: 10 },
 ];
 
+// Signup flow excludes Guest Pass (guests don't need accounts)
+const signupMembershipTypes = membershipTypes.filter(m => m.key !== 'guest');
+
 function InfoPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -219,7 +222,7 @@ function InfoPageContent() {
   // Load existing profile from localStorage
   useEffect(() => {
     try {
-      const stored = localStorage.getItem('currentUser');
+      const stored = localStorage.getItem('mtc-current-user');
       if (stored) setExistingProfile(JSON.parse(stored));
     } catch { /* ignore */ }
   }, [signupStep]);
@@ -274,21 +277,33 @@ function InfoPageContent() {
   };
 
   const [signupError, setSignupError] = useState('');
+  const [signupLoading, setSignupLoading] = useState(false);
 
   const completeSignup = async () => {
     setSignupError('');
+    setSignupLoading(true);
 
-    // Create Supabase auth user + profile
-    const { user, error } = await signUp(signupData.email, signupData.password, signupData.name);
-    if (error || !user) {
-      setSignupError(error || 'Signup failed. Please try again.');
-      return;
+    try {
+      // Create Supabase auth user + profile
+      const { user, error } = await signUp(signupData.email, signupData.password, signupData.name, signupData.membershipType);
+      if (error || !user) {
+        setSignupError(error || 'Signup failed. Please try again.');
+        setSignupLoading(false);
+        return;
+      }
+
+      // Sign in immediately to establish Supabase session (so middleware allows dashboard access)
+      await signIn(signupData.email, signupData.password);
+
+      // Cache user for instant dashboard access
+      localStorage.setItem('mtc-current-user', JSON.stringify(user));
+
+      setSignupLoading(false);
+      setSignupStep(5);
+    } catch {
+      setSignupError('Something went wrong. Please try again.');
+      setSignupLoading(false);
     }
-
-    // Cache user for instant dashboard access
-    localStorage.setItem('mtc-current-user', JSON.stringify(user));
-
-    setSignupStep(5);
   };
 
   const getMembershipPrice = () => {
@@ -400,7 +415,7 @@ function InfoPageContent() {
               <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
                 <div className="relative fade-in-left">
                   <div className="aspect-[4/3] rounded-2xl overflow-hidden">
-                    <img src="https://cdn.jsdelivr.net/gh/film4sport/my-webapp-images@main/mtc-images/gallery-05-serve.jpeg" alt="Tennis serve at Mono Tennis Club" className="w-full h-full object-cover" loading="lazy" />
+                    <img src="https://cdn.jsdelivr.net/gh/film4sport/my-webapp-images@main/mtc-images/gallery-05-serve.png" alt="Tennis serve at Mono Tennis Club" className="w-full h-full object-cover" loading="lazy" />
                   </div>
                   <div className="hidden lg:grid grid-cols-2 gap-3 mt-3">
                     <div className="aspect-video rounded-lg overflow-hidden">
@@ -683,7 +698,7 @@ function InfoPageContent() {
                     <h3 className="headline-font text-2xl mb-2 text-center" style={{ color: '#2a2f1e' }}>Select Membership Type</h3>
                     <p className="text-sm text-center mb-8" style={{ color: '#6b7266' }}>Choose the membership that best fits your needs.</p>
                     <div className="grid gap-4">
-                      {membershipTypes.map((m) => (
+                      {signupMembershipTypes.map((m) => (
                         <button
                           key={m.key}
                           onClick={() => { setSignupData({ ...signupData, membershipType: m.key }); setSignupStep(2); }}
@@ -692,9 +707,6 @@ function InfoPageContent() {
                         >
                           <div>
                             <span className="font-semibold text-base" style={{ color: '#2a2f1e' }}>{m.label}</span>
-                            {m.key === 'guest' && (
-                              <span className="block text-xs mt-1" style={{ color: '#999' }}>Per visit, no membership required</span>
-                            )}
                           </div>
                           <span className="font-bold text-xl" style={{ color: '#4a5528' }}>${m.price}</span>
                         </button>
@@ -749,6 +761,9 @@ function InfoPageContent() {
                         />
                       </div>
                     </div>
+                    {signupError && signupStep === 2 && (
+                      <p className="text-sm mt-4 text-center" style={{ color: '#ef4444' }}>{signupError}</p>
+                    )}
                     <div className="flex items-center gap-4 mt-8">
                       <button
                         onClick={() => setSignupStep(1)}
@@ -758,7 +773,15 @@ function InfoPageContent() {
                         Back
                       </button>
                       <button
-                        onClick={() => setSignupStep(3)}
+                        onClick={() => {
+                          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                          if (!emailRegex.test(signupData.email)) {
+                            setSignupError('Please enter a valid email address');
+                            return;
+                          }
+                          setSignupError('');
+                          setSignupStep(3);
+                        }}
                         disabled={!signupData.name.trim() || !signupData.email.trim() || signupData.password.length < 6}
                         className="flex-1 px-6 py-3 rounded-full text-sm font-semibold transition-all"
                         style={
@@ -880,10 +903,11 @@ function InfoPageContent() {
                       </button>
                       <button
                         onClick={completeSignup}
-                        className="flex-1 px-6 py-3 rounded-full text-sm font-semibold transition-all hover:opacity-90"
+                        disabled={signupLoading}
+                        className="flex-1 px-6 py-3 rounded-full text-sm font-semibold transition-all hover:opacity-90 disabled:opacity-60"
                         style={{ backgroundColor: '#6b7a3d', color: '#fff' }}
                       >
-                        I&apos;ve Sent the E-Transfer
+                        {signupLoading ? 'Creating Account...' : "I've Sent the E-Transfer"}
                       </button>
                     </div>
                   </div>

@@ -27,6 +27,7 @@ export default function BookCourtPage() {
   const [guestName, setGuestName] = useState('');
   const [selectedParticipants, setSelectedParticipants] = useState<{ id: string; name: string }[]>([]);
   const [participantSearch, setParticipantSearch] = useState('');
+  const [bookingLoading, setBookingLoading] = useState(false);
   const [calMonth, setCalMonth] = useState(() => new Date());
   const [calSelectedDate, setCalSelectedDate] = useState<string | null>(null);
 
@@ -59,29 +60,51 @@ export default function BookCourtPage() {
 
   const isSlotPast = (date: string, time: string) => {
     const now = new Date();
-    const [hourStr] = time.split(':');
-    const isPM = time.includes('PM');
-    let hour = parseInt(hourStr);
+    const match = time.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+    if (!match) return false;
+    let hour = parseInt(match[1]);
+    const minute = parseInt(match[2]);
+    const isPM = match[3].toUpperCase() === 'PM';
     if (isPM && hour !== 12) hour += 12;
     if (!isPM && hour === 12) hour = 0;
     const slotDate = new Date(date + 'T00:00:00');
-    slotDate.setHours(hour);
+    slotDate.setHours(hour, minute, 0, 0);
     return slotDate < now;
   };
 
   const isCourtClosed = (courtId: number, time: string) => {
     const closeHour = parseInt(COURT_HOURS[courtId]?.close || '22');
-    const [hourStr] = time.split(':');
-    const isPM = time.includes('PM');
-    let hour = parseInt(hourStr);
+    const match = time.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+    if (!match) return false;
+    let hour = parseInt(match[1]);
+    const isPM = match[3].toUpperCase() === 'PM';
     if (isPM && hour !== 12) hour += 12;
     if (!isPM && hour === 12) hour = 0;
+    // Close hour is lights-out; last bookable slot starts 1 hour before
     return hour >= closeHour;
+  };
+
+  const canCancel = (date: string, time: string) => {
+    const match = time.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+    if (!match) return true;
+    let hour = parseInt(match[1]);
+    const minute = parseInt(match[2]);
+    const isPM = match[3].toUpperCase() === 'PM';
+    if (isPM && hour !== 12) hour += 12;
+    if (!isPM && hour === 12) hour = 0;
+    const slotDate = new Date(date + 'T00:00:00');
+    slotDate.setHours(hour, minute, 0, 0);
+    const hoursUntil = (slotDate.getTime() - Date.now()) / (1000 * 60 * 60);
+    return hoursUntil >= FEES.cancelWindowHours;
   };
 
   const handleSlotClick = (courtId: number, courtName: string, date: string, time: string) => {
     const mine = isSlotMine(courtId, date, time);
     if (mine) {
+      if (!canCancel(date, time)) {
+        showToast(`Cannot cancel within ${FEES.cancelWindowHours} hours of booking`, 'error');
+        return;
+      }
       if (confirm(`Cancel booking for ${courtName} on ${date} at ${time}?`)) {
         cancelBooking(mine.id);
         showToast('Booking cancelled');
@@ -98,8 +121,16 @@ export default function BookCourtPage() {
   };
 
   const confirmBooking = () => {
-    if (!modalData || !currentUser) return;
+    if (!modalData || !currentUser || bookingLoading) return;
     if (isGuest && !guestName.trim()) return;
+    // Check for double-booking
+    const alreadyBooked = bookings.find(b => b.courtId === modalData.courtId && b.date === modalData.date && b.time === modalData.time && b.status === 'confirmed');
+    if (alreadyBooked) {
+      showToast('This slot was just booked by someone else', 'error');
+      setShowModal(false);
+      return;
+    }
+    setBookingLoading(true);
     const booking = {
       id: generateId('b'),
       courtId: modalData.courtId,
@@ -114,6 +145,7 @@ export default function BookCourtPage() {
       type: 'court' as const,
     };
     addBooking(booking);
+    setBookingLoading(false);
     setShowModal(false);
     setBookingSuccess({ courtName: modalData.courtName, date: modalData.date, time: modalData.time, participants: selectedParticipants.length > 0 ? selectedParticipants : undefined });
     showToast(`Court booked for ${modalData.time}`);
@@ -371,30 +403,35 @@ export default function BookCourtPage() {
                     </h4>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
                       {TIME_SLOTS.map(time => {
-                        const courts = COURTS_CONFIG.filter(c =>
+                        const availableCourts = (selectedCourt ? COURTS_CONFIG.filter(c => c.id === selectedCourt) : COURTS_CONFIG).filter(c =>
                           !isSlotBooked(c.id, calSelectedDate, time) &&
                           !isSlotPast(calSelectedDate, time) &&
                           !isCourtClosed(c.id, time)
                         );
-                        if (courts.length === 0) return null;
+                        if (availableCourts.length === 0) return null;
                         return (
-                          <button
-                            key={time}
-                            onClick={() => {
-                              const court = courts[0];
-                              setModalData({ courtId: court.id, courtName: court.name, date: calSelectedDate, time });
-                              setIsGuest(false);
-                              setGuestName('');
-                              setSelectedParticipants([]);
-                              setParticipantSearch('');
-                              setShowModal(true);
-                            }}
-                            className="text-left rounded-xl p-3 border transition-colors hover:border-[#6b7a3d] hover:bg-[rgba(107,122,61,0.04)]"
-                            style={{ borderColor: '#e0dcd3' }}
-                          >
-                            <p className="font-medium text-sm" style={{ color: '#2a2f1e' }}>{time}</p>
-                            <p className="text-xs mt-0.5" style={{ color: '#6b7266' }}>{courts.length} court{courts.length > 1 ? 's' : ''} open</p>
-                          </button>
+                          <div key={time} className="rounded-xl p-3 border" style={{ borderColor: '#e0dcd3' }}>
+                            <p className="font-medium text-sm mb-1.5" style={{ color: '#2a2f1e' }}>{time}</p>
+                            <div className="flex flex-wrap gap-1.5">
+                              {availableCourts.map(court => (
+                                <button
+                                  key={court.id}
+                                  onClick={() => {
+                                    setModalData({ courtId: court.id, courtName: court.name, date: calSelectedDate, time });
+                                    setIsGuest(false);
+                                    setGuestName('');
+                                    setSelectedParticipants([]);
+                                    setParticipantSearch('');
+                                    setShowModal(true);
+                                  }}
+                                  className="text-xs px-2.5 py-1.5 rounded-lg transition-colors hover:bg-[rgba(107,122,61,0.08)]"
+                                  style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', color: '#16a34a' }}
+                                >
+                                  {court.name}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
                         );
                       })}
                     </div>
@@ -417,7 +454,14 @@ export default function BookCourtPage() {
                       <div className="flex items-center justify-between">
                         <p className="font-medium text-sm" style={{ color: '#2a2f1e' }}>{b.courtName}</p>
                         <button
-                          onClick={() => cancelBooking(b.id)}
+                          onClick={() => {
+                            if (!canCancel(b.date, b.time)) {
+                              showToast(`Cannot cancel within ${FEES.cancelWindowHours}h of booking`, 'error');
+                              return;
+                            }
+                            cancelBooking(b.id);
+                            showToast('Booking cancelled');
+                          }}
                           className="text-xs px-2 py-0.5 rounded hover:bg-red-50 transition-colors"
                           style={{ color: '#ef4444' }}
                         >
@@ -475,7 +519,7 @@ export default function BookCourtPage() {
                 <input
                   type="checkbox"
                   checked={isGuest}
-                  onChange={(e) => setIsGuest(e.target.checked)}
+                  onChange={(e) => { setIsGuest(e.target.checked); if (!e.target.checked) setGuestName(''); }}
                   className="w-5 h-5 rounded"
                   style={{ accentColor: '#6b7a3d' }}
                 />
@@ -567,11 +611,11 @@ export default function BookCourtPage() {
               </button>
               <button
                 onClick={confirmBooking}
-                disabled={isGuest && !guestName.trim()}
+                disabled={(isGuest && !guestName.trim()) || bookingLoading}
                 className="flex-1 py-3 rounded-xl text-sm font-medium text-white transition-colors hover:opacity-90 disabled:opacity-50"
                 style={{ background: '#6b7a3d' }}
               >
-                Confirm Booking
+                {bookingLoading ? 'Booking...' : 'Confirm Booking'}
               </button>
             </div>
           </div>

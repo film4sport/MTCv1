@@ -38,11 +38,12 @@ export async function signUp(
   email: string,
   password: string,
   name: string,
+  membershipType?: string,
 ): Promise<{ user: User | null; error: string | null }> {
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: { name, role: 'member' } },
+    options: { data: { name, role: 'member', membership_type: membershipType || 'single' } },
   });
 
   if (error) return { user: null, error: error.message };
