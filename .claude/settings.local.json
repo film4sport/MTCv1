@@ -32,7 +32,9 @@
       "mcp__plugin_playwright_playwright__browser_navigate",
       "mcp__plugin_playwright_playwright__browser_install",
       "Bash(npx next dev:*)",
-      "Bash(npm ls:*)"
+      "Bash(npm ls:*)",
+      "Bash(export NEXT_PUBLIC_SUPABASE_URL:*)",
+      "Bash(export:*)"
     ]
   }
 }
