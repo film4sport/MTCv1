@@ -19,7 +19,7 @@ export default function DashboardHome() {
     .slice(0, 3);
 
   const activeAnnouncements = announcements.filter(
-    a => !a.dismissedBy.includes(currentUser?.email || '')
+    a => !a.dismissedBy.includes(currentUser?.id || '')
   );
 
   const formatDate = (dateStr: string) => {

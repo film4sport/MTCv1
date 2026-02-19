@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useApp } from '../lib/store';
 import DashboardHeader from '../components/DashboardHeader';
 import { generateId } from '../lib/utils';
+import * as db from '../lib/db';
 
 type AdminTab = 'dashboard' | 'members' | 'courts' | 'payments' | 'announcements';
 
@@ -61,7 +62,10 @@ export default function AdminPage() {
   );
 
   const toggleCourtMaintenance = (courtId: number) => {
-    setCourts(courts.map(c => c.id === courtId ? { ...c, status: c.status === 'maintenance' ? 'available' : 'maintenance' } as typeof c : c));
+    const court = courts.find(c => c.id === courtId);
+    const newStatus = court?.status === 'maintenance' ? 'available' : 'maintenance';
+    setCourts(courts.map(c => c.id === courtId ? { ...c, status: newStatus } as typeof c : c));
+    db.updateCourtStatus(courtId, newStatus).catch(() => {});
   };
 
   const addAnnouncement = () => {
@@ -71,14 +75,16 @@ export default function AdminPage() {
       text: newAnnouncement.trim(),
       type: newAnnouncementType,
       date: new Date().toISOString().split('T')[0],
-      dismissedBy: [],
+      dismissedBy: [] as string[],
     };
     setAnnouncements([ann, ...announcements]);
     setNewAnnouncement('');
+    db.createAnnouncement(ann).catch(() => {});
   };
 
   const deleteAnnouncement = (id: string) => {
     setAnnouncements(announcements.filter(a => a.id !== id));
+    db.deleteAnnouncement(id).catch(() => {});
   };
 
   const tabs: { key: AdminTab; label: string }[] = [

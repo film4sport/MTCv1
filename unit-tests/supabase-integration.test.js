@@ -170,7 +170,12 @@ describe('CSP — next.config.js', () => {
     expect(content).toContain('wss://*.supabase.co');
   });
 
-  it('does NOT use unsafe-eval', () => {
-    expect(content).not.toContain('unsafe-eval');
+  it('only allows unsafe-eval conditionally for dev mode', () => {
+    // unsafe-eval is needed for Next.js HMR/React hydration in dev mode
+    // Verify it's behind an isDev conditional, not hardcoded into the CSP
+    expect(content).toContain('isDev');
+    expect(content).toContain("'unsafe-eval'");
+    // Ensure the conditional pattern exists (isDev ? " 'unsafe-eval'" : '')
+    expect(content).toMatch(/isDev\s*\?\s*.*unsafe-eval.*:\s*['"]['"]/)
   });
 });

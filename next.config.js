@@ -1,4 +1,5 @@
 /** @type {import('next').NextConfig} */
+const isDev = process.env.NODE_ENV !== 'production';
 const nextConfig = {
   images: {
     remotePatterns: [
@@ -70,7 +71,7 @@ const nextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https://cdn.jsdelivr.net; frame-src 'self' https://www.google.com; connect-src 'self' https://api.open-meteo.com https://*.supabase.co wss://*.supabase.co; font-src 'self' https://fonts.gstatic.com; manifest-src 'self'",
+            value: `default-src 'self'; script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''}; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https://cdn.jsdelivr.net; frame-src 'self' https://www.google.com; connect-src 'self' https://api.open-meteo.com https://*.supabase.co wss://*.supabase.co; font-src 'self' https://fonts.gstatic.com; manifest-src 'self'`,
           },
           {
             key: 'Permissions-Policy',

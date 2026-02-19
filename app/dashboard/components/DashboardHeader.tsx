@@ -77,17 +77,33 @@ export default function DashboardHeader({ title }: DashboardHeaderProps) {
                 {filteredNotifications.length === 0 ? (
                   <div className="p-6 text-center text-sm" style={{ color: '#6b7a3d' }}>No notifications</div>
                 ) : (
-                  filteredNotifications.map(n => (
-                    <button
-                      key={n.id}
-                      onClick={() => markNotificationRead(n.id)}
-                      className={`w-full text-left p-4 border-b transition-colors hover:bg-black/[0.02] ${!n.read ? 'bg-[#d4e157]/10' : ''}`}
-                      style={{ borderColor: '#e0dcd3' }}
-                    >
-                      <p className="text-sm font-medium" style={{ color: '#1a1f12' }}>{n.title}</p>
-                      <p className="text-xs mt-0.5" style={{ color: '#6b7a3d' }}>{n.body}</p>
-                    </button>
-                  ))
+                  filteredNotifications.map(n => {
+                    const formatAgo = (ts: string) => {
+                      const diff = Date.now() - new Date(ts).getTime();
+                      const mins = Math.floor(diff / 60000);
+                      if (mins < 1) return 'Just now';
+                      if (mins < 60) return `${mins}m ago`;
+                      const hrs = Math.floor(mins / 60);
+                      if (hrs < 24) return `${hrs}h ago`;
+                      const days = Math.floor(hrs / 24);
+                      if (days < 7) return `${days}d ago`;
+                      return new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                    };
+                    return (
+                      <button
+                        key={n.id}
+                        onClick={() => markNotificationRead(n.id)}
+                        className={`w-full text-left p-4 border-b transition-colors hover:bg-black/[0.02] ${!n.read ? 'bg-[#d4e157]/10' : ''}`}
+                        style={{ borderColor: '#e0dcd3' }}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <p className="text-sm font-medium" style={{ color: '#1a1f12' }}>{n.title}</p>
+                          <span className="text-[0.6rem] shrink-0 mt-0.5" style={{ color: '#6b7266' }}>{formatAgo(n.timestamp)}</span>
+                        </div>
+                        <p className="text-xs mt-0.5" style={{ color: '#6b7a3d' }}>{n.body}</p>
+                      </button>
+                    );
+                  })
                 )}
               </div>
             </div>
