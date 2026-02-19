@@ -12,8 +12,8 @@ export default function ProfilePage() {
   const [notifCoaching, setNotifCoaching] = useState(false);
   const [notifPush, setNotifPush] = useState(true);
 
-  const ntrp = '3.5';
-  const skillLevel = 'Intermediate';
+  const ntrp = currentUser?.ntrp ?? 3.5;
+  const skillLevel = ntrp <= 2.5 ? 'Beginner' : ntrp <= 4.0 ? 'Intermediate' : ntrp <= 5.5 ? 'Advanced' : 'Expert';
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#f5f2eb' }}>
