@@ -31,7 +31,8 @@
       "WebFetch(domain:clubspark.ca)",
       "mcp__plugin_playwright_playwright__browser_navigate",
       "mcp__plugin_playwright_playwright__browser_install",
-      "Bash(npx next dev:*)"
+      "Bash(npx next dev:*)",
+      "Bash(npm ls:*)"
     ]
   }
 }

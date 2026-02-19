@@ -6,6 +6,7 @@ import { CLUB_LOCATION, DEFAULT_NOTIFICATION_PREFS } from './types';
 import { DEFAULT_MEMBERS, DEFAULT_COURTS, DEFAULT_BOOKINGS, DEFAULT_EVENTS, DEFAULT_PARTNERS, DEFAULT_CONVERSATIONS, DEFAULT_ANNOUNCEMENTS, DEFAULT_NOTIFICATIONS, DEFAULT_PAYMENTS, DEFAULT_ANALYTICS, DEFAULT_PROGRAMS } from './data';
 import { generateId } from './utils';
 import { signIn, signOut, getCurrentUser } from './auth';
+import * as db from './db';
 
 interface AppState {
   // Auth
@@ -93,7 +94,7 @@ function saveJSON(key: string, value: unknown) {
 export function AppProvider({ children }: { children: ReactNode }) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [members] = useState<User[]>(DEFAULT_MEMBERS);
+  const [members, setMembers] = useState<User[]>(DEFAULT_MEMBERS);
   const [courts, setCourts] = useState<Court[]>(DEFAULT_COURTS);
   const [bookings, setBookings] = useState<Booking[]>(DEFAULT_BOOKINGS);
   const [events, setEvents] = useState<ClubEvent[]>(DEFAULT_EVENTS);
@@ -118,19 +119,50 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const savedUser = loadJSON<User | null>('mtc-current-user', null);
     if (savedUser) setCurrentUser(savedUser);
 
-    // Then verify against Supabase session
-    getCurrentUser().then(user => {
+    // Then verify against Supabase session and fetch live data
+    getCurrentUser().then(async (user) => {
       if (user) {
         setCurrentUser(user);
         saveJSON('mtc-current-user', user);
+
+        // Fetch all data from Supabase in parallel
+        const [members, bookings, events, partners, conversations, announcements, notifications, programs, payment, notifPrefs] = await Promise.all([
+          db.fetchMembers(),
+          db.fetchBookings(),
+          db.fetchEvents(),
+          db.fetchPartners(),
+          db.fetchConversations(user.id),
+          db.fetchAnnouncements(user.id),
+          db.fetchNotifications(user.id),
+          db.fetchPrograms(),
+          db.fetchPayments(user.id),
+          db.fetchNotificationPreferences(user.id),
+        ]);
+
+        // Update state with Supabase data (fall back to defaults if empty)
+        if (members.length) setMembers(members);
+        if (bookings.length) setBookings(bookings);
+        if (events.length) setEvents(events);
+        if (partners.length) setPartners(partners);
+        if (conversations.length) setConversations(conversations);
+        if (announcements.length) setAnnouncements(announcements);
+        setNotifications(notifications); // Can be empty legitimately
+        if (programs.length) setPrograms(programs);
+        if (payment) setPayments(prev => {
+          const idx = prev.findIndex(p => p.memberId === user.id);
+          if (idx >= 0) return prev.map((p, i) => i === idx ? payment : p);
+          return [...prev, payment];
+        });
+        if (notifPrefs) setNotificationPreferences(notifPrefs);
       } else if (savedUser) {
         // Supabase session expired — clear cached user
         setCurrentUser(null);
         localStorage.removeItem('mtc-current-user');
       }
+      setIsLoaded(true);
     });
 
-    // Load other data from localStorage (will be migrated to Supabase in db.ts)
+    // Load from localStorage as immediate cache (Supabase data will overwrite)
     setBookings(loadJSON('mtc-bookings', DEFAULT_BOOKINGS));
     setConversations(loadJSON('mtc-conversations', DEFAULT_CONVERSATIONS));
     setAnnouncements(loadJSON('mtc-announcements', DEFAULT_ANNOUNCEMENTS));
@@ -138,7 +170,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setPrograms(loadJSON('mtc-programs', DEFAULT_PROGRAMS));
     setPayments(loadJSON('mtc-payments', DEFAULT_PAYMENTS));
     setNotificationPreferences(loadJSON('mtc-notification-prefs', DEFAULT_NOTIFICATION_PREFS));
-    setIsLoaded(true);
   }, []);
 
   // Persist to localStorage on changes
@@ -148,7 +179,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => { if (isLoaded) saveJSON('mtc-notifications', notifications); }, [notifications, isLoaded]);
   useEffect(() => { if (isLoaded) saveJSON('mtc-programs', programs); }, [programs, isLoaded]);
   useEffect(() => { if (isLoaded) saveJSON('mtc-payments', payments); }, [payments, isLoaded]);
-  useEffect(() => { if (isLoaded) saveJSON('mtc-notification-prefs', notificationPreferences); }, [notificationPreferences, isLoaded]);
+  useEffect(() => {
+    if (isLoaded) {
+      saveJSON('mtc-notification-prefs', notificationPreferences);
+      if (currentUser) db.updateNotificationPreferences(currentUser.id, notificationPreferences).catch(() => {});
+    }
+  }, [notificationPreferences, isLoaded, currentUser]);
 
   // Fetch weather
   useEffect(() => {
@@ -213,6 +249,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // Actions
   const addBooking = useCallback((booking: Booking) => {
     setBookings(prev => [...prev, booking]);
+    // Persist to Supabase
+    db.createBooking(booking).catch(() => {});
     // Create notification for booker
     if (booking.type === 'court') {
       const notif: Notification = {
@@ -264,6 +302,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const cancelBooking = useCallback((id: string) => {
     const booking = bookings.find(b => b.id === id);
     setBookings(prev => prev.map(b => b.id === id ? { ...b, status: 'cancelled' as const } : b));
+    // Persist to Supabase
+    db.cancelBooking(id).catch(() => {});
 
     // Notify participants when a booking is cancelled
     if (booking && booking.participants && booking.participants.length > 0) {
@@ -303,6 +343,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // Program CRUD
   const addProgram = useCallback((program: CoachingProgram) => {
     setPrograms(prev => [...prev, program]);
+    // Persist to Supabase
+    db.createProgram(program).catch(() => {});
     // Auto-generate blocked bookings for each session
     const newBookings: Booking[] = program.sessions.map((s, i) => ({
       id: `bp-${program.id}-${i}`,
@@ -322,6 +364,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const cancelProgram = useCallback((programId: string) => {
     setPrograms(prev => prev.map(p => p.id === programId ? { ...p, status: 'cancelled' as const } : p));
     setBookings(prev => prev.map(b => b.programId === programId ? { ...b, status: 'cancelled' as const } : b));
+    // Persist to Supabase
+    db.cancelProgram(programId).catch(() => {});
   }, []);
 
   const enrollInProgram = useCallback((programId: string, memberId: string, memberName: string) => {
@@ -329,6 +373,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (!program) return;
     // Add member to enrolled list
     setPrograms(prev => prev.map(p => p.id === programId ? { ...p, enrolledMembers: [...p.enrolledMembers, memberId] } : p));
+    // Persist to Supabase
+    db.enrollInProgram(programId, memberId).catch(() => {});
     // Charge fee
     setPayments(prev => {
       const existing = prev.find(p => p.memberId === memberId);
@@ -372,6 +418,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const program = programs.find(p => p.id === programId);
     if (!program) return;
     setPrograms(prev => prev.map(p => p.id === programId ? { ...p, enrolledMembers: p.enrolledMembers.filter(m => m !== memberId) } : p));
+    // Persist to Supabase
+    db.withdrawFromProgram(programId, memberId).catch(() => {});
     // Credit refund
     setPayments(prev => {
       const existing = prev.find(p => p.memberId === memberId);
@@ -393,6 +441,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         ...(e.spotsTaken != null ? { spotsTaken: attending ? e.spotsTaken - 1 : e.spotsTaken + 1 } : {}),
       };
     }));
+    // Persist to Supabase
+    db.toggleEventRsvp(eventId, userName).catch(() => {});
   }, []);
 
   const sendMessage = useCallback((toId: string, text: string) => {
@@ -428,15 +478,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const dismissAnnouncement = useCallback((id: string) => {
     if (!currentUser) return;
     setAnnouncements(prev => prev.map(a => a.id === id ? { ...a, dismissedBy: [...a.dismissedBy, currentUser.email] } : a));
+    // Persist to Supabase
+    db.dismissAnnouncement(id, currentUser.id).catch(() => {});
   }, [currentUser]);
 
   const markNotificationRead = useCallback((id: string) => {
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+    // Persist to Supabase
+    db.markNotificationRead(id).catch(() => {});
   }, []);
 
   const clearNotifications = useCallback(() => {
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-  }, []);
+    // Persist to Supabase
+    if (currentUser) db.clearNotifications(currentUser.id).catch(() => {});
+  }, [currentUser]);
 
   const showToast = useCallback((message: string, type: 'success' | 'error' | 'info' = 'success') => {
     const id = generateId('toast');
