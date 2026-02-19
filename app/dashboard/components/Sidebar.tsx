@@ -152,46 +152,26 @@ export default function Sidebar() {
               </li>
             )}
 
-            {/* Admin links — admin sees both Coaching Panel and Admin Panel */}
+            {/* Admin Panel — admin only */}
             {isAdmin && (
-              <>
-                <li className="pt-2 mt-2" style={{ borderTop: '1px solid rgba(232, 228, 217, 0.1)' }}>
-                  <Link
-                    href={coachItem.href}
-                    onClick={closeMobileSidebar}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${
-                      pathname.startsWith(coachItem.href)
-                        ? 'font-semibold'
-                        : 'hover:bg-white/5'
-                    }`}
-                    style={pathname.startsWith(coachItem.href) ? { backgroundColor: 'rgba(212, 225, 87, 0.15)', color: '#d4e157' } : { color: 'rgba(232, 228, 217, 0.7)' }}
-                    title={sidebarCollapsed ? coachItem.label : undefined}
-                  >
-                    <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={pathname.startsWith(coachItem.href) ? 2.5 : 2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d={coachItem.icon} />
-                    </svg>
-                    {!sidebarCollapsed && <span className="text-sm">{coachItem.label}</span>}
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href={adminItem.href}
-                    onClick={closeMobileSidebar}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${
-                      pathname.startsWith(adminItem.href)
-                        ? 'font-semibold'
-                        : 'hover:bg-white/5'
-                    }`}
-                    style={pathname.startsWith(adminItem.href) ? { backgroundColor: 'rgba(212, 225, 87, 0.15)', color: '#d4e157' } : { color: 'rgba(232, 228, 217, 0.7)' }}
-                    title={sidebarCollapsed ? adminItem.label : undefined}
-                  >
-                    <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={pathname.startsWith(adminItem.href) ? 2.5 : 2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d={adminItem.icon} />
-                    </svg>
-                    {!sidebarCollapsed && <span className="text-sm">{adminItem.label}</span>}
-                  </Link>
-                </li>
-              </>
+              <li className="pt-2 mt-2" style={{ borderTop: '1px solid rgba(232, 228, 217, 0.1)' }}>
+                <Link
+                  href={adminItem.href}
+                  onClick={closeMobileSidebar}
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${
+                    pathname.startsWith(adminItem.href)
+                      ? 'font-semibold'
+                      : 'hover:bg-white/5'
+                  }`}
+                  style={pathname.startsWith(adminItem.href) ? { backgroundColor: 'rgba(212, 225, 87, 0.15)', color: '#d4e157' } : { color: 'rgba(232, 228, 217, 0.7)' }}
+                  title={sidebarCollapsed ? adminItem.label : undefined}
+                >
+                  <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={pathname.startsWith(adminItem.href) ? 2.5 : 2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d={adminItem.icon} />
+                  </svg>
+                  {!sidebarCollapsed && <span className="text-sm">{adminItem.label}</span>}
+                </Link>
+              </li>
             )}
           </ul>
         </nav>
