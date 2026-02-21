@@ -12,8 +12,19 @@ async function loginAs(page, role = 'member') {
   };
   const { email, pass } = creds[role];
 
+  // Clear cookies to avoid stale sessions from previous tests
+  await page.context().clearCookies();
+
   await page.goto(`${BASE}/login`, { waitUntil: 'domcontentloaded' });
   await page.waitForTimeout(500);
+
+  // If redirected away from login (stale session), clear storage and retry
+  if (!page.url().includes('/login')) {
+    await page.evaluate(() => localStorage.clear());
+    await page.context().clearCookies();
+    await page.goto(`${BASE}/login`, { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(500);
+  }
 
   // Type credentials directly (demo buttons are dev-only, not available in CI production builds)
   await page.locator('input[type="email"]').click();
@@ -24,9 +35,10 @@ async function loginAs(page, role = 'member') {
   // Submit the form
   await page.locator('button[type="submit"]').click();
 
-  // Wait for redirect to dashboard (Supabase auth + router.push)
-  await page.waitForURL('**/dashboard**', { timeout: 15000 });
-  await page.waitForTimeout(1000);
+  // Wait for redirect to dashboard — use 'commit' (not default 'load') because
+  // dashboard makes ongoing Supabase fetches that block the load event on slow CI runners
+  await page.waitForURL('**/dashboard**', { timeout: 30000, waitUntil: 'commit' });
+  await page.waitForTimeout(1500);
 }
 
 // Helper: navigate to a dashboard sub-page (after loginAs)

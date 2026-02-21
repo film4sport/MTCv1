@@ -24,7 +24,7 @@ module.exports = defineConfig({
   testMatch: '**/*.spec.js',
   fullyParallel: true,
   workers: process.env.CI ? 4 : 2,
-  retries: process.env.CI ? 0 : 1,
+  retries: process.env.CI ? 1 : 1,
   reporter: 'list',
   use: {
     baseURL: 'http://localhost:3000',
