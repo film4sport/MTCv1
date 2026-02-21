@@ -1,6 +1,6 @@
 [build]
 builder = "nixpacks"
-buildCommand = "rm -rf .next && npm run build"
+buildCommand = "find .next -mindepth 1 ! -path '.next/cache*' -delete 2>/dev/null; npm run build"
 
 [deploy]
 startCommand = "npm start"
