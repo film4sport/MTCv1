@@ -145,7 +145,7 @@ export default function Schedule() {
           <div className="flex items-center gap-4">
             <button
               onClick={() => changeMonth(-1)}
-              className="w-10 h-10 rounded-full border flex items-center justify-center transition-colors hover:bg-[rgba(232,228,217,0.08)]"
+              className="cal-nav-btn w-10 h-10 rounded-full border flex items-center justify-center hover:bg-[rgba(232,228,217,0.08)]"
               style={{ borderColor: 'rgba(232, 228, 217, 0.2)' }}
             >
               <svg className="w-4 h-4" style={{ color: '#e8e4d9' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -157,7 +157,7 @@ export default function Schedule() {
             </h3>
             <button
               onClick={() => changeMonth(1)}
-              className="w-10 h-10 rounded-full border flex items-center justify-center transition-colors hover:bg-[rgba(232,228,217,0.08)]"
+              className="cal-nav-btn w-10 h-10 rounded-full border flex items-center justify-center hover:bg-[rgba(232,228,217,0.08)]"
               style={{ borderColor: 'rgba(232, 228, 217, 0.2)' }}
             >
               <svg className="w-4 h-4" style={{ color: '#e8e4d9' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -167,7 +167,7 @@ export default function Schedule() {
           </div>
           <button
             onClick={goToToday}
-            className="px-4 py-2 rounded-lg border text-sm font-medium transition-colors hover:bg-[rgba(232,228,217,0.08)]"
+            className="cal-nav-btn px-4 py-2 rounded-lg border text-sm font-medium hover:bg-[rgba(232,228,217,0.08)]"
             style={{ borderColor: 'rgba(232, 228, 217, 0.2)', color: '#e8e4d9' }}
           >
             Today
@@ -224,19 +224,27 @@ export default function Schedule() {
 
         {/* Selected Day Events */}
         {selectedDay && selectedEvents.length > 0 && (
-          <div className="mt-6 fade-in">
+          <div className="mt-6 cal-detail-panel" key={`${calMonth}-${selectedDay}`}>
             <div
-              className="rounded-xl p-6"
-              style={{ background: 'rgba(232, 228, 217, 0.06)', border: '1px solid rgba(232, 228, 217, 0.1)' }}
+              className="rounded-2xl p-6"
+              style={{
+                background: 'rgba(232, 228, 217, 0.05)',
+                border: '1px solid rgba(232, 228, 217, 0.1)',
+                backdropFilter: 'blur(8px)',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
+              }}
             >
               <h4 className="font-bold text-lg mb-4" style={{ color: '#e8e4d9' }}>
                 {MONTH_NAMES[calMonth]} {selectedDay}, {calYear}
+                <span className="ml-3 text-xs font-normal px-2.5 py-1 rounded-full" style={{ background: 'rgba(212,225,87,0.15)', color: '#d4e157' }}>
+                  {selectedEvents.length} event{selectedEvents.length > 1 ? 's' : ''}
+                </span>
               </h4>
               <div className="space-y-3">
                 {selectedEvents.map((e, i) => (
                   <div
                     key={i}
-                    className="flex items-center gap-4 p-4 rounded-lg"
+                    className="cal-event-row flex items-center gap-4 p-4 rounded-xl transition-all hover:scale-[1.01]"
                     style={{
                       background: bgColors[e.type] || 'rgba(232,228,217,0.06)',
                       border: '1px solid rgba(232,228,217,0.08)',
@@ -244,7 +252,7 @@ export default function Schedule() {
                   >
                     <div
                       className="w-3 h-3 rounded-full flex-shrink-0"
-                      style={{ backgroundColor: dotColors[e.type] || '#6b7280' }}
+                      style={{ backgroundColor: dotColors[e.type] || '#6b7280', boxShadow: `0 0 8px ${dotColors[e.type] || '#6b7280'}80` }}
                     />
                     <div className="flex-1">
                       <p className="font-semibold" style={{ color: '#e8e4d9' }}>
@@ -256,8 +264,8 @@ export default function Schedule() {
                     </div>
                     <a
                       href="/login"
-                      className="text-xs px-3 py-1.5 rounded-full font-medium transition-all hover:opacity-80 flex-shrink-0"
-                      style={{ background: 'rgba(212,225,87,0.15)', color: '#d4e157', border: '1px solid rgba(212,225,87,0.3)' }}
+                      className="text-xs px-4 py-2 rounded-full font-semibold transition-all hover:scale-105 flex-shrink-0"
+                      style={{ background: 'rgba(212,225,87,0.2)', color: '#d4e157', border: '1px solid rgba(212,225,87,0.3)', boxShadow: '0 0 12px rgba(212,225,87,0.1)' }}
                     >
                       RSVP →
                     </a>
