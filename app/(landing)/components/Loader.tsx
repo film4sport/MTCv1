@@ -3,16 +3,24 @@
 import { useEffect, useState, useRef } from 'react';
 
 export default function Loader() {
-  const [exitActive, setExitActive] = useState(false);
+  const [ballHit, setBallHit] = useState(false);
+  const [fadeOut, setFadeOut] = useState(false);
   const imgLoaded = useRef(false);
 
   useEffect(() => {
-    // Start exit after image loads (or 1s minimum, whichever is later)
+    // Ball flies away after 1s minimum (if image loaded)
     const minDelay = setTimeout(() => {
-      if (imgLoaded.current) setExitActive(true);
+      if (imgLoaded.current) {
+        setBallHit(true);
+        // Loader fades out 400ms after ball starts flying
+        setTimeout(() => setFadeOut(true), 400);
+      }
     }, 1000);
     // Hard fallback — never show loader longer than 2.5s even if image fails
-    const fallback = setTimeout(() => setExitActive(true), 2500);
+    const fallback = setTimeout(() => {
+      setBallHit(true);
+      setTimeout(() => setFadeOut(true), 400);
+    }, 2500);
     return () => {
       clearTimeout(minDelay);
       clearTimeout(fallback);
@@ -24,29 +32,16 @@ export default function Loader() {
   };
 
   return (
-    <div className={`loader${exitActive ? ' exit-active' : ''}`} id="loader">
+    <div className={`loader${fadeOut ? ' exit-active' : ''}`} id="loader">
       <div className="flex flex-col items-center gap-4">
-        <div className="flex items-center gap-3">
-          <div
-            className="w-12 h-12 rounded-full border-2 flex items-center justify-center"
-            style={{ borderColor: '#1a1f12' }}
-          >
-            <span
-              className="text-base font-bold tracking-wide"
-              style={{ color: '#1a1f12' }}
-            >
-              MTC
-            </span>
-          </div>
-          <span
-            className="text-xl font-bold tracking-wide"
-            style={{ color: '#1a1f12' }}
-          >
-            Mono Tennis
-          </span>
-        </div>
-        <div className="tennis-ball-wrapper">
-          <img className="tennis-ball" src="/tennis-ball-clean.png" alt="" onLoad={handleImgLoad} />
+        <img
+          src="/mono-logo-transparent.png"
+          alt="Mono Tennis Club"
+          className="h-16 w-auto"
+          style={{ filter: 'brightness(0)' }}
+        />
+        <div className={`tennis-ball-wrapper${ballHit ? ' ball-hit' : ''}`}>
+          <img className="tennis-ball" src="/tennis-ball-loader.png" alt="" onLoad={handleImgLoad} />
         </div>
       </div>
     </div>

@@ -471,6 +471,12 @@ html, body {
   width: 40px;
   height: 40px;
 }
+.tennis-ball-wrapper.ball-hit {
+  animation: ballHitAway 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+.tennis-ball-wrapper.ball-hit .tennis-ball {
+  animation: ballSpin 0.5s linear forwards;
+}
 .tennis-ball {
   width: 100%;
   height: 100%;
@@ -480,6 +486,15 @@ html, body {
 @keyframes loaderBallBounce {
   0% { transform: translateY(0) rotate(0deg); }
   100% { transform: translateY(-16px) rotate(20deg); }
+}
+@keyframes ballHitAway {
+  0% { transform: translate(0, 0) scale(1); opacity: 1; }
+  30% { transform: translate(40px, -60px) scale(0.9); opacity: 1; }
+  100% { transform: translate(250px, -200px) scale(0.3); opacity: 0; }
+}
+@keyframes ballSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* Sticky Navbar */

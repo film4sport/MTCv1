@@ -1,8 +1,9 @@
-const CACHE_NAME = 'mtc-v11'; // Bump on each deploy to invalidate old caches
+const CACHE_NAME = 'mtc-v12'; // Bump on each deploy to invalidate old caches
 const STATIC_ASSETS = [
   '/manifest.json',
   '/favicon.png',
   '/tennis-ball-clean.png',
+  '/tennis-ball-loader.png',
   '/mono-logo.png',
   '/Gotham_Rounded_Medium.otf',
 ];

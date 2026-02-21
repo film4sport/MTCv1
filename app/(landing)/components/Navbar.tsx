@@ -26,23 +26,12 @@ export default function Navbar() {
     <>
       <nav className={`navbar flex items-center justify-between${scrolled ? ' scrolled' : ''}`} id="navbar">
         <div className="logo-group">
-          <div
-            className="logo-circle w-11 h-11 rounded-full border-2 flex items-center justify-center"
-            style={{ borderColor: '#e8e4d9' }}
-          >
-            <span
-              className="text-base font-bold tracking-wide"
-              style={{ color: '#e8e4d9' }}
-            >
-              MTC
-            </span>
-          </div>
-          <span
-            className="logo-text text-xl font-bold tracking-wide"
-            style={{ color: '#e8e4d9' }}
-          >
-            Mono Tennis
-          </span>
+          <img
+            src="/mono-logo-transparent.png"
+            alt="Mono Tennis Club"
+            className="h-10 w-auto"
+            style={{ filter: 'brightness(0) invert(1)' }}
+          />
         </div>
 
         {/* Desktop Nav */}
