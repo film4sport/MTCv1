@@ -44,9 +44,12 @@ function getEventsForDate(year: number, month: number, day: number): CalEvent[] 
     if (e.date === dateStr) events.push(e);
   });
 
-  recurringEvents.forEach((e) => {
-    if (e.day === dayOfWeek) events.push(e);
-  });
+  // Recurring events only during club season (May–October)
+  if (month >= 4 && month <= 9) {
+    recurringEvents.forEach((e) => {
+      if (e.day === dayOfWeek) events.push(e);
+    });
+  }
 
   return events;
 }
@@ -206,9 +209,11 @@ export default function Schedule() {
                           <span key={type} className={`cal-dot ${type}`} />
                         ))}
                       </div>
-                      <span className={`cal-event-label ${events[0].type}`}>
-                        {events.length > 1 ? `${events[0].title} +${events.length - 1}` : events[0].title}
-                      </span>
+                      {events.map((ev, idx) => (
+                        <span key={idx} className={`cal-event-label ${ev.type}`}>
+                          {ev.title}
+                        </span>
+                      ))}
                     </>
                   )}
                 </div>
