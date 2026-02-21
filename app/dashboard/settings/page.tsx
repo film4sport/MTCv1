@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useApp } from '../lib/store';
@@ -8,6 +9,7 @@ import DashboardHeader from '../components/DashboardHeader';
 export default function SettingsPage() {
   const { currentUser, logout, notificationPreferences, setNotificationPreferences } = useApp();
   const router = useRouter();
+  const [showInstallTip, setShowInstallTip] = useState(false);
 
   const togglePref = (key: keyof typeof notificationPreferences) => {
     setNotificationPreferences({ ...notificationPreferences, [key]: !notificationPreferences[key] });
@@ -31,7 +33,6 @@ export default function SettingsPage() {
             {([
               { label: 'Bookings', desc: 'Court booking confirmations and participant alerts', key: 'bookings' as const },
               { label: 'Events & Tournaments', desc: 'New events, RSVP reminders', key: 'events' as const },
-              { label: 'Payments & Billing', desc: 'Charges, payments, balance alerts', key: 'payments' as const },
               { label: 'Partner Requests', desc: 'New partner matches and requests', key: 'partners' as const },
               { label: 'Messages', desc: 'New messages from members', key: 'messages' as const },
               { label: 'Programs', desc: 'Enrollment confirmations, session reminders', key: 'programs' as const },
@@ -78,7 +79,7 @@ export default function SettingsPage() {
               if (deferredPrompt && typeof (deferredPrompt as { prompt: () => void }).prompt === 'function') {
                 (deferredPrompt as { prompt: () => void }).prompt();
               } else {
-                alert('To install: open this site on your phone browser, tap the share icon, then "Add to Home Screen".');
+                setShowInstallTip(true);
               }
             }}
             className="w-full rounded-xl p-4 flex items-center gap-4 transition-all hover:shadow-md btn-press"
@@ -97,6 +98,21 @@ export default function SettingsPage() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/>
             </svg>
           </button>
+          {showInstallTip && (
+            <div className="mt-3 rounded-xl p-3 flex items-start gap-2 animate-slideUp" style={{ background: 'rgba(107, 122, 61, 0.08)', border: '1px solid rgba(107, 122, 61, 0.15)' }}>
+              <svg className="w-4 h-4 mt-0.5 shrink-0" fill="none" stroke="#6b7a3d" viewBox="0 0 24 24" strokeWidth="1.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20 10 10 0 000-20z" />
+              </svg>
+              <p className="text-xs leading-relaxed" style={{ color: '#4a5528' }}>
+                Open this site on your phone browser, tap the <strong>Share</strong> icon, then select <strong>&quot;Add to Home Screen&quot;</strong>.
+              </p>
+              <button onClick={() => setShowInstallTip(false)} className="shrink-0 mt-0.5" aria-label="Dismiss">
+                <svg className="w-3.5 h-3.5" fill="none" stroke="#6b7266" viewBox="0 0 24 24" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Legal */}

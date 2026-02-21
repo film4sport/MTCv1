@@ -19,9 +19,9 @@ export const DEFAULT_MEMBERS: User[] = [
 
 // ─── Courts ─────────────────────────────────────────────
 export const DEFAULT_COURTS: Court[] = [
-  { id: 1, name: 'Court 1', floodlight: true, status: 'in-use', currentUser: 'Mike Chen', endsAt: '3:00 PM' },
+  { id: 1, name: 'Court 1', floodlight: true, status: 'available' },
   { id: 2, name: 'Court 2', floodlight: true, status: 'available' },
-  { id: 3, name: 'Court 3', floodlight: false, status: 'reserved', startsIn: 30 },
+  { id: 3, name: 'Court 3', floodlight: false, status: 'available' },
   { id: 4, name: 'Court 4', floodlight: false, status: 'available' },
 ];
 

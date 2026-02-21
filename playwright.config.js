@@ -30,7 +30,7 @@ module.exports = defineConfig({
   testMatch: '**/*.spec.js',
   fullyParallel: true,
   workers: isCI ? 4 : 2,
-  retries: 1,
+  retries: isCI ? 0 : 1,
   reporter: 'list',
   use: {
     baseURL: 'http://localhost:3000',

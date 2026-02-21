@@ -960,6 +960,7 @@ html, body {
 .cal-dot.tournament { background: #dc2626; box-shadow: 0 0 4px rgba(220, 38, 38, 0.6); }
 .cal-dot.camp { background: #2563eb; box-shadow: 0 0 4px rgba(37, 99, 235, 0.6); }
 .cal-dot.special { background: #d4e157; box-shadow: 0 0 4px rgba(212, 225, 87, 0.6); }
+.cal-dot.booking { background: #8b95a5; box-shadow: 0 0 4px rgba(139, 149, 165, 0.6); }
 @keyframes dotGlow {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.6; }
@@ -987,6 +988,7 @@ html, body {
 .cal-event-label.tournament { background: rgba(220,38,38,0.3); color: #fca5a5; }
 .cal-event-label.camp { background: rgba(37,99,235,0.3); color: #93c5fd; }
 .cal-event-label.special { background: rgba(212,225,87,0.35); color: #d4e157; }
+.cal-event-label.booking { background: rgba(139,149,165,0.25); color: #b0b8c5; }
 
 /* Selected day detail panel — slide in */
 .cal-detail-panel {

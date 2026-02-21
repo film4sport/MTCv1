@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 const MONTH_NAMES = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -34,6 +34,11 @@ interface CalEvent {
   day?: number;
 }
 
+interface BookingSlot {
+  court: string;
+  time: string;
+}
+
 function getEventsForDate(year: number, month: number, day: number): CalEvent[] {
   const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
   const date = new Date(year, month, day);
@@ -61,6 +66,7 @@ const dotColors: Record<string, string> = {
   tournament: '#dc2626',
   camp: '#2563eb',
   special: '#d4e157',
+  booking: '#8b95a5',
 };
 
 const bgColors: Record<string, string> = {
@@ -69,6 +75,7 @@ const bgColors: Record<string, string> = {
   tournament: 'rgba(220,38,38,0.15)',
   camp: 'rgba(37,99,235,0.15)',
   special: 'rgba(212,225,87,0.15)',
+  booking: 'rgba(139,149,165,0.15)',
 };
 
 export default function Schedule() {
@@ -76,9 +83,25 @@ export default function Schedule() {
   const [calYear, setCalYear] = useState(today.getFullYear());
   const [calMonth, setCalMonth] = useState(today.getMonth());
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
+  const [bookingData, setBookingData] = useState<Record<string, BookingSlot[]>>({});
   const sectionRef = useRef<HTMLElement>(null);
 
-  // IntersectionObserver for .fade-in is handled globally in page.tsx
+  // Fetch live booking slots for current month
+  const fetchBookings = useCallback(async (year: number, month: number) => {
+    try {
+      const res = await fetch(`/api/public-calendar?year=${year}&month=${month + 1}`);
+      if (res.ok) {
+        const data = await res.json();
+        setBookingData(data);
+      }
+    } catch {
+      // Silently fail — calendar still shows events without booking data
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchBookings(calYear, calMonth);
+  }, [calYear, calMonth, fetchBookings]);
 
   const changeMonth = (delta: number) => {
     let newMonth = calMonth + delta;
@@ -107,6 +130,10 @@ export default function Schedule() {
   const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
 
   const selectedEvents = selectedDay ? getEventsForDate(calYear, calMonth, selectedDay) : [];
+  const selectedDateStr = selectedDay
+    ? `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(selectedDay).padStart(2, '0')}`
+    : '';
+  const selectedSlots: BookingSlot[] = selectedDateStr ? (bookingData[selectedDateStr] || []) : [];
 
   return (
     <section id="schedule" className="py-20 lg:py-28" style={{ backgroundColor: '#22271a' }} ref={sectionRef}>
@@ -126,7 +153,9 @@ export default function Schedule() {
           {Object.entries(dotColors).map(([type, color]) => (
             <div key={type} className="flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: color }} />
-              <span className="text-xs capitalize" style={{ color: 'rgba(232,228,217,0.5)' }}>{type}</span>
+              <span className="text-xs capitalize" style={{ color: 'rgba(232,228,217,0.5)' }}>
+                {type === 'booking' ? 'court bookings' : type}
+              </span>
             </div>
           ))}
         </div>
@@ -183,8 +212,14 @@ export default function Schedule() {
                 today.getFullYear() === calYear && today.getMonth() === calMonth && today.getDate() === day;
               const isSelected = selectedDay === day;
 
-              // Deduplicate dots by event type so e.g. camp doesn't show 3 dots for 3 overlapping events
+              // Check for bookings on this day
+              const dateStr = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+              const daySlots = bookingData[dateStr];
+              const hasBookings = daySlots && daySlots.length > 0;
+
+              // Deduplicate dots by event type
               const uniqueTypes = Array.from(new Set(events.map(e => e.type)));
+              if (hasBookings) uniqueTypes.push('booking');
 
               return (
                 <div
@@ -193,10 +228,10 @@ export default function Schedule() {
                   onClick={() => setSelectedDay(day)}
                 >
                   <div className="cal-day-num">{day}</div>
-                  {events.length > 0 && (
+                  {uniqueTypes.length > 0 && (
                     <>
                       <div>
-                        {uniqueTypes.slice(0, 3).map((type) => (
+                        {uniqueTypes.slice(0, 4).map((type) => (
                           <span key={type} className={`cal-dot ${type}`} />
                         ))}
                       </div>
@@ -213,8 +248,8 @@ export default function Schedule() {
           </div>
         </div>
 
-        {/* Selected Day Events */}
-        {selectedDay && selectedEvents.length > 0 && (
+        {/* Selected Day Detail Panel */}
+        {selectedDay && (selectedEvents.length > 0 || selectedSlots.length > 0) && (
           <div className="mt-6 cal-detail-panel" key={`${calMonth}-${selectedDay}`}>
             <div
               className="rounded-2xl p-6"
@@ -227,11 +262,14 @@ export default function Schedule() {
             >
               <h4 className="font-bold text-lg mb-4" style={{ color: '#e8e4d9' }}>
                 {MONTH_NAMES[calMonth]} {selectedDay}, {calYear}
-                <span className="ml-3 text-xs font-normal px-2.5 py-1 rounded-full" style={{ background: 'rgba(212,225,87,0.15)', color: '#d4e157' }}>
-                  {selectedEvents.length} event{selectedEvents.length > 1 ? 's' : ''}
-                </span>
+                {selectedEvents.length > 0 && (
+                  <span className="ml-3 text-xs font-normal px-2.5 py-1 rounded-full" style={{ background: 'rgba(212,225,87,0.15)', color: '#d4e157' }}>
+                    {selectedEvents.length} event{selectedEvents.length > 1 ? 's' : ''}
+                  </span>
+                )}
               </h4>
               <div className="space-y-3">
+                {/* Club events */}
                 {selectedEvents.map((e, i) => (
                   <div
                     key={i}
@@ -260,6 +298,37 @@ export default function Schedule() {
                     >
                       RSVP →
                     </a>
+                  </div>
+                ))}
+
+                {/* Court bookings — shown exactly like members see them */}
+                {selectedSlots.map((slot, i) => (
+                  <div
+                    key={`booking-${i}`}
+                    className="cal-event-row flex items-center gap-4 p-4 rounded-xl transition-all hover:scale-[1.01]"
+                    style={{
+                      background: bgColors.booking,
+                      border: '1px solid rgba(232,228,217,0.08)',
+                    }}
+                  >
+                    <div
+                      className="w-3 h-3 rounded-full flex-shrink-0"
+                      style={{ backgroundColor: dotColors.booking, boxShadow: `0 0 8px ${dotColors.booking}80` }}
+                    />
+                    <div className="flex-1">
+                      <p className="font-semibold" style={{ color: '#e8e4d9' }}>
+                        {slot.court}
+                      </p>
+                      <p className="text-sm" style={{ color: 'rgba(232,228,217,0.5)' }}>
+                        {slot.time}
+                      </p>
+                    </div>
+                    <span
+                      className="text-xs px-3 py-1.5 rounded-full font-medium"
+                      style={{ background: 'rgba(139,149,165,0.2)', color: '#8b95a5' }}
+                    >
+                      Booked
+                    </span>
                   </div>
                 ))}
               </div>

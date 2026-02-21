@@ -26,10 +26,7 @@ create table if not exists courts (
   id integer primary key,
   name text not null,
   floodlight boolean not null default false,
-  status text not null default 'available' check (status in ('available', 'in-use', 'reserved', 'maintenance')),
-  current_user_name text,
-  ends_at text,
-  starts_in integer
+  status text not null default 'available' check (status in ('available', 'maintenance'))
 );
 
 -- ─── Bookings ───────────────────────────────────────────
@@ -43,7 +40,7 @@ create table if not exists bookings (
   user_name text not null,
   guest_name text,
   status text not null default 'confirmed' check (status in ('confirmed', 'cancelled')),
-  type text not null default 'court' check (type in ('court', 'partner', 'ball-machine', 'program', 'lesson')),
+  type text not null default 'court' check (type in ('court', 'partner', 'program', 'lesson')),
   program_id text,
   created_at timestamptz default now()
 );
@@ -139,30 +136,11 @@ create table if not exists announcement_dismissals (
 create table if not exists notifications (
   id text primary key,
   user_id uuid not null references profiles(id),
-  type text not null check (type in ('booking', 'event', 'partner', 'message', 'payment', 'announcement')),
+  type text not null check (type in ('booking', 'event', 'partner', 'message', 'program', 'announcement')),
   title text not null,
   body text not null,
   timestamp timestamptz not null default now(),
   read boolean not null default false
-);
-
--- ─── Payments ───────────────────────────────────────────
-create table if not exists payments (
-  id serial primary key,
-  user_id uuid not null references profiles(id),
-  user_name text not null,
-  balance numeric(10,2) not null default 0
-);
-
--- ─── Payment Entries ────────────────────────────────────
-create table if not exists payment_entries (
-  id text primary key,
-  payment_id integer not null references payments(id) on delete cascade,
-  date date not null,
-  description text not null,
-  amount numeric(10,2) not null,
-  type text not null check (type in ('charge', 'payment')),
-  created_at timestamptz default now()
 );
 
 -- ─── Coaching Programs ──────────────────────────────────
@@ -204,7 +182,6 @@ create table if not exists notification_preferences (
   user_id uuid primary key references profiles(id) on delete cascade,
   bookings boolean not null default true,
   events boolean not null default true,
-  payments boolean not null default true,
   partners boolean not null default true,
   messages boolean not null default true,
   programs boolean not null default true

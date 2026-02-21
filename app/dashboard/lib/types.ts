@@ -15,10 +15,7 @@ export interface Court {
   id: number;
   name: string;
   floodlight: boolean;
-  status: 'available' | 'in-use' | 'reserved' | 'maintenance';
-  currentUser?: string;
-  endsAt?: string;
-  startsIn?: number;
+  status: 'available' | 'maintenance';
 }
 
 export interface Booking {
@@ -32,7 +29,7 @@ export interface Booking {
   guestName?: string;
   participants?: { id: string; name: string }[];
   status: 'confirmed' | 'cancelled';
-  type: 'court' | 'partner' | 'ball-machine' | 'program' | 'lesson';
+  type: 'court' | 'partner' | 'program' | 'lesson';
   programId?: string;
 }
 
@@ -94,7 +91,7 @@ export interface Announcement {
 
 export interface Notification {
   id: string;
-  type: 'booking' | 'event' | 'partner' | 'message' | 'payment' | 'announcement' | 'program';
+  type: 'booking' | 'event' | 'partner' | 'message' | 'announcement' | 'program';
   title: string;
   body: string;
   timestamp: string;
@@ -104,7 +101,6 @@ export interface Notification {
 export interface NotificationPreferences {
   bookings: boolean;
   events: boolean;
-  payments: boolean;
   partners: boolean;
   messages: boolean;
   programs: boolean;
@@ -113,7 +109,6 @@ export interface NotificationPreferences {
 export const DEFAULT_NOTIFICATION_PREFS: NotificationPreferences = {
   bookings: true,
   events: true,
-  payments: true,
   partners: true,
   messages: true,
   programs: true,
@@ -181,8 +176,6 @@ export const COURT_HOURS: Record<number, { close: string }> = {
 export const FEES = {
   booking: 0,
   guest: 10,
-  tabWarning: 20,
-  tabBlock: 30,
   cancelWindowHours: 24,
 } as const;
 

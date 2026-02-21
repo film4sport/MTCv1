@@ -471,12 +471,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const removePartner = useCallback((partnerId: string) => {
+    const removed = partners.find(p => p.id === partnerId);
     setPartners(prev => prev.filter(p => p.id !== partnerId));
     db.deletePartner(partnerId).catch((err) => {
       console.error('[MTC Supabase]', err);
+      if (removed) setPartners(prev => [...prev, removed]);
       showToast('Failed to remove partner request.', 'error');
     });
-  }, []);
+  }, [partners]);
 
   const toggleRsvp = useCallback((eventId: string, userName: string) => {
     // Snapshot for rollback
@@ -514,6 +516,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       timestamp: new Date().toISOString(),
       read: true,
     };
+    const snapshot = conversations;
     setConversations(prev => {
       const existing = prev.find(c => c.memberId === toId);
       if (existing) {
@@ -530,8 +533,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     db.sendMessageByUsers({
       id: msg.id, fromId: currentUser.id, fromName: currentUser.name,
       toId, toName, text,
-    }).catch((err) => console.error('[MTC Supabase]', err));
-  }, [currentUser, members]);
+    }).catch((err) => {
+      console.error('[MTC Supabase]', err);
+      setConversations(snapshot);
+      showToast('Failed to send message. Please try again.', 'error');
+    });
+  }, [currentUser, members, conversations]);
 
   const markConversationRead = useCallback((memberId: string) => {
     setConversations(prev => prev.map(c => {
@@ -557,7 +564,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (!currentUser) return;
     setAnnouncements(prev => prev.map(a => a.id === id ? { ...a, dismissedBy: [...a.dismissedBy, currentUser.id] } : a));
     // Persist to Supabase
-    db.dismissAnnouncement(id, currentUser.id).catch((err) => console.error('[MTC Supabase]', err));
+    db.dismissAnnouncement(id, currentUser.id).catch((err) => {
+      console.error('[MTC Supabase]', err);
+      setAnnouncements(prev => prev.map(a => a.id === id ? { ...a, dismissedBy: a.dismissedBy.filter(uid => uid !== currentUser!.id) } : a));
+      showToast('Failed to dismiss announcement.', 'error');
+    });
   }, [currentUser]);
 
   const markNotificationRead = useCallback((id: string) => {
