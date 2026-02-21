@@ -12,9 +12,10 @@ interface DashboardHeaderProps {
 
 export default function DashboardHeader({ title }: DashboardHeaderProps) {
   const router = useRouter();
-  const { currentUser, logout, notifications, clearNotifications, markNotificationRead, notificationPreferences } = useApp();
+  const { currentUser, logout, notifications, clearNotifications, markNotificationRead, notificationPreferences, refreshData, showToast } = useApp();
   const [menuOpen, setMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
 
@@ -48,6 +49,21 @@ export default function DashboardHeader({ title }: DashboardHeaderProps) {
 
         {/* Right Side */}
         <div className="flex items-center gap-2">
+          {/* Refresh Button */}
+          <button
+            onClick={async () => {
+              setRefreshing(true);
+              await refreshData();
+              setRefreshing(false);
+              showToast('Data refreshed', 'info');
+            }}
+            className="w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 bg-[#6b7a3d]/10 hover:bg-[#6b7a3d]/20 active:scale-95"
+            aria-label="Refresh data"
+          >
+            <svg className={`w-[18px] h-[18px] transition-transform duration-500 ${refreshing ? 'animate-spin' : ''}`} fill="none" stroke="#1a1f12" viewBox="0 0 24 24" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+          </button>
           {/* Notification Bell */}
           <div ref={notifRef} className="relative">
             <button

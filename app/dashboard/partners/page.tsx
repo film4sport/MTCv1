@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useApp } from '../lib/store';
 import DashboardHeader from '../components/DashboardHeader';
 import Link from 'next/link';
-import { generateId } from '../lib/utils';
+import { generateId, haptic } from '../lib/utils';
 
 type FilterType = 'all' | 'singles' | 'doubles' | 'mixed';
 type SkillLevel = 'beginner' | 'intermediate' | 'advanced';
@@ -19,6 +19,13 @@ export default function PartnersPage() {
   const [postTime, setPostTime] = useState('');
   const [postType, setPostType] = useState<'singles' | 'doubles' | 'mixed' | 'any'>('any');
   const [removingId, setRemovingId] = useState<string | null>(null);
+
+  // Esc key closes post modal
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape' && showPost) setShowPost(false); };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [showPost]);
 
   const getSkillLevel = (ntrp: number): SkillLevel => {
     if (ntrp <= 2.5) return 'beginner';
@@ -95,8 +102,17 @@ export default function PartnersPage() {
 
         {/* Partner Cards */}
         {filtered.length === 0 ? (
-          <div className="text-center py-16 rounded-2xl border" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
-            <p className="text-sm" style={{ color: '#6b7266' }}>No partners match your filters</p>
+          <div className="text-center py-16 rounded-2xl border animate-scaleIn" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+            <div className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center" style={{ background: 'rgba(107, 122, 61, 0.08)' }}>
+              <svg className="w-8 h-8" fill="none" stroke="#6b7a3d" viewBox="0 0 24 24" strokeWidth="1.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+              </svg>
+            </div>
+            <p className="font-medium text-sm mb-1" style={{ color: '#2a2f1e' }}>No partners found</p>
+            <p className="text-xs mb-4" style={{ color: '#6b7266' }}>Post a request and find someone to play with</p>
+            <button onClick={() => setShowPost(true)} className="px-4 py-2 rounded-xl text-sm font-medium text-white btn-press" style={{ background: '#6b7a3d' }}>
+              Post a Request
+            </button>
           </div>
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -137,6 +153,7 @@ export default function PartnersPage() {
                   {p.userId === currentUser?.id ? (
                     <button
                       onClick={() => {
+                        haptic('medium');
                         setRemovingId(p.id);
                         setTimeout(() => {
                           removePartner(p.id);

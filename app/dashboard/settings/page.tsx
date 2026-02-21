@@ -10,6 +10,10 @@ export default function SettingsPage() {
   const { currentUser, logout, notificationPreferences, setNotificationPreferences } = useApp();
   const router = useRouter();
   const [showInstallTip, setShowInstallTip] = useState(false);
+  const [hapticEnabled, setHapticEnabled] = useState(() => {
+    if (typeof localStorage !== 'undefined') return localStorage.getItem('mtc-haptic') !== 'off';
+    return true;
+  });
 
   const togglePref = (key: keyof typeof notificationPreferences) => {
     setNotificationPreferences({ ...notificationPreferences, [key]: !notificationPreferences[key] });
@@ -113,6 +117,32 @@ export default function SettingsPage() {
               </button>
             </div>
           )}
+        </div>
+
+        {/* Preferences */}
+        <div className="rounded-2xl border p-6 section-card" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+          <h3 className="font-semibold mb-4" style={{ color: '#2a2f1e' }}>Preferences</h3>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium" style={{ color: '#2a2f1e' }}>Haptic Feedback</p>
+              <p className="text-xs" style={{ color: '#6b7266' }}>Vibration on button taps (Android only)</p>
+            </div>
+            <button
+              onClick={() => {
+                const next = !hapticEnabled;
+                setHapticEnabled(next);
+                localStorage.setItem('mtc-haptic', next ? 'on' : 'off');
+              }}
+              className="relative w-11 h-6 rounded-full transition-colors duration-200"
+              style={{ background: hapticEnabled ? '#6b7a3d' : '#d5d0c8' }}
+              aria-label={`Haptic feedback ${hapticEnabled ? 'on' : 'off'}`}
+            >
+              <span
+                className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200"
+                style={{ transform: hapticEnabled ? 'translateX(20px)' : 'translateX(0)' }}
+              />
+            </button>
+          </div>
         </div>
 
         {/* Legal */}
