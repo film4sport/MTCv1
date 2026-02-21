@@ -122,7 +122,7 @@ export default function Schedule() {
 
   return (
     <section id="schedule" className="py-20 lg:py-28" style={{ backgroundColor: '#22271a' }} ref={sectionRef}>
-      <div className="max-w-5xl mx-auto px-8 lg:px-16">
+      <div className="max-w-5xl mx-auto px-4 sm:px-8 lg:px-16">
         <div className="text-center mb-12 fade-in">
           <span className="section-label section-label-light">// Schedule</span>
           <h2
@@ -195,6 +195,9 @@ export default function Schedule() {
                 today.getFullYear() === calYear && today.getMonth() === calMonth && today.getDate() === day;
               const isSelected = selectedDay === day;
 
+              // Deduplicate dots by event type so e.g. camp doesn't show 3 dots for 3 overlapping events
+              const uniqueTypes = Array.from(new Set(events.map(e => e.type)));
+
               return (
                 <div
                   key={day}
@@ -205,11 +208,13 @@ export default function Schedule() {
                   {events.length > 0 && (
                     <>
                       <div>
-                        {events.slice(0, 3).map((e, ei) => (
-                          <span key={ei} className={`cal-dot ${e.type}`} />
+                        {uniqueTypes.slice(0, 3).map((type) => (
+                          <span key={type} className={`cal-dot ${type}`} />
                         ))}
                       </div>
-                      <span className={`cal-event-label ${events[0].type}`}>{events[0].title}</span>
+                      <span className={`cal-event-label ${events[0].type}`}>
+                        {events.length > 1 ? `${events[0].title} +${events.length - 1}` : events[0].title}
+                      </span>
                     </>
                   )}
                 </div>
