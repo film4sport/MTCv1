@@ -87,10 +87,12 @@ export default function Events({ onOpenLightbox }: EventsProps) {
 
         {/* Events Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-          {filteredEvents.map((event, index) => (
+          {filteredEvents.map((event, index) => {
+            const isLastOdd = filteredEvents.length % 2 === 1 && index === filteredEvents.length - 1;
+            return (
             <div
               key={`${event.title}-${animKey}`}
-              className="event-card tilt-card rounded-2xl overflow-hidden card-hover event-card-stagger"
+              className={`event-card tilt-card rounded-2xl overflow-hidden card-hover event-card-stagger${isLastOdd ? ' md:col-span-2 lg:col-span-1' : ''}`}
               style={{ backgroundColor: '#faf8f3', animationDelay: `${index * 100}ms` }}
               data-category={event.category}
             >
@@ -119,7 +121,8 @@ export default function Events({ onOpenLightbox }: EventsProps) {
                 <p className="text-gray-600 text-sm leading-relaxed">{event.description}</p>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
 
       </div>

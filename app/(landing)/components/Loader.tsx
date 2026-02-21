@@ -1,21 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-
 export default function Loader() {
-  const [exitActive, setExitActive] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setExitActive(true), 1000);
-    const fallback = setTimeout(() => setExitActive(true), 2000);
-    return () => {
-      clearTimeout(timer);
-      clearTimeout(fallback);
-    };
-  }, []);
-
   return (
-    <div className={`loader${exitActive ? ' exit-active' : ''}`} id="loader">
+    <div className="loader" id="loader">
       <div className="flex flex-col items-center gap-4">
         <div className="flex items-center gap-3">
           <div
