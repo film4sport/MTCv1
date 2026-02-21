@@ -405,8 +405,8 @@ test.describe('Info Page', () => {
 
 test.describe('Dashboard route works', () => {
   test('/dashboard route loads', async ({ page }) => {
-    await page.goto('/dashboard', { waitUntil: 'networkidle' });
-    await page.waitForTimeout(2000);
+    await page.goto('/dashboard', { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(1000);
     const body = page.locator('body');
     await expect(body).toBeAttached();
   });

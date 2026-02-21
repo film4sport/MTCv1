@@ -37,7 +37,9 @@ test.describe('Dashboard — Login Flow', () => {
     await expect(page.getByText('Please enter a valid email address')).toBeVisible();
   });
 
+  // Demo credential buttons only render in NODE_ENV=development — skip in CI (production build)
   test('demo credential buttons fill in the form', async ({ page }) => {
+    test.skip(process.env.CI === 'true', 'Demo buttons are dev-only');
     await page.getByText('Member', { exact: true }).click();
     await page.waitForTimeout(300);
     await expect(page.locator('input[type="email"]')).toHaveValue('member@mtc.ca');
@@ -74,7 +76,9 @@ test.describe('Dashboard — Login Flow', () => {
     await expect(link).toHaveAttribute('href', '/info?tab=membership');
   });
 
+  // Test accounts section only renders in NODE_ENV=development — skip in CI (production build)
   test('has test accounts section', async ({ page }) => {
+    test.skip(process.env.CI === 'true', 'Test accounts section is dev-only');
     await expect(page.getByText('Test Accounts')).toBeVisible();
     await expect(page.getByText('member@mtc.ca')).toBeVisible();
     await expect(page.getByText('coach@mtc.ca')).toBeVisible();
@@ -85,10 +89,13 @@ test.describe('Dashboard — Login Flow', () => {
 test.describe('Dashboard — Structure', () => {
   test.beforeEach(async ({ page }) => {
     // Login via real Supabase auth (member demo account)
+    // Type credentials directly (demo buttons are dev-only, not available in CI production builds)
     await page.goto('/login', { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(500);
-    await page.getByText('Member', { exact: true }).click();
-    await page.waitForTimeout(300);
+    await page.locator('input[type="email"]').click();
+    await page.keyboard.type('member@mtc.ca', { delay: 20 });
+    await page.locator('input[type="password"]').click();
+    await page.keyboard.type('member123', { delay: 20 });
     await page.locator('button[type="submit"]').click();
     await page.waitForURL('**/dashboard**', { timeout: 15000 });
     await page.waitForTimeout(1000);
@@ -121,10 +128,13 @@ test.describe('Dashboard — Structure', () => {
 test.describe('Dashboard — Profile Page', () => {
   test.beforeEach(async ({ page }) => {
     // Login via real Supabase auth (member demo account)
+    // Type credentials directly (demo buttons are dev-only, not available in CI production builds)
     await page.goto('/login', { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(500);
-    await page.getByText('Member', { exact: true }).click();
-    await page.waitForTimeout(300);
+    await page.locator('input[type="email"]').click();
+    await page.keyboard.type('member@mtc.ca', { delay: 20 });
+    await page.locator('input[type="password"]').click();
+    await page.keyboard.type('member123', { delay: 20 });
     await page.locator('button[type="submit"]').click();
     await page.waitForURL('**/dashboard**', { timeout: 15000 });
     await page.waitForTimeout(500);
