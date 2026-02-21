@@ -90,7 +90,7 @@ export default function DashboardHeader({ title }: DashboardHeaderProps) {
                     <button onClick={clearNotifications} className="text-xs font-medium hover:underline" style={{ color: '#6b7a3d' }}>Mark all read</button>
                   )}
                 </div>
-                <div className="max-h-80 overflow-y-auto stagger-children">
+                <div className="max-h-80 overflow-y-auto">
                   {filteredNotifications.length === 0 ? (
                     <div className="p-6 text-center">
                       <svg className="w-8 h-8 mx-auto mb-2 opacity-30" fill="none" stroke="#6b7a3d" viewBox="0 0 24 24" strokeWidth="1.5">
