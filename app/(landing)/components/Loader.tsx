@@ -1,18 +1,27 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 export default function Loader() {
   const [exitActive, setExitActive] = useState(false);
+  const imgLoaded = useRef(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => setExitActive(true), 1000);
-    const fallback = setTimeout(() => setExitActive(true), 2000);
+    // Start exit after image loads (or 1s minimum, whichever is later)
+    const minDelay = setTimeout(() => {
+      if (imgLoaded.current) setExitActive(true);
+    }, 1000);
+    // Hard fallback — never show loader longer than 2.5s even if image fails
+    const fallback = setTimeout(() => setExitActive(true), 2500);
     return () => {
-      clearTimeout(timer);
+      clearTimeout(minDelay);
       clearTimeout(fallback);
     };
   }, []);
+
+  const handleImgLoad = () => {
+    imgLoaded.current = true;
+  };
 
   return (
     <div className={`loader${exitActive ? ' exit-active' : ''}`} id="loader">
@@ -37,7 +46,7 @@ export default function Loader() {
           </span>
         </div>
         <div className="tennis-ball-wrapper">
-          <img className="tennis-ball" src="https://cdn.jsdelivr.net/gh/film4sport/my-webapp-images@main/mtc-images/loader-tennis-ball.png" alt="" />
+          <img className="tennis-ball" src="/tennis-ball-clean.png" alt="" onLoad={handleImgLoad} />
         </div>
       </div>
     </div>
