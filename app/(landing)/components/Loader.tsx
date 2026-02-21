@@ -37,7 +37,7 @@ export default function Loader() {
         <img
           src="/mono-logo-transparent.png"
           alt="Mono Tennis Club"
-          className="h-16 w-auto"
+          className="h-32 w-auto"
           style={{ filter: 'brightness(0)' }}
         />
         <div className={`tennis-ball-wrapper${ballHit ? ' ball-hit' : ''}`}>

@@ -29,7 +29,7 @@ export default function Navbar() {
           <img
             src="/mono-logo-transparent.png"
             alt="Mono Tennis Club"
-            className="h-10 w-auto"
+            className="h-10 md:h-12 lg:h-14 w-auto"
             style={{ filter: 'brightness(0) invert(1)' }}
           />
         </div>
