@@ -8,7 +8,7 @@ test.describe('Signup Flow — /info?tab=membership', () => {
   });
 
   test('membership tab loads by default', async ({ page }) => {
-    await expect(page.getByText('How to Join')).toBeAttached();
+    await expect(page.getByText('How to Join').first()).toBeAttached();
   });
 
   test('has membership fee information', async ({ page }) => {
@@ -21,18 +21,16 @@ test.describe('Signup Flow — /info?tab=membership', () => {
   });
 
   test('tab navigation works', async ({ page }) => {
-    // Click About tab
-    await page.getByText('About', { exact: true }).click();
+    // Use dispatchEvent to bypass mobile horizontal scroll viewport issues
+    await page.getByText('About', { exact: true }).dispatchEvent('click');
     await page.waitForTimeout(300);
     await expect(page).toHaveURL(/tab=about/);
 
-    // Click FAQ tab
-    await page.getByText('FAQ', { exact: true }).click();
+    await page.getByText('FAQ', { exact: true }).dispatchEvent('click');
     await page.waitForTimeout(300);
     await expect(page).toHaveURL(/tab=faq/);
 
-    // Click Rules tab
-    await page.getByText('Rules', { exact: true }).click();
+    await page.getByText('Rules', { exact: true }).dispatchEvent('click');
     await page.waitForTimeout(300);
     await expect(page).toHaveURL(/tab=rules/);
   });

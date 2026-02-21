@@ -177,28 +177,24 @@ test.describe('Coach Dashboard', () => {
 
   test('coaching panel page loads', async ({ page }) => {
     await goTo(page, '/dashboard/coaching');
-    await expect(page.locator('h1')).toContainText('Coaching');
+    await expect(page.locator('h1')).toContainText('Book Lessons');
   });
 
-  test('coach can see create program UI', async ({ page }) => {
+  test('coach can see lesson booking UI', async ({ page }) => {
     await goTo(page, '/dashboard/coaching');
-    const createBtn = page.locator('button:has-text("Create"), button:has-text("New"), button:has-text("Add")').first();
-    if (await createBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
-      await createBtn.click();
-      await page.waitForTimeout(500);
-      expect(true).toBe(true);
-    }
+    // Coach should see lesson booking form (Book Lesson tab)
+    const body = await page.textContent('body');
+    expect(body).toContain('Court');
   });
 
-  test('coach sidebar hides Partners and Lessons', async ({ page }) => {
+  test('coach sidebar hides Partners and shows Book Lessons', async ({ page }) => {
     const sidebar = page.locator('aside');
     await expect(sidebar).toBeAttached();
-    // Coach should see Coaching Panel
-    await expect(sidebar.getByText('Coaching Panel')).toBeAttached();
-    // Partners and Lessons should NOT appear
+    // Coach should see Book Lessons
+    await expect(sidebar.getByText('Book Lessons')).toBeAttached();
+    // Partners should NOT appear for coach
     const navText = await sidebar.locator('nav').textContent();
     expect(navText).not.toContain('Partners');
-    expect(navText).not.toContain('Lessons');
   });
 });
 
@@ -324,6 +320,6 @@ test.describe('Cross-cutting', () => {
   test('dashboard header renders with h1', async ({ page }) => {
     await loginAs(page, 'member');
     await expect(page.locator('header')).toBeAttached();
-    await expect(page.locator('h1')).toContainText('Dashboard');
+    await expect(page.locator('h1')).toContainText('Home');
   });
 });

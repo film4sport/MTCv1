@@ -50,7 +50,6 @@ export default function Navbar() {
           <a href="#" className="nav-link text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9' }}>.Home</a>
           <a href="/info?tab=about" className="nav-link text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9' }}>.About</a>
           <a href="/info?tab=membership" className="nav-link text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9' }}>.Membership</a>
-          <a href="#events" className="nav-link text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9' }}>.Events</a>
           <a href="/info?tab=faq" className="nav-link text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9' }}>.FAQ</a>
           <a href="/login" className="login-btn ml-2">
             Login
@@ -76,7 +75,6 @@ export default function Navbar() {
           <a href="#" className="mobile-menu-link" onClick={closeMobileMenu}>.Home</a>
           <a href="/info?tab=about" className="mobile-menu-link" onClick={closeMobileMenu}>.About</a>
           <a href="/info?tab=membership" className="mobile-menu-link" onClick={closeMobileMenu}>.Membership</a>
-          <a href="#events" className="mobile-menu-link" onClick={closeMobileMenu}>.Events</a>
           <a href="/info?tab=faq" className="mobile-menu-link" onClick={closeMobileMenu}>.FAQ</a>
           <a href="/login" className="mobile-menu-link" onClick={closeMobileMenu}>.LOGIN</a>
         </div>

@@ -7,11 +7,10 @@
 - If no → ASK before choosing an approach
 - If a fix fails → the decision was right, my implementation was wrong. Debug the implementation, don't change the approach.
 
-## #2: DO EXACTLY WHAT'S ASKED — NOTHING MORE
-- Did user EXPLICITLY ask for this change? If not, DON'T DO IT
-- Don't "helpfully" add related things
+## #2: MINIMAL DIFF + PROACTIVE SUGGESTIONS
 - **MINIMAL DIFF**: If asked to change ONE property, change ONLY that property. Don't touch surrounding values (positions, sizes, colors) unless explicitly told to.
-- If I think something else would be nice → ASK first
+- **DO proactively suggest** improvements, optimizations, and structural enhancements as you go — the user wants to hear ideas.
+- Don't silently implement unasked-for changes — suggest first, then implement if approved.
 
 ## #3: GREP BEFORE TOUCHING ANYTHING
 - Find ALL locations first
@@ -55,16 +54,20 @@ When new project rules or conventions are established, add them to this file AND
 ---
 
 ## PROJECT OVERVIEW
-- **Mono Tennis Club** - Next.js 14 + TypeScript + Tailwind CSS web app
+- **Mono Tennis Club** — Next.js 14 + TypeScript (strict mode) + Tailwind CSS monorepo
 - Tennis club management for Mono Tennis Club, Ontario
 - PWA-ready with manifest.json
+- Mobile PWA (vanilla JS SPA) merged into monorepo at `public/mobile-app/`
 
 ## ARCHITECTURE
-- Landing page: `app/(landing)/page.tsx` with React components (migrated from static HTML)
+- Landing page: `app/(landing)/page.tsx` with React components, ErrorBoundary
 - Dashboard PWA: `app/dashboard/` (componentized: Sidebar, DashboardHeader, WeatherWidget, etc.)
-- Login: `public/login.html` (static)
+- Mobile PWA: `public/mobile-app/` (vanilla JS SPA, served as static files at `/mobile-app/`)
+- Mobile auth: `app/api/mobile-auth/route.ts` (validates via Supabase + demo fallback)
+- Login: `app/login/page.tsx` (demo credentials gated behind NODE_ENV=development)
 - Root route `/` serves landing page via Next.js App Router
-- Service worker: `public/sw.js` (network-first caching, offline fallback)
+- Service worker: `public/sw.js` (desktop), `public/mobile-app/sw.js` (mobile, scoped)
+- Sitemap: `app/sitemap.ts` (dynamic XML)
 
 ## DESIGN SYSTEM
 - Dark green theme: #1a1f12 bg, #6b7a3d and #d4e157 accents, #e8e4d9 light text
@@ -95,15 +98,25 @@ Note: Sections 3→4→5→6 meet flush (no wave dividers between them)
 - `/info?tab=terms` — Terms of service
 
 ## KEY FILES
-- `app/layout.tsx` - Root layout (fonts, PWA meta tags, service worker registration)
+- `app/layout.tsx` - Root layout (fonts, PWA meta tags, OG/Twitter/JSON-LD SEO, service worker)
 - `app/(landing)/page.tsx` - Landing page root
+- `app/(landing)/layout.tsx` - Landing layout (SEO metadata, JSON-LD, ErrorBoundary)
 - `app/(landing)/components/` - All landing page components
 - `app/(landing)/styles/landing.css` - Landing page CSS
+- `app/sitemap.ts` - Dynamic XML sitemap
 - `app/dashboard/` - Dashboard PWA (layout, components, lib/store)
+- `app/dashboard/components/ErrorBoundary.tsx` - React error boundary
+- `app/dashboard/book/components/` - Extracted booking components (Modal, Sidebar, Legend, Success, utils)
+- `app/dashboard/lib/db.ts` - Supabase database functions
+- `app/dashboard/lib/store.tsx` - State management (all mutations have error toasts + rollback)
+- `app/api/mobile-auth/route.ts` - Mobile PWA auth endpoint
 - `app/globals.css` - Global styles (@font-face after @tailwind directives)
-- `public/sw.js` - Service worker
+- `supabase/schema.sql` - Full DB schema (18+ tables, indexes, RPC functions, triggers)
+- `public/sw.js` - Service worker (desktop)
+- `public/mobile-app/` - Mobile PWA (merged from mtc-app repo)
 - `public/manifest.json` - PWA manifest
-- `next.config.js` - Routes config
+- `next.config.js` - Routes config, CSP, mobile-app SW headers
+- `mobile-app-tests/` - Mobile PWA E2E + unit tests
 - `playwright.config.js` - E2E test config
 - `vitest.config.js` - Unit test config
 

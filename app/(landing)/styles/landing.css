@@ -193,29 +193,6 @@ html, body {
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Hero preview images */
-.hero-preview-img {
-  transition: transform 0.4s ease, box-shadow 0.4s ease;
-  cursor: pointer;
-}
-.hero-preview-img:hover {
-  transform: scale(1.08) translateY(-4px);
-  box-shadow: 0 12px 30px rgba(0,0,0,0.4);
-  z-index: 10;
-}
-.hero-preview-container { position: relative; }
-.hero-preview-container::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to top, rgba(0,0,0,0.3), transparent);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  border-radius: 0.5rem;
-  pointer-events: none;
-}
-.hero-preview-container:hover::after { opacity: 1; }
-
 /* Gallery Carousel */
 .gallery-carousel {
   position: relative;
@@ -227,6 +204,7 @@ html, body {
   gap: 1rem;
 }
 .gallery-slide {
+  position: relative;
   flex: 0 0 calc(50% - 0.5rem);
   min-width: 0;
   aspect-ratio: 1;
@@ -281,45 +259,28 @@ html, body {
   margin-top: 1.5rem;
 }
 .gallery-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.gallery-dot::before {
+  content: '';
+  display: block;
   width: 8px;
   height: 8px;
   border-radius: 50%;
   background: rgba(107, 122, 61, 0.3);
-  border: none;
-  cursor: pointer;
   transition: all 0.3s ease;
 }
-.gallery-dot.active { background: #6b7a3d; transform: scale(1.3); }
-.gallery-dot:hover { background: rgba(107, 122, 61, 0.6); }
-
-/* Enhanced event cards - 3D effect */
-.event-card-enhanced {
-  background: white;
-  border-radius: 1rem;
-  overflow: hidden;
-  transition: transform 0.4s ease, box-shadow 0.4s ease;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.07), 0 10px 20px rgba(0,0,0,0.04);
-  transform-style: preserve-3d;
-  perspective: 1000px;
-}
-.event-card-enhanced:hover {
-  transform: translateY(-8px) rotateX(2deg);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.12), 0 8px 16px rgba(0,0,0,0.08), 0 0 0 1px rgba(107, 122, 61, 0.1);
-}
-.event-card-enhanced .card-image { transition: transform 0.6s ease; }
-.event-card-enhanced:hover .card-image { transform: scale(1.05); }
-.event-card-enhanced::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #6b7a3d, #d4e157);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-.event-card-enhanced:hover::before { opacity: 1; }
+.gallery-dot.active::before { background: #6b7a3d; transform: scale(1.3); }
+.gallery-dot:hover::before { background: rgba(107, 122, 61, 0.6); }
 
 /* Scroll Progress Bar — animated multicolor light bar (matches PWA header) */
 .scroll-progress {
@@ -555,18 +516,18 @@ html, body {
     height: 44px;
   }
   section { max-width: 100vw; overflow-x: hidden; }
-  .btn-primary, a[href^="#"], button { min-height: 44px; }
+  a[href^="#"], button { min-height: 44px; }
   html { -webkit-overflow-scrolling: touch; }
   .gallery-nav { display: none; }
 }
 
 /* Touch/Tap feedback */
 @media (hover: none) and (pointer: coarse) {
-  .event-card:active, .tilt-card:active, .glass-card:active {
+  .event-card:active, .tilt-card:active {
     transform: scale(0.98) !important;
     transition: transform 0.1s ease;
   }
-  .btn-primary:active, button:active, [role="button"]:active {
+  button:active, [role="button"]:active {
     transform: scale(0.95);
     opacity: 0.9;
     transition: all 0.1s ease;
@@ -581,34 +542,6 @@ html, body {
   .login-btn:active { transform: scale(0.92); }
 }
 
-/* Ripple effect */
-.ripple { position: relative; overflow: hidden; }
-.ripple::after {
-  content: '';
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-  pointer-events: none;
-  background-image: radial-gradient(circle, rgba(255,255,255,0.3) 10%, transparent 10%);
-  background-repeat: no-repeat;
-  background-position: 50%;
-  transform: scale(10);
-  opacity: 0;
-  transition: transform 0.5s, opacity 0.5s;
-}
-.ripple:active::after { transform: scale(0); opacity: 1; transition: 0s; }
-
-/* Mobile CTA pulse */
-@keyframes mobilePulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(212, 225, 87, 0.4); }
-  50% { box-shadow: 0 0 0 10px rgba(212, 225, 87, 0); }
-}
-@media (hover: none) {
-  .btn-primary { animation: mobilePulse 2.5s ease-in-out infinite; }
-  .btn-primary:active { animation: none; }
-}
 
 /* Safe area for notched phones */
 @supports (padding: env(safe-area-inset-bottom)) {
@@ -652,31 +585,6 @@ html, body {
 .hero-overlay {
   background: linear-gradient(to right, rgba(0, 0, 0, 0.65) 0%, rgba(0, 0, 0, 0.4) 50%, rgba(0, 0, 0, 0.2) 100%);
 }
-/* Hero cinematic grain overlay */
-.hero-grain {
-  pointer-events: none;
-  z-index: 1;
-  opacity: 0.06;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-  background-size: 200px 200px;
-  /* animation disabled — caused visible jiggling on the hero section */
-}
-@keyframes heroGrainShift {
-  0%, 100% { transform: translate(0, 0); }
-  10% { transform: translate(-5%, -10%); }
-  20% { transform: translate(-15%, 5%); }
-  30% { transform: translate(7%, -25%); }
-  40% { transform: translate(-5%, 25%); }
-  50% { transform: translate(-15%, 10%); }
-  60% { transform: translate(15%, 0%); }
-  70% { transform: translate(0%, 15%); }
-  80% { transform: translate(3%, 35%); }
-  90% { transform: translate(-10%, 10%); }
-}
 .divider-line {
   height: 1px;
   background: linear-gradient(to right, rgba(212, 212, 180, 0.5) 0%, rgba(212, 212, 180, 0.1) 100%);
@@ -708,45 +616,11 @@ html, body {
 .card-hover .card-image { transition: transform 0.5s ease; }
 .card-hover:hover .card-image { transform: scale(1.08); }
 
-/* Glass cards in Book section */
-.glass-card {
-  transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
-  transform-style: preserve-3d;
-}
-.glass-card:hover { box-shadow: 0 16px 32px rgba(0,0,0,0.3); background: rgba(255,255,255,0.15); }
-.glass-card:active { transform: scale(0.97); background: rgba(255,255,255,0.2); }
-
 .footer-watermark {
   font-size: clamp(3rem, 12vw, 10rem);
   font-weight: 700;
   letter-spacing: 0.05em;
   line-height: 1;
-}
-
-/* MTC Logo Animation */
-.mtc-logo {
-  display: flex;
-  gap: 2px;
-  transition: text-shadow 0.3s ease, transform 0.3s ease;
-  cursor: pointer;
-}
-.mtc-logo:hover { text-shadow: 0 0 20px rgba(212, 225, 87, 0.8), 0 0 40px rgba(212, 225, 87, 0.4); }
-.navbar.scrolled .mtc-logo { transform: scale(0.9); }
-.mtc-letter {
-  display: inline-block;
-  animation: ballBounceNav 0.6s cubic-bezier(0.28, 0.84, 0.42, 1) forwards;
-  opacity: 0;
-  transform: translateY(-60px);
-}
-.mtc-letter:nth-child(1) { animation-delay: 0.8s; }
-.mtc-letter:nth-child(2) { animation-delay: 0.95s; }
-.mtc-letter:nth-child(3) { animation-delay: 1.1s; }
-@keyframes ballBounceNav {
-  0% { opacity: 0; transform: translateY(-60px); }
-  50% { opacity: 1; transform: translateY(8px); }
-  70% { transform: translateY(-4px); }
-  85% { transform: translateY(2px); }
-  100% { opacity: 1; transform: translateY(0); }
 }
 
 /* ── Navbar Logo Animations ── */
@@ -801,13 +675,6 @@ html, body {
 /* Keep circle glowing for a moment after hover out */
 .logo-circle {
   will-change: box-shadow, border-color;
-}
-
-/* Scroll Arrow */
-.scroll-arrow { animation: scrollBounce 1.5s ease-in-out infinite; }
-@keyframes scrollBounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(6px); }
 }
 
 /* Nav link hover */
@@ -909,11 +776,6 @@ html, body {
 @keyframes menuLinkSlideIn {
   to { opacity: 1; transform: translateX(0); }
 }
-
-/* Button hover pulse */
-.btn-primary { transition: transform 0.2s ease, box-shadow 0.2s ease; }
-.btn-primary:hover { transform: scale(1.03); box-shadow: 0 8px 20px rgba(212, 225, 87, 0.4); }
-.btn-primary:active { transform: scale(0.97); box-shadow: 0 2px 10px rgba(212, 225, 87, 0.3); }
 
 /* Fade in on scroll */
 .fade-in {

@@ -1,0 +1,1504 @@
+/* neumorphic.css - MTC Court */
+/* ============================================
+   SHOP SCREEN
+============================================ */
+
+.shop-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  padding: 0 16px;
+  margin-bottom: 24px;
+}
+
+.shop-item {
+  background: var(--bg-card);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: var(--card-shadow);
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.shop-item:active {
+  transform: scale(0.96);
+}
+
+.shop-item-image {
+  height: 120px;
+  background: var(--bg-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.shop-svg-wrap {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+}
+
+.shop-svg-wrap svg {
+  width: 80%;
+  height: 80%;
+  transition: transform var(--duration-normal) var(--ease-out);
+}
+
+.shop-item:hover .shop-svg-wrap svg {
+  transform: scale(1.1);
+}
+
+.shop-item-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--duration-normal) var(--ease-out);
+}
+
+.shop-item:hover .shop-item-image img {
+  transform: scale(1.05);
+}
+
+.shop-item-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  padding: 4px 8px;
+  background: var(--volt);
+  color: var(--color-black);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  border-radius: 6px;
+  text-transform: uppercase;
+}
+
+.shop-item-badge.sale {
+  background: var(--coral);
+  color: var(--color-white);
+}
+
+.shop-item-badge.new {
+  background: var(--electric-blue);
+  color: var(--color-black);
+}
+
+.shop-item-info {
+  padding: 14px;
+}
+
+.shop-item-name {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.shop-item-price {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px;
+  color: var(--volt);
+}
+
+.price-old {
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  color: var(--text-muted);
+  text-decoration: line-through;
+  margin-right: 6px;
+}
+
+/* ============================================
+   MESSAGES SCREEN
+============================================ */
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  margin: 0 16px 16px;
+  background: var(--bg-card);
+  border-radius: 14px;
+  box-shadow: var(--card-shadow);
+}
+
+.search-bar input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  font-size: 15px;
+  color: var(--text-primary);
+}
+
+.search-bar input::placeholder {
+  color: var(--text-muted);
+}
+
+/* Message styles handled by chat.css */
+
+.message-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.message-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.message-name {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.message-time {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.message-preview {
+  font-size: 13px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ============================================
+   MATCHES SCREEN
+============================================ */
+
+.match-card {
+  margin: 0 16px 16px;
+  padding: 20px;
+  background: var(--bg-card);
+  border-radius: 20px;
+  box-shadow: var(--shadow-md);
+  transition: all var(--duration-normal) var(--ease-out);
+}
+
+.match-type {
+  display: inline-block;
+  padding: 4px 12px;
+  background: var(--volt);
+  color: var(--color-black);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  border-radius: 100px;
+  margin-bottom: 16px;
+}
+
+.match-type.doubles {
+  background: var(--electric-blue);
+}
+
+.match-players {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.match-player {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.match-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid var(--volt);
+  flex-shrink: 0;
+}
+
+.match-avatar svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.match-avatar.small {
+  width: 36px;
+  height: 36px;
+}
+
+.match-avatar.overlap {
+  margin-left: -12px;
+}
+
+.match-avatar-group {
+  display: flex;
+}
+
+.match-vs {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 24px;
+  color: var(--text-muted);
+}
+
+.match-details {
+  display: flex;
+  gap: 20px;
+}
+
+.match-detail-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  color: var(--text-secondary);
+}
+
+.match-detail-item svg {
+  width: 14px;
+  height: 14px;
+  color: var(--text-muted);
+}
+
+.match-result {
+  display: flex;
+  gap: 14px;
+  padding: 16px;
+  margin: 0 16px 12px;
+  background: var(--bg-card);
+  border-radius: 16px;
+  box-shadow: var(--card-shadow);
+}
+
+.match-result-badge {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.match-result-badge.win {
+  background: transparent;
+  color: var(--volt);
+}
+
+.match-result-badge.loss {
+  background: rgba(255, 90, 95, 0.15);
+  color: var(--coral);
+}
+
+.match-result-info {
+  flex: 1;
+}
+
+.match-result-opponent {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.match-result-score {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px;
+  color: var(--text-primary);
+}
+
+.match-result-date {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* ============================================
+   MODAL
+============================================ */
+
+.modal-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.3s, visibility 0.3s;
+  z-index: 100;
+}
+
+/* Celebration modal */
+#modal {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+#modal .modal {
+  background: rgba(30, 30, 28, 0.85);
+  backdrop-filter: blur(24px) saturate(200%);
+  -webkit-backdrop-filter: blur(24px) saturate(200%);
+}
+
+/* Event, interclub, post partner modals */
+#eventModal,
+#interclubRsvpModal,
+#postPartnerModal {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+#eventModal .modal,
+#interclubRsvpModal .modal,
+#postPartnerModal .modal {
+  background: rgba(30, 30, 28, 0.85);
+  backdrop-filter: blur(24px) saturate(200%);
+  -webkit-backdrop-filter: blur(24px) saturate(200%);
+}
+
+.modal-overlay.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.modal {
+  background: rgba(30, 30, 28, 0.85);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  border-radius: 28px;
+  padding: 32px;
+  text-align: center;
+  transform: scale(0.9);
+  transition: transform 0.3s;
+  width: 100%;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.modal-overlay.active .modal {
+  transform: scale(1);
+}
+
+/* Light mode modal overlay - lighter background */
+[data-theme="light"] .modal-overlay {
+  background: rgba(0, 0, 0, 0.35);
+}
+
+/* Celebration modal - light mode */
+[data-theme="light"] #modal {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+[data-theme="light"] #modal .modal {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(24px) saturate(200%);
+  -webkit-backdrop-filter: blur(24px) saturate(200%);
+  border: 1.5px solid rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+/* Event, interclub, post partner modals - light mode */
+[data-theme="light"] #eventModal,
+[data-theme="light"] #interclubRsvpModal,
+[data-theme="light"] #postPartnerModal {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+[data-theme="light"] #eventModal .modal,
+[data-theme="light"] #interclubRsvpModal .modal,
+[data-theme="light"] #postPartnerModal .modal {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(24px) saturate(200%);
+  -webkit-backdrop-filter: blur(24px) saturate(200%);
+  border: 1.5px solid rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+/* Light mode modal card */
+[data-theme="light"] .modal {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  border: 1.5px solid rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+[data-theme="light"] .modal-title {
+  color: #0a0a0a;
+}
+
+[data-theme="light"] .modal-desc {
+  color: #444444;
+}
+
+.modal-icon {
+  width: 72px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+}
+
+.modal-icon svg {
+  width: 60px;
+  height: 60px;
+  filter: drop-shadow(0 4px 12px rgba(200, 255, 0, 0.4));
+}
+
+.modal-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+.modal-desc {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 24px;
+}
+
+.modal-btn {
+  width: 100%;
+  padding: 16px;
+  background: var(--volt);
+  color: var(--color-black);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px;
+  letter-spacing: 1px;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.modal-btn:active {
+  transform: scale(0.98);
+}
+
+/* Staggered content reveal in celebration modal */
+.modal-overlay.active .modal-title {
+  animation: fadeSlideUp 0.3s ease 0.25s both;
+}
+.modal-overlay.active .modal-desc {
+  animation: fadeSlideUp 0.3s ease 0.35s both;
+}
+.modal-overlay.active .modal-btn {
+  animation: fadeSlideUp 0.3s ease 0.45s both;
+}
+
+/* ============================================
+   NEUMORPHIC GLOBAL STYLES
+   Soft shadows throughout the entire app
+============================================ */
+
+/* Base neumorphic variables */
+:root {
+  --neu-bg: #f0f0f0;
+  --neu-shadow-dark: rgba(0, 0, 0, 0.12);
+  --neu-shadow-light: rgba(255, 255, 255, 0.8);
+  --neu-raised: 
+    6px 6px 12px var(--neu-shadow-dark),
+    -6px -6px 12px var(--neu-shadow-light);
+  --neu-raised-sm: 
+    4px 4px 8px var(--neu-shadow-dark),
+    -4px -4px 8px var(--neu-shadow-light);
+  --neu-inset: 
+    inset 4px 4px 8px var(--neu-shadow-dark),
+    inset -4px -4px 8px var(--neu-shadow-light);
+  --neu-inset-sm: 
+    inset 2px 2px 4px var(--neu-shadow-dark),
+    inset -2px -2px 4px var(--neu-shadow-light);
+}
+
+/* ============================================
+   SCREENS - Solid background (prevents login bleedthrough)
+============================================ */
+
+.screen {
+  background-color: var(--color-light-border);
+}
+
+/* Neumorphic Cards - Raised look with micro-interactions */
+.qa-emoji-item,
+.court-grid-item,
+.activity-item,
+.schedule-item,
+.match-card,
+.calendar-event-item,
+.program-card,
+.shop-item,
+.booking-card,
+.stats-card,
+.streak-card,
+.event-card {
+  background: var(--neu-bg);
+  border: none;
+  box-shadow: var(--neu-raised);
+  transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  cursor: pointer;
+}
+
+/* .partner-card moved to partners.css */
+
+.qa-emoji-item:hover,
+.court-grid-item:hover,
+.activity-item:hover,
+.schedule-item:hover,
+.match-card:hover,
+.calendar-event-item:hover,
+.program-card:hover,
+.shop-item:hover,
+.booking-card:hover,
+.event-card:hover {
+  transform: translateY(-3px) scale(1.01);
+  box-shadow:
+    10px 10px 20px var(--neu-shadow-dark),
+    -10px -10px 20px var(--neu-shadow-light);
+}
+
+/* Tap/click micro-interaction - pressed in feel */
+.qa-emoji-item:active,
+.court-grid-item:active,
+.activity-item:active,
+.schedule-item:active,
+.match-card:active,
+.calendar-event-item:active,
+.program-card:active,
+.shop-item:active,
+.booking-card:active,
+.event-card:active {
+  transform: translateY(1px) scale(0.98);
+  box-shadow: var(--neu-inset-sm);
+  transition: all 0.1s ease;
+}
+
+/* Neumorphic Quick Actions with colors */
+.quick-action {
+  box-shadow: var(--neu-raised);
+  border: none;
+}
+
+.quick-action:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 
+    8px 8px 16px var(--neu-shadow-dark),
+    -8px -8px 16px var(--neu-shadow-light);
+}
+
+.quick-action:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 
+    inset 4px 4px 8px rgba(0, 0, 0, 0.15),
+    inset -4px -4px 8px rgba(255, 255, 255, 0.5);
+}
+
+/* Neumorphic Tabs and Toggles - Inset with texture-compatible bg */
+.schedule-tabs,
+.view-toggle,
+.booking-view-toggle {
+  background: rgba(220, 220, 220, 0.7);
+  border: none;
+  box-shadow: var(--neu-inset);
+  backdrop-filter: blur(4px);
+}
+
+/* Filter pills - clean horizontal scroll, no background wrapper */
+.filter-pills {
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  padding: 14px 16px;
+  margin: 0 0 12px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  display: flex;
+  flex-wrap: nowrap;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  gap: 8px;
+  touch-action: pan-x;
+  scroll-behavior: smooth;
+  mask-image: linear-gradient(to right, transparent 0%, black 16px, black calc(100% - 24px), transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 16px, black calc(100% - 24px), transparent 100%);
+  padding-right: 32px;
+}
+
+.filter-pills::-webkit-scrollbar {
+  display: none;
+}
+
+.search-bar {
+  background: var(--color-light-border);
+  border: none;
+  box-shadow: var(--neu-inset);
+}
+
+/* Neumorphic Tab/Toggle Active State */
+.schedule-tab.active {
+  background: var(--color-light-border);
+  box-shadow: var(--neu-raised-sm);
+}
+
+.view-toggle-btn.active,
+.booking-view-btn.active {
+  background: var(--volt);
+  color: var(--color-black);
+  box-shadow: var(--neu-raised-sm);
+}
+
+[data-theme="dark"] .schedule-tab.active,
+[data-theme="dark"] .view-toggle-btn.active,
+[data-theme="dark"] .booking-view-btn.active {
+  background: var(--volt);
+  color: var(--color-black);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* .filter-pill.active moved to events-screen.css */
+
+/* Neumorphic Bottom Navigation - Keep outer transparent */
+.bottom-nav {
+  background: transparent;
+  box-shadow: none;
+  border: none;
+}
+
+/* .nav-container moved to navigation.css */
+
+.nav-item {
+  transition: all 0.3s ease;
+}
+
+.nav-item.active {
+  background: transparent;
+}
+
+/* Neumorphic Calendar Days */
+.calendar-day {
+  background: var(--neu-bg);
+  box-shadow: 
+    3px 3px 6px var(--neu-shadow-dark),
+    -3px -3px 6px var(--neu-shadow-light);
+  border: none;
+}
+
+.calendar-day:hover {
+  box-shadow: 
+    4px 4px 8px var(--neu-shadow-dark),
+    -4px -4px 8px var(--neu-shadow-light);
+}
+
+.calendar-day.today {
+  box-shadow: 
+    inset 3px 3px 6px rgba(0, 180, 220, 0.3),
+    inset -3px -3px 6px rgba(255, 255, 255, 0.5);
+}
+
+/* Neumorphic Buttons */
+.calendar-nav-btn,
+.notif-btn,
+.menu-btn,
+.back-btn,
+.header-btn {
+  background: var(--bg-card);
+  box-shadow: 
+    inset 2px 2px 4px rgba(0, 0, 0, 0.08),
+    inset -2px -2px 4px rgba(255, 255, 255, 0.7),
+    2px 2px 6px rgba(0, 0, 0, 0.06);
+  border: none;
+}
+
+.calendar-nav-btn:hover,
+.notif-btn:hover,
+.menu-btn:hover,
+.back-btn:hover,
+.header-btn:hover {
+  box-shadow: 
+    inset 2px 2px 4px rgba(0, 0, 0, 0.06),
+    inset -2px -2px 4px rgba(255, 255, 255, 0.8),
+    2px 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.calendar-nav-btn:active,
+.notif-btn:active,
+.menu-btn:active,
+.back-btn:active,
+.header-btn:active {
+  box-shadow: var(--neu-inset-sm);
+}
+
+/* Neumorphic Screen Headers - Transparent to show texture */
+.screen-header {
+  background: transparent;
+  box-shadow: none;
+}
+
+/* Top header - transparent with subtle blur */
+.top-header {
+  background: transparent;
+  backdrop-filter: none;
+}
+
+/* Header buttons - match theme-pill style */
+.header-btn,
+.theme-pill {
+  box-shadow: 
+    inset 2px 2px 4px rgba(0, 0, 0, 0.08),
+    inset -2px -2px 4px rgba(255, 255, 255, 0.7),
+    2px 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.header-btn:active {
+  box-shadow: 
+    inset 3px 3px 6px var(--neu-shadow-dark),
+    inset -3px -3px 6px var(--neu-shadow-light);
+}
+
+/* Neumorphic Section Headers */
+.section-header {
+  background: transparent;
+}
+
+/* Neumorphic Partner/Message Avatar */
+.partner-avatar,
+.message-avatar {
+  box-shadow: 
+    3px 3px 6px var(--neu-shadow-dark),
+    -3px -3px 6px var(--neu-shadow-light);
+}
+
+/* Neumorphic Action Buttons */
+.partner-action-btn,
+.request-action {
+  box-shadow: 
+    3px 3px 6px var(--neu-shadow-dark),
+    -3px -3px 6px var(--neu-shadow-light);
+}
+
+.partner-action-btn:active,
+.request-action:active {
+  box-shadow: var(--neu-inset-sm);
+}
+
+/* Neumorphic Stats */
+.stat-circle {
+  background: var(--neu-bg);
+  box-shadow: var(--neu-inset);
+}
+
+/* Neumorphic Time Block - dark gradient with volt text */
+.schedule-time-block {
+  background: linear-gradient(135deg, var(--deep-black) 0%, #2a2a2a 100%);
+  box-shadow: none;
+  border-radius: 12px;
+}
+
+.schedule-time {
+  color: var(--volt);
+}
+
+.schedule-period {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Neumorphic Court Status Badge */
+.court-status-badge {
+  background: var(--neu-bg);
+  box-shadow: 
+    2px 2px 4px var(--neu-shadow-dark),
+    -2px -2px 4px var(--neu-shadow-light);
+}
+
+/* Neumorphic Menu Items */
+.menu-item {
+  transition: all 0.2s ease;
+}
+
+.menu-item:active {
+  background: var(--neu-bg);
+  box-shadow: var(--neu-inset-sm);
+}
+
+/* Dark mode neumorphic adjustments */
+[data-theme="dark"] {
+  --neu-bg: #1a1a1a;
+  --neu-shadow-dark: rgba(0, 0, 0, 0.4);
+  --neu-shadow-light: rgba(50, 50, 50, 0.3);
+}
+
+[data-theme="dark"] .qa-emoji-item,
+[data-theme="dark"] .court-grid-item,
+[data-theme="dark"] .activity-item,
+[data-theme="dark"] .schedule-item,
+[data-theme="dark"] .match-card,
+[data-theme="dark"] .calendar-event-item,
+[data-theme="dark"] .calendar-day,
+[data-theme="dark"] .calendar-nav-btn,
+[data-theme="dark"] .screen-header,
+[data-theme="dark"] .event-card {
+  background: var(--color-dark-bg);
+  box-shadow: 
+    6px 6px 12px rgba(0, 0, 0, 0.4),
+    -6px -6px 12px rgba(50, 50, 50, 0.3);
+}
+
+/* [data-theme="dark"] .partner-card moved to partners.css */
+
+/* Quick Actions - Keep colors in dark mode but add depth */
+[data-theme="dark"] .quick-action.volt {
+  background: var(--volt);
+  box-shadow: 0 2px 10px rgba(200, 255, 0, 0.15), 4px 4px 8px rgba(0, 0, 0, 0.3);
+}
+[data-theme="dark"] .quick-action.coral {
+  background: var(--coral);
+  box-shadow: 0 2px 10px rgba(255, 90, 95, 0.15), 4px 4px 8px rgba(0, 0, 0, 0.3);
+}
+[data-theme="dark"] .quick-action.electric {
+  background: var(--electric-blue);
+  box-shadow: 0 2px 10px rgba(0, 212, 255, 0.15), 4px 4px 8px rgba(0, 0, 0, 0.3);
+}
+[data-theme="dark"] .quick-action.dark {
+  background: var(--color-dark-bg);
+  border: 1px solid rgba(200, 255, 0, 0.2);
+  box-shadow: 0 2px 10px rgba(200, 255, 0, 0.08), 4px 4px 8px rgba(0, 0, 0, 0.3);
+}
+[data-theme="dark"] .quick-action.dark .quick-action-content {
+  color: var(--volt);
+}
+
+/* Dark mode bottom nav - keep outer transparent */
+[data-theme="dark"] .bottom-nav {
+  background: transparent;
+  box-shadow: none;
+}
+
+/* [data-theme="dark"] .nav-container moved to navigation.css */
+
+[data-theme="dark"] .schedule-tabs,
+[data-theme="dark"] .view-toggle,
+[data-theme="dark"] .booking-view-toggle,
+[data-theme="dark"] .search-bar,
+[data-theme="dark"] .stat-circle {
+  background: rgba(30, 30, 30, 0.8);
+  box-shadow: 
+    inset 4px 4px 8px rgba(0, 0, 0, 0.5),
+    inset -4px -4px 8px rgba(60, 58, 54, 0.35);
+}
+
+/* Dark mode screens - solid background */
+[data-theme="dark"] .screen {
+  background-color: #131211;
+}
+
+/* Dark mode header buttons - solid inset style */
+[data-theme="dark"] .header-btn,
+[data-theme="dark"] .back-btn {
+  background: var(--color-dark-bg);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: 
+    inset 2px 2px 4px rgba(0, 0, 0, 0.4),
+    inset -2px -2px 4px rgba(60, 58, 54, 0.2),
+    2px 2px 8px rgba(0, 0, 0, 0.3);
+  border: none;
+}
+
+/* Dark mode nav item active */
+[data-theme="dark"] .nav-item.active {
+  background: rgba(200, 255, 0, 0.08);
+  box-shadow: inset 0 0 8px rgba(200, 255, 0, 0.1);
+}
+
+[data-theme="dark"] #nav-schedule.active,
+[data-theme="dark"] #nav-messages.active {
+  background: rgba(0, 212, 255, 0.08);
+  box-shadow: inset 0 0 8px rgba(0, 212, 255, 0.1);
+}
+
+[data-theme="dark"] #nav-partners.active {
+  background: rgba(255, 90, 95, 0.12);
+  box-shadow: 0 0 25px rgba(255, 90, 95, 0.25), inset 0 0 12px rgba(255, 90, 95, 0.08);
+}
+
+/* Dark mode cards - solid inset */
+[data-theme="dark"] .qa-emoji-item,
+[data-theme="dark"] .court-grid-item,
+[data-theme="dark"] .activity-item,
+[data-theme="dark"] .schedule-item,
+[data-theme="dark"] .match-card,
+[data-theme="dark"] .calendar-event-item,
+[data-theme="dark"] .program-card,
+[data-theme="dark"] .shop-item,
+[data-theme="dark"] .booking-card,
+[data-theme="dark"] .stats-card,
+[data-theme="dark"] .streak-card {
+  background: var(--color-dark-surface);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  box-shadow: 
+    inset 2px 2px 4px rgba(0, 0, 0, 0.3),
+    inset -2px -2px 4px rgba(60, 58, 54, 0.15),
+    2px 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+[data-theme="dark"] .qa-emoji-item:hover,
+[data-theme="dark"] .court-grid-item:hover,
+[data-theme="dark"] .activity-item:hover,
+[data-theme="dark"] .schedule-item:hover,
+[data-theme="dark"] .match-card:hover,
+[data-theme="dark"] .calendar-event-item:hover,
+[data-theme="dark"] .program-card:hover,
+[data-theme="dark"] .shop-item:hover,
+[data-theme="dark"] .booking-card:hover {
+  background: #252525;
+  box-shadow: 
+    inset 2px 2px 4px rgba(0, 0, 0, 0.25),
+    inset -2px -2px 4px rgba(60, 58, 54, 0.18),
+    3px 3px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Dark mode book button */
+[data-theme="dark"] .nav-item.book-btn {
+  box-shadow: 0 2px 12px rgba(200, 255, 0, 0.2);
+}
+
+[data-theme="dark"] .nav-item.book-btn::before {
+  border-color: rgba(200, 255, 0, 0.4);
+}
+
+/* ============================================
+   ROLE SWITCHER FAB
+============================================ */
+
+/* Role FAB + role switcher removed — roles set via login credentials */
+
+/* Coach Dashboard Styles */
+.coach-quick-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 0 16px;
+  margin-bottom: 20px;
+}
+
+.coach-action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 20px 16px;
+  background: var(--bg-card);
+  border-radius: 16px;
+  border: none;
+  cursor: pointer;
+  box-shadow: var(--card-shadow);
+  transition: all 0.2s;
+}
+
+.coach-action-btn:active {
+  transform: scale(0.98);
+}
+
+.coach-action-btn svg {
+  width: 28px;
+  height: 28px;
+  stroke: var(--volt);
+}
+
+.coach-action-btn span {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* E-transfer Settings */
+.etransfer-card {
+  margin: 0 16px 16px;
+  padding: 20px;
+  background: var(--bg-card);
+  border-radius: 16px;
+  box-shadow: var(--card-shadow);
+}
+
+.etransfer-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.etransfer-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #22C55E 0%, #16a34a 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.etransfer-icon svg {
+  width: 24px;
+  height: 24px;
+  stroke: var(--color-white);
+}
+
+.etransfer-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.etransfer-subtitle {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* Message Composer */
+.message-composer {
+  margin: 0 16px 16px;
+  background: var(--bg-card);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: var(--card-shadow);
+}
+
+.message-composer-header {
+  background: linear-gradient(135deg, var(--deep-black) 0%, #2a2a2a 100%);
+  padding: 16px;
+}
+
+.message-composer-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-white);
+  margin-bottom: 8px;
+}
+
+.message-recipient-select {
+  width: 100%;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: var(--color-white);
+  font-size: 14px;
+}
+
+.message-composer-body {
+  padding: 16px;
+}
+
+.message-type-pills {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.message-type-pill {
+  padding: 6px 12px;
+  border-radius: 20px;
+  background: var(--bg-secondary);
+  border: none;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.message-type-pill.active {
+  background: var(--volt);
+  color: var(--color-black);
+}
+
+/* ============================================
+   TASK ASSIGNMENT SYSTEM
+============================================ */
+
+.task-list {
+  margin: 0 16px 20px;
+}
+
+.task-section-header {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--electric-blue);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.task-section-header .count {
+  background: var(--electric-blue);
+  color: var(--color-white);
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.task-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  background: var(--bg-card);
+  border-radius: 12px;
+  margin-bottom: 10px;
+  box-shadow: var(--card-shadow);
+}
+
+.task-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.task-icon.snacks { background: #FFA500; }
+.task-icon.setup { background: #22C55E; }
+.task-icon.cleanup { background: #6366F1; }
+.task-icon.photo { background: #3B82F6; }
+.task-icon.score { background: #10B981; }
+.task-icon.firstaid { background: #EF4444; }
+.task-icon.parking { background: #8B5CF6; }
+.task-icon.drinks { background: #06B6D4; }
+
+.task-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.task-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.task-status {
+  font-size: 12px;
+  color: var(--electric-blue);
+  font-weight: 600;
+}
+
+.task-status.assigned {
+  color: var(--text-muted);
+}
+
+.task-assignee {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.task-action-btn {
+  padding: 8px 14px;
+  border-radius: 20px;
+  border: none;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.task-action-btn.signup {
+  background: var(--volt);
+  color: var(--color-black);
+}
+
+.task-action-btn.assign {
+  background: var(--electric-blue);
+  color: var(--color-white);
+}
+
+.task-action-btn.assigned {
+  background: var(--bg-secondary);
+  color: var(--text-muted);
+}
+
+/* Event Detail Modal */
+.event-detail-header {
+  background: linear-gradient(135deg, var(--deep-black) 0%, #2a2a2a 100%);
+  margin: -24px -24px 20px -24px;
+  padding: 24px;
+  border-radius: 20px 20px 0 0;
+}
+
+.event-detail-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.event-detail-badge.interclub { background: var(--coral); color: var(--color-white); }
+.event-detail-badge.tournament { background: var(--volt); color: var(--color-black); }
+.event-detail-badge.social { background: var(--electric-blue); color: var(--color-white); }
+
+.event-detail-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--color-white);
+  margin-bottom: 8px;
+}
+
+.event-detail-datetime {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255,255,255,0.8);
+  font-size: 14px;
+}
+
+.event-detail-datetime svg {
+  width: 16px;
+  height: 16px;
+  stroke: var(--volt);
+}
+
+.event-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.event-info-card {
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.event-info-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.event-info-value {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.event-instructions {
+  background: rgba(200, 255, 0, 0.1);
+  border: 1px solid var(--volt);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.event-instructions-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--volt);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.event-instructions-list {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.event-instructions-list li {
+  margin-bottom: 6px;
+}
+
+.event-rsvp-section {
+  margin-bottom: 20px;
+}
+
+.event-rsvp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.event-rsvp-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.event-rsvp-count {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.event-rsvp-avatars {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.event-rsvp-avatar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-secondary);
+  padding: 6px 10px 6px 6px;
+  border-radius: 20px;
+}
+
+.event-rsvp-avatar svg {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+}
+
+.event-rsvp-avatar span {
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.event-rsvp-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.rsvp-btn {
+  padding: 14px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.rsvp-btn.going {
+  background: var(--volt);
+  color: var(--color-black);
+  border: none;
+}
+
+.rsvp-btn.going.active {
+  background: #22C55E;
+  color: var(--color-white);
+}
+
+.rsvp-btn.not-going {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+}
+
+.rsvp-btn.not-going.active {
+  background: var(--coral);
+  color: var(--color-white);
+  border-color: var(--coral);
+}
+
+.rsvp-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+
+/* ============================================
+   SETTINGS SCREEN - Compact (no scroll)
+============================================ */
+#screen-settings {
+  padding-bottom: 0;
+  overflow: hidden;
+}
+
+#screen-settings .section-header {
+  margin-top: 4px;
+  margin-bottom: 6px;
+}
+
+#screen-settings .section-header:first-of-type {
+  margin-top: 6px;
+}
+
+#screen-settings .settings-group {
+  margin: 0 12px 8px;
+  border-radius: 16px;
+}
+
+#screen-settings .settings-item {
+  padding: 11px 16px;
+  gap: 10px;
+}
+
+#screen-settings .settings-icon {
+  width: 20px;
+  height: 20px;
+}
+
+#screen-settings .settings-label {
+  font-size: 14px;
+}
+
+#screen-settings .toggle {
+  width: 44px;
+  height: 24px;
+  border-radius: 12px;
+}
+
+#screen-settings .toggle::after {
+  width: 20px;
+  height: 20px;
+}
+
+#screen-settings .toggle.active::after {
+  transform: translateX(20px);
+}
+
+/* Booking screen needs extra bottom padding for nav bar + gesture bar */
+#screen-book {
+  padding-bottom: 160px;
+}

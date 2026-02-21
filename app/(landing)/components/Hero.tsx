@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import Image from 'next/image';
 
 export default function Hero() {
   const heroContentRef = useRef<HTMLDivElement>(null);
@@ -28,11 +29,13 @@ export default function Hero() {
     <section className="relative h-screen w-full overflow-hidden texture-overlay" style={{ zIndex: 0 }}>
       {/* Background Image with Parallax */}
       <div className="absolute inset-0 parallax-bg" ref={heroBgRef}>
-        <img
+        <Image
           src="https://cdn.jsdelivr.net/gh/film4sport/my-webapp-images@main/mtc-images/hero-aerial-court.png"
           alt="Tennis court aerial view"
           className="w-full h-full object-cover scale-110"
-          loading="eager"
+          fill
+          priority
+          sizes="100vw"
         />
       </div>
       <div className="absolute inset-0 hero-overlay"></div>

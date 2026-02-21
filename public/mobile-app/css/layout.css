@@ -1,0 +1,353 @@
+/* layout.css - MTC Court */
+/* ============================================
+   ANIMATIONS
+============================================ */
+
+/* Screen Transitions */
+.screen {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--bg-primary);
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-bottom: 120px;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.25s ease, transform 0.25s ease, visibility 0s 0.25s;
+  -webkit-overflow-scrolling: touch;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+@media (max-width: 500px) {
+  .screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    min-height: auto;
+    /* Dynamic padding: nav height + safe area bottom */
+    padding-bottom: calc(120px + env(safe-area-inset-bottom, 0px));
+    /* Prevent overscroll showing blank areas */
+    overscroll-behavior-y: contain;
+    /* Ensure screen has same bg as app */
+    background-color: var(--bg-primary);
+    /* Smooth scrolling on iOS */
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+.screen.active { 
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.25s ease, transform 0.25s ease, visibility 0s 0s;
+  pointer-events: auto;
+  visibility: visible;
+}
+
+/* Directional screen transitions for swipe navigation */
+@keyframes slideFromLeft {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes slideFromRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.screen.active.from-left {
+  animation: slideFromLeft 0.25s ease forwards;
+}
+.screen.active.from-right {
+  animation: slideFromRight 0.25s ease forwards;
+}
+
+.screen::-webkit-scrollbar { display: none; }
+
+/* Staggered List Animation */
+@keyframes staggerFadeIn {
+  from { opacity: 0; transform: translateY(16px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.stagger-item {
+  opacity: 0;
+  animation: staggerFadeIn 0.45s var(--ease-out) forwards;
+}
+
+.stagger-item:nth-child(1) { animation-delay: 0.04s; }
+.stagger-item:nth-child(2) { animation-delay: 0.08s; }
+.stagger-item:nth-child(3) { animation-delay: 0.12s; }
+.stagger-item:nth-child(4) { animation-delay: 0.16s; }
+.stagger-item:nth-child(5) { animation-delay: 0.2s; }
+.stagger-item:nth-child(6) { animation-delay: 0.24s; }
+.stagger-item:nth-child(7) { animation-delay: 0.28s; }
+.stagger-item:nth-child(8) { animation-delay: 0.32s; }
+
+
+/* Smooth scroll behavior */
+html, .screen, .main-content, .courts-scroll {
+  scroll-behavior: smooth;
+}
+
+/* Count Up Animation (for stats) */
+@keyframes countPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.count-animate {
+  animation: countPulse 0.3s ease;
+}
+
+/* Floating Button Pulse */
+@keyframes floatPulse {
+  0%, 100% { box-shadow: 0 4px 20px rgba(200, 255, 0, 0.4); }
+  50% { box-shadow: 0 4px 30px rgba(200, 255, 0, 0.6), 0 0 40px rgba(200, 255, 0, 0.3); }
+}
+
+.pulse-animate {
+  animation: floatPulse 2s ease-in-out infinite;
+}
+
+/* Toast Notification */
+.toast {
+  position: absolute;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-100px);
+  background: transparent;
+  backdrop-filter: blur(16px) saturate(200%);
+  -webkit-backdrop-filter: blur(16px) saturate(200%);
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  color: var(--color-white);
+  padding: 14px 20px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  z-index: 200;
+  opacity: 0;
+  transition: transform 0.4s ease, opacity 0.4s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 
+    0 0 30px rgba(200, 255, 0, 0.1),
+    0 10px 30px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--volt);
+}
+
+.toast.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+.toast-icon {
+  width: 22px;
+  height: 22px;
+  background: var(--volt);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.toast-icon svg {
+  width: 12px;
+  height: 12px;
+  color: var(--color-black);
+}
+
+/* Push Notification Banner - Liquid Glass */
+.push-notification {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  width: calc(100% - 32px);
+  max-width: 398px;
+  background: rgba(30, 30, 30, 0.25);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  z-index: 9999;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transform: translateX(-50%) translateY(-120%);
+  opacity: 0;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  cursor: pointer;
+}
+
+.push-notification.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+.push-notification-icon {
+  width: 44px;
+  height: 44px;
+  background: var(--volt);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.push-notification-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.push-notification-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-white);
+  margin-bottom: 4px;
+}
+
+.push-notification-message {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.4;
+}
+
+.push-notification-close {
+  width: 28px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+
+@media (hover: hover) {
+  .push-notification-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+}
+
+.push-notification-close svg {
+  width: 14px;
+  height: 14px;
+  stroke: rgba(255, 255, 255, 0.6);
+}
+
+/* Action button in push notifications */
+.push-notification-action {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 4px 12px;
+  background: var(--volt);
+  color: var(--color-black);
+  border: none;
+  border-radius: 8px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 12px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.push-notification-action:active {
+  transform: scale(0.95);
+}
+
+/* Notification badge pulse */
+.notification-badge.pulse {
+  animation: badgePulse 0.6s ease;
+}
+
+@keyframes badgePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+}
+
+/* Hero Parallax */
+.hero-card {
+  position: relative;
+  height: 280px;
+  margin: 16px;
+  border-radius: 24px;
+  overflow: hidden;
+  background: var(--gradient-primary);
+  transform-style: preserve-3d;
+  transition: transform 0.3s ease;
+}
+
+.hero-card:hover {
+  transform: scale(1.02);
+}
+
+.hero-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.7;
+  transition: transform 0.5s ease;
+}
+
+.hero-card:hover img {
+  transform: scale(1.05);
+}
+
+/* Light mode toast - liquid glass style */
+[data-theme="light"] .toast {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  color: var(--text-primary);
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+
+/* Push notification - always dark card for readability */
+[data-theme="light"] .push-notification {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+[data-theme="light"] .push-notification .push-notification-title {
+  color: #0a0a0a;
+}
+
+[data-theme="light"] .push-notification .push-notification-message {
+  color: #444444;
+}
+
+[data-theme="light"] .push-notification .push-notification-close {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .push-notification .push-notification-close svg {
+  stroke: rgba(0, 0, 0, 0.5);
+}
+
+/* Screen layout fixes now in index.html <style> block for cascade priority */

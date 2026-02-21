@@ -594,26 +594,28 @@ export default function LoginPage() {
             </div>
           )}
 
-          {/* Demo Credentials */}
-          <div className="mt-6 rounded-xl p-4 space-y-2" style={{ background: 'rgba(107, 122, 61, 0.06)', border: '1px solid rgba(107, 122, 61, 0.15)' }}>
-            <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: '#6b7a3d' }}>Test Accounts</p>
-            {[
-              { label: 'Member', email: 'member@mtc.ca', pass: 'member123' },
-              { label: 'Coach', email: 'coach@mtc.ca', pass: 'coach123' },
-              { label: 'Admin', email: 'admin@mtc.ca', pass: 'admin123' },
-            ].map(cred => (
-              <button
-                key={cred.label}
-                type="button"
-                onClick={() => { setEmail(cred.email); setPassword(cred.pass); setEmailError(false); setPasswordError(false); }}
-                className="flex items-center justify-between w-full px-3 py-2 rounded-lg text-xs transition-colors hover:bg-white/60"
-                style={{ color: '#2a2f1e' }}
-              >
-                <span className="font-medium">{cred.label}</span>
-                <span style={{ color: '#6b7266' }}>{cred.email}</span>
-              </button>
-            ))}
-          </div>
+          {/* Demo Credentials — development only, stripped from production builds */}
+          {process.env.NODE_ENV === 'development' && (
+            <div className="mt-6 rounded-xl p-4 space-y-2" style={{ background: 'rgba(107, 122, 61, 0.06)', border: '1px solid rgba(107, 122, 61, 0.15)' }}>
+              <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: '#6b7a3d' }}>Test Accounts</p>
+              {[
+                { label: 'Member', email: 'member@mtc.ca', pass: 'member123' },
+                { label: 'Coach', email: 'coach@mtc.ca', pass: 'coach123' },
+                { label: 'Admin', email: 'admin@mtc.ca', pass: 'admin123' },
+              ].map(cred => (
+                <button
+                  key={cred.label}
+                  type="button"
+                  onClick={() => { setEmail(cred.email); setPassword(cred.pass); setEmailError(false); setPasswordError(false); }}
+                  className="flex items-center justify-between w-full px-3 py-2 rounded-lg text-xs transition-colors hover:bg-white/60"
+                  style={{ color: '#2a2f1e' }}
+                >
+                  <span className="font-medium">{cred.label}</span>
+                  <span style={{ color: '#6b7266' }}>{cred.email}</span>
+                </button>
+              ))}
+            </div>
+          )}
 
           {/* Register Link */}
           <p className="mt-6 lg:mt-8 text-center text-sm sm:text-base" style={{ color: '#6b7266' }}>

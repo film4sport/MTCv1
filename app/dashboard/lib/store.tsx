@@ -261,8 +261,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // Actions
   const addBooking = useCallback((booking: Booking) => {
     setBookings(prev => [...prev, booking]);
-    // Persist to Supabase
-    db.createBooking(booking).catch((err) => console.error('[MTC Supabase]', err));
+    // Persist to Supabase — rollback on failure
+    db.createBooking(booking).catch((err) => {
+      console.error('[MTC Supabase]', err);
+      setBookings(prev => prev.filter(b => b.id !== booking.id));
+      showToast('Failed to save booking. Please try again.', 'error');
+    });
     // Create notification for booker
     if (booking.type === 'lesson') {
       const notif: Notification = {
@@ -366,15 +370,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
       return prev.map(b => b.id === id ? { ...b, status: 'cancelled' as const } : b);
     });
-    // Persist to Supabase
-    db.cancelBooking(id).catch((err) => console.error('[MTC Supabase]', err));
+    // Persist to Supabase — rollback on failure
+    db.cancelBooking(id).catch((err) => {
+      console.error('[MTC Supabase]', err);
+      setBookings(prev => prev.map(b => b.id === id ? { ...b, status: 'confirmed' as const } : b));
+      showToast('Failed to cancel booking. Please try again.', 'error');
+    });
   }, []);
 
   // Program CRUD
   const addProgram = useCallback((program: CoachingProgram) => {
     setPrograms(prev => [...prev, program]);
     // Persist to Supabase
-    db.createProgram(program).catch((err) => console.error('[MTC Supabase]', err));
+    db.createProgram(program).catch((err) => {
+      console.error('[MTC Supabase]', err);
+      setPrograms(prev => prev.filter(p => p.id !== program.id));
+      showToast('Failed to create program. Please try again.', 'error');
+    });
     // Auto-generate blocked bookings for each session
     const newBookings: Booking[] = program.sessions.map((s, i) => ({
       id: `bp-${program.id}-${i}`,
@@ -397,7 +409,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setPrograms(prev => prev.map(p => p.id === programId ? { ...p, status: 'cancelled' as const } : p));
     setBookings(prev => prev.map(b => b.programId === programId ? { ...b, status: 'cancelled' as const } : b));
     // Persist to Supabase
-    db.cancelProgram(programId).catch((err) => console.error('[MTC Supabase]', err));
+    db.cancelProgram(programId).catch((err) => {
+      console.error('[MTC Supabase]', err);
+      setPrograms(prev => prev.map(p => p.id === programId ? { ...p, status: 'active' as const } : p));
+      showToast('Failed to cancel program. Please try again.', 'error');
+    });
   }, []);
 
   const enrollInProgram = useCallback((programId: string, memberId: string, memberName: string) => {
@@ -406,7 +422,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     // Add member to enrolled list
     setPrograms(prev => prev.map(p => p.id === programId ? { ...p, enrolledMembers: [...p.enrolledMembers, memberId] } : p));
     // Persist to Supabase
-    db.enrollInProgram(programId, memberId).catch((err) => console.error('[MTC Supabase]', err));
+    db.enrollInProgram(programId, memberId).catch((err) => {
+      console.error('[MTC Supabase]', err);
+      setPrograms(prev => prev.map(p => p.id === programId ? { ...p, enrolledMembers: p.enrolledMembers.filter(m => m !== memberId) } : p));
+      showToast('Failed to enroll. Please try again.', 'error');
+    });
     // Charge fee
     setPayments(prev => {
       const existing = prev.find(p => p.memberId === memberId);
@@ -458,7 +478,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (!program) return;
     setPrograms(prev => prev.map(p => p.id === programId ? { ...p, enrolledMembers: p.enrolledMembers.filter(m => m !== memberId) } : p));
     // Persist to Supabase
-    db.withdrawFromProgram(programId, memberId).catch((err) => console.error('[MTC Supabase]', err));
+    db.withdrawFromProgram(programId, memberId).catch((err) => {
+      console.error('[MTC Supabase]', err);
+      setPrograms(prev => prev.map(p => p.id === programId ? { ...p, enrolledMembers: [...p.enrolledMembers, memberId] } : p));
+      showToast('Failed to withdraw. Please try again.', 'error');
+    });
     // Credit refund
     setPayments(prev => {
       const existing = prev.find(p => p.memberId === memberId);
@@ -472,12 +496,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const addPartner = useCallback((partner: Partner) => {
     setPartners(prev => [partner, ...prev]);
-    db.createPartner(partner).catch((err) => console.error('[MTC Supabase]', err));
+    db.createPartner(partner).catch((err) => {
+      console.error('[MTC Supabase]', err);
+      setPartners(prev => prev.filter(p => p.id !== partner.id));
+      showToast('Failed to post partner request. Please try again.', 'error');
+    });
   }, []);
 
   const removePartner = useCallback((partnerId: string) => {
     setPartners(prev => prev.filter(p => p.id !== partnerId));
-    db.deletePartner(partnerId).catch((err) => console.error('[MTC Supabase]', err));
+    db.deletePartner(partnerId).catch((err) => {
+      console.error('[MTC Supabase]', err);
+      showToast('Failed to remove partner request.', 'error');
+    });
   }, []);
 
   const toggleRsvp = useCallback((eventId: string, userName: string) => {
@@ -491,7 +522,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       };
     }));
     // Persist to Supabase
-    db.toggleEventRsvp(eventId, userName).catch((err) => console.error('[MTC Supabase]', err));
+    db.toggleEventRsvp(eventId, userName).catch((err) => {
+      console.error('[MTC Supabase]', err);
+      showToast('Failed to update RSVP. Please try again.', 'error');
+    });
   }, []);
 
   const sendMessage = useCallback((toId: string, text: string) => {

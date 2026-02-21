@@ -1,0 +1,77 @@
+{
+  "name": "MTC COURT - Mono Tennis Club",
+  "short_name": "MTC Court",
+  "description": "Book courts, find partners, and manage your tennis at Mono Tennis Club.",
+  "start_url": "/mobile-app/index.html",
+  "scope": "/mobile-app/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a0a0a",
+  "theme_color": "#c8ff00",
+  "categories": ["sports", "lifestyle"],
+  "icons": [
+    {
+      "src": "/mobile-app/icons/icon-72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/mobile-app/icons/icon-96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/mobile-app/icons/icon-128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/mobile-app/icons/icon-144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/mobile-app/icons/icon-152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/mobile-app/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/mobile-app/icons/icon-384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/mobile-app/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Book a Court",
+      "short_name": "Book",
+      "url": "/mobile-app/index.html#book",
+      "icons": []
+    },
+    {
+      "name": "My Schedule",
+      "short_name": "Schedule",
+      "url": "/mobile-app/index.html#schedule",
+      "icons": []
+    }
+  ]
+}

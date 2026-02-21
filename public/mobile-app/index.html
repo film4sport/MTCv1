@@ -1,0 +1,2275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#c8ff00">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>MTC COURT - Mono Tennis Club</title>
+  <script>
+    // Force clear ALL old service worker caches and re-register
+    if ('serviceWorker' in navigator) {
+      caches.keys().then(function(names) {
+        names.forEach(function(name) {
+          if (name.indexOf('mtc-court-v148') === -1) {
+            caches.delete(name);
+            console.log('[CacheBust] Deleted old cache:', name);
+          }
+        });
+      });
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        registrations.forEach(function(reg) {
+          reg.update();
+        });
+      });
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" href="css/variables.css" as="style">
+  <link rel="preload" href="css/base.css" as="style">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- CSS - Load order matters for specificity -->
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/login.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/home.css">
+  <link rel="stylesheet" href="css/booking.css">
+  <link rel="stylesheet" href="css/navigation.css">
+  <link rel="stylesheet" href="css/social.css">
+  <link rel="stylesheet" href="css/admin.css">
+  <link rel="stylesheet" href="css/payments.css">
+  <link rel="stylesheet" href="css/search.css">
+  <link rel="stylesheet" href="css/profile.css">
+  <link rel="stylesheet" href="css/messaging.css">
+  <link rel="stylesheet" href="css/events.css">
+  <link rel="stylesheet" href="css/partners.css">
+  <link rel="stylesheet" href="css/schedule.css">
+  <link rel="stylesheet" href="css/events-screen.css">
+  <link rel="stylesheet" href="css/screens.css">
+  <link rel="stylesheet" href="css/modals.css">
+  <link rel="stylesheet" href="css/enhancements.css">
+  <!-- Neumorphic overrides load LAST to take precedence -->
+  <link rel="stylesheet" href="css/neumorphic.css">
+  <link rel="stylesheet" href="css/chat.css">
+  
+  <!-- Critical overrides - loads LAST, wins cascade -->
+  <style>
+    /* === FIX: Dark flash on login === */
+    body { background: #e8e8e8; }
+    @media (min-width: 501px) { body { background: #1a1a1a; } }
+    
+    /* === FIX: Booking white space — fixed layout === */
+    #screen-book {
+      overflow: hidden;
+      padding-bottom: calc(90px + env(safe-area-inset-bottom, 0px));
+    }
+    #screen-book .screen-header,
+    #screen-book .booking-view-toggle,
+    #screen-book .booking-legend {
+      flex-shrink: 0;
+    }
+    #weekView {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+    }
+    #weekView .week-navigator {
+      flex-shrink: 0;
+    }
+    #weekView .weekly-grid-container {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      border-radius: 20px 20px 0 0;
+      margin-bottom: 0;
+    }
+    #weekView .weekly-grid-header {
+      flex-shrink: 0;
+    }
+    #weekView .weekly-grid-body {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 60px;
+    }
+    /* Calendar day view — same treatment */
+    #bookingCalendarView {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    #bookingCalendarView .calendar-container {
+      flex-shrink: 0;
+    }
+    #dayTimeSlotsContainer {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    #dayTimeSlotsContainer .weekly-grid-container {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      border-radius: 20px 20px 0 0;
+      margin-bottom: 0;
+    }
+    #dayTimeSlotsContainer .weekly-grid-body {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 60px;
+    }
+    
+    /* === FIX: Conversation — pinned layout === */
+    #screen-conversation {
+      overflow: hidden;
+      padding-bottom: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    #screen-conversation .screen-header {
+      flex-shrink: 0;
+    }
+    #screen-conversation .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      min-height: 0;
+      padding-bottom: 16px;
+    }
+    #screen-conversation .chat-input-area {
+      flex-shrink: 0;
+    }
+    
+    /* === FIX: Messages screen scroll === */
+    #screen-messages {
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    #screen-messages .screen-header {
+      flex-shrink: 0;
+    }
+    #screen-messages .messages-content,
+    #screen-messages .messages-list {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      min-height: 0;
+      padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px));
+    }
+    
+    /* === FIX: Push notification — true liquid glass === */
+    [data-theme="dark"] .push-notification {
+      background: rgba(30, 30, 30, 0.25);
+      backdrop-filter: blur(40px) saturate(180%);
+      -webkit-backdrop-filter: blur(40px) saturate(180%);
+    }
+    [data-theme="dark"] .push-notification-title {
+      color: #fff;
+    }
+    [data-theme="dark"] .push-notification-message {
+      color: rgba(255, 255, 255, 0.85);
+    }
+    [data-theme="light"] .push-notification {
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(40px) saturate(180%);
+      -webkit-backdrop-filter: blur(40px) saturate(180%);
+      border: 1.5px solid rgba(255, 255, 255, 0.4);
+    }
+    [data-theme="light"] .push-notification-title {
+      color: #0a0a0a;
+    }
+    [data-theme="light"] .push-notification-message {
+      color: #444444;
+    }
+  </style>
+  <!-- Liquid glass overrides - MUST BE LAST -->
+</head>
+<body>
+  <!-- Skip Navigation Link -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  
+  <!-- ARIA Live Region for Screen Reader Announcements -->
+  <div id="a11yAnnouncer" class="a11y-announcer" aria-live="polite" aria-atomic="true"></div>
+  
+  <!-- Offline Banner -->
+  <div class="offline-banner" role="alert">📡 You're offline - Some features unavailable</div>
+  
+  <div id="app" data-theme="light" role="application" aria-label="Mono Tennis Club App">
+    <!-- Dynamic Island - Shows on desktop phone frame -->
+    <!-- App content starts here -->
+
+    <!-- Offline banner - shown when body has .offline class -->
+    <div class="offline-banner" role="status" aria-live="polite">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="1" y1="1" x2="23" y2="23"></line><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"></path><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"></path><path d="M10.71 5.05A16 16 0 0 1 22.56 9"></path><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg>
+      You're offline
+    </div>
+
+    <!-- ============================================
+         LOGIN SCREEN - Light COURT Themed
+    ============================================ -->
+    <div class="login-screen active" id="login-screen">
+      <!-- Full-bleed Background Photo -->
+      <div class="login-bg">
+        <img src="https://i.imgur.com/TZ31bSl.png" alt="Mono Tennis Club">
+      </div>
+      
+      <!-- Floating ambient orbs -->
+      <div class="liquid-orbs" aria-hidden="true">
+        <div class="liquid-orb orb-1"></div>
+        <div class="liquid-orb orb-2"></div>
+        <div class="liquid-orb orb-3"></div>
+        <div class="liquid-orb orb-4"></div>
+        <div class="liquid-orb orb-5"></div>
+      </div>
+      
+      <!-- Tennis court lines decoration -->
+      <div class="court-lines-bg" aria-hidden="true">
+        <div class="court-line-h"></div>
+        <div class="court-line-v"></div>
+        <div class="court-line-circle"></div>
+      </div>
+      
+      <!-- Floating Tennis Ball - Original PNG -->
+      <div class="floating-tennis-ball">
+        <img src="icons/tennis-ball.png" alt="Tennis Ball">
+      </div>
+      
+      <!-- MTC Badge -->
+      <div class="mtc-badge">
+        <span class="badge-text">MONO TENNIS CLUB</span>
+      </div>
+      
+      <!-- Animated Hero Title -->
+      <div class="login-hero-title">
+        <h1>
+          <span>M</span><span>T</span><span>C</span><span class="space">&nbsp;</span><span class="volt">C</span><span class="volt">O</span><span class="volt">U</span><span class="volt">R</span><span class="volt">T</span>
+        </h1>
+        <p>Your Game, Elevated</p>
+      </div>
+      
+      <!-- Colorful Feature Pills (Dashboard Style) -->
+      <div class="feature-pills">
+        <div class="feature-pill purple">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Book
+        </div>
+        <div class="feature-pill orange">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Partners
+        </div>
+        <div class="feature-pill pink">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Messages
+        </div>
+      </div>
+      
+      <div class="login-card">
+        <!-- Liquid highlight overlay -->
+        <div class="liquid-highlight" aria-hidden="true"></div>
+        <!-- Refraction orbs -->
+        <div class="refraction-orb refraction-orb-1" aria-hidden="true"></div>
+        <div class="refraction-orb refraction-orb-2" aria-hidden="true"></div>
+        
+        <div class="card-accent"></div>
+        <p class="card-welcome">Welcome back</p>
+        <input type="email" class="login-input" placeholder="Email" id="loginEmail" aria-label="Email address">
+        <input type="password" class="login-input" placeholder="Password" id="loginPassword" aria-label="Password">
+        
+        <div class="login-options">
+          <label class="login-remember">
+            <input type="checkbox" id="rememberMe">
+            <span>Remember me</span>
+          </label>
+          <a href="#" class="forgot-password" onclick="showForgotPassword()">Forgot password?</a>
+        </div>
+        
+        <button type="button" class="login-btn" onclick="handleLogin()" aria-label="Sign in">Sign In</button>
+        
+        <div class="login-footer">
+          Don't have an account? <a href="#" onclick="showSignUpScreen()">Sign up</a>
+        </div>
+      </div>
+
+      <!-- SIGN UP CARD (hidden by default, replaces login card) -->
+      <div class="login-card signup-card" id="signupCard" style="display:none;">
+        <div class="liquid-highlight" aria-hidden="true"></div>
+        <div class="refraction-orb refraction-orb-1" aria-hidden="true"></div>
+        <div class="refraction-orb refraction-orb-2" aria-hidden="true"></div>
+
+        <div class="card-accent"></div>
+        <p class="card-welcome">Create Account</p>
+
+        <!-- Account type selector -->
+        <div class="signup-type-selector">
+          <button class="signup-type-btn active" id="signupTypeMember" onclick="selectSignupType('member')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            Member
+          </button>
+          <button class="signup-type-btn" id="signupTypeGuest" onclick="selectSignupType('guest')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+            Guest
+          </button>
+        </div>
+
+        <div class="signup-type-desc" id="signupTypeDesc">
+          Full access to courts, programs, partners, messaging, and all club features.
+        </div>
+
+        <input type="text" class="login-input" placeholder="Full Name" id="signupName" aria-label="Full name">
+        <input type="email" class="login-input" placeholder="Email" id="signupEmail" aria-label="Email address">
+        <input type="tel" class="login-input" placeholder="Phone (optional)" id="signupPhone" aria-label="Phone number">
+        <input type="password" class="login-input" placeholder="Create Password" id="signupPassword" aria-label="Create password">
+
+        <button type="button" class="login-btn" onclick="handleSignUp()" aria-label="Create account">Create Account</button>
+
+        <div class="login-footer">
+          Already have an account? <a href="#" onclick="showLoginScreen()">Sign in</a>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Forgot Password Modal -->
+    <div class="modal-overlay" id="forgotPasswordModal" role="dialog" aria-label="Reset password" aria-modal="true" onclick="closeForgotPassword()">
+      <div class="modal modal-sm" onclick="event.stopPropagation()">
+        <div class="modal-icon modal-icon-reset">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" width="32" height="32"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+        </div>
+        <div class="modal-title">RESET PASSWORD</div>
+        <div class="modal-desc modal-form-group">Enter your email and we'll send you a reset link.</div>
+        <input type="email" class="modal-input" placeholder="Email address" id="resetEmail" aria-label="Email address for password reset">
+        <button class="modal-btn ripple modal-btn-primary-full" onclick="sendResetEmail()">
+          Send Reset Link
+        </button>
+        <button class="modal-btn-ghost" onclick="closeForgotPassword()" aria-label="Cancel">
+          Back to login
+        </button>
+      </div>
+    </div>
+    
+    <!-- Avatar Picker Modal -->
+    <div class="modal-overlay" id="avatarPickerModal" role="dialog" aria-label="Choose avatar" aria-modal="true" onclick="closeAvatarPicker()">
+      <div class="modal avatar-picker-modal" onclick="event.stopPropagation()">
+        <div class="modal-title">CHOOSE YOUR AVATAR</div>
+        <div class="modal-desc">Pick a tennis player that represents you!</div>
+        
+        <div class="avatar-category">
+          <div class="avatar-category-title">🎾 Tennis Players</div>
+          <div class="avatar-grid">
+            <!-- Male Tennis Player - Light Skin -->
+            <div class="avatar-option illustrated" onclick="selectAvatar('tennis-male-1')" data-avatar="tennis-male-1">
+              <svg viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="45" fill="#FFE0BD"/>
+                <path d="M30 38 Q35 20 55 22 Q75 24 72 42 L68 38 Q60 30 45 32 Q35 34 30 38 Z" fill="#6B4423"/>
+                <rect x="28" y="36" width="44" height="6" rx="2" fill="#2563EB"/>
+                <ellipse cx="50" cy="52" rx="22" ry="20" fill="#FFE0BD"/>
+                <circle cx="42" cy="50" r="3" fill="#333"/>
+                <circle cx="58" cy="50" r="3" fill="#333"/>
+                <path d="M42 60 Q50 68 58 60" stroke="#333" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                <path d="M30 78 Q50 72 70 78 L72 100 L28 100 Z" fill="#3BAFDA"/>
+                <ellipse cx="82" cy="35" rx="12" ry="15" fill="#fff" stroke="#333" stroke-width="2.5"/>
+                <line x1="74" y1="26" x2="90" y2="26" stroke="#333" stroke-width="1"/>
+                <line x1="73" y1="31" x2="91" y2="31" stroke="#333" stroke-width="1"/>
+                <line x1="73" y1="36" x2="91" y2="36" stroke="#333" stroke-width="1"/>
+                <line x1="73" y1="41" x2="91" y2="41" stroke="#333" stroke-width="1"/>
+                <line x1="74" y1="46" x2="90" y2="46" stroke="#333" stroke-width="1"/>
+                <line x1="76" y1="22" x2="76" y2="48" stroke="#333" stroke-width="1"/>
+                <line x1="80" y1="21" x2="80" y2="49" stroke="#333" stroke-width="1"/>
+                <line x1="84" y1="21" x2="84" y2="49" stroke="#333" stroke-width="1"/>
+                <line x1="88" y1="22" x2="88" y2="48" stroke="#333" stroke-width="1"/>
+                <line x1="82" y1="50" x2="82" y2="65" stroke="#333" stroke-width="4"/>
+              </svg>
+            </div>
+            <!-- Male Tennis Player - Dark Skin -->
+            <div class="avatar-option illustrated" onclick="selectAvatar('tennis-male-2')" data-avatar="tennis-male-2">
+              <svg viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="45" fill="#8D5524"/>
+                <path d="M30 38 Q35 20 55 22 Q75 24 72 42 L68 38 Q60 30 45 32 Q35 34 30 38 Z" fill="#1a1a1a"/>
+                <rect x="28" y="36" width="44" height="6" rx="2" fill="#c8ff00"/>
+                <ellipse cx="50" cy="52" rx="22" ry="20" fill="#8D5524"/>
+                <circle cx="42" cy="50" r="3" fill="#222"/>
+                <circle cx="58" cy="50" r="3" fill="#222"/>
+                <path d="M42 60 Q50 68 58 60" stroke="#222" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                <path d="M30 78 Q50 72 70 78 L72 100 L28 100 Z" fill="#3BAFDA"/>
+                <ellipse cx="82" cy="35" rx="12" ry="15" fill="#fff" stroke="#333" stroke-width="2.5"/>
+                <line x1="74" y1="26" x2="90" y2="26" stroke="#333" stroke-width="1"/>
+                <line x1="73" y1="31" x2="91" y2="31" stroke="#333" stroke-width="1"/>
+                <line x1="73" y1="36" x2="91" y2="36" stroke="#333" stroke-width="1"/>
+                <line x1="73" y1="41" x2="91" y2="41" stroke="#333" stroke-width="1"/>
+                <line x1="74" y1="46" x2="90" y2="46" stroke="#333" stroke-width="1"/>
+                <line x1="76" y1="22" x2="76" y2="48" stroke="#333" stroke-width="1"/>
+                <line x1="80" y1="21" x2="80" y2="49" stroke="#333" stroke-width="1"/>
+                <line x1="84" y1="21" x2="84" y2="49" stroke="#333" stroke-width="1"/>
+                <line x1="88" y1="22" x2="88" y2="48" stroke="#333" stroke-width="1"/>
+                <line x1="82" y1="50" x2="82" y2="65" stroke="#333" stroke-width="4"/>
+              </svg>
+            </div>
+            <!-- Female Tennis Player - Light Skin -->
+            <div class="avatar-option illustrated" onclick="selectAvatar('tennis-female-1')" data-avatar="tennis-female-1">
+              <svg viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="45" fill="#FFE0BD"/>
+                <path d="M68 30 Q85 35 80 55 Q78 65 72 60 Q75 45 68 38 Z" fill="#8B4513"/>
+                <path d="M28 40 Q30 25 50 24 Q70 25 72 40 L68 42 Q60 32 40 34 Q32 36 28 40 Z" fill="#8B4513"/>
+                <rect x="26" y="36" width="48" height="7" rx="2" fill="#3BAFDA"/>
+                <rect x="26" y="38" width="48" height="2" fill="#fff"/>
+                <ellipse cx="50" cy="52" rx="21" ry="19" fill="#FFE0BD"/>
+                <circle cx="42" cy="50" r="2.5" fill="#333"/>
+                <circle cx="58" cy="50" r="2.5" fill="#333"/>
+                <path d="M43 59 Q50 66 57 59" stroke="#333" stroke-width="2" fill="none" stroke-linecap="round"/>
+                <path d="M32 78 Q50 72 68 78 L70 100 L30 100 Z" fill="#3BAFDA"/>
+                <ellipse cx="82" cy="38" rx="11" ry="14" fill="#fff" stroke="#333" stroke-width="2.5"/>
+                <line x1="74" y1="29" x2="90" y2="29" stroke="#333" stroke-width="1"/>
+                <line x1="73" y1="34" x2="91" y2="34" stroke="#333" stroke-width="1"/>
+                <line x1="73" y1="39" x2="91" y2="39" stroke="#333" stroke-width="1"/>
+                <line x1="73" y1="44" x2="91" y2="44" stroke="#333" stroke-width="1"/>
+                <line x1="74" y1="49" x2="90" y2="49" stroke="#333" stroke-width="1"/>
+                <line x1="76" y1="25" x2="76" y2="51" stroke="#333" stroke-width="1"/>
+                <line x1="80" y1="24" x2="80" y2="52" stroke="#333" stroke-width="1"/>
+                <line x1="84" y1="24" x2="84" y2="52" stroke="#333" stroke-width="1"/>
+                <line x1="88" y1="25" x2="88" y2="51" stroke="#333" stroke-width="1"/>
+                <line x1="82" y1="52" x2="82" y2="68" stroke="#333" stroke-width="4"/>
+              </svg>
+            </div>
+            <!-- Female Tennis Player - Dark Skin -->
+            <div class="avatar-option illustrated" onclick="selectAvatar('tennis-female-2')" data-avatar="tennis-female-2">
+              <svg viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="45" fill="#8D5524"/>
+                <path d="M68 30 Q85 35 80 55 Q78 65 72 60 Q75 45 68 38 Z" fill="#1a1a1a"/>
+                <path d="M28 40 Q30 25 50 24 Q70 25 72 40 L68 42 Q60 32 40 34 Q32 36 28 40 Z" fill="#1a1a1a"/>
+                <rect x="26" y="36" width="48" height="7" rx="2" fill="#c8ff00"/>
+                <rect x="26" y="38" width="48" height="2" fill="#fff"/>
+                <ellipse cx="50" cy="52" rx="21" ry="19" fill="#8D5524"/>
+                <circle cx="42" cy="50" r="2.5" fill="#222"/>
+                <circle cx="58" cy="50" r="2.5" fill="#222"/>
+                <path d="M43 59 Q50 66 57 59" stroke="#222" stroke-width="2" fill="none" stroke-linecap="round"/>
+                <path d="M32 78 Q50 72 68 78 L70 100 L30 100 Z" fill="#3BAFDA"/>
+                <ellipse cx="82" cy="38" rx="11" ry="14" fill="#fff" stroke="#333" stroke-width="2.5"/>
+                <line x1="74" y1="29" x2="90" y2="29" stroke="#333" stroke-width="1"/>
+                <line x1="73" y1="34" x2="91" y2="34" stroke="#333" stroke-width="1"/>
+                <line x1="73" y1="39" x2="91" y2="39" stroke="#333" stroke-width="1"/>
+                <line x1="73" y1="44" x2="91" y2="44" stroke="#333" stroke-width="1"/>
+                <line x1="74" y1="49" x2="90" y2="49" stroke="#333" stroke-width="1"/>
+                <line x1="76" y1="25" x2="76" y2="51" stroke="#333" stroke-width="1"/>
+                <line x1="80" y1="24" x2="80" y2="52" stroke="#333" stroke-width="1"/>
+                <line x1="84" y1="24" x2="84" y2="52" stroke="#333" stroke-width="1"/>
+                <line x1="88" y1="25" x2="88" y2="51" stroke="#333" stroke-width="1"/>
+                <line x1="82" y1="52" x2="82" y2="68" stroke="#333" stroke-width="4"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+        
+        <button class="modal-btn-secondary" onclick="closeAvatarPicker()" aria-label="Cancel">
+          Cancel
+        </button>
+      </div>
+    </div>
+    
+    <!-- Toast Notification -->
+    <div class="toast" id="toast" role="alert" aria-live="assertive" aria-atomic="true" style="opacity: 0; visibility: hidden;">
+      <div class="toast-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      </div>
+      <span id="toastText"></span>
+    </div>
+    
+    <!-- Menu Backdrop -->
+    <div class="menu-backdrop" id="menuBackdrop" onclick="closeMenu()" aria-hidden="true"></div>
+    
+    <!-- Menu Drawer -->
+    <div class="menu-drawer" id="menuDrawer" role="dialog" aria-label="Navigation menu" aria-modal="true">
+      <button class="menu-close" onclick="closeMenu()" aria-label="Close menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+      
+      <div class="menu-scroll-container">
+        <div class="menu-header">
+          <div class="menu-title">MENU</div>
+          <div class="menu-subtitle">Mono Tennis Club</div>
+        </div>
+        
+        <div class="menu-items">
+          <div class="menu-item" role="button" tabindex="0" onclick="navigateTo('profile'); closeMenu();">
+            <div class="menu-item-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            </div>
+            <span class="menu-item-text">Profile</span>
+          </div>
+          <div class="menu-item" role="button" tabindex="0" onclick="navigateTo('schedule'); closeMenu();">
+            <div class="menu-item-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            </div>
+            <span class="menu-item-text">My Schedule</span>
+          </div>
+          <div class="menu-item admin-hidden" id="menuAdminItem" role="button" tabindex="0" onclick="navigateTo('admin'); closeMenu();">
+            <div class="menu-item-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            </div>
+            <span class="menu-item-text">Admin Panel</span>
+          </div>
+          <div class="menu-item" role="button" tabindex="0" onclick="navigateTo('settings'); closeMenu();">
+            <div class="menu-item-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            </div>
+            <span class="menu-item-text">Settings</span>
+          </div>
+        </div>
+
+        <!-- Weather & Club Footer -->
+        <div class="menu-footer-section">
+          <div class="menu-weather-row">
+            <span class="menu-weather-icon-sm" id="menuWeatherIcon">☀️</span>
+            <span class="menu-weather-temp-sm" id="menuWeatherTemp">--°C</span>
+            <span class="menu-weather-loc">Mono Centre, ON</span>
+          </div>
+          <div class="menu-club-footer">
+            <div class="menu-club-line">754483 Mono Centre Rd</div>
+            <div class="menu-club-line muted">© 2026 Mono Tennis Club</div>
+          </div>
+          <div class="menu-item logout" onclick="handleLogout()" style="margin-top: 12px;">
+            <div class="menu-item-icon logout-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+            </div>
+            <span class="menu-item-text">Logout</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- ============================================
+         HOME SCREEN
+    ============================================ -->
+    <div class="screen" id="screen-home" role="main" aria-label="Home screen">
+      <div id="main-content"></div>
+      <!-- Top Header -->
+      <div class="top-header">
+        <div class="header-left">
+          <div class="theme-pill" onclick="toggleTheme()" role="switch" aria-label="Toggle dark/light mode" tabindex="0">
+            <div class="theme-pill-sun">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+            </div>
+            <div class="theme-pill-moon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            </div>
+          </div>
+        </div>
+        
+        <div class="header-center">
+          <div class="header-logo">MTC <span>COURT</span></div>
+        </div>
+        
+        <div class="header-right">
+          <button class="header-btn ripple" onclick="navigateTo('notifications')" aria-label="Notifications">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+            <div class="notification-badge" aria-hidden="true"></div>
+          </button>
+          <button class="header-btn ripple" onclick="openMenu()" aria-label="Open menu" aria-expanded="false" aria-controls="menuDrawer">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Quick Actions - Moved above events -->
+      <div class="section-header">
+        <h3 class="section-title">QUICK ACTIONS</h3>
+      </div>
+      <div class="quick-actions">
+        <div class="quick-action volt ripple" onclick="navigateTo('book')">
+          <div class="quick-action-content">
+            <svg class="quick-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            <span class="quick-action-label">BOOK COURT</span>
+          </div>
+        </div>
+        <div class="quick-action coral ripple" onclick="navigateTo('partners')">
+          <div class="quick-action-content">
+            <svg class="quick-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            <span class="quick-action-label">FIND PARTNER</span>
+          </div>
+        </div>
+        <div class="quick-action electric ripple" onclick="navigateTo('events')">
+          <div class="quick-action-content">
+            <svg class="quick-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+            <span class="quick-action-label">CLUB EVENTS</span>
+          </div>
+        </div>
+        <div class="quick-action dark ripple" onclick="navigateTo('schedule')">
+          <div class="quick-action-content">
+            <svg class="quick-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+            <span class="quick-action-label">MY SCHEDULE</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Upcoming Club Events - Moved below quick actions -->
+      <div class="events-card stagger-item">
+        <div class="events-header">
+          <div class="events-title">UPCOMING EVENTS</div>
+          <div class="events-see-all" onclick="navigateTo('events')">See All →</div>
+        </div>
+        <div class="event-item event-item-wrap" id="homeEvent-bbq" onclick="showRsvpListModal('bbq')" style="cursor:pointer;">
+          <div class="event-date-box">
+            <div class="event-date-month" data-home-event-month="bbq">May</div>
+            <div class="event-date-day" data-home-event-day="bbq">9</div>
+          </div>
+          <div class="event-info event-info-flex">
+            <div class="event-name">Opening Day BBQ</div>
+            <div class="event-details">1:00 PM • All Courts • Free</div>
+          </div>
+          <button class="event-rsvp-btn" aria-label="RSVP to event" onclick="event.stopPropagation(); rsvpToEvent('bbq', this)">RSVP</button>
+        </div>
+        <div class="event-item event-item-wrap" id="homeEvent-mensrr" onclick="showRsvpListModal('mensrr')" style="cursor:pointer;">
+          <div class="event-date-box">
+            <div class="event-date-month" data-home-event-month="mensrr">—</div>
+            <div class="event-date-day" data-home-event-day="mensrr">—</div>
+          </div>
+          <div class="event-info event-info-flex">
+            <div class="event-name">Men's Round Robin</div>
+            <div class="event-details">Tue 9:00 AM • Courts 1-2</div>
+          </div>
+          <button class="event-rsvp-btn" aria-label="RSVP to event" onclick="event.stopPropagation(); rsvpToEvent('mensrr', this)">RSVP</button>
+        </div>
+        <div class="event-item event-item-wrap" id="homeEvent-frimixed" onclick="showRsvpListModal('frimixed')" style="cursor:pointer;">
+          <div class="event-date-box">
+            <div class="event-date-month" data-home-event-month="frimixed">—</div>
+            <div class="event-date-day" data-home-event-day="frimixed">—</div>
+          </div>
+          <div class="event-info event-info-flex">
+            <div class="event-name">Friday Night Mixed</div>
+            <div class="event-details">Fri 6:00 PM • All Courts</div>
+          </div>
+          <button class="event-rsvp-btn" aria-label="RSVP to event" onclick="event.stopPropagation(); rsvpToEvent('frimixed', this)">RSVP</button>
+        </div>
+      </div>
+      
+      
+      <!-- Looking for Partners (keeping existing style) -->
+      <div class="section-header">
+        <h3 class="section-title">LOOKING FOR PARTNERS</h3>
+        <span class="section-action" onclick="navigateTo('partners')">See All →</span>
+      </div>
+      
+      <div class="partner-requests">
+        <div class="partner-request-card stagger-item">
+          <div class="partner-request-avatar">
+            <svg viewBox="0 0 100 100" style="width:100%;height:100%;"><circle cx="50" cy="50" r="45" fill="#8D5524"/><path d="M30 38 Q35 20 55 22 Q75 24 72 42 L68 38 Q60 30 45 32 Q35 34 30 38 Z" fill="#1a1a1a"/><rect x="28" y="36" width="44" height="6" rx="2" fill="#c8ff00"/><ellipse cx="50" cy="52" rx="22" ry="20" fill="#8D5524"/><circle cx="42" cy="50" r="3" fill="#222"/><circle cx="58" cy="50" r="3" fill="#222"/><path d="M42 60 Q50 68 58 60" stroke="#222" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M30 78 Q50 72 70 78 L72 100 L28 100 Z" fill="#3BAFDA"/><ellipse cx="82" cy="35" rx="12" ry="15" fill="#fff" stroke="#333" stroke-width="2.5"/><line x1="74" y1="26" x2="90" y2="26" stroke="#333" stroke-width="1"/><line x1="73" y1="31" x2="91" y2="31" stroke="#333" stroke-width="1"/><line x1="73" y1="36" x2="91" y2="36" stroke="#333" stroke-width="1"/><line x1="73" y1="41" x2="91" y2="41" stroke="#333" stroke-width="1"/><line x1="74" y1="46" x2="90" y2="46" stroke="#333" stroke-width="1"/><line x1="76" y1="22" x2="76" y2="48" stroke="#333" stroke-width="1"/><line x1="80" y1="21" x2="80" y2="49" stroke="#333" stroke-width="1"/><line x1="84" y1="21" x2="84" y2="49" stroke="#333" stroke-width="1"/><line x1="88" y1="22" x2="88" y2="48" stroke="#333" stroke-width="1"/><line x1="82" y1="50" x2="82" y2="65" stroke="#333" stroke-width="4"/></svg>
+          </div>
+          <div class="partner-request-info">
+            <div class="partner-request-name">James Park</div>
+            <div class="partner-request-details">
+              <span class="partner-time">Today<span class="partner-time-hour">4PM</span></span>
+              <span class="skill-badge">Intermediate</span>
+            </div>
+          </div>
+          <button class="partner-join-btn" aria-label="Join session ripple" onclick="joinPartner('James Park', 'Today at 4PM', this)">Join</button>
+        </div>
+        
+        <div class="partner-request-card stagger-item">
+          <div class="partner-request-avatar">
+            <svg viewBox="0 0 100 100" style="width:100%;height:100%;"><circle cx="50" cy="50" r="45" fill="#FFE0BD"/><path d="M68 30 Q85 35 80 55 Q78 65 72 60 Q75 45 68 38 Z" fill="#8B4513"/><path d="M28 40 Q30 25 50 24 Q70 25 72 40 L68 42 Q60 32 40 34 Q32 36 28 40 Z" fill="#8B4513"/><rect x="26" y="36" width="48" height="7" rx="2" fill="#3BAFDA"/><rect x="26" y="38" width="48" height="2" fill="#fff"/><ellipse cx="50" cy="52" rx="21" ry="19" fill="#FFE0BD"/><circle cx="42" cy="50" r="2.5" fill="#333"/><circle cx="58" cy="50" r="2.5" fill="#333"/><path d="M43 59 Q50 66 57 59" stroke="#333" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M32 78 Q50 72 68 78 L70 100 L30 100 Z" fill="#3BAFDA"/><ellipse cx="82" cy="38" rx="11" ry="14" fill="#fff" stroke="#333" stroke-width="2.5"/><line x1="74" y1="29" x2="90" y2="29" stroke="#333" stroke-width="1"/><line x1="73" y1="34" x2="91" y2="34" stroke="#333" stroke-width="1"/><line x1="73" y1="39" x2="91" y2="39" stroke="#333" stroke-width="1"/><line x1="73" y1="44" x2="91" y2="44" stroke="#333" stroke-width="1"/><line x1="74" y1="49" x2="90" y2="49" stroke="#333" stroke-width="1"/><line x1="76" y1="25" x2="76" y2="51" stroke="#333" stroke-width="1"/><line x1="80" y1="24" x2="80" y2="52" stroke="#333" stroke-width="1"/><line x1="84" y1="24" x2="84" y2="52" stroke="#333" stroke-width="1"/><line x1="88" y1="25" x2="88" y2="51" stroke="#333" stroke-width="1"/><line x1="82" y1="52" x2="82" y2="68" stroke="#333" stroke-width="4"/></svg>
+          </div>
+          <div class="partner-request-info">
+            <div class="partner-request-name">Emily Rodriguez</div>
+            <div class="partner-request-details">
+              <span class="partner-time">Tomorrow<span class="partner-time-hour">10AM</span></span>
+              <span class="skill-badge advanced">Advanced</span>
+            </div>
+          </div>
+          <button class="partner-join-btn" aria-label="Join session ripple" onclick="joinPartner('Emily Rodriguez', 'Tomorrow at 10AM', this)">Join</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- ============================================
+         NOTIFICATIONS SCREEN
+    ============================================ -->
+    <div class="screen" id="screen-notifications" aria-label="Notifications">
+      <div class="screen-header">
+        <button class="back-btn" onclick="navigateTo('home')" aria-label="Go back to home">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+        <h2 class="screen-title">NOTIFICATIONS</h2>
+        <button class="header-btn mark-read-btn" aria-label="Mark all notifications as read" onclick="markAllNotificationsRead()" id="markAllReadBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline><polyline points="20 12 9 23 4 18" opacity="0.5"></polyline></svg>
+        </button>
+      </div>
+      
+      <!-- Unread count banner -->
+      <div class="notifications-summary" id="notificationsSummary">
+        <span id="unreadCount">3 unread notifications</span>
+        <button onclick="markAllNotificationsRead()" aria-label="Mark all notifications as read">Mark all read</button>
+      </div>
+      
+      <div class="section-header">
+        <h3 class="section-title">TODAY</h3>
+      </div>
+      
+      <div class="notification-item booking-type unread stagger-item" id="notif1" onclick="markNotificationRead(this)">
+        <div class="notification-icon-wrap booking">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        </div>
+        <div class="notification-content">
+          <div class="notification-title">Booking Confirmed</div>
+          <div class="notification-desc">Court 1 booked for Friday Night Mixed Round Robin at 6:00 PM.</div>
+          <div class="notification-time">10 minutes ago</div>
+        </div>
+        <button class="notification-dismiss-btn" aria-label="Dismiss notification" onclick="dismissNotification(this.parentElement); event.stopPropagation();">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+        <div class="notification-unread-dot"></div>
+      </div>
+
+      <div class="notification-item message-type unread stagger-item" id="notif2" onclick="markNotificationRead(this)">
+        <div class="notification-icon-wrap message">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+        </div>
+        <div class="notification-content">
+          <div class="notification-title">Message from Kelly K.</div>
+          <div class="notification-desc">"See you at House League Friday! I've signed us up for Court 2."</div>
+          <div class="notification-time">2 hours ago</div>
+        </div>
+        <button class="notification-dismiss-btn" aria-label="Dismiss notification" onclick="dismissNotification(this.parentElement); event.stopPropagation();">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+        <div class="notification-unread-dot"></div>
+      </div>
+
+      <div class="notification-item club-type unread stagger-item" id="notif3" onclick="markNotificationRead(this)">
+        <div class="notification-icon-wrap club">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+        </div>
+        <div class="notification-content">
+          <div class="notification-title">📢 2026 Season Registration Open!</div>
+          <div class="notification-desc">Registration is now open for the 2026 season! Season opener May 3rd. Welcome back to Mono Tennis Club!</div>
+          <div class="notification-time">3 hours ago</div>
+        </div>
+        <button class="notification-dismiss-btn" aria-label="Dismiss notification" onclick="dismissNotification(this.parentElement); event.stopPropagation();">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+        <div class="notification-unread-dot"></div>
+      </div>
+      
+      <!-- Empty state (shown when all notifications dismissed) -->
+      <div class="empty-state" id="noNotifications" style="display: none;">
+        <div class="empty-state-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+        </div>
+        <div class="empty-state-title">ALL CAUGHT UP</div>
+        <div class="empty-state-text">No new notifications. Check back later for updates on bookings and club activity.</div>
+      </div>
+    </div>
+    
+    <!-- ============================================
+         BOOKING SCREEN
+    ============================================ -->
+    <div class="screen" id="screen-book" aria-label="Book a court">
+      <div class="screen-header">
+        <button class="back-btn" onclick="navigateTo('home')" aria-label="Go back to home">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+        <h2 class="screen-title">BOOK A COURT</h2>
+      </div>
+      
+      <!-- View Toggle -->
+      <div class="booking-view-toggle">
+        <button class="booking-view-btn active" id="weekViewBtn" aria-label="Week view" onclick="switchBookingView('week')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          WEEK VIEW
+        </button>
+        <button class="booking-view-btn" id="bookingCalendarViewBtn" aria-label="Calendar view" onclick="switchBookingView('calendar')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          CALENDAR
+        </button>
+      </div>
+      
+      <!-- Legend -->
+      <div class="booking-legend">
+        <div class="legend-item">
+          <div class="legend-dot available"></div>
+          <span>Available</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot mine"></div>
+          <span>My Booking</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot booked"></div>
+          <span>Booked</span>
+        </div>
+      </div>
+      
+      <!-- Week View -->
+      <div id="weekView">
+        <!-- Week Navigation -->
+        <div class="week-navigator">
+          <button class="week-nav-btn" aria-label="Navigate week" onclick="changeWeek(-1)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          </button>
+          <div class="week-display">
+            <div class="week-label" id="weekLabel">THIS WEEK</div>
+            <div class="week-dates" id="weekDates">Jan 27 - Feb 2</div>
+          </div>
+          <button class="week-nav-btn" aria-label="Navigate week" onclick="changeWeek(1)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </button>
+        </div>
+        
+        <!-- Weekly Grid -->
+        <div class="weekly-grid-container">
+          <div class="weekly-grid-header">
+            <div class="weekly-grid-header-cell">Time</div>
+            <div class="weekly-grid-header-cell court-header">Court 1</div>
+            <div class="weekly-grid-header-cell court-header">Court 2</div>
+            <div class="weekly-grid-header-cell court-header">Court 3</div>
+            <div class="weekly-grid-header-cell court-header">Court 4</div>
+          </div>
+          <div class="weekly-grid-body" id="weeklyGridBody">
+            <!-- Grid rows populated by JavaScript -->
+          </div>
+        </div>
+      </div>
+      
+      <!-- Calendar View (Hidden by default) -->
+      <div id="bookingCalendarView" style="display: none;">
+        <div class="calendar-container">
+          <div class="calendar-header">
+            <div class="calendar-month" id="calendarMonth">February 2025</div>
+            <div class="calendar-nav">
+              <button class="calendar-nav-btn" aria-label="Navigate calendar" onclick="changeMonth(-1)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+              </button>
+              <button class="calendar-nav-btn" aria-label="Navigate calendar" onclick="changeMonth(1)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              </button>
+            </div>
+          </div>
+          
+          <div class="calendar-weekdays">
+            <div class="calendar-weekday">Sun</div>
+            <div class="calendar-weekday">Mon</div>
+            <div class="calendar-weekday">Tue</div>
+            <div class="calendar-weekday">Wed</div>
+            <div class="calendar-weekday">Thu</div>
+            <div class="calendar-weekday">Fri</div>
+            <div class="calendar-weekday">Sat</div>
+          </div>
+          
+          <div class="calendar-days" id="calendarDays">
+            <!-- Days populated by JavaScript -->
+          </div>
+        </div>
+        
+        <!-- Day's Time Slots (shown when a day is selected) -->
+        <div id="dayTimeSlotsContainer" style="display: none;">
+          <div class="section-header">
+            <h3 class="section-title" id="selectedDayTitle">SELECT TIME</h3>
+          </div>
+          <div class="weekly-grid-container">
+            <div class="weekly-grid-header">
+              <div class="weekly-grid-header-cell">Time</div>
+              <div class="weekly-grid-header-cell court-header">Court 1</div>
+              <div class="weekly-grid-header-cell court-header">Court 2</div>
+              <div class="weekly-grid-header-cell court-header">Court 3</div>
+              <div class="weekly-grid-header-cell court-header">Court 4</div>
+            </div>
+            <div class="weekly-grid-body" id="dayTimeSlotsGrid">
+              <!-- Time slots for selected day -->
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Booking Summary (Shows when slot selected) -->
+      <!-- Booking Confirmation Modal -->
+      <div class="booking-modal-overlay" id="bookingModal" onclick="closeBookingModal(event)" role="dialog" aria-modal="true" aria-label="Book court">
+        <div class="booking-modal" onclick="event.stopPropagation()">
+          <button class="booking-modal-close" onclick="closeBookingModal()" aria-label="Close">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+          
+          <div class="booking-modal-header">
+            <div class="booking-modal-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            </div>
+            <div class="booking-modal-title">CONFIRM BOOKING</div>
+          </div>
+          
+          <div class="booking-modal-details">
+            <div class="booking-modal-row">
+              <span class="booking-modal-label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line></svg>
+                Date
+              </span>
+              <span class="booking-modal-value" id="summaryDate">--</span>
+            </div>
+            <div class="booking-modal-row">
+              <span class="booking-modal-label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                Time
+              </span>
+              <span class="booking-modal-value" id="summaryTime">--</span>
+            </div>
+            <div class="booking-modal-row">
+              <span class="booking-modal-label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><rect x="2" y="2" width="20" height="20" rx="2"></rect><line x1="2" y1="12" x2="22" y2="12"></line><line x1="12" y1="2" x2="12" y2="22"></line></svg>
+                Court
+              </span>
+              <span class="booking-modal-value" id="summaryCourt">--</span>
+            </div>
+            <div class="booking-modal-row">
+              <span class="booking-modal-label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 8 14"></polyline></svg>
+                Duration
+              </span>
+              <span class="booking-modal-value">1 Hour</span>
+            </div>
+          </div>
+          
+          <div class="booking-modal-payment">
+            <div class="booking-modal-fee-row">
+              <span class="booking-modal-fee-label">Court Fee</span>
+              <span class="booking-modal-fee-value" id="summaryFee">FREE</span>
+            </div>
+            <div class="booking-modal-fee-row" id="guestFeeRow" style="display: none;">
+              <span class="booking-modal-fee-label">Guest Fee</span>
+              <span class="booking-modal-fee-value booking-modal-fee-value-coral">$10.00</span>
+            </div>
+            <div class="booking-modal-fee-row booking-modal-fee-row-summary">
+              <span class="booking-modal-fee-label booking-modal-fee-label-flex">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                Bringing a Guest?
+              </span>
+              <div class="toggle" id="guestToggle" role="switch" aria-checked="false" tabindex="0" onclick="toggleGuestFee()"></div>
+            </div>
+            <div id="summaryCreditNote" style="display: none;" class="booking-modal-credit">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span id="summaryCreditText"></span>
+            </div>
+            <div id="summaryCreditExplain" style="display: none;" class="booking-modal-credit-explain"></div>
+          </div>
+          
+          <div class="booking-modal-payment-info" id="paymentInfoBox">
+            <div class="booking-modal-payment-title" id="paymentInfoTitle">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+              Payment Info
+            </div>
+            <div class="booking-modal-payment-text" id="paymentInfoText">
+              Court bookings are <strong>free</strong> for all MTC members. Bringing a guest? A $10 guest fee will be added to your tab.
+            </div>
+            <div class="booking-modal-payment-note" id="paymentInfoNote">
+              Cancel 24+ hrs in advance to free up the slot for others.
+            </div>
+          </div>
+          
+          <div class="booking-modal-actions">
+            <button class="booking-modal-cancel-btn" onclick="closeBookingModal()">CANCEL</button>
+            <button class="booking-confirm-btn" aria-label="Book court" onclick="confirmBookingPayment()">
+              CONFIRM & BOOK
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- ============================================
+         PARTNERS SCREEN
+    ============================================ -->
+    <div class="screen" id="screen-partners" aria-label="Find partners">
+      <div class="screen-header">
+        <button class="back-btn" onclick="navigateTo('home')" aria-label="Go back to home">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+        <h2 class="screen-title">FIND PARTNERS</h2>
+        <button class="header-btn header-btn-right" onclick="showPostPartnerModal()" aria-label="Post partner request">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </button>
+      </div>
+      
+      <div class="filter-pills" id="partnerFilterPills">
+        <div class="filter-pill active" onclick="filterPartners(this, 'all')">All</div>
+        <div class="filter-pill" onclick="filterPartners(this, 'available')">Available Now</div>
+        <div class="filter-pill" onclick="filterPartners(this, 'singles')">Singles</div>
+        <div class="filter-pill" onclick="filterPartners(this, 'mixed')">Mixed Doubles</div>
+        <div class="filter-pill" onclick="filterPartners(this, 'mens')">Men's Doubles</div>
+        <div class="filter-pill" onclick="filterPartners(this, 'womens')">Women's Doubles</div>
+        <div class="filter-pill" onclick="filterPartners(this, 'beginner')">Beginner</div>
+        <div class="filter-pill" onclick="filterPartners(this, 'intermediate')">Intermediate</div>
+        <div class="filter-pill" onclick="filterPartners(this, 'advanced')">Advanced</div>
+      </div>
+      
+      <div class="partner-card stagger-item" data-match-type="singles" data-level="advanced" data-available="true">
+        <div class="partner-match-type singles">Singles</div>
+        <svg class="partner-avatar" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#FFE0BD"/><path d="M30 38 Q35 20 55 22 Q75 24 72 42 L68 38 Q60 30 45 32 Q35 34 30 38 Z" fill="#6B4423"/><rect x="28" y="36" width="44" height="6" rx="2" fill="#2563EB"/><ellipse cx="50" cy="52" rx="22" ry="20" fill="#FFE0BD"/><circle cx="42" cy="50" r="3" fill="#333"/><circle cx="58" cy="50" r="3" fill="#333"/><path d="M42 60 Q50 68 58 60" stroke="#333" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M30 78 Q50 72 70 78 L72 100 L28 100 Z" fill="#3BAFDA"/><ellipse cx="82" cy="35" rx="12" ry="15" fill="#fff" stroke="#333" stroke-width="2.5"/><line x1="74" y1="26" x2="90" y2="26" stroke="#333" stroke-width="1"/><line x1="73" y1="31" x2="91" y2="31" stroke="#333" stroke-width="1"/><line x1="73" y1="36" x2="91" y2="36" stroke="#333" stroke-width="1"/><line x1="73" y1="41" x2="91" y2="41" stroke="#333" stroke-width="1"/><line x1="74" y1="46" x2="90" y2="46" stroke="#333" stroke-width="1"/><line x1="76" y1="22" x2="76" y2="48" stroke="#333" stroke-width="1"/><line x1="80" y1="21" x2="80" y2="49" stroke="#333" stroke-width="1"/><line x1="84" y1="21" x2="84" y2="49" stroke="#333" stroke-width="1"/><line x1="88" y1="22" x2="88" y2="48" stroke="#333" stroke-width="1"/><line x1="82" y1="50" x2="82" y2="65" stroke="#333" stroke-width="4"/></svg>
+        <div class="partner-info">
+          <div class="partner-name">Mike Chen</div>
+          <div class="partner-level">NTRP 4.0</div>
+          <div class="partner-availability">Available now</div>
+        </div>
+        <div class="partner-action">
+          <button class="partner-action-btn ripple" onclick="navigateTo('messages'); setTimeout(function(){ openConversation('mike'); }, 300);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+          </button>
+        </div>
+      </div>
+      
+      <div class="partner-card stagger-item" data-match-type="mixed" data-level="intermediate" data-available="false">
+        <div class="partner-match-type mixed">Mixed Doubles</div>
+        <svg class="partner-avatar" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#8D5524"/><path d="M68 30 Q85 35 80 55 Q78 65 72 60 Q75 45 68 38 Z" fill="#1a1a1a"/><path d="M28 40 Q30 25 50 24 Q70 25 72 40 L68 42 Q60 32 40 34 Q32 36 28 40 Z" fill="#1a1a1a"/><rect x="26" y="36" width="48" height="7" rx="2" fill="#c8ff00"/><rect x="26" y="38" width="48" height="2" fill="#fff"/><ellipse cx="50" cy="52" rx="21" ry="19" fill="#8D5524"/><circle cx="42" cy="50" r="2.5" fill="#222"/><circle cx="58" cy="50" r="2.5" fill="#222"/><path d="M43 59 Q50 66 57 59" stroke="#222" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M32 78 Q50 72 68 78 L70 100 L30 100 Z" fill="#3BAFDA"/><ellipse cx="82" cy="38" rx="11" ry="14" fill="#fff" stroke="#333" stroke-width="2.5"/><line x1="74" y1="29" x2="90" y2="29" stroke="#333" stroke-width="1"/><line x1="73" y1="34" x2="91" y2="34" stroke="#333" stroke-width="1"/><line x1="73" y1="39" x2="91" y2="39" stroke="#333" stroke-width="1"/><line x1="73" y1="44" x2="91" y2="44" stroke="#333" stroke-width="1"/><line x1="74" y1="49" x2="90" y2="49" stroke="#333" stroke-width="1"/><line x1="76" y1="25" x2="76" y2="51" stroke="#333" stroke-width="1"/><line x1="80" y1="24" x2="80" y2="52" stroke="#333" stroke-width="1"/><line x1="84" y1="24" x2="84" y2="52" stroke="#333" stroke-width="1"/><line x1="88" y1="25" x2="88" y2="51" stroke="#333" stroke-width="1"/><line x1="82" y1="52" x2="82" y2="68" stroke="#333" stroke-width="4"/></svg>
+        <div class="partner-info">
+          <div class="partner-name">Sarah Wilson</div>
+          <div class="partner-level">NTRP 3.5</div>
+          <div class="partner-availability">Available at 3:00 PM</div>
+        </div>
+        <div class="partner-action">
+          <button class="partner-action-btn ripple" onclick="navigateTo('messages'); setTimeout(function(){ openConversation('sarah'); }, 300);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+          </button>
+        </div>
+      </div>
+      
+      <div class="partner-card stagger-item" data-match-type="mens" data-level="advanced" data-available="true">
+        <div class="partner-match-type mens">Men's Doubles</div>
+        <svg class="partner-avatar" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#8D5524"/><path d="M30 38 Q35 20 55 22 Q75 24 72 42 L68 38 Q60 30 45 32 Q35 34 30 38 Z" fill="#1a1a1a"/><rect x="28" y="36" width="44" height="6" rx="2" fill="#c8ff00"/><ellipse cx="50" cy="52" rx="22" ry="20" fill="#8D5524"/><circle cx="42" cy="50" r="3" fill="#222"/><circle cx="58" cy="50" r="3" fill="#222"/><path d="M42 60 Q50 68 58 60" stroke="#222" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M30 78 Q50 72 70 78 L72 100 L28 100 Z" fill="#3BAFDA"/><ellipse cx="82" cy="35" rx="12" ry="15" fill="#fff" stroke="#333" stroke-width="2.5"/><line x1="74" y1="26" x2="90" y2="26" stroke="#333" stroke-width="1"/><line x1="73" y1="31" x2="91" y2="31" stroke="#333" stroke-width="1"/><line x1="73" y1="36" x2="91" y2="36" stroke="#333" stroke-width="1"/><line x1="73" y1="41" x2="91" y2="41" stroke="#333" stroke-width="1"/><line x1="74" y1="46" x2="90" y2="46" stroke="#333" stroke-width="1"/><line x1="76" y1="22" x2="76" y2="48" stroke="#333" stroke-width="1"/><line x1="80" y1="21" x2="80" y2="49" stroke="#333" stroke-width="1"/><line x1="84" y1="21" x2="84" y2="49" stroke="#333" stroke-width="1"/><line x1="88" y1="22" x2="88" y2="48" stroke="#333" stroke-width="1"/><line x1="82" y1="50" x2="82" y2="65" stroke="#333" stroke-width="4"/></svg>
+        <div class="partner-info">
+          <div class="partner-name">James Park</div>
+          <div class="partner-level">NTRP 4.5</div>
+          <div class="partner-availability">Available tomorrow</div>
+        </div>
+        <div class="partner-action">
+          <button class="partner-action-btn ripple" onclick="navigateTo('messages'); setTimeout(function(){ openConversation('james'); }, 300);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+          </button>
+        </div>
+      </div>
+      
+      <div class="partner-card stagger-item" data-match-type="womens" data-level="intermediate" data-available="false">
+        <div class="partner-match-type womens">Women's Doubles</div>
+        <svg class="partner-avatar" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#FFE0BD"/><path d="M68 30 Q85 35 80 55 Q78 65 72 60 Q75 45 68 38 Z" fill="#8B4513"/><path d="M28 40 Q30 25 50 24 Q70 25 72 40 L68 42 Q60 32 40 34 Q32 36 28 40 Z" fill="#8B4513"/><rect x="26" y="36" width="48" height="7" rx="2" fill="#3BAFDA"/><rect x="26" y="38" width="48" height="2" fill="#fff"/><ellipse cx="50" cy="52" rx="21" ry="19" fill="#FFE0BD"/><circle cx="42" cy="50" r="2.5" fill="#333"/><circle cx="58" cy="50" r="2.5" fill="#333"/><path d="M43 59 Q50 66 57 59" stroke="#333" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M32 78 Q50 72 68 78 L70 100 L30 100 Z" fill="#3BAFDA"/><ellipse cx="82" cy="38" rx="11" ry="14" fill="#fff" stroke="#333" stroke-width="2.5"/><line x1="74" y1="29" x2="90" y2="29" stroke="#333" stroke-width="1"/><line x1="73" y1="34" x2="91" y2="34" stroke="#333" stroke-width="1"/><line x1="73" y1="39" x2="91" y2="39" stroke="#333" stroke-width="1"/><line x1="73" y1="44" x2="91" y2="44" stroke="#333" stroke-width="1"/><line x1="74" y1="49" x2="90" y2="49" stroke="#333" stroke-width="1"/><line x1="76" y1="25" x2="76" y2="51" stroke="#333" stroke-width="1"/><line x1="80" y1="24" x2="80" y2="52" stroke="#333" stroke-width="1"/><line x1="84" y1="24" x2="84" y2="52" stroke="#333" stroke-width="1"/><line x1="88" y1="25" x2="88" y2="51" stroke="#333" stroke-width="1"/><line x1="82" y1="52" x2="82" y2="68" stroke="#333" stroke-width="4"/></svg>
+        <div class="partner-info">
+          <div class="partner-name">Emily Rodriguez</div>
+          <div class="partner-level">NTRP 3.0</div>
+          <div class="partner-availability">Available now</div>
+        </div>
+        <div class="partner-action">
+          <button class="partner-action-btn ripple" onclick="navigateTo('messages'); setTimeout(function(){ openConversation('emily'); }, 300);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+          </button>
+        </div>
+      </div>
+      
+      <div class="empty-state" id="noPartners">
+        <div class="empty-state-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        </div>
+        <div class="empty-state-title">NO PARTNERS FOUND</div>
+        <div class="empty-state-text">No players match this filter. Try a different skill level.</div>
+      </div>
+      
+      <!-- Post Partner Request Modal -->
+      <div class="modal-overlay" id="postPartnerModal" onclick="closePostPartnerModal()" role="dialog" aria-modal="true" aria-label="Post partner request">
+        <div class="modal modal-scrollable-tall" onclick="event.stopPropagation()">
+          <div class="modal-title">POST PARTNER REQUEST</div>
+          <div class="modal-desc">Let other members know you're looking for a match</div>
+
+          <div class="modal-form-group">
+            <label class="modal-form-label">Match Type</label>
+            <div class="partner-post-types modal-pill-group">
+              <button class="partner-type-btn active" data-type="singles" onclick="selectPartnerType(this)">Singles</button>
+              <button class="partner-type-btn" data-type="mixed" onclick="selectPartnerType(this)">Mixed Doubles</button>
+              <button class="partner-type-btn" data-type="mens" onclick="selectPartnerType(this)">Men's Doubles</button>
+              <button class="partner-type-btn" data-type="womens" onclick="selectPartnerType(this)">Women's Doubles</button>
+            </div>
+
+            <label class="modal-form-label">Preferred Skill Level</label>
+            <div class="partner-post-types modal-pill-group">
+              <button class="partner-type-btn active" data-level="any" onclick="selectPartnerLevel(this)">Any Level</button>
+              <button class="partner-type-btn" data-level="beginner" onclick="selectPartnerLevel(this)">Beginner</button>
+              <button class="partner-type-btn" data-level="intermediate" onclick="selectPartnerLevel(this)">Intermediate</button>
+              <button class="partner-type-btn" data-level="advanced" onclick="selectPartnerLevel(this)">Advanced</button>
+            </div>
+
+            <label class="modal-form-label">When</label>
+            <div class="partner-post-types modal-pill-group">
+              <button class="partner-type-btn active" data-when="anytime" onclick="selectPartnerWhen(this)">Anytime</button>
+              <button class="partner-type-btn" data-when="today" onclick="selectPartnerWhen(this)">Today</button>
+              <button class="partner-type-btn" data-when="tomorrow" onclick="selectPartnerWhen(this)">Tomorrow</button>
+              <button class="partner-type-btn" data-when="weekend" onclick="selectPartnerWhen(this)">This Weekend</button>
+            </div>
+
+            <label class="modal-form-label">Message (optional)</label>
+            <textarea id="partnerPostMessage" class="modal-textarea" aria-label="Partner request message" placeholder="Looking for a rally partner..."></textarea>
+          </div>
+
+          <button class="modal-btn-primary-full" onclick="submitPartnerRequest()">Post Request</button>
+          <button class="modal-btn-secondary" onclick="closePostPartnerModal()">Cancel</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- ============================================
+         SCHEDULE SCREEN
+    ============================================ -->
+    <div class="screen" id="screen-schedule" aria-label="Schedule">
+      <div class="screen-header">
+        <button class="back-btn" onclick="navigateTo('home')" aria-label="Go back to home">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+        <h2 class="screen-title">MY SCHEDULE</h2>
+      </div>
+
+      <!-- Schedule / Club Events Pill Toggle -->
+      <div class="schedule-pills">
+        <button class="schedule-pill active" id="scheduleMyPill" onclick="switchSchedulePill('my')">MY SCHEDULE</button>
+        <button class="schedule-pill" id="scheduleEventsPill" onclick="switchSchedulePill('events')">CLUB EVENTS</button>
+      </div>
+
+      <!-- My Schedule sub-view -->
+      <div id="scheduleMyView" class="schedule-sub-view">
+
+      <!-- Weekly List View -->
+      <div class="schedule-view active" id="listView">
+        <div class="schedule-tabs">
+          <button class="schedule-tab active" onclick="switchScheduleTab('upcoming')" id="upcomingTab">Upcoming</button>
+          <button class="schedule-tab" onclick="switchScheduleTab('past')" id="pastTab">Past</button>
+        </div>
+        
+        <!-- Upcoming Content -->
+        <div class="schedule-content active" id="upcomingContent">
+          <!-- Dynamic bookings (RSVPs, court bookings, partner matches) -->
+          <div id="scheduleEventBookings"></div>
+
+          <div class="section-header">
+            <h3 class="section-title">TUESDAY</h3>
+          </div>
+
+          <div class="schedule-item stagger-item">
+            <div class="schedule-time-block">
+              <div class="schedule-time">9:00</div>
+              <div class="schedule-period">AM</div>
+            </div>
+            <div class="schedule-details">
+              <div class="schedule-title">Men's Round Robin</div>
+              <div class="schedule-subtitle">Weekly morning session</div>
+              <div class="schedule-meta">
+                <div class="schedule-meta-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                  Courts 1-2
+                </div>
+                <div class="schedule-meta-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                  2 hours
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-header">
+            <h3 class="section-title">THURSDAY</h3>
+          </div>
+
+          <div class="schedule-item stagger-item">
+            <div class="schedule-time-block">
+              <div class="schedule-time">9:00</div>
+              <div class="schedule-period">AM</div>
+            </div>
+            <div class="schedule-details">
+              <div class="schedule-title">Freedom 55 League</div>
+              <div class="schedule-subtitle">Weekday morning league</div>
+              <div class="schedule-meta">
+                <div class="schedule-meta-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                  Courts 1-2
+                </div>
+                <div class="schedule-meta-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                  2 hours
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="schedule-item stagger-item">
+            <div class="schedule-time-block">
+              <div class="schedule-time">7:00</div>
+              <div class="schedule-period">PM</div>
+            </div>
+            <div class="schedule-details">
+              <div class="schedule-title">Interclub Competitive League</div>
+              <div class="schedule-subtitle">A &amp; B Teams</div>
+              <div class="schedule-meta">
+                <div class="schedule-meta-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                  Courts 1-2
+                </div>
+                <div class="schedule-meta-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path></svg>
+                  2.5 hours
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-header">
+            <h3 class="section-title">FRIDAY</h3>
+          </div>
+
+          <div class="schedule-item stagger-item">
+            <div class="schedule-time-block">
+              <div class="schedule-time">9:00</div>
+              <div class="schedule-period">AM</div>
+            </div>
+            <div class="schedule-details">
+              <div class="schedule-title">Ladies Round Robin</div>
+              <div class="schedule-subtitle">Weekly morning session</div>
+              <div class="schedule-meta">
+                <div class="schedule-meta-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                  Courts 1-2
+                </div>
+                <div class="schedule-meta-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                  2 hours
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="schedule-item stagger-item">
+            <div class="schedule-time-block">
+              <div class="schedule-time">6:00</div>
+              <div class="schedule-period">PM</div>
+            </div>
+            <div class="schedule-details">
+              <div class="schedule-title">Friday Night Mixed Round Robin</div>
+              <div class="schedule-subtitle">Mixed doubles under the lights</div>
+              <div class="schedule-meta">
+                <div class="schedule-meta-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                  All Courts
+                </div>
+                <div class="schedule-meta-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                  3 hours
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Past Content -->
+        <div class="schedule-content" id="pastContent">
+          <div class="section-header">
+            <h3 class="section-title">LAST WEEK</h3>
+          </div>
+          
+          <div class="schedule-item stagger-item past">
+            <div class="schedule-time-block">
+              <div class="schedule-time">JAN</div>
+              <div class="schedule-period">25</div>
+            </div>
+            <div class="schedule-details">
+              <div class="schedule-title">Singles Match</div>
+              <div class="schedule-subtitle">vs. Mike Chen</div>
+              <div class="schedule-meta">
+                <div class="schedule-meta-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                  Won 6-4, 6-3
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="schedule-item stagger-item past">
+            <div class="schedule-time-block">
+              <div class="schedule-time">JAN</div>
+              <div class="schedule-period">22</div>
+            </div>
+            <div class="schedule-details">
+              <div class="schedule-title">Doubles Practice</div>
+              <div class="schedule-subtitle">with Sarah Wilson</div>
+              <div class="schedule-meta">
+                <div class="schedule-meta-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                  2 hours • Court 2
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="section-header">
+            <h3 class="section-title">JANUARY</h3>
+          </div>
+          
+          <div class="schedule-item stagger-item past">
+            <div class="schedule-time-block">
+              <div class="schedule-time">JAN</div>
+              <div class="schedule-period">18</div>
+            </div>
+            <div class="schedule-details">
+              <div class="schedule-title">Club Lesson</div>
+              <div class="schedule-subtitle">Intermediate Group</div>
+              <div class="schedule-meta">
+                <div class="schedule-meta-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                  1 hour • Court 3
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="schedule-item stagger-item past">
+            <div class="schedule-time-block">
+              <div class="schedule-time">JAN</div>
+              <div class="schedule-period">15</div>
+            </div>
+            <div class="schedule-details">
+              <div class="schedule-title">Singles Match</div>
+              <div class="schedule-subtitle">vs. James Park</div>
+              <div class="schedule-meta">
+                <div class="schedule-meta-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+                  Lost 4-6, 6-7
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      </div><!-- /scheduleMyView -->
+
+      <!-- Club Events sub-view (hidden by default) -->
+      <div id="scheduleEventsView" class="schedule-sub-view" style="display:none">
+        <!-- View Toggle -->
+        <div class="view-toggle-container">
+          <div class="view-toggle">
+            <button class="view-toggle-btn active" onclick="switchEventsView('list')" id="eventsListViewBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+              List
+            </button>
+            <button class="view-toggle-btn" onclick="switchEventsView('calendar')" id="eventsCalendarViewBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+              Calendar
+            </button>
+          </div>
+        </div>
+
+        <!-- Events List View -->
+        <div class="events-view active" id="eventsListView">
+          <!-- Featured Event -->
+          <div class="section-header">
+            <h3 class="section-title">SEASON OPENER</h3>
+          </div>
+
+          <div class="event-card featured" onclick="showEventModal('opening-day-bbq')" tabindex="0" role="button">
+            <div class="event-card-header">
+              <div class="event-card-date">
+                <div class="event-card-month">MAY</div>
+                <div class="event-card-day">9</div>
+              </div>
+              <div class="event-card-info">
+                <div class="event-card-title">Opening Day BBQ &amp; Meet the Pros</div>
+                <div class="event-card-meta">Saturday 1:00 - 3:00 PM • All Courts</div>
+              </div>
+              <div class="event-card-badge free">Free</div>
+            </div>
+            <div class="event-card-body">
+              <p class="event-card-desc">Kick off the season! BBQ, music, and meet our coaching staff. All members, families, and guests welcome.</p>
+              <div class="event-card-footer">
+                <div class="event-card-spots">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                  <span>All welcome</span>
+                </div>
+                <div class="event-card-action">
+                  <span>View Details</span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-header">
+            <h3 class="section-title">WEEKLY PROGRAMS</h3>
+          </div>
+
+          <div class="event-card" onclick="showEventModal('mens-round-robin')" tabindex="0" role="button">
+            <div class="event-card-header">
+              <div class="event-card-date">
+                <div class="event-card-month">TUE</div>
+                <div class="event-card-day">9AM</div>
+              </div>
+              <div class="event-card-info">
+                <div class="event-card-title">Men's Round Robin</div>
+                <div class="event-card-meta">Tuesdays 9:00 - 11:00 AM • Courts 1-2</div>
+              </div>
+              <div class="event-card-badge members">Members</div>
+            </div>
+            <div class="event-card-footer-mini">
+              <span class="event-card-spots-mini">All skill levels welcome</span>
+              <span class="event-card-tap">Tap for details →</span>
+            </div>
+          </div>
+
+          <div class="event-card" onclick="showEventModal('freedom-55')" tabindex="0" role="button">
+            <div class="event-card-header">
+              <div class="event-card-date">
+                <div class="event-card-month">THU</div>
+                <div class="event-card-day">9AM</div>
+              </div>
+              <div class="event-card-info">
+                <div class="event-card-title">Freedom 55 League</div>
+                <div class="event-card-meta">Thursdays 9:00 - 11:00 AM • Courts 1-2</div>
+              </div>
+              <div class="event-card-badge members">Members</div>
+            </div>
+            <div class="event-card-footer-mini">
+              <span class="event-card-spots-mini">Fun and social morning league</span>
+              <span class="event-card-tap">Tap for details →</span>
+            </div>
+          </div>
+
+          <div class="event-card" onclick="showEventModal('interclub-league')" tabindex="0" role="button">
+            <div class="event-card-header">
+              <div class="event-card-date">
+                <div class="event-card-month">THU</div>
+                <div class="event-card-day">7PM</div>
+              </div>
+              <div class="event-card-info">
+                <div class="event-card-title">Interclub Competitive League</div>
+                <div class="event-card-meta">Thursdays 7:00 - 9:30 PM • Courts 1-2</div>
+              </div>
+              <div class="event-card-badge members">Team</div>
+            </div>
+            <div class="event-card-footer-mini">
+              <span class="event-card-spots-mini">A &amp; B Teams • RSVP required</span>
+              <span class="event-card-tap">Tap for details →</span>
+            </div>
+          </div>
+
+          <div class="event-card" onclick="showEventModal('ladies-round-robin')" tabindex="0" role="button">
+            <div class="event-card-header">
+              <div class="event-card-date">
+                <div class="event-card-month">FRI</div>
+                <div class="event-card-day">9AM</div>
+              </div>
+              <div class="event-card-info">
+                <div class="event-card-title">Ladies Round Robin</div>
+                <div class="event-card-meta">Fridays 9:00 - 11:00 AM • Courts 1-2</div>
+              </div>
+              <div class="event-card-badge members">Members</div>
+            </div>
+            <div class="event-card-footer-mini">
+              <span class="event-card-spots-mini">All skill levels welcome</span>
+              <span class="event-card-tap">Tap for details →</span>
+            </div>
+          </div>
+
+          <div class="event-card" onclick="showEventModal('friday-mixed')" tabindex="0" role="button">
+            <div class="event-card-header">
+              <div class="event-card-date">
+                <div class="event-card-month">FRI</div>
+                <div class="event-card-day">6PM</div>
+              </div>
+              <div class="event-card-info">
+                <div class="event-card-title">Friday Night Mixed Round Robin</div>
+                <div class="event-card-meta">Fridays 6:00 - 9:00 PM • All Courts</div>
+              </div>
+              <div class="event-card-badge members">Members</div>
+            </div>
+            <div class="event-card-footer-mini">
+              <span class="event-card-spots-mini">Bring a partner or get matched!</span>
+              <span class="event-card-tap">Tap for details →</span>
+            </div>
+          </div>
+
+          <div class="section-header">
+            <h3 class="section-title">COACHING &amp; CAMPS</h3>
+          </div>
+
+          <div class="event-card" onclick="showCoachRegistrationModal()" tabindex="0" role="button">
+            <div class="event-card-header">
+              <div class="event-card-date event-card-date-volt">
+                <div class="event-card-month">PRO</div>
+                <div class="event-card-day">🎾</div>
+              </div>
+              <div class="event-card-info">
+                <div class="event-card-title">Classes &amp; Summer Camps</div>
+                <div class="event-card-meta">Classes, clinics &amp; junior camps</div>
+              </div>
+              <div class="event-card-badge free">Register</div>
+            </div>
+            <div class="event-card-footer-mini">
+              <span class="event-card-spots-mini">Contact Pro to register</span>
+              <span class="event-card-tap">Register →</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Calendar View -->
+        <div class="events-view" id="eventsCalendarView">
+          <div class="calendar-header" style="display:flex;justify-content:space-between;align-items:center;padding:0 16px 16px;">
+            <button class="calendar-nav-btn" onclick="changeEventsMonth(-1)" aria-label="Previous month">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </button>
+            <div class="calendar-month-label" id="eventsCalendarMonth">February 2026</div>
+            <button class="calendar-nav-btn" onclick="changeEventsMonth(1)" aria-label="Next month">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
+          </div>
+          <div class="calendar-weekdays" style="display:grid;grid-template-columns:repeat(7,1fr);padding:0 16px 8px;text-align:center;">
+            <div class="calendar-weekday">S</div>
+            <div class="calendar-weekday">M</div>
+            <div class="calendar-weekday">T</div>
+            <div class="calendar-weekday">W</div>
+            <div class="calendar-weekday">T</div>
+            <div class="calendar-weekday">F</div>
+            <div class="calendar-weekday">S</div>
+          </div>
+          <div class="calendar-grid" id="eventsCalendarGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;padding:0 16px 16px;"></div>
+          <div class="calendar-events" style="padding:0 16px;">
+            <div class="section-header">
+              <h3 class="section-title" id="eventsSelectedDateTitle">SELECT A DATE</h3>
+            </div>
+            <div id="eventsCalendarEventsList">
+              <div class="calendar-event-item-empty" style="text-align:center;padding:20px;color:var(--text-muted);">
+                Tap a date to see events
+              </div>
+            </div>
+          </div>
+        </div>
+      </div><!-- /scheduleEventsView -->
+
+    </div>
+
+    <!-- ============================================
+         PROFILE SCREEN - ENHANCED
+    ============================================ -->
+    <div class="screen" id="screen-profile" aria-label="Profile">
+      <div class="screen-header">
+        <button class="back-btn" onclick="navigateTo('home')" aria-label="Go back to home">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+        <h2 class="screen-title">PROFILE</h2>
+        <button class="header-btn" onclick="navigateTo('settings')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        </button>
+      </div>
+      
+      <!-- Profile Header Card -->
+      <div class="profile-header-card">
+        <div class="profile-avatar-large" id="profileAvatarWrap" onclick="showAvatarPicker()">
+          <div class="avatar-display" id="profileAvatar">🎾</div>
+          <div class="profile-avatar-edit">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+          </div>
+        </div>
+        <div class="profile-name" id="profileName">ALEX THOMPSON</div>
+      </div>
+      
+      <!-- Personal Info Section -->
+      <div class="profile-section">
+        <h3 class="profile-section-title">PERSONAL INFO</h3>
+        <div class="profile-field" onclick="editProfileField('name')">
+          <span class="profile-field-label">Full Name</span>
+          <span class="profile-field-value" id="profileFieldName">Alex Thompson <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></span>
+        </div>
+        <div class="profile-field" onclick="editProfileField('email')">
+          <span class="profile-field-label">Email</span>
+          <span class="profile-field-value" id="profileFieldEmail">alex.t@email.com <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></span>
+        </div>
+        <div class="profile-field" onclick="editProfileField('skill')">
+          <span class="profile-field-label">Player Rating</span>
+          <span class="profile-field-value" id="profileFieldSkill"><span class="player-rating-ntrp" id="playerRatingNTRP">4.0</span> <span class="player-rating-level intermediate" id="playerRatingLevel">INTERMEDIATE</span> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></span>
+        </div>
+      </div>
+      
+      <!-- Availability Section -->
+      <div class="profile-section">
+        <h3 class="profile-section-title">AVAILABILITY</h3>
+        <div class="profile-field" onclick="editProfileField('availability')">
+          <span class="profile-field-label">Preferred Times</span>
+          <span class="profile-field-value" id="profileFieldAvailability">Weekday Evenings, Weekends <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></span>
+        </div>
+        <div class="profile-field" onclick="editProfileField('playstyle')">
+          <span class="profile-field-label">Play Style</span>
+          <span class="profile-field-value" id="profileFieldPlaystyle">Singles &amp; Doubles <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></span>
+        </div>
+      </div>
+      
+      <!-- Notifications Section -->
+      <div class="profile-section profile-section-last">
+        <h3 class="profile-section-title">NOTIFICATIONS</h3>
+        <div class="profile-field">
+          <span class="profile-field-label">Booking Reminders</span>
+          <div class="toggle active" role="switch" aria-checked="true" tabindex="0" onclick="this.classList.toggle('active'); this.setAttribute('aria-checked', this.classList.contains('active')); saveSettingsToggles(); showToast('Notification setting updated')"></div>
+        </div>
+        <div class="profile-field">
+          <span class="profile-field-label">Partner Requests</span>
+          <div class="toggle active" role="switch" aria-checked="true" tabindex="0" onclick="this.classList.toggle('active'); this.setAttribute('aria-checked', this.classList.contains('active')); saveSettingsToggles(); showToast('Notification setting updated')"></div>
+        </div>
+        <div class="profile-field">
+          <span class="profile-field-label">Club Announcements</span>
+          <div class="toggle active" role="switch" aria-checked="true" tabindex="0" onclick="this.classList.toggle('active'); this.setAttribute('aria-checked', this.classList.contains('active')); saveSettingsToggles(); showToast('Notification setting updated')"></div>
+        </div>
+        <div class="profile-field">
+          <span class="profile-field-label">Coaching Updates</span>
+          <div class="toggle active" role="switch" aria-checked="true" tabindex="0" onclick="this.classList.toggle('active'); this.setAttribute('aria-checked', this.classList.contains('active')); saveSettingsToggles(); showToast('Notification setting updated')"></div>
+        </div>
+        <div class="profile-field">
+          <span class="profile-field-label">Push Notifications</span>
+          <div class="toggle active" id="pushNotifToggle" role="switch" aria-checked="true" tabindex="0" onclick="togglePushNotifications(this)"></div>
+        </div>
+      </div>
+    </div>
+<!-- ============================================
+         SEARCH SCREEN
+    ============================================ -->
+    <div class="screen" id="screen-search" aria-label="Search">
+      <div class="screen-header">
+        <button class="back-btn" onclick="navigateTo('home')" aria-label="Go back to home">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+        <h2 class="screen-title">SEARCH</h2>
+      </div>
+      
+      <div class="search-container">
+        <div class="search-input-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="text" class="search-input" placeholder="Search members, courts, events..." id="globalSearchInput" aria-label="Search members, courts, events" oninput="debouncedHandleSearch(this.value)">
+        </div>
+        
+        <div class="search-results" id="searchResults">
+          <!-- Initial State -->
+          <div class="search-category" id="searchSuggestions">
+            <div class="section-header">
+              <h3 class="section-title">QUICK ACCESS</h3>
+            </div>
+            <div class="search-result-item" onclick="navigateTo('book')">
+              <div class="search-result-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+              </div>
+              <div class="search-result-info">
+                <h4>Book a Court</h4>
+                <p>Reserve a court for your next match</p>
+              </div>
+            </div>
+            <div class="search-result-item" onclick="navigateTo('partners')">
+              <div class="search-result-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+              </div>
+              <div class="search-result-info">
+                <h4>Find a Partner</h4>
+                <p>Connect with other members</p>
+              </div>
+            </div>
+            <div class="search-result-item" onclick="navigateTo('events')">
+              <div class="search-result-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+              </div>
+              <div class="search-result-info">
+                <h4>Club Events</h4>
+                <p>Tournaments and clinics</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Search Results (populated dynamically) -->
+          <div id="dynamicSearchResults"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- ============================================
+         EVENTS SCREEN (content moved to schedule screen)
+    ============================================ -->
+    <div class="screen" id="screen-events" aria-label="Events">
+      <!-- Content moved to schedule screen — navigateTo('events') redirects to schedule -->
+    </div>
+
+    <!-- ============================================
+         SETTINGS SCREEN
+    ============================================ -->
+    <div class="screen" id="screen-settings" aria-label="Settings">
+      <div class="screen-header">
+        <button class="back-btn" onclick="navigateTo('home')" aria-label="Go back to home">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+        <h2 class="screen-title">SETTINGS</h2>
+      </div>
+      
+      <div class="section-header section-header-spaced">
+        <h3 class="section-title">PREFERENCES</h3>
+      </div>
+      <div class="settings-group">
+        <div class="settings-item">
+          <div class="settings-item-left">
+            <svg class="settings-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+            <span class="settings-label">Push Notifications</span>
+          </div>
+          <div class="toggle active" id="pushNotifToggleSettings" role="switch" aria-checked="true" tabindex="0" onclick="togglePushNotifications(this)"></div>
+        </div>
+        <div class="settings-item">
+          <div class="settings-item-left">
+            <svg class="settings-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path></svg>
+            <span class="settings-label">Dark Mode</span>
+          </div>
+          <div class="toggle" id="darkModeToggle" onclick="toggleTheme()"></div>
+        </div>
+        <div class="settings-item">
+          <div class="settings-item-left">
+            <svg class="settings-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+            <span class="settings-label">Location Services</span>
+          </div>
+          <div class="toggle active" role="switch" aria-checked="true" tabindex="0" onclick="this.classList.toggle('active'); this.setAttribute('aria-checked', this.classList.contains('active')); saveSettingsToggles(); showToast('Location services ' + (this.classList.contains('active') ? 'enabled' : 'disabled'))"></div>
+        </div>
+      </div>
+      
+      <div class="section-header">
+        <h3 class="section-title">ACCOUNT</h3>
+      </div>
+      <div class="settings-group">
+        <div class="settings-item" onclick="navigateTo('profile')">
+          <div class="settings-item-left">
+            <svg class="settings-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            <span class="settings-label">Edit Profile</span>
+          </div>
+          <svg class="icon-muted" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </div>
+        <div class="settings-item" onclick="showPrivacySettings()">
+          <div class="settings-item-left">
+            <svg class="settings-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            <span class="settings-label">Privacy</span>
+          </div>
+          <svg class="icon-muted" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </div>
+        <div class="settings-item" onclick="showHelpSupport()">
+          <div class="settings-item-left">
+            <svg class="settings-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            <span class="settings-label">Help & Support</span>
+          </div>
+          <svg class="icon-muted" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </div>
+        <div class="settings-item settings-item-danger" onclick="handleLogout()">
+          <div class="settings-item-left">
+            <svg class="settings-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+            <span class="settings-label">Sign Out</span>
+          </div>
+        </div>
+      </div>
+    </div>
+<!-- ============================================
+         ADMIN PANEL SCREEN
+    ============================================ -->
+    <div class="screen" id="screen-admin" aria-label="Admin Panel">
+      <div class="screen-header">
+        <button class="back-btn" onclick="navigateTo('home')" aria-label="Go back to home">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+        <h2 class="screen-title">ADMIN PANEL</h2>
+        <div class="admin-header-spacer"></div>
+      </div>
+
+      <div class="admin-content">
+        <div class="section-header">
+          <h3 class="section-title">ANNOUNCEMENTS</h3>
+        </div>
+        
+        <div class="settings-group">
+          <div class="settings-item" onclick="showSendAnnouncementModal()">
+            <div class="settings-item-left">
+              <svg class="settings-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"></path><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+              <span class="settings-label">Send Announcement</span>
+            </div>
+            <svg class="icon-muted" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </div>
+        </div>
+        
+        <div class="section-header admin-section-header">
+          <h3 class="section-title">RECENT ANNOUNCEMENTS</h3>
+        </div>
+        
+        <div id="adminAnnouncementHistory" class="settings-group">
+          <div class="admin-empty-state">
+            No announcements sent yet
+          </div>
+        </div>
+        
+        <div class="section-header admin-section-header">
+          <h3 class="section-title">COACHING — CLASS REGISTRATIONS</h3>
+        </div>
+
+        <div id="adminClassRegistrations" class="settings-group">
+          <div class="admin-empty-state">Loading class data...</div>
+        </div>
+
+        <div class="section-header admin-section-header">
+          <h3 class="section-title">COACH NOTIFICATIONS</h3>
+        </div>
+
+        <div id="adminCoachNotifications" class="settings-group">
+          <div class="admin-empty-state">No notifications</div>
+        </div>
+
+        <div class="admin-info-box">
+          <div class="admin-info-text">
+            <svg class="admin-info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+            Full admin features (member management, booking oversight, payments) are available on the desktop version.
+          </div>
+        </div>
+      </div>
+    </div>
+<!-- Gear Exchange screen removed -->
+    
+    <!-- ============================================
+         MESSAGES SCREEN
+    ============================================ -->
+    <div class="screen" id="screen-messages" aria-label="Messages">
+      <div class="screen-header">
+        <button class="back-btn" onclick="navigateTo('home')" aria-label="Go back to home">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+        <h2 class="screen-title">MESSAGES</h2>
+        <button class="header-btn header-btn-right" onclick="showNewMessageModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </button>
+      </div>
+      
+      <div class="search-bar search-bar-messages">
+        <svg class="icon-muted" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" placeholder="Search conversations..." id="messageSearchInput" aria-label="Search conversations" oninput="debouncedFilterConversations(this.value)">
+      </div>
+      
+      <div id="conversationsList">
+        <div class="message-item stagger-item" onclick="openConversation('mike')">
+          <div class="message-avatar-wrap">
+            <svg class="message-avatar-svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#FFE0BD"/><path d="M30 38 Q35 20 55 22 Q75 24 72 42 L68 38 Q60 30 45 32 Q35 34 30 38 Z" fill="#6B4423"/><rect x="28" y="36" width="44" height="6" rx="2" fill="#2563EB"/><ellipse cx="50" cy="52" rx="22" ry="20" fill="#FFE0BD"/><circle cx="42" cy="50" r="3" fill="#333"/><circle cx="58" cy="50" r="3" fill="#333"/><path d="M42 60 Q50 68 58 60" stroke="#333" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M30 78 Q50 72 70 78 L72 100 L28 100 Z" fill="#3BAFDA"/><ellipse cx="82" cy="35" rx="12" ry="15" fill="#fff" stroke="#333" stroke-width="2.5"/><line x1="74" y1="26" x2="90" y2="26" stroke="#333" stroke-width="1"/><line x1="73" y1="31" x2="91" y2="31" stroke="#333" stroke-width="1"/><line x1="73" y1="36" x2="91" y2="36" stroke="#333" stroke-width="1"/><line x1="73" y1="41" x2="91" y2="41" stroke="#333" stroke-width="1"/><line x1="74" y1="46" x2="90" y2="46" stroke="#333" stroke-width="1"/><line x1="76" y1="22" x2="76" y2="48" stroke="#333" stroke-width="1"/><line x1="80" y1="21" x2="80" y2="49" stroke="#333" stroke-width="1"/><line x1="84" y1="21" x2="84" y2="49" stroke="#333" stroke-width="1"/><line x1="88" y1="22" x2="88" y2="48" stroke="#333" stroke-width="1"/><line x1="82" y1="50" x2="82" y2="65" stroke="#333" stroke-width="4"/></svg>
+          </div>
+          <div class="message-content">
+            <div class="message-header">
+              <div class="message-name">Mike Chen</div>
+              <div class="message-time">2m ago</div>
+            </div>
+            <div class="message-preview">Ready for our match tomorrow? 🎾</div>
+          </div>
+          <div class="message-unread"></div>
+        </div>
+        
+        <div class="message-item stagger-item" onclick="openConversation('sarah')">
+          <div class="message-avatar-wrap">
+            <svg class="message-avatar-svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#8D5524"/><path d="M68 30 Q85 35 80 55 Q78 65 72 60 Q75 45 68 38 Z" fill="#1a1a1a"/><path d="M28 40 Q30 25 50 24 Q70 25 72 40 L68 42 Q60 32 40 34 Q32 36 28 40 Z" fill="#1a1a1a"/><rect x="26" y="36" width="48" height="7" rx="2" fill="#c8ff00"/><rect x="26" y="38" width="48" height="2" fill="#fff"/><ellipse cx="50" cy="52" rx="21" ry="19" fill="#8D5524"/><circle cx="42" cy="50" r="2.5" fill="#222"/><circle cx="58" cy="50" r="2.5" fill="#222"/><path d="M43 59 Q50 66 57 59" stroke="#222" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M32 78 Q50 72 68 78 L70 100 L30 100 Z" fill="#3BAFDA"/><ellipse cx="82" cy="38" rx="11" ry="14" fill="#fff" stroke="#333" stroke-width="2.5"/><line x1="74" y1="29" x2="90" y2="29" stroke="#333" stroke-width="1"/><line x1="73" y1="34" x2="91" y2="34" stroke="#333" stroke-width="1"/><line x1="73" y1="39" x2="91" y2="39" stroke="#333" stroke-width="1"/><line x1="73" y1="44" x2="91" y2="44" stroke="#333" stroke-width="1"/><line x1="74" y1="49" x2="90" y2="49" stroke="#333" stroke-width="1"/><line x1="76" y1="25" x2="76" y2="51" stroke="#333" stroke-width="1"/><line x1="80" y1="24" x2="80" y2="52" stroke="#333" stroke-width="1"/><line x1="84" y1="24" x2="84" y2="52" stroke="#333" stroke-width="1"/><line x1="88" y1="25" x2="88" y2="51" stroke="#333" stroke-width="1"/><line x1="82" y1="52" x2="82" y2="68" stroke="#333" stroke-width="4"/></svg>
+          </div>
+          <div class="message-content">
+            <div class="message-header">
+              <div class="message-name">Sarah Wilson</div>
+              <div class="message-time">1h ago</div>
+            </div>
+            <div class="message-preview">Great game today! Let's play again soon.</div>
+          </div>
+        </div>
+        
+        <div class="message-item stagger-item" onclick="openConversation('james')">
+          <div class="message-avatar-wrap">
+            <svg class="message-avatar-svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#8D5524"/><path d="M30 38 Q35 20 55 22 Q75 24 72 42 L68 38 Q60 30 45 32 Q35 34 30 38 Z" fill="#1a1a1a"/><rect x="28" y="36" width="44" height="6" rx="2" fill="#c8ff00"/><ellipse cx="50" cy="52" rx="22" ry="20" fill="#8D5524"/><circle cx="42" cy="50" r="3" fill="#222"/><circle cx="58" cy="50" r="3" fill="#222"/><path d="M42 60 Q50 68 58 60" stroke="#222" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M30 78 Q50 72 70 78 L72 100 L28 100 Z" fill="#3BAFDA"/><ellipse cx="82" cy="35" rx="12" ry="15" fill="#fff" stroke="#333" stroke-width="2.5"/><line x1="74" y1="26" x2="90" y2="26" stroke="#333" stroke-width="1"/><line x1="73" y1="31" x2="91" y2="31" stroke="#333" stroke-width="1"/><line x1="73" y1="36" x2="91" y2="36" stroke="#333" stroke-width="1"/><line x1="73" y1="41" x2="91" y2="41" stroke="#333" stroke-width="1"/><line x1="74" y1="46" x2="90" y2="46" stroke="#333" stroke-width="1"/><line x1="76" y1="22" x2="76" y2="48" stroke="#333" stroke-width="1"/><line x1="80" y1="21" x2="80" y2="49" stroke="#333" stroke-width="1"/><line x1="84" y1="21" x2="84" y2="49" stroke="#333" stroke-width="1"/><line x1="88" y1="22" x2="88" y2="48" stroke="#333" stroke-width="1"/><line x1="82" y1="50" x2="82" y2="65" stroke="#333" stroke-width="4"/></svg>
+          </div>
+          <div class="message-content">
+            <div class="message-header">
+              <div class="message-name">James Park</div>
+              <div class="message-time">3h ago</div>
+            </div>
+            <div class="message-preview">Thanks for the tips on my serve!</div>
+          </div>
+        </div>
+        
+        <div class="message-item stagger-item" onclick="openConversation('emma')">
+          <div class="message-avatar-wrap">
+            <svg class="message-avatar-svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#FFE0BD"/><path d="M68 30 Q85 35 80 55 Q78 65 72 60 Q75 45 68 38 Z" fill="#8B4513"/><path d="M28 40 Q30 25 50 24 Q70 25 72 40 L68 42 Q60 32 40 34 Q32 36 28 40 Z" fill="#8B4513"/><rect x="26" y="36" width="48" height="7" rx="2" fill="#3BAFDA"/><rect x="26" y="38" width="48" height="2" fill="#fff"/><ellipse cx="50" cy="52" rx="21" ry="19" fill="#FFE0BD"/><circle cx="42" cy="50" r="2.5" fill="#333"/><circle cx="58" cy="50" r="2.5" fill="#333"/><path d="M43 59 Q50 66 57 59" stroke="#333" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M32 78 Q50 72 68 78 L70 100 L30 100 Z" fill="#3BAFDA"/><ellipse cx="82" cy="38" rx="11" ry="14" fill="#fff" stroke="#333" stroke-width="2.5"/><line x1="74" y1="29" x2="90" y2="29" stroke="#333" stroke-width="1"/><line x1="73" y1="34" x2="91" y2="34" stroke="#333" stroke-width="1"/><line x1="73" y1="39" x2="91" y2="39" stroke="#333" stroke-width="1"/><line x1="73" y1="44" x2="91" y2="44" stroke="#333" stroke-width="1"/><line x1="74" y1="49" x2="90" y2="49" stroke="#333" stroke-width="1"/><line x1="76" y1="25" x2="76" y2="51" stroke="#333" stroke-width="1"/><line x1="80" y1="24" x2="80" y2="52" stroke="#333" stroke-width="1"/><line x1="84" y1="24" x2="84" y2="52" stroke="#333" stroke-width="1"/><line x1="88" y1="25" x2="88" y2="51" stroke="#333" stroke-width="1"/><line x1="82" y1="52" x2="82" y2="68" stroke="#333" stroke-width="4"/></svg>
+          </div>
+          <div class="message-content">
+            <div class="message-header">
+              <div class="message-name">Emma Davis</div>
+              <div class="message-time">Yesterday</div>
+            </div>
+            <div class="message-preview">Are you free for doubles Saturday?</div>
+          </div>
+        </div>
+        
+        <div class="message-item stagger-item" onclick="openConversation('club')">
+          <div class="message-avatar-wrap club-avatar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="5"></circle><path d="M12 13v8"></path><path d="M9 18h6"></path></svg>
+          </div>
+          <div class="message-content">
+            <div class="message-header">
+              <div class="message-name">MTC Club</div>
+              <div class="message-time">Yesterday</div>
+            </div>
+            <div class="message-preview">Your court booking is confirmed for...</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="empty-state" id="noConversations" style="display: none;">
+        <div class="empty-state-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+        </div>
+        <div class="empty-state-title">NO CONVERSATIONS FOUND</div>
+        <div class="empty-state-text">Try a different search term or start a new conversation with a club member.</div>
+        <button class="empty-state-btn" onclick="showNewMessageModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          New Message
+        </button>
+      </div>
+    </div>
+    
+    <!-- Conversation View Screen -->
+    <div class="screen" id="screen-conversation" aria-label="Conversation">
+      <div class="screen-header conversation-header">
+        <button class="back-btn" onclick="navigateTo('messages')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+        <div class="conversation-user-info">
+          <div class="conversation-avatar" id="conversationAvatar"></div>
+          <div class="conversation-name" id="conversationName">Mike Chen</div>
+        </div>
+      </div>
+      
+      <div class="chat-messages" id="chatMessages">
+        <!-- Messages will be populated dynamically -->
+      </div>
+      
+      <div class="chat-input-area">
+        <input type="text" class="chat-input" id="chatInput" aria-label="Type a message" placeholder="Type a message..." onkeypress="if(event.key==='Enter')sendMessage()">
+        <button class="chat-send-btn" onclick="sendMessage()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+        </button>
+      </div>
+    </div>
+    
+    <!-- New Message Modal -->
+    <div class="modal-overlay" id="newMessageModal" onclick="closeNewMessageModal()" role="dialog" aria-modal="true" aria-label="New message">
+      <div class="modal modal-scrollable" onclick="event.stopPropagation()">
+        <div class="modal-title">NEW MESSAGE</div>
+        <div class="modal-desc">Search for a member to start chatting</div>
+
+        <div class="search-bar search-bar-modal">
+          <svg class="icon-muted" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="text" placeholder="Search members..." id="memberSearchInput" aria-label="Search members" oninput="debouncedSearchMembers(this.value)">
+        </div>
+
+        <div id="memberSearchResults">
+          <!-- Default: show all members -->
+        </div>
+
+        <button class="modal-btn-secondary" onclick="closeNewMessageModal()">
+          Cancel
+        </button>
+      </div>
+    </div>
+    
+    <!-- ============================================
+         TENNIS PROGRAMS SCREEN
+    ============================================ -->
+<!-- Role Switcher FAB -->
+<!-- Role Switcher Modal -->
+<!-- Bottom Navigation - Floating -->
+    <nav class="bottom-nav" id="bottomNav" style="display: none;" role="navigation" aria-label="Main navigation">
+      <div class="nav-container">
+        <button class="nav-item active" id="nav-home" onclick="navigateTo('home'); haptic('light');" aria-label="Home" aria-current="page">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+          <span class="nav-label">Home</span>
+        </button>
+        <button class="nav-item" id="nav-schedule" onclick="navigateTo('schedule'); haptic('light');" aria-label="Schedule">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          <span class="nav-label">Schedule</span>
+        </button>
+        <button class="nav-item book-btn pulse-animate ripple" id="nav-book" onclick="navigateTo('book'); haptic('medium');" aria-label="Book a court">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </button>
+        <button class="nav-item" id="nav-partners" onclick="navigateTo('partners'); haptic('light');" aria-label="Find partners">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          <span class="nav-label">Partners</span>
+        </button>
+        <button class="nav-item" id="nav-messages" onclick="navigateTo('messages'); haptic('light');" style="position: relative;" aria-label="Messages, 2 unread">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+          <span class="nav-label">Messages</span>
+          <span class="message-badge" id="navMessageBadge" aria-hidden="true">2</span>
+        </button>
+      </div>
+    </nav>
+    
+    <!-- Confirmation Modal -->
+    <div class="modal-overlay" id="modal" role="dialog" aria-modal="true" aria-label="Booking confirmed">
+      <canvas id="confettiCanvas"></canvas>
+      <div class="modal">
+        <div class="modal-icon modal-icon-success">
+          <svg viewBox="0 0 56 56" width="56" height="56" fill="none"><circle cx="28" cy="28" r="28" fill="#1a1a1a"/><polyline points="18 28 25 35 38 22" fill="none" stroke="#c8ff00" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="modal-title" id="modalTitle">BOOKING CONFIRMED!</div>
+        <div class="modal-desc" id="modalDesc">Court 1 is booked for Tuesday, Jan 28 at 11:00 AM. See you on the court!</div>
+        <button class="modal-btn ripple" onclick="closeModal()">LET'S GO!</button>
+      </div>
+    </div>
+    
+    <!-- Booking Confirmation Screen -->
+    <div class="confirmation-screen" id="confirmationScreen">
+      <div class="confirmation-checkmark">
+        <svg viewBox="0 0 100 100" width="80" height="80">
+          <circle cx="50" cy="50" r="46" fill="#c8ff00" stroke="#a8d600" stroke-width="3"/>
+          <path d="M 18 22 Q 50 48 18 78" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+          <path d="M 82 22 Q 50 48 82 78" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+          <polyline points="35 50 45 60 65 40" fill="none" stroke="#1a1a1a" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="confirmation-title">BOOKING CONFIRMED!</div>
+      <div class="confirmation-subtitle">Your court has been booked</div>
+      
+      <div class="confirmation-details">
+        <div class="confirmation-row">
+          <span class="confirmation-label">Date</span>
+          <span class="confirmation-value" id="confirmDate">Saturday, Feb 1</span>
+        </div>
+        <div class="confirmation-row">
+          <span class="confirmation-label">Time</span>
+          <span class="confirmation-value" id="confirmTime">2:00 PM - 3:00 PM</span>
+        </div>
+        <div class="confirmation-row">
+          <span class="confirmation-label">Court</span>
+          <span class="confirmation-value" id="confirmCourt">Court 2</span>
+        </div>
+        <div class="confirmation-row">
+          <span class="confirmation-label">Confirmation #</span>
+          <span class="confirmation-value" id="confirmNumber">MTC-2026-0201</span>
+        </div>
+      </div>
+      
+      <div class="confirmation-actions">
+        <button class="confirmation-btn primary" onclick="addToCalendar()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          Add to Calendar
+        </button>
+        <button class="confirmation-btn secondary" onclick="closeConfirmation()">
+          Done
+        </button>
+      </div>
+    </div>
+    
+    <!-- Cancel Booking Modal -->
+    <div class="modal-overlay" id="cancelModal" onclick="closeCancelModal()" role="dialog" aria-modal="true" aria-label="Cancel booking">
+      <div class="action-modal" id="cancelModalContent" onclick="event.stopPropagation()">
+        <div class="action-modal-handle"></div>
+        <div class="action-modal-title">CANCEL BOOKING?</div>
+        <div class="action-modal-subtitle">This action cannot be undone. Are you sure you want to cancel this booking?</div>
+        
+        <div class="action-modal-options">
+          <button class="action-modal-btn danger" onclick="confirmCancelBooking()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+            Yes, Cancel Booking
+          </button>
+          <button class="action-modal-btn neutral" onclick="closeCancelModal()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            Keep Booking
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Modify Booking Modal -->
+    <div class="modal-overlay" id="modifyModal" onclick="closeModifyModal()" role="dialog" aria-modal="true" aria-label="Modify booking">
+      <div class="action-modal" id="modifyModalContent" onclick="event.stopPropagation()">
+        <div class="action-modal-handle"></div>
+        <div class="action-modal-title">MODIFY BOOKING</div>
+        <div class="action-modal-subtitle">Choose how you'd like to change this booking</div>
+        
+        <div class="action-modal-options">
+          <button class="action-modal-btn neutral" onclick="changeBookingTime()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            Change Time
+          </button>
+          <button class="action-modal-btn neutral" onclick="changeBookingCourt()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+            Change Court
+          </button>
+          <button class="action-modal-btn danger" onclick="showCancelFromModify()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+            Cancel Booking
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Profile Edit Modal -->
+    <div class="profile-edit-overlay" id="profileEditModal" role="dialog" aria-modal="true" aria-label="Edit profile">
+      <div class="profile-edit-modal">
+        <div class="profile-edit-header">
+          <button class="profile-edit-close" onclick="closeProfileEdit()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+          <div class="profile-edit-title" id="profileEditTitle">EDIT FIELD</div>
+          <button class="profile-edit-save" onclick="saveProfileEdit()">SAVE</button>
+        </div>
+        <div class="profile-edit-body" id="profileEditBody">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Booking Pro-Tip Modal -->
+    <div class="protip-overlay" id="bookingProTip" role="dialog" aria-modal="true" aria-label="Booking tip">
+      <div class="protip-modal">
+        <div class="protip-badge">PRO TIP</div>
+        <div class="protip-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+        </div>
+        <div class="protip-title">HOW BOOKING PAYMENTS WORK</div>
+        <div class="protip-steps">
+          <div class="protip-step">
+            <div class="protip-step-num">1</div>
+            <div class="protip-step-text"><strong>Book courts freely</strong> — courts are free for all members!</div>
+          </div>
+          <div class="protip-step">
+            <div class="protip-step-num">2</div>
+            <div class="protip-step-text"><strong>Guests pay $10/hr</strong> — add a guest to your booking if bringing someone.</div>
+          </div>
+          <div class="protip-step">
+            <div class="protip-step-num">3</div>
+            <div class="protip-step-text"><strong>Pay when ready</strong> — send one e-transfer to <strong>monotennis.payment@gmail.com</strong> for your tab total (e.g. $20 for 4 bookings).</div>
+          </div>
+          <div class="protip-step">
+            <div class="protip-step-num">4</div>
+            <div class="protip-step-text"><strong>Cancel 24+ hrs ahead?</strong> Charge is removed from your tab. Late cancel stays on tab.</div>
+          </div>
+        </div>
+        <div class="protip-note">⚠️ Bookings are <strong>paused</strong> if your tab reaches <strong>$25</strong>. Overpayments carry forward as <strong>credit</strong>.</div>
+        <button class="protip-dismiss-btn" onclick="dismissBookingProTip(true)">GOT IT</button>
+        <button class="protip-never-btn" onclick="dismissBookingProTip(false)">DON'T SHOW ME AGAIN</button>
+      </div>
+    </div>
+    
+    <!-- Reusable Confirmation Modal -->
+    <div class="confirm-modal-overlay" id="confirmModal" onclick="closeConfirmModal(event)" role="dialog" aria-modal="true" aria-label="Confirm action">
+      <div class="confirm-modal" onclick="event.stopPropagation()">
+        <div class="confirm-modal-handle"></div>
+        <div class="confirm-modal-icon" id="confirmModalIcon"></div>
+        <div class="confirm-modal-title" id="confirmModalTitle"></div>
+        <div class="confirm-modal-message" id="confirmModalMessage"></div>
+        <div class="confirm-modal-detail" id="confirmModalDetail"></div>
+        <div class="confirm-modal-actions">
+          <button class="confirm-modal-btn secondary" id="confirmModalCancel" onclick="closeConfirmModal()">CANCEL</button>
+          <button class="confirm-modal-btn primary" id="confirmModalConfirm">CONFIRM</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Onboarding Overlay -->
+    <div class="onboarding-overlay" id="onboardingOverlay">
+      <div class="onboarding-slides" id="onboardingSlides">
+        <div class="onboarding-slide" data-slide="0">
+          <div class="onboarding-icon onboarding-icon-transparent onboarding-tennis-ball">
+            <img src="icons/tennis-ball.png" alt="Tennis Ball" class="onboarding-tennis-ball-img" loading="lazy">
+          </div>
+          <div class="onboarding-title">WELCOME TO MTC COURT</div>
+          <div class="onboarding-text">Your tennis life, all in one place. Let's take a quick tour.</div>
+        </div>
+        <div class="onboarding-slide" data-slide="1">
+          <div class="onboarding-icon onboarding-icon-blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01" stroke-linecap="round"/></svg>
+          </div>
+          <div class="onboarding-title">BOOK COURTS</div>
+          <div class="onboarding-text">Reserve your court in seconds. See real-time availability and get instant confirmations.</div>
+        </div>
+        <div class="onboarding-slide" data-slide="2">
+          <div class="onboarding-icon onboarding-icon-coral">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M7 2v4M17 2v4"/><polyline points="9 16 11 18 15 14"/></svg>
+          </div>
+          <div class="onboarding-title">YOUR SCHEDULE</div>
+          <div class="onboarding-text">All your matches, practices, and lessons in one calendar. Never double-book again.</div>
+        </div>
+        <div class="onboarding-slide" data-slide="3">
+          <div class="onboarding-icon onboarding-icon-volt">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <div class="onboarding-title">FIND PARTNERS & EVENTS</div>
+          <div class="onboarding-text">Connect with members, join tournaments, and sign up for clinics — all from the app.</div>
+        </div>
+        <div class="onboarding-slide" data-slide="4">
+          <div class="onboarding-icon onboarding-theme-toggle">
+            <div class="onboarding-theme-circle-light">
+              <svg class="onboarding-theme-svg-glow" viewBox="0 0 24 24" fill="none" stroke="#f5a623" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+            </div>
+            <div class="onboarding-theme-circle-dark">
+              <svg class="onboarding-theme-svg" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            </div>
+          </div>
+          <div class="onboarding-title">MAKE IT YOURS</div>
+          <div class="onboarding-text">Tap the sun/moon toggle in the top-left to switch between light and dark mode.</div>
+        </div>
+      </div>
+      
+      <div class="onboarding-dots" id="onboardingDots">
+        <div class="onboarding-dot active" data-dot="0"></div>
+        <div class="onboarding-dot" data-dot="1"></div>
+        <div class="onboarding-dot" data-dot="2"></div>
+        <div class="onboarding-dot" data-dot="3"></div>
+        <div class="onboarding-dot" data-dot="4"></div>
+      </div>
+      
+      <div class="onboarding-actions">
+        <button class="onboarding-btn" id="onboardingBtn" onclick="nextOnboardingSlide()">NEXT</button>
+        <button class="onboarding-skip" onclick="skipOnboarding()">Skip Tour</button>
+      </div>
+    </div>
+    
+    <!-- Role Switcher FAB removed — roles set via login credentials -->
+    
+    <!-- Pull to Refresh Indicator -->
+    <div class="pull-indicator" id="pullIndicator">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" width="24" height="24"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+    </div>
+  </div>
+  
+
+  <!-- JavaScript - Load order matters for dependencies -->
+  <script src="js/utils.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/navigation.js"></script>
+  <script src="js/partners.js"></script>
+  <script src="js/weather.js"></script>
+  <script src="js/booking.js"></script>
+  <script src="js/schedule.js"></script>
+  <script src="js/events.js"></script>
+  <script src="js/interactive.js"></script>
+  <script src="js/payments.js"></script>
+  <script src="js/mybookings.js"></script>
+  <script src="js/onboarding.js"></script>
+  <script src="js/events-registration.js"></script>
+  <script src="js/avatar.js"></script>
+  <script src="js/messaging.js"></script>
+  <script src="js/account.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/pull-refresh.js"></script>
+  <script src="js/profile.js"></script>
+  <script src="js/confirm-modal.js"></script>
+  <script src="js/enhancements.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

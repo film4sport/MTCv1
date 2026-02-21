@@ -1,0 +1,414 @@
+/* payments.css - MTC Court */
+/* ============================================
+   BALANCE BANNER (My Bookings)
+============================================ */
+
+.balance-banner {
+  margin: 0 16px 16px;
+  padding: 16px;
+  border-radius: 16px;
+  background: var(--bg-card);
+  box-shadow: var(--card-shadow);
+}
+
+.balance-banner-inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+}
+
+.balance-owed,
+.balance-credit {
+  flex: 1;
+  min-width: 80px;
+}
+
+.balance-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.balance-amount {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  line-height: 1;
+}
+
+.balance-amount.owed {
+  color: var(--coral);
+}
+
+.balance-amount.credit {
+  color: var(--volt);
+}
+
+.balance-action {
+  flex: 1;
+  min-width: 140px;
+}
+
+.balance-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.balance-hint strong {
+  color: var(--text-primary);
+  word-break: break-all;
+}
+
+/* ============================================
+   PAYMENT BADGES (Booking Cards)
+============================================ */
+
+.booking-card-badges {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.payment-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.payment-badge.unpaid {
+  background: rgba(255, 90, 95, 0.15);
+  color: var(--coral);
+}
+
+.payment-badge.paid {
+  background: rgba(200, 255, 0, 0.15);
+  color: var(--volt);
+}
+
+.payment-badge.credited {
+  background: rgba(0, 212, 255, 0.15);
+  color: var(--electric-blue);
+}
+
+.payment-badge.no-refund {
+  background: rgba(255, 90, 95, 0.1);
+  color: var(--text-muted);
+}
+
+[data-theme="dark"] .payment-badge.unpaid {
+  background: rgba(255, 90, 95, 0.2);
+}
+
+[data-theme="dark"] .payment-badge.paid {
+  background: rgba(200, 255, 0, 0.15);
+}
+
+[data-theme="dark"] .payment-badge.credited {
+  background: rgba(0, 212, 255, 0.15);
+}
+
+/* ============================================
+   BOOKING CARD FOOTER
+============================================ */
+
+.booking-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-color);
+}
+
+.booking-ref {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+}
+
+/* ============================================
+   CANCEL MODAL EXTRAS
+============================================ */
+
+.cancel-refund-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 0;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.cancel-refund-info.credit {
+  background: rgba(200, 255, 0, 0.1);
+  color: var(--volt);
+  border: 1px solid rgba(200, 255, 0, 0.2);
+}
+
+.cancel-refund-info.no-refund {
+  background: rgba(255, 90, 95, 0.08);
+  color: var(--coral);
+  border: 1px solid rgba(255, 90, 95, 0.15);
+}
+
+.cancel-booking-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 16px;
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.cancel-booking-summary .booking-ref {
+  margin-top: 4px;
+}
+
+/* ============================================
+   BOOKING SUMMARY FEE ROW
+============================================ */
+
+.booking-fee-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  margin-top: 4px;
+  border-top: 1px dashed var(--border-color);
+}
+
+.booking-fee-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.booking-fee-value {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px;
+  color: var(--text-primary);
+}
+
+.booking-fee-note {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  text-align: right;
+}
+
+.booking-credit-applied {
+  font-size: 11px;
+  color: var(--electric-blue);
+  font-weight: 600;
+}
+
+/* ============================================
+   ADMIN: PAYMENT RECONCILIATION TAB
+============================================ */
+
+.payment-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  padding: 0 16px 16px;
+}
+
+.payment-summary-card {
+  padding: 14px;
+  background: var(--bg-card);
+  border-radius: 14px;
+  box-shadow: var(--card-shadow);
+}
+
+.payment-summary-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.payment-summary-value {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.payment-summary-value.volt {
+  color: var(--volt);
+}
+
+.payment-summary-value.coral {
+  color: var(--coral);
+}
+
+/* Member Payment Cards */
+.payment-member-card {
+  margin: 0 16px 10px;
+  padding: 14px 16px;
+  background: var(--bg-card);
+  border-radius: 14px;
+  box-shadow: var(--card-shadow);
+  transition: all 0.2s ease;
+}
+
+.payment-member-card.flagged {
+  border-left: 3px solid var(--coral);
+}
+
+.payment-member-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.payment-member-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.payment-member-avatar {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.payment-member-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.flag-icon {
+  font-size: 12px;
+}
+
+.payment-member-meta {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.payment-member-balance {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.payment-member-balance.owed {
+  color: var(--coral);
+}
+
+.payment-member-balance.credit {
+  color: var(--volt);
+}
+
+.payment-member-balance.clear {
+  color: var(--text-muted);
+}
+
+.payment-member-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-color);
+}
+
+.payment-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: none;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.payment-action-btn.mark-paid {
+  background: rgba(200, 255, 0, 0.15);
+  color: var(--volt);
+}
+
+.payment-action-btn.mark-paid:active {
+  background: rgba(200, 255, 0, 0.3);
+}
+
+.payment-action-btn.flag {
+  background: rgba(255, 90, 95, 0.1);
+  color: var(--coral);
+}
+
+.payment-action-btn.flag:active {
+  background: rgba(255, 90, 95, 0.2);
+}
+
+.payment-action-btn.unflag {
+  background: rgba(0, 212, 255, 0.1);
+  color: var(--electric-blue);
+}
+
+.payment-action-btn.unflag:active {
+  background: rgba(0, 212, 255, 0.2);
+}
+
+/* Reconciliation Hint */
+.reconciliation-hint {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin: 20px 16px 100px;
+  padding: 16px;
+  border-radius: 14px;
+  background: rgba(0, 212, 255, 0.06);
+  border: 1px solid rgba(0, 212, 255, 0.15);
+}
+
+.reconciliation-hint-icon {
+  flex-shrink: 0;
+  color: var(--electric-blue);
+}
+
+.reconciliation-hint-text {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* Dark mode overrides */
+[data-theme="dark"] .payment-member-card {
+  background: var(--color-dark-surface);
+  box-shadow: inset 2px 2px 4px rgba(0,0,0,0.3), inset -2px -2px 4px rgba(60,58,54,0.15);
+}
+
+[data-theme="dark"] .payment-summary-card {
+  background: var(--color-dark-surface);
+  box-shadow: inset 2px 2px 4px rgba(0,0,0,0.3), inset -2px -2px 4px rgba(60,58,54,0.15);
+}
+
+[data-theme="dark"] .balance-banner {
+  background: var(--color-dark-surface);
+  box-shadow: inset 2px 2px 4px rgba(0,0,0,0.3), inset -2px -2px 4px rgba(60,58,54,0.15);
+}

@@ -216,6 +216,18 @@ create index if not exists idx_notifications_user_read on notifications(user_id,
 create index if not exists idx_partners_status on partners(status);
 create index if not exists idx_program_enrollments_member on program_enrollments(member_id);
 
+-- Prevent double-booking: only one confirmed booking per court/date/time
+create unique index if not exists idx_bookings_no_double_booking
+  on bookings(court_id, date, time) where status = 'confirmed';
+
+-- Additional indexes for common queries
+create index if not exists idx_events_date on events(date);
+create index if not exists idx_conversations_members on conversations(member_a, member_b);
+create index if not exists idx_messages_to_read on messages(to_id, read);
+create index if not exists idx_booking_participants_user on booking_participants(participant_id);
+create index if not exists idx_bookings_status on bookings(status);
+create index if not exists idx_profiles_role on profiles(role);
+
 -- ─── Auto-create profile on signup ──────────────────────
 create or replace function public.handle_new_user()
 returns trigger as $$

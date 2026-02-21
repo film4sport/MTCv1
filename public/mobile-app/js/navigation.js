@@ -1,0 +1,673 @@
+/**
+ * navigation.js - MTC Court
+ * IIFE Module: Screen navigation, menu, modals, partner matching, toast, a11y
+ */
+(function() {
+  'use strict';
+
+  // ============================================
+  // PRIVATE: Navigation State
+  // ============================================
+  let _currentScreen = 'home';
+  const _scrollPositions = {};
+
+  // ============================================
+  // MTC.fn + WINDOW: Navigate To (called from EVERYWHERE - onclick, cross-file)
+  // ============================================
+  /** @param {string} screen - Screen ID to navigate to
+   *  @param {string} [direction] - Optional 'left'|'right' for directional slide transition */
+  MTC.fn.navigateTo = function(screen, direction) {
+    // Redirects - merged/removed screens
+    if (screen === 'mybookings') screen = 'schedule';
+    if (screen === 'programs' || screen === 'events') {
+      const showEvents = (screen === 'events');
+      screen = 'schedule';
+      if (showEvents) {
+        setTimeout(function() { if (typeof switchSchedulePill === 'function') switchSchedulePill('events'); }, 50);
+      }
+    }
+    if (screen === 'matches') screen = 'home';
+    if (screen === 'coach') screen = 'home';
+
+    // Show target screen
+    const targetScreen = document.getElementById('screen-' + screen);
+    if (!targetScreen) return;
+
+    // Save scroll position of the screen we're leaving
+    if (_currentScreen && _currentScreen !== screen) {
+      const leavingScreen = document.getElementById('screen-' + _currentScreen);
+      if (leavingScreen) _scrollPositions[_currentScreen] = leavingScreen.scrollTop;
+    }
+
+    // Cleanup the screen we're leaving
+    if (typeof MTC !== 'undefined' && _currentScreen && _currentScreen !== screen) {
+      MTC.cleanupScreen(_currentScreen);
+    }
+    _currentScreen = screen;
+
+    // Hide all screens
+    document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+
+    if (targetScreen) {
+      targetScreen.classList.add('active');
+
+      // Apply directional slide class if specified (swipe navigation)
+      if (direction === 'left' || direction === 'right') {
+        targetScreen.classList.add('from-' + direction);
+        setTimeout(function() { targetScreen.classList.remove('from-left', 'from-right'); }, 280);
+      }
+
+      // Restore saved scroll position
+      targetScreen.scrollTop = _scrollPositions[screen] || 0;
+
+      // Announce screen change to screen readers
+      announceToScreenReader('Navigated to ' + screen.replace(/([A-Z])/g, ' $1').trim() + ' screen');
+
+      // Focus the screen for keyboard users
+      targetScreen.setAttribute('tabindex', '-1');
+      targetScreen.focus({ preventScroll: true });
+
+      // Re-trigger stagger animations
+      targetScreen.querySelectorAll('.stagger-item').forEach(function(item, index) {
+        item.style.animation = 'none';
+        item.offsetHeight; // Trigger reflow
+        item.style.animation = null;
+      });
+    }
+
+    // Initialize booking system when navigating to book screen
+    if (screen === 'book') {
+      setTimeout(function() { renderWeeklyGrid(); }, 100);
+    }
+
+    // Render schedule bookings dynamically
+    if (screen === 'schedule') {
+      setTimeout(function() {
+        if (typeof renderScheduleBookings === 'function') renderScheduleBookings();
+      }, 100);
+    }
+
+    // Update nav - new order: Home, Schedule, Book, Partners, Messages
+    document.querySelectorAll('.nav-container .nav-item').forEach(function(n) {
+      n.classList.remove('active');
+      n.setAttribute('aria-current', '');
+    });
+    const navMap = { home: 0, schedule: 1, book: 2, partners: 3, messages: 4 };
+    if (navMap[screen] !== undefined) {
+      const navItems = document.querySelectorAll('.nav-container .nav-item');
+      if (navItems[navMap[screen]]) {
+        navItems[navMap[screen]].classList.add('active');
+        navItems[navMap[screen]].setAttribute('aria-current', 'page');
+      }
+    }
+
+    closeMenu();
+  };
+  window.navigateTo = MTC.fn.navigateTo;
+
+  // ============================================
+  // WINDOW: Open Menu (onclick from index.html)
+  // ============================================
+  window.openMenu = function() {
+    document.getElementById('menuDrawer').classList.add('open');
+    document.getElementById('menuBackdrop').classList.add('open');
+    // Update aria-expanded on menu button
+    const menuBtn = document.querySelector('[aria-controls="menuDrawer"]');
+    if (menuBtn) menuBtn.setAttribute('aria-expanded', 'true');
+    // Focus the close button for keyboard users
+    const closeBtn = document.querySelector('.menu-close');
+    if (closeBtn) setTimeout(function() { closeBtn.focus(); }, 100);
+    announceToScreenReader('Menu opened');
+  };
+
+  // ============================================
+  // WINDOW: Close Menu (onclick from index.html, called cross-file)
+  // ============================================
+  window.closeMenu = function() {
+    document.getElementById('menuDrawer').classList.remove('open');
+    document.getElementById('menuBackdrop').classList.remove('open');
+    // Update aria-expanded on menu button
+    const menuBtn = document.querySelector('[aria-controls="menuDrawer"]');
+    if (menuBtn) menuBtn.setAttribute('aria-expanded', 'false');
+  };
+
+  // ============================================
+  // WINDOW: Show Modal (called from booking.js)
+  // ============================================
+  window.showModal = function() {
+    if (!selectedSlot) { showToast('No slot selected'); return; }
+    showCelebrationModal('BOOKING CONFIRMED!', 'Court ' + selectedSlot.court + ' booked for ' + selectedSlot.time + '. See you on the court!');
+  };
+
+  // ============================================
+  // WINDOW: Show Celebration Modal (called from partners.js, events-registration.js, booking.js)
+  // ============================================
+  window.showCelebrationModal = function(title, desc) {
+    haptic('success');
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalDesc').textContent = desc;
+    const modalEl = document.getElementById('modal');
+    modalEl.classList.add('active');
+    if (MTC.fn.manageFocus) MTC.fn.manageFocus(modalEl);
+    // Force icon pop animation replay
+    const iconEl = modalEl.querySelector('.modal-icon');
+    if (iconEl) {
+      iconEl.style.animation = 'none';
+      iconEl.offsetHeight;
+      iconEl.style.animation = '';
+    }
+    launchConfetti();
+  };
+
+  // ============================================
+  // WINDOW: Close Modal (onclick from index.html, called from tests)
+  // ============================================
+  window.closeModal = function() {
+    document.getElementById('modal').classList.remove('active');
+    const canvas = document.getElementById('confettiCanvas');
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  };
+
+  // ============================================
+  // PRIVATE: Launch Confetti
+  // ============================================
+  function launchConfetti() {
+    const canvas = document.getElementById('confettiCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+
+    const colors = ['#c8ff00', '#ff5a5f', '#00d4ff', '#ffffff', '#FFD700', '#FF69B4'];
+    const confetti = [];
+
+    for (let i = 0; i < 80; i++) {
+      confetti.push({
+        x: canvas.width / 2 + (Math.random() - 0.5) * 60,
+        y: canvas.height / 2,
+        vx: (Math.random() - 0.5) * 16,
+        vy: -(Math.random() * 12 + 4),
+        w: Math.random() * 8 + 4,
+        h: Math.random() * 6 + 2,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        rotation: Math.random() * 360,
+        rotSpeed: (Math.random() - 0.5) * 12,
+        gravity: 0.15 + Math.random() * 0.1,
+        opacity: 1,
+        delay: Math.random() * 8
+      });
+    }
+
+    let frame = 0;
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      let alive = false;
+
+      confetti.forEach(function(p) {
+        if (p.delay > 0) { p.delay--; alive = true; return; }
+        p.vy += p.gravity;
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vx *= 0.99;
+        p.rotation += p.rotSpeed;
+
+        if (frame > 40) p.opacity -= 0.01;
+        if (p.opacity <= 0) return;
+        alive = true;
+
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rotation * Math.PI / 180);
+        ctx.globalAlpha = Math.max(0, p.opacity);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        ctx.restore();
+      });
+
+      frame++;
+      if (alive && frame < 180) requestAnimationFrame(animate);
+      else ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    requestAnimationFrame(animate);
+  }
+
+  // ============================================
+  // WINDOW: Join Partner (onclick from index.html)
+  // ============================================
+  window.joinPartner = function(name, time, btnEl) {
+    showCelebrationModal('YOU\'RE IN!', 'Matched with ' + name + '. See you ' + time + '!');
+    showPushNotification(
+      'Partner Matched!',
+      'You\'re playing with ' + name + ' \u2014 ' + time,
+      '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>'
+    );
+
+    // Parse a date from the time string (e.g., "Tomorrow at 2pm", "Saturday Morning")
+    let partnerDate = '';
+    const now = new Date();
+    const timeLower = (time || '').toLowerCase();
+    if (timeLower.indexOf('tomorrow') !== -1) {
+      const tomorrow = new Date(now);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      partnerDate = tomorrow.toISOString().split('T')[0];
+    } else if (timeLower.indexOf('today') !== -1 || timeLower.indexOf('this evening') !== -1) {
+      partnerDate = now.toISOString().split('T')[0];
+    } else {
+      // Default to tomorrow
+      const tmrw = new Date(now);
+      tmrw.setDate(tmrw.getDate() + 1);
+      partnerDate = tmrw.toISOString().split('T')[0];
+    }
+
+    // Add to My Bookings with a real date so it shows in Schedule
+    if (typeof addEventToMyBookings === 'function') {
+      addEventToMyBookings('partner-' + name.replace(/\s/g, '-'), 'partner', {
+        title: 'Partner Match: ' + name,
+        date: partnerDate,
+        time: time || 'See details',
+        location: 'MTC Courts'
+      });
+    }
+
+    // Persist joined partner so card stays gone on reload
+    const joined = MTC.storage.get('mtc-joined-partners', []);
+    if (joined.indexOf(name) === -1) joined.push(name);
+    MTC.storage.set('mtc-joined-partners', joined);
+
+    // Remove the partner card from DOM with animation
+    if (btnEl) {
+      const card = btnEl.closest('.partner-request-card');
+      if (card) {
+        card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+        card.style.opacity = '0';
+        card.style.transform = 'translateX(100%)';
+        setTimeout(function() {
+          card.remove();
+          // Check if all partner cards are gone
+          hideEmptyPartnerRequests();
+        }, 300);
+      }
+    }
+  };
+
+  // ============================================
+  // WINDOW: Hide Joined Partner Cards (called from interactive.js)
+  // ============================================
+  window.hideJoinedPartnerCards = function() {
+    try {
+      const joined = MTC.storage.get('mtc-joined-partners', []);
+      if (joined.length === 0) return;
+      const cards = document.querySelectorAll('.partner-requests .partner-request-card');
+      cards.forEach(function(card) {
+        const nameEl = card.querySelector('.partner-request-name');
+        if (nameEl && joined.indexOf(nameEl.textContent.trim()) !== -1) {
+          card.remove();
+        }
+      });
+      hideEmptyPartnerRequests();
+    } catch(e) {}
+  };
+
+  // ============================================
+  // PRIVATE: Pool of partner requests available
+  // ============================================
+  const homePartnerPool = [
+    { name: 'Mike Chen', time: 'Today at 5PM', level: 'advanced', levelClass: 'advanced' },
+    { name: 'Sarah Wilson', time: 'Tomorrow at 3PM', level: 'intermediate', levelClass: '' },
+    { name: 'James Park', time: 'Today at 4PM', level: 'intermediate', levelClass: '' },
+    { name: 'Emily Rodriguez', time: 'Tomorrow at 10AM', level: 'advanced', levelClass: 'advanced' },
+    { name: 'David Kim', time: 'This Weekend', level: 'intermediate', levelClass: '' },
+    { name: 'Lisa Thompson', time: 'Tomorrow at 9AM', level: 'beginner', levelClass: 'beginner' },
+    { name: "Ryan O'Connor", time: 'Today at 6PM', level: 'advanced', levelClass: 'advanced' }
+  ];
+
+  // ============================================
+  // PRIVATE: Repopulate home partner cards from pool after joining
+  // ============================================
+  function repopulateHomePartners() {
+    const container = document.querySelector('#screen-home .partner-requests');
+    if (!container) return;
+
+    const joined = MTC.storage.get('mtc-joined-partners', []);
+
+    // Get names currently shown on home
+    const shownNames = [];
+    container.querySelectorAll('.partner-request-card .partner-request-name').forEach(function(el) {
+      shownNames.push(el.textContent.trim());
+    });
+
+    // Find pool members not joined and not already shown
+    const available = homePartnerPool.filter(function(p) {
+      return joined.indexOf(p.name) === -1 && shownNames.indexOf(p.name) === -1;
+    });
+
+    // How many slots to fill (we show max 2 cards)
+    const currentCards = container.querySelectorAll('.partner-request-card').length;
+    const slotsToFill = 2 - currentCards;
+
+    if (slotsToFill <= 0 || available.length === 0) {
+      // Still check if totally empty
+      if (currentCards === 0 && available.length === 0) {
+        if (!container.querySelector('.all-matched-msg')) {
+          container.innerHTML = '<div class="all-matched-msg" style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px;">All matched! Check Partners for more.</div>';
+        }
+      }
+      return;
+    }
+
+    // Remove "All matched" message if present
+    const msg = container.querySelector('.all-matched-msg');
+    if (msg) msg.remove();
+
+    for (let i = 0; i < Math.min(slotsToFill, available.length); i++) {
+      const p = available[i];
+      const avatar = typeof getAvatar === 'function' ? getAvatar(p.name) : '';
+      const card = document.createElement('div');
+      card.className = 'partner-request-card stagger-item';
+      card.innerHTML =
+        '<div class="partner-request-avatar">' + avatar + '</div>' +
+        '<div class="partner-request-info">' +
+          '<div class="partner-request-name">' + sanitizeHTML(p.name) + '</div>' +
+          '<div class="partner-request-details">' +
+            '<span class="partner-time">' + sanitizeHTML(p.time) + '</span>' +
+            '<span class="skill-badge ' + sanitizeHTML(p.levelClass) + '">' + sanitizeHTML(p.level.charAt(0).toUpperCase() + p.level.slice(1)) + '</span>' +
+          '</div>' +
+        '</div>' +
+        '<button class="partner-join-btn" aria-label="Join session" onclick="joinPartner(\'' + sanitizeHTML(p.name).replace(/'/g, '&#039;') + '\', \'' + sanitizeHTML(p.time) + '\', this)">Join</button>';
+      // Animate in
+      card.style.opacity = '0';
+      card.style.transform = 'translateX(-20px)';
+      container.appendChild(card);
+      (function(c) {
+        setTimeout(function() {
+          c.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+          c.style.opacity = '1';
+          c.style.transform = 'translateX(0)';
+        }, 50);
+      })(card);
+    }
+  }
+
+  // ============================================
+  // PRIVATE: Show "All matched" message if no partner cards remain
+  // ============================================
+  function hideEmptyPartnerRequests() {
+    const remaining = document.querySelectorAll('#screen-home .partner-requests .partner-request-card');
+    if (remaining.length === 0) {
+      // Try to repopulate first
+      repopulateHomePartners();
+    }
+  }
+
+  // ============================================
+  // MTC.fn + WINDOW: Toast Notifications (called from EVERYWHERE)
+  // ============================================
+  /** @param {string} message - Toast message text @param {Function|string} [undoCallbackOrType] - Undo callback or toast type */
+  MTC.fn.showToast = function(message, undoCallbackOrType) {
+    const toast = document.getElementById('toast');
+    const toastText = document.getElementById('toastText');
+    const toastIcon = toast ? toast.querySelector('.toast-icon') : null;
+
+    // Clear any existing timeout
+    if (window._toastTimeout) clearTimeout(window._toastTimeout);
+
+    // Determine if 2nd arg is an undo callback (function) or a type string
+    const undoCallback = typeof undoCallbackOrType === 'function' ? undoCallbackOrType : null;
+    const toastType = typeof undoCallbackOrType === 'string' ? undoCallbackOrType : '';
+
+    // Update icon based on type
+    if (toastIcon) {
+      if (toastType === 'error') {
+        toastIcon.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>';
+      } else if (toastType === 'info') {
+        toastIcon.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>';
+      } else {
+        toastIcon.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+      }
+    }
+
+    if (undoCallback) {
+      // Toast with undo button
+      toastText.innerHTML = '<div class="toast-content"><span class="toast-message">' + sanitizeHTML(message) + '</span><button class="toast-undo" onclick="event.stopPropagation();">UNDO</button></div>';
+      const undoBtn = toastText.querySelector('.toast-undo');
+      if (undoBtn) {
+        undoBtn.onclick = function(e) {
+          e.stopPropagation();
+          undoCallback();
+          toast.classList.remove('show');
+          toast.style.visibility = 'hidden';
+          toast.style.opacity = '0';
+        };
+      }
+    } else {
+      toastText.textContent = message;
+    }
+
+    // Clear inline opacity/visibility so CSS .show class can take effect
+    toast.style.opacity = '';
+    toast.style.visibility = 'visible';
+    toast.classList.add('show');
+    // ARIA live region will auto-announce since role="alert"
+
+    window._toastTimeout = setTimeout(function() {
+      toast.classList.remove('show');
+      toast.style.visibility = 'hidden';
+      toast.style.opacity = '0';
+    }, undoCallback ? 5000 : 3000);
+  };
+  window.showToast = MTC.fn.showToast;
+
+  // ============================================
+  // PRIVATE: Announce messages to screen readers
+  // ============================================
+  function announceToScreenReader(message) {
+    const announcer = document.getElementById('a11yAnnouncer');
+    if (announcer) {
+      announcer.textContent = '';
+      setTimeout(function() { announcer.textContent = message; }, 50);
+    }
+  }
+
+  // ============================================
+  // ACCESSIBILITY: Modal focus management
+  // ============================================
+  /** @param {HTMLElement} modalEl - Modal to move focus into */
+  function manageFocus(modalEl, triggerEl) {
+    modalEl._triggerEl = triggerEl || document.activeElement;
+    const focusable = modalEl.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+    if (focusable) setTimeout(function() { focusable.focus(); }, 50);
+  }
+
+  /** @param {HTMLElement} modalEl - Modal to restore focus from */
+  function restoreFocus(modalEl) {
+    if (modalEl && modalEl._triggerEl && typeof modalEl._triggerEl.focus === 'function') {
+      modalEl._triggerEl.focus();
+    }
+  }
+
+  MTC.fn.manageFocus = manageFocus;
+  MTC.fn.restoreFocus = restoreFocus;
+
+  // ============================================
+  // ACCESSIBILITY: Keyboard navigation for toggles (Enter/Space to toggle)
+  // ============================================
+  document.addEventListener('keydown', function(e) {
+    const target = e.target;
+
+    // Activate role="button" elements with Enter/Space (menu items, etc.)
+    if (target.getAttribute('role') === 'button' && (e.key === 'Enter' || e.key === ' ')) {
+      e.preventDefault();
+      target.click();
+    }
+
+    // Toggle switches via keyboard
+    if (target.getAttribute('role') === 'switch' && (e.key === 'Enter' || e.key === ' ')) {
+      e.preventDefault();
+      target.click();
+      const isChecked = target.classList.contains('active');
+      target.setAttribute('aria-checked', isChecked ? 'true' : 'false');
+      announceToScreenReader(isChecked ? 'Enabled' : 'Disabled');
+    }
+
+    // Admin tabs - arrow key navigation
+    if (target.getAttribute('role') === 'tab') {
+      const tabs = Array.from(target.parentElement.querySelectorAll('[role="tab"]'));
+      const index = tabs.indexOf(target);
+      let newIndex = index;
+
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        newIndex = (index + 1) % tabs.length;
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        newIndex = (index - 1 + tabs.length) % tabs.length;
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        newIndex = 0;
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        newIndex = tabs.length - 1;
+      }
+
+      if (newIndex !== index) {
+        tabs[newIndex].focus();
+        tabs[newIndex].click();
+      }
+    }
+
+    // Escape key to close menu/modals (centralized handler)
+    if (e.key === 'Escape') {
+      // Priority-ordered list of closeable overlays
+      const closeable = [
+        { id: 'menuDrawer', check: 'open', fn: function(el) { closeMenu(); var btn = document.querySelector('[aria-controls="menuDrawer"]'); if (btn) btn.focus(); } },
+        { id: 'confirmModal', check: 'active', fn: function(el) { closeConfirmModal(); } },
+        { id: 'bookingModal', check: 'active', fn: function(el) { closeBookingModal(); } },
+        { id: 'profileEditModal', check: 'active', fn: function(el) { el.classList.remove('active'); document.body.style.overflow = ''; } },
+        { id: 'bookingProTip', check: 'active', fn: function(el) { el.classList.remove('active'); } },
+        { id: 'cancelModal', check: 'active', fn: function(el) { closeCancelModal(); } },
+        { id: 'modifyModal', check: 'active', fn: function(el) { closeModifyModal(); } },
+        { id: 'avatarPickerModal', check: 'active', fn: function(el) { closeAvatarPicker(); } },
+        { id: 'postPartnerModal', check: 'active', fn: function(el) { closePostPartnerModal(); } },
+        { id: 'newMessageModal', check: 'active', fn: function(el) { closeNewMessageModal(); } },
+        { id: 'modal', check: 'active', fn: function(el) { closeModal(); } },
+        { id: 'forgotPasswordModal', check: 'display', fn: function(el) { closeForgotPassword(); } }
+      ];
+
+      for (let i = 0; i < closeable.length; i++) {
+        const entry = closeable[i];
+        const el = document.getElementById(entry.id);
+        if (!el) continue;
+        if (entry.check === 'display') {
+          if (el.style.display !== 'none' && el.style.display !== '') {
+            restoreFocus(el);
+            entry.fn(el);
+            return;
+          }
+        } else if (el.classList.contains(entry.check)) {
+          restoreFocus(el);
+          entry.fn(el);
+          return;
+        }
+      }
+
+      // Catch-all: any dynamic .modal-overlay.active inside #app
+      const dynamicModal = document.querySelector('#app > .modal-overlay.active');
+      if (dynamicModal) {
+        restoreFocus(dynamicModal);
+        dynamicModal.classList.remove('active');
+        setTimeout(function() { dynamicModal.remove(); }, 300);
+        return;
+      }
+    }
+  });
+
+  // ============================================
+  // ACCESSIBILITY: Focus trap for menu drawer
+  // Uses shared MTC.fn.trapFocus utility
+  // ============================================
+  let menuTrapCleanup = null;
+
+  // Watch for drawer open/close to activate/deactivate trap
+  const menuDrawerEl = document.getElementById('menuDrawer');
+  if (menuDrawerEl) {
+    const observer = new MutationObserver(function() {
+      if (menuDrawerEl.classList.contains('open')) {
+        if (!menuTrapCleanup) {
+          menuTrapCleanup = MTC.fn.trapFocus(menuDrawerEl);
+        }
+      } else {
+        if (menuTrapCleanup) {
+          menuTrapCleanup();
+          menuTrapCleanup = null;
+        }
+      }
+    });
+    observer.observe(menuDrawerEl, { attributes: true, attributeFilter: ['class'] });
+  }
+
+  // ============================================
+  // SWIPE NAVIGATION — swipe between main screens
+  // Home(0) ↔ Schedule(1) ↔ Partners(2) ↔ Messages(3)
+  // Book screen excluded (center button only)
+  // ============================================
+  const swipeScreens = ['home', 'schedule', 'partners', 'messages'];
+  const swipeIgnore = '.courts-scroll, .filter-pills, .date-selector, .weekly-grid-body, .booking-dates, .chat-messages, .schedule-pills';
+  let swipeStartX = 0;
+  let swipeStartY = 0;
+  let swipeLocked = false;
+
+  document.addEventListener('touchstart', function(e) {
+    // Only swipe on main swipeable screens
+    if (swipeScreens.indexOf(_currentScreen) === -1) return;
+    // Don't swipe on inputs or horizontally-scrollable containers
+    const tag = e.target.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+    if (e.target.closest(swipeIgnore)) return;
+
+    swipeStartX = e.touches[0].clientX;
+    swipeStartY = e.touches[0].clientY;
+    swipeLocked = false;
+  }, { passive: true });
+
+  document.addEventListener('touchmove', function(e) {
+    if (swipeLocked || swipeStartX === 0) return;
+    const dx = Math.abs(e.touches[0].clientX - swipeStartX);
+    const dy = Math.abs(e.touches[0].clientY - swipeStartY);
+    // If vertical scroll is dominant, cancel swipe detection
+    if (dy > 20 && dy > dx) { swipeStartX = 0; }
+  }, { passive: true });
+
+  document.addEventListener('touchend', function(e) {
+    if (swipeStartX === 0) return;
+    const endX = e.changedTouches[0].clientX;
+    const endY = e.changedTouches[0].clientY;
+    const dx = endX - swipeStartX;
+    const dy = Math.abs(endY - swipeStartY);
+
+    swipeStartX = 0;
+
+    // Must be horizontal (dx > dy) and distance > 80px
+    if (Math.abs(dx) < 80 || dy > Math.abs(dx)) return;
+
+    const currentIndex = swipeScreens.indexOf(_currentScreen);
+    if (currentIndex === -1) return;
+
+    let nextIndex, direction;
+    if (dx < 0) {
+      // Swipe left → next screen
+      nextIndex = currentIndex + 1;
+      direction = 'left';
+    } else {
+      // Swipe right → prev screen
+      nextIndex = currentIndex - 1;
+      direction = 'right';
+    }
+
+    if (nextIndex < 0 || nextIndex >= swipeScreens.length) return;
+
+    haptic('light');
+    MTC.fn.navigateTo(swipeScreens[nextIndex], direction);
+  }, { passive: true });
+
+})();
