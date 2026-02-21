@@ -1,0 +1,897 @@
+/* enhancements.css - MTC Court */
+/* ============================================
+   POLISH & UX IMPROVEMENTS
+============================================ */
+
+/* ============================================
+   1. EMPTY STATES (shared across all screens)
+============================================ */
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 32px;
+  text-align: center;
+  min-height: 200px;
+}
+
+.empty-state-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--bg-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+.empty-state-icon svg {
+  width: 36px;
+  height: 36px;
+  color: var(--text-muted);
+  stroke-width: 1.5;
+}
+
+.empty-state-icon .empty-emoji {
+  font-size: 36px;
+  line-height: 1;
+}
+
+.empty-state-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px;
+  letter-spacing: 1px;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.empty-state-text {
+  font-size: 14px;
+  color: var(--text-muted);
+  max-width: 260px;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.empty-state-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: var(--volt);
+  color: var(--deep-black);
+  border: none;
+  border-radius: 14px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.empty-state-btn:active {
+  transform: scale(0.96);
+  box-shadow: var(--shadow-inset);
+}
+
+.empty-state-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ============================================
+   2. SKELETON LOADING SYSTEM
+============================================ */
+
+@keyframes skeletonShimmer {
+  0% { background-position: -200px 0; }
+  100% { background-position: 200px 0; }
+}
+
+.skeleton-loader {
+  padding: 16px;
+}
+
+.skeleton-item {
+  background: var(--bg-card);
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.skeleton-bar {
+  height: 14px;
+  border-radius: 7px;
+  margin-bottom: 10px;
+  background: linear-gradient(90deg, var(--bg-secondary) 25%, rgba(200,255,0,0.06) 50%, var(--bg-secondary) 75%);
+  background-size: 400px 100%;
+  animation: skeletonShimmer 1.5s ease-in-out infinite;
+}
+
+.skeleton-bar.short { width: 40%; }
+.skeleton-bar.medium { width: 65%; }
+.skeleton-bar.long { width: 85%; }
+.skeleton-bar.full { width: 100%; }
+
+.skeleton-bar.title {
+  height: 20px;
+  width: 50%;
+  margin-bottom: 14px;
+}
+
+.skeleton-bar.circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  margin-bottom: 0;
+}
+
+.skeleton-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.skeleton-row .skeleton-bar {
+  margin-bottom: 0;
+}
+
+[data-theme="dark"] .skeleton-bar {
+  background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
+  background-size: 400px 100%;
+  animation: skeletonShimmer 1.5s ease-in-out infinite;
+}
+
+/* ============================================
+   3. DARK MODE GAP FILLS
+============================================ */
+
+/* Screens - solid background (login bleedthrough fix) */
+[data-theme="dark"] #screen-events,
+[data-theme="dark"] #screen-notifications,
+[data-theme="dark"] #screen-search,
+[data-theme="dark"] #screen-settings,
+[data-theme="dark"] #screen-admin {
+  background-color: #131211;
+}
+
+/* Coach dashboard cards - see dark mode refinements section below */
+
+/* .filter-pill dark mode moved to events-screen.css */
+
+/* Notification items dark */
+[data-theme="dark"] .notification-item {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .notification-title {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .notification-desc {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .notification-time {
+  color: var(--text-muted);
+}
+
+[data-theme="dark"] .notifications-summary {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+}
+
+/* Settings dark */
+[data-theme="dark"] .settings-group {
+  background: var(--bg-card);
+}
+
+[data-theme="dark"] .settings-item {
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .settings-label {
+  color: var(--text-primary);
+}
+
+/* Events screen dark - neumorphic (handled by neumorphic.css) */
+
+/* Booking slots dark */
+[data-theme="dark"] .time-slot {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+[data-theme="dark"] .time-slot.available:hover {
+  background: transparent;
+}
+
+[data-theme="dark"] .time-slot.booked {
+  background: var(--bg-secondary);
+  color: var(--text-muted);
+}
+
+/* Week grid dark */
+[data-theme="dark"] .week-header-cell {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .grid-cell {
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .grid-cell.available {
+  background: rgba(200, 255, 0, 0.08);
+}
+
+/* Modal dark overrides (ensure consistency) */
+[data-theme="dark"] .modal {
+  background: var(--bg-card);
+  box-shadow: 0 24px 48px rgba(0,0,0,0.6);
+}
+
+[data-theme="dark"] .modal-title {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .modal-desc {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .modal-input {
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+/* Empty state dark */
+[data-theme="dark"] .empty-state-icon {
+  background: var(--bg-card);
+}
+
+[data-theme="dark"] .empty-state-title {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .empty-state-text {
+  color: var(--text-muted);
+}
+
+[data-theme="dark"] .empty-state-btn {
+  background: var(--volt);
+  color: var(--deep-black);
+}
+
+/* Conversation screen dark */
+[data-theme="dark"] .message-composer {
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .message-input {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .message-bubble.sent {
+  background: var(--volt);
+  color: var(--deep-black);
+}
+
+[data-theme="dark"] .message-bubble.received {
+  background: var(--bg-card);
+  color: var(--text-primary);
+}
+
+/* Login screen dark (rare but possible from settings) */
+[data-theme="dark"] .login-card {
+  background: rgba(27, 26, 24, 0.95);
+  backdrop-filter: blur(20px);
+}
+
+[data-theme="dark"] .login-input {
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+/* ============================================
+   4. TOAST ENHANCEMENT (undo support)
+============================================ */
+
+#toast {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s;
+}
+
+.toast-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+}
+
+.toast-message {
+  flex: 1;
+  font-size: 14px;
+}
+
+.toast-undo {
+  background: none;
+  border: none;
+  color: var(--volt);
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 4px 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.toast-undo:active {
+  background: transparent;
+}
+
+/* ============================================
+   5. ENTRANCE ANIMATIONS (flat screens)
+============================================ */
+
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleInSubtle {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+
+/* Notification items entrance */
+#screen-notifications .notification-item.stagger-item {
+  opacity: 0;
+  animation: fadeSlideUp 0.35s ease forwards;
+}
+
+#screen-notifications .notification-item.stagger-item:nth-child(1) { animation-delay: 0.05s; }
+#screen-notifications .notification-item.stagger-item:nth-child(2) { animation-delay: 0.1s; }
+#screen-notifications .notification-item.stagger-item:nth-child(3) { animation-delay: 0.15s; }
+#screen-notifications .notification-item.stagger-item:nth-child(4) { animation-delay: 0.2s; }
+#screen-notifications .notification-item.stagger-item:nth-child(5) { animation-delay: 0.25s; }
+#screen-notifications .notification-item.stagger-item:nth-child(6) { animation-delay: 0.3s; }
+
+/* Re-trigger animations on screen entry */
+.screen.active .stagger-item {
+  animation-play-state: running;
+}
+
+/* Screen-level entrance animation for screens without stagger-item children */
+#screen-settings > :not(.screen-header),
+#screen-search > :not(.screen-header) {
+  animation: fadeSlideUp 0.35s ease both;
+}
+
+/* ============================================
+   DARK MODE REFINEMENTS
+============================================ */
+
+/* Settings items dark mode */
+[data-theme="dark"] .settings-item {
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+[data-theme="dark"] .settings-label {
+  color: var(--text-primary);
+}
+
+/* ============================================
+   6. FORM VALIDATION INLINE ERRORS
+============================================ */
+
+.form-field {
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.form-error {
+  display: none;
+  font-size: 12px;
+  color: var(--coral);
+  margin-top: 4px;
+  padding-left: 4px;
+  animation: fadeSlideUp 0.2s ease;
+}
+
+.form-error.visible {
+  display: block;
+}
+
+.form-field.has-error input,
+.form-field.has-error textarea,
+input.input-error,
+textarea.input-error {
+  border-color: var(--coral);
+  box-shadow: 0 0 0 3px rgba(255, 107, 157, 0.15);
+}
+
+.form-field.has-error input:focus,
+input.input-error:focus {
+  border-color: var(--coral);
+  box-shadow: 0 0 0 3px rgba(255, 107, 157, 0.25);
+}
+
+/* Inline field error text (appended dynamically below inputs) */
+.field-error {
+  font-size: 12px;
+  color: var(--coral);
+  margin-top: 4px;
+  padding-left: 4px;
+  animation: fadeSlideUp 0.2s ease;
+}
+
+/* Success field state */
+.form-field.valid input,
+input.input-valid {
+  border-color: var(--volt);
+  box-shadow: 0 0 0 3px rgba(200, 255, 0, 0.1);
+}
+
+/* Shake animation for login card validation */
+@keyframes shakeX {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-5px); }
+  80% { transform: translateX(5px); }
+}
+
+/* ============================================
+   7. WEATHER ERROR FALLBACK
+============================================ */
+
+.weather-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(255, 107, 157, 0.1);
+  border-radius: 12px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.weather-error svg {
+  width: 16px;
+  height: 16px;
+  color: var(--coral);
+  flex-shrink: 0;
+}
+
+.weather-retry-btn {
+  background: none;
+  border: none;
+  color: var(--electric-blue);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.weather-retry-btn:active {
+  background: rgba(0, 180, 216, 0.1);
+}
+
+/* ============================================
+   8. SWIPE-TO-DISMISS NOTIFICATIONS
+============================================ */
+
+.notification-item {
+  position: relative;
+  touch-action: pan-y;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.notification-item.swiping {
+  transition: none;
+}
+
+.notification-item .swipe-delete-bg {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 80px;
+  background: var(--coral);
+  border-radius: 0 16px 16px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s;
+  z-index: -1;
+}
+
+.notification-item .swipe-delete-bg svg {
+  width: 20px;
+  height: 20px;
+  color: var(--color-white);
+}
+
+.notification-item.swiping .swipe-delete-bg {
+  opacity: 1;
+}
+
+/* ============================================
+   9. LONG-PRESS FEEDBACK
+============================================ */
+
+.long-press-feedback {
+  position: relative;
+}
+
+.long-press-feedback::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: transparent;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+
+.long-press-feedback.pressing::after {
+  opacity: 1;
+}
+
+/* Haptic-style scale pulse */
+@keyframes hapticPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.97); }
+  100% { transform: scale(1); }
+}
+
+.haptic-tap {
+  animation: hapticPulse 0.15s ease;
+}
+
+/* ============================================
+   10. ENHANCED SKELETON LOADERS
+============================================ */
+
+.skeleton-shop-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  padding: 0 16px;
+}
+
+.skeleton-shop-card {
+  background: var(--bg-card);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.skeleton-shop-image {
+  height: 120px;
+  background: linear-gradient(90deg, var(--bg-secondary) 25%, rgba(200,255,0,0.06) 50%, var(--bg-secondary) 75%);
+  background-size: 400px 100%;
+  animation: skeletonShimmer 1.5s ease-in-out infinite;
+}
+
+.skeleton-shop-info {
+  padding: 14px;
+}
+
+.skeleton-partner {
+  display: flex;
+  gap: 14px;
+  padding: 16px;
+  margin: 0 16px 12px;
+  background: var(--bg-card);
+  border-radius: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.skeleton-home-card {
+  margin: 0 16px 12px;
+  background: var(--bg-card);
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Booking screen skeleton */
+.skeleton-booking-wrap {
+  padding: 16px;
+}
+
+.skeleton-date-bar {
+  height: 56px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+
+.skeleton-slot-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.skeleton-slot {
+  height: 44px;
+  border-radius: 8px;
+  margin-bottom: 0;
+}
+
+/* Schedule screen skeleton */
+.skeleton-schedule-wrap {
+  padding: 16px;
+}
+
+.skeleton-pills-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.skeleton-pill-item {
+  width: 100px;
+  height: 36px;
+  border-radius: 100px;
+  margin-bottom: 0;
+}
+
+.skeleton-schedule-card {
+  background: var(--bg-card);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Messages screen skeleton */
+.skeleton-messages-wrap {
+  padding: 8px 0;
+}
+
+.skeleton-message-item {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 16px;
+}
+
+/* ============================================
+   11. PARTNERS/MATCHES EMPTY STATES
+============================================ */
+
+/* ============================================
+   12. RENDER ERROR FALLBACK UI
+============================================ */
+
+.render-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 32px;
+  text-align: center;
+  color: var(--text-muted);
+  gap: 12px;
+}
+
+.render-error svg {
+  color: var(--coral);
+  opacity: 0.6;
+}
+
+.render-error p {
+  font-size: 14px;
+  line-height: 1.5;
+  max-width: 260px;
+  margin: 0;
+}
+
+#noPartners,
+#noMatches {
+  display: none;
+}
+
+/* ============================================
+   OFFLINE BANNER
+============================================ */
+.offline-banner {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--coral);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  position: sticky;
+  top: 0;
+  z-index: var(--z-header);
+  flex-shrink: 0;
+}
+
+.offline-banner svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+body.offline .offline-banner {
+  display: flex;
+}
+
+/* ============================================
+   LOADING SKELETONS
+============================================ */
+.skeleton {
+  background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--border-color) 50%, var(--bg-secondary) 75%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.5s ease-in-out infinite;
+  border-radius: var(--radius-base);
+}
+
+.skeleton-text {
+  height: 14px;
+  margin-bottom: 8px;
+  border-radius: var(--radius-sm);
+}
+
+.skeleton-text.short {
+  width: 60%;
+}
+
+.skeleton-text.medium {
+  width: 80%;
+}
+
+.skeleton-card {
+  height: 80px;
+  margin-bottom: 12px;
+  border-radius: var(--radius-xl);
+}
+
+.skeleton-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+@keyframes skeletonShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ============================================
+   SMALL SCREEN FIXES (<375px)
+============================================ */
+@media (max-width: 374px) {
+  /* Prevent horizontal overflow */
+  .screen-header {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .screen-header h1, .screen-header .headline-sm {
+    font-size: 22px;
+  }
+
+  /* Booking grid: smaller slots */
+  .weekly-time-cell {
+    font-size: 9px;
+    min-width: 36px;
+    padding: 0 2px;
+  }
+
+  .weekly-slot {
+    min-width: 0;
+    font-size: 9px;
+    padding: 2px;
+  }
+
+  .slot-label, .slot-book-btn {
+    font-size: 8px;
+  }
+
+  /* Navigation: tighter spacing */
+  .nav-container {
+    padding: 0 4px;
+    gap: 0;
+  }
+
+  .nav-item {
+    font-size: 9px;
+    padding: 6px 2px;
+  }
+
+  .nav-item svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* Cards: reduce padding */
+  .card, .partner-request-card, .event-card, .program-card {
+    padding: 10px;
+  }
+
+  /* Quick actions: smaller grid */
+  .quick-actions {
+    gap: 6px;
+    padding: 0 12px;
+  }
+
+  .quick-action-btn {
+    padding: 10px 6px;
+    font-size: 10px;
+  }
+
+  /* Week day tabs */
+  .week-day-tab {
+    padding: 4px 2px;
+    min-width: 0;
+  }
+
+  .week-day-tab-name {
+    font-size: 9px;
+  }
+
+  .week-day-tab-date {
+    font-size: 13px;
+  }
+
+  /* Partner cards */
+  .partner-request-info {
+    min-width: 0;
+  }
+
+  .partner-request-name {
+    font-size: 13px;
+  }
+
+  .partner-join-btn {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+
+  /* Messages */
+  .message-item {
+    padding: 10px 12px;
+  }
+
+  /* Modal cards */
+  .event-detail-card {
+    margin: 16px 8px;
+    padding: 20px 14px;
+  }
+
+  /* Settings toggles */
+  .settings-item {
+    padding: 12px;
+  }
+}
+

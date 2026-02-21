@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { ErrorBoundary } from '../dashboard/components/ErrorBoundary';
 
 const SITE_URL = 'https://monotennisclub.ca';
 const CDN = 'https://cdn.jsdelivr.net/gh/film4sport/my-webapp-images@main/mtc-images';
@@ -190,7 +191,7 @@ export default function LandingLayout({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      {children}
+      <ErrorBoundary>{children}</ErrorBoundary>
     </div>
   );
 }

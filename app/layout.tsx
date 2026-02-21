@@ -22,6 +22,21 @@ export const metadata: Metadata = {
     statusBarStyle: 'black-translucent',
     title: 'Mono Tennis',
   },
+  openGraph: {
+    title: 'Mono Tennis Club',
+    description:
+      'A community tennis club in Mono, Ontario — tournaments, leagues, coaching, and more since 1980.',
+    url: SITE_URL,
+    siteName: 'Mono Tennis Club',
+    locale: 'en_CA',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Mono Tennis Club',
+    description:
+      'Community tennis in Mono, Ontario — tournaments, leagues, coaching & more.',
+  },
 }
 
 export const viewport: Viewport = {
@@ -39,6 +54,29 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        {/* JSON-LD structured data for local business SEO */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'SportsActivityLocation',
+              name: 'Mono Tennis Club',
+              description:
+                'A not-for-profit community tennis club in Mono, Ontario serving Caledon, Dufferin County, and the GTA since 1980.',
+              url: SITE_URL,
+              sport: 'Tennis',
+              address: {
+                '@type': 'PostalAddress',
+                addressLocality: 'Mono',
+                addressRegion: 'ON',
+                addressCountry: 'CA',
+              },
+              foundingDate: '1980',
+              nonprofitStatus: 'NonprofitType',
+            }),
+          }}
+        />
         {/* Preconnect to external origins for faster resource loading */}
         <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />

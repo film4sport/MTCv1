@@ -27,10 +27,18 @@ const nextConfig = {
         ],
       },
       {
+        // Mobile PWA service worker — no cache + scope header
+        source: '/mobile-app/sw.js',
+        headers: [
+          { key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' },
+          { key: 'Service-Worker-Allowed', value: '/mobile-app/' },
+        ],
+      },
+      {
         // Prevent browser from caching ALL dynamic content — pages, RSC payloads, API.
         // No 'has' condition (the old Accept header check was unreliable).
         // Excludes only truly static files (Next.js hashed assets, fonts, images).
-        source: '/((?!_next/static|_next/image).*)',
+        source: '/((?!_next/static|_next/image|mobile-app).*)',
         headers: [
           {
             key: 'Cache-Control',
@@ -71,7 +79,7 @@ const nextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            value: `default-src 'self'; script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''}; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https://cdn.jsdelivr.net; frame-src 'self' https://www.google.com; connect-src 'self' https://api.open-meteo.com https://*.supabase.co wss://*.supabase.co; font-src 'self' https://fonts.gstatic.com; manifest-src 'self'`,
+            value: `default-src 'self'; script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''}; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https://cdn.jsdelivr.net; frame-src 'self' https://www.google.com; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://*.supabase.co wss://*.supabase.co; font-src 'self' https://fonts.gstatic.com; manifest-src 'self'`,
           },
           {
             key: 'Permissions-Policy',

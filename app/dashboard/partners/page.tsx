@@ -7,7 +7,8 @@ import Link from 'next/link';
 import { generateId } from '../lib/utils';
 
 type FilterType = 'all' | 'singles' | 'doubles' | 'mixed';
-type SkillFilter = 'all' | 'beginner' | 'intermediate' | 'advanced';
+type SkillLevel = 'beginner' | 'intermediate' | 'advanced';
+type SkillFilter = 'all' | SkillLevel;
 
 export default function PartnersPage() {
   const { partners, currentUser, addPartner, removePartner, showToast } = useApp();
@@ -18,7 +19,7 @@ export default function PartnersPage() {
   const [postTime, setPostTime] = useState('');
   const [postType, setPostType] = useState<'singles' | 'doubles' | 'mixed' | 'any'>('any');
 
-  const getSkillLevel = (ntrp: number): SkillFilter => {
+  const getSkillLevel = (ntrp: number): SkillLevel => {
     if (ntrp <= 2.5) return 'beginner';
     if (ntrp <= 3.5) return 'intermediate';
     return 'advanced';

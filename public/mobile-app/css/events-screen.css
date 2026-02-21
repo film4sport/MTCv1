@@ -1,0 +1,470 @@
+/* events-screen.css - MTC Court */
+/* ============================================
+   PARTNERS SCREEN
+============================================ */
+
+.filter-pills {
+  display: flex;
+  gap: 8px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.filter-pills::-webkit-scrollbar { display: none; }
+
+.filter-pill {
+  flex-shrink: 0;
+  padding: 10px 18px;
+  background: var(--color-light-border);
+  border-radius: 100px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+  /* Neumorphic raised effect */
+  box-shadow: 
+    4px 4px 8px rgba(0, 0, 0, 0.12),
+    -4px -4px 8px rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.filter-pill:hover {
+  box-shadow: 
+    2px 2px 4px rgba(0, 0, 0, 0.1),
+    -2px -2px 4px rgba(255, 255, 255, 0.7);
+}
+
+.filter-pill.active {
+  background: var(--deep-black);
+  color: var(--coral);
+  /* Neumorphic pressed effect */
+  box-shadow: 
+    inset 3px 3px 6px rgba(0, 0, 0, 0.4),
+    inset -3px -3px 6px rgba(60, 58, 54, 0.35);
+  border: 1px solid rgba(255, 90, 95, 0.3);
+}
+
+/* Dark mode */
+[data-theme="dark"] .filter-pill {
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .filter-pill.active {
+  background: var(--deep-black);
+  color: var(--volt);
+  box-shadow:
+    inset 3px 3px 6px rgba(0, 0, 0, 0.5),
+    inset -3px -3px 6px rgba(30, 30, 30, 0.3);
+}
+
+/* .partner-card moved to partners.css */
+
+.partner-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--coral);
+}
+
+.partner-info {
+  flex: 1;
+}
+
+.partner-name {
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.partner-level {
+  display: inline-block;
+  padding: 2px 8px;
+  background: rgba(255, 90, 95, 0.15);
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--coral);
+  margin-bottom: 4px;
+}
+
+.partner-availability {
+  font-size: 15px;
+  color: var(--text-muted);
+}
+
+.partner-action {
+  display: flex;
+  align-items: center;
+}
+
+.partner-action-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--coral);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+}
+
+.partner-action-btn:active {
+  transform: scale(0.9);
+}
+
+.partner-action-btn svg {
+  width: 18px;
+  height: 18px;
+  color: var(--color-black);
+}
+
+/* ============================================
+   SCHEDULE SCREEN
+============================================ */
+
+.schedule-tabs {
+  display: flex;
+  gap: 4px;
+  margin: 0 16px 20px;
+  background: var(--bg-card);
+  border-radius: 14px;
+  padding: 4px;
+}
+
+.schedule-tab {
+  flex: 1;
+  padding: 12px;
+  text-align: center;
+  background: transparent;
+  border: none;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.schedule-tab.active {
+  background: var(--electric-blue);
+  color: var(--color-black);
+}
+
+.schedule-content {
+  display: none;
+}
+
+.schedule-content.active {
+  display: block;
+}
+
+.schedule-item.past {
+  opacity: 0.7;
+}
+
+.schedule-item.past .schedule-time-block {
+  background: var(--bg-secondary);
+}
+
+.schedule-item {
+  display: flex;
+  gap: 14px;
+  padding: 16px;
+  margin: 0 16px 12px;
+  background: var(--bg-card);
+  border-radius: 16px;
+  box-shadow: var(--card-shadow);
+}
+
+.schedule-time-block {
+  width: 60px;
+  text-align: center;
+  padding: 10px;
+  background: var(--bg-primary);
+  border-radius: 12px;
+}
+
+.schedule-time {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px;
+  color: var(--text-primary);
+}
+
+.schedule-period {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.schedule-details {
+  flex: 1;
+}
+
+.schedule-title {
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.schedule-subtitle {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.schedule-meta {
+  display: flex;
+  gap: 12px;
+}
+
+.schedule-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.schedule-meta-item svg {
+  width: 14px;
+  height: 14px;
+}
+
+
+/* ============================================
+   LIQUID GLASS - FILTER PILLS
+============================================ */
+/* Filter pills */
+.filter-pill {
+  background: transparent;
+  backdrop-filter: blur(16px) saturate(200%);
+  -webkit-backdrop-filter: blur(16px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  transition: all 0.2s ease;
+}
+
+.filter-pill:hover {
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.filter-pill.active {
+  background: transparent;
+  border-color: rgba(200, 255, 0, 0.4);
+  box-shadow: 0 0 15px rgba(200, 255, 0, 0.2);
+}
+
+[data-theme="light"] .filter-pill {
+  background: transparent;
+  backdrop-filter: blur(16px) saturate(200%);
+  -webkit-backdrop-filter: blur(16px) saturate(200%);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .filter-pill:hover {
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="light"] .filter-pill.active {
+  background: transparent;
+  border-color: rgba(150, 190, 0, 0.4);
+}
+
+
+/* Event cards - neumorphic (glass removed, styled by neumorphic.css) */
+
+/* ============================================
+   RSVP LIST MODAL
+============================================ */
+.rsvp-list-modal {
+  background: var(--bg-primary);
+  border-radius: 20px;
+  padding: 24px 20px;
+  max-width: 360px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+  margin: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.rsvp-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+}
+
+[data-theme="dark"] .rsvp-modal-close {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--color-white);
+}
+
+.rsvp-modal-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 24px;
+  letter-spacing: 1px;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+  padding-right: 32px;
+}
+
+.rsvp-modal-meta {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+.rsvp-modal-spots {
+  margin-bottom: 16px;
+}
+
+.rsvp-spots-bar {
+  height: 6px;
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+[data-theme="dark"] .rsvp-spots-bar {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.rsvp-spots-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.rsvp-spots-text {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.rsvp-modal-section-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 14px;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.rsvp-attendee-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.rsvp-attendee {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.03);
+}
+
+[data-theme="dark"] .rsvp-attendee {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.rsvp-attendee.you {
+  background: rgba(200, 255, 0, 0.1);
+  border: 1px solid rgba(200, 255, 0, 0.3);
+}
+
+.rsvp-attendee-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.rsvp-attendee-avatar svg {
+  width: 100%;
+  height: 100%;
+}
+
+.rsvp-attendee-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  flex: 1;
+}
+
+.rsvp-you-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: var(--volt);
+  color: var(--color-black);
+  letter-spacing: 0.5px;
+}
+
+.rsvp-empty {
+  text-align: center;
+  padding: 20px;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.rsvp-modal-action-btn {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 14px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 16px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.rsvp-modal-action-btn:active {
+  transform: scale(0.97);
+}
+
+.rsvp-modal-action-btn.register {
+  background: var(--volt);
+  color: var(--color-black);
+}
+
+.rsvp-modal-action-btn.registered {
+  background: rgba(0, 200, 100, 0.15);
+  color: #00a855;
+  border: 1px solid rgba(0, 200, 100, 0.3);
+}
+

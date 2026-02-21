@@ -38,7 +38,10 @@
       "WebFetch(domain:www.playbypoint.com)",
       "Bash(findstr:*)",
       "Bash(dir \"C:\\\\Users\\\\1337\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-1337-Documents-GitHub-MTCv1\\\\tasks\"\")",
-      "Bash(dir:*)"
+      "Bash(dir:*)",
+      "Bash(find:*)",
+      "Bash(ls:*)",
+      "Bash(tar:*)"
     ]
   }
 }

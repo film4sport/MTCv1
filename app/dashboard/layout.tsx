@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { AppProvider, useApp } from './lib/store';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import Sidebar from './components/Sidebar';
 import Toast from './components/Toast';
 
@@ -77,8 +78,10 @@ function DashboardGuard({ children }: { children: React.ReactNode }) {
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
-    <AppProvider>
-      <DashboardGuard>{children}</DashboardGuard>
-    </AppProvider>
+    <ErrorBoundary>
+      <AppProvider>
+        <DashboardGuard>{children}</DashboardGuard>
+      </AppProvider>
+    </ErrorBoundary>
   );
 }

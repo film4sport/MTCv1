@@ -1,0 +1,365 @@
+/* partners.css - MTC Court */
+/* ============================================
+   EVENT REGISTRATION
+============================================ */
+
+.event-detail-card {
+  margin: 0 16px 20px;
+  background: var(--bg-card);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: var(--card-shadow);
+}
+
+.event-detail-header {
+  padding: 24px;
+  background: linear-gradient(135deg, var(--deep-black) 0%, #2a2a2a 100%);
+  position: relative;
+}
+
+.event-detail-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.event-detail-badge.free {
+  background: var(--electric-blue);
+  color: var(--color-white);
+}
+
+.event-detail-badge.paid {
+  background: var(--volt);
+  color: var(--color-black);
+}
+
+.event-detail-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  color: var(--color-white);
+  margin-bottom: 8px;
+}
+
+
+/* ============================================
+   EVENTS VIEW & CARDS
+============================================ */
+
+.events-view {
+  display: none;
+}
+
+.events-view.active {
+  display: block;
+  animation: fadeIn 0.3s ease;
+}
+
+.event-card {
+  margin: 0 16px 12px;
+  border-radius: 16px;
+  padding: 16px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.event-card.featured {
+  border: 2px solid var(--volt);
+}
+
+.event-card-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* ============================================
+   PARTNER CARDS — consolidated from navigation.css, events-screen.css, neumorphic.css
+============================================ */
+.partner-card {
+  display: flex;
+  gap: 14px;
+  padding: 16px;
+  margin: 0 16px 12px;
+  background: transparent;
+  backdrop-filter: blur(16px) saturate(200%);
+  -webkit-backdrop-filter: blur(16px) saturate(200%);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  border-radius: 16px;
+  box-shadow:
+    0 0 30px rgba(200, 255, 0, 0.08),
+    0 10px 30px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  position: relative;
+  overflow: hidden;
+}
+
+.partner-card:hover {
+  transform: translateY(-3px) scale(1.01);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow:
+    0 0 40px rgba(200, 255, 0, 0.15),
+    0 15px 40px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.partner-card:active {
+  transform: translateY(1px) scale(0.98);
+  transition: all 0.1s ease;
+}
+
+[data-theme="light"] .partner-card {
+  background: transparent;
+  backdrop-filter: blur(16px) saturate(200%);
+  -webkit-backdrop-filter: blur(16px) saturate(200%);
+  border: 1.5px solid rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+[data-theme="light"] .partner-card:hover {
+  border-color: rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="dark"] .partner-card {
+  background: transparent;
+  backdrop-filter: blur(16px) saturate(200%);
+  -webkit-backdrop-filter: blur(16px) saturate(200%);
+}
+
+
+/* ============================================
+   PARTNER FILTER DROPDOWN & MATCH TYPE LABELS
+   ============================================ */
+
+/* Filter Row */
+.partner-filter-row {
+  padding: 12px 20px 0;
+}
+
+/* Dropdown Button */
+.partner-filter-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.filter-dropdown-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.filter-dropdown-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.filter-dropdown-btn:active {
+  transform: scale(0.98);
+}
+
+[data-theme="dark"] .filter-dropdown-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .filter-dropdown-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* Dropdown Menu */
+.filter-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  min-width: 180px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  border-radius: 14px;
+  padding: 6px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.2s ease;
+  z-index: 100;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.filter-dropdown-menu.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+[data-theme="dark"] .filter-dropdown-menu {
+  background: rgba(40, 40, 40, 0.9);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* Dropdown Items */
+.filter-dropdown-item {
+  padding: 10px 14px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.filter-dropdown-item:hover {
+  background: rgba(200, 255, 0, 0.15);
+}
+
+.filter-dropdown-item.active {
+  background: var(--volt);
+  color: var(--color-black);
+  font-weight: 600;
+}
+
+[data-theme="dark"] .filter-dropdown-item:hover {
+  background: rgba(200, 255, 0, 0.2);
+}
+
+/* Match Type Labels - Top Corner */
+.partner-match-type {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 4px 10px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  max-width: 110px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Match type color coding */
+.partner-match-type.singles {
+  background: rgba(59, 175, 218, 0.2);
+  color: #0088aa;
+  border-color: rgba(59, 175, 218, 0.4);
+}
+
+.partner-match-type.mixed {
+  background: rgba(200, 255, 0, 0.25);
+  color: #5a8a00;
+  border-color: rgba(200, 255, 0, 0.5);
+}
+
+.partner-match-type.mens {
+  background: rgba(100, 149, 237, 0.2);
+  color: #2563eb;
+  border-color: rgba(100, 149, 237, 0.4);
+}
+
+.partner-match-type.womens {
+  background: rgba(255, 105, 180, 0.2);
+  color: #d63384;
+  border-color: rgba(255, 105, 180, 0.4);
+}
+
+[data-theme="dark"] .partner-match-type.singles {
+  background: rgba(59, 175, 218, 0.25);
+  color: #5bc0de;
+}
+
+[data-theme="dark"] .partner-match-type.mixed {
+  background: rgba(200, 255, 0, 0.2);
+  color: var(--volt);
+}
+
+[data-theme="dark"] .partner-match-type.mens {
+  background: rgba(100, 149, 237, 0.25);
+  color: #6495ed;
+}
+
+[data-theme="dark"] .partner-match-type.womens {
+  background: rgba(255, 105, 180, 0.25);
+  color: #ff69b4;
+}
+
+/* Make partner card position relative for absolute label */
+.partner-card {
+  position: relative;
+}
+
+/* ============================================
+   POST PARTNER REQUEST MODAL BUTTONS
+============================================ */
+
+.partner-type-btn {
+  padding: 8px 16px;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1.5px solid var(--border-color);
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.partner-type-btn.active {
+  background: var(--volt);
+  color: var(--color-black);
+  border-color: var(--volt);
+}
+
+.partner-type-btn:active {
+  transform: scale(0.95);
+}
+
+[data-theme="dark"] .partner-type-btn {
+  background: var(--color-dark-surface);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .partner-type-btn.active {
+  background: var(--volt);
+  color: var(--color-black);
+  border-color: var(--volt);
+}
+
+[data-theme="dark"] #postPartnerModal textarea {
+  background: var(--color-dark-surface);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+}

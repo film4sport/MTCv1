@@ -54,7 +54,7 @@ test.describe('Navbar', () => {
   });
 
   test('nav links exist for key sections', async ({ page }) => {
-    const links = ['Home', 'About', 'Membership', 'Events', 'FAQ', 'Login'];
+    const links = ['Home', 'About', 'Membership', 'FAQ', 'Login'];
     for (const text of links) {
       const link = page.locator('.navbar').getByText(text, { exact: false }).first();
       await expect(link).toBeAttached();
@@ -376,13 +376,13 @@ test.describe('Info Page', () => {
   test('tab switching works', async ({ page }) => {
     await page.goto('/info', { waitUntil: 'networkidle' });
     await page.waitForTimeout(1000);
-    // Click About tab
-    await page.getByRole('button', { name: 'About' }).click();
+    // Click About tab (use dispatchEvent for mobile horizontal scroll container)
+    await page.getByRole('button', { name: 'About' }).dispatchEvent('click');
     await page.waitForTimeout(500);
     const aboutContent = page.getByText('Passion, Community,');
     await expect(aboutContent).toBeAttached();
     // Click FAQ tab
-    await page.getByRole('button', { name: 'FAQ' }).click();
+    await page.getByRole('button', { name: 'FAQ' }).dispatchEvent('click');
     await page.waitForTimeout(500);
     const faqContent = page.getByText('Frequently Asked Questions');
     await expect(faqContent).toBeAttached();

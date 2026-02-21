@@ -781,7 +781,7 @@ function InfoPageContent() {
                           value={signupData.password}
                           onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
                           maxLength={100}
-                          placeholder="Create a password (min. 6 characters)"
+                          placeholder="Min. 8 chars, uppercase, lowercase & number"
                           className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors"
                           style={{ backgroundColor: '#faf8f3', border: '1px solid #e0dcd3', color: '#2a2f1e' }}
                         />
@@ -805,13 +805,18 @@ function InfoPageContent() {
                             setSignupError('Please enter a valid email address');
                             return;
                           }
+                          const pwd = signupData.password;
+                          if (pwd.length < 8 || !/[A-Z]/.test(pwd) || !/[a-z]/.test(pwd) || !/[0-9]/.test(pwd)) {
+                            setSignupError('Password must be at least 8 characters with uppercase, lowercase, and a number');
+                            return;
+                          }
                           setSignupError('');
                           setSignupStep(3);
                         }}
-                        disabled={!signupData.name.trim() || !signupData.email.trim() || signupData.password.length < 6}
+                        disabled={!signupData.name.trim() || !signupData.email.trim() || signupData.password.length < 8}
                         className="flex-1 px-6 py-3 rounded-full text-sm font-semibold transition-all"
                         style={
-                          signupData.name.trim() && signupData.email.trim() && signupData.password.length >= 6
+                          signupData.name.trim() && signupData.email.trim() && signupData.password.length >= 8
                             ? { backgroundColor: '#6b7a3d', color: '#fff' }
                             : { backgroundColor: '#e0dcd3', color: '#999', cursor: 'not-allowed' }
                         }

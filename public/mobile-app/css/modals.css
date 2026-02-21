@@ -1,0 +1,758 @@
+/* modals.css - MTC Court */
+/* ============================================
+   SETTINGS SCREEN
+============================================ */
+
+.settings-group {
+  margin: 0 16px 24px;
+  background: var(--bg-card);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: var(--card-shadow);
+}
+
+.settings-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: background 0.2s;
+  gap: 12px;
+}
+
+.settings-item:active {
+  background: rgba(200, 255, 0, 0.1);
+}
+
+.settings-item:last-child {
+  border-bottom: none;
+}
+
+.settings-item-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+}
+
+.settings-icon {
+  width: 22px;
+  height: 22px;
+  color: var(--text-primary);
+  flex-shrink: 0;
+}
+
+.settings-label {
+  font-size: 15px;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.toggle {
+  width: 50px;
+  height: 28px;
+  background: var(--text-muted);
+  border-radius: 14px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.toggle::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  background: var(--color-white);
+  border-radius: 50%;
+  transition: transform 0.3s;
+}
+
+.toggle.active {
+  background: var(--volt);
+}
+
+.toggle.active::after {
+  transform: translateX(22px);
+}
+
+/* Confetti Canvas */
+#confettiCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 101;
+}
+
+/* ============================================
+   PROFILE EDIT MODAL
+============================================ */
+
+.profile-edit-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 10000;
+  display: flex;
+  align-items: flex-end;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s, visibility 0.3s;
+}
+
+.profile-edit-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.profile-edit-modal {
+  width: 100%;
+  max-height: 85vh;
+  background: var(--bg-primary);
+  border-radius: 24px 24px 0 0;
+  transform: translateY(100%);
+  transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+  overflow-y: auto;
+}
+
+.profile-edit-overlay.active .profile-edit-modal {
+  transform: translateY(0);
+}
+
+.profile-edit-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: var(--bg-primary);
+  z-index: 2;
+}
+
+.profile-edit-close {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: var(--bg-secondary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.profile-edit-close svg {
+  width: 18px;
+  height: 18px;
+  color: var(--text-secondary);
+}
+
+.profile-edit-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px;
+  letter-spacing: 1px;
+  color: var(--text-primary);
+}
+
+.profile-edit-save {
+  padding: 8px 18px;
+  background: var(--volt);
+  border: none;
+  border-radius: 10px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 14px;
+  color: var(--color-black);
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.profile-edit-save:active {
+  transform: scale(0.95);
+}
+
+.profile-edit-body {
+  padding: 24px 20px 40px;
+}
+
+/* Text input */
+.profile-edit-input-wrap {
+  margin-bottom: 16px;
+}
+
+.profile-edit-input {
+  width: 100%;
+  padding: 16px;
+  font-size: 16px;
+  border: 2px solid var(--border);
+  border-radius: 14px;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.profile-edit-input:focus {
+  border-color: var(--volt);
+}
+
+/* Option selectors */
+.profile-edit-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.profile-edit-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: var(--bg-secondary);
+  border: 2px solid transparent;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+}
+
+.profile-edit-option:hover {
+  background: var(--bg-card);
+}
+
+.profile-edit-option.active {
+  border-color: var(--volt);
+  background: rgba(200, 255, 0, 0.08);
+}
+
+.profile-edit-option-text {
+  font-size: 15px;
+  color: var(--text-primary);
+}
+
+.profile-edit-check {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--bg-primary);
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.profile-edit-check svg {
+  width: 14px;
+  height: 14px;
+  opacity: 0;
+  color: var(--color-black);
+  transition: opacity 0.2s;
+}
+
+.profile-edit-option.active .profile-edit-check {
+  background: var(--volt);
+  border-color: var(--volt);
+}
+
+.profile-edit-option.active .profile-edit-check svg {
+  opacity: 1;
+}
+
+/* ============================================
+   BOOKING PRO-TIP MODAL
+============================================ */
+
+.protip-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 10001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s, visibility 0.3s;
+}
+
+.protip-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.protip-modal {
+  width: 100%;
+  max-width: 380px;
+  background: var(--bg-primary);
+  border-radius: 24px;
+  padding: 28px 24px;
+  text-align: center;
+  transform: scale(0.9);
+  transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.protip-overlay.active .protip-modal {
+  transform: scale(1);
+}
+
+.protip-badge {
+  display: inline-block;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: var(--color-black);
+  background: var(--volt);
+  padding: 4px 14px;
+  border-radius: 20px;
+  margin-bottom: 16px;
+}
+
+.protip-icon {
+  width: 52px;
+  height: 52px;
+  background: linear-gradient(135deg, var(--deep-black), #2a2a2a);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 14px;
+}
+
+.protip-icon svg {
+  width: 24px;
+  height: 24px;
+  color: var(--volt);
+}
+
+.protip-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px;
+  letter-spacing: 1px;
+  color: var(--text-primary);
+  margin-bottom: 18px;
+}
+
+.protip-steps {
+  text-align: left;
+  margin-bottom: 14px;
+}
+
+.protip-step {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 8px 0;
+}
+
+.protip-step-num {
+  min-width: 26px;
+  height: 26px;
+  background: var(--deep-black);
+  color: var(--volt);
+  border: 2px solid var(--volt);
+  border-radius: 50%;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+  box-shadow: 0 2px 8px rgba(200, 255, 0, 0.25);
+}
+
+.protip-step-text {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.protip-step-text strong {
+  color: var(--text-primary);
+}
+
+.protip-note {
+  font-size: 12px;
+  color: var(--coral);
+  font-weight: 600;
+  margin-bottom: 20px;
+  padding: 12px 14px;
+  background: rgba(255, 90, 95, 0.08);
+  border: 1px solid rgba(255, 90, 95, 0.25);
+  border-radius: 10px;
+  line-height: 1.5;
+}
+
+.protip-dismiss-btn {
+  width: 100%;
+  padding: 14px;
+  background: var(--volt);
+  border: none;
+  border-radius: 14px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 16px;
+  color: var(--color-black);
+  cursor: pointer;
+  margin-bottom: 8px;
+  transition: transform 0.2s;
+}
+
+.protip-dismiss-btn:active {
+  transform: scale(0.97);
+}
+
+.protip-never-btn {
+  width: 100%;
+  padding: 10px;
+  background: none;
+  border: none;
+  font-size: 13px;
+  color: var(--text-muted);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ============================================
+   REUSABLE CONFIRMATION MODAL
+============================================ */
+
+.confirm-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 10000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s, visibility 0.3s;
+}
+
+.confirm-modal-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.confirm-modal {
+  width: 100%;
+  max-width: 420px;
+  background: var(--bg-primary);
+  border-radius: 24px 24px 0 0;
+  padding: 12px 24px 32px;
+  transform: translateY(100%);
+  transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+  text-align: center;
+}
+
+.confirm-modal-overlay.active .confirm-modal {
+  transform: translateY(0);
+}
+
+.confirm-modal-handle {
+  width: 36px;
+  height: 4px;
+  background: var(--text-muted);
+  opacity: 0.3;
+  border-radius: 2px;
+  margin: 0 auto 20px;
+}
+
+.confirm-modal-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+
+.confirm-modal-icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+.confirm-modal-icon.danger {
+  background: rgba(255, 90, 95, 0.15);
+}
+
+.confirm-modal-icon.danger svg {
+  color: var(--coral);
+}
+
+.confirm-modal-icon.warning {
+  background: rgba(255, 180, 0, 0.15);
+}
+
+.confirm-modal-icon.warning svg {
+  color: #f5a623;
+}
+
+.confirm-modal-icon.info {
+  background: rgba(0, 180, 216, 0.15);
+}
+
+.confirm-modal-icon.info svg {
+  color: var(--electric-blue);
+}
+
+.confirm-modal-icon.success {
+  background: rgba(200, 255, 0, 0.2);
+}
+
+.confirm-modal-icon.success svg {
+  color: #5a8a00;
+}
+
+.confirm-modal-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  letter-spacing: 1px;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.confirm-modal-message {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.confirm-modal-detail {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+  padding: 10px 14px;
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  display: none;
+}
+
+.confirm-modal-detail:not(:empty) {
+  display: block;
+}
+
+.confirm-modal-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.confirm-modal-btn {
+  flex: 1;
+  padding: 14px;
+  border: none;
+  border-radius: 14px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 16px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.confirm-modal-btn:active {
+  transform: scale(0.97);
+}
+
+.confirm-modal-btn.secondary {
+  background: var(--bg-secondary);
+  color: var(--text-muted);
+}
+
+.confirm-modal-btn.primary {
+  color: var(--color-black);
+  background: var(--volt);
+}
+
+.confirm-modal-btn.primary.danger {
+  background: var(--coral);
+  color: var(--color-white);
+}
+
+.confirm-modal-btn.primary.warning {
+  background: #f5a623;
+  color: var(--color-white);
+}
+
+
+/* ============================================
+   LIQUID GLASS - MODALS
+============================================ */
+/* Modals */
+.profile-edit-modal {
+  background: rgba(30, 30, 28, 0.88);
+  backdrop-filter: blur(16px) saturate(200%);
+  -webkit-backdrop-filter: blur(16px) saturate(200%);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  box-shadow:
+    0 0 40px rgba(200, 255, 0, 0.1),
+    0 20px 40px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+[data-theme="light"] .profile-edit-modal {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(16px) saturate(200%);
+  -webkit-backdrop-filter: blur(16px) saturate(200%);
+  border: 1.5px solid rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+/* ============================================
+   REUSABLE MODAL UTILITIES
+============================================ */
+
+/* Scrollable modal body */
+.modal-scrollable {
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.modal-scrollable-tall {
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+/* Modal sizing variants */
+.modal-sm {
+  max-width: 320px;
+}
+
+.modal-md {
+  max-width: 380px;
+}
+
+.modal-lg {
+  max-width: 400px;
+}
+
+/* Modal icon - no background, SVG has its own dark circle */
+.modal-icon-success {
+  background: none;
+}
+
+.modal-icon-reset {
+  background: linear-gradient(135deg, var(--electric-blue) 0%, #0099cc 100%);
+}
+
+/* Secondary/ghost modal button */
+.modal-btn-secondary {
+  width: 100%;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  font-size: 14px;
+  padding: 14px;
+  border-radius: 12px;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+/* Ghost text button (no border) */
+.modal-btn-ghost {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 14px;
+  padding: 12px;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+/* Form label inside modals */
+.modal-form-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  display: block;
+  margin-bottom: 6px;
+}
+
+/* Form group spacing in modals */
+.modal-form-group {
+  margin-bottom: 16px;
+}
+
+/* Pill button group in modals */
+.modal-pill-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+/* Textarea in modals */
+.modal-textarea {
+  width: 100%;
+  min-height: 70px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 14px;
+  resize: vertical;
+  font-family: 'Inter', sans-serif;
+  box-sizing: border-box;
+}
+
+/* Full-width primary action button in modals */
+.modal-btn-primary-full {
+  width: 100%;
+  padding: 14px;
+  background: var(--volt);
+  color: var(--color-black);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 16px;
+  letter-spacing: 1px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  margin-top: 16px;
+  transition: transform 0.2s;
+}
+
+.modal-btn-primary-full:active {
+  transform: scale(0.97);
+}
+
+/* Confirm modal - structure only, backgrounds in neumorphic.css */
+.confirm-modal {
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 
+    0 0 40px rgba(200, 255, 0, 0.1),
+    0 20px 40px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+[data-theme="light"] .confirm-modal {
+  border: 1.5px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
