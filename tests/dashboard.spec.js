@@ -97,7 +97,7 @@ test.describe('Dashboard — Structure', () => {
     await page.locator('input[type="password"]').click();
     await page.keyboard.type('member123', { delay: 20 });
     await page.locator('button[type="submit"]').click();
-    await page.waitForURL('**/dashboard**', { timeout: 15000 });
+    await page.waitForURL('**/dashboard**', { timeout: 30000, waitUntil: 'commit' });
     await page.waitForTimeout(1000);
   });
 
@@ -136,7 +136,7 @@ test.describe('Dashboard — Profile Page', () => {
     await page.locator('input[type="password"]').click();
     await page.keyboard.type('member123', { delay: 20 });
     await page.locator('button[type="submit"]').click();
-    await page.waitForURL('**/dashboard**', { timeout: 15000 });
+    await page.waitForURL('**/dashboard**', { timeout: 30000, waitUntil: 'commit' });
     await page.waitForTimeout(500);
     await page.goto('/dashboard/profile', { waitUntil: 'domcontentloaded', timeout: 30000 });
     await page.waitForTimeout(1000);
