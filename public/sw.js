@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mtc-v10'; // Bump on each deploy to invalidate old caches
+const CACHE_NAME = 'mtc-v11'; // Bump on each deploy to invalidate old caches
 const STATIC_ASSETS = [
   '/manifest.json',
   '/favicon.png',
@@ -70,7 +70,10 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // For static assets (images, fonts, manifest) — cache-first strategy
+  // Skip cross-origin requests entirely — let the browser handle CDN images naturally
+  if (url.origin !== self.location.origin) return;
+
+  // For same-origin static assets (images, fonts, manifest) — cache-first strategy
   const isStaticAsset = STATIC_ASSETS.some(asset => url.pathname === asset) ||
     url.pathname.match(/\.(png|jpg|jpeg|gif|svg|ico|woff|woff2|otf|ttf|webp)$/);
 
@@ -79,7 +82,7 @@ self.addEventListener('fetch', (event) => {
       caches.match(event.request).then((cached) => {
         if (cached) return cached;
         return fetch(event.request).then((response) => {
-          if (response.ok && url.origin === self.location.origin) {
+          if (response.ok) {
             const clone = response.clone();
             caches.open(CACHE_NAME).then((cache) => {
               cache.put(event.request, clone);
@@ -92,15 +95,12 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Everything else (RSC payloads, JSON, etc.) — force network fetch.
+  // Everything else same-origin (RSC payloads, JSON, etc.) — force network fetch.
   // A bare `return;` would let the browser's HTTP cache serve stale content.
   // Using event.respondWith(fetch()) bypasses the HTTP cache from within the SW.
-  if (url.origin === self.location.origin) {
-    event.respondWith(
-      fetch(event.request).catch(function() {
-        return new Response('Network error', { status: 503 });
-      })
-    );
-    return;
-  }
+  event.respondWith(
+    fetch(event.request).catch(function() {
+      return new Response('Network error', { status: 503 });
+    })
+  );
 });

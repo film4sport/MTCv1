@@ -7,9 +7,6 @@ const MONTH_NAMES = [
   'July', 'August', 'September', 'October', 'November', 'December',
 ];
 
-const SEASON_START_MONTH = 4; // May
-const SEASON_END_MONTH = 9; // October
-
 const specialEvents = [
   { date: '2026-05-09', title: 'Opening Day BBQ & Meet the Pros', time: '1:00 - 3:00 PM', type: 'special' },
   { date: '2026-07-26', title: '95+ Mixed Doubles Tournament (Day 1)', time: 'All Day', type: 'tournament' },
@@ -47,12 +44,9 @@ function getEventsForDate(year: number, month: number, day: number): CalEvent[] 
     if (e.date === dateStr) events.push(e);
   });
 
-  const openingDay = new Date(2026, 4, 9);
-  if (month >= SEASON_START_MONTH && month <= SEASON_END_MONTH && date > openingDay) {
-    recurringEvents.forEach((e) => {
-      if (e.day === dayOfWeek) events.push(e);
-    });
-  }
+  recurringEvents.forEach((e) => {
+    if (e.day === dayOfWeek) events.push(e);
+  });
 
   return events;
 }
@@ -255,6 +249,13 @@ export default function Schedule() {
                         {e.time}
                       </p>
                     </div>
+                    <a
+                      href="/login"
+                      className="text-xs px-3 py-1.5 rounded-full font-medium transition-all hover:opacity-80 flex-shrink-0"
+                      style={{ background: 'rgba(212,225,87,0.15)', color: '#d4e157', border: '1px solid rgba(212,225,87,0.3)' }}
+                    >
+                      RSVP →
+                    </a>
                   </div>
                 ))}
               </div>
