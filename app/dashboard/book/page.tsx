@@ -7,7 +7,7 @@ import { TIME_SLOTS, COURTS_CONFIG, FEES } from '../lib/types';
 import { generateId } from '../lib/utils';
 import {
   ViewMode, COURT_COLORS, getTimeRange,
-  isSlotBooked, isSlotMine, isSlotPast, isCourtClosed, canCancel,
+  isSlotBooked, isSlotMine, isSlotPast, isCourtClosed, isCourtInMaintenance, canCancel,
   formatDateShort, isToday,
 } from './components/booking-utils';
 import BookingLegend from './components/BookingLegend';
@@ -16,7 +16,7 @@ import BookingSidebar from './components/BookingSidebar';
 import SuccessModal from './components/SuccessModal';
 
 export default function BookCourtPage() {
-  const { currentUser, members, bookings, events, addBooking, cancelBooking, showToast } = useApp();
+  const { currentUser, members, bookings, courts, events, addBooking, cancelBooking, showToast } = useApp();
   const [bookingSuccess, setBookingSuccess] = useState<{ courtName: string; date: string; time: string; participants?: { id: string; name: string }[] } | null>(null);
   const [view, setView] = useState<ViewMode>('week');
   const [weekStart, setWeekStart] = useState(() => {
@@ -63,6 +63,7 @@ export default function BookCourtPage() {
       }
       return;
     }
+    if (isCourtInMaintenance(courts, courtId)) { showToast('This court is currently closed', 'error'); return; }
     if (isSlotBooked(bookings, courtId, date, time) || isSlotPast(date, time) || isCourtClosed(courtId, time)) return;
     setModalData({ courtId, courtName, date, time });
     setShowModal(true);
@@ -156,24 +157,26 @@ export default function BookCourtPage() {
             {COURTS_CONFIG.map(c => {
               const colors = COURT_COLORS[c.id];
               const active = selectedCourt === c.id;
+              const closed = isCourtInMaintenance(courts, c.id);
               return (
                 <button
                   key={c.id}
                   onClick={() => setSelectedCourt(c.id)}
                   className="relative px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 shrink-0"
                   style={{
-                    background: active ? '#2a2f1e' : '#fff',
-                    color: active ? '#fff' : '#6b7266',
+                    background: active ? '#2a2f1e' : closed ? '#f5f2eb' : '#fff',
+                    color: active ? '#fff' : closed ? '#b5b0a5' : '#6b7266',
                     border: active ? '1px solid #2a2f1e' : '1px solid #e0dcd3',
                     boxShadow: active ? '0 2px 8px rgba(42,47,30,0.15)' : 'none',
+                    opacity: closed && !active ? 0.7 : 1,
                   }}
                 >
                   <span className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full" style={{ background: active ? '#d4e157' : colors.dot, opacity: active ? 1 : 0.5 }} />
+                    <span className="w-2 h-2 rounded-full" style={{ background: closed ? '#dc2626' : active ? '#d4e157' : colors.dot, opacity: active ? 1 : 0.5 }} />
                     {c.name}
                   </span>
                   <span className="block text-[0.6rem] font-normal mt-0.5" style={{ opacity: 0.7 }}>
-                    {c.floodlight ? 'til 10 PM' : 'til 8 PM'}
+                    {closed ? 'Closed' : c.floodlight ? 'til 10 PM' : 'til 8 PM'}
                   </span>
                 </button>
               );
@@ -226,7 +229,7 @@ export default function BookCourtPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {slotsForCourt.map(time => (
+                        {(() => { const courtClosed = isCourtInMaintenance(courts, selectedCourt); return slotsForCourt.map(time => (
                           <tr key={time}>
                             <td className="sticky left-0 z-10 px-3 py-0 text-[0.7rem] font-medium border-b" style={{ borderColor: '#f7f5f0', background: '#faf8f3', color: '#9ca3a0' }}>{time}</td>
                             {weekDays.map(day => {
@@ -234,7 +237,7 @@ export default function BookCourtPage() {
                               const booked = isSlotBooked(bookings, selectedCourt, dateStr, time);
                               const mine = isSlotMine(bookings, selectedCourt, dateStr, time, currentUser?.id);
                               const past = isSlotPast(dateStr, time);
-                              const closed = isCourtClosed(selectedCourt, time);
+                              const closed = isCourtClosed(selectedCourt, time) || courtClosed;
                               const isProgram = booked?.type === 'program';
                               const isLesson = booked?.type === 'lesson';
                               const today = isToday(day);
@@ -243,7 +246,7 @@ export default function BookCourtPage() {
                               const showTooltipHere = hoveredSlot === slotKey && booked && !mine;
 
                               return (
-                                <td key={`${dateStr}-${time}`} className="border-b p-[3px] relative" style={{ borderColor: '#f7f5f0', background: today ? 'rgba(107, 122, 61, 0.02)' : 'transparent' }}>
+                                <td key={`${dateStr}-${time}`} className="border-b p-[3px] relative" style={{ borderColor: '#f7f5f0', background: courtClosed ? '#f5f2eb' : today ? 'rgba(107, 122, 61, 0.02)' : 'transparent' }}>
                                   <button
                                     onClick={() => handleSlotClick(selectedCourt, courtConfig.name, dateStr, time)}
                                     onMouseEnter={() => (booked && !mine) ? handleSlotHover(slotKey) : undefined}
@@ -251,10 +254,10 @@ export default function BookCourtPage() {
                                     disabled={(!mine && !!booked) || past || closed}
                                     className={`slot-cell w-full rounded-lg text-xs font-medium py-2.5 px-2 transition-all duration-150 relative overflow-hidden ${available ? 'hover:border-[#6b7a3d] hover:border-solid hover:bg-[#6b7a3d]/[0.04]' : ''}`}
                                     style={{
-                                      background: mine ? '#6b7a3d' : isLesson ? 'rgba(59, 130, 246, 0.08)' : isProgram ? 'rgba(245, 158, 11, 0.08)' : booked ? '#f5f3ee' : 'transparent',
-                                      color: mine ? '#fff' : isLesson ? '#3b82f6' : isProgram ? '#d97706' : booked ? '#b5b0a5' : past || closed ? '#d5d0c8' : '#6b7a3d',
+                                      background: mine ? '#6b7a3d' : courtClosed ? '#f0ede6' : isLesson ? 'rgba(59, 130, 246, 0.08)' : isProgram ? 'rgba(245, 158, 11, 0.08)' : booked ? '#f5f3ee' : 'transparent',
+                                      color: mine ? '#fff' : courtClosed ? '#c5c0b5' : isLesson ? '#3b82f6' : isProgram ? '#d97706' : booked ? '#b5b0a5' : past || closed ? '#d5d0c8' : '#6b7a3d',
                                       cursor: available ? 'pointer' : mine ? 'pointer' : 'default',
-                                      border: mine ? '1.5px solid #6b7a3d' : available ? '1.5px dashed #d4d0c7' : '1.5px solid transparent',
+                                      border: mine ? '1.5px solid #6b7a3d' : available ? '1.5px dashed #d4d0c7' : courtClosed ? '1.5px solid #e0dcd3' : '1.5px solid transparent',
                                     }}
                                   >
                                     {mine ? (
@@ -262,6 +265,8 @@ export default function BookCourtPage() {
                                         <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
                                         Booked
                                       </span>
+                                    ) : courtClosed ? (
+                                      <span style={{ opacity: 0.4 }}>Closed</span>
                                     ) : isLesson ? 'Lesson' : isProgram ? 'Program' : booked ? (
                                       <span className="flex items-center justify-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-current opacity-40" />Taken</span>
                                     ) : past || closed ? (
@@ -282,7 +287,7 @@ export default function BookCourtPage() {
                               );
                             })}
                           </tr>
-                        ))}
+                        )); })()}
                       </tbody>
                     </table>
                   </div>
@@ -310,29 +315,29 @@ export default function BookCourtPage() {
                       <p className="text-[0.65rem] mt-0.5" style={{ color: '#9ca3a0' }}>{courtConfig.name} &bull; {courtConfig.floodlight ? 'Lights til 10 PM' : 'Closes 8 PM'}</p>
                     </div>
                     <div className="divide-y" style={{ borderColor: '#f7f5f0' }}>
-                      {slotsForCourt.map(time => {
+                      {(() => { const mobileCourtClosed = isCourtInMaintenance(courts, selectedCourt); return slotsForCourt.map(time => {
                         const booked = isSlotBooked(bookings, selectedCourt, mobileDateStr, time);
                         const mine = isSlotMine(bookings, selectedCourt, mobileDateStr, time, currentUser?.id);
                         const past = isSlotPast(mobileDateStr, time);
-                        const available = !booked && !past;
+                        const available = !booked && !past && !mobileCourtClosed;
                         const isLesson = booked?.type === 'lesson';
                         const isProgram = booked?.type === 'program';
 
                         return (
-                          <button key={time} onClick={() => (available || mine) ? handleSlotClick(selectedCourt, courtConfig.name, mobileDateStr, time) : undefined} disabled={!available && !mine} className="w-full flex items-center justify-between px-4 py-3.5 transition-colors" style={{ background: mine ? 'rgba(107, 122, 61, 0.06)' : 'transparent', cursor: (available || mine) ? 'pointer' : 'default' }}>
+                          <button key={time} onClick={() => (available || mine) ? handleSlotClick(selectedCourt, courtConfig.name, mobileDateStr, time) : undefined} disabled={!available && !mine} className="w-full flex items-center justify-between px-4 py-3.5 transition-colors" style={{ background: mine ? 'rgba(107, 122, 61, 0.06)' : mobileCourtClosed ? '#f5f2eb' : 'transparent', cursor: (available || mine) ? 'pointer' : 'default' }}>
                             <div className="flex items-center gap-3">
-                              <div className="w-1.5 h-8 rounded-full" style={{ background: mine ? '#6b7a3d' : isLesson ? '#3b82f6' : isProgram ? '#d97706' : available ? '#d4d0c7' : '#f0ede6' }} />
+                              <div className="w-1.5 h-8 rounded-full" style={{ background: mine ? '#6b7a3d' : mobileCourtClosed ? '#e0dcd3' : isLesson ? '#3b82f6' : isProgram ? '#d97706' : available ? '#d4d0c7' : '#f0ede6' }} />
                               <div className="text-left">
-                                <span className="text-sm font-medium" style={{ color: (past && !mine) ? '#d1d5db' : '#2a2f1e' }}>{time}</span>
+                                <span className="text-sm font-medium" style={{ color: (past && !mine) || mobileCourtClosed ? '#d1d5db' : '#2a2f1e' }}>{time}</span>
                                 <span className="block text-[0.65rem]" style={{ color: '#9ca3a0' }}>{getTimeRange(time).split(' – ')[1] ? `til ${getTimeRange(time).split(' – ')[1]}` : ''}</span>
                               </div>
                             </div>
-                            <span className="text-xs font-medium" style={{ color: mine ? '#6b7a3d' : isLesson ? '#3b82f6' : isProgram ? '#d97706' : available ? '#9ca3a0' : '#d1d5db' }}>
-                              {mine ? 'Your Booking ✓' : isLesson ? 'Lesson' : isProgram ? 'Program' : booked ? booked.userName : past ? 'Past' : 'Available'}
+                            <span className="text-xs font-medium" style={{ color: mine ? '#6b7a3d' : mobileCourtClosed ? '#c5c0b5' : isLesson ? '#3b82f6' : isProgram ? '#d97706' : available ? '#9ca3a0' : '#d1d5db' }}>
+                              {mine ? 'Your Booking ✓' : mobileCourtClosed ? 'Closed' : isLesson ? 'Lesson' : isProgram ? 'Program' : booked ? booked.userName : past ? 'Past' : 'Available'}
                             </span>
                           </button>
                         );
-                      })}
+                      }); })()}
                     </div>
                   </div>
                 </div>

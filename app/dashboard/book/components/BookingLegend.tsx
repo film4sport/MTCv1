@@ -22,6 +22,10 @@ export default function BookingLegend() {
         Program
       </div>
       <div className="flex items-center gap-1.5">
+        <span className="w-5 h-3 rounded" style={{ background: '#f0ede6', border: '1px solid #e0dcd3' }} />
+        Closed
+      </div>
+      <div className="flex items-center gap-1.5">
         <span className="w-2 h-2 rounded-full" style={{ background: '#d4e157' }} />
         Club Event
       </div>

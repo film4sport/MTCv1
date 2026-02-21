@@ -129,21 +129,6 @@ export interface WeatherData {
   lastUpdated: string | null;
 }
 
-export interface MemberPayment {
-  memberId: string;
-  memberName: string;
-  balance: number;
-  history: PaymentEntry[];
-}
-
-export interface PaymentEntry {
-  id: string;
-  date: string;
-  description: string;
-  amount: number;
-  type: 'charge' | 'payment';
-}
-
 export interface AdminAnalytics {
   totalBookingsThisMonth: number;
   bookingsChange: number;

@@ -4,7 +4,7 @@ test.describe('Landing Page - Load & Structure', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/', { waitUntil: 'networkidle' });
     // Wait for loader to finish
-    await page.waitForTimeout(4500);
+    await page.waitForTimeout(2500);
   });
 
   test('page loads without console errors', async ({ page }) => {
@@ -37,7 +37,7 @@ test.describe('Landing Page - Load & Structure', () => {
 test.describe('Navbar', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/', { waitUntil: 'networkidle' });
-    await page.waitForTimeout(4500);
+    await page.waitForTimeout(2500);
   });
 
   test('navbar exists and is fixed', async ({ page }) => {
@@ -70,7 +70,7 @@ test.describe('Navbar', () => {
 test.describe('Hero Section', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/', { waitUntil: 'networkidle' });
-    await page.waitForTimeout(4500);
+    await page.waitForTimeout(2500);
   });
 
   test('hero section renders with parallax background', async ({ page }) => {
@@ -105,7 +105,7 @@ test.describe('Hero Section', () => {
 test.describe('Events Section', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/', { waitUntil: 'networkidle' });
-    await page.waitForTimeout(4500);
+    await page.waitForTimeout(2500);
     await page.locator('#events').scrollIntoViewIfNeeded();
     await page.waitForTimeout(500);
   });
@@ -154,7 +154,7 @@ test.describe('Events Section', () => {
 test.describe('Schedule / Calendar Section', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/', { waitUntil: 'networkidle' });
-    await page.waitForTimeout(4500);
+    await page.waitForTimeout(2500);
     await page.locator('#schedule').scrollIntoViewIfNeeded();
     await page.waitForTimeout(500);
   });
@@ -201,7 +201,7 @@ test.describe('Schedule / Calendar Section', () => {
 test.describe('Partners Section', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/', { waitUntil: 'networkidle' });
-    await page.waitForTimeout(4500);
+    await page.waitForTimeout(2500);
   });
 
   test('3 partner logos are displayed', async ({ page }) => {
@@ -220,7 +220,7 @@ test.describe('Partners Section', () => {
 test.describe('Gallery Section', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/', { waitUntil: 'networkidle' });
-    await page.waitForTimeout(4500);
+    await page.waitForTimeout(2500);
     await page.locator('#gallery').scrollIntoViewIfNeeded();
     await page.waitForTimeout(500);
   });
@@ -258,7 +258,7 @@ test.describe('Gallery Section', () => {
 test.describe('Wave Dividers', () => {
   test('wave divider exists on the page', async ({ page }) => {
     await page.goto('/', { waitUntil: 'networkidle' });
-    await page.waitForTimeout(4500);
+    await page.waitForTimeout(2500);
     const dividers = page.locator('.wave-divider');
     const count = await dividers.count();
     expect(count).toBeGreaterThanOrEqual(1);
@@ -268,7 +268,7 @@ test.describe('Wave Dividers', () => {
 test.describe('Footer', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/', { waitUntil: 'networkidle' });
-    await page.waitForTimeout(4500);
+    await page.waitForTimeout(2500);
     await page.locator('footer').scrollIntoViewIfNeeded();
     await page.waitForTimeout(500);
   });
@@ -303,7 +303,7 @@ test.describe('Footer', () => {
 test.describe('No ClubSpark Links - Full Page', () => {
   test('zero ClubSpark links on entire page', async ({ page }) => {
     await page.goto('/', { waitUntil: 'networkidle' });
-    await page.waitForTimeout(4500);
+    await page.waitForTimeout(2500);
     const clubsparkLinks = await page.locator('a[href*="clubspark"]').count();
     expect(clubsparkLinks).toBe(0);
   });

@@ -219,7 +219,6 @@ test.describe('Admin Dashboard', () => {
     await expect(page.getByRole('button', { name: 'Dashboard', exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Members', exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Courts', exact: true })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Payments', exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Announcements', exact: true })).toBeVisible();
   });
 
@@ -249,14 +248,6 @@ test.describe('Admin Dashboard', () => {
     const body = await page.textContent('body');
     // Announcements tab is active, content should exist
     expect(body.length).toBeGreaterThan(100);
-  });
-
-  test('admin payments tab shows payment data', async ({ page }) => {
-    await goTo(page, '/dashboard/admin');
-    await page.getByRole('button', { name: 'Payments', exact: true }).click();
-    await page.waitForTimeout(500);
-    const body = await page.textContent('body');
-    expect(body).toBeTruthy();
   });
 
   test('admin sidebar shows Admin Panel link', async ({ page }) => {
