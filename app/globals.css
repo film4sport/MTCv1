@@ -41,9 +41,9 @@ html, body, #__next, main, div {
   :root {
     color-scheme: light only !important;
   }
-  
+
   html, body {
-    background-color: #f9fafb !important;
+    background-color: #1a1f12 !important;
     color: #111827 !important;
     filter: none !important;
     -webkit-filter: none !important;
@@ -52,7 +52,8 @@ html, body, #__next, main, div {
 
 @layer base {
   body {
-    @apply bg-gray-50 text-gray-900;
+    @apply text-gray-900;
+    background-color: #1a1f12;
     color-scheme: light only !important;
     overflow-x: clip;
     padding-left: var(--sal);

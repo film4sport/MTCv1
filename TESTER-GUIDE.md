@@ -49,7 +49,10 @@
 - **Lessons:** View available coaching programs, enroll
 - **Messages:** Send a message to another member
 - **Profile:** View your profile info
-- **Settings:** Toggle notification preferences
+- **Settings:** Toggle notification preferences, toggle haptic feedback on/off
+- **Settings:** Try "Install MTC App" button — should show inline instructions (not a browser alert)
+- **Refresh button:** Tap the refresh icon (↻) in the header to reload data from Supabase
+- **Keyboard:** Press `Escape` to close any open modal or dialog
 
 ### 4. Coach Dashboard
 - **Login as:** `coach@mtc.ca` / `coach123`
@@ -64,6 +67,7 @@
 - **Members tab:** Search members, pause/reactivate/cancel a member
 - **Courts tab:** Close a court (toggle button) — then switch to member account and verify court shows as "Closed" on booking page
 - **Announcements tab:** Post a new announcement (info/warning/urgent), delete existing ones
+- Note: **Payments tab was removed** — payments are e-transfers handled outside the app
 
 ### 6. Cross-Feature Tests
 - Book a court as member, then check if it appears on the landing page calendar for that day
@@ -73,11 +77,20 @@
 
 ---
 
+### 7. Mobile-Specific Tests
+- **Haptic feedback** (Android only): Tap booking slots, RSVP buttons, send messages — should feel a light vibration
+- Haptic can be disabled in **Settings → Preferences → Haptic Feedback**
+- **Animations:** Empty states should animate in, partner cards should fade out on removal
+- **Modals:** All modals should be scrollable on small screens
+
+---
+
 ## Known Limitations
 - **Profile NTRP rating** is hardcoded at 3.5 — editing not yet implemented
 - **Signup flow** creates a real Supabase account — use test emails if testing signup
 - **Weather widget** requires internet connection (Open-Meteo API)
 - **Demo data** resets periodically — bookings you make may disappear
+- **Haptic feedback** only works on Android Chrome — iOS Safari does not support the Vibration API
 
 ---
 
