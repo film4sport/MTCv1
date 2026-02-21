@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { signUp, signIn } from '../dashboard/lib/auth';
+import { sendWelcomeMessage } from '../dashboard/lib/db';
 import '../(landing)/styles/landing.css';
 
 const privacySections = [
@@ -294,6 +295,9 @@ function InfoPageContent() {
 
       // Sign in immediately to establish Supabase session (so middleware allows dashboard access)
       await signIn(signupData.email, signupData.password);
+
+      // Send welcome message with gate code (non-blocking)
+      sendWelcomeMessage(user.id, user.name).catch(err => console.error('[MTC] welcome message:', err));
 
       // Cache user for instant dashboard access
       localStorage.setItem('mtc-current-user', JSON.stringify(user));

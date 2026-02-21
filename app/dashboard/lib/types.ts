@@ -5,6 +5,7 @@ export interface User {
   name: string;
   email: string;
   role: 'member' | 'coach' | 'admin';
+  status?: 'active' | 'paused'; // undefined treated as 'active'
   ntrp?: number; // skill rating 1.0 - 7.0
   memberSince?: string;
   avatar?: string;
@@ -31,7 +32,7 @@ export interface Booking {
   guestName?: string;
   participants?: { id: string; name: string }[];
   status: 'confirmed' | 'cancelled';
-  type: 'court' | 'partner' | 'ball-machine' | 'program';
+  type: 'court' | 'partner' | 'ball-machine' | 'program' | 'lesson';
   programId?: string;
 }
 

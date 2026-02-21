@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useApp } from '../lib/store';
 import DashboardHeader from '../components/DashboardHeader';
 import { generateId } from '../lib/utils';
@@ -9,11 +9,88 @@ import * as db from '../lib/db';
 type AdminTab = 'dashboard' | 'members' | 'courts' | 'payments' | 'announcements';
 
 export default function AdminPage() {
-  const { currentUser, members, bookings, courts, setCourts, payments, analytics, announcements, setAnnouncements } = useApp();
+  const { currentUser, members, setMembers, bookings, courts, setCourts, payments, analytics, announcements, setAnnouncements, showToast } = useApp();
   const [tab, setTab] = useState<AdminTab>('dashboard');
   const [memberSearch, setMemberSearch] = useState('');
   const [newAnnouncement, setNewAnnouncement] = useState('');
   const [newAnnouncementType, setNewAnnouncementType] = useState<'info' | 'warning' | 'urgent'>('info');
+
+  // Gate code state
+  const [gateCode, setGateCode] = useState('');
+  const [newGateCode, setNewGateCode] = useState('');
+  const [gateCodeLoading, setGateCodeLoading] = useState(false);
+
+  // Member action state
+  const [actionTarget, setActionTarget] = useState<{ id: string; name: string; action: 'pause' | 'unpause' | 'cancel' } | null>(null);
+  const [actionLoading, setActionLoading] = useState(false);
+
+  // Fetch gate code on mount
+  useEffect(() => {
+    db.getGateCode().then(code => { if (code) setGateCode(code); });
+  }, []);
+
+  // Handle gate code update
+  const handleGateCodeUpdate = async () => {
+    if (!newGateCode.trim() || !currentUser) return;
+    setGateCodeLoading(true);
+    try {
+      await db.updateGateCode(newGateCode.trim(), currentUser.id);
+      setGateCode(newGateCode.trim());
+
+      // Send message + notification to all active non-admin members
+      const activeMembers = members.filter(m => m.id !== currentUser.id && m.role !== 'admin' && (m.status || 'active') === 'active');
+      for (const member of activeMembers) {
+        await db.sendMessageByUsers({
+          id: generateId('msg'),
+          fromId: currentUser.id,
+          fromName: 'Mono Tennis Club',
+          toId: member.id,
+          toName: member.name,
+          text: `The court gate code has been updated. Your new gate code is: ${newGateCode.trim()}\n\nPlease keep this code confidential and do not share it with non-members.`,
+        });
+        await db.createNotification(member.id, {
+          id: generateId('n'),
+          type: 'message',
+          title: 'Gate Code Updated',
+          body: 'The court gate code has been changed. Check your messages for the new code.',
+          timestamp: new Date().toISOString(),
+        });
+      }
+
+      setNewGateCode('');
+      showToast(`Gate code updated. ${activeMembers.length} member${activeMembers.length !== 1 ? 's' : ''} notified.`);
+    } catch (err) {
+      console.error('[MTC Supabase] gate code update:', err);
+      showToast('Failed to update gate code', 'error');
+    }
+    setGateCodeLoading(false);
+  };
+
+  // Handle member actions
+  const handleMemberAction = async () => {
+    if (!actionTarget) return;
+    setActionLoading(true);
+    try {
+      if (actionTarget.action === 'pause') {
+        await db.pauseMember(actionTarget.id);
+        setMembers(members.map(m => m.id === actionTarget.id ? { ...m, status: 'paused' as const } : m));
+        showToast(`${actionTarget.name}'s membership paused.`);
+      } else if (actionTarget.action === 'unpause') {
+        await db.unpauseMember(actionTarget.id);
+        setMembers(members.map(m => m.id === actionTarget.id ? { ...m, status: 'active' as const } : m));
+        showToast(`${actionTarget.name}'s membership reactivated.`);
+      } else if (actionTarget.action === 'cancel') {
+        await db.deleteMember(actionTarget.id);
+        setMembers(members.filter(m => m.id !== actionTarget.id));
+        showToast(`${actionTarget.name}'s account deleted.`);
+      }
+    } catch (err) {
+      console.error('[MTC Supabase] member action:', err);
+      showToast('Action failed', 'error');
+    }
+    setActionLoading(false);
+    setActionTarget(null);
+  };
 
   // Non-admin redirect (extra guard in addition to layout)
   if (!currentUser || currentUser.role !== 'admin') {
@@ -140,6 +217,46 @@ export default function AdminPage() {
                   {btn.label}
                 </button>
               ))}
+            </div>
+
+            {/* Gate Code Management */}
+            <div className="rounded-2xl border p-5" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'rgba(107, 122, 61, 0.1)' }}>
+                  <svg className="w-5 h-5" style={{ color: '#6b7a3d' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                  </svg>
+                </div>
+                <div>
+                  <h4 className="font-medium text-sm" style={{ color: '#2a2f1e' }}>Court Gate Code</h4>
+                  <p className="text-xs" style={{ color: '#6b7266' }}>Access code for the court gate lock</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="px-4 py-2.5 rounded-xl text-lg font-bold tracking-widest" style={{ background: '#f5f2eb', color: '#2a2f1e' }}>
+                  {gateCode || '—'}
+                </div>
+                <span className="text-xs" style={{ color: '#6b7266' }}>Current code</span>
+              </div>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newGateCode}
+                  onChange={(e) => setNewGateCode(e.target.value)}
+                  placeholder="Enter new code..."
+                  maxLength={10}
+                  className="flex-1 px-4 py-2.5 rounded-xl text-sm border focus:outline-none focus:ring-2 focus:ring-[#6b7a3d]/20"
+                  style={{ borderColor: '#e0dcd3', color: '#2a2f1e' }}
+                />
+                <button
+                  onClick={handleGateCodeUpdate}
+                  disabled={!newGateCode.trim() || gateCodeLoading}
+                  className="px-4 py-2.5 rounded-xl text-sm font-medium text-white disabled:opacity-50 transition-all hover:opacity-90 whitespace-nowrap"
+                  style={{ background: '#6b7a3d' }}
+                >
+                  {gateCodeLoading ? 'Updating...' : 'Update & Notify'}
+                </button>
+              </div>
             </div>
 
             {/* Analytics Cards */}
@@ -302,7 +419,9 @@ export default function AdminPage() {
                     <th className="text-left px-4 py-3 text-xs font-medium" style={{ color: '#6b7266' }}>Email</th>
                     <th className="text-left px-4 py-3 text-xs font-medium" style={{ color: '#6b7266' }}>Role</th>
                     <th className="text-left px-4 py-3 text-xs font-medium" style={{ color: '#6b7266' }}>NTRP</th>
+                    <th className="text-left px-4 py-3 text-xs font-medium" style={{ color: '#6b7266' }}>Status</th>
                     <th className="text-left px-4 py-3 text-xs font-medium" style={{ color: '#6b7266' }}>Since</th>
+                    <th className="text-right px-4 py-3 text-xs font-medium" style={{ color: '#6b7266' }}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -326,7 +445,45 @@ export default function AdminPage() {
                         </span>
                       </td>
                       <td className="px-4 py-3 text-sm" style={{ color: '#2a2f1e' }}>{m.ntrp || '—'}</td>
+                      <td className="px-4 py-3">
+                        <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{
+                          background: (m.status || 'active') === 'active' ? 'rgba(34, 197, 94, 0.1)' : 'rgba(245, 158, 11, 0.1)',
+                          color: (m.status || 'active') === 'active' ? '#16a34a' : '#d97706',
+                        }}>
+                          {(m.status || 'active') === 'active' ? 'Active' : 'Paused'}
+                        </span>
+                      </td>
                       <td className="px-4 py-3 text-sm" style={{ color: '#6b7266' }}>{m.memberSince || '—'}</td>
+                      <td className="px-4 py-3 text-right">
+                        {m.id !== currentUser.id && m.role !== 'admin' && (
+                          <div className="flex items-center justify-end gap-1.5">
+                            {(m.status || 'active') === 'active' ? (
+                              <button
+                                onClick={() => setActionTarget({ id: m.id, name: m.name, action: 'pause' })}
+                                className="text-xs px-2.5 py-1 rounded-lg transition-colors hover:bg-amber-50"
+                                style={{ color: '#d97706' }}
+                              >
+                                Pause
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => setActionTarget({ id: m.id, name: m.name, action: 'unpause' })}
+                                className="text-xs px-2.5 py-1 rounded-lg transition-colors hover:bg-green-50"
+                                style={{ color: '#16a34a' }}
+                              >
+                                Reactivate
+                              </button>
+                            )}
+                            <button
+                              onClick={() => setActionTarget({ id: m.id, name: m.name, action: 'cancel' })}
+                              className="text-xs px-2.5 py-1 rounded-lg transition-colors hover:bg-red-50"
+                              style={{ color: '#ef4444' }}
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -463,6 +620,62 @@ export default function AdminPage() {
           </div>
         )}
       </div>
+
+      {/* Confirmation Modal */}
+      {actionTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.4)' }}>
+          <div className="rounded-2xl p-6 max-w-sm w-full shadow-xl" style={{ background: '#fff' }}>
+            <div className="w-12 h-12 rounded-xl mx-auto mb-4 flex items-center justify-center" style={{
+              background: actionTarget.action === 'cancel' ? 'rgba(239, 68, 68, 0.1)' : actionTarget.action === 'pause' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(34, 197, 94, 0.1)',
+            }}>
+              {actionTarget.action === 'cancel' ? (
+                <svg className="w-6 h-6" style={{ color: '#ef4444' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              ) : actionTarget.action === 'pause' ? (
+                <svg className="w-6 h-6" style={{ color: '#d97706' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              ) : (
+                <svg className="w-6 h-6" style={{ color: '#16a34a' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              )}
+            </div>
+            <h3 className="text-center font-medium mb-2" style={{ color: '#2a2f1e' }}>
+              {actionTarget.action === 'cancel' ? 'Cancel Membership' : actionTarget.action === 'pause' ? 'Pause Membership' : 'Reactivate Membership'}
+            </h3>
+            <p className="text-center text-sm mb-6" style={{ color: '#6b7266' }}>
+              {actionTarget.action === 'cancel'
+                ? `This will permanently delete ${actionTarget.name}'s account and all their data. This cannot be undone.`
+                : actionTarget.action === 'pause'
+                ? `${actionTarget.name} will be unable to access the dashboard or book courts until reactivated.`
+                : `${actionTarget.name}'s account will be reactivated and they will regain full access.`}
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setActionTarget(null)}
+                disabled={actionLoading}
+                className="flex-1 py-2.5 rounded-xl text-sm font-medium transition-colors"
+                style={{ background: '#f5f2eb', color: '#2a2f1e' }}
+              >
+                Go Back
+              </button>
+              <button
+                onClick={handleMemberAction}
+                disabled={actionLoading}
+                className="flex-1 py-2.5 rounded-xl text-sm font-medium text-white disabled:opacity-50 transition-all hover:opacity-90"
+                style={{
+                  background: actionTarget.action === 'cancel' ? '#ef4444' : actionTarget.action === 'pause' ? '#d97706' : '#16a34a',
+                }}
+              >
+                {actionLoading ? 'Processing...' : actionTarget.action === 'cancel' ? 'Delete Account' : actionTarget.action === 'pause' ? 'Pause' : 'Reactivate'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

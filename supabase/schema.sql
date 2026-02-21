@@ -10,6 +10,7 @@ create table if not exists profiles (
   name text not null,
   email text not null unique,
   role text not null default 'member' check (role in ('member', 'coach', 'admin')),
+  status text not null default 'active' check (status in ('active', 'paused')),
   ntrp numeric(2,1) check (ntrp >= 1.0 and ntrp <= 7.0),
   member_since text,
   avatar text,
@@ -38,7 +39,7 @@ create table if not exists bookings (
   user_name text not null,
   guest_name text,
   status text not null default 'confirmed' check (status in ('confirmed', 'cancelled')),
-  type text not null default 'court' check (type in ('court', 'partner', 'ball-machine', 'program')),
+  type text not null default 'court' check (type in ('court', 'partner', 'ball-machine', 'program', 'lesson')),
   program_id text,
   created_at timestamptz default now()
 );
@@ -245,3 +246,67 @@ drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
+
+-- ─── Club Settings (key-value) ────────────────────────────
+create table if not exists club_settings (
+  key text primary key,
+  value text not null,
+  updated_at timestamptz default now(),
+  updated_by uuid references profiles(id)
+);
+
+-- Seed default gate code
+insert into club_settings (key, value) values ('gate_code', '1234') on conflict do nothing;
+
+-- ─── Delete Member (Admin RPC) ────────────────────────────
+create or replace function delete_member(target_user_id uuid)
+returns void as $$
+begin
+  -- Only admin can call this (RLS on profiles enforces admin check)
+  delete from auth.users where id = target_user_id;
+end;
+$$ language plpgsql security definer;
+
+-- ─── Send Welcome Message (Signup RPC) ────────────────────
+create or replace function send_welcome_message(new_user_id uuid, new_user_name text)
+returns void as $$
+declare
+  v_admin_id uuid;
+  v_gate_code text;
+  v_conv_id integer;
+  v_msg text;
+begin
+  -- Find first admin
+  select id into v_admin_id from profiles where role = 'admin' limit 1;
+  if v_admin_id is null then return; end if;
+
+  -- Get gate code
+  select value into v_gate_code from club_settings where key = 'gate_code';
+
+  -- Build message
+  v_msg := 'Welcome to Mono Tennis Club, ' || split_part(new_user_name, ' ', 1) || '!';
+  if v_gate_code is not null then
+    v_msg := v_msg || E'\n\nYour court gate code is: ' || v_gate_code || E'\n\nPlease keep this code confidential.';
+  end if;
+  v_msg := v_msg || ' See you on the court!';
+
+  -- Create conversation
+  insert into conversations (member_a, member_b, last_message, last_timestamp)
+  values (v_admin_id, new_user_id, v_msg, now())
+  returning id into v_conv_id;
+
+  -- Insert message
+  insert into messages (id, conversation_id, from_id, from_name, to_id, to_name, text, timestamp, read)
+  values (
+    'welcome-' || new_user_id::text,
+    v_conv_id,
+    v_admin_id,
+    'Mono Tennis Club',
+    new_user_id,
+    new_user_name,
+    v_msg,
+    now(),
+    false
+  );
+end;
+$$ language plpgsql security definer;
