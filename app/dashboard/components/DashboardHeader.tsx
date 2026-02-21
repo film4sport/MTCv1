@@ -21,7 +21,7 @@ export default function DashboardHeader({ title }: DashboardHeaderProps) {
   // Map notification type to preference key; announcements always show
   const prefMap: Record<string, keyof typeof notificationPreferences> = {
     booking: 'bookings', event: 'events', payment: 'payments',
-    partner: 'partners', message: 'messages',
+    partner: 'partners', message: 'messages', program: 'programs',
   };
   const filteredNotifications = notifications.filter(n => {
     if (n.type === 'announcement') return true;

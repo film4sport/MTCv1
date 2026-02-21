@@ -336,7 +336,7 @@ export async function markNotificationRead(id: string): Promise<void> {
 }
 
 export async function clearNotifications(userId: string): Promise<void> {
-  await supabase.from('notifications').delete().eq('user_id', userId);
+  await supabase.from('notifications').update({ read: true }).eq('user_id', userId).eq('read', false);
 }
 
 // ─── Payments ───────────────────────────────────────────

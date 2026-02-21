@@ -211,10 +211,29 @@ export default function PartnersPage() {
                     return;
                   }
                   if (!currentUser) return;
-                  // Prevent posting for past dates
-                  if (new Date(postDate + 'T23:59:59') < new Date()) {
+                  // Prevent posting for past date+time
+                  const postDateTime = new Date(postDate + 'T00:00:00');
+                  const today = new Date();
+                  today.setHours(0, 0, 0, 0);
+                  if (postDateTime < today) {
                     showToast('Cannot post for a past date', 'error');
                     return;
+                  }
+                  // Also check if time has passed for today
+                  if (postDateTime.getTime() === today.getTime() && postTime) {
+                    const match = postTime.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+                    if (match) {
+                      let hr = parseInt(match[1]);
+                      const isPM = match[3].toUpperCase() === 'PM';
+                      if (isPM && hr !== 12) hr += 12;
+                      if (!isPM && hr === 12) hr = 0;
+                      const slotTime = new Date();
+                      slotTime.setHours(hr, parseInt(match[2]), 0, 0);
+                      if (slotTime < new Date()) {
+                        showToast('Cannot post for a past time', 'error');
+                        return;
+                      }
+                    }
                   }
                   const partner: import('../lib/types').Partner = {
                     id: generateId('p'),

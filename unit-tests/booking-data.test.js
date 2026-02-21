@@ -31,8 +31,8 @@ describe('Courts Config', () => {
 });
 
 describe('Time Slots', () => {
-  it('should have 14 time slots', () => {
-    expect(TIME_SLOTS).toHaveLength(14);
+  it('should have 15 time slots', () => {
+    expect(TIME_SLOTS).toHaveLength(15);
   });
 
   it('should start at 9:30 AM', () => {
