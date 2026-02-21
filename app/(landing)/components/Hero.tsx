@@ -16,12 +16,12 @@ export default function Hero() {
 
   useEffect(() => {
     const handleScroll = () => {
-      const scrolled = window.pageYOffset;
+      const scrolled = window.scrollY;
       if (heroBgRef.current && scrolled < window.innerHeight) {
         heroBgRef.current.style.transform = `translateY(${scrolled * 0.4}px)`;
       }
     };
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 

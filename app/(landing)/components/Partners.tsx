@@ -1,5 +1,7 @@
 'use client';
 
+import Image from 'next/image';
+
 const CDN = 'https://cdn.jsdelivr.net/gh/film4sport/my-webapp-images@main/mtc-images';
 
 const partners = [
@@ -34,11 +36,12 @@ export default function Partners() {
         <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 fade-in">
           {partners.map((p) => (
             <a key={p.name} href={p.url} target="_blank" rel="noopener noreferrer" className="partner-logo">
-              <img
+              <Image
                 src={p.logo}
                 alt={p.name}
+                width={160}
+                height={80}
                 className="h-16 md:h-20 w-auto rounded-lg object-contain"
-                loading="lazy"
               />
             </a>
           ))}

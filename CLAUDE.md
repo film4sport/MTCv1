@@ -35,13 +35,16 @@ Don't keep adding CSS. Debug WHY:
 - If an agent needs to make >5 edits in one file, do it in the main conversation instead
 - **ALWAYS verify file integrity** after any significant write (`wc -l`, `head -5`, `grep` key exports)
 
-## #7: NO CLUBSPARK LINKS
+## #7: NEVER SUGGEST prefers-reduced-motion
+**Animations are a core design feature of this project.** Do NOT suggest adding `prefers-reduced-motion` media queries. The parallax, shimmer, confetti, bounce, and calendar animations are intentional and must always run.
+
+## #8: NO CLUBSPARK LINKS
 All external links to clubspark.ca have been removed. ClubSpark was only used as an info source. Replace with on-page anchors (#faq, #events, #schedule, #directions) or booking overlay triggers.
 
-## #8: ALWAYS UPDATE CLAUDE.md
+## #9: ALWAYS UPDATE CLAUDE.md
 When new project rules or conventions are established, add them to this file AND MEMORY.md.
 
-## #9: VERIFY BEFORE REPORTING — PLAYWRIGHT + BDG COMBO
+## #10: VERIFY BEFORE REPORTING — PLAYWRIGHT + BDG COMBO
 **Never tell the user "it's done" without verifying visually.**
 - **Playwright** — Primary tool for visual verification and regression testing:
   - `npm run test` (E2E), `npm run test:unit` (Vitest), `npm run test:all` (both)
@@ -52,6 +55,13 @@ When new project rules or conventions are established, add them to this file AND
 - **Claude in Chrome (BDG)** — Use for live visual verification and interactive checks:
   - Best for: real-time page inspection, verifying hover states, checking interactive elements
 - **Workflow**: Playwright for automated screenshots + BDG for live visual spot-checks
+
+## #11: MAINTENANCE CONVENTIONS
+- **Supabase schema**: `supabase/schema.sql` is the single source of truth. All DB changes go there FIRST, then apply to Supabase. No ad-hoc ALTER TABLEs.
+- **localStorage is a cache, not a source of truth**: Data flow is Supabase → localStorage → React state. New features must follow the same `store.tsx` pattern: optimistic update → Supabase write → rollback on failure.
+- **E2E tests for new features**: Every new user-facing feature needs at least one Playwright happy-path test in `tests/`.
+- **Mobile PWA `dist/` is build output**: Never edit `dist/app.bundle.*` directly — edit source files in `css/` and `js/`, then run `npm run build:mobile`. The build script auto-bumps the SW cache version from content hash.
+- **Dependency updates**: Run `npm run deps:check` monthly to review outdated packages.
 
 ---
 
@@ -119,6 +129,7 @@ Note: Sections 3→4→5→6 meet flush (no wave dividers between them)
 - `public/manifest.json` - PWA manifest
 - `next.config.js` - Routes config, CSP, mobile-app SW headers
 - `mobile-app-tests/` - Mobile PWA E2E + unit tests
+- `scripts/build-mobile.js` - Mobile PWA build pipeline (concat + minify + auto SW cache bump)
 - `playwright.config.js` - E2E test config
 - `vitest.config.js` - Unit test config
 

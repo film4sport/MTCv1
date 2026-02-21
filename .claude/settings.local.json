@@ -43,7 +43,10 @@
       "Bash(ls:*)",
       "Bash(tar:*)",
       "Bash(gh run view:*)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(npm install:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run deps:check:*)"
     ]
   }
 }

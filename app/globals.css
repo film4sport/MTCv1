@@ -278,8 +278,8 @@ html {
   animation: spin 1s linear infinite;
 }
 
-/* Fade in animation */
-.fade-in {
+/* Fade in animation (dashboard-only — landing/info use scroll-triggered .fade-in from landing.css) */
+.animate-fade-in {
   animation: fadeIn 0.3s ease-in;
 }
 

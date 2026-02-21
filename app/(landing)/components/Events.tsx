@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import Image from 'next/image';
 
 const CDN = 'https://cdn.jsdelivr.net/gh/film4sport/my-webapp-images@main/mtc-images';
 
@@ -47,6 +48,7 @@ interface EventsProps {
 export default function Events({ onOpenLightbox }: EventsProps) {
   const [filter, setFilter] = useState('all');
   const [animKey, setAnimKey] = useState(0);
+  const sectionRef = useRef<HTMLDivElement>(null);
 
   const filters = [
     { label: 'All Events', value: 'all' },
@@ -57,8 +59,46 @@ export default function Events({ onOpenLightbox }: EventsProps) {
 
   const filteredEvents = filter === 'all' ? events : events.filter((e) => e.category === filter);
 
+  // 3D Tilt effect — re-attaches whenever filter changes (animKey)
+  const attachTilt = useCallback(() => {
+    if (!sectionRef.current) return;
+    const cards = sectionRef.current.querySelectorAll<HTMLElement>('.tilt-card');
+    const handlers = new Map<HTMLElement, { move: (e: MouseEvent) => void; leave: (e: MouseEvent) => void }>();
+
+    cards.forEach((card) => {
+      const move = (e: MouseEvent) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        const rotateX = (y - centerY) / 20;
+        const rotateY = (centerX - x) / 20;
+        card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-8px)`;
+      };
+      const leave = () => {
+        card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) translateY(0)';
+      };
+      card.addEventListener('mousemove', move);
+      card.addEventListener('mouseleave', leave);
+      handlers.set(card, { move, leave });
+    });
+
+    return () => {
+      handlers.forEach(({ move, leave }, card) => {
+        card.removeEventListener('mousemove', move);
+        card.removeEventListener('mouseleave', leave);
+      });
+    };
+  }, []);
+
+  useEffect(() => {
+    const cleanup = attachTilt();
+    return cleanup;
+  }, [animKey, attachTilt]);
+
   return (
-    <section id="events" className="text-gray-900 py-20 lg:py-28" style={{ backgroundColor: '#f5f2eb' }}>
+    <section id="events" className="text-gray-900 py-20 lg:py-28" style={{ backgroundColor: '#f5f2eb' }} ref={sectionRef}>
       <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-16">
 
         {/* Section Header */}
@@ -95,14 +135,15 @@ export default function Events({ onOpenLightbox }: EventsProps) {
               data-category={event.category}
             >
               <div
-                className="aspect-[4/3] overflow-hidden cursor-pointer"
+                className="aspect-[4/3] overflow-hidden cursor-pointer relative"
                 onClick={() => onOpenLightbox(event.image, event.title)}
               >
-                <img
+                <Image
                   src={event.image}
                   alt={event.alt}
-                  className="card-image w-full h-full object-cover"
-                  loading="lazy"
+                  className="card-image object-cover"
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 />
               </div>
               <div className="p-6">

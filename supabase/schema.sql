@@ -1,6 +1,10 @@
 -- ============================================================
--- MTC Supabase Schema
+-- MTC Supabase Schema  (single source of truth)
 -- Run this in Supabase SQL Editor to create all tables
+-- ============================================================
+-- IMPORTANT: All schema changes MUST be made here first, then
+-- applied to Supabase. Never do ad-hoc ALTER TABLEs without
+-- updating this file — it must always reflect the live schema.
 -- ============================================================
 
 -- ─── Profiles ───────────────────────────────────────────

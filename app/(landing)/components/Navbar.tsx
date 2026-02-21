@@ -1,26 +1,68 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const hamburgerRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 100);
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const closeMobileMenu = () => {
+  // Cleanup body overflow on unmount
+  useEffect(() => {
+    return () => { document.body.style.overflow = ''; };
+  }, []);
+
+  const closeMobileMenu = useCallback(() => {
     setMobileMenuOpen(false);
     document.body.style.overflow = '';
-  };
+    // Return focus to hamburger button
+    hamburgerRef.current?.focus();
+  }, []);
 
-  const openMobileMenu = () => {
+  const openMobileMenu = useCallback(() => {
     setMobileMenuOpen(true);
     document.body.style.overflow = 'hidden';
-  };
+  }, []);
+
+  // Focus trap + Escape key for mobile menu
+  useEffect(() => {
+    if (!mobileMenuOpen || !menuRef.current) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        closeMobileMenu();
+        return;
+      }
+      if (e.key !== 'Tab') return;
+
+      const focusable = menuRef.current?.querySelectorAll<HTMLElement>('a, button');
+      if (!focusable || focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    // Focus first link when menu opens
+    const firstLink = menuRef.current.querySelector<HTMLElement>('button, a');
+    firstLink?.focus();
+
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [mobileMenuOpen, closeMobileMenu]);
 
   return (
     <>
@@ -46,7 +88,14 @@ export default function Navbar() {
         </div>
 
         {/* Mobile Menu Button */}
-        <button className="lg:hidden p-2 rounded-lg" onClick={openMobileMenu} style={{ color: '#e8e4d9' }} aria-label="Open menu">
+        <button
+          ref={hamburgerRef}
+          className="lg:hidden p-2 rounded-lg"
+          onClick={openMobileMenu}
+          style={{ color: '#e8e4d9' }}
+          aria-label="Open menu"
+          aria-expanded={mobileMenuOpen}
+        >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
           </svg>
@@ -54,7 +103,15 @@ export default function Navbar() {
       </nav>
 
       {/* Mobile Menu */}
-      <div className={`mobile-menu${mobileMenuOpen ? ' active' : ''}`}>
+      <div
+        ref={menuRef}
+        className={`mobile-menu${mobileMenuOpen ? ' active' : ''}`}
+        role="dialog"
+        aria-modal={mobileMenuOpen}
+        aria-label="Navigation menu"
+        // @ts-expect-error — inert is a valid HTML attribute but React types lag behind
+        inert={!mobileMenuOpen ? '' : undefined}
+      >
         <div className="mobile-menu-content">
           <button className="mobile-menu-close" onClick={closeMobileMenu} aria-label="Close menu">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

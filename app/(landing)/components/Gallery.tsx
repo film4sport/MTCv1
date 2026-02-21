@@ -92,17 +92,7 @@ export default function Gallery({ onOpenLightbox }: GalleryProps) {
   };
 
   // Fade-in observer
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) =>
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) entry.target.classList.add('visible');
-        }),
-      { threshold: 0.1 }
-    );
-    sectionRef.current?.querySelectorAll('.fade-in').forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
-  }, []);
+  // IntersectionObserver for .fade-in is handled globally in page.tsx
 
   // Subtle parallax on heading
   useEffect(() => {
