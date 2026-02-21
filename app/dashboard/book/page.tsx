@@ -20,7 +20,7 @@ export default function BookCourtPage() {
     d.setDate(d.getDate() - day);
     return d;
   });
-  const [selectedCourt, setSelectedCourt] = useState<number | null>(null);
+  const [selectedCourt, setSelectedCourt] = useState<number>(1);
   const [showModal, setShowModal] = useState(false);
   const [modalData, setModalData] = useState<{ courtId: number; courtName: string; date: string; time: string } | null>(null);
   const [isGuest, setIsGuest] = useState(false);
@@ -80,7 +80,6 @@ export default function BookCourtPage() {
     const isPM = match[3].toUpperCase() === 'PM';
     if (isPM && hour !== 12) hour += 12;
     if (!isPM && hour === 12) hour = 0;
-    // Close hour is lights-out; last bookable slot starts 1 hour before
     return hour >= closeHour;
   };
 
@@ -123,7 +122,6 @@ export default function BookCourtPage() {
   const confirmBooking = () => {
     if (!modalData || !currentUser || bookingLoading) return;
     if (isGuest && !guestName.trim()) return;
-    // Check for double-booking
     const alreadyBooked = bookings.find(b => b.courtId === modalData.courtId && b.date === modalData.date && b.time === modalData.time && b.status === 'confirmed');
     if (alreadyBooked) {
       showToast('This slot was just booked by someone else', 'error');
@@ -157,8 +155,7 @@ export default function BookCourtPage() {
 
   const formatDateShort = (d: Date) => {
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return { day: days[d.getDay()], date: d.getDate(), month: months[d.getMonth()] };
+    return { day: days[d.getDay()], date: d.getDate() };
   };
 
   const isToday = (d: Date) => {
@@ -166,9 +163,10 @@ export default function BookCourtPage() {
     return d.getDate() === now.getDate() && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
   };
 
-  const courtsToShow = selectedCourt ? COURTS_CONFIG.filter(c => c.id === selectedCourt) : [...COURTS_CONFIG];
+  const courtConfig = COURTS_CONFIG.find(c => c.id === selectedCourt)!;
+  const slotsForCourt = TIME_SLOTS.filter(t => !isCourtClosed(selectedCourt, t));
 
-  // Calendar view helpers
+  // Calendar helpers
   const calDays = useMemo(() => {
     const year = calMonth.getFullYear();
     const month = calMonth.getMonth();
@@ -186,44 +184,57 @@ export default function BookCourtPage() {
     return bookings.some(b => b.date === dateStr && b.status === 'confirmed');
   };
 
+  const myBookingOnDate = (d: Date) => {
+    const dateStr = d.toISOString().split('T')[0];
+    return bookings.some(b => b.date === dateStr && b.status === 'confirmed' && b.userId === currentUser?.id);
+  };
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#f5f2eb' }}>
       <DashboardHeader title="Book Court" />
 
-      <div className="p-6 lg:p-8 max-w-[1400px] mx-auto animate-slideUp">
+      <div className="p-4 sm:p-6 lg:p-8 max-w-[1400px] mx-auto animate-slideUp">
 
-        {/* Controls */}
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-          <div className="flex items-center gap-2">
+        {/* Top Bar: View Toggle + Court Tabs */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
+          {/* Court Tabs */}
+          <div className="flex gap-1.5">
+            {COURTS_CONFIG.map(c => (
+              <button
+                key={c.id}
+                onClick={() => setSelectedCourt(c.id)}
+                className="relative px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200"
+                style={{
+                  background: selectedCourt === c.id ? '#2a2f1e' : '#fff',
+                  color: selectedCourt === c.id ? '#fff' : '#6b7266',
+                  border: selectedCourt === c.id ? '1px solid #2a2f1e' : '1px solid #e0dcd3',
+                  boxShadow: selectedCourt === c.id ? '0 2px 8px rgba(42,47,30,0.15)' : 'none',
+                }}
+              >
+                {c.name}
+                <span className="block text-[0.6rem] font-normal mt-0.5" style={{ opacity: 0.7 }}>
+                  {c.floodlight ? 'til 10 PM' : 'til 8 PM'}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          {/* View Toggle */}
+          <div className="flex items-center gap-1 p-1 rounded-xl" style={{ background: '#fff', border: '1px solid #e0dcd3' }}>
             <button
               onClick={() => setView('week')}
-              className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-              style={{ background: view === 'week' ? '#6b7a3d' : '#fff', color: view === 'week' ? '#fff' : '#2a2f1e', border: view === 'week' ? 'none' : '1px solid #e0dcd3' }}
+              className="px-4 py-2 rounded-lg text-xs font-medium transition-all duration-200"
+              style={{ background: view === 'week' ? '#6b7a3d' : 'transparent', color: view === 'week' ? '#fff' : '#6b7266' }}
             >
-              Week View
+              Week
             </button>
             <button
               onClick={() => setView('calendar')}
-              className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-              style={{ background: view === 'calendar' ? '#6b7a3d' : '#fff', color: view === 'calendar' ? '#fff' : '#2a2f1e', border: view === 'calendar' ? 'none' : '1px solid #e0dcd3' }}
+              className="px-4 py-2 rounded-lg text-xs font-medium transition-all duration-200"
+              style={{ background: view === 'calendar' ? '#6b7a3d' : 'transparent', color: view === 'calendar' ? '#fff' : '#6b7266' }}
             >
-              Calendar
+              Month
             </button>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-medium" style={{ color: '#6b7266' }}>Court:</span>
-            <select
-              value={selectedCourt || ''}
-              onChange={(e) => setSelectedCourt(e.target.value ? Number(e.target.value) : null)}
-              className="px-3 py-2 rounded-lg text-sm border focus:outline-none focus:ring-2 focus:ring-[#6b7a3d]/20"
-              style={{ borderColor: '#e0dcd3', background: '#fff', color: '#2a2f1e' }}
-            >
-              <option value="">All Courts</option>
-              {COURTS_CONFIG.map(c => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-            </select>
           </div>
         </div>
 
@@ -236,29 +247,28 @@ export default function BookCourtPage() {
               <>
                 {/* Week Navigation */}
                 <div className="flex items-center justify-between mb-4">
-                  <button onClick={prevWeek} className="p-2 rounded-lg border hover:bg-white transition-colors" style={{ borderColor: '#e0dcd3' }}>
-                    <svg className="w-4 h-4" fill="none" stroke="#2a2f1e" viewBox="0 0 24 24" strokeWidth="2">
+                  <button onClick={prevWeek} className="w-9 h-9 rounded-xl flex items-center justify-center border hover:bg-white transition-colors active:scale-95" style={{ borderColor: '#e0dcd3' }}>
+                    <svg className="w-4 h-4" fill="none" stroke="#2a2f1e" viewBox="0 0 24 24" strokeWidth="2.5">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/>
                     </svg>
                   </button>
-                  <span className="font-medium text-sm" style={{ color: '#2a2f1e' }}>
-                    {weekDays[0].toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} — {weekDays[6].toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                  <span className="font-semibold text-sm" style={{ color: '#2a2f1e' }}>
+                    {weekDays[0].toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} — {weekDays[6].toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                   </span>
-                  <button onClick={nextWeek} className="p-2 rounded-lg border hover:bg-white transition-colors" style={{ borderColor: '#e0dcd3' }}>
-                    <svg className="w-4 h-4" fill="none" stroke="#2a2f1e" viewBox="0 0 24 24" strokeWidth="2">
+                  <button onClick={nextWeek} className="w-9 h-9 rounded-xl flex items-center justify-center border hover:bg-white transition-colors active:scale-95" style={{ borderColor: '#e0dcd3' }}>
+                    <svg className="w-4 h-4" fill="none" stroke="#2a2f1e" viewBox="0 0 24 24" strokeWidth="2.5">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/>
                     </svg>
                   </button>
                 </div>
 
-                {/* Week Grid */}
+                {/* Week Grid — single court */}
                 <div className="rounded-2xl border overflow-hidden" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
                   <div className="overflow-x-auto">
-                    <table className="w-full border-collapse min-w-[700px]">
+                    <table className="w-full border-collapse min-w-[600px]">
                       <thead>
                         <tr>
-                          <th className="sticky left-0 z-10 p-3 text-xs font-medium text-left border-b border-r" style={{ borderColor: '#f0ede6', background: '#faf8f3', color: '#6b7266', width: 80 }}>
-                            Time
+                          <th className="sticky left-0 z-10 p-3 text-[0.7rem] font-medium text-left border-b" style={{ borderColor: '#f0ede6', background: '#faf8f3', color: '#9ca3a0', width: 72 }}>
                           </th>
                           {weekDays.map(day => {
                             const f = formatDateShort(day);
@@ -266,59 +276,80 @@ export default function BookCourtPage() {
                             return (
                               <th
                                 key={day.toISOString()}
-                                className="p-3 text-center border-b border-r last:border-r-0"
-                                style={{ borderColor: '#f0ede6', background: today ? 'rgba(107, 122, 61, 0.08)' : '#faf8f3' }}
+                                className="p-2.5 text-center border-b"
+                                style={{ borderColor: '#f0ede6', background: today ? 'rgba(107, 122, 61, 0.06)' : '#faf8f3' }}
                               >
-                                <div className="text-[0.65rem] font-medium uppercase" style={{ color: '#6b7266' }}>{f.day}</div>
-                                <div className="text-sm font-bold" style={{ color: today ? '#6b7a3d' : '#2a2f1e' }}>{f.date}</div>
+                                <div className="text-[0.6rem] font-medium uppercase tracking-wider" style={{ color: '#9ca3a0' }}>{f.day}</div>
+                                <div className={`text-base font-bold mt-0.5 ${today ? 'text-white' : ''}`} style={today ? { background: '#6b7a3d', borderRadius: '8px', padding: '2px 8px', display: 'inline-block' } : { color: '#2a2f1e' }}>
+                                  {f.date}
+                                </div>
                               </th>
                             );
                           })}
                         </tr>
                       </thead>
                       <tbody>
-                        {TIME_SLOTS.map(time => (
-                          <tr key={time}>
-                            <td className="sticky left-0 z-10 px-3 py-1.5 text-xs font-medium border-b border-r" style={{ borderColor: '#f0ede6', background: '#faf8f3', color: '#6b7266' }}>
+                        {slotsForCourt.map(time => (
+                          <tr key={time} className="group">
+                            <td className="sticky left-0 z-10 px-3 py-0 text-[0.7rem] font-medium border-b" style={{ borderColor: '#f7f5f0', background: '#faf8f3', color: '#9ca3a0' }}>
                               {time}
                             </td>
                             {weekDays.map(day => {
                               const dateStr = day.toISOString().split('T')[0];
+                              const booked = isSlotBooked(selectedCourt, dateStr, time);
+                              const mine = isSlotMine(selectedCourt, dateStr, time);
                               const past = isSlotPast(dateStr, time);
+                              const closed = isCourtClosed(selectedCourt, time);
+                              const isProgram = booked?.type === 'program';
+                              const isLesson = booked?.type === 'lesson';
+                              const today = isToday(day);
+                              const available = !booked && !past && !closed;
+
                               return (
-                                <td key={`${dateStr}-${time}`} className="border-b border-r last:border-r-0 p-0.5" style={{ borderColor: '#f0ede6' }}>
-                                  <div className="flex gap-0.5">
-                                    {courtsToShow.map(court => {
-                                      const booked = isSlotBooked(court.id, dateStr, time);
-                                      const mine = isSlotMine(court.id, dateStr, time);
-                                      const closed = isCourtClosed(court.id, time);
-
-                                      const isProgram = booked?.type === 'program';
-                                      const isLesson = booked?.type === 'lesson';
-                                      let bg = '#f0fdf4';
-                                      let border = '#bbf7d0';
-                                      let cursor = 'pointer';
-
-                                      if (mine) { bg = 'rgba(107, 122, 61, 0.15)'; border = '#6b7a3d'; }
-                                      else if (isLesson) { bg = 'rgba(59, 130, 246, 0.1)'; border = '#93c5fd'; cursor = 'default'; }
-                                      else if (isProgram) { bg = 'rgba(245, 158, 11, 0.1)'; border = '#fbbf24'; cursor = 'default'; }
-                                      else if (booked) { bg = '#f3f4f6'; border = '#d1d5db'; cursor = 'default'; }
-                                      else if (past || closed) { bg = '#fafafa'; border = '#e5e7eb'; cursor = 'default'; }
-
-                                      return (
-                                        <button
-                                          key={court.id}
-                                          onClick={() => handleSlotClick(court.id, court.name, dateStr, time)}
-                                          disabled={(!mine && booked !== undefined && !!booked) || past || closed}
-                                          className="flex-1 rounded text-[0.55rem] font-medium py-1.5 px-1 transition-colors truncate"
-                                          style={{ background: bg, border: `1px solid ${border}`, cursor, minHeight: 28, color: mine ? '#6b7a3d' : isLesson ? '#3b82f6' : isProgram ? '#d97706' : booked ? '#9ca3af' : past || closed ? '#d1d5db' : '#16a34a' }}
-                                          title={`${court.name} - ${time} - ${mine ? 'Your booking (click to cancel)' : isLesson ? 'Lesson' : isProgram ? 'Program' : booked ? 'Booked' : past ? 'Past' : closed ? 'Closed' : 'Available'}`}
-                                        >
-                                          {courtsToShow.length > 1 ? (isLesson ? 'L' : isProgram ? 'P' : `C${court.id}`) : (mine ? 'Mine' : isLesson ? 'Lesson' : isProgram ? 'Prog' : booked ? '—' : '')}
-                                        </button>
-                                      );
-                                    })}
-                                  </div>
+                                <td key={`${dateStr}-${time}`} className="border-b p-[3px]" style={{ borderColor: '#f7f5f0', background: today ? 'rgba(107, 122, 61, 0.02)' : 'transparent' }}>
+                                  <button
+                                    onClick={() => handleSlotClick(selectedCourt, courtConfig.name, dateStr, time)}
+                                    disabled={(!mine && !!booked) || past || closed}
+                                    className="w-full rounded-lg text-xs font-medium py-2.5 px-2 transition-all duration-150 relative overflow-hidden"
+                                    style={{
+                                      background: mine
+                                        ? '#6b7a3d'
+                                        : isLesson ? 'rgba(59, 130, 246, 0.08)'
+                                        : isProgram ? 'rgba(245, 158, 11, 0.08)'
+                                        : booked ? '#f5f3ee'
+                                        : past || closed ? 'transparent'
+                                        : 'transparent',
+                                      color: mine
+                                        ? '#fff'
+                                        : isLesson ? '#3b82f6'
+                                        : isProgram ? '#d97706'
+                                        : booked ? '#b5b0a5'
+                                        : past || closed ? '#d5d0c8'
+                                        : '#6b7a3d',
+                                      cursor: available ? 'pointer' : mine ? 'pointer' : 'default',
+                                      border: mine
+                                        ? '1.5px solid #6b7a3d'
+                                        : available ? '1.5px dashed #d4d0c7'
+                                        : '1.5px solid transparent',
+                                    }}
+                                    title={mine ? 'Click to cancel' : isLesson ? 'Lesson' : isProgram ? 'Program' : booked ? `Booked by ${booked.userName}` : past ? 'Past' : closed ? 'Closed' : 'Book this slot'}
+                                  >
+                                    {mine ? (
+                                      <span className="flex items-center justify-center gap-1">
+                                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
+                                        Booked
+                                      </span>
+                                    ) : isLesson ? 'Lesson' : isProgram ? 'Program' : booked ? (
+                                      <span className="flex items-center justify-center gap-1">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-current opacity-40" />
+                                        Taken
+                                      </span>
+                                    ) : past || closed ? (
+                                      <span style={{ opacity: 0.3 }}>—</span>
+                                    ) : (
+                                      <span className="opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: '#6b7a3d' }}>Book</span>
+                                    )}
+                                  </button>
                                 </td>
                               );
                             })}
@@ -330,51 +361,66 @@ export default function BookCourtPage() {
                 </div>
 
                 {/* Legend */}
-                <div className="flex flex-wrap gap-4 mt-4 text-xs" style={{ color: '#6b7266' }}>
-                  <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded border" style={{ background: '#f0fdf4', borderColor: '#bbf7d0' }} /> Available</div>
-                  <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded border" style={{ background: 'rgba(107, 122, 61, 0.15)', borderColor: '#6b7a3d' }} /> My Booking</div>
-                  <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded border" style={{ background: '#f3f4f6', borderColor: '#d1d5db' }} /> Booked</div>
-                  <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded border" style={{ background: 'rgba(59, 130, 246, 0.1)', borderColor: '#93c5fd' }} /> Lesson</div>
-                  <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded border" style={{ background: 'rgba(245, 158, 11, 0.1)', borderColor: '#fbbf24' }} /> Program</div>
-                  <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded border" style={{ background: '#fafafa', borderColor: '#e5e7eb' }} /> Past / Closed</div>
+                <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mt-4 text-[0.7rem]" style={{ color: '#9ca3a0' }}>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-5 h-3 rounded border border-dashed" style={{ borderColor: '#d4d0c7' }} />
+                    Available
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-5 h-3 rounded" style={{ background: '#6b7a3d' }} />
+                    My Booking
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-5 h-3 rounded" style={{ background: '#f5f3ee' }} />
+                    Taken
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-5 h-3 rounded" style={{ background: 'rgba(59, 130, 246, 0.08)', border: '1px solid rgba(59, 130, 246, 0.2)' }} />
+                    Lesson
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-5 h-3 rounded" style={{ background: 'rgba(245, 158, 11, 0.08)', border: '1px solid rgba(245, 158, 11, 0.2)' }} />
+                    Program
+                  </div>
                 </div>
               </>
             ) : (
               /* Calendar View */
-              <div className="rounded-2xl border p-6" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
-                <div className="flex items-center justify-between mb-6">
+              <div className="rounded-2xl border p-5 sm:p-6" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+                <div className="flex items-center justify-between mb-5">
                   <button
                     onClick={() => setCalMonth(new Date(calMonth.getFullYear(), calMonth.getMonth() - 1))}
-                    className="p-2 rounded-lg border hover:bg-gray-50 transition-colors"
+                    className="w-9 h-9 rounded-xl flex items-center justify-center border hover:bg-gray-50 transition-colors active:scale-95"
                     style={{ borderColor: '#e0dcd3' }}
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="#2a2f1e" viewBox="0 0 24 24" strokeWidth="2">
+                    <svg className="w-4 h-4" fill="none" stroke="#2a2f1e" viewBox="0 0 24 24" strokeWidth="2.5">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/>
                     </svg>
                   </button>
-                  <span className="font-semibold" style={{ color: '#2a2f1e' }}>
+                  <span className="font-semibold text-sm" style={{ color: '#2a2f1e' }}>
                     {calMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                   </span>
                   <button
                     onClick={() => setCalMonth(new Date(calMonth.getFullYear(), calMonth.getMonth() + 1))}
-                    className="p-2 rounded-lg border hover:bg-gray-50 transition-colors"
+                    className="w-9 h-9 rounded-xl flex items-center justify-center border hover:bg-gray-50 transition-colors active:scale-95"
                     style={{ borderColor: '#e0dcd3' }}
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="#2a2f1e" viewBox="0 0 24 24" strokeWidth="2">
+                    <svg className="w-4 h-4" fill="none" stroke="#2a2f1e" viewBox="0 0 24 24" strokeWidth="2.5">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/>
                     </svg>
                   </button>
                 </div>
 
                 <div className="grid grid-cols-7 gap-1">
-                  {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
-                    <div key={d} className="text-center text-xs font-medium py-2" style={{ color: '#6b7266' }}>{d}</div>
+                  {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => (
+                    <div key={i} className="text-center text-[0.65rem] font-semibold uppercase tracking-wider py-2" style={{ color: '#9ca3a0' }}>{d}</div>
                   ))}
                   {calDays.map((day, i) => {
                     if (!day) return <div key={`empty-${i}`} />;
                     const dateStr = day.toISOString().split('T')[0];
                     const today = isToday(day);
                     const hasBooking = hasBookingOnDate(day);
+                    const hasMine = myBookingOnDate(day);
                     const isPast = day < new Date(new Date().setHours(0, 0, 0, 0));
                     const selected = calSelectedDate === dateStr;
                     return (
@@ -382,16 +428,20 @@ export default function BookCourtPage() {
                         key={dateStr}
                         onClick={() => !isPast && setCalSelectedDate(selected ? null : dateStr)}
                         disabled={isPast}
-                        className="aspect-square rounded-xl flex flex-col items-center justify-center gap-0.5 transition-colors relative"
+                        className="aspect-square rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all duration-150 relative"
                         style={{
-                          background: selected ? '#6b7a3d' : today ? 'rgba(107, 122, 61, 0.08)' : 'transparent',
+                          background: selected ? '#2a2f1e' : today ? 'rgba(107, 122, 61, 0.08)' : 'transparent',
                           color: selected ? '#fff' : isPast ? '#d1d5db' : '#2a2f1e',
                           cursor: isPast ? 'default' : 'pointer',
+                          fontWeight: today ? 700 : 500,
                         }}
                       >
-                        <span className="text-sm font-medium">{day.getDate()}</span>
-                        {hasBooking && (
-                          <span className="w-1.5 h-1.5 rounded-full" style={{ background: selected ? '#fff' : '#6b7a3d' }} />
+                        <span className="text-sm">{day.getDate()}</span>
+                        {(hasBooking || hasMine) && (
+                          <div className="flex gap-0.5">
+                            {hasMine && <span className="w-1.5 h-1.5 rounded-full" style={{ background: selected ? '#d4e157' : '#6b7a3d' }} />}
+                            {hasBooking && !hasMine && <span className="w-1.5 h-1.5 rounded-full" style={{ background: selected ? 'rgba(255,255,255,0.4)' : '#d4d0c7' }} />}
+                          </div>
                         )}
                       </button>
                     );
@@ -400,41 +450,39 @@ export default function BookCourtPage() {
 
                 {/* Selected date slots */}
                 {calSelectedDate && (
-                  <div className="mt-6 pt-6 border-t" style={{ borderColor: '#f0ede6' }}>
-                    <h4 className="font-medium text-sm mb-3" style={{ color: '#2a2f1e' }}>
+                  <div className="mt-5 pt-5 border-t" style={{ borderColor: '#f0ede6' }}>
+                    <h4 className="font-semibold text-sm mb-3" style={{ color: '#2a2f1e' }}>
                       {new Date(calSelectedDate + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
                     </h4>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                      {TIME_SLOTS.map(time => {
-                        const availableCourts = (selectedCourt ? COURTS_CONFIG.filter(c => c.id === selectedCourt) : COURTS_CONFIG).filter(c =>
-                          !isSlotBooked(c.id, calSelectedDate, time) &&
-                          !isSlotPast(calSelectedDate, time) &&
-                          !isCourtClosed(c.id, time)
-                        );
-                        if (availableCourts.length === 0) return null;
+                    <div className="space-y-1.5">
+                      {slotsForCourt.map(time => {
+                        const booked = isSlotBooked(selectedCourt, calSelectedDate, time);
+                        const mine = isSlotMine(selectedCourt, calSelectedDate, time);
+                        const past = isSlotPast(calSelectedDate, time);
+                        const available = !booked && !past;
+                        const isLesson = booked?.type === 'lesson';
+                        const isProgram = booked?.type === 'program';
+
+                        if (past) return null;
+
                         return (
-                          <div key={time} className="rounded-xl p-3 border" style={{ borderColor: '#e0dcd3' }}>
-                            <p className="font-medium text-sm mb-1.5" style={{ color: '#2a2f1e' }}>{time}</p>
-                            <div className="flex flex-wrap gap-1.5">
-                              {availableCourts.map(court => (
-                                <button
-                                  key={court.id}
-                                  onClick={() => {
-                                    setModalData({ courtId: court.id, courtName: court.name, date: calSelectedDate, time });
-                                    setIsGuest(false);
-                                    setGuestName('');
-                                    setSelectedParticipants([]);
-                                    setParticipantSearch('');
-                                    setShowModal(true);
-                                  }}
-                                  className="text-xs px-2.5 py-1.5 rounded-lg transition-colors hover:bg-[rgba(107,122,61,0.08)]"
-                                  style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', color: '#16a34a' }}
-                                >
-                                  {court.name}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
+                          <button
+                            key={time}
+                            onClick={() => available || mine ? handleSlotClick(selectedCourt, courtConfig.name, calSelectedDate, time) : undefined}
+                            disabled={!available && !mine}
+                            className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm transition-all duration-150"
+                            style={{
+                              background: mine ? '#6b7a3d' : available ? '#fff' : '#f9f7f3',
+                              color: mine ? '#fff' : available ? '#2a2f1e' : '#b5b0a5',
+                              border: mine ? '1px solid #6b7a3d' : available ? '1px solid #e0dcd3' : '1px solid #f0ede6',
+                              cursor: available || mine ? 'pointer' : 'default',
+                            }}
+                          >
+                            <span className="font-medium">{time}</span>
+                            <span className="text-xs font-medium" style={{ opacity: 0.7 }}>
+                              {mine ? 'Your Booking ✓' : isLesson ? 'Lesson' : isProgram ? 'Program' : booked ? 'Taken' : 'Available'}
+                            </span>
+                          </button>
                         );
                       })}
                     </div>
@@ -447,15 +495,45 @@ export default function BookCourtPage() {
           {/* Sidebar: My Bookings */}
           <div className="hidden lg:block w-72 shrink-0">
             <div className="rounded-2xl border p-5 sticky top-6" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
-              <h3 className="font-semibold text-sm mb-4" style={{ color: '#2a2f1e' }}>My Bookings</h3>
+              <h3 className="font-semibold text-sm mb-4 flex items-center gap-2" style={{ color: '#2a2f1e' }}>
+                <svg className="w-4 h-4" style={{ color: '#6b7a3d' }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                My Bookings
+              </h3>
               {myUpcoming.length === 0 ? (
-                <p className="text-sm" style={{ color: '#6b7266' }}>No upcoming bookings</p>
+                <div className="text-center py-6">
+                  <div className="w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center" style={{ background: 'rgba(107, 122, 61, 0.06)' }}>
+                    <svg className="w-6 h-6" fill="none" stroke="#6b7a3d" viewBox="0 0 24 24" strokeWidth="1.5" style={{ opacity: 0.4 }}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <p className="text-xs" style={{ color: '#9ca3a0' }}>No upcoming bookings</p>
+                  <p className="text-[0.65rem] mt-1" style={{ color: '#c5c0b8' }}>Click a time slot to book</p>
+                </div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-2.5">
                   {myUpcoming.slice(0, 5).map(b => (
-                    <div key={b.id} className="rounded-xl p-3 border" style={{ borderColor: '#f0ede6' }}>
-                      <div className="flex items-center justify-between">
-                        <p className="font-medium text-sm" style={{ color: '#2a2f1e' }}>{b.courtName}</p>
+                    <div key={b.id} className="rounded-xl p-3.5 transition-colors" style={{ background: '#faf8f3' }}>
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <p className="font-semibold text-sm" style={{ color: '#2a2f1e' }}>{b.courtName}</p>
+                          <p className="text-xs mt-0.5" style={{ color: '#6b7266' }}>
+                            {new Date(b.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} &bull; {b.time}
+                          </p>
+                          {b.guestName && (
+                            <p className="text-xs mt-1 flex items-center gap-1" style={{ color: '#d97706' }}>
+                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                              {b.guestName}
+                            </p>
+                          )}
+                          {b.participants && b.participants.length > 0 && (
+                            <p className="text-xs mt-1 flex items-center gap-1" style={{ color: '#6b7a3d' }}>
+                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                              {b.participants.map(p => p.name).join(', ')}
+                            </p>
+                          )}
+                        </div>
                         <button
                           onClick={() => {
                             if (!canCancel(b.date, b.time)) {
@@ -465,21 +543,12 @@ export default function BookCourtPage() {
                             cancelBooking(b.id);
                             showToast('Booking cancelled');
                           }}
-                          className="text-xs px-2 py-0.5 rounded hover:bg-red-50 transition-colors"
+                          className="text-[0.65rem] px-2 py-1 rounded-lg hover:bg-red-50 transition-colors shrink-0"
                           style={{ color: '#ef4444' }}
                         >
                           Cancel
                         </button>
                       </div>
-                      <p className="text-xs mt-1" style={{ color: '#6b7266' }}>
-                        {new Date(b.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} &bull; {b.time}
-                      </p>
-                      {b.guestName && (
-                        <p className="text-xs mt-0.5" style={{ color: '#d97706' }}>Guest: {b.guestName}</p>
-                      )}
-                      {b.participants && b.participants.length > 0 && (
-                        <p className="text-xs mt-0.5" style={{ color: '#6b7a3d' }}>With: {b.participants.map(p => p.name).join(', ')}</p>
-                      )}
                     </div>
                   ))}
                 </div>
@@ -492,7 +561,7 @@ export default function BookCourtPage() {
       {/* Booking Modal */}
       {showModal && modalData && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.4)' }}>
-          <div className="rounded-2xl p-6 w-full max-w-md" style={{ background: '#fff' }}>
+          <div className="rounded-2xl p-6 w-full max-w-md animate-scaleIn" style={{ background: '#fff' }}>
             <h3 className="font-semibold text-lg mb-4" style={{ color: '#2a2f1e' }}>Confirm Booking</h3>
 
             <div className="space-y-3 mb-6">
@@ -628,7 +697,7 @@ export default function BookCourtPage() {
       {/* Booking Success + Add to Calendar */}
       {bookingSuccess && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.4)' }} onClick={() => setBookingSuccess(null)}>
-          <div className="rounded-2xl p-6 w-full max-w-sm text-center" style={{ background: '#fff' }} onClick={e => e.stopPropagation()}>
+          <div className="rounded-2xl p-6 w-full max-w-sm text-center animate-scaleIn" style={{ background: '#fff' }} onClick={e => e.stopPropagation()}>
             <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ background: 'rgba(34, 197, 94, 0.1)' }}>
               <svg className="w-8 h-8" fill="none" stroke="#16a34a" viewBox="0 0 24 24" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
