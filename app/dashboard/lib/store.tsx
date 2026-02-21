@@ -88,6 +88,11 @@ function loadJSON<T>(key: string, fallback: T): T {
   }
 }
 
+function safeLoadArray<T>(key: string, fallback: T[]): T[] {
+  const loaded = loadJSON(key, fallback);
+  return Array.isArray(loaded) ? loaded : fallback;
+}
+
 function saveJSON(key: string, value: unknown) {
   if (typeof window === 'undefined') return;
   try {
@@ -167,12 +172,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
 
     // Load from localStorage as immediate cache (Supabase data will overwrite)
-    setBookings(loadJSON('mtc-bookings', DEFAULT_BOOKINGS));
-    setConversations(loadJSON('mtc-conversations', DEFAULT_CONVERSATIONS));
-    setAnnouncements(loadJSON('mtc-announcements', DEFAULT_ANNOUNCEMENTS));
-    setNotifications(loadJSON('mtc-notifications', DEFAULT_NOTIFICATIONS));
-    setPrograms(loadJSON('mtc-programs', DEFAULT_PROGRAMS));
-    setPayments(loadJSON('mtc-payments', DEFAULT_PAYMENTS));
+    // Use safeLoadArray to prevent crashes from corrupted localStorage data
+    setBookings(safeLoadArray('mtc-bookings', DEFAULT_BOOKINGS));
+    setConversations(safeLoadArray('mtc-conversations', DEFAULT_CONVERSATIONS));
+    setAnnouncements(safeLoadArray('mtc-announcements', DEFAULT_ANNOUNCEMENTS));
+    setNotifications(safeLoadArray('mtc-notifications', DEFAULT_NOTIFICATIONS));
+    setPrograms(safeLoadArray('mtc-programs', DEFAULT_PROGRAMS));
+    setPayments(safeLoadArray('mtc-payments', DEFAULT_PAYMENTS));
     setNotificationPreferences(loadJSON('mtc-notification-prefs', DEFAULT_NOTIFICATION_PREFS));
   }, []);
 
@@ -319,40 +325,42 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const cancelBooking = useCallback((id: string) => {
-    // Use functional update to read current bookings without stale closure
+    // Read current booking before state update to avoid setState-inside-setState
     setBookings(prev => {
       const booking = prev.find(b => b.id === id);
 
-      // Notify participants when a booking is cancelled
+      // Schedule participant notifications outside setBookings (avoids React violation)
       if (booking && booking.participants && booking.participants.length > 0) {
-        const cancelNotifs: Notification[] = booking.participants.map((p) => ({
-          id: generateId('n'),
-          type: 'booking' as const,
-          title: 'Booking Cancelled',
-          body: `${booking.userName} cancelled the booking: ${booking.courtName} on ${booking.date} at ${booking.time}.`,
-          timestamp: new Date().toISOString(),
-          read: false,
-        }));
-        setNotifications(prev => [...cancelNotifs, ...prev]);
-        // Persist participant notifications to Supabase (1:1 mapping)
-        booking.participants.forEach((p, i) => {
-          db.createNotification(p.id, cancelNotifs[i]).catch((err) => console.error('[MTC Supabase]', err));
-        });
-
-        // Send cancellation message to each participant
-        booking.participants.forEach((participant) => {
-          const msg = {
-            id: generateId('msg'),
-            from: booking.userName,
-            fromId: booking.userId,
-            to: participant.name,
-            toId: participant.id,
-            text: `A court booking you were part of has been cancelled.\n${booking.courtName} — ${new Date(booking.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} at ${booking.time}.`,
+        queueMicrotask(() => {
+          const cancelNotifs: Notification[] = booking.participants!.map((p) => ({
+            id: generateId('n'),
+            type: 'booking' as const,
+            title: 'Booking Cancelled',
+            body: `${booking.userName} cancelled the booking: ${booking.courtName} on ${booking.date} at ${booking.time}.`,
             timestamp: new Date().toISOString(),
             read: false,
-          };
-          // Persist to Supabase
-          db.sendMessageByUsers({ id: msg.id, fromId: booking.userId, fromName: booking.userName, toId: participant.id, toName: participant.name, text: msg.text }).catch((err) => console.error('[MTC Supabase]', err));
+          }));
+          setNotifications(prev => [...cancelNotifs, ...prev]);
+          // Persist participant notifications to Supabase (1:1 mapping)
+          booking.participants!.forEach((p, i) => {
+            db.createNotification(p.id, cancelNotifs[i]).catch((err) => console.error('[MTC Supabase]', err));
+          });
+
+          // Send cancellation message to each participant
+          booking.participants!.forEach((participant) => {
+            const msg = {
+              id: generateId('msg'),
+              from: booking.userName,
+              fromId: booking.userId,
+              to: participant.name,
+              toId: participant.id,
+              text: `A court booking you were part of has been cancelled.\n${booking.courtName} — ${new Date(booking.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} at ${booking.time}.`,
+              timestamp: new Date().toISOString(),
+              read: false,
+            };
+            // Persist to Supabase
+            db.sendMessageByUsers({ id: msg.id, fromId: booking.userId, fromName: booking.userName, toId: participant.id, toName: participant.name, text: msg.text }).catch((err) => console.error('[MTC Supabase]', err));
+          });
         });
       }
 
@@ -411,7 +419,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     // Create notification
     const notif: Notification = {
       id: generateId('n'),
-      type: 'event',
+      type: 'program',
       title: `Enrolled in ${program.title}`,
       body: `${program.sessions.length} sessions starting ${program.sessions[0]?.date}. Fee: $${program.fee}.`,
       timestamp: new Date().toISOString(),
@@ -455,7 +463,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setPayments(prev => {
       const existing = prev.find(p => p.memberId === memberId);
       if (existing) {
-        const entry = { id: generateId('pay'), date: new Date().toISOString().split('T')[0], description: `Refund: ${program.title}`, amount: -program.fee, type: 'payment' as const };
+        const entry = { id: generateId('pay'), date: new Date().toISOString().split('T')[0], description: `Refund: ${program.title}`, amount: -program.fee, type: 'charge' as const };
         return prev.map(p => p.memberId === memberId ? { ...p, balance: p.balance - program.fee, history: [...p.history, entry] } : p);
       }
       return prev;

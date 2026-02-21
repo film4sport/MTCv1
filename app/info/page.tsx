@@ -232,6 +232,24 @@ function InfoPageContent() {
     setActiveTab(tab);
   }, [tab]);
 
+  // Auto-detect if waiver/ack content fits without scrolling (large screens)
+  useEffect(() => {
+    if (signupStep === 3) {
+      const checkFit = () => {
+        if (waiverRef.current) {
+          const { scrollHeight, clientHeight } = waiverRef.current;
+          if (scrollHeight <= clientHeight + 10) setWaiverScrolled(true);
+        }
+        if (ackRef.current) {
+          const { scrollHeight, clientHeight } = ackRef.current;
+          if (scrollHeight <= clientHeight + 10) setAckScrolled(true);
+        }
+      };
+      // Check after render
+      requestAnimationFrame(checkFit);
+    }
+  }, [signupStep]);
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) =>
@@ -294,13 +312,17 @@ function InfoPageContent() {
       }
 
       // Sign in immediately to establish Supabase session (so middleware allows dashboard access)
-      await signIn(signupData.email, signupData.password);
+      const loggedInUser = await signIn(signupData.email, signupData.password);
+      if (!loggedInUser) {
+        // Auth user was created but profile may not exist yet — still show success
+        console.warn('[MTC] signIn after signUp returned null — profile may not be ready yet');
+      }
 
       // Send welcome message with gate code (non-blocking)
       sendWelcomeMessage(user.id, user.name).catch(err => console.error('[MTC] welcome message:', err));
 
       // Cache user for instant dashboard access
-      localStorage.setItem('mtc-current-user', JSON.stringify(user));
+      localStorage.setItem('mtc-current-user', JSON.stringify(loggedInUser || user));
 
       setSignupLoading(false);
       setSignupStep(5);
@@ -778,7 +800,7 @@ function InfoPageContent() {
                       </button>
                       <button
                         onClick={() => {
-                          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                          const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/;
                           if (!emailRegex.test(signupData.email)) {
                             setSignupError('Please enter a valid email address');
                             return;

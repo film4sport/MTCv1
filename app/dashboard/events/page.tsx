@@ -255,7 +255,7 @@ export default function EventsPage() {
             {eventsToShow.map(ev => {
               const bc = badgeColors[ev.badge] || badgeColors['members'];
               const attending = ev.attendees.includes(currentUser?.name || '');
-              const isPast = new Date(ev.date) < new Date(new Date().setHours(0, 0, 0, 0));
+              const isPast = new Date(ev.date + 'T00:00:00') < new Date(new Date().setHours(0, 0, 0, 0));
 
               return (
                 <div

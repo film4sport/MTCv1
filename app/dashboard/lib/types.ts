@@ -94,7 +94,7 @@ export interface Announcement {
 
 export interface Notification {
   id: string;
-  type: 'booking' | 'event' | 'partner' | 'message' | 'payment' | 'announcement';
+  type: 'booking' | 'event' | 'partner' | 'message' | 'payment' | 'announcement' | 'program';
   title: string;
   body: string;
   timestamp: string;
@@ -181,7 +181,7 @@ export const COURTS_CONFIG = [
 ] as const;
 
 export const TIME_SLOTS = [
-  '9:30 AM', '10:00 AM', '10:30 AM', '11:00 AM', '12:00 PM',
+  '9:30 AM', '10:00 AM', '10:30 AM', '11:00 AM', '11:30 AM', '12:00 PM',
   '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM',
   '5:00 PM', '6:00 PM', '7:00 PM', '8:00 PM', '9:00 PM',
 ] as const;

@@ -11,7 +11,6 @@ export default function LoginPage() {
   const [emailError, setEmailError] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [remember, setRemember] = useState(false);
 
   // Load Bebas Neue for phone mockup
   useEffect(() => {
@@ -493,17 +492,7 @@ export default function LoginPage() {
               {passwordError && <p className="text-xs mt-2" style={{ color: '#ef4444' }}>{loginError || 'Password is required'}</p>}
             </div>
 
-            <div className="flex items-center justify-between text-sm">
-              <label className="flex items-center gap-2 cursor-pointer" style={{ color: '#6b7266' }}>
-                <input
-                  type="checkbox"
-                  checked={remember}
-                  onChange={(e) => setRemember(e.target.checked)}
-                  className="w-5 h-5 rounded"
-                  style={{ accentColor: '#6b7a3d' }}
-                />
-                Remember me
-              </label>
+            <div className="flex items-center justify-end text-sm">
               <button type="button" onClick={() => { setShowForgotPassword(true); setResetEmail(email); setResetSent(false); setResetError(''); }} className="font-medium hover:underline" style={{ color: '#6b7a3d', background: 'none', border: 'none', cursor: 'pointer' }}>Forgot password?</button>
             </div>
 
