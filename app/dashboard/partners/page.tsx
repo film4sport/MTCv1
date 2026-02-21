@@ -211,6 +211,11 @@ export default function PartnersPage() {
                     return;
                   }
                   if (!currentUser) return;
+                  // Prevent posting for past dates
+                  if (new Date(postDate + 'T23:59:59') < new Date()) {
+                    showToast('Cannot post for a past date', 'error');
+                    return;
+                  }
                   const partner: import('../lib/types').Partner = {
                     id: generateId('p'),
                     userId: currentUser.id,

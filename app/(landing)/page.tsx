@@ -11,6 +11,7 @@ import Partners from './components/Partners';
 import Gallery from './components/Gallery';
 import Footer from './components/Footer';
 import Lightbox from './components/Lightbox';
+import Loader from './components/Loader';
 
 export default function LandingPage() {
   const [lightbox, setLightbox] = useState<{ src: string; alt: string } | null>(null);
@@ -99,6 +100,9 @@ export default function LandingPage() {
 
   return (
     <>
+      {/* Loading Screen */}
+      <Loader />
+
       <a href="#events" className="skip-to-content">Skip to content</a>
 
       {/* Scroll Progress Bar */}
@@ -108,6 +112,9 @@ export default function LandingPage() {
 
       {/* Hero Section (dark, parallax) */}
       <Hero />
+
+      {/* Wave Divider: Hero (dark) → Events (cream) */}
+      <WaveDivider bgColor="#1a1f12" fillColor="#f5f2eb" height={80} overlap />
 
       {/* Events & Programs Section */}
       <Events onOpenLightbox={openLightbox} />

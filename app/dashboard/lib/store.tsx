@@ -185,7 +185,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (isLoaded) {
       saveJSON('mtc-notification-prefs', notificationPreferences);
-      if (currentUser) db.updateNotificationPreferences(currentUser.id, notificationPreferences).catch(() => {});
+      if (currentUser) db.updateNotificationPreferences(currentUser.id, notificationPreferences).catch((err) => console.error('[MTC Supabase]', err));
     }
   }, [notificationPreferences, isLoaded, currentUser]);
 
@@ -255,7 +255,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const addBooking = useCallback((booking: Booking) => {
     setBookings(prev => [...prev, booking]);
     // Persist to Supabase
-    db.createBooking(booking).catch(() => {});
+    db.createBooking(booking).catch((err) => console.error('[MTC Supabase]', err));
     // Create notification for booker
     if (booking.type === 'court') {
       const notif: Notification = {
@@ -268,7 +268,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       };
       setNotifications(prev => [notif, ...prev]);
       // Persist booker notification to Supabase
-      db.createNotification(booking.userId, notif).catch(() => {});
+      db.createNotification(booking.userId, notif).catch((err) => console.error('[MTC Supabase]', err));
 
       // Notify each participant with a notification + message
       if (booking.participants && booking.participants.length > 0) {
@@ -283,7 +283,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setNotifications(prev => [...participantNotifs, ...prev]);
         // Persist participant notifications to Supabase
         booking.participants.forEach((p, i) => {
-          db.createNotification(p.id, participantNotifs[i]).catch(() => {});
+          db.createNotification(p.id, participantNotifs[i]).catch((err) => console.error('[MTC Supabase]', err));
         });
 
         // Send message to each participant with calendar marker
@@ -299,7 +299,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
             read: false,
           };
           // Persist to Supabase
-          db.sendMessageByUsers({ id: msg.id, fromId: booking.userId, fromName: booking.userName, toId: participant.id, toName: participant.name, text: msg.text }).catch(() => {});
+          db.sendMessageByUsers({ id: msg.id, fromId: booking.userId, fromName: booking.userName, toId: participant.id, toName: participant.name, text: msg.text }).catch((err) => console.error('[MTC Supabase]', err));
         });
       }
     }
@@ -323,7 +323,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setNotifications(prev => [...cancelNotifs, ...prev]);
         // Persist participant notifications to Supabase (1:1 mapping)
         booking.participants.forEach((p, i) => {
-          db.createNotification(p.id, cancelNotifs[i]).catch(() => {});
+          db.createNotification(p.id, cancelNotifs[i]).catch((err) => console.error('[MTC Supabase]', err));
         });
 
         // Send cancellation message to each participant
@@ -339,21 +339,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
             read: false,
           };
           // Persist to Supabase
-          db.sendMessageByUsers({ id: msg.id, fromId: booking.userId, fromName: booking.userName, toId: participant.id, toName: participant.name, text: msg.text }).catch(() => {});
+          db.sendMessageByUsers({ id: msg.id, fromId: booking.userId, fromName: booking.userName, toId: participant.id, toName: participant.name, text: msg.text }).catch((err) => console.error('[MTC Supabase]', err));
         });
       }
 
       return prev.map(b => b.id === id ? { ...b, status: 'cancelled' as const } : b);
     });
     // Persist to Supabase
-    db.cancelBooking(id).catch(() => {});
+    db.cancelBooking(id).catch((err) => console.error('[MTC Supabase]', err));
   }, []);
 
   // Program CRUD
   const addProgram = useCallback((program: CoachingProgram) => {
     setPrograms(prev => [...prev, program]);
     // Persist to Supabase
-    db.createProgram(program).catch(() => {});
+    db.createProgram(program).catch((err) => console.error('[MTC Supabase]', err));
     // Auto-generate blocked bookings for each session
     const newBookings: Booking[] = program.sessions.map((s, i) => ({
       id: `bp-${program.id}-${i}`,
@@ -369,14 +369,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }));
     setBookings(prev => [...prev, ...newBookings]);
     // Persist program bookings to Supabase
-    newBookings.forEach(b => db.createBooking(b).catch(() => {}));
+    newBookings.forEach(b => db.createBooking(b).catch((err) => console.error('[MTC Supabase]', err)));
   }, []);
 
   const cancelProgram = useCallback((programId: string) => {
     setPrograms(prev => prev.map(p => p.id === programId ? { ...p, status: 'cancelled' as const } : p));
     setBookings(prev => prev.map(b => b.programId === programId ? { ...b, status: 'cancelled' as const } : b));
     // Persist to Supabase
-    db.cancelProgram(programId).catch(() => {});
+    db.cancelProgram(programId).catch((err) => console.error('[MTC Supabase]', err));
   }, []);
 
   const enrollInProgram = useCallback((programId: string, memberId: string, memberName: string) => {
@@ -385,7 +385,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     // Add member to enrolled list
     setPrograms(prev => prev.map(p => p.id === programId ? { ...p, enrolledMembers: [...p.enrolledMembers, memberId] } : p));
     // Persist to Supabase
-    db.enrollInProgram(programId, memberId).catch(() => {});
+    db.enrollInProgram(programId, memberId).catch((err) => console.error('[MTC Supabase]', err));
     // Charge fee
     setPayments(prev => {
       const existing = prev.find(p => p.memberId === memberId);
@@ -406,7 +406,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     };
     setNotifications(prev => [notif, ...prev]);
     // Persist enrollment notification to Supabase
-    db.createNotification(memberId, notif).catch(() => {});
+    db.createNotification(memberId, notif).catch((err) => console.error('[MTC Supabase]', err));
     // Send message from coach (persist to Supabase)
     const coachMsgText = `Welcome to ${program.title}! Your enrollment is confirmed. ${program.sessions.length} sessions starting ${new Date(program.sessions[0]?.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}. See you on the court!`;
     const coachMsg = {
@@ -429,7 +429,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     db.sendMessageByUsers({
       id: coachMsg.id, fromId: program.coachId, fromName: program.coachName,
       toId: memberId, toName: memberName, text: coachMsgText,
-    }).catch(() => {});
+    }).catch((err) => console.error('[MTC Supabase]', err));
   }, [programs]);
 
   const withdrawFromProgram = useCallback((programId: string, memberId: string) => {
@@ -437,7 +437,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (!program) return;
     setPrograms(prev => prev.map(p => p.id === programId ? { ...p, enrolledMembers: p.enrolledMembers.filter(m => m !== memberId) } : p));
     // Persist to Supabase
-    db.withdrawFromProgram(programId, memberId).catch(() => {});
+    db.withdrawFromProgram(programId, memberId).catch((err) => console.error('[MTC Supabase]', err));
     // Credit refund
     setPayments(prev => {
       const existing = prev.find(p => p.memberId === memberId);
@@ -451,12 +451,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const addPartner = useCallback((partner: Partner) => {
     setPartners(prev => [partner, ...prev]);
-    db.createPartner(partner).catch(() => {});
+    db.createPartner(partner).catch((err) => console.error('[MTC Supabase]', err));
   }, []);
 
   const removePartner = useCallback((partnerId: string) => {
     setPartners(prev => prev.filter(p => p.id !== partnerId));
-    db.deletePartner(partnerId).catch(() => {});
+    db.deletePartner(partnerId).catch((err) => console.error('[MTC Supabase]', err));
   }, []);
 
   const toggleRsvp = useCallback((eventId: string, userName: string) => {
@@ -470,7 +470,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       };
     }));
     // Persist to Supabase
-    db.toggleEventRsvp(eventId, userName).catch(() => {});
+    db.toggleEventRsvp(eventId, userName).catch((err) => console.error('[MTC Supabase]', err));
   }, []);
 
   const sendMessage = useCallback((toId: string, text: string) => {
@@ -502,7 +502,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     db.sendMessageByUsers({
       id: msg.id, fromId: currentUser.id, fromName: currentUser.name,
       toId, toName, text,
-    }).catch(() => {});
+    }).catch((err) => console.error('[MTC Supabase]', err));
   }, [currentUser, members]);
 
   const markConversationRead = useCallback((memberId: string) => {
@@ -520,7 +520,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         .or(`and(member_a.eq.${currentUser.id},member_b.eq.${memberId}),and(member_a.eq.${memberId},member_b.eq.${currentUser.id})`)
         .single()
         .then(({ data: conv }) => {
-          if (conv) db.markMessagesRead(conv.id, currentUser.id).catch(() => {});
+          if (conv) db.markMessagesRead(conv.id, currentUser.id).catch((err) => console.error('[MTC Supabase]', err));
         });
     }
   }, [currentUser]);
@@ -529,19 +529,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (!currentUser) return;
     setAnnouncements(prev => prev.map(a => a.id === id ? { ...a, dismissedBy: [...a.dismissedBy, currentUser.id] } : a));
     // Persist to Supabase
-    db.dismissAnnouncement(id, currentUser.id).catch(() => {});
+    db.dismissAnnouncement(id, currentUser.id).catch((err) => console.error('[MTC Supabase]', err));
   }, [currentUser]);
 
   const markNotificationRead = useCallback((id: string) => {
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
     // Persist to Supabase
-    db.markNotificationRead(id).catch(() => {});
+    db.markNotificationRead(id).catch((err) => console.error('[MTC Supabase]', err));
   }, []);
 
   const clearNotifications = useCallback(() => {
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
     // Persist to Supabase
-    if (currentUser) db.clearNotifications(currentUser.id).catch(() => {});
+    if (currentUser) db.clearNotifications(currentUser.id).catch((err) => console.error('[MTC Supabase]', err));
   }, [currentUser]);
 
   const showToast = useCallback((message: string, type: 'success' | 'error' | 'info' = 'success') => {

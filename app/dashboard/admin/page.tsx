@@ -16,7 +16,7 @@ export default function AdminPage() {
   const [newAnnouncementType, setNewAnnouncementType] = useState<'info' | 'warning' | 'urgent'>('info');
 
   // Non-admin redirect (extra guard in addition to layout)
-  if (currentUser?.role !== 'admin') {
+  if (!currentUser || currentUser.role !== 'admin') {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#f5f2eb' }}>
         <p className="text-sm" style={{ color: '#6b7266' }}>Admin access required</p>
@@ -65,7 +65,7 @@ export default function AdminPage() {
     const court = courts.find(c => c.id === courtId);
     const newStatus = court?.status === 'maintenance' ? 'available' : 'maintenance';
     setCourts(courts.map(c => c.id === courtId ? { ...c, status: newStatus } as typeof c : c));
-    db.updateCourtStatus(courtId, newStatus).catch(() => {});
+    db.updateCourtStatus(courtId, newStatus).catch((err) => console.error('[MTC Supabase]', err));
   };
 
   const addAnnouncement = () => {
@@ -79,12 +79,12 @@ export default function AdminPage() {
     };
     setAnnouncements([ann, ...announcements]);
     setNewAnnouncement('');
-    db.createAnnouncement(ann).catch(() => {});
+    db.createAnnouncement(ann).catch((err) => console.error('[MTC Supabase]', err));
   };
 
   const deleteAnnouncement = (id: string) => {
     setAnnouncements(announcements.filter(a => a.id !== id));
-    db.deleteAnnouncement(id).catch(() => {});
+    db.deleteAnnouncement(id).catch((err) => console.error('[MTC Supabase]', err));
   };
 
   const tabs: { key: AdminTab; label: string }[] = [
