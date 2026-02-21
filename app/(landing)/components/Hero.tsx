@@ -41,7 +41,7 @@ export default function Hero() {
       <div className="absolute inset-0 hero-overlay"></div>
 
       {/* Hero Content */}
-      <div className="absolute inset-0 flex flex-col lg:flex-row lg:items-center justify-center px-8 lg:px-16 z-10 pt-16">
+      <div className="absolute inset-0 flex flex-col lg:flex-row lg:items-center justify-center px-8 lg:px-16 z-10 pt-24 md:pt-28">
         <div className="max-w-2xl hero-content flex-1" ref={heroContentRef}>
           {/* Main Headline */}
           <h1
