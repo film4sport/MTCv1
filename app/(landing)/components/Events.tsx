@@ -59,7 +59,7 @@ export default function Events({ onOpenLightbox }: EventsProps) {
 
   return (
     <section id="events" className="text-gray-900 py-20 lg:py-28" style={{ backgroundColor: '#f5f2eb' }}>
-      <div className="max-w-7xl mx-auto px-8 lg:px-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-16">
 
         {/* Section Header */}
         <div className="text-center mb-12 fade-in">

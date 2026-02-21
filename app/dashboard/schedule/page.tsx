@@ -95,7 +95,7 @@ export default function SchedulePage() {
     const dateStr = d.toISOString().split('T')[0];
     return {
       booking: myBookings.some(b => b.date === dateStr),
-      event: myEvents.some(e => e.date === dateStr),
+      event: events.some(e => e.date === dateStr),
       program: myPrograms.some(p => p.sessions.some(s => s.date === dateStr)),
     };
   };
@@ -234,8 +234,8 @@ export default function SchedulePage() {
               })}
             </div>
             <div className="flex gap-4 mt-4 pt-4 border-t text-xs" style={{ borderColor: '#f0ede6', color: '#6b7266' }}>
-              <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full" style={{ background: '#6b7a3d' }} /> Booking</div>
-              <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full" style={{ background: '#d4e157' }} /> Event</div>
+              <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full" style={{ background: '#6b7a3d' }} /> My Booking</div>
+              <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full" style={{ background: '#d4e157' }} /> Club Event</div>
               <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full" style={{ background: '#f59e0b' }} /> Program</div>
             </div>
           </div>

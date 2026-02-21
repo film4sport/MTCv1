@@ -88,8 +88,53 @@ export const DEFAULT_BOOKINGS: Booking[] = [
 ];
 
 // ─── Club Events ────────────────────────────────────────
-// REAL club events only — matches landing page Schedule.tsx
+// Generate recurring events for the full season (May 9 – Oct 31, 2026)
+// Matches landing page Schedule.tsx recurring events exactly
+
+function generateRecurringEvents(): ClubEvent[] {
+  const SEASON_START = new Date(2026, 4, 9); // May 9 opening day
+  const SEASON_END = new Date(2026, 9, 31);  // Oct 31
+
+  // Recurring event templates (dayOfWeek: 0=Sun, 2=Tue, 4=Thu, 5=Fri)
+  const templates: { dayOfWeek: number; id: string; title: string; time: string; location: string; badge: 'free' | 'members' | 'paid'; price: string; description: string; type: ClubEvent['type'] }[] = [
+    { dayOfWeek: 2, id: 'mens-rr', title: "Men's Round Robin", time: '9:00 AM - 11:00 AM', location: 'Courts 1-2', badge: 'members', price: 'Members', description: "Weekly men's round robin every Tuesday morning. All skill levels welcome.", type: 'roundrobin' },
+    { dayOfWeek: 4, id: 'freedom-55', title: 'Freedom 55 League', time: '9:00 AM - 11:00 AM', location: 'Courts 1-2', badge: 'members', price: 'Members', description: 'Thursday morning league for the 55+ crowd. Fun and social tennis.', type: 'roundrobin' },
+    { dayOfWeek: 4, id: 'interclub', title: 'Interclub Competitive League', time: '7:00 PM - 9:30 PM', location: 'Courts 1-2', badge: 'members', price: 'Team Only', description: 'A & B teams interclub competitive league. RSVP required for team selection.', type: 'match' },
+    { dayOfWeek: 5, id: 'ladies-rr', title: "Ladies Round Robin", time: '9:00 AM - 11:00 AM', location: 'Courts 1-2', badge: 'members', price: 'Members', description: "Weekly ladies round robin every Friday morning. All skill levels welcome.", type: 'roundrobin' },
+    { dayOfWeek: 5, id: 'friday-mixed', title: 'Friday Night Mixed Round Robin', time: '6:00 PM - 9:00 PM', location: 'All Courts', badge: 'members', price: 'Members', description: 'Mixed doubles round robin every Friday evening. Rotating partners, fun format!', type: 'roundrobin' },
+  ];
+
+  const events: ClubEvent[] = [];
+  const current = new Date(SEASON_START);
+  // Move to the day after opening (recurring events start after May 9)
+  current.setDate(current.getDate() + 1);
+  while (current <= SEASON_END) {
+    const dow = current.getDay();
+    const dateStr = `${current.getFullYear()}-${String(current.getMonth() + 1).padStart(2, '0')}-${String(current.getDate()).padStart(2, '0')}`;
+    for (const t of templates) {
+      if (t.dayOfWeek === dow) {
+        events.push({
+          id: `${t.id}-${dateStr}`,
+          title: t.title,
+          date: dateStr,
+          time: t.time,
+          location: t.location,
+          badge: t.badge,
+          price: t.price,
+          description: t.description,
+          attendees: [],
+          type: t.type,
+        });
+      }
+    }
+    current.setDate(current.getDate() + 1);
+  }
+  return events;
+}
+
+// REAL club events — special one-off events + full-season recurring events
 export const DEFAULT_EVENTS: ClubEvent[] = [
+  // ── Special Events ──
   {
     id: 'opening-day-bbq',
     title: 'Opening Day BBQ & Meet the Pros',
@@ -103,68 +148,8 @@ export const DEFAULT_EVENTS: ClubEvent[] = [
     type: 'social',
   },
   {
-    id: 'mens-round-robin',
-    title: "Men's Round Robin",
-    date: '2026-05-12',
-    time: '9:00 AM - 11:00 AM',
-    location: 'Courts 1-2',
-    badge: 'members',
-    price: 'Members',
-    description: "Weekly men's round robin every Tuesday morning. All skill levels welcome.",
-    attendees: ['Mike Chen', 'James Park', 'David Kim', "Ryan O'Connor"],
-    type: 'roundrobin',
-  },
-  {
-    id: 'freedom-55',
-    title: 'Freedom 55 League',
-    date: '2026-05-14',
-    time: '9:00 AM - 11:00 AM',
-    location: 'Courts 1-2',
-    badge: 'members',
-    price: 'Members',
-    description: 'Thursday morning league for the 55+ crowd. Fun and social tennis.',
-    attendees: ['Lisa Thompson', 'David Kim'],
-    type: 'roundrobin',
-  },
-  {
-    id: 'interclub-league',
-    title: 'Interclub Competitive League',
-    date: '2026-05-14',
-    time: '7:00 PM - 9:30 PM',
-    location: 'Courts 1-2',
-    badge: 'members',
-    price: 'Team Only',
-    description: 'A & B teams interclub competitive league. RSVP required.',
-    attendees: ['Mike Chen', 'James Park', "Ryan O'Connor"],
-    type: 'match',
-  },
-  {
-    id: 'ladies-round-robin',
-    title: "Ladies Round Robin",
-    date: '2026-05-15',
-    time: '9:00 AM - 11:00 AM',
-    location: 'Courts 1-2',
-    badge: 'members',
-    price: 'Members',
-    description: "Weekly ladies round robin every Friday morning. All skill levels welcome.",
-    attendees: ['Sarah Wilson', 'Emily Rodriguez', 'Lisa Thompson'],
-    type: 'roundrobin',
-  },
-  {
-    id: 'friday-mixed',
-    title: 'Friday Night Mixed Round Robin',
-    date: '2026-05-15',
-    time: '6:00 PM - 9:00 PM',
-    location: 'All Courts',
-    badge: 'members',
-    price: 'Members',
-    description: 'Mixed doubles round robin every Friday evening. Rotating partners, fun format!',
-    attendees: ['Mike Chen', 'Sarah Wilson', 'James Park', 'Emily Rodriguez', 'David Kim'],
-    type: 'roundrobin',
-  },
-  {
-    id: 'mixed-doubles-tournament',
-    title: '95+ Mixed Doubles Tournament',
+    id: 'mixed-doubles-tournament-day1',
+    title: '95+ Mixed Doubles Tournament (Day 1)',
     date: '2026-07-26',
     time: 'All Day',
     location: 'All Courts',
@@ -172,13 +157,27 @@ export const DEFAULT_EVENTS: ClubEvent[] = [
     price: 'Members',
     spotsTotal: 32,
     spotsTaken: 16,
-    description: '95+ combined age mixed doubles tournament. Day 1 of 2 (continues July 27).',
+    description: '95+ combined age mixed doubles tournament. Day 1 of 2.',
     attendees: [],
     type: 'tournament',
   },
   {
-    id: 'summer-camp',
-    title: 'Summer Tennis Camp',
+    id: 'mixed-doubles-tournament-day2',
+    title: '95+ Mixed Doubles Tournament (Day 2)',
+    date: '2026-07-27',
+    time: 'All Day',
+    location: 'All Courts',
+    badge: 'members',
+    price: 'Members',
+    spotsTotal: 32,
+    spotsTaken: 16,
+    description: '95+ combined age mixed doubles tournament. Day 2 of 2.',
+    attendees: [],
+    type: 'tournament',
+  },
+  {
+    id: 'summer-camp-day1',
+    title: 'Summer Tennis Camp (Day 1)',
     date: '2026-07-28',
     time: '8:30 AM - 3:30 PM',
     location: 'Courts 1-4',
@@ -186,10 +185,68 @@ export const DEFAULT_EVENTS: ClubEvent[] = [
     price: 'See Details',
     spotsTotal: 30,
     spotsTaken: 12,
-    description: '5-day summer tennis camp (Jul 28 - Aug 1). Instruction, drills, and match play for all ages.',
+    description: '5-day summer tennis camp. Instruction, drills, and match play for all ages.',
     attendees: [],
     type: 'lesson',
   },
+  {
+    id: 'summer-camp-day2',
+    title: 'Summer Tennis Camp (Day 2)',
+    date: '2026-07-29',
+    time: '8:30 AM - 3:30 PM',
+    location: 'Courts 1-4',
+    badge: 'paid',
+    price: 'See Details',
+    spotsTotal: 30,
+    spotsTaken: 12,
+    description: '5-day summer tennis camp. Instruction, drills, and match play for all ages.',
+    attendees: [],
+    type: 'lesson',
+  },
+  {
+    id: 'summer-camp-day3',
+    title: 'Summer Tennis Camp (Day 3)',
+    date: '2026-07-30',
+    time: '8:30 AM - 3:30 PM',
+    location: 'Courts 1-4',
+    badge: 'paid',
+    price: 'See Details',
+    spotsTotal: 30,
+    spotsTaken: 12,
+    description: '5-day summer tennis camp. Instruction, drills, and match play for all ages.',
+    attendees: [],
+    type: 'lesson',
+  },
+  {
+    id: 'summer-camp-day4',
+    title: 'Summer Tennis Camp (Day 4)',
+    date: '2026-07-31',
+    time: '8:30 AM - 3:30 PM',
+    location: 'Courts 1-4',
+    badge: 'paid',
+    price: 'See Details',
+    spotsTotal: 30,
+    spotsTaken: 12,
+    description: '5-day summer tennis camp. Instruction, drills, and match play for all ages.',
+    attendees: [],
+    type: 'lesson',
+  },
+  {
+    id: 'summer-camp-day5',
+    title: 'Summer Tennis Camp (Day 5)',
+    date: '2026-08-01',
+    time: '8:30 AM - 3:30 PM',
+    location: 'Courts 1-4',
+    badge: 'paid',
+    price: 'See Details',
+    spotsTotal: 30,
+    spotsTaken: 12,
+    description: '5-day summer tennis camp. Instruction, drills, and match play for all ages.',
+    attendees: [],
+    type: 'lesson',
+  },
+  // ── Full-season recurring events (generated) ──
+  ...generateRecurringEvents(),
 ];
 
 // ─── Partner Requests ───────────────────────────────────

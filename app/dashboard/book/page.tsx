@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { useApp } from '../lib/store';
 import DashboardHeader from '../components/DashboardHeader';
 import { TIME_SLOTS, COURTS_CONFIG, COURT_HOURS, FEES } from '../lib/types';
@@ -9,8 +9,68 @@ import { generateId } from '../lib/utils';
 
 type ViewMode = 'week' | 'calendar';
 
+// Compute end time for a given slot (next slot or +30/60 min)
+function getTimeRange(time: string): string {
+  const idx = TIME_SLOTS.indexOf(time as typeof TIME_SLOTS[number]);
+  if (idx >= 0 && idx < TIME_SLOTS.length - 1) {
+    return `${time} – ${TIME_SLOTS[idx + 1]}`;
+  }
+  // Last slot — add 1 hour
+  const match = time.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+  if (!match) return time;
+  let hour = parseInt(match[1]);
+  const min = match[2];
+  const ampm = match[3].toUpperCase();
+  hour += 1;
+  let newAmpm = ampm;
+  if (hour === 12 && ampm === 'AM') newAmpm = 'PM';
+  if (hour === 13) { hour = 1; if (ampm === 'PM') newAmpm = 'PM'; }
+  if (hour > 12) hour -= 12;
+  return `${time} – ${hour}:${min} ${newAmpm}`;
+}
+
+// Subtle court accent colors
+const COURT_COLORS: Record<number, { bg: string; accent: string; dot: string }> = {
+  1: { bg: 'rgba(107, 122, 61, 0.06)', accent: '#6b7a3d', dot: '#6b7a3d' },
+  2: { bg: 'rgba(107, 122, 61, 0.06)', accent: '#6b7a3d', dot: '#8b9a5d' },
+  3: { bg: 'rgba(180, 140, 80, 0.06)', accent: '#b48c50', dot: '#b48c50' },
+  4: { bg: 'rgba(180, 140, 80, 0.06)', accent: '#b48c50', dot: '#c4a060' },
+};
+
+// Shared legend component
+function BookingLegend() {
+  return (
+    <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[0.7rem]" style={{ color: '#9ca3a0' }}>
+      <div className="flex items-center gap-1.5">
+        <span className="w-5 h-3 rounded border border-dashed" style={{ borderColor: '#d4d0c7' }} />
+        Available
+      </div>
+      <div className="flex items-center gap-1.5">
+        <span className="w-5 h-3 rounded" style={{ background: '#6b7a3d' }} />
+        My Booking
+      </div>
+      <div className="flex items-center gap-1.5">
+        <span className="w-5 h-3 rounded" style={{ background: '#f5f3ee', border: '1px solid #e8e5dd' }} />
+        Taken
+      </div>
+      <div className="flex items-center gap-1.5">
+        <span className="w-5 h-3 rounded" style={{ background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)' }} />
+        Lesson
+      </div>
+      <div className="flex items-center gap-1.5">
+        <span className="w-5 h-3 rounded" style={{ background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)' }} />
+        Program
+      </div>
+      <div className="flex items-center gap-1.5">
+        <span className="w-2 h-2 rounded-full" style={{ background: '#d4e157' }} />
+        Club Event
+      </div>
+    </div>
+  );
+}
+
 export default function BookCourtPage() {
-  const { currentUser, members, bookings, addBooking, cancelBooking, showToast } = useApp();
+  const { currentUser, members, bookings, events, addBooking, cancelBooking, showToast } = useApp();
   const [bookingSuccess, setBookingSuccess] = useState<{ courtName: string; date: string; time: string; participants?: { id: string; name: string }[] } | null>(null);
   const [view, setView] = useState<ViewMode>('week');
   const [weekStart, setWeekStart] = useState(() => {
@@ -30,6 +90,12 @@ export default function BookCourtPage() {
   const [bookingLoading, setBookingLoading] = useState(false);
   const [calMonth, setCalMonth] = useState(() => new Date());
   const [calSelectedDate, setCalSelectedDate] = useState<string | null>(null);
+  const [hoveredSlot, setHoveredSlot] = useState<string | null>(null);
+  const [contentKey, setContentKey] = useState(0); // for transition animation
+  const tooltipTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  // Mobile: selected day index for day-by-day nav
+  const [mobileDayIdx, setMobileDayIdx] = useState(() => new Date().getDay());
 
   const weekDays = useMemo(() => {
     return Array.from({ length: 7 }, (_, i) => {
@@ -43,12 +109,19 @@ export default function BookCourtPage() {
     const d = new Date(weekStart);
     d.setDate(d.getDate() - 7);
     setWeekStart(d);
+    setContentKey(k => k + 1);
   };
   const nextWeek = () => {
     const d = new Date(weekStart);
     d.setDate(d.getDate() + 7);
     setWeekStart(d);
+    setContentKey(k => k + 1);
   };
+
+  // Trigger transition on court/view change
+  useEffect(() => {
+    setContentKey(k => k + 1);
+  }, [selectedCourt, view]);
 
   const isSlotBooked = (courtId: number, date: string, time: string) => {
     return bookings.find(b => b.courtId === courtId && b.date === date && b.time === time && b.status === 'confirmed');
@@ -166,6 +239,24 @@ export default function BookCourtPage() {
   const courtConfig = COURTS_CONFIG.find(c => c.id === selectedCourt)!;
   const slotsForCourt = TIME_SLOTS.filter(t => !isCourtClosed(selectedCourt, t));
 
+  // Quick book: find next available slot for current court
+  const nextAvailableSlot = useMemo(() => {
+    const today = new Date();
+    // Check today + next 7 days
+    for (let d = 0; d < 8; d++) {
+      const date = new Date(today);
+      date.setDate(date.getDate() + d);
+      const dateStr = date.toISOString().split('T')[0];
+      for (const time of slotsForCourt) {
+        if (!isSlotPast(dateStr, time) && !isSlotBooked(selectedCourt, dateStr, time) && !isCourtClosed(selectedCourt, time)) {
+          return { date: dateStr, time, courtId: selectedCourt, courtName: courtConfig.name };
+        }
+      }
+    }
+    return null;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCourt, bookings, slotsForCourt]);
+
   // Calendar helpers
   const calDays = useMemo(() => {
     const year = calMonth.getFullYear();
@@ -189,38 +280,59 @@ export default function BookCourtPage() {
     return bookings.some(b => b.date === dateStr && b.status === 'confirmed' && b.userId === currentUser?.id);
   };
 
+  // Hover tooltip handler
+  const handleSlotHover = (slotKey: string | null) => {
+    if (tooltipTimeout.current) clearTimeout(tooltipTimeout.current);
+    if (slotKey) {
+      tooltipTimeout.current = setTimeout(() => setHoveredSlot(slotKey), 300);
+    } else {
+      setHoveredSlot(null);
+    }
+  };
+
+  // Mobile day for day-by-day view
+  const mobileDay = weekDays[mobileDayIdx] || weekDays[0];
+  const mobileDateStr = mobileDay.toISOString().split('T')[0];
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#f5f2eb' }}>
       <DashboardHeader title="Book Court" />
 
       <div className="p-4 sm:p-6 lg:p-8 max-w-[1400px] mx-auto animate-slideUp">
 
-        {/* Top Bar: View Toggle + Court Tabs */}
+        {/* Top Bar: Court Tabs + View Toggle */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
-          {/* Court Tabs */}
-          <div className="flex gap-1.5">
-            {COURTS_CONFIG.map(c => (
-              <button
-                key={c.id}
-                onClick={() => setSelectedCourt(c.id)}
-                className="relative px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200"
-                style={{
-                  background: selectedCourt === c.id ? '#2a2f1e' : '#fff',
-                  color: selectedCourt === c.id ? '#fff' : '#6b7266',
-                  border: selectedCourt === c.id ? '1px solid #2a2f1e' : '1px solid #e0dcd3',
-                  boxShadow: selectedCourt === c.id ? '0 2px 8px rgba(42,47,30,0.15)' : 'none',
-                }}
-              >
-                {c.name}
-                <span className="block text-[0.6rem] font-normal mt-0.5" style={{ opacity: 0.7 }}>
-                  {c.floodlight ? 'til 10 PM' : 'til 8 PM'}
-                </span>
-              </button>
-            ))}
+          {/* Court Tabs with subtle color coding */}
+          <div className="flex gap-1.5 overflow-x-auto pb-1 -mb-1">
+            {COURTS_CONFIG.map(c => {
+              const colors = COURT_COLORS[c.id];
+              const active = selectedCourt === c.id;
+              return (
+                <button
+                  key={c.id}
+                  onClick={() => setSelectedCourt(c.id)}
+                  className="relative px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 shrink-0"
+                  style={{
+                    background: active ? '#2a2f1e' : '#fff',
+                    color: active ? '#fff' : '#6b7266',
+                    border: active ? '1px solid #2a2f1e' : '1px solid #e0dcd3',
+                    boxShadow: active ? '0 2px 8px rgba(42,47,30,0.15)' : 'none',
+                  }}
+                >
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full" style={{ background: active ? '#d4e157' : colors.dot, opacity: active ? 1 : 0.5 }} />
+                    {c.name}
+                  </span>
+                  <span className="block text-[0.6rem] font-normal mt-0.5" style={{ opacity: 0.7 }}>
+                    {c.floodlight ? 'til 10 PM' : 'til 8 PM'}
+                  </span>
+                </button>
+              );
+            })}
           </div>
 
           {/* View Toggle */}
-          <div className="flex items-center gap-1 p-1 rounded-xl" style={{ background: '#fff', border: '1px solid #e0dcd3' }}>
+          <div className="flex items-center gap-1 p-1 rounded-xl shrink-0" style={{ background: '#fff', border: '1px solid #e0dcd3' }}>
             <button
               onClick={() => setView('week')}
               className="px-4 py-2 rounded-lg text-xs font-medium transition-all duration-200"
@@ -242,6 +354,7 @@ export default function BookCourtPage() {
 
           {/* Main Grid Area */}
           <div className="flex-1 min-w-0">
+            <div key={contentKey} className="animate-fadeIn">
 
             {view === 'week' ? (
               <>
@@ -262,8 +375,8 @@ export default function BookCourtPage() {
                   </button>
                 </div>
 
-                {/* Week Grid — single court */}
-                <div className="rounded-2xl border overflow-hidden" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+                {/* Desktop: Full Week Grid */}
+                <div className="hidden sm:block rounded-2xl border overflow-hidden" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
                   <div className="overflow-x-auto">
                     <table className="w-full border-collapse min-w-[600px]">
                       <thead>
@@ -290,7 +403,7 @@ export default function BookCourtPage() {
                       </thead>
                       <tbody>
                         {slotsForCourt.map(time => (
-                          <tr key={time} className="group">
+                          <tr key={time}>
                             <td className="sticky left-0 z-10 px-3 py-0 text-[0.7rem] font-medium border-b" style={{ borderColor: '#f7f5f0', background: '#faf8f3', color: '#9ca3a0' }}>
                               {time}
                             </td>
@@ -304,13 +417,17 @@ export default function BookCourtPage() {
                               const isLesson = booked?.type === 'lesson';
                               const today = isToday(day);
                               const available = !booked && !past && !closed;
+                              const slotKey = `${selectedCourt}-${dateStr}-${time}`;
+                              const showTooltip = hoveredSlot === slotKey && booked && !mine;
 
                               return (
-                                <td key={`${dateStr}-${time}`} className="border-b p-[3px]" style={{ borderColor: '#f7f5f0', background: today ? 'rgba(107, 122, 61, 0.02)' : 'transparent' }}>
+                                <td key={`${dateStr}-${time}`} className="border-b p-[3px] relative" style={{ borderColor: '#f7f5f0', background: today ? 'rgba(107, 122, 61, 0.02)' : 'transparent' }}>
                                   <button
                                     onClick={() => handleSlotClick(selectedCourt, courtConfig.name, dateStr, time)}
+                                    onMouseEnter={() => (booked && !mine) ? handleSlotHover(slotKey) : undefined}
+                                    onMouseLeave={() => handleSlotHover(null)}
                                     disabled={(!mine && !!booked) || past || closed}
-                                    className="w-full rounded-lg text-xs font-medium py-2.5 px-2 transition-all duration-150 relative overflow-hidden"
+                                    className={`slot-cell w-full rounded-lg text-xs font-medium py-2.5 px-2 transition-all duration-150 relative overflow-hidden ${available ? 'hover:border-[#6b7a3d] hover:border-solid hover:bg-[#6b7a3d]/[0.04]' : ''}`}
                                     style={{
                                       background: mine
                                         ? '#6b7a3d'
@@ -332,7 +449,6 @@ export default function BookCourtPage() {
                                         : available ? '1.5px dashed #d4d0c7'
                                         : '1.5px solid transparent',
                                     }}
-                                    title={mine ? 'Click to cancel' : isLesson ? 'Lesson' : isProgram ? 'Program' : booked ? `Booked by ${booked.userName}` : past ? 'Past' : closed ? 'Closed' : 'Book this slot'}
                                   >
                                     {mine ? (
                                       <span className="flex items-center justify-center gap-1">
@@ -347,9 +463,18 @@ export default function BookCourtPage() {
                                     ) : past || closed ? (
                                       <span style={{ opacity: 0.3 }}>—</span>
                                     ) : (
-                                      <span className="opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: '#6b7a3d' }}>Book</span>
+                                      <span className="slot-book-label opacity-0 transition-opacity duration-150" style={{ color: '#6b7a3d' }}>Book</span>
                                     )}
                                   </button>
+
+                                  {/* Hover tooltip: who booked */}
+                                  {showTooltip && booked && (
+                                    <div className="absolute z-30 bottom-full left-1/2 -translate-x-1/2 mb-1 px-2.5 py-1.5 rounded-lg text-[0.65rem] font-medium whitespace-nowrap shadow-lg pointer-events-none animate-fadeIn" style={{ background: '#2a2f1e', color: '#e8e4d9' }}>
+                                      {isLesson ? 'Lesson' : isProgram ? 'Program session' : booked.userName}
+                                      <span className="block text-[0.55rem] font-normal" style={{ color: '#9ca3a0' }}>{getTimeRange(time)}</span>
+                                      <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent" style={{ borderTopColor: '#2a2f1e' }} />
+                                    </div>
+                                  )}
                                 </td>
                               );
                             })}
@@ -360,28 +485,85 @@ export default function BookCourtPage() {
                   </div>
                 </div>
 
-                {/* Legend */}
-                <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mt-4 text-[0.7rem]" style={{ color: '#9ca3a0' }}>
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-5 h-3 rounded border border-dashed" style={{ borderColor: '#d4d0c7' }} />
-                    Available
+                {/* Mobile: Day-by-day vertical list */}
+                <div className="sm:hidden">
+                  {/* Day pills */}
+                  <div className="flex gap-1 mb-4 overflow-x-auto pb-1 -mb-1">
+                    {weekDays.map((day, idx) => {
+                      const f = formatDateShort(day);
+                      const today = isToday(day);
+                      const active = mobileDayIdx === idx;
+                      return (
+                        <button
+                          key={day.toISOString()}
+                          onClick={() => setMobileDayIdx(idx)}
+                          className="flex flex-col items-center px-3 py-2 rounded-xl transition-all duration-200 shrink-0"
+                          style={{
+                            background: active ? '#2a2f1e' : today ? 'rgba(107, 122, 61, 0.08)' : '#fff',
+                            color: active ? '#fff' : today ? '#6b7a3d' : '#6b7266',
+                            border: active ? '1px solid #2a2f1e' : '1px solid #e0dcd3',
+                            minWidth: 48,
+                          }}
+                        >
+                          <span className="text-[0.6rem] font-medium uppercase">{f.day}</span>
+                          <span className="text-sm font-bold">{f.date}</span>
+                        </button>
+                      );
+                    })}
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-5 h-3 rounded" style={{ background: '#6b7a3d' }} />
-                    My Booking
+
+                  {/* Slot list for selected day */}
+                  <div className="rounded-2xl border overflow-hidden" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+                    <div className="p-3 border-b" style={{ borderColor: '#f0ede6', background: '#faf8f3' }}>
+                      <p className="text-xs font-semibold" style={{ color: '#2a2f1e' }}>
+                        {mobileDay.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+                      </p>
+                      <p className="text-[0.65rem] mt-0.5" style={{ color: '#9ca3a0' }}>{courtConfig.name} &bull; {courtConfig.floodlight ? 'Lights til 10 PM' : 'Closes 8 PM'}</p>
+                    </div>
+                    <div className="divide-y" style={{ borderColor: '#f7f5f0' }}>
+                      {slotsForCourt.map(time => {
+                        const booked = isSlotBooked(selectedCourt, mobileDateStr, time);
+                        const mine = isSlotMine(selectedCourt, mobileDateStr, time);
+                        const past = isSlotPast(mobileDateStr, time);
+                        const available = !booked && !past;
+                        const isLesson = booked?.type === 'lesson';
+                        const isProgram = booked?.type === 'program';
+
+                        return (
+                          <button
+                            key={time}
+                            onClick={() => (available || mine) ? handleSlotClick(selectedCourt, courtConfig.name, mobileDateStr, time) : undefined}
+                            disabled={!available && !mine}
+                            className="w-full flex items-center justify-between px-4 py-3.5 transition-colors"
+                            style={{
+                              background: mine ? 'rgba(107, 122, 61, 0.06)' : 'transparent',
+                              cursor: (available || mine) ? 'pointer' : 'default',
+                            }}
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="w-1.5 h-8 rounded-full" style={{
+                                background: mine ? '#6b7a3d' : isLesson ? '#3b82f6' : isProgram ? '#d97706' : available ? '#d4d0c7' : '#f0ede6',
+                              }} />
+                              <div className="text-left">
+                                <span className="text-sm font-medium" style={{ color: (past && !mine) ? '#d1d5db' : '#2a2f1e' }}>{time}</span>
+                                <span className="block text-[0.65rem]" style={{ color: '#9ca3a0' }}>{getTimeRange(time).split(' – ')[1] ? `til ${getTimeRange(time).split(' – ')[1]}` : ''}</span>
+                              </div>
+                            </div>
+                            <span className="text-xs font-medium" style={{
+                              color: mine ? '#6b7a3d' : isLesson ? '#3b82f6' : isProgram ? '#d97706' : available ? '#9ca3a0' : '#d1d5db',
+                            }}>
+                              {mine ? 'Your Booking ✓' : isLesson ? 'Lesson' : isProgram ? 'Program' : booked ? booked.userName : past ? 'Past' : 'Available'}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-5 h-3 rounded" style={{ background: '#f5f3ee' }} />
-                    Taken
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-5 h-3 rounded" style={{ background: 'rgba(59, 130, 246, 0.08)', border: '1px solid rgba(59, 130, 246, 0.2)' }} />
-                    Lesson
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-5 h-3 rounded" style={{ background: 'rgba(245, 158, 11, 0.08)', border: '1px solid rgba(245, 158, 11, 0.2)' }} />
-                    Program
-                  </div>
+                </div>
+
+                {/* Legend — shared component */}
+                <div className="mt-4">
+                  <BookingLegend />
                 </div>
               </>
             ) : (
@@ -421,6 +603,7 @@ export default function BookCourtPage() {
                     const today = isToday(day);
                     const hasBooking = hasBookingOnDate(day);
                     const hasMine = myBookingOnDate(day);
+                    const hasEvent = events.some(e => e.date === dateStr);
                     const isPast = day < new Date(new Date().setHours(0, 0, 0, 0));
                     const selected = calSelectedDate === dateStr;
                     return (
@@ -437,9 +620,10 @@ export default function BookCourtPage() {
                         }}
                       >
                         <span className="text-sm">{day.getDate()}</span>
-                        {(hasBooking || hasMine) && (
+                        {(hasBooking || hasMine || hasEvent) && (
                           <div className="flex gap-0.5">
                             {hasMine && <span className="w-1.5 h-1.5 rounded-full" style={{ background: selected ? '#d4e157' : '#6b7a3d' }} />}
+                            {hasEvent && <span className="w-1.5 h-1.5 rounded-full" style={{ background: selected ? 'rgba(212,225,87,0.7)' : '#d4e157' }} />}
                             {hasBooking && !hasMine && <span className="w-1.5 h-1.5 rounded-full" style={{ background: selected ? 'rgba(255,255,255,0.4)' : '#d4d0c7' }} />}
                           </div>
                         )}
@@ -472,15 +656,29 @@ export default function BookCourtPage() {
                             disabled={!available && !mine}
                             className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm transition-all duration-150"
                             style={{
-                              background: mine ? '#6b7a3d' : available ? '#fff' : '#f9f7f3',
+                              background: mine ? '#6b7a3d'
+                                : isLesson ? 'rgba(59, 130, 246, 0.06)'
+                                : isProgram ? 'rgba(245, 158, 11, 0.06)'
+                                : available ? '#fff' : '#f9f7f3',
                               color: mine ? '#fff' : available ? '#2a2f1e' : '#b5b0a5',
-                              border: mine ? '1px solid #6b7a3d' : available ? '1px solid #e0dcd3' : '1px solid #f0ede6',
+                              border: mine ? '1px solid #6b7a3d'
+                                : isLesson ? '1px solid rgba(59, 130, 246, 0.15)'
+                                : isProgram ? '1px solid rgba(245, 158, 11, 0.15)'
+                                : available ? '1px solid #e0dcd3' : '1px solid #f0ede6',
                               cursor: available || mine ? 'pointer' : 'default',
                             }}
                           >
-                            <span className="font-medium">{time}</span>
-                            <span className="text-xs font-medium" style={{ opacity: 0.7 }}>
-                              {mine ? 'Your Booking ✓' : isLesson ? 'Lesson' : isProgram ? 'Program' : booked ? 'Taken' : 'Available'}
+                            <div>
+                              <span className="font-medium">{time}</span>
+                              <span className="text-[0.65rem] ml-2" style={{ color: mine ? 'rgba(255,255,255,0.6)' : '#c5c0b8' }}>
+                                {getTimeRange(time).split(' – ')[1] ? `→ ${getTimeRange(time).split(' – ')[1]}` : ''}
+                              </span>
+                            </div>
+                            <span className="text-xs font-medium" style={{
+                              opacity: 0.8,
+                              color: mine ? '#fff' : isLesson ? '#3b82f6' : isProgram ? '#d97706' : booked ? '#b5b0a5' : '#9ca3a0',
+                            }}>
+                              {mine ? 'Your Booking ✓' : isLesson ? 'Lesson' : isProgram ? 'Program' : booked ? booked.userName : 'Available'}
                             </span>
                           </button>
                         );
@@ -488,71 +686,112 @@ export default function BookCourtPage() {
                     </div>
                   </div>
                 )}
+
+                {/* Legend — same as week view */}
+                <div className="mt-5 pt-4 border-t" style={{ borderColor: '#f0ede6' }}>
+                  <BookingLegend />
+                </div>
               </div>
             )}
+
+            </div>
           </div>
 
-          {/* Sidebar: My Bookings */}
+          {/* Sidebar: My Bookings + Quick Book */}
           <div className="hidden lg:block w-72 shrink-0">
-            <div className="rounded-2xl border p-5 sticky top-6" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
-              <h3 className="font-semibold text-sm mb-4 flex items-center gap-2" style={{ color: '#2a2f1e' }}>
-                <svg className="w-4 h-4" style={{ color: '#6b7a3d' }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                My Bookings
-              </h3>
-              {myUpcoming.length === 0 ? (
-                <div className="text-center py-6">
-                  <div className="w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center" style={{ background: 'rgba(107, 122, 61, 0.06)' }}>
-                    <svg className="w-6 h-6" fill="none" stroke="#6b7a3d" viewBox="0 0 24 24" strokeWidth="1.5" style={{ opacity: 0.4 }}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            <div className="space-y-4 sticky top-6">
+
+              {/* Quick Book Card */}
+              {nextAvailableSlot && (
+                <div className="rounded-2xl border p-4" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+                  <p className="text-xs font-semibold mb-2 flex items-center gap-1.5" style={{ color: '#6b7a3d' }}>
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
-                  </div>
-                  <p className="text-xs" style={{ color: '#9ca3a0' }}>No upcoming bookings</p>
-                  <p className="text-[0.65rem] mt-1" style={{ color: '#c5c0b8' }}>Click a time slot to book</p>
-                </div>
-              ) : (
-                <div className="space-y-2.5">
-                  {myUpcoming.slice(0, 5).map(b => (
-                    <div key={b.id} className="rounded-xl p-3.5 transition-colors" style={{ background: '#faf8f3' }}>
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <p className="font-semibold text-sm" style={{ color: '#2a2f1e' }}>{b.courtName}</p>
-                          <p className="text-xs mt-0.5" style={{ color: '#6b7266' }}>
-                            {new Date(b.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} &bull; {b.time}
-                          </p>
-                          {b.guestName && (
-                            <p className="text-xs mt-1 flex items-center gap-1" style={{ color: '#d97706' }}>
-                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-                              {b.guestName}
-                            </p>
-                          )}
-                          {b.participants && b.participants.length > 0 && (
-                            <p className="text-xs mt-1 flex items-center gap-1" style={{ color: '#6b7a3d' }}>
-                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                              {b.participants.map(p => p.name).join(', ')}
-                            </p>
-                          )}
-                        </div>
-                        <button
-                          onClick={() => {
-                            if (!canCancel(b.date, b.time)) {
-                              showToast(`Cannot cancel within ${FEES.cancelWindowHours}h of booking`, 'error');
-                              return;
-                            }
-                            cancelBooking(b.id);
-                            showToast('Booking cancelled');
-                          }}
-                          className="text-[0.65rem] px-2 py-1 rounded-lg hover:bg-red-50 transition-colors shrink-0"
-                          style={{ color: '#ef4444' }}
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </div>
-                  ))}
+                    Quick Book
+                  </p>
+                  <p className="text-[0.7rem] mb-3" style={{ color: '#9ca3a0' }}>
+                    Next available on {courtConfig.name}
+                  </p>
+                  <button
+                    onClick={() => handleSlotClick(nextAvailableSlot.courtId, nextAvailableSlot.courtName, nextAvailableSlot.date, nextAvailableSlot.time)}
+                    className="w-full py-2.5 rounded-xl text-sm font-medium transition-all duration-200 hover:opacity-90 active:scale-[0.98]"
+                    style={{ background: '#6b7a3d', color: '#fff' }}
+                  >
+                    {new Date(nextAvailableSlot.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} at {nextAvailableSlot.time}
+                  </button>
                 </div>
               )}
+
+              {/* My Bookings */}
+              <div className="rounded-2xl border p-5" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+                <h3 className="font-semibold text-sm mb-4 flex items-center gap-2" style={{ color: '#2a2f1e' }}>
+                  <svg className="w-4 h-4" style={{ color: '#6b7a3d' }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  My Bookings
+                  {myUpcoming.length > 0 && (
+                    <span className="text-[0.6rem] px-1.5 py-0.5 rounded-md font-medium" style={{ background: 'rgba(107, 122, 61, 0.1)', color: '#6b7a3d' }}>{myUpcoming.length}</span>
+                  )}
+                </h3>
+                {myUpcoming.length === 0 ? (
+                  <div className="text-center py-6">
+                    <div className="w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center" style={{ background: 'rgba(107, 122, 61, 0.06)' }}>
+                      <svg className="w-6 h-6" fill="none" stroke="#6b7a3d" viewBox="0 0 24 24" strokeWidth="1.5" style={{ opacity: 0.4 }}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    <p className="text-xs" style={{ color: '#9ca3a0' }}>No upcoming bookings</p>
+                    <p className="text-[0.65rem] mt-1" style={{ color: '#c5c0b8' }}>Click a time slot to book</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2.5">
+                    {myUpcoming.slice(0, 5).map(b => (
+                      <div key={b.id} className="rounded-xl p-3.5 transition-colors" style={{ background: '#faf8f3' }}>
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <p className="font-semibold text-sm" style={{ color: '#2a2f1e' }}>{b.courtName}</p>
+                            <p className="text-xs mt-0.5" style={{ color: '#6b7266' }}>
+                              {new Date(b.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} &bull; {b.time}
+                            </p>
+                            {b.guestName && (
+                              <p className="text-xs mt-1 flex items-center gap-1" style={{ color: '#d97706' }}>
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                                {b.guestName}
+                              </p>
+                            )}
+                            {b.participants && b.participants.length > 0 && (
+                              <p className="text-xs mt-1 flex items-center gap-1" style={{ color: '#6b7a3d' }}>
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                {b.participants.map(p => p.name).join(', ')}
+                              </p>
+                            )}
+                          </div>
+                          <button
+                            onClick={() => {
+                              if (!canCancel(b.date, b.time)) {
+                                showToast(`Cannot cancel within ${FEES.cancelWindowHours}h of booking`, 'error');
+                                return;
+                              }
+                              cancelBooking(b.id);
+                              showToast('Booking cancelled');
+                            }}
+                            className="text-[0.65rem] px-2 py-1 rounded-lg hover:bg-red-50 transition-colors shrink-0"
+                            style={{ color: '#ef4444' }}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                    {myUpcoming.length > 5 && (
+                      <p className="text-center text-[0.65rem] pt-1" style={{ color: '#9ca3a0' }}>
+                        +{myUpcoming.length - 5} more
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -577,7 +816,7 @@ export default function BookCourtPage() {
               </div>
               <div className="flex justify-between text-sm">
                 <span style={{ color: '#6b7266' }}>Time</span>
-                <span className="font-medium" style={{ color: '#2a2f1e' }}>{modalData.time}</span>
+                <span className="font-medium" style={{ color: '#2a2f1e' }}>{getTimeRange(modalData.time)}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span style={{ color: '#6b7266' }}>Cost</span>
