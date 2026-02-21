@@ -113,9 +113,6 @@ export default function LandingPage() {
       {/* Hero Section (dark, parallax) */}
       <Hero />
 
-      {/* Wave Divider: Hero (dark) → Events (cream) */}
-      <WaveDivider bgColor="#1a1f12" fillColor="#f5f2eb" height={80} overlap />
-
       {/* Events & Programs Section */}
       <Events onOpenLightbox={openLightbox} />
 

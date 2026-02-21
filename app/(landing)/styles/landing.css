@@ -489,21 +489,20 @@ html, body {
   transition: transform 0.1s ease;
 }
 
-/* Enhanced Loading Screen */
+/* Enhanced Loading Screen — pure CSS, no JS state needed */
 .loader {
   position: fixed;
   inset: 0;
   z-index: 99999;
-  background: #d4e157;
+  background: #e8e4d9;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: opacity 0.6s ease, visibility 0.6s ease;
+  animation: loaderFadeOut 0.6s ease 1.2s forwards;
 }
-.loader.exit-active {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
+@keyframes loaderFadeOut {
+  0% { opacity: 1; visibility: visible; }
+  100% { opacity: 0; visibility: hidden; pointer-events: none; }
 }
 .tennis-ball-wrapper {
   width: 32px;
