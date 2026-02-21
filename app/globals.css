@@ -539,3 +539,17 @@ html {
   animation: shimmer 1.5s ease-in-out infinite;
   border-radius: 8px;
 }
+
+/* Login page — MTC Court App title shimmer */
+.login-app-title {
+  background: linear-gradient(90deg, #2a2f1e 0%, #2a2f1e 40%, #6b7a3d 50%, #2a2f1e 60%, #2a2f1e 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: titleShimmer 3s ease-in-out infinite;
+}
+@keyframes titleShimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}

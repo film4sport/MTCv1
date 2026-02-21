@@ -98,7 +98,7 @@ export default function LoginPage() {
 
           {/* Content */}
           <div className="relative z-10 text-center">
-            <h2 className="headline-font text-3xl xl:text-4xl mb-4" style={{ color: '#2a2f1e' }}>
+            <h2 className="headline-font text-3xl xl:text-4xl mb-4 login-app-title" style={{ color: '#2a2f1e' }}>
               MTC Court App
             </h2>
             <p className="text-base mb-12 max-w-md mx-auto" style={{ color: '#6b7266' }}>

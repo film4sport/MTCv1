@@ -44,8 +44,9 @@ function getEventsForDate(year: number, month: number, day: number): CalEvent[] 
     if (e.date === dateStr) events.push(e);
   });
 
-  // Recurring events only during club season (May–October)
-  if (month >= 4 && month <= 9) {
+  // Recurring events only during club season (May 9th – October)
+  const openingDay = new Date(year, 4, 9); // May 9
+  if (month >= 4 && month <= 9 && date >= openingDay) {
     recurringEvents.forEach((e) => {
       if (e.day === dayOfWeek) events.push(e);
     });
