@@ -1160,7 +1160,7 @@ function InfoPageContent() {
                     <a href="/dashboard/events" className="font-semibold hover:underline" style={{ color: '#6b7a3d' }}>
                       log in to your member dashboard
                     </a>
-                    {' '}and visit the Programs tab. For questions, email Mark at{' '}
+                    {' '}and visit the Lessons tab. For questions, email Mark at{' '}
                     <a href="mailto:Taylor.Mark.Tennis@gmail.com" className="font-semibold hover:underline" style={{ color: '#6b7a3d' }}>
                       Taylor.Mark.Tennis@gmail.com
                     </a>

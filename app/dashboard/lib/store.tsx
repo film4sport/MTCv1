@@ -1,9 +1,9 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
-import type { User, Court, Booking, ClubEvent, Partner, Conversation, Announcement, Notification, WeatherData, MemberPayment, AdminAnalytics, CoachingProgram, NotificationPreferences } from './types';
+import type { User, Court, Booking, ClubEvent, Partner, Conversation, Announcement, Notification, WeatherData, AdminAnalytics, CoachingProgram, NotificationPreferences } from './types';
 import { CLUB_LOCATION, DEFAULT_NOTIFICATION_PREFS } from './types';
-import { DEFAULT_MEMBERS, DEFAULT_COURTS, DEFAULT_BOOKINGS, DEFAULT_EVENTS, DEFAULT_PARTNERS, DEFAULT_CONVERSATIONS, DEFAULT_ANNOUNCEMENTS, DEFAULT_NOTIFICATIONS, DEFAULT_PAYMENTS, DEFAULT_ANALYTICS, DEFAULT_PROGRAMS } from './data';
+import { DEFAULT_MEMBERS, DEFAULT_COURTS, DEFAULT_BOOKINGS, DEFAULT_EVENTS, DEFAULT_PARTNERS, DEFAULT_CONVERSATIONS, DEFAULT_ANNOUNCEMENTS, DEFAULT_NOTIFICATIONS, DEFAULT_ANALYTICS, DEFAULT_PROGRAMS } from './data';
 import { generateId } from './utils';
 import { signIn, signOut, getCurrentUser } from './auth';
 import { supabase } from '../../lib/supabase';
@@ -43,8 +43,6 @@ interface AppState {
   markNotificationRead: (id: string) => void;
   clearNotifications: () => void;
   weather: WeatherData;
-  payments: MemberPayment[];
-  setPayments: (payments: MemberPayment[]) => void;
   analytics: AdminAnalytics;
   programs: CoachingProgram[];
   setPrograms: (programs: CoachingProgram[]) => void;
@@ -114,7 +112,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [weather, setWeather] = useState<WeatherData>({
     tempC: 0, tempF: 32, condition: 'sunny', wind: 0, humidity: 0, description: 'Loading...', lastUpdated: null,
   });
-  const [payments, setPayments] = useState<MemberPayment[]>(DEFAULT_PAYMENTS);
   const [analytics] = useState<AdminAnalytics>(DEFAULT_ANALYTICS);
   const [programs, setPrograms] = useState<CoachingProgram[]>(DEFAULT_PROGRAMS);
   const [notificationPreferences, setNotificationPreferences] = useState<NotificationPreferences>(DEFAULT_NOTIFICATION_PREFS);
@@ -135,7 +132,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         saveJSON('mtc-current-user', user);
 
         // Fetch all data from Supabase in parallel
-        const [members, bookings, events, partners, conversations, announcements, notifications, programs, payment, notifPrefs] = await Promise.all([
+        const [members, bookings, events, partners, conversations, announcements, notifications, programs, notifPrefs] = await Promise.all([
           db.fetchMembers(),
           db.fetchBookings(),
           db.fetchEvents(),
@@ -144,7 +141,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
           db.fetchAnnouncements(user.id),
           db.fetchNotifications(user.id),
           db.fetchPrograms(),
-          db.fetchPayments(user.id),
           db.fetchNotificationPreferences(user.id),
         ]);
 
@@ -157,11 +153,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setAnnouncements(announcements);
         setNotifications(notifications);
         setPrograms(programs);
-        if (payment) setPayments(prev => {
-          const idx = prev.findIndex(p => p.memberId === user.id);
-          if (idx >= 0) return prev.map((p, i) => i === idx ? payment : p);
-          return [...prev, payment];
-        });
         if (notifPrefs) setNotificationPreferences(notifPrefs);
       } else if (savedUser) {
         // Supabase session expired — clear cached user
@@ -178,7 +169,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setAnnouncements(safeLoadArray('mtc-announcements', DEFAULT_ANNOUNCEMENTS));
     setNotifications(safeLoadArray('mtc-notifications', DEFAULT_NOTIFICATIONS));
     setPrograms(safeLoadArray('mtc-programs', DEFAULT_PROGRAMS));
-    setPayments(safeLoadArray('mtc-payments', DEFAULT_PAYMENTS));
     setNotificationPreferences(loadJSON('mtc-notification-prefs', DEFAULT_NOTIFICATION_PREFS));
   }, []);
 
@@ -188,7 +178,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => { if (isLoaded) saveJSON('mtc-announcements', announcements); }, [announcements, isLoaded]);
   useEffect(() => { if (isLoaded) saveJSON('mtc-notifications', notifications); }, [notifications, isLoaded]);
   useEffect(() => { if (isLoaded) saveJSON('mtc-programs', programs); }, [programs, isLoaded]);
-  useEffect(() => { if (isLoaded) saveJSON('mtc-payments', payments); }, [payments, isLoaded]);
   useEffect(() => {
     if (isLoaded) {
       saveJSON('mtc-notification-prefs', notificationPreferences);
@@ -427,15 +416,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setPrograms(prev => prev.map(p => p.id === programId ? { ...p, enrolledMembers: p.enrolledMembers.filter(m => m !== memberId) } : p));
       showToast('Failed to enroll. Please try again.', 'error');
     });
-    // Charge fee
-    setPayments(prev => {
-      const existing = prev.find(p => p.memberId === memberId);
-      const entry = { id: generateId('pay'), date: new Date().toISOString().split('T')[0], description: `Program: ${program.title}`, amount: program.fee, type: 'charge' as const };
-      if (existing) {
-        return prev.map(p => p.memberId === memberId ? { ...p, balance: p.balance + program.fee, history: [...p.history, entry] } : p);
-      }
-      return [...prev, { memberId, memberName, balance: program.fee, history: [entry] }];
-    });
     // Create notification
     const notif: Notification = {
       id: generateId('n'),
@@ -482,15 +462,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       console.error('[MTC Supabase]', err);
       setPrograms(prev => prev.map(p => p.id === programId ? { ...p, enrolledMembers: [...p.enrolledMembers, memberId] } : p));
       showToast('Failed to withdraw. Please try again.', 'error');
-    });
-    // Credit refund
-    setPayments(prev => {
-      const existing = prev.find(p => p.memberId === memberId);
-      if (existing) {
-        const entry = { id: generateId('pay'), date: new Date().toISOString().split('T')[0], description: `Refund: ${program.title}`, amount: -program.fee, type: 'charge' as const };
-        return prev.map(p => p.memberId === memberId ? { ...p, balance: p.balance - program.fee, history: [...p.history, entry] } : p);
-      }
-      return prev;
     });
   }, [programs]);
 
@@ -613,7 +584,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       currentUser, login, logout, members, setMembers, courts, setCourts, bookings, setBookings, addBooking, cancelBooking,
       events, setEvents, toggleRsvp, partners, setPartners, addPartner, removePartner, conversations, setConversations, sendMessage, markConversationRead,
       announcements, setAnnouncements, dismissAnnouncement, notifications, setNotifications, markNotificationRead,
-      clearNotifications, weather, payments, setPayments, analytics,
+      clearNotifications, weather, analytics,
       programs, setPrograms, addProgram, cancelProgram, enrollInProgram, withdrawFromProgram,
       notificationPreferences, setNotificationPreferences,
       sidebarCollapsed, setSidebarCollapsed, mobileSidebarOpen, setMobileSidebarOpen, isLoaded,

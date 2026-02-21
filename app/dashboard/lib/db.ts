@@ -1,5 +1,5 @@
 import { supabase } from '../../lib/supabase';
-import type { Booking, ClubEvent, Partner, Conversation, Message, Announcement, Notification, MemberPayment, PaymentEntry, CoachingProgram, NotificationPreferences, User } from './types';
+import type { Booking, ClubEvent, Partner, Conversation, Message, Announcement, Notification, CoachingProgram, NotificationPreferences, User } from './types';
 
 // ─── Profiles ───────────────────────────────────────────
 
@@ -337,29 +337,6 @@ export async function markNotificationRead(id: string): Promise<void> {
 
 export async function clearNotifications(userId: string): Promise<void> {
   await supabase.from('notifications').update({ read: true }).eq('user_id', userId).eq('read', false);
-}
-
-// ─── Payments ───────────────────────────────────────────
-
-export async function fetchPayments(userId: string): Promise<MemberPayment | null> {
-  const { data } = await supabase
-    .from('payments')
-    .select('*, payment_entries(*)')
-    .eq('user_id', userId)
-    .single();
-  if (!data) return null;
-  return {
-    memberId: data.user_id,
-    memberName: data.user_name,
-    balance: data.balance,
-    history: (data.payment_entries || []).map((e: Record<string, unknown>) => ({
-      id: e.id as string,
-      date: e.date as string,
-      description: e.description as string,
-      amount: e.amount as number,
-      type: e.type as PaymentEntry['type'],
-    })),
-  };
 }
 
 // ─── Coaching Programs ──────────────────────────────────

@@ -1,5 +1,5 @@
 import { TIME_SLOTS, COURT_HOURS, FEES } from '../../lib/types';
-import type { Booking } from '../../lib/types';
+import type { Booking, Court } from '../../lib/types';
 
 export type ViewMode = 'week' | 'calendar';
 
@@ -66,6 +66,11 @@ export function isSlotPast(date: string, time: string): boolean {
 export function isCourtClosed(courtId: number, time: string): boolean {
   const closeHour = parseInt(COURT_HOURS[courtId]?.close || '22');
   return parseTimeHour(time) >= closeHour;
+}
+
+export function isCourtInMaintenance(courts: Court[], courtId: number): boolean {
+  const court = courts.find(c => c.id === courtId);
+  return court?.status === 'maintenance';
 }
 
 export function canCancel(date: string, time: string): boolean {

@@ -5,7 +5,7 @@ test.describe('Mobile Responsive', () => {
 
   test.beforeEach(async ({ page }) => {
     await page.goto('/', { waitUntil: 'networkidle' });
-    await page.waitForTimeout(4500);
+    await page.waitForTimeout(2500);
   });
 
   test('mobile menu button is visible', async ({ page }) => {

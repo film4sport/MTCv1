@@ -1,7 +1,7 @@
 // Default mock data for the dashboard
 // In production, this will be replaced with Supabase queries
 
-import type { Court, Booking, ClubEvent, Partner, Conversation, Announcement, Notification, MemberPayment, AdminAnalytics, User, CoachingProgram } from './types';
+import type { Court, Booking, ClubEvent, Partner, Conversation, Announcement, Notification, AdminAnalytics, User, CoachingProgram } from './types';
 
 // ─── Members ────────────────────────────────────────────
 export const DEFAULT_MEMBERS: User[] = [
@@ -304,27 +304,6 @@ export const DEFAULT_NOTIFICATIONS: Notification[] = [
   { id: 'n1', type: 'booking', title: 'Booking Confirmed', body: 'Court 2 reserved for today at 4:00 PM.', timestamp: '2026-02-10T08:00:00', read: false },
   { id: 'n2', type: 'event', title: 'Opening Day BBQ', body: 'Don\'t forget to RSVP for Opening Day BBQ on May 9th!', timestamp: '2026-02-09T12:00:00', read: false },
   { id: 'n3', type: 'message', title: 'New Message', body: 'Sarah Wilson sent you a message.', timestamp: '2026-02-10T10:30:00', read: false },
-];
-
-// ─── Payments ───────────────────────────────────────────
-export const DEFAULT_PAYMENTS: MemberPayment[] = [
-  {
-    memberId: 'alex',
-    memberName: 'Alex Thompson',
-    balance: 10,
-    history: [
-      { id: 'pay1', date: '2026-02-08', description: 'Guest fee - Court 2', amount: 10, type: 'charge' },
-    ],
-  },
-  {
-    memberId: 'mike',
-    memberName: 'Mike Chen',
-    balance: 0,
-    history: [
-      { id: 'pay2', date: '2026-02-05', description: 'Guest fee - Court 1', amount: 10, type: 'charge' },
-      { id: 'pay3', date: '2026-02-06', description: 'E-transfer payment', amount: -10, type: 'payment' },
-    ],
-  },
 ];
 
 // ─── Admin Analytics ────────────────────────────────────

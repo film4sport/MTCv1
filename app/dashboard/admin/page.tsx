@@ -6,10 +6,10 @@ import DashboardHeader from '../components/DashboardHeader';
 import { generateId } from '../lib/utils';
 import * as db from '../lib/db';
 
-type AdminTab = 'dashboard' | 'members' | 'courts' | 'payments' | 'announcements';
+type AdminTab = 'dashboard' | 'members' | 'courts' | 'announcements';
 
 export default function AdminPage() {
-  const { currentUser, members, setMembers, bookings, courts, setCourts, payments, analytics, announcements, setAnnouncements, showToast } = useApp();
+  const { currentUser, members, setMembers, bookings, courts, setCourts, analytics, announcements, setAnnouncements, showToast } = useApp();
   const [tab, setTab] = useState<AdminTab>('dashboard');
   const [memberSearch, setMemberSearch] = useState('');
   const [newAnnouncement, setNewAnnouncement] = useState('');
@@ -168,7 +168,6 @@ export default function AdminPage() {
     { key: 'dashboard', label: 'Dashboard' },
     { key: 'members', label: 'Members' },
     { key: 'courts', label: 'Courts' },
-    { key: 'payments', label: 'Payments' },
     { key: 'announcements', label: 'Announcements' },
   ];
 
@@ -503,7 +502,7 @@ export default function AdminPage() {
                     background: court.status === 'maintenance' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(34, 197, 94, 0.1)',
                     color: court.status === 'maintenance' ? '#dc2626' : '#16a34a',
                   }}>
-                    {court.status === 'maintenance' ? 'Maintenance' : 'Active'}
+                    {court.status === 'maintenance' ? 'Closed' : 'Active'}
                   </span>
                 </div>
                 <div className="space-y-2 text-sm mb-4" style={{ color: '#6b7266' }}>
@@ -518,45 +517,8 @@ export default function AdminPage() {
                     color: court.status === 'maintenance' ? '#16a34a' : '#dc2626',
                   }}
                 >
-                  {court.status === 'maintenance' ? 'Reopen Court' : 'Set Maintenance'}
+                  {court.status === 'maintenance' ? 'Reopen Court' : 'Close Court'}
                 </button>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Payments Tab */}
-        {tab === 'payments' && (
-          <div className="space-y-4">
-            {payments.map(p => (
-              <div key={p.memberId} className="rounded-2xl border p-5" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
-                <div className="flex items-center justify-between mb-3">
-                  <div>
-                    <p className="font-medium text-sm" style={{ color: '#2a2f1e' }}>{p.memberName}</p>
-                    <p className="text-xs" style={{ color: '#6b7266' }}>Member</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-bold text-lg" style={{ color: p.balance > 0 ? '#ef4444' : '#16a34a' }}>
-                      ${Math.abs(p.balance).toFixed(2)}
-                    </p>
-                    <p className="text-xs" style={{ color: '#6b7266' }}>{p.balance > 0 ? 'Outstanding' : 'Paid'}</p>
-                  </div>
-                </div>
-                {p.history.length > 0 && (
-                  <div className="border-t pt-3 space-y-2" style={{ borderColor: '#f0ede6' }}>
-                    {p.history.map(h => (
-                      <div key={h.id} className="flex items-center justify-between text-sm">
-                        <div>
-                          <span style={{ color: '#2a2f1e' }}>{h.description}</span>
-                          <span className="ml-2 text-xs" style={{ color: '#6b7266' }}>{h.date}</span>
-                        </div>
-                        <span className="font-medium" style={{ color: h.type === 'charge' ? '#ef4444' : '#16a34a' }}>
-                          {h.type === 'charge' ? '+' : '-'}${Math.abs(h.amount).toFixed(2)}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                )}
               </div>
             ))}
           </div>
