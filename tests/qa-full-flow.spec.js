@@ -15,13 +15,11 @@ async function loginAs(page, role = 'member') {
   await page.goto(`${BASE}/login`, { waitUntil: 'domcontentloaded' });
   await page.waitForTimeout(500);
 
-  // Click the test account button to fill credentials
-  const testBtn = page.getByText(role.charAt(0).toUpperCase() + role.slice(1), { exact: true });
-  await testBtn.click();
-  await page.waitForTimeout(300);
-
-  // Verify fields were filled
-  await expect(page.locator('input[type="email"]')).toHaveValue(email);
+  // Type credentials directly (demo buttons are dev-only, not available in CI production builds)
+  await page.locator('input[type="email"]').click();
+  await page.keyboard.type(email, { delay: 20 });
+  await page.locator('input[type="password"]').click();
+  await page.keyboard.type(pass, { delay: 20 });
 
   // Submit the form
   await page.locator('button[type="submit"]').click();

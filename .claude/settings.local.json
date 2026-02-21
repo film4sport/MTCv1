@@ -41,7 +41,9 @@
       "Bash(dir:*)",
       "Bash(find:*)",
       "Bash(ls:*)",
-      "Bash(tar:*)"
+      "Bash(tar:*)",
+      "Bash(gh run view:*)",
+      "WebFetch(domain:github.com)"
     ]
   }
 }
