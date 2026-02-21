@@ -41,7 +41,7 @@ export default function DashboardHome() {
 
   return (
     <div className="min-h-screen relative overflow-hidden" style={{ backgroundColor: '#f5f2eb' }}>
-      <DashboardHeader title="Dashboard" />
+      <DashboardHeader title="Home" />
 
       {/* Tennis silhouette background — alternates between two images each page load */}
       <div
