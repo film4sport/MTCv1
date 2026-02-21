@@ -17,7 +17,15 @@ export default function ProfilePage() {
   const [editingNtrp, setEditingNtrp] = useState(false);
   const [ntrpValue, setNtrpValue] = useState(currentUser?.ntrp ?? 3.5);
 
-  const ntrp = currentUser?.ntrp ?? 3.5;
+  if (!currentUser) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#f5f2eb' }}>
+        <p className="text-sm" style={{ color: '#6b7266' }}>Loading profile...</p>
+      </div>
+    );
+  }
+
+  const ntrp = currentUser.ntrp ?? 3.5;
   const skillLevel = ntrp <= 2.5 ? 'Beginner' : ntrp <= 4.0 ? 'Intermediate' : ntrp <= 5.5 ? 'Advanced' : 'Expert';
 
   const saveNtrp = async () => {
@@ -43,7 +51,7 @@ export default function ProfilePage() {
           <div className="flex items-center gap-5">
             <div className="relative group cursor-pointer">
               <div className="w-20 h-20 rounded-full flex items-center justify-center text-2xl font-bold" style={{ background: 'rgba(107, 122, 61, 0.1)', color: '#6b7a3d' }}>
-                {currentUser?.name.split(' ').map(n => n[0]).join('')}
+                {currentUser.name.split(' ').map(n => n[0]).join('')}
               </div>
               <div className="absolute inset-0 rounded-full flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
                 <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
@@ -53,12 +61,12 @@ export default function ProfilePage() {
               </div>
             </div>
             <div>
-              <h2 className="text-xl font-semibold" style={{ color: '#2a2f1e' }}>{currentUser?.name}</h2>
+              <h2 className="text-xl font-semibold" style={{ color: '#2a2f1e' }}>{currentUser.name}</h2>
               <div className="flex items-center gap-3 mt-2">
                 <span className="text-xs px-3 py-1 rounded-full font-medium" style={{ background: 'rgba(107, 122, 61, 0.1)', color: '#6b7a3d' }}>
-                  {currentUser?.role === 'admin' ? 'Admin' : currentUser?.role === 'coach' ? 'Coach' : 'Member'}
+                  {currentUser.role === 'admin' ? 'Admin' : currentUser.role === 'coach' ? 'Coach' : 'Member'}
                 </span>
-                {currentUser?.memberSince && (
+                {currentUser.memberSince && (
                   <span className="text-xs" style={{ color: '#6b7266' }}>
                     Member since {new Date(currentUser.memberSince + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                   </span>
@@ -75,7 +83,7 @@ export default function ProfilePage() {
             <div className="flex items-center justify-between py-2 border-b" style={{ borderColor: '#f0ede6' }}>
               <div>
                 <p className="text-xs" style={{ color: '#6b7266' }}>Full Name</p>
-                <p className="text-sm font-medium" style={{ color: '#2a2f1e' }}>{currentUser?.name}</p>
+                <p className="text-sm font-medium" style={{ color: '#2a2f1e' }}>{currentUser.name}</p>
               </div>
               <svg className="w-4 h-4" fill="none" stroke="#6b7266" viewBox="0 0 24 24" strokeWidth="1.5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/>
@@ -84,7 +92,7 @@ export default function ProfilePage() {
             <div className="flex items-center justify-between py-2 border-b" style={{ borderColor: '#f0ede6' }}>
               <div>
                 <p className="text-xs" style={{ color: '#6b7266' }}>Email</p>
-                <p className="text-sm font-medium" style={{ color: '#2a2f1e' }}>{currentUser?.email}</p>
+                <p className="text-sm font-medium" style={{ color: '#2a2f1e' }}>{currentUser.email}</p>
               </div>
               <svg className="w-4 h-4" fill="none" stroke="#6b7266" viewBox="0 0 24 24" strokeWidth="1.5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/>

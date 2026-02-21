@@ -490,6 +490,41 @@ html, body {
 }
 
 /* Enhanced Loading Screen */
+.loader {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: #d4e157;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.6s ease, visibility 0.6s ease;
+}
+.loader.exit-active {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.tennis-ball-wrapper {
+  width: 32px;
+  height: 32px;
+  animation: loaderBounce 0.6s ease-in-out infinite alternate;
+}
+.tennis-ball {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  animation: loaderSpin 1.2s linear infinite;
+}
+@keyframes loaderBounce {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-12px); }
+}
+@keyframes loaderSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 /* Sticky Navbar */
 .navbar {
   position: fixed;

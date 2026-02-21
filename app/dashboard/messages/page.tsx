@@ -143,7 +143,7 @@ function MessagesContent() {
                   <p className="text-sm" style={{ color: '#6b7266' }}>No conversations yet</p>
                 </div>
               ) : (
-                conversations
+                [...conversations]
                   .sort((a, b) => new Date(b.lastTimestamp).getTime() - new Date(a.lastTimestamp).getTime())
                   .map(convo => (
                     <button
