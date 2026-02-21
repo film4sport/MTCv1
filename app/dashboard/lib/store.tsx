@@ -65,6 +65,9 @@ interface AppState {
   // Toasts
   toasts: { id: string; message: string; type: 'success' | 'error' | 'info'; exiting?: boolean }[];
   showToast: (message: string, type?: 'success' | 'error' | 'info') => void;
+
+  // Refresh
+  refreshData: () => Promise<void>;
 }
 
 const AppContext = createContext<AppState | null>(null);
@@ -592,6 +595,29 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }, 2500);
   }, []);
 
+  const refreshData = useCallback(async () => {
+    if (!currentUser) return;
+    try {
+      const [m, b, ev, p, c, a, n, pr, np] = await Promise.all([
+        db.fetchMembers(), db.fetchBookings(), db.fetchEvents(), db.fetchPartners(),
+        db.fetchConversations(currentUser.id), db.fetchAnnouncements(currentUser.id),
+        db.fetchNotifications(currentUser.id), db.fetchPrograms(),
+        db.fetchNotificationPreferences(currentUser.id),
+      ]);
+      if (m.length) setMembers(m);
+      setBookings(b);
+      if (ev.length) setEvents(ev);
+      setPartners(p);
+      setConversations(c);
+      setAnnouncements(a);
+      setNotifications(n);
+      setPrograms(pr);
+      if (np) setNotificationPreferences(np);
+    } catch (err) {
+      console.error('[MTC] Refresh failed', err);
+    }
+  }, [currentUser]);
+
   return (
     <AppContext.Provider value={{
       currentUser, login, logout, members, setMembers, courts, setCourts, bookings, setBookings, addBooking, cancelBooking,
@@ -601,7 +627,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       programs, setPrograms, addProgram, cancelProgram, enrollInProgram, withdrawFromProgram,
       notificationPreferences, setNotificationPreferences,
       sidebarCollapsed, setSidebarCollapsed, mobileSidebarOpen, setMobileSidebarOpen, isLoaded,
-      toasts, showToast,
+      toasts, showToast, refreshData,
     }}>
       {children}
     </AppContext.Provider>

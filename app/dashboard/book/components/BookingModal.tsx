@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FEES } from '../../lib/types';
 import type { User } from '../../lib/types';
 import { getTimeRange } from './booking-utils';
@@ -24,6 +24,12 @@ export default function BookingModal({ modalData, members, currentUser, onConfir
   const [guestName, setGuestName] = useState('');
   const [selectedParticipants, setSelectedParticipants] = useState<{ id: string; name: string }[]>([]);
   const [participantSearch, setParticipantSearch] = useState('');
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onCancel(); };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [onCancel]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.4)' }}>
@@ -153,7 +159,12 @@ export default function BookingModal({ modalData, members, currentUser, onConfir
             className="flex-1 py-3 rounded-xl text-sm font-medium text-white transition-colors hover:opacity-90 disabled:opacity-50"
             style={{ background: '#6b7a3d' }}
           >
-            {loading ? 'Booking...' : 'Confirm Booking'}
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+                Booking…
+              </span>
+            ) : 'Confirm Booking'}
           </button>
         </div>
       </div>

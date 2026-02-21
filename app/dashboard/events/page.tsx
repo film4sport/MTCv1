@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useApp } from '../lib/store';
 import DashboardHeader from '../components/DashboardHeader';
 import { downloadICS } from '../lib/calendar';
+import { haptic } from '../lib/utils';
 
 type EventFilter = 'all' | 'social' | 'match' | 'roundrobin' | 'lesson' | 'tournament';
 type ViewMode = 'calendar' | 'list';
@@ -41,6 +42,19 @@ export default function EventsPage() {
   };
 
   const detail = selectedEvent ? events.find(e => e.id === selectedEvent) : null;
+
+  // Esc key closes modals
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (enrollConfirm) setEnrollConfirm(null);
+        else if (selectedEvent) setSelectedEvent(null);
+        else if (selectedProgram) setSelectedProgram(null);
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [enrollConfirm, selectedEvent, selectedProgram]);
 
   // Calendar helpers
   const year = calendarDate.getFullYear();
@@ -294,6 +308,7 @@ export default function EventsPage() {
                       onClick={(e) => {
                         e.stopPropagation();
                         if (!isPast) {
+                          haptic('medium');
                           toggleRsvp(ev.id, currentUser?.name || '');
                           showToast(attending ? 'RSVP cancelled' : `RSVP'd to ${ev.title}`);
                         }
@@ -365,6 +380,7 @@ export default function EventsPage() {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
+                            haptic('medium');
                             if (isEnrolled) {
                               withdrawFromProgram(prog.id, currentUser?.id || '');
                               showToast('Withdrawn from program');
@@ -470,6 +486,7 @@ export default function EventsPage() {
                     </button>
                     <button
                       onClick={() => {
+                        haptic('success');
                         enrollInProgram(prog.id, currentUser?.id || '', currentUser?.name || '');
                         showToast(`Enrolled in ${prog.title}`);
                         setJustEnrolled(prog.id);
@@ -564,6 +581,7 @@ export default function EventsPage() {
 
               <button
                 onClick={() => {
+                  haptic('medium');
                   if (isEnrolled) {
                     withdrawFromProgram(prog.id, currentUser?.id || '');
                     showToast('Withdrawn from program');
@@ -639,6 +657,7 @@ export default function EventsPage() {
 
             <button
               onClick={() => {
+                haptic('medium');
                 const wasAttending = detail.attendees.includes(currentUser?.name || '');
                 toggleRsvp(detail.id, currentUser?.name || '');
                 showToast(wasAttending ? 'RSVP cancelled' : `RSVP'd to ${detail.title}`);

@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { downloadICS } from '../../lib/calendar';
 
 interface SuccessModalProps {
@@ -9,6 +10,12 @@ interface SuccessModalProps {
 }
 
 export default function SuccessModal({ courtName, date, time, participants, onClose }: SuccessModalProps) {
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [onClose]);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.4)' }} onClick={onClose}>
       <div className="rounded-2xl p-6 w-full max-w-sm text-center animate-scaleIn" style={{ background: '#fff' }} onClick={e => e.stopPropagation()}>
