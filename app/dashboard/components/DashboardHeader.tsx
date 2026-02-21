@@ -43,8 +43,8 @@ export default function DashboardHeader({ title }: DashboardHeaderProps) {
   return (
     <>
       <header className="h-16 flex items-center justify-between px-4 pl-14 sm:pl-6 lg:pl-6 border-b" style={{ backgroundColor: '#faf8f3', borderColor: '#e0dcd3' }}>
-        {/* Page Title */}
-        <h1 className="headline-font text-xl truncate" style={{ color: '#1a1f12' }}>{title}</h1>
+        {/* Logo */}
+        <img src="/mono-logo-transparent.png" alt="Mono Tennis Club" className="h-9 w-auto" style={{ filter: 'brightness(0.2)' }} />
 
         {/* Right Side */}
         <div className="flex items-center gap-2">
@@ -55,7 +55,7 @@ export default function DashboardHeader({ title }: DashboardHeaderProps) {
               className={`bell-btn relative w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 ${notifOpen ? 'bg-[#6b7a3d] shadow-md' : 'bg-[#6b7a3d]/10 hover:bg-[#6b7a3d]/20 active:scale-95'}`}
               aria-label="Notifications"
             >
-              <svg className="bell-icon w-[22px] h-[22px] transition-transform duration-200" style={{ color: notifOpen ? '#fff' : '#4a5530' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="bell-icon w-[22px] h-[22px] transition-transform duration-200" style={{ color: notifOpen ? '#fff' : '#1a1f12' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
               </svg>
               {unreadCount > 0 && (
@@ -124,9 +124,9 @@ export default function DashboardHeader({ title }: DashboardHeaderProps) {
               aria-label="Menu"
             >
               <div className="w-[18px] h-[14px] flex flex-col justify-between">
-                <span className="menu-line menu-line-1 block w-full h-[2px] rounded-full" style={{ backgroundColor: menuOpen ? '#fff' : '#4a5530' }} />
-                <span className="menu-line menu-line-2 block w-full h-[2px] rounded-full" style={{ backgroundColor: menuOpen ? '#fff' : '#4a5530' }} />
-                <span className="menu-line menu-line-3 block w-full h-[2px] rounded-full" style={{ backgroundColor: menuOpen ? '#fff' : '#4a5530' }} />
+                <span className="menu-line menu-line-1 block w-full h-[2px] rounded-full" style={{ backgroundColor: menuOpen ? '#fff' : '#1a1f12' }} />
+                <span className="menu-line menu-line-2 block w-full h-[2px] rounded-full" style={{ backgroundColor: menuOpen ? '#fff' : '#1a1f12' }} />
+                <span className="menu-line menu-line-3 block w-full h-[2px] rounded-full" style={{ backgroundColor: menuOpen ? '#fff' : '#1a1f12' }} />
               </div>
             </button>
 
