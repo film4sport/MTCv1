@@ -88,7 +88,7 @@ function MessagesContent() {
     <div className="min-h-screen" style={{ backgroundColor: '#f5f2eb' }}>
       <DashboardHeader title="Messages" />
 
-      <div className="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto">
+      <div className="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto animate-slideUp">
         <div className="flex rounded-2xl border overflow-hidden" style={{ background: '#fff', borderColor: '#e0dcd3', height: 'calc(100vh - 160px)', minHeight: 500 }}>
 
           {/* Conversation List — hidden on mobile when chat is open */}

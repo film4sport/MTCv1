@@ -65,14 +65,6 @@ describe('Fees', () => {
     expect(FEES.guest).toBe(10);
   });
 
-  it('tab warning threshold should be $20', () => {
-    expect(FEES.tabWarning).toBe(20);
-  });
-
-  it('tab block threshold should be $30', () => {
-    expect(FEES.tabBlock).toBe(30);
-  });
-
   it('cancel window should be 24 hours', () => {
     expect(FEES.cancelWindowHours).toBe(24);
   });

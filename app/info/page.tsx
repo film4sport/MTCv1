@@ -218,7 +218,7 @@ function InfoPageContent() {
   const [waiverAccepted, setWaiverAccepted] = useState(false);
   const [waiverScrolled, setWaiverScrolled] = useState(false);
   const [ackScrolled, setAckScrolled] = useState(false);
-  const [existingProfile, setExistingProfile] = useState<{ name: string; email: string; membershipType: string; joinedDate: string } | null>(null);
+  const [existingProfile, setExistingProfile] = useState<{ name: string; email: string; role?: string; status?: string } | null>(null);
 
   // Load existing profile from localStorage
   useEffect(() => {
@@ -261,6 +261,55 @@ function InfoPageContent() {
     pageRef.current?.querySelectorAll('.fade-in, .fade-in-left, .fade-in-right').forEach((el) => observer.observe(el));
     return () => observer.disconnect();
   }, [activeTab, signupStep]);
+
+  // Tab-specific document titles for SEO (Google sees each ?tab= as a unique URL)
+  useEffect(() => {
+    const titles: Record<string, string> = {
+      about: 'About Us — History, Facilities & Board | Mono Tennis Club',
+      membership: 'Membership — Fees, Benefits & How to Join | Mono Tennis Club',
+      coaching: 'Coaching — Lessons, Camps & Programs | Mono Tennis Club',
+      faq: 'FAQ & Directions — Find Us | Mono Tennis Club',
+      rules: 'Club Rules & Constitution | Mono Tennis Club',
+      privacy: 'Privacy Policy | Mono Tennis Club',
+      terms: 'Terms of Service | Mono Tennis Club',
+    };
+    document.title = titles[activeTab] || 'Club Info | Mono Tennis Club';
+
+    const descriptions: Record<string, string> = {
+      about: 'Learn about Mono Tennis Club — our history since 1980, 4 courts, clubhouse facilities, and volunteer Board of Directors in Mono, Ontario.',
+      membership: 'Join Mono Tennis Club — membership fees from $50/year, family plans, guest passes, and online registration for the Caledon-Dufferin tennis community.',
+      coaching: 'Tennis coaching at Mono Tennis Club — lessons with Mark Taylor, summer camps for juniors, clinics for all levels in Mono, Ontario.',
+      faq: 'Frequently asked questions about Mono Tennis Club — hours, equipment, booking, guest policy, and directions to 754883 Mono Centre Road.',
+      rules: 'Mono Tennis Club constitution, court rules, regulations, and member code of conduct.',
+      privacy: 'Mono Tennis Club privacy policy — how we collect, use, and protect your personal information under PIPEDA.',
+      terms: 'Mono Tennis Club terms of service — membership agreement, liability, and usage policies.',
+    };
+    const meta = document.querySelector('meta[name="description"]');
+    if (meta) meta.setAttribute('content', descriptions[activeTab] || '');
+  }, [activeTab]);
+
+  // FAQPage JSON-LD for Google rich results (injected when FAQ tab active)
+  useEffect(() => {
+    if (activeTab !== 'faq') return;
+    const faqJsonLd = {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: faqItems.map((item) => ({
+        '@type': 'Question',
+        name: item.question,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: item.answer,
+        },
+      })),
+    };
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.id = 'faq-jsonld';
+    script.textContent = JSON.stringify(faqJsonLd);
+    document.head.appendChild(script);
+    return () => { script.remove(); };
+  }, [activeTab]);
 
   const switchTab = (newTab: string) => {
     setActiveTab(newTab);
@@ -315,7 +364,7 @@ function InfoPageContent() {
       const loggedInUser = await signIn(signupData.email, signupData.password);
       if (!loggedInUser) {
         // Auth user was created but profile may not exist yet — still show success
-        console.warn('[MTC] signIn after signUp returned null — profile may not be ready yet');
+        console.error('[MTC] signIn after signUp returned null — profile may not be ready yet');
       }
 
       // Send welcome message with gate code (non-blocking)
@@ -532,12 +581,15 @@ function InfoPageContent() {
                   <div className="flex-1">
                     <h4 className="font-bold text-base" style={{ color: '#2a2f1e' }}>{existingProfile.name}</h4>
                     <p className="text-sm" style={{ color: '#6b7266' }}>
-                      {membershipTypes.find(m => m.key === existingProfile.membershipType)?.label || existingProfile.membershipType} Member
+                      {existingProfile.status === 'paused' ? 'Paused' : 'Active'} Member
                     </p>
                     <p className="text-xs mt-1" style={{ color: '#999' }}>{existingProfile.email}</p>
                   </div>
-                  <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: 'rgba(107, 122, 61, 0.15)', color: '#4a5528' }}>
-                    Active
+                  <span className="px-3 py-1 rounded-full text-xs font-medium" style={existingProfile.status === 'paused'
+                    ? { backgroundColor: 'rgba(234, 179, 8, 0.15)', color: '#92400e' }
+                    : { backgroundColor: 'rgba(107, 122, 61, 0.15)', color: '#4a5528' }
+                  }>
+                    {existingProfile.status === 'paused' ? 'Paused' : 'Active'}
                   </span>
                 </div>
               </div>
@@ -1160,10 +1212,11 @@ function InfoPageContent() {
                     <a href="/dashboard/events" className="font-semibold hover:underline" style={{ color: '#6b7a3d' }}>
                       log in to your member dashboard
                     </a>
-                    {' '}and visit the Lessons tab. For questions, email Mark at{' '}
-                    <a href="mailto:Taylor.Mark.Tennis@gmail.com" className="font-semibold hover:underline" style={{ color: '#6b7a3d' }}>
-                      Taylor.Mark.Tennis@gmail.com
+                    {' '}and visit the Lessons tab. For questions,{' '}
+                    <a href="/dashboard/messages" className="font-semibold hover:underline" style={{ color: '#6b7a3d' }}>
+                      message Coach Mark
                     </a>
+                    {' '}through the dashboard
                   </p>
                 </div>
               </div>
@@ -1240,6 +1293,10 @@ function InfoPageContent() {
                     <a href="mailto:info@monotennisclub.ca" className="hover:underline" style={{ color: '#6b7a3d' }}>
                       info@monotennisclub.ca
                     </a>
+                  </p>
+                  <p className="text-sm mt-3 flex items-center gap-2" style={{ color: '#6b7a3d' }}>
+                    <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <span>Just <strong>~1 hour</strong> north of Toronto — an easy drive up Highway 10</span>
                   </p>
                 </div>
               </div>

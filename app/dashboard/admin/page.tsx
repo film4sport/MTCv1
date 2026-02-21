@@ -175,7 +175,7 @@ export default function AdminPage() {
     <div className="min-h-screen" style={{ backgroundColor: '#f5f2eb' }}>
       <DashboardHeader title="Admin Panel" />
 
-      <div className="p-6 lg:p-8 max-w-6xl mx-auto">
+      <div className="p-6 lg:p-8 max-w-6xl mx-auto animate-slideUp">
 
         {/* Tabs */}
         <div className="flex gap-1 mb-6 border-b" style={{ borderColor: '#e0dcd3' }}>

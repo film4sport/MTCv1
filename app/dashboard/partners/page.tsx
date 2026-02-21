@@ -18,6 +18,7 @@ export default function PartnersPage() {
   const [postDate, setPostDate] = useState('');
   const [postTime, setPostTime] = useState('');
   const [postType, setPostType] = useState<'singles' | 'doubles' | 'mixed' | 'any'>('any');
+  const [removingId, setRemovingId] = useState<string | null>(null);
 
   const getSkillLevel = (ntrp: number): SkillLevel => {
     if (ntrp <= 2.5) return 'beginner';
@@ -102,7 +103,7 @@ export default function PartnersPage() {
             {filtered.map(p => {
               const badge = getSkillBadge(p.ntrp);
               return (
-                <div key={p.id} className="rounded-2xl border p-5 card-hover" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+                <div key={p.id} className={`rounded-2xl border p-5 card-hover ${removingId === p.id ? 'animate-exit' : ''}`} style={{ background: '#fff', borderColor: '#e0dcd3' }}>
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold" style={{ background: 'rgba(107, 122, 61, 0.1)', color: '#6b7a3d' }}>
@@ -136,8 +137,12 @@ export default function PartnersPage() {
                   {p.userId === currentUser?.id ? (
                     <button
                       onClick={() => {
-                        removePartner(p.id);
-                        showToast('Partner request removed');
+                        setRemovingId(p.id);
+                        setTimeout(() => {
+                          removePartner(p.id);
+                          showToast('Partner request removed');
+                          setRemovingId(null);
+                        }, 280);
                       }}
                       className="block w-full text-center py-2.5 rounded-xl text-sm font-medium transition-all duration-200 hover:shadow-md btn-press"
                       style={{ background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca' }}

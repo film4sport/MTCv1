@@ -410,6 +410,25 @@ html {
   animation: scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
+/* Success checkmark draw */
+@keyframes checkDraw {
+  0% { stroke-dashoffset: 24; }
+  100% { stroke-dashoffset: 0; }
+}
+@keyframes circlePop {
+  0% { transform: scale(0); opacity: 0; }
+  60% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.success-check {
+  stroke-dasharray: 24;
+  stroke-dashoffset: 24;
+  animation: checkDraw 0.4s ease-out 0.3s forwards;
+}
+.success-circle {
+  animation: circlePop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
 .animate-fadeIn {
   animation: fadeIn 0.3s ease-out both;
 }
@@ -526,6 +545,29 @@ html {
 /* ─── Booking Slot Hover Effects ──────────────── */
 .slot-cell:hover .slot-book-label {
   opacity: 1 !important;
+}
+.slot-cell:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+/* Slot booked pulse — applied briefly on new bookings */
+@keyframes slotBooked {
+  0% { transform: scale(0.9); opacity: 0.7; }
+  50% { transform: scale(1.04); }
+  100% { transform: scale(1); opacity: 1; }
+}
+.slot-booked-pulse {
+  animation: slotBooked 0.35s ease-out both;
+}
+
+/* Exit animation — fade out + shrink on removal */
+@keyframes fadeOutShrink {
+  0% { opacity: 1; transform: scale(1); max-height: 300px; }
+  100% { opacity: 0; transform: scale(0.95); max-height: 0; padding: 0; margin: 0; overflow: hidden; }
+}
+.animate-exit {
+  animation: fadeOutShrink 0.3s ease-in forwards;
+  pointer-events: none;
 }
 
 /* Skeleton shimmer */

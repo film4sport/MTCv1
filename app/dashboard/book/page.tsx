@@ -250,7 +250,7 @@ export default function BookCourtPage() {
                                     onMouseEnter={() => (booked && !mine) ? handleSlotHover(slotKey) : undefined}
                                     onMouseLeave={() => handleSlotHover(null)}
                                     disabled={(!mine && !!booked) || past || closed}
-                                    className={`slot-cell w-full rounded-lg text-xs font-medium py-2.5 px-2 transition-all duration-150 relative overflow-hidden ${available ? 'hover:border-[#6b7a3d] hover:border-solid hover:bg-[#6b7a3d]/[0.04]' : ''}`}
+                                    className={`slot-cell w-full rounded-lg text-xs font-medium py-2.5 px-2 transition-all duration-150 relative overflow-hidden ${mine ? 'slot-booked-pulse' : ''} ${available ? 'hover:border-[#6b7a3d] hover:border-solid hover:bg-[#6b7a3d]/[0.04]' : ''}`}
                                     style={{
                                       background: mine ? '#6b7a3d' : courtClosed ? '#f0ede6' : isLesson ? 'rgba(59, 130, 246, 0.08)' : isProgram ? 'rgba(245, 158, 11, 0.08)' : booked ? '#f5f3ee' : 'transparent',
                                       color: mine ? '#fff' : courtClosed ? '#c5c0b5' : isLesson ? '#3b82f6' : isProgram ? '#d97706' : booked ? '#b5b0a5' : past || closed ? '#d5d0c8' : '#6b7a3d',

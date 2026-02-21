@@ -20,7 +20,7 @@ export default function DashboardHeader({ title }: DashboardHeaderProps) {
 
   // Map notification type to preference key; announcements always show
   const prefMap: Record<string, keyof typeof notificationPreferences> = {
-    booking: 'bookings', event: 'events', payment: 'payments',
+    booking: 'bookings', event: 'events',
     partner: 'partners', message: 'messages', program: 'programs',
   };
   const filteredNotifications = notifications.filter(n => {
@@ -74,7 +74,7 @@ export default function DashboardHeader({ title }: DashboardHeaderProps) {
                     <button onClick={clearNotifications} className="text-xs font-medium hover:underline" style={{ color: '#6b7a3d' }}>Mark all read</button>
                   )}
                 </div>
-                <div className="max-h-80 overflow-y-auto">
+                <div className="max-h-80 overflow-y-auto stagger-children">
                   {filteredNotifications.length === 0 ? (
                     <div className="p-6 text-center">
                       <svg className="w-8 h-8 mx-auto mb-2 opacity-30" fill="none" stroke="#6b7a3d" viewBox="0 0 24 24" strokeWidth="1.5">
