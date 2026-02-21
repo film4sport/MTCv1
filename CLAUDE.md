@@ -7,10 +7,12 @@
 - If no → ASK before choosing an approach
 - If a fix fails → the decision was right, my implementation was wrong. Debug the implementation, don't change the approach.
 
-## #2: MINIMAL DIFF + PROACTIVE SUGGESTIONS
-- **MINIMAL DIFF**: If asked to change ONE property, change ONLY that property. Don't touch surrounding values (positions, sizes, colors) unless explicitly told to.
-- **DO proactively suggest** improvements, optimizations, and structural enhancements as you go — the user wants to hear ideas.
-- Don't silently implement unasked-for changes — suggest first, then implement if approved.
+## #2: ONLY CHANGE WHAT IS ASKED — ZERO EXTRAS
+- **Before EVERY edit, ask yourself: "Did the user ask for this specific change?"** If NO → don't do it.
+- If asked to fix 2 things, fix exactly those 2 things. Not 2 + 5 "improvements" you noticed.
+- Necessary dependencies of the asked change are OK (e.g. bumping SW cache version when adding a new cached file). Refactors, cleanups, style tweaks, "while I'm here" changes are NOT OK.
+- **DO proactively suggest** improvements — but ONLY as text suggestions. Never silently implement them.
+- This rule exists because it has been violated repeatedly. When in doubt, DON'T touch it.
 
 ## #3: GREP BEFORE TOUCHING ANYTHING
 - Find ALL locations first
