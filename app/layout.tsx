@@ -112,8 +112,8 @@ export default function RootLayout({
                           reg.update();
                         }
                       });
-                      // Periodic update check every 60s (catches long-open tabs)
-                      setInterval(function() { reg.update(); }, 60 * 1000);
+                      // Periodic update check every 30s (catches long-open tabs)
+                      setInterval(function() { reg.update(); }, 30 * 1000);
                     });
                 });
               }

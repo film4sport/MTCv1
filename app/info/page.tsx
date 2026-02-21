@@ -1041,7 +1041,7 @@ function InfoPageContent() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                       </svg>
                     </button>
-                    <div className="faq-answer" style={{ maxHeight: activeConstitution === i ? '300px' : '0', color: '#666' }}>
+                    <div className="faq-answer" style={{ maxHeight: activeConstitution === i ? '300px' : '0', color: '#555' }}>
                       <p>{article.content}</p>
                     </div>
                   </div>
@@ -1214,7 +1214,7 @@ function InfoPageContent() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                           </svg>
                         </button>
-                        <div className="faq-answer" style={{ maxHeight: activeFaq === originalIndex ? '200px' : '0', color: '#666' }}>
+                        <div className="faq-answer" style={{ maxHeight: activeFaq === originalIndex ? '200px' : '0', color: '#555' }}>
                           <p>{item.answer}</p>
                         </div>
                       </div>
@@ -1272,7 +1272,7 @@ function InfoPageContent() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                     </svg>
                   </button>
-                  <div className="faq-answer" style={{ maxHeight: activePrivacy === i ? '300px' : '0', color: '#666' }}>
+                  <div className="faq-answer" style={{ maxHeight: activePrivacy === i ? '300px' : '0', color: '#555' }}>
                     <p>{section.content}</p>
                   </div>
                 </div>
@@ -1306,7 +1306,7 @@ function InfoPageContent() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                     </svg>
                   </button>
-                  <div className="faq-answer" style={{ maxHeight: activeTerms === i ? '300px' : '0', color: '#666' }}>
+                  <div className="faq-answer" style={{ maxHeight: activeTerms === i ? '300px' : '0', color: '#555' }}>
                     <p>{section.content}</p>
                   </div>
                 </div>

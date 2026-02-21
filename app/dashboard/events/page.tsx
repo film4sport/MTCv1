@@ -212,7 +212,7 @@ export default function EventsPage() {
                     <span className="text-sm font-medium">{day}</span>
                     {hasEvent && (
                       <span
-                        className="absolute bottom-1 w-1.5 h-1.5 rounded-full"
+                        className="absolute bottom-1 w-2 h-2 rounded-full"
                         style={{ background: isSelected ? '#fff' : '#d4e157' }}
                       />
                     )}
