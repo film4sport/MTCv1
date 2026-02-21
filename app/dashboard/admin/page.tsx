@@ -258,22 +258,26 @@ export default function AdminPage() {
               </div>
             </div>
 
-            {/* Analytics Cards */}
+            {/* Analytics Cards — computed from real data */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              {[
-                { label: 'Bookings This Month', value: analytics.totalBookingsThisMonth, change: `+${analytics.bookingsChange}%` },
-                { label: 'Revenue', value: `$${analytics.revenueThisMonth}`, change: `+${analytics.revenueChange}%` },
-                { label: 'Active Members', value: members.length },
-                { label: 'Courts', value: courts.length },
-              ].map(card => (
+              {(() => {
+                const now = new Date();
+                const thisMonth = bookings.filter(b => {
+                  const d = new Date(b.date);
+                  return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear() && b.status === 'confirmed';
+                });
+                const activeMembers = members.filter(m => m.status !== 'paused');
+                const activeCourts = courts.filter(c => c.status === 'available');
+                return [
+                  { label: 'Bookings This Month', value: thisMonth.length },
+                  { label: 'Total Bookings', value: bookings.filter(b => b.status === 'confirmed').length },
+                  { label: 'Active Members', value: activeMembers.length },
+                  { label: 'Courts Available', value: `${activeCourts.length}/${courts.length}` },
+                ];
+              })().map(card => (
                 <div key={card.label} className="rounded-2xl border p-4" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
                   <p className="text-xs mb-1" style={{ color: '#6b7266' }}>{card.label}</p>
-                  <div className="flex items-end gap-2">
-                    <p className="text-2xl font-bold" style={{ color: '#2a2f1e' }}>{card.value}</p>
-                    {card.change && (
-                      <span className="text-xs font-medium pb-1" style={{ color: '#16a34a' }}>{card.change}</span>
-                    )}
-                  </div>
+                  <p className="text-2xl font-bold" style={{ color: '#2a2f1e' }}>{card.value}</p>
                 </div>
               ))}
             </div>

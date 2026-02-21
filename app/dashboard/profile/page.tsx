@@ -8,12 +8,7 @@ import * as db from '../lib/db';
 const NTRP_OPTIONS = [1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0];
 
 export default function ProfilePage() {
-  const { currentUser, showToast } = useApp();
-  const [notifBooking, setNotifBooking] = useState(true);
-  const [notifPartners, setNotifPartners] = useState(true);
-  const [notifClub, setNotifClub] = useState(true);
-  const [notifCoaching, setNotifCoaching] = useState(false);
-  const [notifPush, setNotifPush] = useState(true);
+  const { currentUser, showToast, notificationPreferences, setNotificationPreferences } = useApp();
   const [editingNtrp, setEditingNtrp] = useState(false);
   const [ntrpValue, setNtrpValue] = useState(currentUser?.ntrp ?? 3.5);
 
@@ -30,14 +25,17 @@ export default function ProfilePage() {
 
   const saveNtrp = async () => {
     if (!currentUser) return;
-    await db.updateProfile(currentUser.id, { ntrp: ntrpValue });
-    // Update the cached user with new ntrp
-    const updated = { ...currentUser, ntrp: ntrpValue };
-    localStorage.setItem('mtc-current-user', JSON.stringify(updated));
-    setEditingNtrp(false);
-    showToast('NTRP rating updated');
-    // Reload page to pick up the updated user
-    window.location.reload();
+    try {
+      await db.updateProfile(currentUser.id, { ntrp: ntrpValue });
+      // Update localStorage cache so next page load picks up the new value
+      const updated = { ...currentUser, ntrp: ntrpValue };
+      localStorage.setItem('mtc-current-user', JSON.stringify(updated));
+      setEditingNtrp(false);
+      showToast('NTRP rating updated');
+    } catch (err) {
+      console.error('[MTC Supabase]', err);
+      showToast('Failed to update rating. Please try again.', 'error');
+    }
   };
 
   return (
@@ -151,18 +149,18 @@ export default function ProfilePage() {
         <div className="rounded-2xl border p-6 section-card" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
           <h3 className="font-semibold mb-4" style={{ color: '#2a2f1e' }}>Notifications</h3>
           <div className="space-y-4">
-            {[
-              { label: 'Booking Reminders', checked: notifBooking, onChange: setNotifBooking },
-              { label: 'Partner Requests', checked: notifPartners, onChange: setNotifPartners },
-              { label: 'Club Announcements', checked: notifClub, onChange: setNotifClub },
-              { label: 'Coaching Updates', checked: notifCoaching, onChange: setNotifCoaching },
-              { label: 'Push Notifications', checked: notifPush, onChange: setNotifPush },
-            ].map(item => (
+            {([
+              { label: 'Booking Reminders', key: 'bookings' as const },
+              { label: 'Partner Requests', key: 'partners' as const },
+              { label: 'Event Updates', key: 'events' as const },
+              { label: 'Coaching Programs', key: 'programs' as const },
+              { label: 'Messages', key: 'messages' as const },
+            ] as const).map(item => (
               <label key={item.label} className="flex items-center justify-between cursor-pointer py-1">
                 <span className="text-sm" style={{ color: '#2a2f1e' }}>{item.label}</span>
                 <div className="relative">
-                  <input type="checkbox" className="sr-only peer" checked={item.checked} onChange={(e) => item.onChange(e.target.checked)} />
-                  <div className="w-11 h-6 rounded-full peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all" style={{ background: item.checked ? '#6b7a3d' : '#d1d5db' }} />
+                  <input type="checkbox" className="sr-only peer" checked={notificationPreferences[item.key]} onChange={() => setNotificationPreferences({ ...notificationPreferences, [item.key]: !notificationPreferences[item.key] })} />
+                  <div className="w-11 h-6 rounded-full peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all" style={{ background: notificationPreferences[item.key] ? '#6b7a3d' : '#d1d5db' }} />
                 </div>
               </label>
             ))}

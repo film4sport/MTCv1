@@ -40,41 +40,11 @@ export default function LandingPage() {
       setScrollProgress(scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0);
       setShowBackToTop(scrollTop > 500);
     };
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // 3D Tilt Effect for tilt-card elements
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      const card = (e.currentTarget as HTMLElement);
-      const rect = card.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      const centerX = rect.width / 2;
-      const centerY = rect.height / 2;
-      const rotateX = (y - centerY) / 20;
-      const rotateY = (centerX - x) / 20;
-      card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-8px)`;
-    };
-
-    const handleMouseLeave = (e: MouseEvent) => {
-      (e.currentTarget as HTMLElement).style.transform = 'perspective(1000px) rotateX(0) rotateY(0) translateY(0)';
-    };
-
-    const tiltCards = document.querySelectorAll('.tilt-card');
-    tiltCards.forEach((card) => {
-      card.addEventListener('mousemove', handleMouseMove as EventListener);
-      card.addEventListener('mouseleave', handleMouseLeave as EventListener);
-    });
-
-    return () => {
-      tiltCards.forEach((card) => {
-        card.removeEventListener('mousemove', handleMouseMove as EventListener);
-        card.removeEventListener('mouseleave', handleMouseLeave as EventListener);
-      });
-    };
-  }, []);
+  // 3D Tilt Effect now lives in Events.tsx (re-attaches on filter change)
 
   const openLightbox = (src: string, alt: string) => setLightbox({ src, alt });
   const closeLightbox = () => setLightbox(null);

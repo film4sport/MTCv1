@@ -162,14 +162,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setIsLoaded(true);
     });
 
-    // Load from localStorage as immediate cache (Supabase data will overwrite)
-    // Use safeLoadArray to prevent crashes from corrupted localStorage data
-    setBookings(safeLoadArray('mtc-bookings', DEFAULT_BOOKINGS));
-    setConversations(safeLoadArray('mtc-conversations', DEFAULT_CONVERSATIONS));
-    setAnnouncements(safeLoadArray('mtc-announcements', DEFAULT_ANNOUNCEMENTS));
-    setNotifications(safeLoadArray('mtc-notifications', DEFAULT_NOTIFICATIONS));
-    setPrograms(safeLoadArray('mtc-programs', DEFAULT_PROGRAMS));
-    setNotificationPreferences(loadJSON('mtc-notification-prefs', DEFAULT_NOTIFICATION_PREFS));
+    // localStorage data is loaded via useState defaults above.
+    // Supabase fetch in getCurrentUser().then() overwrites with live data.
+    // No duplicate setState calls here — they caused a race condition where
+    // stale localStorage values could overwrite fresh Supabase data.
   }, []);
 
   // Persist to localStorage on changes
@@ -483,19 +479,25 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const toggleRsvp = useCallback((eventId: string, userName: string) => {
-    setEvents(prev => prev.map(e => {
-      if (e.id !== eventId) return e;
-      const attending = e.attendees.includes(userName);
-      return {
-        ...e,
-        attendees: attending ? e.attendees.filter(a => a !== userName) : [...e.attendees, userName],
-        ...(e.spotsTaken != null ? { spotsTaken: attending ? e.spotsTaken - 1 : e.spotsTaken + 1 } : {}),
-      };
-    }));
-    // Persist to Supabase
-    db.toggleEventRsvp(eventId, userName).catch((err) => {
-      console.error('[MTC Supabase]', err);
-      showToast('Failed to update RSVP. Please try again.', 'error');
+    // Snapshot for rollback
+    setEvents(prev => {
+      const snapshot = prev;
+      const updated = prev.map(e => {
+        if (e.id !== eventId) return e;
+        const attending = e.attendees.includes(userName);
+        return {
+          ...e,
+          attendees: attending ? e.attendees.filter(a => a !== userName) : [...e.attendees, userName],
+          ...(e.spotsTaken != null ? { spotsTaken: attending ? e.spotsTaken - 1 : e.spotsTaken + 1 } : {}),
+        };
+      });
+      // Persist to Supabase — rollback on failure
+      db.toggleEventRsvp(eventId, userName).catch((err) => {
+        console.error('[MTC Supabase]', err);
+        setEvents(snapshot);
+        showToast('Failed to update RSVP. Please try again.', 'error');
+      });
+      return updated;
     });
   }, []);
 

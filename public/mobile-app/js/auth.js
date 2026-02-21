@@ -80,9 +80,8 @@
               showFieldError(passwordInput, 'Incorrect password');
               showToast('Incorrect password');
             } else if (result.data.error === 'unknown_account') {
-              // Not a known demo account — allow login with stored user or generic
-              finishLogin(email, null);
-              return;
+              showFieldError(emailInput, 'Account not found');
+              showToast('Account not found');
             } else {
               showToast('Login failed');
             }
@@ -329,7 +328,7 @@
     if (!email) { showFieldError(emailInput, 'Email is required'); errors.push('valid email'); }
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showFieldError(emailInput, 'Enter a valid email address'); errors.push('valid email'); }
     if (phone && !/^[\d\s\-\+\(\)]{7,15}$/.test(phone)) { showFieldError(phoneInput, 'Enter a valid phone number'); errors.push('valid phone number'); }
-    if (!password || password.length < 6) { showFieldError(passwordInput, 'Password must be at least 6 characters'); errors.push('password (min 6 chars)'); }
+    if (!password || password.length < 8 || !/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/\d/.test(password)) { showFieldError(passwordInput, 'Password must be 8+ chars with uppercase, lowercase & number'); errors.push('stronger password (min 8 chars, mixed case + number)'); }
 
     if (errors.length > 0) {
       const signupCard = document.getElementById('signupCard');

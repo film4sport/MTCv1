@@ -1,57 +1,13 @@
-// MTC Court Service Worker v47 (monorepo edition — served from /mobile-app/)
-const CACHE_NAME = 'mtc-court-v148';
+// MTC Court Service Worker v48 (monorepo edition — served from /mobile-app/)
+const CACHE_NAME = 'mtc-court-f5227556';
 const OFFLINE_URL = '/mobile-app/offline.html';
 
-// Assets to cache immediately on install
+// Assets to cache immediately on install (bundles built by scripts/build-mobile.js)
 const PRECACHE_ASSETS = [
   '/mobile-app/offline.html',
   '/mobile-app/manifest.json',
-  '/mobile-app/css/variables.css',
-  '/mobile-app/css/base.css',
-  '/mobile-app/css/login.css',
-  '/mobile-app/css/layout.css',
-  '/mobile-app/css/home.css',
-  '/mobile-app/css/booking.css',
-  '/mobile-app/css/navigation.css',
-  '/mobile-app/css/social.css',
-  '/mobile-app/css/admin.css',
-  '/mobile-app/css/payments.css',
-  '/mobile-app/css/search.css',
-  '/mobile-app/css/profile.css',
-  '/mobile-app/css/messaging.css',
-  '/mobile-app/css/events.css',
-  '/mobile-app/css/partners.css',
-  '/mobile-app/css/schedule.css',
-  '/mobile-app/css/events-screen.css',
-  '/mobile-app/css/screens.css',
-  '/mobile-app/css/modals.css',
-  '/mobile-app/css/enhancements.css',
-  '/mobile-app/css/neumorphic.css',
-  '/mobile-app/css/chat.css',
-  '/mobile-app/js/utils.js',
-  '/mobile-app/js/config.js',
-  '/mobile-app/js/auth.js',
-  '/mobile-app/js/theme.js',
-  '/mobile-app/js/navigation.js',
-  '/mobile-app/js/partners.js',
-  '/mobile-app/js/weather.js',
-  '/mobile-app/js/booking.js',
-  '/mobile-app/js/schedule.js',
-  '/mobile-app/js/events.js',
-  '/mobile-app/js/interactive.js',
-  '/mobile-app/js/payments.js',
-  '/mobile-app/js/mybookings.js',
-  '/mobile-app/js/onboarding.js',
-  '/mobile-app/js/events-registration.js',
-  '/mobile-app/js/avatar.js',
-  '/mobile-app/js/messaging.js',
-  '/mobile-app/js/account.js',
-  '/mobile-app/js/notifications.js',
-  '/mobile-app/js/pull-refresh.js',
-  '/mobile-app/js/profile.js',
-  '/mobile-app/js/enhancements.js',
-  '/mobile-app/js/confirm-modal.js',
-  '/mobile-app/js/app.js',
+  '/mobile-app/dist/app.bundle.css',
+  '/mobile-app/dist/app.bundle.js',
   '/mobile-app/icon-192.png',
   '/mobile-app/favicon.png',
   '/mobile-app/favicon-16.png',
@@ -61,7 +17,7 @@ const PRECACHE_ASSETS = [
 
 // Install event - cache core assets
 self.addEventListener('install', (event) => {
-  console.log('[ServiceWorker] Installing v47...');
+  console.log('[ServiceWorker] Installing mtc-court-f5227556...');
 
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -78,7 +34,7 @@ self.addEventListener('install', (event) => {
 
 // Activate event - clean up ALL old caches
 self.addEventListener('activate', (event) => {
-  console.log('[ServiceWorker] Activating v47...');
+  console.log('[ServiceWorker] Activating mtc-court-f5227556...');
 
   event.waitUntil(
     caches.keys().then((cacheNames) => {

@@ -166,25 +166,6 @@ function sanitizeHTML(str) {
 // Expose on MTC.fn for use in modules
 MTC.fn.sanitizeHTML = sanitizeHTML;
 
-// ============================================
-// MTC.fn.safeCall — Wraps a function with try/catch + error UI fallback
-// Use to wrap screen render functions so they show a friendly error instead of blank screen.
-// @param {Function} fn - The function to wrap
-// @param {HTMLElement} [container] - Optional container for renderError fallback
-// @param {string} [label] - Optional label for console.error
-// @returns {Function} Wrapped function
-// ============================================
-MTC.fn.safeCall = function(fn, container, label) {
-  return function() {
-    try {
-      return fn.apply(this, arguments);
-    } catch (e) {
-      console.error('[MTC' + (label ? ' ' + label : '') + ']', e);
-      if (container) MTC.fn.renderError(container, 'Something went wrong. Please try again.');
-    }
-  };
-};
-
 // Haptic feedback for mobile devices
 // Note: Requires "Vibration feedback" enabled in phone settings
 // Samsung: Settings > Sounds and vibration > System sound/vibration control > Touch interactions

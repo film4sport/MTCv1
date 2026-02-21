@@ -221,15 +221,12 @@ export default function PartnersPage() {
                     return;
                   }
                   // Also check if time has passed for today
+                  // <input type="time"> returns HH:MM in 24-hour format
                   if (postDateTime.getTime() === today.getTime() && postTime) {
-                    const match = postTime.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
-                    if (match) {
-                      let hr = parseInt(match[1]);
-                      const isPM = match[3].toUpperCase() === 'PM';
-                      if (isPM && hr !== 12) hr += 12;
-                      if (!isPM && hr === 12) hr = 0;
+                    const [hours, minutes] = postTime.split(':').map(Number);
+                    if (!isNaN(hours) && !isNaN(minutes)) {
                       const slotTime = new Date();
-                      slotTime.setHours(hr, parseInt(match[2]), 0, 0);
+                      slotTime.setHours(hours, minutes, 0, 0);
                       if (slotTime < new Date()) {
                         showToast('Cannot post for a past time', 'error');
                         return;

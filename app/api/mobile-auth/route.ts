@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createBrowserClient } from '@supabase/ssr';
+import { createClient } from '@supabase/supabase-js';
 
 /**
  * Mobile PWA Auth Proxy
@@ -14,6 +14,22 @@ const DEMO_CREDENTIALS: Record<string, { password: string; role: string; name: s
   'admin@mtc.ca':  { password: process.env.DEMO_ADMIN_PW  || 'admin123',  role: 'admin',  name: 'Admin' },
 };
 
+// Simple in-memory rate limiter: max 5 attempts per email per 60 seconds
+const loginAttempts = new Map<string, { count: number; firstAttempt: number }>();
+const RATE_LIMIT_WINDOW = 60_000; // 1 minute
+const RATE_LIMIT_MAX = 5;
+
+function isRateLimited(email: string): boolean {
+  const now = Date.now();
+  const entry = loginAttempts.get(email);
+  if (!entry || now - entry.firstAttempt > RATE_LIMIT_WINDOW) {
+    loginAttempts.set(email, { count: 1, firstAttempt: now });
+    return false;
+  }
+  entry.count++;
+  return entry.count > RATE_LIMIT_MAX;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { email, password } = await request.json();
@@ -24,13 +40,18 @@ export async function POST(request: NextRequest) {
 
     const emailLower = email.toLowerCase();
 
+    // Rate limit check
+    if (isRateLimited(emailLower)) {
+      return NextResponse.json({ error: 'Too many login attempts. Please wait a minute.' }, { status: 429 });
+    }
+
     // Try Supabase auth first
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
     if (supabaseUrl && supabaseKey && !supabaseUrl.includes('placeholder')) {
       try {
-        const supabase = createBrowserClient(supabaseUrl, supabaseKey);
+        const supabase = createClient(supabaseUrl, supabaseKey);
         const { data, error } = await supabase.auth.signInWithPassword({ email: emailLower, password });
 
         if (!error && data.user) {
