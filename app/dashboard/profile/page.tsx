@@ -80,23 +80,13 @@ export default function ProfilePage() {
         <div className="rounded-2xl border p-6 section-card" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
           <h3 className="font-semibold mb-4" style={{ color: '#2a2f1e' }}>Personal Info</h3>
           <div className="space-y-4">
-            <div className="flex items-center justify-between py-2 border-b" style={{ borderColor: '#f0ede6' }}>
-              <div>
-                <p className="text-xs" style={{ color: '#6b7266' }}>Full Name</p>
-                <p className="text-sm font-medium" style={{ color: '#2a2f1e' }}>{currentUser.name}</p>
-              </div>
-              <svg className="w-4 h-4" fill="none" stroke="#6b7266" viewBox="0 0 24 24" strokeWidth="1.5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/>
-              </svg>
+            <div className="py-2 border-b" style={{ borderColor: '#f0ede6' }}>
+              <p className="text-xs" style={{ color: '#6b7266' }}>Full Name</p>
+              <p className="text-sm font-medium" style={{ color: '#2a2f1e' }}>{currentUser.name}</p>
             </div>
-            <div className="flex items-center justify-between py-2 border-b" style={{ borderColor: '#f0ede6' }}>
-              <div>
-                <p className="text-xs" style={{ color: '#6b7266' }}>Email</p>
-                <p className="text-sm font-medium" style={{ color: '#2a2f1e' }}>{currentUser.email}</p>
-              </div>
-              <svg className="w-4 h-4" fill="none" stroke="#6b7266" viewBox="0 0 24 24" strokeWidth="1.5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/>
-              </svg>
+            <div className="py-2 border-b" style={{ borderColor: '#f0ede6' }}>
+              <p className="text-xs" style={{ color: '#6b7266' }}>Email</p>
+              <p className="text-sm font-medium" style={{ color: '#2a2f1e' }}>{currentUser.email}</p>
             </div>
             <div className="flex items-center justify-between py-2">
               <div>

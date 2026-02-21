@@ -33,6 +33,7 @@ export default function BookCourtPage() {
   const [calMonth, setCalMonth] = useState(() => new Date());
   const [calSelectedDate, setCalSelectedDate] = useState<string | null>(null);
   const [hoveredSlot, setHoveredSlot] = useState<string | null>(null);
+  const [cancelTarget, setCancelTarget] = useState<{ id: string; courtName: string; date: string; time: string } | null>(null);
   const [contentKey, setContentKey] = useState(0);
   const tooltipTimeout = useRef<NodeJS.Timeout | null>(null);
   const [mobileDayIdx, setMobileDayIdx] = useState(() => new Date().getDay());
@@ -57,10 +58,7 @@ export default function BookCourtPage() {
         showToast(`Cannot cancel within ${FEES.cancelWindowHours} hours of booking`, 'error');
         return;
       }
-      if (confirm(`Cancel booking for ${courtName} on ${date} at ${time}?`)) {
-        cancelBooking(mine.id);
-        showToast('Booking cancelled');
-      }
+      setCancelTarget({ id: mine.id, courtName, date, time });
       return;
     }
     if (isCourtInMaintenance(courts, courtId)) { showToast('This court is currently closed', 'error'); return; }
@@ -198,13 +196,13 @@ export default function BookCourtPage() {
               <>
                 {/* Week Navigation */}
                 <div className="flex items-center justify-between mb-4">
-                  <button onClick={prevWeek} className="w-9 h-9 rounded-xl flex items-center justify-center border hover:bg-white transition-colors active:scale-95" style={{ borderColor: '#e0dcd3' }}>
+                  <button onClick={prevWeek} className="w-10 h-10 rounded-xl flex items-center justify-center border hover:bg-white transition-colors active:scale-95" style={{ borderColor: '#e0dcd3' }}>
                     <svg className="w-4 h-4" fill="none" stroke="#2a2f1e" viewBox="0 0 24 24" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/></svg>
                   </button>
                   <span className="font-semibold text-sm" style={{ color: '#2a2f1e' }}>
                     {weekDays[0].toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} — {weekDays[6].toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                   </span>
-                  <button onClick={nextWeek} className="w-9 h-9 rounded-xl flex items-center justify-center border hover:bg-white transition-colors active:scale-95" style={{ borderColor: '#e0dcd3' }}>
+                  <button onClick={nextWeek} className="w-10 h-10 rounded-xl flex items-center justify-center border hover:bg-white transition-colors active:scale-95" style={{ borderColor: '#e0dcd3' }}>
                     <svg className="w-4 h-4" fill="none" stroke="#2a2f1e" viewBox="0 0 24 24" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/></svg>
                   </button>
                 </div>
@@ -348,11 +346,11 @@ export default function BookCourtPage() {
               /* Calendar View */
               <div className="rounded-2xl border p-5 sm:p-6" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
                 <div className="flex items-center justify-between mb-5">
-                  <button onClick={() => setCalMonth(new Date(calMonth.getFullYear(), calMonth.getMonth() - 1))} className="w-9 h-9 rounded-xl flex items-center justify-center border hover:bg-gray-50 transition-colors active:scale-95" style={{ borderColor: '#e0dcd3' }}>
+                  <button onClick={() => setCalMonth(new Date(calMonth.getFullYear(), calMonth.getMonth() - 1))} className="w-10 h-10 rounded-xl flex items-center justify-center border hover:bg-gray-50 transition-colors active:scale-95" style={{ borderColor: '#e0dcd3' }}>
                     <svg className="w-4 h-4" fill="none" stroke="#2a2f1e" viewBox="0 0 24 24" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/></svg>
                   </button>
                   <span className="font-semibold text-sm" style={{ color: '#2a2f1e' }}>{calMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</span>
-                  <button onClick={() => setCalMonth(new Date(calMonth.getFullYear(), calMonth.getMonth() + 1))} className="w-9 h-9 rounded-xl flex items-center justify-center border hover:bg-gray-50 transition-colors active:scale-95" style={{ borderColor: '#e0dcd3' }}>
+                  <button onClick={() => setCalMonth(new Date(calMonth.getFullYear(), calMonth.getMonth() + 1))} className="w-10 h-10 rounded-xl flex items-center justify-center border hover:bg-gray-50 transition-colors active:scale-95" style={{ borderColor: '#e0dcd3' }}>
                     <svg className="w-4 h-4" fill="none" stroke="#2a2f1e" viewBox="0 0 24 24" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/></svg>
                   </button>
                 </div>
@@ -458,6 +456,39 @@ export default function BookCourtPage() {
           participants={bookingSuccess.participants}
           onClose={() => setBookingSuccess(null)}
         />
+      )}
+
+      {/* Cancel Confirmation Modal */}
+      {cancelTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.4)' }} onClick={() => setCancelTarget(null)}>
+          <div className="w-full max-w-sm rounded-2xl p-6 animate-scaleIn" style={{ background: '#fff' }} onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 rounded-full" style={{ background: 'rgba(239,68,68,0.1)' }}>
+              <svg className="w-6 h-6" fill="none" stroke="#ef4444" viewBox="0 0 24 24" strokeWidth="1.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+              </svg>
+            </div>
+            <h3 className="text-center font-semibold text-lg mb-1" style={{ color: '#2a2f1e' }}>Cancel Booking?</h3>
+            <p className="text-center text-sm mb-5" style={{ color: '#6b7266' }}>
+              {cancelTarget.courtName} on {new Date(cancelTarget.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} at {cancelTarget.time}
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setCancelTarget(null)}
+                className="flex-1 py-2.5 rounded-xl text-sm font-medium transition-all hover:opacity-80"
+                style={{ background: '#f5f2eb', color: '#2a2f1e' }}
+              >
+                Keep Booking
+              </button>
+              <button
+                onClick={() => { cancelBooking(cancelTarget.id); showToast('Booking cancelled'); setCancelTarget(null); }}
+                className="flex-1 py-2.5 rounded-xl text-sm font-medium text-white transition-all hover:opacity-90"
+                style={{ background: '#ef4444' }}
+              >
+                Cancel Booking
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

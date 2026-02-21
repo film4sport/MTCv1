@@ -10,6 +10,7 @@ export default function SchedulePage() {
   const { currentUser, bookings, events, cancelBooking, showToast, programs } = useApp();
   const [view, setView] = useState<'list' | 'calendar'>('list');
   const [calMonth, setCalMonth] = useState(() => new Date());
+  const [cancelTarget, setCancelTarget] = useState<{ id: string; title: string; date: string; time: string } | null>(null);
 
   const myBookings = bookings
     .filter(b => b.userId === currentUser?.id && b.status === 'confirmed')
@@ -182,8 +183,7 @@ export default function SchedulePage() {
                                       showToast(`Cannot cancel within ${FEES.cancelWindowHours}h of booking`, 'error');
                                       return;
                                     }
-                                    cancelBooking(item.id);
-                                    showToast('Booking cancelled');
+                                    setCancelTarget({ id: item.id, title: item.title, date: item.date, time: item.time });
                                   }}
                                   className="text-xs px-2 py-1 rounded-lg hover:bg-red-50 transition-colors"
                                   style={{ color: canCancelSlot ? '#ef4444' : '#d1d5db' }}
@@ -225,9 +225,9 @@ export default function SchedulePage() {
                   <div key={day.toISOString()} className="aspect-square rounded-xl flex flex-col items-center justify-center gap-0.5" style={{ background: today ? 'rgba(107, 122, 61, 0.08)' : 'transparent' }}>
                     <span className="text-sm font-medium" style={{ color: today ? '#6b7a3d' : '#2a2f1e' }}>{day.getDate()}</span>
                     <div className="flex gap-0.5">
-                      {items.booking && <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#6b7a3d' }} />}
-                      {items.event && <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#d4e157' }} />}
-                      {items.program && <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#f59e0b' }} />}
+                      {items.booking && <span className="w-2 h-2 rounded-full" style={{ background: '#6b7a3d' }} />}
+                      {items.event && <span className="w-2 h-2 rounded-full" style={{ background: '#d4e157' }} />}
+                      {items.program && <span className="w-2 h-2 rounded-full" style={{ background: '#f59e0b' }} />}
                     </div>
                   </div>
                 );
@@ -241,6 +241,39 @@ export default function SchedulePage() {
           </div>
         )}
       </div>
+
+      {/* Cancel Confirmation Modal */}
+      {cancelTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.4)' }} onClick={() => setCancelTarget(null)}>
+          <div className="w-full max-w-sm rounded-2xl p-6 animate-scaleIn" style={{ background: '#fff' }} onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 rounded-full" style={{ background: 'rgba(239,68,68,0.1)' }}>
+              <svg className="w-6 h-6" fill="none" stroke="#ef4444" viewBox="0 0 24 24" strokeWidth="1.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+              </svg>
+            </div>
+            <h3 className="text-center font-semibold text-lg mb-1" style={{ color: '#2a2f1e' }}>Cancel Booking?</h3>
+            <p className="text-center text-sm mb-5" style={{ color: '#6b7266' }}>
+              {cancelTarget.title} on {new Date(cancelTarget.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} at {cancelTarget.time}
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setCancelTarget(null)}
+                className="flex-1 py-2.5 rounded-xl text-sm font-medium transition-all hover:opacity-80"
+                style={{ background: '#f5f2eb', color: '#2a2f1e' }}
+              >
+                Keep Booking
+              </button>
+              <button
+                onClick={() => { cancelBooking(cancelTarget.id); showToast('Booking cancelled'); setCancelTarget(null); }}
+                className="flex-1 py-2.5 rounded-xl text-sm font-medium text-white transition-all hover:opacity-90"
+                style={{ background: '#ef4444' }}
+              >
+                Cancel Booking
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
