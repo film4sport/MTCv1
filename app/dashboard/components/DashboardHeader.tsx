@@ -42,7 +42,7 @@ export default function DashboardHeader({ title }: DashboardHeaderProps) {
 
   return (
     <>
-      <header className="h-16 flex items-center justify-between px-4 pl-14 sm:pl-6 lg:pl-6 border-b" style={{ backgroundColor: '#faf8f3', borderColor: '#e0dcd3' }}>
+      <header className="h-16 flex items-center justify-between px-4 pl-14 sm:pl-6 lg:pl-6 border-b relative z-[1]" style={{ backgroundColor: '#faf8f3', borderColor: '#e0dcd3' }}>
         {/* Logo */}
         <img src="/mono-logo-transparent.png" alt="Mono Tennis Club" className="h-9 w-auto" style={{ filter: 'brightness(0.2)' }} />
 
