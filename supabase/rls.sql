@@ -62,9 +62,12 @@ create policy "Bookings: update own" on bookings
   for update to authenticated using (user_id = auth.uid());
 create policy "Bookings: admin full access" on bookings
   for all to authenticated using (is_admin());
--- Coaches can create program bookings
-create policy "Bookings: coach create program" on bookings
-  for insert to authenticated with check (is_coach() and type = 'program');
+-- Coaches can create program and lesson bookings
+create policy "Bookings: coach create program/lesson" on bookings
+  for insert to authenticated with check (is_coach() and type in ('program', 'lesson'));
+-- Coaches can update own bookings (for cancellation)
+create policy "Bookings: coach update own" on bookings
+  for update to authenticated using (is_coach() and user_id = auth.uid());
 
 -- ─── Booking Participants ───────────────────────────────
 create policy "Booking participants: read by authenticated" on booking_participants
@@ -179,3 +182,10 @@ create policy "Notification prefs: update own" on notification_preferences
   for update to authenticated using (user_id = auth.uid());
 create policy "Notification prefs: insert own" on notification_preferences
   for insert to authenticated with check (user_id = auth.uid());
+
+-- ─── Club Settings ────────────────────────────────────────
+alter table club_settings enable row level security;
+create policy "Club settings: read by authenticated" on club_settings
+  for select to authenticated using (true);
+create policy "Club settings: admin manage" on club_settings
+  for all to authenticated using (is_admin());

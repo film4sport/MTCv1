@@ -11,6 +11,7 @@ export async function fetchMembers(): Promise<User[]> {
     name: p.name,
     email: p.email,
     role: p.role as User['role'],
+    status: (p.status as User['status']) || 'active',
     ntrp: p.ntrp ?? undefined,
     memberSince: p.member_since ?? undefined,
     avatar: p.avatar ?? undefined,
@@ -458,5 +459,49 @@ export async function updateNotificationPreferences(userId: string, prefs: Notif
   await supabase.from('notification_preferences').upsert({
     user_id: userId,
     ...prefs,
+  });
+}
+
+// ─── Member Management (Admin) ──────────────────────────
+
+export async function pauseMember(userId: string): Promise<void> {
+  await supabase.from('profiles').update({ status: 'paused' }).eq('id', userId);
+}
+
+export async function unpauseMember(userId: string): Promise<void> {
+  await supabase.from('profiles').update({ status: 'active' }).eq('id', userId);
+}
+
+export async function deleteMember(userId: string): Promise<void> {
+  const { error } = await supabase.rpc('delete_member', { target_user_id: userId });
+  if (error) console.error('[MTC Supabase] deleteMember:', error);
+}
+
+// ─── Club Settings (Gate Code) ──────────────────────────
+
+export async function getGateCode(): Promise<string | null> {
+  const { data } = await supabase
+    .from('club_settings')
+    .select('value')
+    .eq('key', 'gate_code')
+    .single();
+  return data?.value ?? null;
+}
+
+export async function updateGateCode(code: string, adminId: string): Promise<void> {
+  await supabase.from('club_settings').upsert({
+    key: 'gate_code',
+    value: code,
+    updated_at: new Date().toISOString(),
+    updated_by: adminId,
+  });
+}
+
+// ─── Welcome Message (Signup) ───────────────────────────
+
+export async function sendWelcomeMessage(userId: string, userName: string): Promise<void> {
+  await supabase.rpc('send_welcome_message', {
+    new_user_id: userId,
+    new_user_name: userName,
   });
 }

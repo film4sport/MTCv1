@@ -294,11 +294,13 @@ export default function BookCourtPage() {
                                       const closed = isCourtClosed(court.id, time);
 
                                       const isProgram = booked?.type === 'program';
+                                      const isLesson = booked?.type === 'lesson';
                                       let bg = '#f0fdf4';
                                       let border = '#bbf7d0';
                                       let cursor = 'pointer';
 
                                       if (mine) { bg = 'rgba(107, 122, 61, 0.15)'; border = '#6b7a3d'; }
+                                      else if (isLesson) { bg = 'rgba(59, 130, 246, 0.1)'; border = '#93c5fd'; cursor = 'default'; }
                                       else if (isProgram) { bg = 'rgba(245, 158, 11, 0.1)'; border = '#fbbf24'; cursor = 'default'; }
                                       else if (booked) { bg = '#f3f4f6'; border = '#d1d5db'; cursor = 'default'; }
                                       else if (past || closed) { bg = '#fafafa'; border = '#e5e7eb'; cursor = 'default'; }
@@ -309,10 +311,10 @@ export default function BookCourtPage() {
                                           onClick={() => handleSlotClick(court.id, court.name, dateStr, time)}
                                           disabled={(!mine && booked !== undefined && !!booked) || past || closed}
                                           className="flex-1 rounded text-[0.55rem] font-medium py-1.5 px-1 transition-colors truncate"
-                                          style={{ background: bg, border: `1px solid ${border}`, cursor, minHeight: 28, color: mine ? '#6b7a3d' : isProgram ? '#d97706' : booked ? '#9ca3af' : past || closed ? '#d1d5db' : '#16a34a' }}
-                                          title={`${court.name} - ${time} - ${mine ? 'Your booking (click to cancel)' : isProgram ? 'Program' : booked ? 'Booked' : past ? 'Past' : closed ? 'Closed' : 'Available'}`}
+                                          style={{ background: bg, border: `1px solid ${border}`, cursor, minHeight: 28, color: mine ? '#6b7a3d' : isLesson ? '#3b82f6' : isProgram ? '#d97706' : booked ? '#9ca3af' : past || closed ? '#d1d5db' : '#16a34a' }}
+                                          title={`${court.name} - ${time} - ${mine ? 'Your booking (click to cancel)' : isLesson ? 'Lesson' : isProgram ? 'Program' : booked ? 'Booked' : past ? 'Past' : closed ? 'Closed' : 'Available'}`}
                                         >
-                                          {courtsToShow.length > 1 ? (isProgram ? 'P' : `C${court.id}`) : (mine ? 'Mine' : isProgram ? 'Prog' : booked ? '—' : '')}
+                                          {courtsToShow.length > 1 ? (isLesson ? 'L' : isProgram ? 'P' : `C${court.id}`) : (mine ? 'Mine' : isLesson ? 'Lesson' : isProgram ? 'Prog' : booked ? '—' : '')}
                                         </button>
                                       );
                                     })}
@@ -332,6 +334,7 @@ export default function BookCourtPage() {
                   <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded border" style={{ background: '#f0fdf4', borderColor: '#bbf7d0' }} /> Available</div>
                   <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded border" style={{ background: 'rgba(107, 122, 61, 0.15)', borderColor: '#6b7a3d' }} /> My Booking</div>
                   <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded border" style={{ background: '#f3f4f6', borderColor: '#d1d5db' }} /> Booked</div>
+                  <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded border" style={{ background: 'rgba(59, 130, 246, 0.1)', borderColor: '#93c5fd' }} /> Lesson</div>
                   <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded border" style={{ background: 'rgba(245, 158, 11, 0.1)', borderColor: '#fbbf24' }} /> Program</div>
                   <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded border" style={{ background: '#fafafa', borderColor: '#e5e7eb' }} /> Past / Closed</div>
                 </div>

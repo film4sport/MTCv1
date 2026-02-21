@@ -17,6 +17,7 @@ interface AppState {
 
   // Data
   members: User[];
+  setMembers: (members: User[]) => void;
   courts: Court[];
   setCourts: (courts: Court[]) => void;
   bookings: Booking[];
@@ -257,6 +258,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
     // Persist to Supabase
     db.createBooking(booking).catch((err) => console.error('[MTC Supabase]', err));
     // Create notification for booker
+    if (booking.type === 'lesson') {
+      const notif: Notification = {
+        id: generateId('n'),
+        type: 'booking',
+        title: 'Lesson Booked',
+        body: `${booking.courtName} booked for lesson on ${booking.date} at ${booking.time}.`,
+        timestamp: new Date().toISOString(),
+        read: false,
+      };
+      setNotifications(prev => [notif, ...prev]);
+      db.createNotification(booking.userId, notif).catch((err) => console.error('[MTC Supabase]', err));
+    }
     if (booking.type === 'court') {
       const notif: Notification = {
         id: generateId('n'),
@@ -555,7 +568,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   return (
     <AppContext.Provider value={{
-      currentUser, login, logout, members, courts, setCourts, bookings, setBookings, addBooking, cancelBooking,
+      currentUser, login, logout, members, setMembers, courts, setCourts, bookings, setBookings, addBooking, cancelBooking,
       events, setEvents, toggleRsvp, partners, setPartners, addPartner, removePartner, conversations, setConversations, sendMessage, markConversationRead,
       announcements, setAnnouncements, dismissAnnouncement, notifications, setNotifications, markNotificationRead,
       clearNotifications, weather, payments, setPayments, analytics,
