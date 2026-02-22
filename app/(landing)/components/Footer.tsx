@@ -5,7 +5,7 @@ export default function Footer() {
     <footer id="contact" className="text-white py-16 fade-in texture-overlay" style={{ backgroundColor: '#1a1f12' }}>
       <div className="max-w-7xl mx-auto px-8 lg:px-16">
         {/* Top Row */}
-        <div className="grid grid-cols-2 md:grid-cols-[2fr_1fr_1.5fr] gap-8 md:gap-12 mb-16">
+        <div className="grid grid-cols-2 md:grid-cols-[1.2fr_0.8fr_1.5fr] gap-8 md:gap-12 mb-16">
           {/* Description */}
           <div className="col-span-2 md:col-span-1">
             <div className="headline-font text-xl mb-4" style={{ color: '#e8e4d9' }}>
