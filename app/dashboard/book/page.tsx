@@ -155,7 +155,7 @@ export default function BookCourtPage() {
   const mobileDateStr = mobileDay.toISOString().split('T')[0];
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#f5f2eb' }}>
+    <div className="min-h-screen">
       <DashboardHeader title="Book Court" />
 
       <div className="p-4 sm:p-6 lg:p-8 max-w-[1400px] mx-auto animate-slideUp">

@@ -31,7 +31,7 @@ const coaches = [
 
 export default function LessonsPage() {
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#f5f2eb' }}>
+    <div className="min-h-screen">
       <DashboardHeader title="Lessons" />
 
       <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-6 animate-slideUp">
