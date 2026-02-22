@@ -11,7 +11,7 @@ test.describe('Latest Fix Verification', () => {
     const label = page.locator('.section-label', { hasText: 'Featured Events' });
     await expect(label).toBeVisible();
 
-    const heading = page.locator('h2', { hasText: 'Upcoming Events & Tournaments' });
+    const heading = page.locator('h2', { hasText: 'Upcoming Events' });
     await expect(heading).toBeVisible();
 
     await page.screenshot({ path: 'test-results/events-section.png', fullPage: false });

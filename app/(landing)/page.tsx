@@ -105,7 +105,7 @@ export default function LandingPage() {
       <Hero />
 
       {/* Events & Programs Section */}
-      <Events onOpenLightbox={openLightbox} />
+      <Events />
 
       {/* Schedule / Calendar Section (dark bg) */}
       <Schedule />

@@ -1,51 +1,41 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import Image from 'next/image';
 
-const CDN = 'https://cdn.jsdelivr.net/gh/film4sport/my-webapp-images@main/mtc-images';
+const categoryColors: Record<string, { accent: string; bg: string; text: string }> = {
+  tournament: { accent: '#6b7a3d', bg: 'rgba(107, 122, 61, 0.08)', text: '#4a5528' },
+  camp: { accent: '#d4e157', bg: 'rgba(212, 225, 87, 0.12)', text: '#3b4229' },
+  social: { accent: '#1a1f12', bg: 'rgba(26, 31, 18, 0.05)', text: '#1a1f12' },
+};
 
 const events = [
   {
     category: 'tournament',
-    image: `${CDN}/event-mixed-doubles-tournament.jpeg`,
-    alt: '95+ Mixed Doubles Tournament',
-    badge: 'Tournament',
-    badgeStyle: { backgroundColor: 'rgba(107, 122, 61, 0.15)', color: '#4a5528' },
     date: 'July 26-27, 2026',
     title: '95+ Mixed Doubles Tournament',
     description:
       '$180/Team — 2 Matches Guaranteed. A+B Draw, Over 95 Mixed Doubles. Includes lunches at Mono Cliffs Inn and great prizes!',
+    highlight: '$180/Team',
   },
   {
     category: 'camp',
-    image: `${CDN}/event-summer-camp.jpeg`,
-    alt: 'Summer Tennis Camp',
-    badge: 'Camp',
-    badgeStyle: { backgroundColor: 'rgba(212, 225, 87, 0.3)', color: '#3b4229' },
     date: 'July 28 - Aug 1, 2026',
     title: 'Summer Tennis Camp',
     description:
       '8:30am - 3:30pm daily. Make memories, build skills, gain confidence and have fun! Perfect for young players.',
+    highlight: '8:30am - 3:30pm',
   },
   {
     category: 'social',
-    image: `${CDN}/event-social-round-robin.jpeg`,
-    alt: 'Social Round Robin',
-    badge: 'Social',
-    badgeStyle: { backgroundColor: 'rgba(59, 66, 41, 0.1)', color: '#3b4229' },
     date: 'Ongoing',
     title: 'Social Round Robin',
     description:
       'Join our friendly social round robins! A great way to meet fellow members, play multiple matches, and enjoy the community atmosphere.',
+    highlight: 'Every week',
   },
 ];
 
-interface EventsProps {
-  onOpenLightbox: (src: string, alt: string) => void;
-}
-
-export default function Events({ onOpenLightbox }: EventsProps) {
+export default function Events() {
   const [filter, setFilter] = useState('all');
   const [animKey, setAnimKey] = useState(0);
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -105,7 +95,7 @@ export default function Events({ onOpenLightbox }: EventsProps) {
         <div className="text-center mb-12 fade-in">
           <span className="section-label">// Featured Events</span>
           <h2 className="headline-font text-3xl md:text-4xl lg:text-[2.75rem] leading-tight mt-4 text-gray-900">
-            Upcoming Events &amp; Tournaments
+            Upcoming Events
           </h2>
         </div>
 
@@ -128,40 +118,51 @@ export default function Events({ onOpenLightbox }: EventsProps) {
 
         {/* Events Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-          {filteredEvents.map((event, index) => (
-            <div
-              key={`${event.title}-${animKey}`}
-              className={`event-card tilt-card rounded-2xl overflow-hidden card-hover event-card-stagger${filteredEvents.length === 3 && index === 2 ? ' md:col-span-2 lg:col-span-1' : ''}`}
-              style={{ backgroundColor: '#faf8f3', animationDelay: `${index * 100}ms` }}
-              data-category={event.category}
-            >
+          {filteredEvents.map((event, index) => {
+            const colors = categoryColors[event.category] || categoryColors.social;
+            return (
               <div
-                className="aspect-[4/3] overflow-hidden cursor-pointer relative"
-                onClick={() => onOpenLightbox(event.image, event.title)}
+                key={`${event.title}-${animKey}`}
+                className={`tilt-card event-card rounded-2xl overflow-hidden card-hover event-card-stagger flex${filteredEvents.length === 3 && index === 2 ? ' md:col-span-2 lg:col-span-1' : ''}`}
+                style={{ backgroundColor: '#faf8f3', animationDelay: `${index * 100}ms`, border: '1px solid #e0dcd3' }}
+                data-category={event.category}
               >
-                <Image
-                  src={event.image}
-                  alt={event.alt}
-                  className="card-image object-cover"
-                  fill
-                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                />
-              </div>
-              <div className="p-6">
-                <div className="flex items-center gap-2 mb-3">
-                  <span
-                    className="px-3 py-1 rounded-full text-xs font-medium"
-                    style={event.badgeStyle}
-                  >
-                    {event.badge}
-                  </span>
-                  <span className="text-xs text-gray-400">{event.date}</span>
+                {/* Accent stripe */}
+                <div className="w-1.5 flex-shrink-0 rounded-l-2xl" style={{ backgroundColor: colors.accent }} />
+
+                {/* Card content */}
+                <div className="p-6 flex-1 flex flex-col">
+                  {/* Category label + date */}
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-[0.65rem] font-semibold tracking-[0.15em] uppercase" style={{ color: colors.text }}>
+                      // {event.category}
+                    </span>
+                    <span className="text-xs font-medium" style={{ color: '#8a8578' }}>{event.date}</span>
+                  </div>
+
+                  {/* Title */}
+                  <h3 className="headline-font text-xl md:text-[1.35rem] leading-snug mb-3" style={{ color: '#1a1f12' }}>
+                    {event.title}
+                  </h3>
+
+                  {/* Description */}
+                  <p className="text-sm leading-relaxed mb-5 flex-1" style={{ color: '#6b7266' }}>
+                    {event.description}
+                  </p>
+
+                  {/* Bottom highlight chip */}
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="px-3 py-1.5 rounded-lg text-xs font-semibold"
+                      style={{ backgroundColor: colors.bg, color: colors.text }}
+                    >
+                      {event.highlight}
+                    </span>
+                  </div>
                 </div>
-                <h3 className="font-semibold text-lg mb-2">{event.title}</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">{event.description}</p>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
       </div>

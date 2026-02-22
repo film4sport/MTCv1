@@ -46,7 +46,7 @@ export default function DashboardHeader({ title }: DashboardHeaderProps) {
 
   return (
     <>
-      <header className="h-16 flex items-center justify-between px-4 pl-14 sm:pl-6 lg:pl-6 border-b relative z-[1]" style={{ backgroundColor: '#faf8f3', borderColor: '#e0dcd3' }}>
+      <header className="h-16 flex items-center justify-between px-4 pl-14 sm:pl-6 lg:pl-6 border-b relative z-10" style={{ backgroundColor: '#faf8f3', borderColor: '#e0dcd3' }}>
         {/* Logo */}
         <Image src="/mono-logo-transparent.png" alt="Mono Tennis Club" width={36} height={36} className="h-9 w-auto" style={{ filter: 'brightness(0.2)' }} />
 
@@ -151,7 +151,7 @@ export default function DashboardHeader({ title }: DashboardHeaderProps) {
 
             {/* Menu Dropdown */}
             {menuOpen && (
-              <div className="dropdown-enter absolute right-0 top-[52px] w-72 rounded-2xl shadow-2xl border overflow-hidden z-50" style={{ backgroundColor: '#faf8f3', borderColor: '#e0dcd3' }}>
+              <div className="dropdown-enter absolute right-0 top-[52px] w-[calc(100vw-24px)] sm:w-72 rounded-2xl shadow-2xl border overflow-hidden z-50" style={{ backgroundColor: '#faf8f3', borderColor: '#e0dcd3' }}>
                 {/* User info */}
                 <div className="p-4 border-b" style={{ borderColor: '#e0dcd3' }}>
                   <p className="font-semibold text-sm" style={{ color: '#1a1f12' }}>{currentUser?.name}</p>
