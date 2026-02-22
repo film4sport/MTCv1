@@ -19,9 +19,11 @@ export default function ProfilePage() {
   const { currentUser, updateCurrentUser, notificationPreferences, setNotificationPreferences } = useApp();
   const { showToast } = useToast();
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [editingName, setEditingName] = useState(false);
+  const [nameValue, setNameValue] = useState(currentUser?.name ?? '');
+  const [nameSaving, setNameSaving] = useState(false);
   const avatarModalRef = useRef<HTMLDivElement>(null);
+  const nameInputRef = useRef<HTMLInputElement>(null);
 
   // Esc key closes avatar picker
   useEffect(() => {
@@ -66,32 +68,21 @@ export default function ProfilePage() {
     }
   };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !currentUser) return;
-
-    if (!file.type.startsWith('image/')) {
-      showToast('Please select an image file', 'error');
-      return;
-    }
-    if (file.size > 2 * 1024 * 1024) {
-      showToast('Image must be under 2MB', 'error');
-      return;
-    }
-
-    setUploading(true);
+  const saveName = async () => {
+    const trimmed = nameValue.trim();
+    if (!trimmed || trimmed === currentUser.name || !currentUser) { setEditingName(false); return; }
+    setNameSaving(true);
     try {
-      const url = await db.uploadAvatar(currentUser.id, file);
-      await db.updateProfile(currentUser.id, { avatar: url });
-      updateCurrentUser({ avatar: url });
-      setShowAvatarPicker(false);
-      showToast('Photo uploaded!');
+      await db.updateProfile(currentUser.id, { name: trimmed });
+      updateCurrentUser({ name: trimmed });
+      showToast('Name updated');
     } catch (err) {
       console.error('[MTC Supabase]', err);
-      showToast('Failed to upload photo. Please try again.', 'error');
+      showToast('Failed to update name. Please try again.', 'error');
+      setNameValue(currentUser.name);
     } finally {
-      setUploading(false);
-      if (fileInputRef.current) fileInputRef.current.value = '';
+      setNameSaving(false);
+      setEditingName(false);
     }
   };
 
@@ -135,7 +126,33 @@ export default function ProfilePage() {
           <div className="space-y-4">
             <div className="py-2 border-b" style={{ borderColor: '#f0ede6' }}>
               <p className="text-xs" style={{ color: '#6b7266' }}>Full Name</p>
-              <p className="text-sm font-medium" style={{ color: '#2a2f1e' }}>{currentUser.name}</p>
+              {editingName ? (
+                <div className="flex items-center gap-2 mt-1">
+                  <input
+                    ref={nameInputRef}
+                    type="text"
+                    value={nameValue}
+                    onChange={e => setNameValue(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter') saveName(); if (e.key === 'Escape') { setNameValue(currentUser.name); setEditingName(false); } }}
+                    maxLength={80}
+                    disabled={nameSaving}
+                    className="flex-1 px-3 py-1.5 rounded-lg text-sm outline-none"
+                    style={{ backgroundColor: '#faf8f3', border: '1px solid #6b7a3d', color: '#2a2f1e' }}
+                    autoFocus
+                  />
+                  <button onClick={saveName} disabled={nameSaving} className="text-xs px-3 py-1.5 rounded-lg font-medium" style={{ backgroundColor: '#6b7a3d', color: '#fff' }}>
+                    {nameSaving ? '...' : 'Save'}
+                  </button>
+                  <button onClick={() => { setNameValue(currentUser.name); setEditingName(false); }} className="text-xs px-3 py-1.5 rounded-lg font-medium" style={{ backgroundColor: '#f5f2eb', color: '#6b7266' }}>
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-medium" style={{ color: '#2a2f1e' }}>{currentUser.name}</p>
+                  <button onClick={() => { setNameValue(currentUser.name); setEditingName(true); }} className="text-xs hover:underline" style={{ color: '#6b7a3d' }}>Edit</button>
+                </div>
+              )}
             </div>
             <div className="py-2 border-b" style={{ borderColor: '#f0ede6' }}>
               <p className="text-xs" style={{ color: '#6b7266' }}>Email</p>
@@ -213,25 +230,6 @@ export default function ProfilePage() {
                   <span className="text-xs font-medium" style={{ color: '#6b7266' }}>{opt.label}</span>
                 </button>
               ))}
-            </div>
-
-            <div className="border-t pt-4 mb-4" style={{ borderColor: '#f0ede6' }}>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleFileUpload}
-              />
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                disabled={uploading}
-                className="w-full py-3 rounded-xl text-sm font-medium transition-all duration-200 hover:shadow-md btn-press disabled:opacity-50"
-                style={{ background: 'rgba(107, 122, 61, 0.08)', color: '#6b7a3d', border: '1px dashed #6b7a3d' }}
-              >
-                {uploading ? 'Uploading...' : 'Upload Your Own Photo'}
-              </button>
-              <p className="text-[0.65rem] text-center mt-2" style={{ color: '#6b7266' }}>Max 2MB, JPG or PNG</p>
             </div>
 
             <button

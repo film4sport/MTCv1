@@ -127,7 +127,7 @@ test.describe('Member Dashboard', () => {
     await expect(page.locator('h1')).toContainText('Profile');
     await expect(page.getByRole('heading', { name: 'Alex Thompson' })).toBeVisible();
     const body = await page.textContent('body');
-    expect(body).toContain('NTRP');
+    expect(body).toContain('Skill Level');
   });
 
   test('settings page shows notification toggles and legal links', async ({ page }) => {
