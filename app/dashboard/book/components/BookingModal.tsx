@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { FEES } from '../../lib/types';
 import type { User } from '../../lib/types';
 import { getTimeRange } from './booking-utils';
+import { useFocusTrap } from '../../lib/utils';
 
 interface ModalData {
   courtId: number;
@@ -24,6 +25,8 @@ export default function BookingModal({ modalData, members, currentUser, onConfir
   const [guestName, setGuestName] = useState('');
   const [selectedParticipants, setSelectedParticipants] = useState<{ id: string; name: string }[]>([]);
   const [participantSearch, setParticipantSearch] = useState('');
+  const trapRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(trapRef);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onCancel(); };
@@ -32,9 +35,9 @@ export default function BookingModal({ modalData, members, currentUser, onConfir
   }, [onCancel]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.4)' }}>
-      <div className="rounded-2xl p-6 w-full max-w-md animate-scaleIn" style={{ background: '#fff' }}>
-        <h3 className="font-semibold text-lg mb-4" style={{ color: '#2a2f1e' }}>Confirm Booking</h3>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.4)' }} role="dialog" aria-modal="true" aria-labelledby="booking-modal-title">
+      <div ref={trapRef} className="rounded-2xl p-6 w-full max-w-md animate-scaleIn" style={{ background: '#fff' }}>
+        <h3 id="booking-modal-title" className="font-semibold text-lg mb-4" style={{ color: '#2a2f1e' }}>Confirm Booking</h3>
 
         <div className="space-y-3 mb-6">
           <div className="flex justify-between text-sm">
@@ -78,6 +81,7 @@ export default function BookingModal({ modalData, members, currentUser, onConfir
               value={guestName}
               onChange={(e) => setGuestName(e.target.value)}
               placeholder="Guest name"
+              aria-label="Guest name"
               className="mt-3 w-full px-3 py-2 rounded-lg text-sm border focus:outline-none focus:ring-2 focus:ring-[#6b7a3d]/20"
               style={{ borderColor: '#e0dcd3', background: '#fff', color: '#2a2f1e' }}
             />
@@ -95,6 +99,7 @@ export default function BookingModal({ modalData, members, currentUser, onConfir
                 value={participantSearch}
                 onChange={(e) => setParticipantSearch(e.target.value)}
                 placeholder="Search members..."
+                aria-label="Search members to add as participants"
                 className="w-full px-3 py-2 rounded-lg text-sm border focus:outline-none focus:ring-2 focus:ring-[#6b7a3d]/20"
                 style={{ borderColor: '#e0dcd3', background: '#fff', color: '#2a2f1e' }}
               />

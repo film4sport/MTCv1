@@ -114,6 +114,7 @@ function MessagesContent() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search members..."
+                    aria-label="Search members to message"
                     className="w-full px-3 py-2 rounded-lg text-sm border focus:outline-none focus:ring-2 focus:ring-[#6b7a3d]/20"
                     style={{ borderColor: '#e0dcd3', color: '#2a2f1e' }}
                     autoFocus
@@ -289,6 +290,7 @@ function MessagesContent() {
                       onChange={(e) => setMessageText(e.target.value)}
                       onKeyDown={handleKeyDown}
                       placeholder="Type a message..."
+                      aria-label="Type a message"
                       maxLength={500}
                       className="flex-1 px-4 py-2.5 rounded-xl text-sm border focus:outline-none focus:ring-2 focus:ring-[#6b7a3d]/20 transition-shadow"
                       style={{ borderColor: '#e0dcd3', color: '#2a2f1e' }}

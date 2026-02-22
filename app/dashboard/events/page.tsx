@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useApp } from '../lib/store';
 import DashboardHeader from '../components/DashboardHeader';
 import { downloadICS } from '../lib/calendar';
-import { haptic } from '../lib/utils';
+import { haptic, useFocusTrap } from '../lib/utils';
 
 type EventFilter = 'all' | 'social' | 'match' | 'roundrobin' | 'lesson' | 'tournament';
 type ViewMode = 'calendar' | 'list';
@@ -21,6 +21,12 @@ export default function EventsPage() {
   const [selectedProgram, setSelectedProgram] = useState<string | null>(null);
   const [enrollConfirm, setEnrollConfirm] = useState<string | null>(null);
   const [justEnrolled, setJustEnrolled] = useState<string | null>(null);
+  const enrollModalRef = useRef<HTMLDivElement>(null);
+  const programModalRef = useRef<HTMLDivElement>(null);
+  const eventModalRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(enrollModalRef, !!enrollConfirm);
+  useFocusTrap(programModalRef, !!selectedProgram);
+  useFocusTrap(eventModalRef, !!selectedEvent);
 
   const filtered = events
     .filter(e => filter === 'all' || e.type === filter)
@@ -411,17 +417,17 @@ export default function EventsPage() {
         const prog = programs.find(p => p.id === enrollConfirm);
         if (!prog) return null;
         return (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.4)' }} onClick={() => { setEnrollConfirm(null); setJustEnrolled(null); }}>
-            <div className="rounded-2xl p-6 w-full max-w-md" style={{ background: '#fff' }} onClick={e => e.stopPropagation()}>
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.4)' }} onClick={() => { setEnrollConfirm(null); setJustEnrolled(null); }} role="dialog" aria-modal="true" aria-labelledby="enroll-modal-title">
+            <div ref={enrollModalRef} className="rounded-2xl p-6 w-full max-w-md" style={{ background: '#fff' }} onClick={e => e.stopPropagation()}>
               {justEnrolled === enrollConfirm ? (
                 // Success state
                 <div className="text-center">
                   <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ background: 'rgba(34, 197, 94, 0.1)' }}>
-                    <svg className="w-8 h-8" fill="none" stroke="#16a34a" viewBox="0 0 24 24" strokeWidth="2">
+                    <svg className="w-8 h-8" fill="none" stroke="#16a34a" viewBox="0 0 24 24" strokeWidth="2" aria-hidden="true">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
                   </div>
-                  <h3 className="font-semibold text-lg mb-1" style={{ color: '#2a2f1e' }}>Enrolled!</h3>
+                  <h3 id="enroll-modal-title" className="font-semibold text-lg mb-1" style={{ color: '#2a2f1e' }}>Enrolled!</h3>
                   <p className="text-sm mb-6" style={{ color: '#6b7266' }}>You&apos;re signed up for {prog.title}</p>
                   <div className="flex gap-3">
                     <button
@@ -458,7 +464,7 @@ export default function EventsPage() {
               ) : (
                 // Confirm state
                 <>
-                  <h3 className="font-semibold text-lg mb-2" style={{ color: '#2a2f1e' }}>Confirm Enrollment</h3>
+                  <h3 id="enroll-modal-title" className="font-semibold text-lg mb-2" style={{ color: '#2a2f1e' }}>Confirm Enrollment</h3>
                   <p className="text-sm mb-4" style={{ color: '#6b7266' }}>
                     Enroll in <strong>{prog.title}</strong> with {prog.coachName}?
                   </p>
@@ -510,12 +516,12 @@ export default function EventsPage() {
         if (!prog) return null;
         const isEnrolled = prog.enrolledMembers.includes(currentUser?.id || '');
         return (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.4)' }} onClick={() => setSelectedProgram(null)}>
-            <div className="rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto" style={{ background: '#fff' }} onClick={e => e.stopPropagation()}>
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.4)' }} onClick={() => setSelectedProgram(null)} role="dialog" aria-modal="true" aria-labelledby="program-modal-title">
+            <div ref={programModalRef} className="rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto" style={{ background: '#fff' }} onClick={e => e.stopPropagation()}>
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <div className="flex items-center gap-2">
-                    <h3 className="font-semibold text-lg" style={{ color: '#2a2f1e' }}>{prog.title}</h3>
+                    <h3 id="program-modal-title" className="font-semibold text-lg" style={{ color: '#2a2f1e' }}>{prog.title}</h3>
                     <span className="text-[0.65rem] px-2 py-0.5 rounded-full font-medium" style={{
                       background: prog.type === 'clinic' ? 'rgba(107, 122, 61, 0.1)' : 'rgba(245, 158, 11, 0.1)',
                       color: prog.type === 'clinic' ? '#6b7a3d' : '#d97706',
@@ -525,8 +531,8 @@ export default function EventsPage() {
                   </div>
                   <p className="text-sm mt-1" style={{ color: '#6b7266' }}>Coach: {prog.coachName}</p>
                 </div>
-                <button onClick={() => setSelectedProgram(null)} className="p-1 rounded-lg hover:bg-gray-100">
-                  <svg className="w-5 h-5" fill="none" stroke="#6b7266" viewBox="0 0 24 24" strokeWidth="2">
+                <button onClick={() => setSelectedProgram(null)} className="p-1 rounded-lg hover:bg-gray-100" aria-label="Close">
+                  <svg className="w-5 h-5" fill="none" stroke="#6b7266" viewBox="0 0 24 24" strokeWidth="2" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/>
                   </svg>
                 </button>
@@ -606,17 +612,17 @@ export default function EventsPage() {
 
       {/* Event Detail Modal */}
       {detail && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.4)' }} onClick={() => setSelectedEvent(null)}>
-          <div className="rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto" style={{ background: '#fff' }} onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.4)' }} onClick={() => setSelectedEvent(null)} role="dialog" aria-modal="true" aria-labelledby="event-modal-title">
+          <div ref={eventModalRef} className="rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto" style={{ background: '#fff' }} onClick={e => e.stopPropagation()}>
             <div className="flex items-start justify-between mb-4">
               <div>
-                <h3 className="font-semibold text-lg" style={{ color: '#2a2f1e' }}>{detail.title}</h3>
+                <h3 id="event-modal-title" className="font-semibold text-lg" style={{ color: '#2a2f1e' }}>{detail.title}</h3>
                 <p className="text-sm mt-1" style={{ color: '#6b7266' }}>
                   {new Date(detail.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
                 </p>
               </div>
-              <button onClick={() => setSelectedEvent(null)} className="p-1 rounded-lg hover:bg-gray-100">
-                <svg className="w-5 h-5" fill="none" stroke="#6b7266" viewBox="0 0 24 24" strokeWidth="2">
+              <button onClick={() => setSelectedEvent(null)} className="p-1 rounded-lg hover:bg-gray-100" aria-label="Close">
+                <svg className="w-5 h-5" fill="none" stroke="#6b7266" viewBox="0 0 24 24" strokeWidth="2" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
               </button>

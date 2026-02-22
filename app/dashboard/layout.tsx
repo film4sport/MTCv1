@@ -52,6 +52,14 @@ function DashboardGuard({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen flex overflow-x-hidden" style={{ backgroundColor: '#f5f2eb' }}>
+      {/* Skip to main content — keyboard accessibility */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:rounded-lg focus:text-sm focus:font-medium focus:text-white"
+        style={{ backgroundColor: '#6b7a3d' }}
+      >
+        Skip to content
+      </a>
       <Sidebar />
       {/* Mobile hamburger button — positioned to not overlap title */}
       <button
@@ -60,11 +68,12 @@ function DashboardGuard({ children }: { children: React.ReactNode }) {
         onClick={() => setMobileSidebarOpen(true)}
         aria-label="Open menu"
       >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
         </svg>
       </button>
       <main
+        id="main-content"
         className={`flex-1 min-h-screen transition-all duration-300 ml-0 overscroll-bounce ${
           sidebarCollapsed ? 'lg:ml-[72px]' : 'lg:ml-[240px]'
         }`}

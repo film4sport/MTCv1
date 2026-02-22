@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useApp } from '../lib/store';
 import DashboardHeader from '../components/DashboardHeader';
 import Link from 'next/link';
-import { generateId, haptic } from '../lib/utils';
+import { generateId, haptic, useFocusTrap } from '../lib/utils';
 
 type FilterType = 'all' | 'singles' | 'doubles' | 'mixed';
 type SkillLevel = 'beginner' | 'intermediate' | 'advanced';
@@ -18,6 +18,8 @@ export default function PartnersPage() {
   const [postDate, setPostDate] = useState('');
   const [postTime, setPostTime] = useState('');
   const [postType, setPostType] = useState<'singles' | 'doubles' | 'mixed' | 'any'>('any');
+  const postModalRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(postModalRef, showPost);
   const [removingId, setRemovingId] = useState<string | null>(null);
 
   // Esc key closes post modal
@@ -184,9 +186,9 @@ export default function PartnersPage() {
 
       {/* Post Request Modal */}
       {showPost && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.4)' }}>
-          <div className="rounded-2xl p-6 w-full max-w-md" style={{ background: '#fff' }}>
-            <h3 className="font-semibold text-lg mb-4" style={{ color: '#2a2f1e' }}>Post Partner Request</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.4)' }} onClick={() => setShowPost(false)} role="dialog" aria-modal="true" aria-labelledby="partner-modal-title">
+          <div ref={postModalRef} className="rounded-2xl p-6 w-full max-w-md" style={{ background: '#fff' }} onClick={e => e.stopPropagation()}>
+            <h3 id="partner-modal-title" className="font-semibold text-lg mb-4" style={{ color: '#2a2f1e' }}>Post Partner Request</h3>
 
             <div className="space-y-4 mb-6">
               <div>

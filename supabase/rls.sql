@@ -16,8 +16,7 @@ alter table messages enable row level security;
 alter table announcements enable row level security;
 alter table announcement_dismissals enable row level security;
 alter table notifications enable row level security;
-alter table payments enable row level security;
-alter table payment_entries enable row level security;
+-- payments and payment_entries tables removed from UI (e-transfer only)
 alter table coaching_programs enable row level security;
 alter table program_sessions enable row level security;
 alter table program_enrollments enable row level security;
@@ -86,8 +85,16 @@ create policy "Events: admin manage" on events
 -- ─── Event Attendees ────────────────────────────────────
 create policy "Event attendees: read by authenticated" on event_attendees
   for select to authenticated using (true);
-create policy "Event attendees: manage own" on event_attendees
-  for all to authenticated using (true);
+create policy "Event attendees: insert own" on event_attendees
+  for insert to authenticated with check (
+    user_name = (select name from profiles where id = auth.uid())
+  );
+create policy "Event attendees: delete own" on event_attendees
+  for delete to authenticated using (
+    user_name = (select name from profiles where id = auth.uid())
+  );
+create policy "Event attendees: admin manage" on event_attendees
+  for all to authenticated using (is_admin());
 
 -- ─── Partners ───────────────────────────────────────────
 create policy "Partners: read by authenticated" on partners
@@ -137,19 +144,9 @@ create policy "Notifications: update own" on notifications
 create policy "Notifications: delete own" on notifications
   for delete to authenticated using (user_id = auth.uid());
 
--- ─── Payments ───────────────────────────────────────────
-create policy "Payments: read own" on payments
-  for select to authenticated using (user_id = auth.uid());
-create policy "Payments: admin full access" on payments
-  for all to authenticated using (is_admin());
-
--- ─── Payment Entries ────────────────────────────────────
-create policy "Payment entries: read own" on payment_entries
-  for select to authenticated using (
-    exists (select 1 from payments where payments.id = payment_id and payments.user_id = auth.uid())
-  );
-create policy "Payment entries: admin full access" on payment_entries
-  for all to authenticated using (is_admin());
+-- ─── Payments / Payment Entries ────────────────────────────
+-- Removed: payments are e-transfers managed outside the app.
+-- Tables kept in DB for data preservation but no RLS policies needed.
 
 -- ─── Coaching Programs ──────────────────────────────────
 create policy "Programs: read by authenticated" on coaching_programs

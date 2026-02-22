@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useApp } from '../lib/store';
 import DashboardHeader from '../components/DashboardHeader';
-import { generateId } from '../lib/utils';
+import { generateId, useFocusTrap } from '../lib/utils';
 import * as db from '../lib/db';
 
 type AdminTab = 'dashboard' | 'members' | 'courts' | 'announcements';
@@ -23,6 +23,8 @@ export default function AdminPage() {
   // Member action state
   const [actionTarget, setActionTarget] = useState<{ id: string; name: string; action: 'pause' | 'unpause' | 'cancel' } | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const adminModalRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(adminModalRef, !!actionTarget);
 
   // Fetch gate code on mount
   useEffect(() => {
@@ -178,11 +180,13 @@ export default function AdminPage() {
       <div className="p-6 lg:p-8 max-w-6xl mx-auto animate-slideUp">
 
         {/* Tabs */}
-        <div className="flex gap-1 mb-6 border-b" style={{ borderColor: '#e0dcd3' }}>
+        <div className="flex gap-1 mb-6 border-b" style={{ borderColor: '#e0dcd3' }} role="tablist">
           {tabs.map(t => (
             <button
               key={t.key}
               onClick={() => setTab(t.key)}
+              role="tab"
+              aria-selected={tab === t.key}
               className="px-4 py-2.5 text-sm font-medium transition-colors relative"
               style={{ color: tab === t.key ? '#6b7a3d' : '#6b7266' }}
             >
@@ -243,6 +247,7 @@ export default function AdminPage() {
                   value={newGateCode}
                   onChange={(e) => setNewGateCode(e.target.value)}
                   placeholder="Enter new code..."
+                  aria-label="New gate code"
                   maxLength={10}
                   className="flex-1 px-4 py-2.5 rounded-xl text-sm border focus:outline-none focus:ring-2 focus:ring-[#6b7a3d]/20"
                   style={{ borderColor: '#e0dcd3', color: '#2a2f1e' }}
@@ -411,6 +416,7 @@ export default function AdminPage() {
               value={memberSearch}
               onChange={(e) => setMemberSearch(e.target.value)}
               placeholder="Search members..."
+              aria-label="Search members"
               className="w-full max-w-sm px-4 py-2.5 rounded-xl text-sm border focus:outline-none focus:ring-2 focus:ring-[#6b7a3d]/20 mb-4"
               style={{ borderColor: '#e0dcd3', color: '#2a2f1e' }}
             />
@@ -540,6 +546,7 @@ export default function AdminPage() {
                   value={newAnnouncement}
                   onChange={(e) => setNewAnnouncement(e.target.value)}
                   placeholder="Write an announcement..."
+                  aria-label="Announcement message"
                   className="flex-1 px-4 py-2.5 rounded-xl text-sm border focus:outline-none focus:ring-2 focus:ring-[#6b7a3d]/20"
                   style={{ borderColor: '#e0dcd3', color: '#2a2f1e' }}
                 />
@@ -589,8 +596,8 @@ export default function AdminPage() {
 
       {/* Confirmation Modal */}
       {actionTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.4)' }}>
-          <div className="rounded-2xl p-6 max-w-sm w-full shadow-xl" style={{ background: '#fff' }}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.4)' }} onClick={() => !actionLoading && setActionTarget(null)} role="dialog" aria-modal="true" aria-labelledby="admin-modal-title">
+          <div ref={adminModalRef} className="rounded-2xl p-6 max-w-sm w-full shadow-xl" style={{ background: '#fff' }} onClick={e => e.stopPropagation()}>
             <div className="w-12 h-12 rounded-xl mx-auto mb-4 flex items-center justify-center" style={{
               background: actionTarget.action === 'cancel' ? 'rgba(239, 68, 68, 0.1)' : actionTarget.action === 'pause' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(34, 197, 94, 0.1)',
             }}>
@@ -609,7 +616,7 @@ export default function AdminPage() {
                 </svg>
               )}
             </div>
-            <h3 className="text-center font-medium mb-2" style={{ color: '#2a2f1e' }}>
+            <h3 id="admin-modal-title" className="text-center font-medium mb-2" style={{ color: '#2a2f1e' }}>
               {actionTarget.action === 'cancel' ? 'Cancel Membership' : actionTarget.action === 'pause' ? 'Pause Membership' : 'Reactivate Membership'}
             </h3>
             <p className="text-center text-sm mb-6" style={{ color: '#6b7266' }}>
