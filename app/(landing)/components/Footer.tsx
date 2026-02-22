@@ -5,9 +5,9 @@ export default function Footer() {
     <footer id="contact" className="text-white py-16 fade-in texture-overlay" style={{ backgroundColor: '#1a1f12' }}>
       <div className="max-w-7xl mx-auto px-8 lg:px-16">
         {/* Top Row */}
-        <div className="grid md:grid-cols-4 gap-6 md:gap-10 mb-16">
-          {/* Logo & Description */}
-          <div className="md:col-span-1">
+        <div className="grid md:grid-cols-3 gap-6 md:gap-10 mb-16">
+          {/* Description */}
+          <div>
             <div className="headline-font text-xl mb-4" style={{ color: '#e8e4d9' }}>
               Mono Tennis Club
             </div>
@@ -35,35 +35,6 @@ export default function Footer() {
               <li>
                 <a href="/info?tab=faq" className="text-sm hover:opacity-80 transition-opacity" style={{ color: 'rgba(232, 228, 217, 0.6)' }}>
                   FAQ
-                </a>
-              </li>
-              <li>
-                <a href="#events" className="text-sm hover:opacity-80 transition-opacity" style={{ color: 'rgba(232, 228, 217, 0.6)' }}>
-                  Events
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          {/* Programs */}
-          <div>
-            <h5 className="font-semibold mb-4" style={{ color: '#e8e4d9' }}>
-              Programs
-            </h5>
-            <ul className="space-y-2">
-              <li>
-                <a href="#events" className="text-sm hover:opacity-80 transition-opacity" style={{ color: 'rgba(232, 228, 217, 0.6)' }}>
-                  Tennis Programs
-                </a>
-              </li>
-              <li>
-                <a href="#schedule" className="text-sm hover:opacity-80 transition-opacity" style={{ color: 'rgba(232, 228, 217, 0.6)' }}>
-                  Schedule
-                </a>
-              </li>
-              <li>
-                <a href="/login" className="text-sm hover:opacity-80 transition-opacity" style={{ color: 'rgba(232, 228, 217, 0.6)' }}>
-                  Member Login
                 </a>
               </li>
             </ul>
