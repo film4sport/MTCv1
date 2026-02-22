@@ -56,8 +56,13 @@ When new project rules or conventions are established, add them to this file AND
   - Best for: real-time page inspection, verifying hover states, checking interactive elements
 - **Workflow**: Playwright for automated screenshots + BDG for live visual spot-checks
 
-## #12: NEVER USE preview_start / preview_* (next-server)
-**Use Claude in Chrome (BDG) for ALL visual verification.** NEVER use `preview_start`, `preview_screenshot`, `preview_snapshot`, `preview_eval`, or any other `preview_*` MCP tools. The user runs `next dev` themselves — BDG connects to localhost:3000 directly. Do NOT start dev servers via preview tools or Bash.
+## #12: VISUAL VERIFICATION — USE WHATEVER WORKS, DON'T STALL
+- **NEVER use `preview_screenshot`** — it hangs/stalls every time. Do NOT call it.
+- **For screenshots**: Use **Playwright** inline scripts (`node -e "..."` with `chromium.launch()`) or **BDG** (`computer` action `screenshot`). Both work reliably.
+- **BDG** for live interaction (hover states, clicking, reading page). Known issues: Loader blocks page (remove via JS), `dynamic()` ssr:false components may not render.
+- **`preview_snapshot`/`preview_inspect`/`preview_eval`** are OK for non-screenshot tasks (accessibility tree, CSS checks, JS eval).
+- **Key rule**: If ANY tool stalls, switch immediately. Never retry the same broken approach.
+- User runs `next dev` on port 3000. `preview_start` uses port 3001 via launch.json.
 
 ## #13: ALWAYS ENSURE CI PASSES AFTER CHANGES
 After making code changes, verify they won't break GitHub Actions CI:
