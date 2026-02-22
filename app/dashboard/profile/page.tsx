@@ -92,7 +92,7 @@ export default function ProfilePage() {
       <div className="p-6 lg:p-8 max-w-3xl mx-auto space-y-6 animate-slideUp">
 
         {/* Profile Card */}
-        <div className="rounded-2xl border p-6 section-card" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+        <div className="glass-card rounded-2xl border p-6 section-card" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
           <div className="flex items-center gap-5">
             <div className="relative group cursor-pointer" onClick={() => setShowAvatarPicker(true)}>
               <AvatarDisplay avatar={currentUser.avatar} name={currentUser.name} size={80} />
@@ -120,7 +120,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Personal Info */}
-        <div className="rounded-2xl border p-6 section-card" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+        <div className="glass-card rounded-2xl border p-6 section-card" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
           <h3 className="font-semibold mb-4" style={{ color: '#2a2f1e' }}>Personal Info</h3>
           <div className="space-y-4">
             <div className="py-2 border-b" style={{ borderColor: '#f0ede6' }}>
@@ -183,7 +183,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Notifications */}
-        <div className="rounded-2xl border p-6 section-card" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+        <div className="glass-card rounded-2xl border p-6 section-card" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
           <h3 className="font-semibold mb-4" style={{ color: '#2a2f1e' }}>Notifications</h3>
           <div className="space-y-4">
             {([

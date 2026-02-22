@@ -57,7 +57,7 @@ export default function SettingsPage() {
       <div className="p-6 lg:p-8 max-w-3xl mx-auto space-y-6 animate-slideUp">
 
         {/* Notification Preferences */}
-        <div className="rounded-2xl border p-6 section-card" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+        <div className="glass-card rounded-2xl border p-6 section-card" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
           <h3 className="font-semibold mb-4" style={{ color: '#2a2f1e' }}>Notification Preferences</h3>
           <div className="space-y-4">
             {([
@@ -82,7 +82,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Account */}
-        <div className="rounded-2xl border p-6 section-card" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+        <div className="glass-card rounded-2xl border p-6 section-card" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
           <h3 className="font-semibold mb-4" style={{ color: '#2a2f1e' }}>Account</h3>
           <div className="space-y-4">
             <div>
@@ -97,7 +97,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Mobile App */}
-        <div className="rounded-2xl border p-6 section-card" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+        <div className="glass-card rounded-2xl border p-6 section-card" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
           <h3 className="font-semibold mb-2" style={{ color: '#2a2f1e' }}>Mobile App</h3>
           <p className="text-sm mb-4" style={{ color: '#6b7266' }}>
             Access your club on the go with our mobile web app. Live court status, bookings, and messaging — all from your phone.
@@ -123,7 +123,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Your Data (PIPEDA) */}
-        <div className="rounded-2xl border p-6 section-card" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+        <div className="glass-card rounded-2xl border p-6 section-card" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
           <h3 className="font-semibold mb-2" style={{ color: '#2a2f1e' }}>Your Data</h3>
           <p className="text-xs mb-4" style={{ color: '#6b7266' }}>
             Download a copy of your profile, bookings, and messages as a JSON file.
@@ -142,7 +142,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Legal */}
-        <div className="rounded-2xl border p-6 section-card" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+        <div className="glass-card rounded-2xl border p-6 section-card" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
           <h3 className="font-semibold mb-4" style={{ color: '#2a2f1e' }}>Legal</h3>
           <div className="space-y-3">
             <Link
@@ -177,7 +177,7 @@ export default function SettingsPage() {
         <button
           onClick={handleLogout}
           className="w-full py-3 rounded-xl text-sm font-medium transition-colors hover:bg-red-50"
-          style={{ background: '#fff', border: '1px solid #e0dcd3', color: '#ef4444' }}
+          style={{ background: 'rgba(255, 255, 255, 0.6)', border: '1px solid rgba(255, 255, 255, 0.5)', color: '#ef4444' }}
         >
           Sign Out
         </button>

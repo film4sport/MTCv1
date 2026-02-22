@@ -19,7 +19,7 @@ export default function BookingSidebar({ myUpcoming, nextAvailableSlot, courtNam
 
         {/* Quick Book Card */}
         {nextAvailableSlot && (
-          <div className="rounded-2xl border p-4" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+          <div className="rounded-2xl border p-4" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
             <p className="text-xs font-semibold mb-2 flex items-center gap-1.5" style={{ color: '#6b7a3d' }}>
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -40,7 +40,7 @@ export default function BookingSidebar({ myUpcoming, nextAvailableSlot, courtNam
         )}
 
         {/* My Bookings */}
-        <div className="rounded-2xl border p-5" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+        <div className="rounded-2xl border p-5" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
           <h3 className="font-semibold text-sm mb-4 flex items-center gap-2" style={{ color: '#2a2f1e' }}>
             <svg className="w-4 h-4" style={{ color: '#6b7a3d' }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />

@@ -121,7 +121,7 @@ export default function CoachingPanelPage() {
 
       <div className="p-6 lg:p-8 max-w-4xl mx-auto animate-slideUp">
         {/* Tabs */}
-        <div className="flex gap-1 p-1 rounded-xl mb-6" style={{ background: '#fff', border: '1px solid #e0dcd3' }}>
+        <div className="glass-card flex gap-1 p-1 rounded-xl mb-6" style={{ background: 'rgba(255, 255, 255, 0.5)', border: '1px solid rgba(255, 255, 255, 0.4)' }}>
           {([
             { key: 'book', label: 'Book Lesson' },
             { key: 'lessons', label: 'My Lessons' },
@@ -142,7 +142,7 @@ export default function CoachingPanelPage() {
 
         {/* Book Lesson Tab */}
         {tab === 'book' && (
-          <div className="rounded-2xl border p-6" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+          <div className="glass-card rounded-2xl border p-6" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
             <div className="space-y-5">
               {/* Court selector */}
               <div>
@@ -265,7 +265,7 @@ export default function CoachingPanelPage() {
         {tab === 'lessons' && (
           <div className="space-y-4">
             {myLessons.length === 0 ? (
-              <div className="text-center py-16 rounded-2xl border" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+              <div className="text-center py-16 rounded-2xl border" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
                 <div className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center" style={{ background: 'rgba(107, 122, 61, 0.08)' }}>
                   <svg className="w-8 h-8" fill="none" stroke="#6b7a3d" viewBox="0 0 24 24" strokeWidth="1.5">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
@@ -281,7 +281,7 @@ export default function CoachingPanelPage() {
               myLessons.map(lesson => {
                 const isPast = isSlotPast(lesson.date, lesson.time);
                 return (
-                  <div key={lesson.id} className="rounded-2xl border p-5" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+                  <div key={lesson.id} className="glass-card rounded-2xl border p-5" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
                     <div className="flex items-start justify-between">
                       <div>
                         <div className="flex items-center gap-2 mb-1">

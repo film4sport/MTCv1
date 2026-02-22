@@ -112,7 +112,7 @@ function MessagesContent() {
       <DashboardHeader title="Messages" />
 
       <div className="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto animate-slideUp">
-        <div className="flex rounded-2xl border overflow-hidden" style={{ background: '#fff', borderColor: '#e0dcd3', height: 'calc(100vh - 160px)', minHeight: 500 }}>
+        <div className="glass-card flex rounded-2xl border overflow-hidden" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)', height: 'calc(100vh - 160px)', minHeight: 500 }}>
 
           {/* Conversation List — hidden on mobile when chat is open */}
           <div className={`w-full sm:w-80 shrink-0 border-r flex flex-col ${mobileShowChat ? 'hidden sm:flex' : 'flex'}`} style={{ borderColor: '#f0ede6' }}>
