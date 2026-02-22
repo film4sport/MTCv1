@@ -41,8 +41,8 @@ export default function Hero() {
       <div className="absolute inset-0 hero-overlay"></div>
 
       {/* Hero Content */}
-      <div className="absolute inset-0 flex flex-col lg:flex-row lg:items-center justify-center px-8 lg:px-16 z-10 pt-24 md:pt-28">
-        <div className="max-w-2xl hero-content flex-1" ref={heroContentRef}>
+      <div className="absolute inset-0 flex flex-col lg:flex-row lg:items-center justify-center px-8 lg:px-16 z-10 pt-16 sm:pt-24 md:pt-28">
+        <div className="max-w-2xl hero-content lg:flex-1" ref={heroContentRef}>
           {/* Section Label */}
           <span className="hero-subtext text-xs md:text-sm tracking-[0.25em] uppercase mb-4 block font-medium" style={{ color: 'rgba(232, 228, 217, 0.6)' }}>
             // Mono Tennis Club
@@ -68,7 +68,7 @@ export default function Hero() {
           {/* Buttons */}
           <div className="hero-buttons flex items-center gap-4 mb-10">
             <a
-              href="/info?tab=membership"
+              href="/signup"
               className="glass-btn px-8 py-3 rounded-full text-sm font-medium"
             >
               Become a Member

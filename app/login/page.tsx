@@ -618,26 +618,10 @@ export default function LoginPage() {
           {/* Register Link */}
           <p className="mt-6 lg:mt-8 text-center text-sm sm:text-base" style={{ color: '#6b7266' }}>
             Don&apos;t have an account?{' '}
-            <a href="/info?tab=membership" className="font-medium hover:underline" style={{ color: '#6b7a3d' }}>
+            <a href="/signup" className="font-medium hover:underline" style={{ color: '#6b7a3d' }}>
               Become a Member
             </a>
           </p>
-
-          {/* Mobile App Download CTA (mobile only) */}
-          <div className="lg:hidden mt-8 p-5 rounded-2xl text-center" style={{ background: 'rgba(107, 122, 61, 0.08)', border: '1px solid rgba(107, 122, 61, 0.2)' }}>
-            <div className="flex items-center justify-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: '#6b7a3d' }}>
-                <span className="text-lg" style={{ filter: 'brightness(10)' }}>📱</span>
-              </div>
-              <div className="text-left">
-                <div className="font-semibold" style={{ color: '#2a2f1e' }}>Get the MTC App</div>
-                <p className="text-xs" style={{ color: '#6b7266' }}>Live status, bookings & more</p>
-              </div>
-            </div>
-            <a href="/dashboard" className="inline-block w-full px-6 py-3 rounded-xl text-sm font-semibold transition-all hover:opacity-90" style={{ background: '#6b7a3d', color: '#fff' }}>
-              Open Web App
-            </a>
-          </div>
 
         </div>
       </div>

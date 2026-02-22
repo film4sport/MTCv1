@@ -158,7 +158,7 @@ function InfoPageContent() {
               </p>
             </div>
             <div className="flex items-center gap-4">
-              <a href="/info?tab=membership" className="px-8 py-3 rounded-full text-sm font-medium transition-all hover:opacity-90 hover:shadow-lg" style={{ backgroundColor: '#6b7a3d', color: '#fff' }}>
+              <a href="/signup" className="px-8 py-3 rounded-full text-sm font-medium transition-all hover:opacity-90 hover:shadow-lg" style={{ backgroundColor: '#6b7a3d', color: '#fff' }}>
                 Become a Member
               </a>
             </div>

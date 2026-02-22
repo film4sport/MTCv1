@@ -39,38 +39,22 @@ describe('Coaching tab — no exposed email', () => {
   });
 });
 
-// ─── Settings: Install MTC App — no alert() ─────────────
-describe('Settings — Install MTC App uses inline tip, not alert()', () => {
+// ─── Settings: Mobile App link ─────────────
+describe('Settings — Mobile App links to /mobile-app/', () => {
   it('should not use alert() anywhere in settings', () => {
     // Match alert( but not aria-label or other valid uses
     const alertCalls = settingsFile.match(/\balert\s*\(/g);
     expect(alertCalls).toBeNull();
   });
 
-  it('should have showInstallTip state', () => {
-    expect(settingsFile).toContain('useState(false)');
-    expect(settingsFile).toContain('showInstallTip');
-    expect(settingsFile).toContain('setShowInstallTip');
+  it('should link to /mobile-app/ instead of PWA install prompt', () => {
+    expect(settingsFile).toContain('/mobile-app/');
+    expect(settingsFile).toContain('Open MTC Mobile App');
   });
 
-  it('should call setShowInstallTip(true) when PWA prompt unavailable', () => {
-    expect(settingsFile).toContain('setShowInstallTip(true)');
-  });
-
-  it('should render inline install tip with instructions', () => {
-    expect(settingsFile).toContain('showInstallTip &&');
-    expect(settingsFile).toContain('Add to Home Screen');
-    expect(settingsFile).toContain('Share');
-  });
-
-  it('should have dismiss button for install tip', () => {
-    expect(settingsFile).toContain('setShowInstallTip(false)');
-    expect(settingsFile).toContain('aria-label="Dismiss"');
-  });
-
-  it('should still attempt PWA install prompt first', () => {
-    expect(settingsFile).toContain('__pwaInstallPrompt');
-    expect(settingsFile).toContain('.prompt()');
+  it('should not have old PWA install prompt logic', () => {
+    expect(settingsFile).not.toContain('__pwaInstallPrompt');
+    expect(settingsFile).not.toContain('showInstallTip');
   });
 });
 
