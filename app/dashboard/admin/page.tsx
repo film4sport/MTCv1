@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useApp } from '../lib/store';
+import { useToast } from '../lib/toast';
 import DashboardHeader from '../components/DashboardHeader';
 import { generateId, useFocusTrap } from '../lib/utils';
 import * as db from '../lib/db';
@@ -9,7 +10,8 @@ import * as db from '../lib/db';
 type AdminTab = 'dashboard' | 'members' | 'courts' | 'announcements';
 
 export default function AdminPage() {
-  const { currentUser, members, setMembers, bookings, courts, setCourts, analytics, announcements, setAnnouncements, showToast } = useApp();
+  const { currentUser, members, setMembers, bookings, courts, setCourts, analytics, announcements, setAnnouncements } = useApp();
+  const { showToast } = useToast();
   const [tab, setTab] = useState<AdminTab>('dashboard');
   const [memberSearch, setMemberSearch] = useState('');
   const [newAnnouncement, setNewAnnouncement] = useState('');

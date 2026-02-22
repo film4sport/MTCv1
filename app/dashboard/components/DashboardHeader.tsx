@@ -3,7 +3,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useApp } from '../lib/store';
+import { useToast } from '../lib/toast';
 import WeatherWidget from './WeatherWidget';
 
 interface DashboardHeaderProps {
@@ -12,7 +14,8 @@ interface DashboardHeaderProps {
 
 export default function DashboardHeader({ title }: DashboardHeaderProps) {
   const router = useRouter();
-  const { currentUser, logout, notifications, clearNotifications, markNotificationRead, notificationPreferences, refreshData, showToast } = useApp();
+  const { currentUser, logout, notifications, clearNotifications, markNotificationRead, notificationPreferences, refreshData } = useApp();
+  const { showToast } = useToast();
   const [menuOpen, setMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -45,7 +48,7 @@ export default function DashboardHeader({ title }: DashboardHeaderProps) {
     <>
       <header className="h-16 flex items-center justify-between px-4 pl-14 sm:pl-6 lg:pl-6 border-b relative z-[1]" style={{ backgroundColor: '#faf8f3', borderColor: '#e0dcd3' }}>
         {/* Logo */}
-        <img src="/mono-logo-transparent.png" alt="Mono Tennis Club" className="h-9 w-auto" style={{ filter: 'brightness(0.2)' }} />
+        <Image src="/mono-logo-transparent.png" alt="Mono Tennis Club" width={36} height={36} className="h-9 w-auto" style={{ filter: 'brightness(0.2)' }} />
 
         {/* Right Side */}
         <div className="flex items-center gap-2">

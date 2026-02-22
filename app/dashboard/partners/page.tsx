@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useApp } from '../lib/store';
+import { useToast } from '../lib/toast';
 import DashboardHeader from '../components/DashboardHeader';
 import Link from 'next/link';
 import { generateId, haptic, useFocusTrap } from '../lib/utils';
@@ -11,7 +12,8 @@ type SkillLevel = 'beginner' | 'intermediate' | 'advanced';
 type SkillFilter = 'all' | SkillLevel;
 
 export default function PartnersPage() {
-  const { partners, currentUser, addPartner, removePartner, showToast } = useApp();
+  const { partners, currentUser, addPartner, removePartner } = useApp();
+  const { showToast } = useToast();
   const [filter, setFilter] = useState<FilterType>('all');
   const [skillFilter, setSkillFilter] = useState<SkillFilter>('all');
   const [showPost, setShowPost] = useState(false);

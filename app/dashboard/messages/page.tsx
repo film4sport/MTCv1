@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useApp } from '../lib/store';
+import { useToast } from '../lib/toast';
 import DashboardHeader from '../components/DashboardHeader';
 import { downloadICS } from '../lib/calendar';
 import { haptic } from '../lib/utils';
@@ -17,7 +18,8 @@ export default function MessagesPage() {
 
 function MessagesContent() {
   const searchParams = useSearchParams();
-  const { currentUser, conversations, members, sendMessage, markConversationRead, showToast } = useApp();
+  const { currentUser, conversations, members, sendMessage, markConversationRead } = useApp();
+  const { showToast } = useToast();
   const [selectedConvo, setSelectedConvo] = useState<string | null>(null);
 
   // Auto-open conversation from query param (e.g. from Partners page)
@@ -28,6 +30,7 @@ function MessagesContent() {
   const [messageText, setMessageText] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [showNewConvo, setShowNewConvo] = useState(false);
+  const [memberActiveIndex, setMemberActiveIndex] = useState(-1);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const activeConvo = conversations.find(c => c.memberId === selectedConvo);
@@ -71,6 +74,26 @@ function MessagesContent() {
     !conversations.some(c => c.memberId === m.id)
   );
 
+  // Reset active index when search changes
+  useEffect(() => { setMemberActiveIndex(-1); }, [searchQuery]);
+
+  const handleMemberKeyDown = (e: React.KeyboardEvent) => {
+    if (filteredMembers.length === 0) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setMemberActiveIndex(prev => (prev + 1) % filteredMembers.length);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setMemberActiveIndex(prev => (prev <= 0 ? filteredMembers.length - 1 : prev - 1));
+    } else if (e.key === 'Enter' && memberActiveIndex >= 0) {
+      e.preventDefault();
+      startNewConvo(filteredMembers[memberActiveIndex].id);
+    } else if (e.key === 'Escape') {
+      setSearchQuery('');
+      setShowNewConvo(false);
+    }
+  };
+
   const formatTime = (ts: string) => {
     const d = new Date(ts);
     const now = new Date();
@@ -113,20 +136,29 @@ function MessagesContent() {
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={handleMemberKeyDown}
                     placeholder="Search members..."
+                    role="combobox"
                     aria-label="Search members to message"
+                    aria-expanded={!!searchQuery && filteredMembers.length > 0}
+                    aria-controls="member-search-listbox"
+                    aria-autocomplete="list"
+                    aria-activedescendant={memberActiveIndex >= 0 ? `member-option-${memberActiveIndex}` : undefined}
                     className="w-full px-3 py-2 rounded-lg text-sm border focus:outline-none focus:ring-2 focus:ring-[#6b7a3d]/20"
                     style={{ borderColor: '#e0dcd3', color: '#2a2f1e' }}
                     autoFocus
                   />
                   {searchQuery && (
-                    <div className="mt-1 max-h-32 overflow-y-auto rounded-lg border" style={{ borderColor: '#e0dcd3' }}>
-                      {filteredMembers.map(m => (
+                    <div role="listbox" id="member-search-listbox" className="mt-1 max-h-32 overflow-y-auto rounded-lg border" style={{ borderColor: '#e0dcd3' }}>
+                      {filteredMembers.map((m, i) => (
                         <button
                           key={m.id}
+                          id={`member-option-${i}`}
+                          role="option"
+                          aria-selected={memberActiveIndex === i}
                           onClick={() => startNewConvo(m.id)}
                           className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors"
-                          style={{ color: '#2a2f1e' }}
+                          style={{ color: '#2a2f1e', backgroundColor: memberActiveIndex === i ? 'rgba(107, 122, 61, 0.08)' : undefined }}
                         >
                           {m.name}
                         </button>

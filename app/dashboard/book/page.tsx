@@ -3,6 +3,7 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { useApp } from '../lib/store';
+import { useToast } from '../lib/toast';
 import DashboardHeader from '../components/DashboardHeader';
 import { TIME_SLOTS, COURTS_CONFIG, FEES } from '../lib/types';
 import { generateId, haptic } from '../lib/utils';
@@ -18,7 +19,8 @@ const BookingModal = dynamic(() => import('./components/BookingModal'), { ssr: f
 const SuccessModal = dynamic(() => import('./components/SuccessModal'), { ssr: false });
 
 export default function BookCourtPage() {
-  const { currentUser, members, bookings, courts, events, addBooking, cancelBooking, showToast } = useApp();
+  const { currentUser, members, bookings, courts, events, addBooking, cancelBooking } = useApp();
+  const { showToast } = useToast();
   const [bookingSuccess, setBookingSuccess] = useState<{ courtName: string; date: string; time: string; participants?: { id: string; name: string }[] } | null>(null);
   const [view, setView] = useState<ViewMode>('week');
   const [weekStart, setWeekStart] = useState(() => {
@@ -443,7 +445,6 @@ export default function BookCourtPage() {
             courtName={courtConfig.name}
             onSlotClick={handleSlotClick}
             onCancelBooking={(id) => cancelBooking(id)}
-            showToast={showToast}
           />
         </div>
       </div>

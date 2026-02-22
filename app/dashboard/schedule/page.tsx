@@ -2,12 +2,14 @@
 
 import { useState, useMemo } from 'react';
 import { useApp } from '../lib/store';
+import { useToast } from '../lib/toast';
 import DashboardHeader from '../components/DashboardHeader';
 import { FEES } from '../lib/types';
 import Link from 'next/link';
 
 export default function SchedulePage() {
-  const { currentUser, bookings, events, cancelBooking, showToast, programs } = useApp();
+  const { currentUser, bookings, events, cancelBooking, programs } = useApp();
+  const { showToast } = useToast();
   const [view, setView] = useState<'list' | 'calendar'>('list');
   const [calMonth, setCalMonth] = useState(() => new Date());
   const [cancelTarget, setCancelTarget] = useState<{ id: string; title: string; date: string; time: string } | null>(null);

@@ -1,6 +1,6 @@
 'use client';
 
-import { useApp } from '../lib/store';
+import { useToast } from '../lib/toast';
 
 const icons: Record<string, string> = {
   success: 'M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
@@ -15,7 +15,7 @@ const colors: Record<string, { bg: string; border: string; icon: string; text: s
 };
 
 export default function Toast() {
-  const { toasts } = useApp();
+  const { toasts } = useToast();
 
   if (toasts.length === 0) return null;
 

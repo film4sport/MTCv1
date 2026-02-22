@@ -4,6 +4,7 @@ import { join } from 'path';
 
 const storeFile = readFileSync(join(__dirname, '..', 'app', 'dashboard', 'lib', 'store.tsx'), 'utf-8');
 const infoFile = readFileSync(join(__dirname, '..', 'app', 'info', 'page.tsx'), 'utf-8');
+const membershipFile = readFileSync(join(__dirname, '..', 'app', 'info', 'components', 'MembershipTab.tsx'), 'utf-8');
 
 // ─── removePartner has optimistic rollback ──────────────
 describe('Store: removePartner rollback on failure', () => {
@@ -72,42 +73,41 @@ describe('Info page: logging convention', () => {
 });
 
 // ─── Info page: existingProfile type is correct ─────────
+// (Now in MembershipTab.tsx after info page split)
 describe('Info page: existingProfile type matches User shape', () => {
   it('existingProfile should not reference membershipType', () => {
-    const stateDecl = infoFile.match(/existingProfile.*useState/);
+    const stateDecl = membershipFile.match(/existingProfile.*useState/);
     expect(stateDecl).toBeTruthy();
     expect(stateDecl[0]).not.toContain('membershipType');
   });
 
   it('existingProfile should not reference joinedDate', () => {
-    const stateDecl = infoFile.match(/existingProfile.*useState/);
+    const stateDecl = membershipFile.match(/existingProfile.*useState/);
     expect(stateDecl).toBeTruthy();
     expect(stateDecl[0]).not.toContain('joinedDate');
   });
 
   it('member banner should not render membershipType (would be undefined)', () => {
-    // The banner section should not reference existingProfile.membershipType
-    const bannerSection = infoFile.match(/Existing Member Profile Banner[\s\S]*?<\/section>/);
+    const bannerSection = membershipFile.match(/Existing Member Profile Banner[\s\S]*?<\/section>/);
     expect(bannerSection).toBeTruthy();
     expect(bannerSection[0]).not.toContain('existingProfile.membershipType');
   });
 
   it('member banner should show Active/Paused Member text', () => {
-    const bannerSection = infoFile.match(/Existing Member Profile Banner[\s\S]*?<\/section>/);
+    const bannerSection = membershipFile.match(/Existing Member Profile Banner[\s\S]*?<\/section>/);
     expect(bannerSection).toBeTruthy();
-    // Now uses ternary: {status === 'paused' ? 'Paused' : 'Active'} Member
     expect(bannerSection[0]).toContain("'Active'");
     expect(bannerSection[0]).toContain('Member');
   });
 
   it('existingProfile type should include optional status field', () => {
-    const stateDecl = infoFile.match(/existingProfile.*useState<([^>]+)>/);
+    const stateDecl = membershipFile.match(/existingProfile.*useState<([^>]+)>/);
     expect(stateDecl).toBeTruthy();
     expect(stateDecl[1]).toContain('status');
   });
 
   it('banner should handle paused status', () => {
-    const bannerSection = infoFile.match(/Existing Member Profile Banner[\s\S]*?<\/section>/);
+    const bannerSection = membershipFile.match(/Existing Member Profile Banner[\s\S]*?<\/section>/);
     expect(bannerSection).toBeTruthy();
     expect(bannerSection[0]).toContain("status === 'paused'");
     expect(bannerSection[0]).toContain('Paused');

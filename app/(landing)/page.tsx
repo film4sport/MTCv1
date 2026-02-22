@@ -1,17 +1,20 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import dynamic from 'next/dynamic';
 import './styles/landing.css';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import WaveDivider from './components/WaveDivider';
 import Events from './components/Events';
-import Schedule from './components/Schedule';
-import Partners from './components/Partners';
-import Gallery from './components/Gallery';
-import Footer from './components/Footer';
-import Lightbox from './components/Lightbox';
 import Loader from './components/Loader';
+
+// Below-the-fold components — dynamically imported for smaller initial bundle
+const Schedule = dynamic(() => import('./components/Schedule'), { ssr: false });
+const Partners = dynamic(() => import('./components/Partners'), { ssr: false });
+const Gallery = dynamic(() => import('./components/Gallery'), { ssr: false });
+const Footer = dynamic(() => import('./components/Footer'), { ssr: false });
+const Lightbox = dynamic(() => import('./components/Lightbox'), { ssr: false });
 
 export default function LandingPage() {
   const [lightbox, setLightbox] = useState<{ src: string; alt: string } | null>(null);

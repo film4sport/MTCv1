@@ -114,6 +114,7 @@ export default function Events({ onOpenLightbox }: EventsProps) {
           {filters.map((f) => (
             <button
               key={f.value}
+              aria-pressed={filter === f.value}
               className={`filter-btn px-5 py-2 rounded-full text-sm font-medium transition-colors${
                 filter === f.value ? ' active text-white' : ' text-gray-600 border hover:border-gray-400'
               }`}

@@ -25,8 +25,39 @@ export default function BookingModal({ modalData, members, currentUser, onConfir
   const [guestName, setGuestName] = useState('');
   const [selectedParticipants, setSelectedParticipants] = useState<{ id: string; name: string }[]>([]);
   const [participantSearch, setParticipantSearch] = useState('');
+  const [activeIndex, setActiveIndex] = useState(-1);
   const trapRef = useRef<HTMLDivElement>(null);
   useFocusTrap(trapRef);
+
+  // Compute participant search results
+  const participantResults = participantSearch.trim().length >= 2
+    ? members.filter(m =>
+        m.id !== currentUser?.id &&
+        !selectedParticipants.some(p => p.id === m.id) &&
+        m.name.toLowerCase().includes(participantSearch.toLowerCase())
+      ).slice(0, 5)
+    : [];
+
+  // Reset active index when search changes
+  useEffect(() => { setActiveIndex(-1); }, [participantSearch]);
+
+  const handleParticipantKeyDown = (e: React.KeyboardEvent) => {
+    if (participantResults.length === 0) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setActiveIndex(prev => (prev + 1) % participantResults.length);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setActiveIndex(prev => (prev <= 0 ? participantResults.length - 1 : prev - 1));
+    } else if (e.key === 'Enter' && activeIndex >= 0) {
+      e.preventDefault();
+      const m = participantResults[activeIndex];
+      setSelectedParticipants(prev => [...prev, { id: m.id, name: m.name }]);
+      setParticipantSearch('');
+    } else if (e.key === 'Escape') {
+      setParticipantSearch('');
+    }
+  };
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onCancel(); };
@@ -98,37 +129,38 @@ export default function BookingModal({ modalData, members, currentUser, onConfir
                 type="text"
                 value={participantSearch}
                 onChange={(e) => setParticipantSearch(e.target.value)}
+                onKeyDown={handleParticipantKeyDown}
                 placeholder="Search members..."
+                role="combobox"
                 aria-label="Search members to add as participants"
+                aria-expanded={participantResults.length > 0}
+                aria-controls="participant-listbox"
+                aria-autocomplete="list"
+                aria-activedescendant={activeIndex >= 0 ? `participant-option-${activeIndex}` : undefined}
                 className="w-full px-3 py-2 rounded-lg text-sm border focus:outline-none focus:ring-2 focus:ring-[#6b7a3d]/20"
                 style={{ borderColor: '#e0dcd3', background: '#fff', color: '#2a2f1e' }}
               />
-              {participantSearch.trim().length >= 2 && (() => {
-                const results = members.filter(m =>
-                  m.id !== currentUser?.id &&
-                  !selectedParticipants.some(p => p.id === m.id) &&
-                  m.name.toLowerCase().includes(participantSearch.toLowerCase())
-                ).slice(0, 5);
-                if (results.length === 0) return null;
-                return (
-                  <div className="absolute left-0 right-0 top-full mt-1 rounded-lg border shadow-lg z-10 max-h-40 overflow-y-auto" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
-                    {results.map(m => (
-                      <button
-                        key={m.id}
-                        onClick={() => {
-                          setSelectedParticipants(prev => [...prev, { id: m.id, name: m.name }]);
-                          setParticipantSearch('');
-                        }}
-                        className="w-full text-left px-3 py-2 text-sm hover:bg-black/[0.03] transition-colors"
-                        style={{ color: '#2a2f1e' }}
-                      >
-                        {m.name}
-                        {m.ntrp && <span className="text-xs ml-2" style={{ color: '#6b7266' }}>NTRP {m.ntrp}</span>}
-                      </button>
-                    ))}
-                  </div>
-                );
-              })()}
+              {participantResults.length > 0 && (
+                <div role="listbox" id="participant-listbox" className="absolute left-0 right-0 top-full mt-1 rounded-lg border shadow-lg z-10 max-h-40 overflow-y-auto" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+                  {participantResults.map((m, i) => (
+                    <button
+                      key={m.id}
+                      id={`participant-option-${i}`}
+                      role="option"
+                      aria-selected={activeIndex === i}
+                      onClick={() => {
+                        setSelectedParticipants(prev => [...prev, { id: m.id, name: m.name }]);
+                        setParticipantSearch('');
+                      }}
+                      className="w-full text-left px-3 py-2 text-sm hover:bg-black/[0.03] transition-colors"
+                      style={{ color: '#2a2f1e', backgroundColor: activeIndex === i ? 'rgba(107, 122, 61, 0.08)' : undefined }}
+                    >
+                      {m.name}
+                      {m.ntrp && <span className="text-xs ml-2" style={{ color: '#6b7266' }}>NTRP {m.ntrp}</span>}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           )}
           {selectedParticipants.length > 0 && (
