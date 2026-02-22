@@ -3,41 +3,39 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 
 const infoFile = readFileSync(join(__dirname, '..', 'app', 'info', 'page.tsx'), 'utf-8');
+const coachingFile = readFileSync(join(__dirname, '..', 'app', 'info', 'components', 'CoachingTab.tsx'), 'utf-8');
 const settingsFile = readFileSync(join(__dirname, '..', 'app', 'dashboard', 'settings', 'page.tsx'), 'utf-8');
 
 // ─── Coaching tab: email replaced with dashboard link ───
 describe('Coaching tab — no exposed email', () => {
   it('should not contain Mark Taylor personal email', () => {
-    expect(infoFile).not.toContain('Taylor.Mark.Tennis@gmail.com');
+    expect(coachingFile).not.toContain('Taylor.Mark.Tennis@gmail.com');
   });
 
   it('coaching section should not have any mailto: links', () => {
-    // Extract the coaching tab section (between coaching tab marker and FAQ tab marker)
-    const coachingSection = infoFile.match(/coaching tab[\s\S]*?FAQ TAB/i);
-    expect(coachingSection).toBeTruthy();
-    expect(coachingSection[0]).not.toContain('mailto:');
+    expect(coachingFile).not.toContain('mailto:');
   });
 
   it('should link to /dashboard/messages instead', () => {
     // Find the coaching registration section
-    const registerSection = infoFile.match(/Register for Coaching[\s\S]*?<\/div>/);
+    const registerSection = coachingFile.match(/Register for Coaching[\s\S]*?<\/div>/);
     expect(registerSection).toBeTruthy();
     expect(registerSection[0]).toContain('/dashboard/messages');
   });
 
   it('should say "message Coach Mark" not "email Mark"', () => {
-    expect(infoFile).toContain('message Coach Mark');
-    expect(infoFile).not.toContain('email Mark');
+    expect(coachingFile).toContain('message Coach Mark');
+    expect(coachingFile).not.toContain('email Mark');
   });
 
   it('should still link to /dashboard/events for registration', () => {
-    const registerSection = infoFile.match(/Register for Coaching[\s\S]*?<\/div>/);
+    const registerSection = coachingFile.match(/Register for Coaching[\s\S]*?<\/div>/);
     expect(registerSection).toBeTruthy();
     expect(registerSection[0]).toContain('/dashboard/events');
   });
 
   it('should mention "through the dashboard" for context', () => {
-    expect(infoFile).toContain('through the dashboard');
+    expect(coachingFile).toContain('through the dashboard');
   });
 });
 

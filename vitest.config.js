@@ -5,5 +5,10 @@ export default defineConfig({
     environment: 'jsdom',
     include: ['unit-tests/**/*.test.js'],
     globals: true,
+    coverage: {
+      provider: 'v8',
+      include: ['app/dashboard/lib/**'],
+      reporter: ['text', 'text-summary'],
+    },
   },
 });

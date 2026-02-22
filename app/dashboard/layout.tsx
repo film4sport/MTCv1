@@ -3,12 +3,15 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { AppProvider, useApp } from './lib/store';
+import { ToastProvider } from './lib/toast';
+import { UIProvider, useUI } from './lib/ui';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import Sidebar from './components/Sidebar';
 import Toast from './components/Toast';
 
 function DashboardGuard({ children }: { children: React.ReactNode }) {
-  const { currentUser, isLoaded, logout, sidebarCollapsed, setMobileSidebarOpen } = useApp();
+  const { currentUser, isLoaded, logout } = useApp();
+  const { sidebarCollapsed, setMobileSidebarOpen } = useUI();
   const router = useRouter();
 
   useEffect(() => {
@@ -88,9 +91,13 @@ function DashboardGuard({ children }: { children: React.ReactNode }) {
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <ErrorBoundary>
-      <AppProvider>
-        <DashboardGuard>{children}</DashboardGuard>
-      </AppProvider>
+      <ToastProvider>
+        <UIProvider>
+          <AppProvider>
+            <DashboardGuard>{children}</DashboardGuard>
+          </AppProvider>
+        </UIProvider>
+      </ToastProvider>
     </ErrorBoundary>
   );
 }

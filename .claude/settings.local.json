@@ -46,7 +46,8 @@
       "WebFetch(domain:github.com)",
       "Bash(npm install:*)",
       "Bash(npm run build:*)",
-      "Bash(npm run deps:check:*)"
+      "Bash(npm run deps:check:*)",
+      "Bash(npm run test:coverage:*)"
     ]
   }
 }

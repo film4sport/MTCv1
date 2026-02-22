@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useApp } from '../lib/store';
+import { useToast } from '../lib/toast';
 import DashboardHeader from '../components/DashboardHeader';
 import { downloadICS } from '../lib/calendar';
 import { haptic, useFocusTrap } from '../lib/utils';
@@ -11,7 +12,8 @@ type ViewMode = 'calendar' | 'list';
 type PageView = 'events' | 'programs';
 
 export default function EventsPage() {
-  const { currentUser, events, toggleRsvp, showToast, programs, enrollInProgram, withdrawFromProgram, members } = useApp();
+  const { currentUser, events, toggleRsvp, programs, enrollInProgram, withdrawFromProgram, members } = useApp();
+  const { showToast } = useToast();
   const [pageView, setPageView] = useState<PageView>('events');
   const [filter, setFilter] = useState<EventFilter>('all');
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null);

@@ -165,10 +165,11 @@ export default function Schedule() {
           <div className="flex items-center gap-4">
             <button
               onClick={() => changeMonth(-1)}
+              aria-label="Previous month"
               className="cal-nav-btn w-10 h-10 rounded-full border flex items-center justify-center hover:bg-[rgba(232,228,217,0.08)]"
               style={{ borderColor: 'rgba(232, 228, 217, 0.2)' }}
             >
-              <svg className="w-4 h-4" style={{ color: '#e8e4d9' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" style={{ color: '#e8e4d9' }} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
@@ -177,16 +178,18 @@ export default function Schedule() {
             </h3>
             <button
               onClick={() => changeMonth(1)}
+              aria-label="Next month"
               className="cal-nav-btn w-10 h-10 rounded-full border flex items-center justify-center hover:bg-[rgba(232,228,217,0.08)]"
               style={{ borderColor: 'rgba(232, 228, 217, 0.2)' }}
             >
-              <svg className="w-4 h-4" style={{ color: '#e8e4d9' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" style={{ color: '#e8e4d9' }} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </button>
           </div>
           <button
             onClick={goToToday}
+            aria-label="Go to today"
             className="cal-nav-btn px-4 py-2 rounded-lg border text-sm font-medium hover:bg-[rgba(232,228,217,0.08)]"
             style={{ borderColor: 'rgba(232, 228, 217, 0.2)', color: '#e8e4d9' }}
           >
@@ -221,11 +224,19 @@ export default function Schedule() {
               const uniqueTypes = Array.from(new Set(events.map(e => e.type)));
               if (hasBookings) uniqueTypes.push('booking');
 
+              const eventCount = events.length + (hasBookings ? 1 : 0);
+
               return (
                 <div
                   key={day}
                   className={`cal-day${isToday ? ' today' : ''}${isSelected ? ' selected' : ''}`}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`${MONTH_NAMES[calMonth]} ${day}, ${calYear}${eventCount > 0 ? `, ${eventCount} event${eventCount > 1 ? 's' : ''}` : ''}`}
+                  aria-current={isToday ? 'date' : undefined}
+                  aria-pressed={isSelected}
                   onClick={() => setSelectedDay(day)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedDay(day); } }}
                 >
                   <div className="cal-day-num">{day}</div>
                   {uniqueTypes.length > 0 && (

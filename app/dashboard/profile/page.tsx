@@ -2,13 +2,15 @@
 
 import { useState } from 'react';
 import { useApp } from '../lib/store';
+import { useToast } from '../lib/toast';
 import DashboardHeader from '../components/DashboardHeader';
 import * as db from '../lib/db';
 
 const NTRP_OPTIONS = [1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0];
 
 export default function ProfilePage() {
-  const { currentUser, showToast, notificationPreferences, setNotificationPreferences } = useApp();
+  const { currentUser, notificationPreferences, setNotificationPreferences } = useApp();
+  const { showToast } = useToast();
   const [editingNtrp, setEditingNtrp] = useState(false);
   const [ntrpValue, setNtrpValue] = useState(currentUser?.ntrp ?? 3.5);
 

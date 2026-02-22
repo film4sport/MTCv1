@@ -1,6 +1,7 @@
 'use client';
 
 import { Component, type ReactNode } from 'react';
+import { reportError } from '../../lib/errorReporter';
 
 interface Props {
   children: ReactNode;
@@ -22,7 +23,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('[MTC ErrorBoundary]', error, errorInfo);
+    reportError(error, `ErrorBoundary (${errorInfo.componentStack?.slice(0, 100)})`);
   }
 
   render() {

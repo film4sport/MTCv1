@@ -1,4 +1,5 @@
 import { supabase } from '../../lib/supabase';
+import { reportError } from '../../lib/errorReporter';
 import type { Booking, ClubEvent, Partner, Conversation, Message, Announcement, Notification, CoachingProgram, NotificationPreferences, User } from './types';
 
 // ─── Profiles ───────────────────────────────────────────
@@ -450,7 +451,7 @@ export async function unpauseMember(userId: string): Promise<void> {
 
 export async function deleteMember(userId: string): Promise<void> {
   const { error } = await supabase.rpc('delete_member', { target_user_id: userId });
-  if (error) console.error('[MTC Supabase] deleteMember:', error);
+  if (error) reportError(error, 'deleteMember');
 }
 
 // ─── Club Settings (Gate Code) ──────────────────────────

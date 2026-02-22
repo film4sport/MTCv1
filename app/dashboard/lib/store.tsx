@@ -6,6 +6,8 @@ import { CLUB_LOCATION, DEFAULT_NOTIFICATION_PREFS } from './types';
 import { DEFAULT_MEMBERS, DEFAULT_COURTS, DEFAULT_BOOKINGS, DEFAULT_EVENTS, DEFAULT_PARTNERS, DEFAULT_CONVERSATIONS, DEFAULT_ANNOUNCEMENTS, DEFAULT_NOTIFICATIONS, DEFAULT_ANALYTICS, DEFAULT_PROGRAMS } from './data';
 import { generateId } from './utils';
 import { signIn, signOut, getCurrentUser } from './auth';
+import { useToast } from './toast';
+import { reportError } from '../../lib/errorReporter';
 import { supabase } from '../../lib/supabase';
 import * as db from './db';
 
@@ -56,15 +58,7 @@ interface AppState {
   setNotificationPreferences: (prefs: NotificationPreferences) => void;
 
   // UI
-  sidebarCollapsed: boolean;
-  setSidebarCollapsed: (collapsed: boolean) => void;
-  mobileSidebarOpen: boolean;
-  setMobileSidebarOpen: (open: boolean) => void;
   isLoaded: boolean;
-
-  // Toasts
-  toasts: { id: string; message: string; type: 'success' | 'error' | 'info'; exiting?: boolean }[];
-  showToast: (message: string, type?: 'success' | 'error' | 'info') => void;
 
   // Refresh
   refreshData: () => Promise<void>;
@@ -118,9 +112,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [analytics] = useState<AdminAnalytics>(DEFAULT_ANALYTICS);
   const [programs, setPrograms] = useState<CoachingProgram[]>(DEFAULT_PROGRAMS);
   const [notificationPreferences, setNotificationPreferences] = useState<NotificationPreferences>(DEFAULT_NOTIFICATION_PREFS);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-  const [toasts, setToasts] = useState<{ id: string; message: string; type: 'success' | 'error' | 'info'; exiting?: boolean }[]>([]);
+  const { showToast } = useToast();
 
   // Load user from Supabase session on mount (localStorage as instant fallback)
   useEffect(() => {
@@ -180,7 +172,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (isLoaded) {
       saveJSON('mtc-notification-prefs', notificationPreferences);
-      if (currentUser) db.updateNotificationPreferences(currentUser.id, notificationPreferences).catch((err) => console.error('[MTC Supabase]', err));
+      if (currentUser) db.updateNotificationPreferences(currentUser.id, notificationPreferences).catch((err) => reportError(err, 'Supabase'));
     }
   }, [notificationPreferences, isLoaded, currentUser]);
 
@@ -251,7 +243,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setBookings(prev => [...prev, booking]);
     // Persist to Supabase — rollback on failure
     db.createBooking(booking).catch((err) => {
-      console.error('[MTC Supabase]', err);
+      reportError(err, 'Supabase');
       setBookings(prev => prev.filter(b => b.id !== booking.id));
       showToast('Failed to save booking. Please try again.', 'error');
     });
@@ -266,7 +258,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         read: false,
       };
       setNotifications(prev => [notif, ...prev]);
-      db.createNotification(booking.userId, notif).catch((err) => console.error('[MTC Supabase]', err));
+      db.createNotification(booking.userId, notif).catch((err) => reportError(err, 'Supabase'));
     }
     if (booking.type === 'court') {
       const notif: Notification = {
@@ -279,7 +271,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       };
       setNotifications(prev => [notif, ...prev]);
       // Persist booker notification to Supabase
-      db.createNotification(booking.userId, notif).catch((err) => console.error('[MTC Supabase]', err));
+      db.createNotification(booking.userId, notif).catch((err) => reportError(err, 'Supabase'));
 
       // Notify each participant with a notification + message
       if (booking.participants && booking.participants.length > 0) {
@@ -294,7 +286,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setNotifications(prev => [...participantNotifs, ...prev]);
         // Persist participant notifications to Supabase
         booking.participants.forEach((p, i) => {
-          db.createNotification(p.id, participantNotifs[i]).catch((err) => console.error('[MTC Supabase]', err));
+          db.createNotification(p.id, participantNotifs[i]).catch((err) => reportError(err, 'Supabase'));
         });
 
         // Send message to each participant with calendar marker
@@ -310,7 +302,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
             read: false,
           };
           // Persist to Supabase
-          db.sendMessageByUsers({ id: msg.id, fromId: booking.userId, fromName: booking.userName, toId: participant.id, toName: participant.name, text: msg.text }).catch((err) => console.error('[MTC Supabase]', err));
+          db.sendMessageByUsers({ id: msg.id, fromId: booking.userId, fromName: booking.userName, toId: participant.id, toName: participant.name, text: msg.text }).catch((err) => reportError(err, 'Supabase'));
         });
       }
     }
@@ -335,7 +327,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           setNotifications(prev => [...cancelNotifs, ...prev]);
           // Persist participant notifications to Supabase (1:1 mapping)
           booking.participants!.forEach((p, i) => {
-            db.createNotification(p.id, cancelNotifs[i]).catch((err) => console.error('[MTC Supabase]', err));
+            db.createNotification(p.id, cancelNotifs[i]).catch((err) => reportError(err, 'Supabase'));
           });
 
           // Send cancellation message to each participant
@@ -351,7 +343,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
               read: false,
             };
             // Persist to Supabase
-            db.sendMessageByUsers({ id: msg.id, fromId: booking.userId, fromName: booking.userName, toId: participant.id, toName: participant.name, text: msg.text }).catch((err) => console.error('[MTC Supabase]', err));
+            db.sendMessageByUsers({ id: msg.id, fromId: booking.userId, fromName: booking.userName, toId: participant.id, toName: participant.name, text: msg.text }).catch((err) => reportError(err, 'Supabase'));
           });
         });
       }
@@ -360,7 +352,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
     // Persist to Supabase — rollback on failure
     db.cancelBooking(id).catch((err) => {
-      console.error('[MTC Supabase]', err);
+      reportError(err, 'Supabase');
       setBookings(prev => prev.map(b => b.id === id ? { ...b, status: 'confirmed' as const } : b));
       showToast('Failed to cancel booking. Please try again.', 'error');
     });
@@ -371,7 +363,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setPrograms(prev => [...prev, program]);
     // Persist to Supabase
     db.createProgram(program).catch((err) => {
-      console.error('[MTC Supabase]', err);
+      reportError(err, 'Supabase');
       setPrograms(prev => prev.filter(p => p.id !== program.id));
       showToast('Failed to create program. Please try again.', 'error');
     });
@@ -390,7 +382,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }));
     setBookings(prev => [...prev, ...newBookings]);
     // Persist program bookings to Supabase
-    newBookings.forEach(b => db.createBooking(b).catch((err) => console.error('[MTC Supabase]', err)));
+    newBookings.forEach(b => db.createBooking(b).catch((err) => reportError(err, 'Supabase')));
   }, []);
 
   const cancelProgram = useCallback((programId: string) => {
@@ -398,7 +390,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setBookings(prev => prev.map(b => b.programId === programId ? { ...b, status: 'cancelled' as const } : b));
     // Persist to Supabase
     db.cancelProgram(programId).catch((err) => {
-      console.error('[MTC Supabase]', err);
+      reportError(err, 'Supabase');
       setPrograms(prev => prev.map(p => p.id === programId ? { ...p, status: 'active' as const } : p));
       showToast('Failed to cancel program. Please try again.', 'error');
     });
@@ -411,7 +403,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setPrograms(prev => prev.map(p => p.id === programId ? { ...p, enrolledMembers: [...p.enrolledMembers, memberId] } : p));
     // Persist to Supabase
     db.enrollInProgram(programId, memberId).catch((err) => {
-      console.error('[MTC Supabase]', err);
+      reportError(err, 'Supabase');
       setPrograms(prev => prev.map(p => p.id === programId ? { ...p, enrolledMembers: p.enrolledMembers.filter(m => m !== memberId) } : p));
       showToast('Failed to enroll. Please try again.', 'error');
     });
@@ -426,7 +418,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     };
     setNotifications(prev => [notif, ...prev]);
     // Persist enrollment notification to Supabase
-    db.createNotification(memberId, notif).catch((err) => console.error('[MTC Supabase]', err));
+    db.createNotification(memberId, notif).catch((err) => reportError(err, 'Supabase'));
     // Send message from coach (persist to Supabase)
     const coachMsgText = `Welcome to ${program.title}! Your enrollment is confirmed. ${program.sessions.length} sessions starting ${new Date(program.sessions[0]?.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}. See you on the court!`;
     const coachMsg = {
@@ -449,7 +441,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     db.sendMessageByUsers({
       id: coachMsg.id, fromId: program.coachId, fromName: program.coachName,
       toId: memberId, toName: memberName, text: coachMsgText,
-    }).catch((err) => console.error('[MTC Supabase]', err));
+    }).catch((err) => reportError(err, 'Supabase'));
   }, [programs]);
 
   const withdrawFromProgram = useCallback((programId: string, memberId: string) => {
@@ -458,7 +450,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setPrograms(prev => prev.map(p => p.id === programId ? { ...p, enrolledMembers: p.enrolledMembers.filter(m => m !== memberId) } : p));
     // Persist to Supabase
     db.withdrawFromProgram(programId, memberId).catch((err) => {
-      console.error('[MTC Supabase]', err);
+      reportError(err, 'Supabase');
       setPrograms(prev => prev.map(p => p.id === programId ? { ...p, enrolledMembers: [...p.enrolledMembers, memberId] } : p));
       showToast('Failed to withdraw. Please try again.', 'error');
     });
@@ -467,7 +459,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const addPartner = useCallback((partner: Partner) => {
     setPartners(prev => [partner, ...prev]);
     db.createPartner(partner).catch((err) => {
-      console.error('[MTC Supabase]', err);
+      reportError(err, 'Supabase');
       setPartners(prev => prev.filter(p => p.id !== partner.id));
       showToast('Failed to post partner request. Please try again.', 'error');
     });
@@ -477,7 +469,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const removed = partners.find(p => p.id === partnerId);
     setPartners(prev => prev.filter(p => p.id !== partnerId));
     db.deletePartner(partnerId).catch((err) => {
-      console.error('[MTC Supabase]', err);
+      reportError(err, 'Supabase');
       if (removed) setPartners(prev => [...prev, removed]);
       showToast('Failed to remove partner request.', 'error');
     });
@@ -498,7 +490,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       });
       // Persist to Supabase — rollback on failure
       db.toggleEventRsvp(eventId, userName).catch((err) => {
-        console.error('[MTC Supabase]', err);
+        reportError(err, 'Supabase');
         setEvents(snapshot);
         showToast('Failed to update RSVP. Please try again.', 'error');
       });
@@ -537,7 +529,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       id: msg.id, fromId: currentUser.id, fromName: currentUser.name,
       toId, toName, text,
     }).catch((err) => {
-      console.error('[MTC Supabase]', err);
+      reportError(err, 'Supabase');
       setConversations(snapshot);
       showToast('Failed to send message. Please try again.', 'error');
     });
@@ -558,7 +550,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         .or(`and(member_a.eq.${currentUser.id},member_b.eq.${memberId}),and(member_a.eq.${memberId},member_b.eq.${currentUser.id})`)
         .single()
         .then(({ data: conv }) => {
-          if (conv) db.markMessagesRead(conv.id, currentUser.id).catch((err) => console.error('[MTC Supabase]', err));
+          if (conv) db.markMessagesRead(conv.id, currentUser.id).catch((err) => reportError(err, 'Supabase'));
         });
     }
   }, [currentUser]);
@@ -568,7 +560,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setAnnouncements(prev => prev.map(a => a.id === id ? { ...a, dismissedBy: [...a.dismissedBy, currentUser.id] } : a));
     // Persist to Supabase
     db.dismissAnnouncement(id, currentUser.id).catch((err) => {
-      console.error('[MTC Supabase]', err);
+      reportError(err, 'Supabase');
       setAnnouncements(prev => prev.map(a => a.id === id ? { ...a, dismissedBy: a.dismissedBy.filter(uid => uid !== currentUser!.id) } : a));
       showToast('Failed to dismiss announcement.', 'error');
     });
@@ -577,23 +569,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const markNotificationRead = useCallback((id: string) => {
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
     // Persist to Supabase
-    db.markNotificationRead(id).catch((err) => console.error('[MTC Supabase]', err));
+    db.markNotificationRead(id).catch((err) => reportError(err, 'Supabase'));
   }, []);
 
   const clearNotifications = useCallback(() => {
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
     // Persist to Supabase
-    if (currentUser) db.clearNotifications(currentUser.id).catch((err) => console.error('[MTC Supabase]', err));
+    if (currentUser) db.clearNotifications(currentUser.id).catch((err) => reportError(err, 'Supabase'));
   }, [currentUser]);
-
-  const showToast = useCallback((message: string, type: 'success' | 'error' | 'info' = 'success') => {
-    const id = generateId('toast');
-    setToasts(prev => [...prev, { id, message, type }]);
-    setTimeout(() => {
-      setToasts(prev => prev.map(t => t.id === id ? { ...t, exiting: true } : t));
-      setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 200);
-    }, 2500);
-  }, []);
 
   const refreshData = useCallback(async () => {
     if (!currentUser) return;
@@ -614,7 +597,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setPrograms(pr);
       if (np) setNotificationPreferences(np);
     } catch (err) {
-      console.error('[MTC] Refresh failed', err);
+      reportError(err, 'Refresh');
     }
   }, [currentUser]);
 
@@ -626,8 +609,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       clearNotifications, weather, analytics,
       programs, setPrograms, addProgram, cancelProgram, enrollInProgram, withdrawFromProgram,
       notificationPreferences, setNotificationPreferences,
-      sidebarCollapsed, setSidebarCollapsed, mobileSidebarOpen, setMobileSidebarOpen, isLoaded,
-      toasts, showToast, refreshData,
+      isLoaded, refreshData,
     }}>
       {children}
     </AppContext.Provider>

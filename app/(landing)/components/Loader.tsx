@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
+import Image from 'next/image';
 
 export default function Loader() {
   const [ballHit, setBallHit] = useState(false);
@@ -34,14 +35,17 @@ export default function Loader() {
   return (
     <div className={`loader${fadeOut ? ' exit-active' : ''}`} id="loader">
       <div className="flex flex-col items-center gap-4">
-        <img
+        <Image
           src="/mono-logo-transparent.png"
           alt="Mono Tennis Club"
+          width={128}
+          height={128}
           className="h-32 w-auto"
           style={{ filter: 'brightness(0)' }}
+          priority
         />
         <div className={`tennis-ball-wrapper${ballHit ? ' ball-hit' : ''}`}>
-          <img className="tennis-ball" src="/tennis-ball-loader.png" alt="" onLoad={handleImgLoad} />
+          <Image className="tennis-ball" src="/tennis-ball-loader.png" alt="" width={40} height={40} onLoad={handleImgLoad} priority />
         </div>
       </div>
     </div>

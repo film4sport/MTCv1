@@ -10,6 +10,7 @@
     "test": "npx playwright test",
     "test:unit": "vitest run",
     "test:all": "vitest run && npx playwright test",
+    "test:coverage": "vitest run --coverage",
     "deps:check": "npm outdated || true"
   },
   "dependencies": {
@@ -25,6 +26,7 @@
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@vitest/coverage-v8": "^4.0.18",
     "autoprefixer": "^10.0.1",
     "esbuild": "^0.27.3",
     "jsdom": "^28.0.0",

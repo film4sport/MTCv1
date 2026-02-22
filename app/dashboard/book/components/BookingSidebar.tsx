@@ -1,5 +1,6 @@
 import type { Booking } from '../../lib/types';
 import { FEES } from '../../lib/types';
+import { useToast } from '../../lib/toast';
 import { canCancel } from './booking-utils';
 
 interface BookingSidebarProps {
@@ -8,10 +9,10 @@ interface BookingSidebarProps {
   courtName: string;
   onSlotClick: (courtId: number, courtName: string, date: string, time: string) => void;
   onCancelBooking: (id: string) => void;
-  showToast: (msg: string, type?: 'error' | 'info' | 'success') => void;
 }
 
-export default function BookingSidebar({ myUpcoming, nextAvailableSlot, courtName, onSlotClick, onCancelBooking, showToast }: BookingSidebarProps) {
+export default function BookingSidebar({ myUpcoming, nextAvailableSlot, courtName, onSlotClick, onCancelBooking }: BookingSidebarProps) {
+  const { showToast } = useToast();
   return (
     <div className="hidden lg:block w-72 shrink-0">
       <div className="space-y-4 sticky top-6">
