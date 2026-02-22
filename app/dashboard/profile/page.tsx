@@ -86,7 +86,7 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen dashboard-gradient-bg">
       <DashboardHeader title="Profile" />
 
       <div className="p-6 lg:p-8 max-w-3xl mx-auto space-y-6 animate-slideUp">
