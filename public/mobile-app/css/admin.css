@@ -246,12 +246,16 @@
 
 .menu-weather-icon-sm {
   font-size: 20px;
+  display: flex;
+  align-items: center;
+  color: var(--text-secondary);
 }
 
 .menu-weather-temp-sm {
   font-family: 'Bebas Neue', sans-serif;
   font-size: 18px;
-  color: var(--volt);
+  font-weight: 700;
+  color: var(--text-primary);
 }
 
 .menu-weather-loc {

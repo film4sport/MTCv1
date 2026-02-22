@@ -49,7 +49,6 @@
 
         setTimeout(function() {
           indicator.classList.remove('visible', 'refreshing');
-          haptic('medium');
           showToast('Refreshed!');
         }, 1000);
       } else {

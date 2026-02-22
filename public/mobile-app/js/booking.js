@@ -631,7 +631,6 @@
     if (el.classList.contains('my-booking')) { showToast('This is your existing booking'); return; }
     document.querySelectorAll('.weekly-slot.selected').forEach(function(s){s.classList.remove('selected');});
     el.classList.add('selected');
-    haptic('light');
 
     selectedSlot={date:el.dataset.date, time:el.dataset.time, court:el.dataset.court};
 
@@ -715,7 +714,6 @@
     if (btn){btn.disabled=true;btn.textContent='BOOKING...';btn.style.transform='scale(0.97)';btn.style.opacity='0.7';}
 
     setTimeout(function(){
-      haptic('success');
       showToast('Court '+selectedSlot.court+' booked for '+selectedSlot.time+'!');
       closeBookingModal();
       document.querySelectorAll('.weekly-slot.selected').forEach(function(s){

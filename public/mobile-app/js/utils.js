@@ -166,36 +166,8 @@ function sanitizeHTML(str) {
 // Expose on MTC.fn for use in modules
 MTC.fn.sanitizeHTML = sanitizeHTML;
 
-// Haptic feedback for mobile devices
-// Note: Requires "Vibration feedback" enabled in phone settings
-// Samsung: Settings > Sounds and vibration > System sound/vibration control > Touch interactions
-function haptic(type = 'light') {
-  // Try vibration API (Android Chrome, etc.)
-  if (navigator.vibrate) {
-    switch(type) {
-      case 'light': navigator.vibrate(25); break;
-      case 'medium': navigator.vibrate(50); break;
-      case 'heavy': navigator.vibrate([50, 30, 50]); break;
-      case 'success': navigator.vibrate([30, 50, 80]); break;
-      case 'error': navigator.vibrate([100, 50, 100, 50, 100]); break;
-    }
-  }
-  
-  // Visual feedback fallback - subtle flash
-  if (type === 'success' || type === 'error') {
-    const flash = document.createElement('div');
-    flash.style.cssText = `
-      position: fixed;
-      inset: 0;
-      background: ${type === 'success' ? 'rgba(200, 255, 0, 0.15)' : 'rgba(255, 90, 95, 0.15)'};
-      pointer-events: none;
-      z-index: 9999;
-      animation: flashFade 0.3s ease forwards;
-    `;
-    document.body.appendChild(flash);
-    setTimeout(() => flash.remove(), 300);
-  }
-}
+// Haptic removed — no-op stub for any remaining calls
+function haptic() {}
 
 // ============================================
 // GLOBAL ERROR HANDLERS

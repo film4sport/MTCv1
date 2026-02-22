@@ -6,7 +6,7 @@ import { useToast } from '../lib/toast';
 import DashboardHeader from '../components/DashboardHeader';
 import { AvatarDisplay } from '../lib/avatars';
 import Link from 'next/link';
-import { generateId, haptic, useFocusTrap } from '../lib/utils';
+import { generateId, useFocusTrap } from '../lib/utils';
 import type { SkillLevel } from '../lib/types';
 
 type FilterType = 'all' | 'singles' | 'doubles' | 'mixed';
@@ -149,7 +149,6 @@ export default function PartnersPage() {
                   {p.userId === currentUser?.id ? (
                     <button
                       onClick={() => {
-                        haptic('medium');
                         setRemovingId(p.id);
                         setTimeout(() => {
                           removePartner(p.id);

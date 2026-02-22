@@ -143,7 +143,6 @@
   // WINDOW: Show Celebration Modal (called from partners.js, events-registration.js, booking.js)
   // ============================================
   window.showCelebrationModal = function(title, desc) {
-    haptic('success');
     document.getElementById('modalTitle').textContent = title;
     document.getElementById('modalDesc').textContent = desc;
     const modalEl = document.getElementById('modal');
@@ -666,7 +665,6 @@
 
     if (nextIndex < 0 || nextIndex >= swipeScreens.length) return;
 
-    haptic('light');
     MTC.fn.navigateTo(swipeScreens[nextIndex], direction);
   }, { passive: true });
 

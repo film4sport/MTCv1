@@ -206,7 +206,6 @@
     });
 
     MTC.fn.saveConversations();
-    haptic('light');
     input.value = '';
     renderMessages(currentConversation);
 

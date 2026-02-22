@@ -177,7 +177,6 @@
     showToast('📦 Preparing bookings export...');
     setTimeout(function() {
       showToast('⬇️ Download starting: mtc-bookings-export.csv');
-      haptic('success');
     }, 1500);
   };
 
