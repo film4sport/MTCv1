@@ -113,7 +113,7 @@ function DashboardGuard({ children }: { children: React.ReactNode }) {
         <div
           className="pointer-events-none select-none absolute inset-0"
           style={{
-            backgroundImage: `url(/tennis-silhouette-1.png)`,
+            backgroundImage: `url(${Math.random() > 0.5 ? '/tennis-silhouette-1.png' : '/tennis-silhouette-2.png'})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
