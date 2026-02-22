@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { generateId, haptic } from '../app/dashboard/lib/utils';
+import { generateId } from '../app/dashboard/lib/utils';
 
 beforeEach(() => {
   vi.restoreAllMocks();
@@ -39,57 +39,3 @@ describe('utils — generateId', () => {
   });
 });
 
-// ─── haptic ─────────────────────────────────────────────────
-
-describe('utils — haptic', () => {
-  it('calls navigator.vibrate with correct pattern', () => {
-    const vibrateMock = vi.fn();
-    Object.defineProperty(navigator, 'vibrate', { value: vibrateMock, writable: true, configurable: true });
-    localStorage.removeItem('mtc-haptic');
-
-    haptic('light');
-    expect(vibrateMock).toHaveBeenCalledWith(10);
-
-    haptic('medium');
-    expect(vibrateMock).toHaveBeenCalledWith(25);
-
-    haptic('success');
-    expect(vibrateMock).toHaveBeenCalledWith([15, 50, 15]);
-
-    haptic('error');
-    expect(vibrateMock).toHaveBeenCalledWith([30, 40, 30, 40, 30]);
-  });
-
-  it('no-ops when navigator.vibrate is undefined', () => {
-    const original = navigator.vibrate;
-    Object.defineProperty(navigator, 'vibrate', { value: undefined, writable: true, configurable: true });
-
-    // Should not throw
-    expect(() => haptic('light')).not.toThrow();
-
-    Object.defineProperty(navigator, 'vibrate', { value: original, writable: true, configurable: true });
-  });
-
-  it('respects localStorage haptic-off preference', () => {
-    const vibrateMock = vi.fn();
-    Object.defineProperty(navigator, 'vibrate', { value: vibrateMock, writable: true, configurable: true });
-    localStorage.setItem('mtc-haptic', 'off');
-
-    haptic('light');
-    expect(vibrateMock).not.toHaveBeenCalled();
-
-    localStorage.removeItem('mtc-haptic');
-  });
-
-  it('handles vibrate throwing an error gracefully', () => {
-    Object.defineProperty(navigator, 'vibrate', {
-      value: () => { throw new Error('NotAllowedError'); },
-      writable: true,
-      configurable: true,
-    });
-    localStorage.removeItem('mtc-haptic');
-
-    // Should not throw
-    expect(() => haptic('medium')).not.toThrow();
-  });
-});
