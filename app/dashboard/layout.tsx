@@ -104,12 +104,24 @@ function DashboardGuard({ children }: { children: React.ReactNode }) {
       </button>
       <main
         id="main-content"
-        className={`flex-1 min-h-screen transition-all duration-300 ml-0 overscroll-bounce overflow-x-hidden w-full max-w-[100vw] ${
+        className={`flex-1 min-h-screen transition-all duration-300 ml-0 overscroll-bounce overflow-x-hidden w-full max-w-[100vw] relative ${
           sidebarCollapsed ? 'lg:ml-[72px]' : 'lg:ml-[240px]'
         }`}
       >
         <MobileAppBanner />
-        <div className="animate-fadeIn">
+        {/* Tennis silhouette background — visible through glass cards */}
+        <div
+          className="pointer-events-none select-none absolute inset-0"
+          style={{
+            backgroundImage: `url(/tennis-silhouette-1.png)`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            opacity: 0.35,
+            filter: 'sepia(1) hue-rotate(60deg) saturate(0.4) brightness(1.05)',
+          }}
+        />
+        <div className="animate-fadeIn relative z-[1]">
           {children}
         </div>
       </main>

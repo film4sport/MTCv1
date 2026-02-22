@@ -40,25 +40,10 @@ export default function DashboardHome() {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden" style={{ backgroundColor: '#f5f2eb' }}>
+    <div className="min-h-screen">
       <DashboardHeader title="Home" />
 
-      {/* Tennis silhouette background — alternates between two images each page load */}
-      <div
-        className="pointer-events-none select-none absolute inset-0"
-        style={{
-          backgroundColor: '#f5f2eb',
-          backgroundImage: `url(${Math.random() > 0.5 ? '/tennis-silhouette-1.png' : '/tennis-silhouette-2.png'})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          backgroundBlendMode: 'multiply',
-          opacity: 0.35,
-          filter: 'sepia(1) hue-rotate(60deg) saturate(0.4) brightness(1.05)',
-        }}
-      />
-
-      <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-6 relative z-[1]">
+      <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
 
         {/* Welcome Greeting */}
         <div className="animate-slideUp">

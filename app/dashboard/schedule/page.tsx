@@ -104,7 +104,7 @@ export default function SchedulePage() {
   };
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#f5f2eb' }}>
+    <div className="min-h-screen">
       <DashboardHeader title="My Schedule" />
 
       <div className="p-6 lg:p-8 max-w-4xl mx-auto animate-slideUp">

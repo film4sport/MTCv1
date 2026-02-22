@@ -47,7 +47,7 @@ export default function PartnersPage() {
   });
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#f5f2eb' }}>
+    <div className="min-h-screen">
       <DashboardHeader title="Find a Partner" />
 
       <div className="p-6 lg:p-8 max-w-5xl mx-auto animate-slideUp">

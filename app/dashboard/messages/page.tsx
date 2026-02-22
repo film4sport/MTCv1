@@ -9,7 +9,7 @@ import { downloadICS } from '../lib/calendar';
 
 export default function MessagesPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen" style={{ backgroundColor: '#f5f2eb' }} />}>
+    <Suspense fallback={<div className="min-h-screen" />}>
       <MessagesContent />
     </Suspense>
   );
@@ -108,7 +108,7 @@ function MessagesContent() {
   const mobileShowChat = selectedConvo !== null;
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#f5f2eb' }}>
+    <div className="min-h-screen">
       <DashboardHeader title="Messages" />
 
       <div className="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto animate-slideUp">
