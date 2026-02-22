@@ -73,8 +73,9 @@ When new project rules or conventions are established, add them to this file AND
 
 ## ARCHITECTURE
 - Landing page: `app/(landing)/page.tsx` with React components, ErrorBoundary
+- Signup page: `app/signup/page.tsx` — dedicated signup wizard (extracted from MembershipTab)
 - Dashboard PWA: `app/dashboard/` (componentized: Sidebar, DashboardHeader, WeatherWidget, etc.)
-- Mobile PWA: `public/mobile-app/` (vanilla JS SPA, served as static files at `/mobile-app/`)
+- Mobile PWA: `public/mobile-app/` (vanilla JS SPA, served as static files at `/mobile-app/index.html`)
 - Mobile auth: `app/api/mobile-auth/route.ts` (validates via Supabase + demo fallback)
 - Login: `app/login/page.tsx` (demo credentials gated behind NODE_ENV=development)
 - Root route `/` serves landing page via Next.js App Router
@@ -102,7 +103,7 @@ Note: Sections 3→4→5→6 meet flush (no wave dividers between them)
 
 ## /INFO PAGE TABS
 - `/info?tab=about` — About Us (images, text, amenity tags)
-- `/info?tab=membership` — Membership fees, facilities, news, signup flow (default)
+- `/info?tab=membership` — Membership fees, facilities, news (default). Signup wizard extracted to `/signup`
 - `/info?tab=coaching` — Mark Taylor's classes, summer camps, dashboard enrollment link
 - `/info?tab=faq` — FAQ accordion + Google Maps
 - `/info?tab=rules` — Constitution articles, regulations
@@ -122,6 +123,8 @@ Note: Sections 3→4→5→6 meet flush (no wave dividers between them)
 - `app/dashboard/lib/db.ts` - Supabase database functions
 - `app/dashboard/lib/store.tsx` - State management (all mutations have error toasts + rollback)
 - `app/api/mobile-auth/route.ts` - Mobile PWA auth endpoint
+- `app/signup/page.tsx` - Dedicated signup wizard (extracted from MembershipTab)
+- `app/dashboard/components/MobileAppBanner.tsx` - Dismissible "Try MTC Court App" banner
 - `app/globals.css` - Global styles (@font-face after @tailwind directives)
 - `supabase/schema.sql` - Full DB schema (18+ tables, indexes, RPC functions, triggers)
 - `public/sw.js` - Service worker (desktop)
