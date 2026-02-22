@@ -47,8 +47,11 @@ export default function DashboardHeader({ title }: DashboardHeaderProps) {
   return (
     <>
       <header className="h-16 flex items-center justify-between px-4 pl-14 sm:pl-6 lg:pl-6 border-b relative z-10" style={{ backgroundColor: '#faf8f3', borderColor: '#e0dcd3' }}>
-        {/* Logo */}
-        <Image src="/mono-logo-transparent.png" alt="Mono Tennis Club" width={36} height={36} className="h-9 w-auto" style={{ filter: 'brightness(0.2)' }} />
+        {/* Logo + Title */}
+        <div className="flex items-center gap-3">
+          <Image src="/mono-logo-transparent.png" alt="Mono Tennis Club" width={36} height={36} className="h-9 w-auto" style={{ filter: 'brightness(0.2)' }} />
+          <h1 className="text-lg font-semibold" style={{ color: '#2a2f1e' }}>{title}</h1>
+        </div>
 
         {/* Right Side */}
         <div className="flex items-center gap-2">
@@ -61,6 +64,7 @@ export default function DashboardHeader({ title }: DashboardHeaderProps) {
               showToast('Data refreshed', 'info');
             }}
             className="w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 bg-[#6b7a3d]/10 hover:bg-[#6b7a3d]/20 active:scale-95"
+            title="Refresh data"
             aria-label="Refresh data"
           >
             <svg className={`w-[18px] h-[18px] transition-transform duration-500 ${refreshing ? 'animate-spin' : ''}`} fill="none" stroke="#1a1f12" viewBox="0 0 24 24" strokeWidth="2">
