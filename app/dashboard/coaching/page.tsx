@@ -26,7 +26,7 @@ export default function CoachingPanelPage() {
 
   if (!isCoachOrAdmin) {
     return (
-      <div className="min-h-screen">
+      <div className="min-h-screen" style={{ backgroundColor: '#f5f2eb' }}>
         <DashboardHeader title="Book Lessons" />
         <div className="p-6 text-center">
           <p className="text-sm" style={{ color: '#6b7266' }}>You do not have access to this page.</p>
@@ -116,7 +116,7 @@ export default function CoachingPanelPage() {
   const today = new Date().toISOString().split('T')[0];
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen dashboard-gradient-bg">
       <DashboardHeader title="Book Lessons" />
 
       <div className="p-6 lg:p-8 max-w-4xl mx-auto animate-slideUp">

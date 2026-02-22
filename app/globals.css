@@ -466,7 +466,15 @@ html {
 .glass-card {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+/* Subtle gradient background for dashboard pages — gives glass cards something to blur */
+.dashboard-gradient-bg {
+  background:
+    radial-gradient(ellipse at 70% 0%, rgba(212, 225, 87, 0.07) 0%, transparent 50%),
+    radial-gradient(ellipse at 20% 100%, rgba(107, 122, 61, 0.06) 0%, transparent 50%),
+    #f5f2eb;
 }
 
 /* Section card hover — subtle lift on glass section cards */

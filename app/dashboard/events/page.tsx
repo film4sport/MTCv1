@@ -100,7 +100,7 @@ export default function EventsPage() {
   const eventsToShow = viewMode === 'calendar' ? dayFiltered : filtered;
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen dashboard-gradient-bg">
       <DashboardHeader title="Club Events" />
 
       <div className="p-6 lg:p-8 max-w-5xl mx-auto animate-slideUp">

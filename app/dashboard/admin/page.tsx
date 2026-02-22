@@ -99,7 +99,7 @@ export default function AdminPage() {
   // Non-admin redirect (extra guard in addition to layout)
   if (!currentUser || currentUser.role !== 'admin') {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#f5f2eb' }}>
         <p className="text-sm" style={{ color: '#6b7266' }}>Admin access required</p>
       </div>
     );
@@ -176,7 +176,7 @@ export default function AdminPage() {
   ];
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen dashboard-gradient-bg">
       <DashboardHeader title="Admin Panel" />
 
       <div className="p-6 lg:p-8 max-w-6xl mx-auto animate-slideUp">
