@@ -54,7 +54,8 @@
       "Bash(npm run build:mobile:*)",
       "Bash(cmd //c \"for /f \"\"tokens=5\"\" %a in \\(''netstat -ano ^| findstr :3000 ^| findstr LISTENING''\\) do taskkill /PID %a /F\")",
       "Bash(cmd //c \"netstat -ano | findstr :3000 | findstr LISTENING\")",
-      "Bash(git mv:*)"
+      "Bash(git mv:*)",
+      "Bash(git commit:*)"
     ]
   }
 }
