@@ -328,7 +328,6 @@
     showToast('\uD83D\uDCCA Generating ' + type + ' report...');
     setTimeout(function() {
       showToast('\u2705 ' + type.charAt(0).toUpperCase() + type.slice(1) + ' report ready!');
-      haptic('success');
     }, 1500);
   };
 
@@ -383,7 +382,6 @@
     showToast('\uD83D\uDCE6 Preparing club data export...');
     setTimeout(function() {
       showToast('\u2B07\uFE0F Download starting: mtc-data-export.csv');
-      haptic('success');
       // In real app, would trigger actual download
     }, 2000);
   };

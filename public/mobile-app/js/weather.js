@@ -19,32 +19,44 @@
       const data = await response.json();
       const current = data.current;
 
-      const weatherIcons = {
-        0: '\u2600\uFE0F', 1: '\uD83C\uDF24\uFE0F', 2: '\u26C5', 3: '\u2601\uFE0F',
-        45: '\uD83C\uDF2B\uFE0F', 48: '\uD83C\uDF2B\uFE0F',
-        51: '\uD83C\uDF27\uFE0F', 53: '\uD83C\uDF27\uFE0F', 55: '\uD83C\uDF27\uFE0F',
-        61: '\uD83C\uDF27\uFE0F', 63: '\uD83C\uDF27\uFE0F', 65: '\uD83C\uDF27\uFE0F',
-        71: '\uD83C\uDF28\uFE0F', 73: '\uD83C\uDF28\uFE0F', 75: '\u2744\uFE0F',
-        80: '\uD83C\uDF26\uFE0F', 81: '\uD83C\uDF26\uFE0F', 82: '\u26C8\uFE0F',
-        95: '\u26C8\uFE0F'
+      // SVG weather icons (reliable rendering on all mobile WebViews)
+      var s = function(d) { return '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + d + '</svg>'; };
+      var svgSun = s('<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>');
+      var svgPartlyCloudy = s('<path d="M12 2v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="M20 12h2"/><path d="m19.07 4.93-1.41 1.41"/><path d="M15.947 12.65a4 4 0 0 0-5.925-4.128"/><path d="M13 22H7a5 5 0 1 1 4.9-6H13a3 3 0 0 1 0 6Z"/>');
+      var svgCloud = s('<path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>');
+      var svgRain = s('<path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M16 14v6"/><path d="M8 14v6"/><path d="M12 16v6"/>');
+      var svgSnow = s('<path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M8 15h.01"/><path d="M8 19h.01"/><path d="M12 17h.01"/><path d="M12 21h.01"/><path d="M16 15h.01"/><path d="M16 19h.01"/>');
+      var svgFog = s('<path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M16 17H7"/><path d="M17 21H9"/>');
+      var svgStorm = s('<path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M13 12l-3 5h4l-3 5"/>');
+      var svgHot = s('<path d="M12 12c0-3 2.5-6 2.5-6S17 6 17 9a5 5 0 0 1-10 0c0-3 2.5-6 2.5-6S12 6 12 9"/><path d="M12 12v10"/>');
+      var svgCold = s('<path d="M2 12h20"/><path d="M12 2v20"/><path d="m4.93 4.93 14.14 14.14"/><path d="m19.07 4.93-14.14 14.14"/>');
+
+      var weatherIcons = {
+        0: svgSun, 1: svgPartlyCloudy, 2: svgPartlyCloudy, 3: svgCloud,
+        45: svgFog, 48: svgFog,
+        51: svgRain, 53: svgRain, 55: svgRain,
+        61: svgRain, 63: svgRain, 65: svgRain,
+        71: svgSnow, 73: svgSnow, 75: svgSnow,
+        80: svgRain, 81: svgRain, 82: svgStorm,
+        95: svgStorm
       };
 
-      const temp = Math.round(current.temperature_2m);
-      let icon = weatherIcons[current.weather_code] || '\uD83C\uDF21\uFE0F';
-      if (temp > 30) icon = '\uD83D\uDD25';
-      if (temp < -10) icon = '\uD83E\uDD76';
+      var temp = Math.round(current.temperature_2m);
+      var icon = weatherIcons[current.weather_code] || svgCloud;
+      if (temp > 30) icon = svgHot;
+      if (temp < -10) icon = svgCold;
 
-      const menuIconEl = document.getElementById('menuWeatherIcon');
-      const menuTempEl = document.getElementById('menuWeatherTemp');
+      var menuIconEl = document.getElementById('menuWeatherIcon');
+      var menuTempEl = document.getElementById('menuWeatherTemp');
 
-      if (menuIconEl) menuIconEl.textContent = icon;
+      if (menuIconEl) menuIconEl.innerHTML = icon;
       if (menuTempEl) menuTempEl.textContent = temp + '\u00B0C';
 
     } catch (error) {
       console.warn('Weather fetch failed:', error);
       const menuIconEl = document.getElementById('menuWeatherIcon');
       const menuTempEl = document.getElementById('menuWeatherTemp');
-      if (menuIconEl) menuIconEl.textContent = '\u26A0\uFE0F';
+      if (menuIconEl) menuIconEl.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
       if (menuTempEl) menuTempEl.textContent = '--\u00B0C';
 
       // Show error on weather card if it exists

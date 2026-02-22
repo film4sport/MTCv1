@@ -266,7 +266,6 @@
           item.style.transform = 'translateX(-100%)';
           item.style.opacity = '0';
           item.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
-          haptic('light');
           setTimeout(function() {
             item.style.transform = ''; item.style.opacity = ''; item.style.transition = '';
             dismissNotification(item);
@@ -304,7 +303,7 @@
   }
 
   // ============================================
-  // LONG-PRESS / HAPTIC FEEDBACK
+  // LONG-PRESS FEEDBACK
   // ============================================
   function setupLongPress() {
     const interactiveItems = [
@@ -327,7 +326,6 @@
       pressElement = el;
       pressTimer = setTimeout(function() {
         el.classList.add('pressing');
-        if (navigator.vibrate) navigator.vibrate(30);
 
         if (el.classList.contains('booking-card')) {
           showToast('Hold to manage booking');
@@ -352,17 +350,6 @@
         pressElement = null;
       }
     }, { passive: true });
-  }
-
-  function setupHapticTap() {
-    document.addEventListener('click', function(e) {
-      const btn = e.target.closest('.quick-action, .filter-pill, .nav-item, .partner-action-btn');
-      if (!btn) return;
-
-      btn.classList.add('haptic-tap');
-      if (navigator.vibrate) navigator.vibrate(10);
-      setTimeout(function() { btn.classList.remove('haptic-tap'); }, 200);
-    });
   }
 
   // ============================================
@@ -490,7 +477,6 @@
     setupSkeletonHooks();
     setupSwipeToDismiss();
     setupLongPress();
-    setupHapticTap();
     setupPersistence();
     setupPartnerFilters();
   }

@@ -6,7 +6,6 @@ import { useApp } from '../lib/store';
 import { useToast } from '../lib/toast';
 import DashboardHeader from '../components/DashboardHeader';
 import { downloadICS } from '../lib/calendar';
-import { haptic } from '../lib/utils';
 
 export default function MessagesPage() {
   return (
@@ -49,7 +48,6 @@ function MessagesContent() {
 
   const handleSend = () => {
     if (!messageText.trim() || !selectedConvo) return;
-    haptic('light');
     sendMessage(selectedConvo, messageText.trim());
     setMessageText('');
     showToast('Message sent');

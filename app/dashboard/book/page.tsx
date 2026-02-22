@@ -6,7 +6,7 @@ import { useApp } from '../lib/store';
 import { useToast } from '../lib/toast';
 import DashboardHeader from '../components/DashboardHeader';
 import { TIME_SLOTS, COURTS_CONFIG, FEES } from '../lib/types';
-import { generateId, haptic } from '../lib/utils';
+import { generateId } from '../lib/utils';
 import {
   ViewMode, COURT_COLORS, getTimeRange,
   isSlotBooked, isSlotMine, isSlotPast, isCourtClosed, isCourtInMaintenance, canCancel,
@@ -66,17 +66,14 @@ export default function BookCourtPage() {
     const mine = isSlotMine(bookings, courtId, date, time, currentUser?.id);
     if (mine) {
       if (!canCancel(date, time)) {
-        haptic('error');
         showToast(`Cannot cancel within ${FEES.cancelWindowHours} hours of booking`, 'error');
         return;
       }
-      haptic('medium');
       setCancelTarget({ id: mine.id, courtName, date, time });
       return;
     }
-    if (isCourtInMaintenance(courts, courtId)) { haptic('error'); showToast('This court is currently closed', 'error'); return; }
+    if (isCourtInMaintenance(courts, courtId)) { showToast('This court is currently closed', 'error'); return; }
     if (isSlotBooked(bookings, courtId, date, time) || isSlotPast(date, time) || isCourtClosed(courtId, time)) return;
-    haptic('light');
     setModalData({ courtId, courtName, date, time });
     setShowModal(true);
   };
@@ -107,7 +104,6 @@ export default function BookCourtPage() {
     setBookingLoading(false);
     setShowModal(false);
     setBookingSuccess({ courtName: modalData.courtName, date: modalData.date, time: modalData.time, participants: participants.length > 0 ? participants : undefined });
-    haptic('success');
     showToast(`Court booked for ${modalData.time}`);
   };
 

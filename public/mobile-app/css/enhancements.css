@@ -559,17 +559,6 @@ input.input-valid {
   opacity: 1;
 }
 
-/* Haptic-style scale pulse */
-@keyframes hapticPulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(0.97); }
-  100% { transform: scale(1); }
-}
-
-.haptic-tap {
-  animation: hapticPulse 0.15s ease;
-}
-
 /* ============================================
    10. ENHANCED SKELETON LOADERS
 ============================================ */

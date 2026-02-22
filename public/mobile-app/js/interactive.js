@@ -106,13 +106,6 @@
     // Initialize notification badge count from DOM
     if (typeof updateUnreadCount === 'function') updateUnreadCount();
 
-    // Haptic feedback on all toggle switches
-    document.addEventListener('click', function(e) {
-      if (e.target.classList.contains('toggle') || e.target.closest('.toggle')) {
-        haptic('light');
-      }
-    });
-
     // Restore saved settings toggles
     if (typeof restoreSettingsToggles === 'function') restoreSettingsToggles();
 

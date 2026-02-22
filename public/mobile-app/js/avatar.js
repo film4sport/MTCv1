@@ -86,7 +86,6 @@
         };
         info = fallback[eventId] || { name: 'the event', date: 'Upcoming', time: 'See details' };
       }
-      haptic('success');
       showToast('You\'re signed up for ' + info.name + '!');
 
       // Add to My Bookings with real date so it shows on calendar

@@ -73,9 +73,6 @@
     appContainer.appendChild(notif);
     activeNotifications.push(notif);
 
-    // Vibrate if available
-    if (navigator.vibrate) navigator.vibrate(100);
-
     // Animate in
     setTimeout(function() { notif.classList.add('show'); }, 50);
 
