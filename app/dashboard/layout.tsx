@@ -66,7 +66,7 @@ function DashboardGuard({ children }: { children: React.ReactNode }) {
       <Sidebar />
       {/* Mobile hamburger button — positioned to not overlap title */}
       <button
-        className="lg:hidden fixed top-3.5 left-3 z-10 p-2.5 rounded-xl shadow-lg"
+        className="lg:hidden fixed top-3.5 left-3 z-20 p-2.5 rounded-xl shadow-lg"
         style={{ backgroundColor: '#1a1f12', color: '#e8e4d9' }}
         onClick={() => setMobileSidebarOpen(true)}
         aria-label="Open menu"
