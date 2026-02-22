@@ -9,7 +9,6 @@ import DashboardHeader from '../components/DashboardHeader';
 export default function SettingsPage() {
   const { currentUser, bookings, conversations, logout, notificationPreferences, setNotificationPreferences } = useApp();
   const router = useRouter();
-  const [showInstallTip, setShowInstallTip] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [hapticEnabled, setHapticEnabled] = useState(() => {
     if (typeof localStorage !== 'undefined') return localStorage.getItem('mtc-haptic') !== 'off';
@@ -107,18 +106,10 @@ export default function SettingsPage() {
           <p className="text-sm mb-4" style={{ color: '#6b7266' }}>
             Access your club on the go with our mobile web app. Live court status, bookings, and messaging — all from your phone.
           </p>
-          <button
-            onClick={() => {
-              // Try PWA install prompt if available
-              const deferredPrompt = (window as unknown as Record<string, unknown>).__pwaInstallPrompt;
-              if (deferredPrompt && typeof (deferredPrompt as { prompt: () => void }).prompt === 'function') {
-                (deferredPrompt as { prompt: () => void }).prompt();
-              } else {
-                setShowInstallTip(true);
-              }
-            }}
+          <a
+            href="/mobile-app/"
             className="w-full rounded-xl p-4 flex items-center gap-4 transition-all hover:shadow-md btn-press"
-            style={{ background: 'rgba(107, 122, 61, 0.06)', border: '1px solid rgba(107, 122, 61, 0.15)' }}
+            style={{ background: 'rgba(107, 122, 61, 0.06)', border: '1px solid rgba(107, 122, 61, 0.15)', textDecoration: 'none' }}
           >
             <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: '#6b7a3d' }}>
               <svg className="w-5 h-5" fill="none" stroke="#fff" viewBox="0 0 24 24" strokeWidth="1.5">
@@ -126,28 +117,13 @@ export default function SettingsPage() {
               </svg>
             </div>
             <div className="flex-1 text-left">
-              <p className="font-medium text-sm" style={{ color: '#2a2f1e' }}>Install MTC App</p>
-              <p className="text-xs" style={{ color: '#6b7266' }}>Add to your home screen for the best experience</p>
+              <p className="font-medium text-sm" style={{ color: '#2a2f1e' }}>Open MTC Mobile App</p>
+              <p className="text-xs" style={{ color: '#6b7266' }}>Optimized for your phone — courts, bookings & more</p>
             </div>
             <svg className="w-5 h-5 shrink-0" fill="none" stroke="#6b7a3d" viewBox="0 0 24 24" strokeWidth="1.5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/>
             </svg>
-          </button>
-          {showInstallTip && (
-            <div className="mt-3 rounded-xl p-3 flex items-start gap-2 animate-slideUp" style={{ background: 'rgba(107, 122, 61, 0.08)', border: '1px solid rgba(107, 122, 61, 0.15)' }}>
-              <svg className="w-4 h-4 mt-0.5 shrink-0" fill="none" stroke="#6b7a3d" viewBox="0 0 24 24" strokeWidth="1.5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20 10 10 0 000-20z" />
-              </svg>
-              <p className="text-xs leading-relaxed" style={{ color: '#4a5528' }}>
-                Open this site on your phone browser, tap the <strong>Share</strong> icon, then select <strong>&quot;Add to Home Screen&quot;</strong>.
-              </p>
-              <button onClick={() => setShowInstallTip(false)} className="shrink-0 mt-0.5" aria-label="Dismiss">
-                <svg className="w-3.5 h-3.5" fill="none" stroke="#6b7266" viewBox="0 0 24 24" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-          )}
+          </a>
         </div>
 
         {/* Preferences */}

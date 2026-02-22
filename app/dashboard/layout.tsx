@@ -7,6 +7,7 @@ import { ToastProvider } from './lib/toast';
 import { UIProvider, useUI } from './lib/ui';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import Sidebar from './components/Sidebar';
+import MobileAppBanner from './components/MobileAppBanner';
 import Toast from './components/Toast';
 
 function DashboardGuard({ children }: { children: React.ReactNode }) {
@@ -77,10 +78,11 @@ function DashboardGuard({ children }: { children: React.ReactNode }) {
       </button>
       <main
         id="main-content"
-        className={`flex-1 min-h-screen transition-all duration-300 ml-0 overscroll-bounce ${
+        className={`flex-1 min-h-screen transition-all duration-300 ml-0 overscroll-bounce overflow-x-hidden w-full max-w-[100vw] ${
           sidebarCollapsed ? 'lg:ml-[72px]' : 'lg:ml-[240px]'
         }`}
       >
+        <MobileAppBanner />
         {children}
       </main>
       <Toast />

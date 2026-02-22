@@ -48,7 +48,8 @@
       "Bash(npm run build:*)",
       "Bash(npm run deps:check:*)",
       "Bash(npm run test:coverage:*)",
-      "Bash(xargs:*)"
+      "Bash(xargs:*)",
+      "Bash(npx vitest:*)"
     ]
   }
 }

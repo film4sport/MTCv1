@@ -86,7 +86,7 @@ export default function DashboardHeader({ title }: DashboardHeaderProps) {
 
             {/* Notification Dropdown */}
             {notifOpen && (
-              <div className="dropdown-enter absolute right-0 top-[52px] w-80 rounded-2xl shadow-2xl border overflow-hidden z-50" style={{ backgroundColor: '#faf8f3', borderColor: '#e0dcd3' }}>
+              <div className="dropdown-enter absolute right-0 top-[52px] w-[calc(100vw-24px)] sm:w-80 rounded-2xl shadow-2xl border overflow-hidden z-50" style={{ backgroundColor: '#faf8f3', borderColor: '#e0dcd3' }}>
                 <div className="p-4 border-b flex items-center justify-between" style={{ borderColor: '#e0dcd3' }}>
                   <span className="font-semibold text-sm" style={{ color: '#1a1f12' }}>Notifications</span>
                   {unreadCount > 0 && (
