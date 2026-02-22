@@ -8,10 +8,9 @@ export default function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-3 gap-8 md:gap-12 mb-16">
           {/* Description */}
           <div className="col-span-2 md:col-span-1">
-            <div className="headline-font text-3xl mb-2" style={{ color: '#d4e157' }}>
+            <div className="headline-font text-3xl mb-4" style={{ color: '#d4e157' }}>
               Mono Tennis Club
             </div>
-            <div className="w-10 h-0.5 mb-4" style={{ backgroundColor: '#d4e157' }} />
             <p className="text-base leading-relaxed" style={{ color: 'rgba(232, 228, 217, 0.7)' }}>
               A not-for-profit community tennis club promoting the game of tennis in Mono, Ontario.
             </p>
@@ -19,10 +18,9 @@ export default function Footer() {
 
           {/* Club Links */}
           <div className="md:text-center">
-            <h5 className="text-base font-bold uppercase tracking-wider mb-2" style={{ color: '#d4e157' }}>
+            <h5 className="text-base font-bold uppercase tracking-wider mb-5" style={{ color: '#d4e157' }}>
               Club
             </h5>
-            <div className="w-8 h-0.5 mb-5 md:mx-auto" style={{ backgroundColor: '#d4e157', opacity: 0.5 }} />
             <ul className="space-y-3">
               <li>
                 <a href="/info?tab=about" className="footer-link text-base" style={{ color: 'rgba(232, 228, 217, 0.7)' }}>
@@ -44,10 +42,9 @@ export default function Footer() {
 
           {/* Location */}
           <div className="md:text-right min-w-0">
-            <h5 className="text-base font-bold uppercase tracking-wider mb-2" style={{ color: '#d4e157' }}>
+            <h5 className="text-base font-bold uppercase tracking-wider mb-5" style={{ color: '#d4e157' }}>
               Location
             </h5>
-            <div className="w-8 h-0.5 mb-5 md:ml-auto" style={{ backgroundColor: '#d4e157', opacity: 0.5 }} />
             <address className="not-italic text-base leading-relaxed" style={{ color: 'rgba(232, 228, 217, 0.7)' }}>
               754883 Mono Centre Road
               <br />
