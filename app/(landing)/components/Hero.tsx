@@ -43,12 +43,17 @@ export default function Hero() {
       {/* Hero Content */}
       <div className="absolute inset-0 flex flex-col lg:flex-row lg:items-center justify-center px-8 lg:px-16 z-10 pt-24 md:pt-28">
         <div className="max-w-2xl hero-content flex-1" ref={heroContentRef}>
+          {/* Section Label */}
+          <span className="hero-subtext text-xs md:text-sm tracking-[0.2em] uppercase mb-4 block font-normal" style={{ color: 'rgba(232, 228, 217, 0.5)' }}>
+            // Mono Tennis Club
+          </span>
+
           {/* Main Headline */}
           <h1
             className="headline-font text-4xl md:text-5xl lg:text-[3.5rem] leading-[1.15] mb-6"
             style={{ color: '#e8e4d9' }}
           >
-            <span>Welcome to</span><br /><span>Mono Tennis Club</span>
+            Your Court<br />is Waiting
           </h1>
 
           {/* Subtext */}
@@ -56,8 +61,8 @@ export default function Hero() {
             className="hero-subtext text-[15px] md:text-base mb-8 leading-relaxed max-w-lg font-normal"
             style={{ color: 'rgba(232, 228, 217, 0.75)' }}
           >
-            We promote the game of tennis in Mono by organizing tournaments, clinic round robins,
-            competitive teams, coaching, kids camps, house leagues and more.
+            Where Mono plays tennis. Tournaments, round robins,
+            competitive teams, coaching, kids camps and more.
           </p>
 
           {/* Buttons */}

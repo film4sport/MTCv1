@@ -366,9 +366,9 @@ test.describe('Info Page', () => {
   test('tab navigation buttons exist', async ({ page }) => {
     await page.goto('/info', { waitUntil: 'networkidle' });
     await page.waitForTimeout(1000);
-    const tabLabels = ['About', 'Membership', 'Rules', 'Coaching', 'FAQ'];
+    const tabLabels = ['About', 'Membership', 'Coaching', 'FAQ', 'Rules', 'Privacy', 'Terms'];
     for (const label of tabLabels) {
-      const tab = page.getByRole('button', { name: label, exact: true });
+      const tab = page.getByRole('tab', { name: label, exact: true });
       await expect(tab).toBeAttached();
     }
   });
@@ -377,12 +377,12 @@ test.describe('Info Page', () => {
     await page.goto('/info', { waitUntil: 'networkidle' });
     await page.waitForTimeout(1000);
     // Click About tab (use dispatchEvent for mobile horizontal scroll container)
-    await page.getByRole('button', { name: 'About' }).dispatchEvent('click');
+    await page.getByRole('tab', { name: 'About' }).dispatchEvent('click');
     await page.waitForTimeout(500);
     const aboutContent = page.getByText('Passion, Community,');
     await expect(aboutContent).toBeAttached();
     // Click FAQ tab
-    await page.getByRole('button', { name: 'FAQ' }).dispatchEvent('click');
+    await page.getByRole('tab', { name: 'FAQ' }).dispatchEvent('click');
     await page.waitForTimeout(500);
     const faqContent = page.getByText('Frequently Asked Questions');
     await expect(faqContent).toBeAttached();
