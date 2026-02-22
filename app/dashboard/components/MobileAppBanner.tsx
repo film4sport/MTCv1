@@ -23,11 +23,11 @@ export default function MobileAppBanner() {
         </svg>
       </div>
       <div className="flex-1 min-w-0">
-        <p className="font-medium text-sm" style={{ color: '#2a2f1e' }}>Try the MTC Mobile App</p>
+        <p className="font-medium text-sm" style={{ color: '#2a2f1e' }}>Try the MTC Court App</p>
         <p className="text-xs" style={{ color: '#6b7266' }}>Optimized for your phone — courts, bookings & more</p>
       </div>
       <a
-        href="/mobile-app/"
+        href="/mobile-app/index.html"
         className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-90"
         style={{ background: '#6b7a3d', color: '#fff' }}
       >

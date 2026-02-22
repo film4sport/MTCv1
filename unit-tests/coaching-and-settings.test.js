@@ -49,7 +49,7 @@ describe('Settings — Mobile App links to /mobile-app/', () => {
 
   it('should link to /mobile-app/ instead of PWA install prompt', () => {
     expect(settingsFile).toContain('/mobile-app/');
-    expect(settingsFile).toContain('Open MTC Mobile App');
+    expect(settingsFile).toContain('Open MTC Court App');
   });
 
   it('should not have old PWA install prompt logic', () => {

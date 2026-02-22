@@ -107,7 +107,7 @@ export default function SettingsPage() {
             Access your club on the go with our mobile web app. Live court status, bookings, and messaging — all from your phone.
           </p>
           <a
-            href="/mobile-app/"
+            href="/mobile-app/index.html"
             className="w-full rounded-xl p-4 flex items-center gap-4 transition-all hover:shadow-md btn-press"
             style={{ background: 'rgba(107, 122, 61, 0.06)', border: '1px solid rgba(107, 122, 61, 0.15)', textDecoration: 'none' }}
           >
@@ -117,7 +117,7 @@ export default function SettingsPage() {
               </svg>
             </div>
             <div className="flex-1 text-left">
-              <p className="font-medium text-sm" style={{ color: '#2a2f1e' }}>Open MTC Mobile App</p>
+              <p className="font-medium text-sm" style={{ color: '#2a2f1e' }}>Open MTC Court App</p>
               <p className="text-xs" style={{ color: '#6b7266' }}>Optimized for your phone — courts, bookings & more</p>
             </div>
             <svg className="w-5 h-5 shrink-0" fill="none" stroke="#6b7a3d" viewBox="0 0 24 24" strokeWidth="1.5">
