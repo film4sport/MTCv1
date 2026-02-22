@@ -50,7 +50,8 @@
       "Bash(npm run test:coverage:*)",
       "Bash(xargs:*)",
       "Bash(npx vitest:*)",
-      "mcp__Claude_Preview__preview_start"
+      "mcp__Claude_Preview__preview_start",
+      "Bash(npm run build:mobile:*)"
     ]
   }
 }
