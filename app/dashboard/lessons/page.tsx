@@ -37,7 +37,7 @@ export default function LessonsPage() {
       <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-6 animate-slideUp">
 
         {/* Intro */}
-        <div className="rounded-2xl border p-6" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+        <div className="glass-card rounded-2xl border p-6" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
           <div className="flex items-start gap-4">
             <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(107, 122, 61, 0.1)' }}>
               <svg className="w-5 h-5" fill="none" stroke="#6b7a3d" viewBox="0 0 24 24" strokeWidth="1.5">
@@ -55,7 +55,7 @@ export default function LessonsPage() {
 
         {/* Coach Cards */}
         {coaches.map((coach) => (
-          <div key={coach.name} className="rounded-2xl border p-6 section-card" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+          <div key={coach.name} className="glass-card rounded-2xl border p-6 section-card" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
             {/* Header */}
             <div className="flex items-center gap-4 mb-5">
               {coach.photo ? (

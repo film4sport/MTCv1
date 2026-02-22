@@ -7,7 +7,7 @@ export default function PageSkeleton() {
       <div className="skeleton h-7 w-48" />
 
       {/* Card skeletons */}
-      <div className="rounded-2xl border p-6" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+      <div className="rounded-2xl border p-6" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
         <div className="skeleton h-5 w-32 mb-4" />
         <div className="space-y-3">
           <div className="skeleton h-4 w-full" />
@@ -16,7 +16,7 @@ export default function PageSkeleton() {
         </div>
       </div>
 
-      <div className="rounded-2xl border p-6" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+      <div className="rounded-2xl border p-6" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
         <div className="skeleton h-5 w-40 mb-4" />
         <div className="space-y-3">
           <div className="skeleton h-4 w-full" />
@@ -24,7 +24,7 @@ export default function PageSkeleton() {
         </div>
       </div>
 
-      <div className="rounded-2xl border p-6" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+      <div className="rounded-2xl border p-6" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
         <div className="skeleton h-5 w-36 mb-4" />
         <div className="flex gap-4">
           <div className="skeleton h-10 w-10 rounded-full" />

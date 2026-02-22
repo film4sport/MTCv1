@@ -192,7 +192,7 @@ export default function BookCourtPage() {
             })}
           </div>
 
-          <div className="flex items-center gap-1 p-1 rounded-xl shrink-0" style={{ background: '#fff', border: '1px solid #e0dcd3' }}>
+          <div className="flex items-center gap-1 p-1 rounded-xl shrink-0" style={{ background: 'rgba(255, 255, 255, 0.5)', border: '1px solid rgba(255, 255, 255, 0.4)' }}>
             <button onClick={() => setView('week')} className="px-4 py-2 rounded-lg text-xs font-medium transition-all duration-200" style={{ background: view === 'week' ? '#6b7a3d' : 'transparent', color: view === 'week' ? '#fff' : '#6b7266' }}>Week</button>
             <button onClick={() => setView('calendar')} className="px-4 py-2 rounded-lg text-xs font-medium transition-all duration-200" style={{ background: view === 'calendar' ? '#6b7a3d' : 'transparent', color: view === 'calendar' ? '#fff' : '#6b7266' }}>Month</button>
           </div>
@@ -219,7 +219,7 @@ export default function BookCourtPage() {
                 </div>
 
                 {/* Desktop: Full Week Grid */}
-                <div className="hidden sm:block rounded-2xl border overflow-hidden" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+                <div className="glass-card hidden sm:block rounded-2xl border overflow-hidden" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
                   <div className="overflow-x-auto">
                     <table className="w-full border-collapse min-w-[600px]">
                       <thead>
@@ -318,7 +318,7 @@ export default function BookCourtPage() {
                     })}
                   </div>
 
-                  <div className="rounded-2xl border overflow-hidden" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+                  <div className="glass-card rounded-2xl border overflow-hidden" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
                     <div className="p-3 border-b" style={{ borderColor: '#f0ede6', background: '#faf8f3' }}>
                       <p className="text-xs font-semibold" style={{ color: '#2a2f1e' }}>{mobileDay.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
                       <p className="text-[0.65rem] mt-0.5" style={{ color: '#9ca3a0' }}>{courtConfig.name} &bull; {courtConfig.floodlight ? 'Lights til 10 PM' : 'Closes 8 PM'}</p>
@@ -355,7 +355,7 @@ export default function BookCourtPage() {
               </>
             ) : (
               /* Calendar View */
-              <div className="rounded-2xl border p-5 sm:p-6" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+              <div className="glass-card rounded-2xl border p-5 sm:p-6" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
                 <div className="flex items-center justify-between mb-5">
                   <button onClick={() => setCalMonth(new Date(calMonth.getFullYear(), calMonth.getMonth() - 1))} className="w-10 h-10 rounded-xl flex items-center justify-center border hover:bg-gray-50 transition-colors active:scale-95" style={{ borderColor: '#e0dcd3' }}>
                     <svg className="w-4 h-4" fill="none" stroke="#2a2f1e" viewBox="0 0 24 24" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/></svg>

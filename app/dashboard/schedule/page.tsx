@@ -114,14 +114,14 @@ export default function SchedulePage() {
           <button
             onClick={() => setView('list')}
             className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-            style={{ background: view === 'list' ? '#6b7a3d' : '#fff', color: view === 'list' ? '#fff' : '#2a2f1e', border: view === 'list' ? 'none' : '1px solid #e0dcd3' }}
+            style={{ background: view === 'list' ? '#6b7a3d' : 'rgba(255, 255, 255, 0.5)', color: view === 'list' ? '#fff' : '#2a2f1e', border: view === 'list' ? 'none' : '1px solid rgba(255, 255, 255, 0.4)' }}
           >
             List
           </button>
           <button
             onClick={() => setView('calendar')}
             className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-            style={{ background: view === 'calendar' ? '#6b7a3d' : '#fff', color: view === 'calendar' ? '#fff' : '#2a2f1e', border: view === 'calendar' ? 'none' : '1px solid #e0dcd3' }}
+            style={{ background: view === 'calendar' ? '#6b7a3d' : 'rgba(255, 255, 255, 0.5)', color: view === 'calendar' ? '#fff' : '#2a2f1e', border: view === 'calendar' ? 'none' : '1px solid rgba(255, 255, 255, 0.4)' }}
           >
             Calendar
           </button>
@@ -130,7 +130,7 @@ export default function SchedulePage() {
         {view === 'list' ? (
           <div>
             {grouped.length === 0 ? (
-              <div className="text-center py-16 rounded-2xl border animate-scaleIn" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+              <div className="glass-card text-center py-16 rounded-2xl border animate-scaleIn" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
                 <div className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center" style={{ background: 'rgba(107, 122, 61, 0.08)' }}>
                   <svg className="w-8 h-8" fill="none" stroke="#6b7a3d" viewBox="0 0 24 24" strokeWidth="1.5">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
@@ -150,7 +150,7 @@ export default function SchedulePage() {
                     <h3 className="text-sm font-semibold mb-3" style={{ color: '#6b7a3d' }}>{formatDate(date)}</h3>
                     <div className="space-y-2">
                       {items.map(item => (
-                        <div key={item.id} className="flex items-center gap-4 rounded-xl p-4 border" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+                        <div key={item.id} className="glass-card flex items-center gap-4 rounded-xl p-4 border" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
                           <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: item.type === 'booking' ? 'rgba(107, 122, 61, 0.1)' : item.type === 'program' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(212, 225, 87, 0.2)' }}>
                             <svg className="w-5 h-5" fill="none" stroke={item.type === 'booking' ? '#6b7a3d' : item.type === 'program' ? '#d97706' : '#8b8f24'} viewBox="0 0 24 24" strokeWidth="1.5">
                               <path strokeLinecap="round" strokeLinejoin="round" d={item.type === 'booking' ? 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' : item.type === 'program' ? 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253' : 'M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z'} />
@@ -205,7 +205,7 @@ export default function SchedulePage() {
           </div>
         ) : (
           /* Calendar */
-          <div className="rounded-2xl border p-6" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+          <div className="glass-card rounded-2xl border p-6" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
             <div className="flex items-center justify-between mb-6">
               <button onClick={() => setCalMonth(new Date(calMonth.getFullYear(), calMonth.getMonth() - 1))} className="p-2 rounded-lg border hover:bg-gray-50" style={{ borderColor: '#e0dcd3' }}>
                 <svg className="w-4 h-4" fill="none" stroke="#2a2f1e" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/></svg>

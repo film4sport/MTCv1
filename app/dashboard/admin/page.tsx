@@ -225,7 +225,7 @@ export default function AdminPage() {
             </div>
 
             {/* Gate Code Management */}
-            <div className="rounded-2xl border p-5" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+            <div className="glass-card rounded-2xl border p-5" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'rgba(107, 122, 61, 0.1)' }}>
                   <svg className="w-5 h-5" style={{ color: '#6b7a3d' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -282,7 +282,7 @@ export default function AdminPage() {
                   { label: 'Courts Available', value: `${activeCourts.length}/${courts.length}` },
                 ];
               })().map(card => (
-                <div key={card.label} className="rounded-2xl border p-4" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+                <div key={card.label} className="glass-card rounded-2xl border p-4" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
                   <p className="text-xs mb-1" style={{ color: '#6b7266' }}>{card.label}</p>
                   <p className="text-2xl font-bold" style={{ color: '#2a2f1e' }}>{card.value}</p>
                 </div>
@@ -290,7 +290,7 @@ export default function AdminPage() {
             </div>
 
             {/* Peak Times */}
-            <div className="rounded-2xl border p-5" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+            <div className="glass-card rounded-2xl border p-5" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
               <h4 className="font-medium text-sm mb-4" style={{ color: '#2a2f1e' }}>Peak Times</h4>
               <div className="space-y-3">
                 {analytics.peakTimes.map((pt, i) => (
@@ -307,7 +307,7 @@ export default function AdminPage() {
             </div>
 
             {/* Court Usage */}
-            <div className="rounded-2xl border p-5" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+            <div className="glass-card rounded-2xl border p-5" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
               <h4 className="font-medium text-sm mb-4" style={{ color: '#2a2f1e' }}>Court Usage</h4>
               <div className="grid grid-cols-3 gap-4">
                 {[
@@ -324,7 +324,7 @@ export default function AdminPage() {
             </div>
 
             {/* Revenue Breakdown */}
-            <div className="rounded-2xl border p-5" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+            <div className="glass-card rounded-2xl border p-5" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
               <h4 className="font-medium text-sm mb-4" style={{ color: '#2a2f1e' }}>Revenue Breakdown</h4>
               {/* Stacked bar */}
               <div className="h-6 rounded-full overflow-hidden flex mb-4" style={{ background: '#f5f2eb' }}>
@@ -360,7 +360,7 @@ export default function AdminPage() {
             </div>
 
             {/* Member Activity */}
-            <div className="rounded-2xl border p-5" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+            <div className="glass-card rounded-2xl border p-5" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
               <h4 className="font-medium text-sm mb-4" style={{ color: '#2a2f1e' }}>Member Activity</h4>
               <div className="grid grid-cols-2 gap-4 mb-5">
                 <div className="rounded-xl p-4" style={{ background: '#f5f2eb' }}>
@@ -391,7 +391,7 @@ export default function AdminPage() {
             </div>
 
             {/* Monthly Trends */}
-            <div className="rounded-2xl border p-5" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+            <div className="glass-card rounded-2xl border p-5" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
               <h4 className="font-medium text-sm mb-4" style={{ color: '#2a2f1e' }}>Monthly Trends</h4>
               <div className="flex items-end justify-between gap-2" style={{ height: '160px' }}>
                 {analytics.monthlyTrends.map(month => {
@@ -422,7 +422,7 @@ export default function AdminPage() {
               className="w-full max-w-sm px-4 py-2.5 rounded-xl text-sm border focus:outline-none focus:ring-2 focus:ring-[#6b7a3d]/20 mb-4"
               style={{ borderColor: '#e0dcd3', color: '#2a2f1e' }}
             />
-            <div className="rounded-2xl border overflow-hidden" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+            <div className="glass-card rounded-2xl border overflow-hidden" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
               <table className="w-full">
                 <thead>
                   <tr style={{ background: '#faf8f3' }}>
@@ -514,7 +514,7 @@ export default function AdminPage() {
         {tab === 'courts' && (
           <div className="grid sm:grid-cols-2 gap-4">
             {courts.map(court => (
-              <div key={court.id} className="rounded-2xl border p-5" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+              <div key={court.id} className="glass-card rounded-2xl border p-5" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
                 <div className="flex items-center justify-between mb-3">
                   <h4 className="font-medium" style={{ color: '#2a2f1e' }}>{court.name}</h4>
                   <span className={`text-xs px-2 py-0.5 rounded-full font-medium`} style={{
@@ -547,7 +547,7 @@ export default function AdminPage() {
         {tab === 'announcements' && (
           <div className="space-y-4">
             {/* New Announcement */}
-            <div className="rounded-2xl border p-5" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+            <div className="glass-card rounded-2xl border p-5" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
               <h4 className="font-medium text-sm mb-3" style={{ color: '#2a2f1e' }}>New Announcement</h4>
               <div className="flex gap-3 mb-3">
                 <input
@@ -582,7 +582,7 @@ export default function AdminPage() {
 
             {/* Existing Announcements */}
             {announcements.map(a => (
-              <div key={a.id} className="rounded-2xl border p-4 flex items-center justify-between" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+              <div key={a.id} className="glass-card rounded-2xl border p-4 flex items-center justify-between" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
                 <div className="flex items-center gap-3">
                   <span className="text-lg">{a.type === 'urgent' ? '🔴' : a.type === 'warning' ? '⚠️' : 'ℹ️'}</span>
                   <div>
