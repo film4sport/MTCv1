@@ -11,29 +11,29 @@ export default function Footer() {
             <div className="headline-font text-2xl mb-4" style={{ color: '#e8e4d9' }}>
               Mono Tennis Club
             </div>
-            <p className="text-sm leading-relaxed" style={{ color: 'rgba(232, 228, 217, 0.6)' }}>
+            <p className="text-base leading-relaxed" style={{ color: 'rgba(232, 228, 217, 0.7)' }}>
               A not-for-profit community tennis club promoting the game of tennis in Mono, Ontario.
             </p>
           </div>
 
           {/* Club Links */}
           <div className="md:text-center">
-            <h5 className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: '#e8e4d9' }}>
+            <h5 className="text-base font-bold uppercase tracking-wider mb-5" style={{ color: '#d4e157' }}>
               Club
             </h5>
-            <ul className="space-y-2">
+            <ul className="space-y-3">
               <li>
-                <a href="/info?tab=about" className="text-sm hover:text-white transition-colors duration-300" style={{ color: 'rgba(232, 228, 217, 0.6)' }}>
+                <a href="/info?tab=about" className="text-base hover:text-white transition-colors duration-300" style={{ color: 'rgba(232, 228, 217, 0.7)' }}>
                   About
                 </a>
               </li>
               <li>
-                <a href="/info?tab=membership" className="text-sm hover:text-white transition-colors duration-300" style={{ color: 'rgba(232, 228, 217, 0.6)' }}>
+                <a href="/info?tab=membership" className="text-base hover:text-white transition-colors duration-300" style={{ color: 'rgba(232, 228, 217, 0.7)' }}>
                   Membership
                 </a>
               </li>
               <li>
-                <a href="/info?tab=faq" className="text-sm hover:text-white transition-colors duration-300" style={{ color: 'rgba(232, 228, 217, 0.6)' }}>
+                <a href="/info?tab=faq" className="text-base hover:text-white transition-colors duration-300" style={{ color: 'rgba(232, 228, 217, 0.7)' }}>
                   FAQ
                 </a>
               </li>
@@ -41,11 +41,11 @@ export default function Footer() {
           </div>
 
           {/* Location */}
-          <div className="md:text-right">
-            <h5 className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: '#e8e4d9' }}>
+          <div className="md:text-right min-w-0">
+            <h5 className="text-base font-bold uppercase tracking-wider mb-5" style={{ color: '#d4e157' }}>
               Location
             </h5>
-            <address className="not-italic text-sm leading-relaxed" style={{ color: 'rgba(232, 228, 217, 0.6)' }}>
+            <address className="not-italic text-base leading-relaxed" style={{ color: 'rgba(232, 228, 217, 0.7)' }}>
               754883 Mono Centre Road
               <br />
               Mono, Ontario
@@ -54,8 +54,8 @@ export default function Footer() {
             </address>
             <a
               href="mailto:monotennis.payment@gmail.com"
-              className="text-sm hover:text-white transition-colors duration-300 block mt-3"
-              style={{ color: 'rgba(232, 228, 217, 0.6)' }}
+              className="text-base hover:text-white transition-colors duration-300 block mt-4 break-all"
+              style={{ color: 'rgba(232, 228, 217, 0.7)' }}
             >
               monotennis.payment@gmail.com
             </a>
