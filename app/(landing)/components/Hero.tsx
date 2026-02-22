@@ -95,17 +95,17 @@ export default function Hero() {
       {/* Bottom Bar */}
       <div className="absolute bottom-0 left-0 right-0 px-8 lg:px-16 pb-8 z-10">
         <div
-          className="flex items-center justify-between text-sm font-medium border-t pt-6"
+          className="flex items-center justify-center sm:justify-between text-sm font-medium border-t pt-6"
           style={{ color: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.2)' }}
         >
-          <span>// Tennis</span>
-          <span>// 2026</span>
           <span className="flex items-center gap-2">
             // Scroll Down
             <svg className="w-4 h-4 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
             </svg>
           </span>
+          <span className="hidden sm:inline">// 2026</span>
+          <span className="hidden sm:inline">// Tennis</span>
         </div>
       </div>
     </section>
