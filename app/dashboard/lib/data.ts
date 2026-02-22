@@ -5,16 +5,16 @@ import type { Court, Booking, ClubEvent, Partner, Conversation, Announcement, No
 
 // ─── Members ────────────────────────────────────────────
 export const DEFAULT_MEMBERS: User[] = [
-  { id: 'alex', name: 'Alex Thompson', email: 'member@mtc.ca', role: 'member', ntrp: 3.5, memberSince: '2025-03' },
-  { id: 'mike', name: 'Mike Chen', email: 'mike.chen@mtc.ca', role: 'member', ntrp: 4.0, memberSince: '2024-12' },
-  { id: 'sarah', name: 'Sarah Wilson', email: 'sarah.w@mtc.ca', role: 'member', ntrp: 3.5, memberSince: '2024-06' },
-  { id: 'james', name: 'James Park', email: 'james.p@mtc.ca', role: 'member', ntrp: 4.5, memberSince: '2024-09' },
-  { id: 'emily', name: 'Emily Rodriguez', email: 'emily.r@mtc.ca', role: 'member', ntrp: 3.0, memberSince: '2025-01' },
-  { id: 'david', name: 'David Kim', email: 'david.k@mtc.ca', role: 'member', ntrp: 4.0, memberSince: '2024-11' },
-  { id: 'lisa', name: 'Lisa Thompson', email: 'lisa.t@mtc.ca', role: 'member', ntrp: 3.0, memberSince: '2024-08' },
-  { id: 'ryan', name: "Ryan O'Connor", email: 'ryan.o@mtc.ca', role: 'member', ntrp: 3.5, memberSince: '2025-02' },
-  { id: 'mark', name: 'Mark Taylor', email: 'coach@mtc.ca', role: 'coach', ntrp: 5.0, memberSince: '2023-01' },
-  { id: 'admin', name: 'Admin', email: 'admin@mtc.ca', role: 'admin', memberSince: '2023-01' },
+  { id: 'alex', name: 'Alex Thompson', email: 'member@mtc.ca', role: 'member', ntrp: 3.5, skillLevel: 'intermediate', memberSince: '2025-03', avatar: 'tennis-male-1' },
+  { id: 'mike', name: 'Mike Chen', email: 'mike.chen@mtc.ca', role: 'member', ntrp: 4.0, skillLevel: 'advanced', memberSince: '2024-12', avatar: 'tennis-male-2' },
+  { id: 'sarah', name: 'Sarah Wilson', email: 'sarah.w@mtc.ca', role: 'member', ntrp: 3.5, skillLevel: 'intermediate', memberSince: '2024-06', avatar: 'tennis-female-1' },
+  { id: 'james', name: 'James Park', email: 'james.p@mtc.ca', role: 'member', ntrp: 4.5, skillLevel: 'competitive', memberSince: '2024-09', avatar: 'tennis-male-1' },
+  { id: 'emily', name: 'Emily Rodriguez', email: 'emily.r@mtc.ca', role: 'member', ntrp: 3.0, skillLevel: 'beginner', memberSince: '2025-01', avatar: 'tennis-female-2' },
+  { id: 'david', name: 'David Kim', email: 'david.k@mtc.ca', role: 'member', ntrp: 4.0, skillLevel: 'advanced', memberSince: '2024-11', avatar: 'tennis-male-2' },
+  { id: 'lisa', name: 'Lisa Thompson', email: 'lisa.t@mtc.ca', role: 'member', ntrp: 3.0, skillLevel: 'beginner', memberSince: '2024-08', avatar: 'tennis-female-1' },
+  { id: 'ryan', name: "Ryan O'Connor", email: 'ryan.o@mtc.ca', role: 'member', ntrp: 3.5, skillLevel: 'intermediate', memberSince: '2025-02', avatar: 'tennis-male-1' },
+  { id: 'mark', name: 'Mark Taylor', email: 'coach@mtc.ca', role: 'coach', ntrp: 5.0, skillLevel: 'competitive', memberSince: '2023-01', avatar: 'tennis-male-2' },
+  { id: 'admin', name: 'Admin', email: 'admin@mtc.ca', role: 'admin', skillLevel: 'intermediate', memberSince: '2023-01', avatar: 'tennis-male-1' },
 ];
 
 // ─── Courts ─────────────────────────────────────────────
@@ -251,11 +251,11 @@ export const DEFAULT_EVENTS: ClubEvent[] = [
 
 // ─── Partner Requests ───────────────────────────────────
 export const DEFAULT_PARTNERS: Partner[] = [
-  { id: 'p1', userId: 'sarah', name: 'Sarah Wilson', ntrp: 3.5, availability: 'Tomorrow, 10am', matchType: 'singles', date: 'Tomorrow', time: '10:00 AM', status: 'available' },
-  { id: 'p2', userId: 'mike', name: 'Mike Chen', ntrp: 4.0, availability: 'Saturday, 2pm', matchType: 'doubles', date: 'Saturday', time: '2:00 PM', status: 'available' },
-  { id: 'p3', userId: 'emily', name: 'Emily Rodriguez', ntrp: 3.0, availability: 'Sunday, 9am', matchType: 'any', date: 'Sunday', time: '9:00 AM', status: 'available' },
-  { id: 'p4', userId: 'david', name: 'David Kim', ntrp: 4.0, availability: 'Monday, 6pm', matchType: 'singles', date: 'Monday', time: '6:00 PM', status: 'available' },
-  { id: 'p5', userId: 'ryan', name: "Ryan O'Connor", ntrp: 3.5, availability: 'Wednesday, 4pm', matchType: 'mixed', date: 'Wednesday', time: '4:00 PM', status: 'available' },
+  { id: 'p1', userId: 'sarah', name: 'Sarah Wilson', ntrp: 3.5, skillLevel: 'intermediate', availability: 'Tomorrow, 10am', matchType: 'singles', date: 'Tomorrow', time: '10:00 AM', avatar: 'tennis-female-1', status: 'available' },
+  { id: 'p2', userId: 'mike', name: 'Mike Chen', ntrp: 4.0, skillLevel: 'advanced', availability: 'Saturday, 2pm', matchType: 'doubles', date: 'Saturday', time: '2:00 PM', avatar: 'tennis-male-2', status: 'available' },
+  { id: 'p3', userId: 'emily', name: 'Emily Rodriguez', ntrp: 3.0, skillLevel: 'beginner', availability: 'Sunday, 9am', matchType: 'any', date: 'Sunday', time: '9:00 AM', avatar: 'tennis-female-2', status: 'available' },
+  { id: 'p4', userId: 'david', name: 'David Kim', ntrp: 4.0, skillLevel: 'advanced', availability: 'Monday, 6pm', matchType: 'singles', date: 'Monday', time: '6:00 PM', avatar: 'tennis-male-2', status: 'available' },
+  { id: 'p5', userId: 'ryan', name: "Ryan O'Connor", ntrp: 3.5, skillLevel: 'intermediate', availability: 'Wednesday, 4pm', matchType: 'mixed', date: 'Wednesday', time: '4:00 PM', avatar: 'tennis-male-1', status: 'available' },
 ];
 
 // ─── Conversations ──────────────────────────────────────

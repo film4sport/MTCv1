@@ -148,9 +148,9 @@ test.describe('Dashboard — Profile Page', () => {
     await expect(page.getByText('member@mtc.ca')).toBeVisible();
   });
 
-  test('profile page shows NTRP from user data', async ({ page }) => {
+  test('profile page shows skill level', async ({ page }) => {
     const body = await page.textContent('body');
-    expect(body).toContain('NTRP');
+    expect(body).toContain('Skill Level');
   });
 
   test('profile page shows member badge', async ({ page }) => {

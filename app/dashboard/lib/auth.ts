@@ -1,4 +1,4 @@
-import type { User } from './types';
+import type { User, SkillLevel } from './types';
 import { supabase } from '../../lib/supabase';
 
 /**
@@ -25,6 +25,7 @@ export async function signIn(email: string, password: string): Promise<User | nu
     role: profile.role as User['role'],
     status: (profile.status as User['status']) || 'active',
     ntrp: profile.ntrp ?? undefined,
+    skillLevel: (profile.skill_level as SkillLevel) ?? undefined,
     memberSince: profile.member_since ?? undefined,
     avatar: profile.avatar ?? undefined,
   };
@@ -103,6 +104,7 @@ export async function getCurrentUser(): Promise<User | null> {
     role: profile.role as User['role'],
     status: (profile.status as User['status']) || 'active',
     ntrp: profile.ntrp ?? undefined,
+    skillLevel: (profile.skill_level as SkillLevel) ?? undefined,
     memberSince: profile.member_since ?? undefined,
     avatar: profile.avatar ?? undefined,
   };

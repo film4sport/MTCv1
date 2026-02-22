@@ -1,18 +1,34 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useApp } from '../lib/store';
 import { useToast } from '../lib/toast';
 import DashboardHeader from '../components/DashboardHeader';
+import { AvatarDisplay, AVATAR_OPTIONS, AVATAR_SVGS } from '../lib/avatars';
+import type { SkillLevel } from '../lib/types';
 import * as db from '../lib/db';
 
-const NTRP_OPTIONS = [1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0];
+const SKILL_LEVELS: { value: SkillLevel; label: string; color: string; bg: string }[] = [
+  { value: 'beginner', label: 'Beginner', color: '#16a34a', bg: 'rgba(34, 197, 94, 0.1)' },
+  { value: 'intermediate', label: 'Intermediate', color: '#3BAFDA', bg: 'rgba(59, 175, 218, 0.1)' },
+  { value: 'advanced', label: 'Advanced', color: '#d97706', bg: 'rgba(245, 158, 11, 0.1)' },
+  { value: 'competitive', label: 'Competitive', color: '#dc2626', bg: 'rgba(239, 68, 68, 0.1)' },
+];
 
 export default function ProfilePage() {
-  const { currentUser, notificationPreferences, setNotificationPreferences } = useApp();
+  const { currentUser, updateCurrentUser, notificationPreferences, setNotificationPreferences } = useApp();
   const { showToast } = useToast();
-  const [editingNtrp, setEditingNtrp] = useState(false);
-  const [ntrpValue, setNtrpValue] = useState(currentUser?.ntrp ?? 3.5);
+  const [showAvatarPicker, setShowAvatarPicker] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const avatarModalRef = useRef<HTMLDivElement>(null);
+
+  // Esc key closes avatar picker
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape' && showAvatarPicker) setShowAvatarPicker(false); };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [showAvatarPicker]);
 
   if (!currentUser) {
     return (
@@ -22,21 +38,60 @@ export default function ProfilePage() {
     );
   }
 
-  const ntrp = currentUser.ntrp ?? 3.5;
-  const skillLevel = ntrp <= 2.5 ? 'Beginner' : ntrp <= 4.0 ? 'Intermediate' : ntrp <= 5.5 ? 'Advanced' : 'Expert';
+  const skillLevel = currentUser.skillLevel ?? 'intermediate';
+  const currentSkill = SKILL_LEVELS.find(s => s.value === skillLevel) ?? SKILL_LEVELS[1];
 
-  const saveNtrp = async () => {
+  const saveSkillLevel = async (level: SkillLevel) => {
     if (!currentUser) return;
     try {
-      await db.updateProfile(currentUser.id, { ntrp: ntrpValue });
-      // Update localStorage cache so next page load picks up the new value
-      const updated = { ...currentUser, ntrp: ntrpValue };
-      localStorage.setItem('mtc-current-user', JSON.stringify(updated));
-      setEditingNtrp(false);
-      showToast('NTRP rating updated');
+      await db.updateProfile(currentUser.id, { skill_level: level });
+      updateCurrentUser({ skillLevel: level });
+      showToast('Skill level updated');
     } catch (err) {
       console.error('[MTC Supabase]', err);
-      showToast('Failed to update rating. Please try again.', 'error');
+      showToast('Failed to update skill level. Please try again.', 'error');
+    }
+  };
+
+  const selectAvatar = async (avatarId: string) => {
+    if (!currentUser) return;
+    try {
+      await db.updateProfile(currentUser.id, { avatar: avatarId });
+      updateCurrentUser({ avatar: avatarId });
+      setShowAvatarPicker(false);
+      showToast('Avatar updated!');
+    } catch (err) {
+      console.error('[MTC Supabase]', err);
+      showToast('Failed to update avatar. Please try again.', 'error');
+    }
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !currentUser) return;
+
+    if (!file.type.startsWith('image/')) {
+      showToast('Please select an image file', 'error');
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      showToast('Image must be under 2MB', 'error');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const url = await db.uploadAvatar(currentUser.id, file);
+      await db.updateProfile(currentUser.id, { avatar: url });
+      updateCurrentUser({ avatar: url });
+      setShowAvatarPicker(false);
+      showToast('Photo uploaded!');
+    } catch (err) {
+      console.error('[MTC Supabase]', err);
+      showToast('Failed to upload photo. Please try again.', 'error');
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
@@ -49,10 +104,8 @@ export default function ProfilePage() {
         {/* Profile Card */}
         <div className="rounded-2xl border p-6 section-card" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
           <div className="flex items-center gap-5">
-            <div className="relative group cursor-pointer">
-              <div className="w-20 h-20 rounded-full flex items-center justify-center text-2xl font-bold" style={{ background: 'rgba(107, 122, 61, 0.1)', color: '#6b7a3d' }}>
-                {currentUser.name.split(' ').map(n => n[0]).join('')}
-              </div>
+            <div className="relative group cursor-pointer" onClick={() => setShowAvatarPicker(true)}>
+              <AvatarDisplay avatar={currentUser.avatar} name={currentUser.name} size={80} />
               <div className="absolute inset-0 rounded-full flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
                 <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"/>
@@ -88,61 +141,27 @@ export default function ProfilePage() {
               <p className="text-xs" style={{ color: '#6b7266' }}>Email</p>
               <p className="text-sm font-medium" style={{ color: '#2a2f1e' }}>{currentUser.email}</p>
             </div>
-            <div className="flex items-center justify-between py-2">
-              <div>
-                <p className="text-xs" style={{ color: '#6b7266' }}>Player Rating</p>
-                {editingNtrp ? (
-                  <div className="flex items-center gap-2 mt-1">
-                    <select
-                      value={ntrpValue}
-                      onChange={(e) => setNtrpValue(parseFloat(e.target.value))}
-                      className="px-2 py-1 rounded-lg text-sm border focus:outline-none focus:ring-2 focus:ring-[#6b7a3d]/20"
-                      style={{ borderColor: '#e0dcd3', color: '#2a2f1e' }}
-                    >
-                      {NTRP_OPTIONS.map(v => (
-                        <option key={v} value={v}>{v}</option>
-                      ))}
-                    </select>
-                    <button onClick={saveNtrp} className="text-xs px-3 py-1 rounded-lg font-medium text-white" style={{ background: '#6b7a3d' }}>Save</button>
-                    <button onClick={() => setEditingNtrp(false)} className="text-xs px-2 py-1 rounded-lg" style={{ color: '#6b7266' }}>Cancel</button>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <p className="text-sm font-medium" style={{ color: '#2a2f1e' }}>NTRP {ntrp}</p>
-                    <span className="text-[0.65rem] px-2 py-0.5 rounded-full font-medium" style={{ background: 'rgba(107, 122, 61, 0.1)', color: '#6b7a3d' }}>{skillLevel}</span>
-                  </div>
-                )}
+            <div className="py-2">
+              <p className="text-xs mb-2" style={{ color: '#6b7266' }}>Skill Level</p>
+              <div className="flex flex-wrap gap-2">
+                {SKILL_LEVELS.map(level => (
+                  <button
+                    key={level.value}
+                    onClick={() => saveSkillLevel(level.value)}
+                    className="px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 btn-press"
+                    style={{
+                      background: skillLevel === level.value ? level.color : level.bg,
+                      color: skillLevel === level.value ? '#fff' : level.color,
+                      border: `1.5px solid ${skillLevel === level.value ? level.color : 'transparent'}`,
+                    }}
+                  >
+                    {level.label}
+                  </button>
+                ))}
               </div>
-              <button onClick={() => { setNtrpValue(ntrp); setEditingNtrp(!editingNtrp); }}>
-                <svg className="w-4 h-4" fill="none" stroke="#6b7266" viewBox="0 0 24 24" strokeWidth="1.5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125"/>
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Availability */}
-        <div className="rounded-2xl border p-6 section-card" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
-          <h3 className="font-semibold mb-4" style={{ color: '#2a2f1e' }}>Availability</h3>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between py-2 border-b" style={{ borderColor: '#f0ede6' }}>
-              <div>
-                <p className="text-xs" style={{ color: '#6b7266' }}>Preferred Times</p>
-                <p className="text-sm font-medium" style={{ color: '#2a2f1e' }}>Mornings, Evenings</p>
-              </div>
-              <svg className="w-4 h-4" fill="none" stroke="#6b7266" viewBox="0 0 24 24" strokeWidth="1.5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/>
-              </svg>
-            </div>
-            <div className="flex items-center justify-between py-2">
-              <div>
-                <p className="text-xs" style={{ color: '#6b7266' }}>Play Style</p>
-                <p className="text-sm font-medium" style={{ color: '#2a2f1e' }}>Singles, Mixed Doubles</p>
-              </div>
-              <svg className="w-4 h-4" fill="none" stroke="#6b7266" viewBox="0 0 24 24" strokeWidth="1.5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/>
-              </svg>
+              <p className="text-xs mt-2" style={{ color: '#6b7266' }}>
+                Your skill level helps match you with the right partners
+              </p>
             </div>
           </div>
         </div>
@@ -169,6 +188,62 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
+
+      {/* Avatar Picker Modal */}
+      {showAvatarPicker && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.4)' }} onClick={() => setShowAvatarPicker(false)} role="dialog" aria-modal="true" aria-labelledby="avatar-modal-title">
+          <div ref={avatarModalRef} className="rounded-2xl p-6 w-full max-w-sm" style={{ background: '#fff' }} onClick={e => e.stopPropagation()}>
+            <h3 id="avatar-modal-title" className="font-semibold text-lg mb-4" style={{ color: '#2a2f1e' }}>Choose Avatar</h3>
+
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              {AVATAR_OPTIONS.map(opt => (
+                <button
+                  key={opt.id}
+                  onClick={() => selectAvatar(opt.id)}
+                  className="p-3 rounded-xl border-2 transition-all duration-200 hover:shadow-md flex flex-col items-center gap-2"
+                  style={{
+                    borderColor: currentUser.avatar === opt.id ? '#6b7a3d' : '#e0dcd3',
+                    background: currentUser.avatar === opt.id ? 'rgba(107, 122, 61, 0.05)' : '#fff',
+                  }}
+                >
+                  <div
+                    className="w-16 h-16 rounded-full overflow-hidden"
+                    dangerouslySetInnerHTML={{ __html: AVATAR_SVGS[opt.id] }}
+                  />
+                  <span className="text-xs font-medium" style={{ color: '#6b7266' }}>{opt.label}</span>
+                </button>
+              ))}
+            </div>
+
+            <div className="border-t pt-4 mb-4" style={{ borderColor: '#f0ede6' }}>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleFileUpload}
+              />
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className="w-full py-3 rounded-xl text-sm font-medium transition-all duration-200 hover:shadow-md btn-press disabled:opacity-50"
+                style={{ background: 'rgba(107, 122, 61, 0.08)', color: '#6b7a3d', border: '1px dashed #6b7a3d' }}
+              >
+                {uploading ? 'Uploading...' : 'Upload Your Own Photo'}
+              </button>
+              <p className="text-[0.65rem] text-center mt-2" style={{ color: '#6b7266' }}>Max 2MB, JPG or PNG</p>
+            </div>
+
+            <button
+              onClick={() => setShowAvatarPicker(false)}
+              className="w-full py-3 rounded-xl text-sm font-medium"
+              style={{ background: '#f5f2eb', color: '#2a2f1e' }}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

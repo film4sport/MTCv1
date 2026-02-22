@@ -1,13 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { signUp, signIn } from '../../dashboard/lib/auth';
 import { sendWelcomeMessage } from '../../dashboard/lib/db';
 import { membershipTypes, signupMembershipTypes, waiverText, acknowledgementText } from '../data';
 
 export default function MembershipTab() {
+  const router = useRouter();
   const waiverRef = useRef<HTMLDivElement>(null);
   const ackRef = useRef<HTMLDivElement>(null);
 
   const [signupStep, setSignupStep] = useState(0);
+  const [redirectCount, setRedirectCount] = useState(5);
   const [signupData, setSignupData] = useState({ membershipType: '', name: '', email: '', password: '' });
   const [waiverAccepted, setWaiverAccepted] = useState(false);
   const [waiverScrolled, setWaiverScrolled] = useState(false);
@@ -57,6 +60,22 @@ export default function MembershipTab() {
     return () => { clearTimeout(timer); observer.disconnect(); };
   }, [signupStep]);
 
+  // Auto-redirect to dashboard after signup completion
+  useEffect(() => {
+    if (signupStep !== 5) return;
+    const interval = setInterval(() => {
+      setRedirectCount(prev => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          router.push('/dashboard');
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [signupStep, router]);
+
   const handleWaiverScroll = () => {
     if (waiverRef.current) {
       const { scrollTop, scrollHeight, clientHeight } = waiverRef.current;
@@ -82,12 +101,27 @@ export default function MembershipTab() {
     try {
       const { user, error } = await signUp(signupData.email, signupData.password, signupData.name, signupData.membershipType);
       if (error || !user) {
-        setSignupError(error || 'Signup failed. Please try again.');
+        // Map Supabase auth errors to user-friendly messages
+        const msg = error?.toLowerCase() || '';
+        if (msg.includes('already registered') || msg.includes('already been registered')) {
+          setSignupError('This email is already registered. Please log in instead.');
+        } else if (msg.includes('password')) {
+          setSignupError('Password is too weak. Use at least 8 characters with uppercase, lowercase, and a number.');
+        } else if (msg.includes('valid email') || msg.includes('invalid')) {
+          setSignupError('Please enter a valid email address.');
+        } else {
+          setSignupError(error || 'Signup failed. Please try again.');
+        }
         setSignupLoading(false);
         return;
       }
 
-      const loggedInUser = await signIn(signupData.email, signupData.password);
+      // Retry signIn with short delay — DB trigger may need a moment to create profile
+      let loggedInUser = await signIn(signupData.email, signupData.password);
+      if (!loggedInUser) {
+        await new Promise(r => setTimeout(r, 1500));
+        loggedInUser = await signIn(signupData.email, signupData.password);
+      }
       if (!loggedInUser) {
         console.error('[MTC] signIn after signUp returned null — profile may not be ready yet');
       }
@@ -584,6 +618,9 @@ export default function MembershipTab() {
                     Back to Home
                   </a>
                 </div>
+                <p className="text-xs mt-4" style={{ color: '#6b7266' }}>
+                  Redirecting to dashboard in {redirectCount}...
+                </p>
               </div>
             )}
           </div>
