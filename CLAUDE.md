@@ -56,6 +56,9 @@ When new project rules or conventions are established, add them to this file AND
   - Best for: real-time page inspection, verifying hover states, checking interactive elements
 - **Workflow**: Playwright for automated screenshots + BDG for live visual spot-checks
 
+## #12: NEVER USE preview_start / preview_* (next-server)
+**Use Claude in Chrome (BDG) for ALL visual verification.** NEVER use `preview_start`, `preview_screenshot`, `preview_snapshot`, `preview_eval`, or any other `preview_*` MCP tools. The user runs `next dev` themselves — BDG connects to localhost:3000 directly. Do NOT start dev servers via preview tools or Bash.
+
 ## #11: MAINTENANCE CONVENTIONS
 - **Supabase schema**: `supabase/schema.sql` is the single source of truth. All DB changes go there FIRST, then apply to Supabase. No ad-hoc ALTER TABLEs.
 - **localStorage is a cache, not a source of truth**: Data flow is Supabase → localStorage → React state. New features must follow the same `store.tsx` pattern: optimistic update → Supabase write → rollback on failure.

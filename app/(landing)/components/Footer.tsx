@@ -5,10 +5,10 @@ export default function Footer() {
     <footer id="contact" className="text-white py-16 fade-in texture-overlay" style={{ backgroundColor: '#1a1f12' }}>
       <div className="max-w-7xl mx-auto px-8 lg:px-16">
         {/* Top Row */}
-        <div className="grid grid-cols-2 md:grid-cols-[1.2fr_0.8fr_1.5fr] gap-8 md:gap-12 mb-16">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-8 md:gap-12 mb-16">
           {/* Description */}
           <div className="col-span-2 md:col-span-1">
-            <div className="headline-font text-xl mb-4" style={{ color: '#e8e4d9' }}>
+            <div className="headline-font text-2xl mb-4" style={{ color: '#e8e4d9' }}>
               Mono Tennis Club
             </div>
             <p className="text-sm leading-relaxed" style={{ color: 'rgba(232, 228, 217, 0.6)' }}>
@@ -17,23 +17,23 @@ export default function Footer() {
           </div>
 
           {/* Club Links */}
-          <div>
-            <h5 className="font-semibold mb-4" style={{ color: '#e8e4d9' }}>
+          <div className="md:text-center">
+            <h5 className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: '#e8e4d9' }}>
               Club
             </h5>
             <ul className="space-y-2">
               <li>
-                <a href="/info?tab=about" className="text-sm hover:opacity-80 transition-opacity" style={{ color: 'rgba(232, 228, 217, 0.6)' }}>
+                <a href="/info?tab=about" className="text-sm hover:text-white transition-colors duration-300" style={{ color: 'rgba(232, 228, 217, 0.6)' }}>
                   About
                 </a>
               </li>
               <li>
-                <a href="/info?tab=membership" className="text-sm hover:opacity-80 transition-opacity" style={{ color: 'rgba(232, 228, 217, 0.6)' }}>
+                <a href="/info?tab=membership" className="text-sm hover:text-white transition-colors duration-300" style={{ color: 'rgba(232, 228, 217, 0.6)' }}>
                   Membership
                 </a>
               </li>
               <li>
-                <a href="/info?tab=faq" className="text-sm hover:opacity-80 transition-opacity" style={{ color: 'rgba(232, 228, 217, 0.6)' }}>
+                <a href="/info?tab=faq" className="text-sm hover:text-white transition-colors duration-300" style={{ color: 'rgba(232, 228, 217, 0.6)' }}>
                   FAQ
                 </a>
               </li>
@@ -41,8 +41,8 @@ export default function Footer() {
           </div>
 
           {/* Location */}
-          <div>
-            <h5 className="font-semibold mb-4" style={{ color: '#e8e4d9' }}>
+          <div className="md:text-right">
+            <h5 className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: '#e8e4d9' }}>
               Location
             </h5>
             <address className="not-italic text-sm leading-relaxed" style={{ color: 'rgba(232, 228, 217, 0.6)' }}>
@@ -54,7 +54,7 @@ export default function Footer() {
             </address>
             <a
               href="mailto:monotennis.payment@gmail.com"
-              className="text-sm hover:opacity-80 transition-opacity block mt-3"
+              className="text-sm hover:text-white transition-colors duration-300 block mt-3"
               style={{ color: 'rgba(232, 228, 217, 0.6)' }}
             >
               monotennis.payment@gmail.com
