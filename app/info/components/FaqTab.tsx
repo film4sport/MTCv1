@@ -37,7 +37,8 @@ export default function FaqTab() {
       <div className="max-w-7xl mx-auto">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16">
           <div className="fade-in-left">
-            <h3 className="font-semibold text-lg mb-6" style={{ color: '#2a2f1e' }}>Frequently Asked Questions</h3>
+            <h3 className="font-semibold text-lg mb-1" style={{ color: '#2a2f1e' }}>Frequently Asked Questions</h3>
+            <p className="text-sm mb-6" style={{ color: '#6b7266' }}>All the A&apos;s to Your Q&apos;s</p>
 
             <div className="mb-6">
               <input
