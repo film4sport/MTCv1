@@ -50,10 +50,10 @@ export default function Hero() {
 
           {/* Main Headline */}
           <h1
-            className="headline-font text-5xl md:text-6xl lg:text-[4.5rem] leading-[1.1] mb-6"
+            className="headline-font text-5xl md:text-6xl lg:text-[4.5rem] leading-[1.1] mb-6 hero-shimmer"
             style={{ color: '#e8e4d9', textShadow: '0 2px 30px rgba(0, 0, 0, 0.4)' }}
           >
-            Your Court<br />is Waiting
+            <span>Your Court</span><br /><span>is Waiting</span>
           </h1>
 
           {/* Subtext */}
