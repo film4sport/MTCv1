@@ -86,8 +86,6 @@ export default function Hero() {
             </a>
           </div>
 
-          {/* Divider Line */}
-          <div className="divider-line w-full max-w-2xl"></div>
         </div>
 
       </div>
@@ -95,8 +93,8 @@ export default function Hero() {
       {/* Bottom Bar */}
       <div className="absolute bottom-0 left-0 right-0 px-8 lg:px-16 pb-8 z-10">
         <div
-          className="flex items-center justify-center sm:justify-between text-sm font-medium border-t pt-6"
-          style={{ color: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.2)' }}
+          className="flex items-center justify-center sm:justify-between text-sm font-medium pt-6"
+          style={{ color: 'rgba(255, 255, 255, 0.6)', borderTop: '1px solid rgba(255, 255, 255, 0.15)' }}
         >
           <span className="flex items-center gap-2">
             // Scroll Down
