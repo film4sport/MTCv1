@@ -41,7 +41,7 @@ export async function signUp(
   password: string,
   name: string,
   membershipType?: string,
-): Promise<{ user: User | null; error: string | null }> {
+): Promise<{ user: User | null; error: string | null; emailConfirmRequired?: boolean }> {
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
@@ -50,6 +50,11 @@ export async function signUp(
 
   if (error) return { user: null, error: error.message };
   if (!data.user) return { user: null, error: 'Signup failed' };
+
+  // Supabase returns identities=[] when email confirmation is required and
+  // the email is already registered but unconfirmed. It also sets
+  // session=null when confirmation is pending.
+  const needsConfirmation = !data.session;
 
   return {
     user: {
@@ -60,6 +65,7 @@ export async function signUp(
       memberSince: new Date().toISOString().slice(0, 7),
     },
     error: null,
+    emailConfirmRequired: needsConfirmation,
   };
 }
 

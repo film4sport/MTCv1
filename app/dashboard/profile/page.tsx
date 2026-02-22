@@ -41,7 +41,6 @@ export default function ProfilePage() {
   }
 
   const skillLevel = currentUser.skillLevel ?? 'intermediate';
-  const currentSkill = SKILL_LEVELS.find(s => s.value === skillLevel) ?? SKILL_LEVELS[1];
 
   const saveSkillLevel = async (level: SkillLevel) => {
     if (!currentUser) return;
