@@ -17,6 +17,7 @@ export default function MembershipTab() {
   const [ackScrolled, setAckScrolled] = useState(false);
   const [signupError, setSignupError] = useState('');
   const [signupLoading, setSignupLoading] = useState(false);
+  const [emailConfirmPending, setEmailConfirmPending] = useState(false);
   const [existingProfile, setExistingProfile] = useState<{ name: string; email: string; role?: string; status?: string } | null>(null);
 
   // Load existing profile from localStorage
@@ -60,9 +61,9 @@ export default function MembershipTab() {
     return () => { clearTimeout(timer); observer.disconnect(); };
   }, [signupStep]);
 
-  // Auto-redirect to dashboard after signup completion
+  // Auto-redirect to dashboard after signup completion (skip if email verification pending)
   useEffect(() => {
-    if (signupStep !== 5) return;
+    if (signupStep !== 5 || emailConfirmPending) return;
     const interval = setInterval(() => {
       setRedirectCount(prev => {
         if (prev <= 1) {
@@ -74,7 +75,7 @@ export default function MembershipTab() {
       });
     }, 1000);
     return () => clearInterval(interval);
-  }, [signupStep, router]);
+  }, [signupStep, router, emailConfirmPending]);
 
   const handleWaiverScroll = () => {
     if (waiverRef.current) {
@@ -99,7 +100,7 @@ export default function MembershipTab() {
     setSignupLoading(true);
 
     try {
-      const { user, error } = await signUp(signupData.email, signupData.password, signupData.name, signupData.membershipType);
+      const { user, error, emailConfirmRequired } = await signUp(signupData.email, signupData.password, signupData.name, signupData.membershipType);
       if (error || !user) {
         // Map Supabase auth errors to user-friendly messages
         const msg = error?.toLowerCase() || '';
@@ -116,6 +117,15 @@ export default function MembershipTab() {
         return;
       }
 
+      // If Supabase requires email confirmation, show "check your email" step
+      if (emailConfirmRequired) {
+        setEmailConfirmPending(true);
+        setSignupLoading(false);
+        setSignupStep(5);
+        return;
+      }
+
+      // No email confirmation required — sign in directly
       // Retry signIn with short delay — DB trigger may need a moment to create profile
       let loggedInUser = await signIn(signupData.email, signupData.password);
       if (!loggedInUser) {
@@ -581,46 +591,96 @@ export default function MembershipTab() {
             {/* Step 5: Confirmation */}
             {signupStep === 5 && (
               <div className="fade-in text-center">
-                <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: 'rgba(107, 122, 61, 0.15)' }}>
-                  <svg className="w-8 h-8" style={{ color: '#6b7a3d' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                <h3 className="headline-font text-2xl mb-3" style={{ color: '#2a2f1e' }}>
-                  Welcome to Mono Tennis Club, {signupData.name.split(' ')[0]}!
-                </h3>
-                <p className="text-sm mb-10" style={{ color: '#6b7266' }}>
-                  Your profile has been created. We&apos;ll confirm your payment and activate your membership shortly.
-                </p>
+                {emailConfirmPending ? (
+                  <>
+                    {/* Email verification required */}
+                    <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: 'rgba(59, 175, 218, 0.15)' }}>
+                      <svg className="w-8 h-8" style={{ color: '#3BAFDA' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    <h3 className="headline-font text-2xl mb-3" style={{ color: '#2a2f1e' }}>
+                      Check Your Email
+                    </h3>
+                    <p className="text-sm mb-6" style={{ color: '#6b7266' }}>
+                      We&apos;ve sent a verification link to <strong style={{ color: '#2a2f1e' }}>{signupData.email}</strong>.
+                      Click the link to verify your account, then log in to get started.
+                    </p>
 
-                <div className="rounded-xl p-6 text-left" style={{ backgroundColor: '#faf8f3', border: '1px solid #e0dcd3' }}>
-                  <h4 className="font-semibold text-sm mb-4" style={{ color: '#999' }}>Your Profile</h4>
-                  <div className="space-y-3">
-                    {[
-                      { label: 'Name', value: signupData.name },
-                      { label: 'Email', value: signupData.email },
-                      { label: 'Membership', value: getMembershipLabel() },
-                      { label: 'Waiver', value: 'Signed' },
-                    ].map((row, i) => (
-                      <div key={i} className="flex items-center justify-between py-2" style={i < 3 ? { borderBottom: '1px solid #e0dcd3' } : {}}>
-                        <span className="text-sm" style={{ color: '#999' }}>{row.label}</span>
-                        <span className="text-sm font-medium" style={{ color: '#2a2f1e' }}>{row.value}</span>
+                    <div className="rounded-xl p-6 text-left" style={{ backgroundColor: '#faf8f3', border: '1px solid #e0dcd3' }}>
+                      <h4 className="font-semibold text-sm mb-4" style={{ color: '#999' }}>Your Profile</h4>
+                      <div className="space-y-3">
+                        {[
+                          { label: 'Name', value: signupData.name },
+                          { label: 'Email', value: signupData.email },
+                          { label: 'Membership', value: getMembershipLabel() },
+                          { label: 'Waiver', value: 'Signed' },
+                        ].map((row, i) => (
+                          <div key={i} className="flex items-center justify-between py-2" style={i < 3 ? { borderBottom: '1px solid #e0dcd3' } : {}}>
+                            <span className="text-sm" style={{ color: '#999' }}>{row.label}</span>
+                            <span className="text-sm font-medium" style={{ color: '#2a2f1e' }}>{row.value}</span>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                </div>
+                    </div>
 
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8">
-                  <a href="/dashboard" className="inline-block px-8 py-3 rounded-full text-sm font-semibold transition-all hover:opacity-90" style={{ backgroundColor: '#6b7a3d', color: '#fff' }}>
-                    Go to Dashboard
-                  </a>
-                  <a href="/" className="inline-block px-8 py-3 rounded-full text-sm font-semibold transition-all hover:opacity-90" style={{ backgroundColor: '#faf8f3', color: '#6b7a3d', border: '1px solid #e0dcd3' }}>
-                    Back to Home
-                  </a>
-                </div>
-                <p className="text-xs mt-4" style={{ color: '#6b7266' }}>
-                  Redirecting to dashboard in {redirectCount}...
-                </p>
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8">
+                      <a href="/login" className="inline-block px-8 py-3 rounded-full text-sm font-semibold transition-all hover:opacity-90" style={{ backgroundColor: '#6b7a3d', color: '#fff' }}>
+                        Go to Login
+                      </a>
+                      <a href="/" className="inline-block px-8 py-3 rounded-full text-sm font-semibold transition-all hover:opacity-90" style={{ backgroundColor: '#faf8f3', color: '#6b7a3d', border: '1px solid #e0dcd3' }}>
+                        Back to Home
+                      </a>
+                    </div>
+                    <p className="text-xs mt-4" style={{ color: '#6b7266' }}>
+                      Didn&apos;t receive it? Check your spam folder.
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    {/* Direct signup — no email confirmation needed */}
+                    <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: 'rgba(107, 122, 61, 0.15)' }}>
+                      <svg className="w-8 h-8" style={{ color: '#6b7a3d' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <h3 className="headline-font text-2xl mb-3" style={{ color: '#2a2f1e' }}>
+                      Welcome to Mono Tennis Club, {signupData.name.split(' ')[0]}!
+                    </h3>
+                    <p className="text-sm mb-10" style={{ color: '#6b7266' }}>
+                      Your profile has been created. We&apos;ll confirm your payment and activate your membership shortly.
+                    </p>
+
+                    <div className="rounded-xl p-6 text-left" style={{ backgroundColor: '#faf8f3', border: '1px solid #e0dcd3' }}>
+                      <h4 className="font-semibold text-sm mb-4" style={{ color: '#999' }}>Your Profile</h4>
+                      <div className="space-y-3">
+                        {[
+                          { label: 'Name', value: signupData.name },
+                          { label: 'Email', value: signupData.email },
+                          { label: 'Membership', value: getMembershipLabel() },
+                          { label: 'Waiver', value: 'Signed' },
+                        ].map((row, i) => (
+                          <div key={i} className="flex items-center justify-between py-2" style={i < 3 ? { borderBottom: '1px solid #e0dcd3' } : {}}>
+                            <span className="text-sm" style={{ color: '#999' }}>{row.label}</span>
+                            <span className="text-sm font-medium" style={{ color: '#2a2f1e' }}>{row.value}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8">
+                      <a href="/dashboard" className="inline-block px-8 py-3 rounded-full text-sm font-semibold transition-all hover:opacity-90" style={{ backgroundColor: '#6b7a3d', color: '#fff' }}>
+                        Go to Dashboard
+                      </a>
+                      <a href="/" className="inline-block px-8 py-3 rounded-full text-sm font-semibold transition-all hover:opacity-90" style={{ backgroundColor: '#faf8f3', color: '#6b7a3d', border: '1px solid #e0dcd3' }}>
+                        Back to Home
+                      </a>
+                    </div>
+                    <p className="text-xs mt-4" style={{ color: '#6b7266' }}>
+                      Redirecting to dashboard in {redirectCount}...
+                    </p>
+                  </>
+                )}
               </div>
             )}
           </div>

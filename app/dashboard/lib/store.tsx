@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef, type ReactNode } from 'react';
 import type { User, Court, Booking, ClubEvent, Partner, Conversation, Announcement, Notification, WeatherData, AdminAnalytics, CoachingProgram, NotificationPreferences } from './types';
 import { CLUB_LOCATION, DEFAULT_NOTIFICATION_PREFS } from './types';
 import { DEFAULT_MEMBERS, DEFAULT_COURTS, DEFAULT_BOOKINGS, DEFAULT_EVENTS, DEFAULT_PARTNERS, DEFAULT_CONVERSATIONS, DEFAULT_ANNOUNCEMENTS, DEFAULT_NOTIFICATIONS, DEFAULT_ANALYTICS, DEFAULT_PROGRAMS } from './data';
@@ -8,7 +8,7 @@ import { generateId } from './utils';
 import { signIn, signOut, getCurrentUser } from './auth';
 import { useToast } from './toast';
 import { reportError } from '../../lib/errorReporter';
-import { supabase } from '../../lib/supabase';
+import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import * as db from './db';
 
 interface AppState {
@@ -96,22 +96,28 @@ function saveJSON(key: string, value: unknown) {
   } catch { /* ignore quota errors */ }
 }
 
+/** When Supabase is configured, return empty array for empty results (real empty state).
+ *  When NOT configured (demo/dev), return demo data as fallback. */
+function demoFallback<T>(data: T[], demo: T[]): T[] {
+  return data.length ? data : (isSupabaseConfigured ? [] : demo);
+}
+
 export function AppProvider({ children }: { children: ReactNode }) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [members, setMembers] = useState<User[]>(DEFAULT_MEMBERS);
+  const [members, setMembers] = useState<User[]>(isSupabaseConfigured ? [] : DEFAULT_MEMBERS);
   const [courts, setCourts] = useState<Court[]>(DEFAULT_COURTS);
-  const [bookings, setBookings] = useState<Booking[]>(DEFAULT_BOOKINGS);
-  const [events, setEvents] = useState<ClubEvent[]>(DEFAULT_EVENTS);
-  const [partners, setPartners] = useState<Partner[]>(DEFAULT_PARTNERS);
-  const [conversations, setConversations] = useState<Conversation[]>(DEFAULT_CONVERSATIONS);
-  const [announcements, setAnnouncements] = useState<Announcement[]>(DEFAULT_ANNOUNCEMENTS);
-  const [notifications, setNotifications] = useState<Notification[]>(DEFAULT_NOTIFICATIONS);
+  const [bookings, setBookings] = useState<Booking[]>(isSupabaseConfigured ? [] : DEFAULT_BOOKINGS);
+  const [events, setEvents] = useState<ClubEvent[]>(isSupabaseConfigured ? [] : DEFAULT_EVENTS);
+  const [partners, setPartners] = useState<Partner[]>(isSupabaseConfigured ? [] : DEFAULT_PARTNERS);
+  const [conversations, setConversations] = useState<Conversation[]>(isSupabaseConfigured ? [] : DEFAULT_CONVERSATIONS);
+  const [announcements, setAnnouncements] = useState<Announcement[]>(isSupabaseConfigured ? [] : DEFAULT_ANNOUNCEMENTS);
+  const [notifications, setNotifications] = useState<Notification[]>(isSupabaseConfigured ? [] : DEFAULT_NOTIFICATIONS);
   const [weather, setWeather] = useState<WeatherData>({
     tempC: 0, tempF: 32, condition: 'sunny', wind: 0, humidity: 0, description: 'Loading...', lastUpdated: null,
   });
   const [analytics] = useState<AdminAnalytics>(DEFAULT_ANALYTICS);
-  const [programs, setPrograms] = useState<CoachingProgram[]>(DEFAULT_PROGRAMS);
+  const [programs, setPrograms] = useState<CoachingProgram[]>(isSupabaseConfigured ? [] : DEFAULT_PROGRAMS);
   const [notificationPreferences, setNotificationPreferences] = useState<NotificationPreferences>(DEFAULT_NOTIFICATION_PREFS);
   const { showToast } = useToast();
 
@@ -141,14 +147,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
         ]);
 
         // Overwrite state with Supabase data (source of truth)
-        setMembers(members.length ? members : DEFAULT_MEMBERS);
+        setMembers(demoFallback(members, DEFAULT_MEMBERS));
         setBookings(bookings);
-        setEvents(events.length ? events : DEFAULT_EVENTS);
-        setPartners(partners.length ? partners : DEFAULT_PARTNERS);
-        setConversations(conversations.length ? conversations : DEFAULT_CONVERSATIONS);
-        setAnnouncements(announcements.length ? announcements : DEFAULT_ANNOUNCEMENTS);
-        setNotifications(notifications.length ? notifications : DEFAULT_NOTIFICATIONS);
-        setPrograms(programs.length ? programs : DEFAULT_PROGRAMS);
+        setEvents(demoFallback(events, DEFAULT_EVENTS));
+        setPartners(demoFallback(partners, DEFAULT_PARTNERS));
+        setConversations(demoFallback(conversations, DEFAULT_CONVERSATIONS));
+        setAnnouncements(demoFallback(announcements, DEFAULT_ANNOUNCEMENTS));
+        setNotifications(demoFallback(notifications, DEFAULT_NOTIFICATIONS));
+        setPrograms(demoFallback(programs, DEFAULT_PROGRAMS));
         if (notifPrefs) setNotificationPreferences(notifPrefs);
       } else if (savedUser) {
         // Supabase session expired — clear cached user
@@ -170,51 +176,58 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => { if (isLoaded) saveJSON('mtc-announcements', announcements); }, [announcements, isLoaded]);
   useEffect(() => { if (isLoaded) saveJSON('mtc-notifications', notifications); }, [notifications, isLoaded]);
   useEffect(() => { if (isLoaded) saveJSON('mtc-programs', programs); }, [programs, isLoaded]);
+  const notifPrefTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
     if (isLoaded) {
       saveJSON('mtc-notification-prefs', notificationPreferences);
-      if (currentUser) db.updateNotificationPreferences(currentUser.id, notificationPreferences).catch((err) => reportError(err, 'Supabase'));
+      // Debounce Supabase write — user may toggle multiple switches quickly
+      if (notifPrefTimerRef.current) clearTimeout(notifPrefTimerRef.current);
+      notifPrefTimerRef.current = setTimeout(() => {
+        if (currentUser) db.updateNotificationPreferences(currentUser.id, notificationPreferences).catch((err) => reportError(err, 'Supabase'));
+      }, 500);
     }
+    return () => { if (notifPrefTimerRef.current) clearTimeout(notifPrefTimerRef.current); };
   }, [notificationPreferences, isLoaded, currentUser]);
+
+  // Ref to avoid stale closure in Realtime handlers — only the ID is needed
+  const currentUserRef = useRef(currentUser);
+  useEffect(() => { currentUserRef.current = currentUser; }, [currentUser]);
 
   // Supabase Realtime — live updates from other users
   useEffect(() => {
     if (!isLoaded || !currentUser) return;
+    const userId = currentUser.id;
 
     const channel = supabase.channel('dashboard-realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, () => {
         db.fetchBookings().then(b => setBookings(b)).catch(err => reportError(err, 'Realtime bookings'));
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, () => {
-        if (currentUser) {
-          db.fetchConversations(currentUser.id).then(c => {
-            setConversations(c.length ? c : DEFAULT_CONVERSATIONS);
-          }).catch(err => reportError(err, 'Realtime messages'));
-        }
+        db.fetchConversations(userId).then(c => {
+          setConversations(demoFallback(c, DEFAULT_CONVERSATIONS));
+        }).catch(err => reportError(err, 'Realtime messages'));
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications' }, () => {
-        if (currentUser) {
-          db.fetchNotifications(currentUser.id).then(n => {
-            setNotifications(n.length ? n : DEFAULT_NOTIFICATIONS);
-          }).catch(err => reportError(err, 'Realtime notifications'));
-        }
+        db.fetchNotifications(userId).then(n => {
+          setNotifications(demoFallback(n, DEFAULT_NOTIFICATIONS));
+        }).catch(err => reportError(err, 'Realtime notifications'));
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'announcements' }, () => {
-        if (currentUser) {
-          db.fetchAnnouncements(currentUser.id).then(a => {
-            setAnnouncements(a.length ? a : DEFAULT_ANNOUNCEMENTS);
-          }).catch(err => reportError(err, 'Realtime announcements'));
-        }
+        db.fetchAnnouncements(userId).then(a => {
+          setAnnouncements(demoFallback(a, DEFAULT_ANNOUNCEMENTS));
+        }).catch(err => reportError(err, 'Realtime announcements'));
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'partners' }, () => {
         db.fetchPartners().then(p => {
-          setPartners(p.length ? p : DEFAULT_PARTNERS);
+          setPartners(demoFallback(p, DEFAULT_PARTNERS));
         }).catch(err => reportError(err, 'Realtime partners'));
       })
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
-  }, [isLoaded, currentUser]);
+    // Only re-subscribe when user logs in/out — not on every profile update
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoaded, currentUser?.id]);
 
   // Fetch weather
   useEffect(() => {
@@ -637,30 +650,39 @@ export function AppProvider({ children }: { children: ReactNode }) {
         db.fetchNotifications(currentUser.id), db.fetchPrograms(),
         db.fetchNotificationPreferences(currentUser.id),
       ]);
-      if (m.length) setMembers(m);
+      setMembers(demoFallback(m, DEFAULT_MEMBERS));
       setBookings(b);
-      if (ev.length) setEvents(ev);
-      setPartners(p.length ? p : DEFAULT_PARTNERS);
-      setConversations(c.length ? c : DEFAULT_CONVERSATIONS);
-      setAnnouncements(a.length ? a : DEFAULT_ANNOUNCEMENTS);
-      setNotifications(n.length ? n : DEFAULT_NOTIFICATIONS);
-      setPrograms(pr.length ? pr : DEFAULT_PROGRAMS);
+      setEvents(demoFallback(ev, DEFAULT_EVENTS));
+      setPartners(demoFallback(p, DEFAULT_PARTNERS));
+      setConversations(demoFallback(c, DEFAULT_CONVERSATIONS));
+      setAnnouncements(demoFallback(a, DEFAULT_ANNOUNCEMENTS));
+      setNotifications(demoFallback(n, DEFAULT_NOTIFICATIONS));
+      setPrograms(demoFallback(pr, DEFAULT_PROGRAMS));
       if (np) setNotificationPreferences(np);
     } catch (err) {
       reportError(err, 'Refresh');
     }
   }, [currentUser]);
 
+  const contextValue = useMemo<AppState>(() => ({
+    currentUser, updateCurrentUser, login, logout, members, setMembers, courts, setCourts, bookings, setBookings, addBooking, cancelBooking,
+    events, setEvents, toggleRsvp, partners, setPartners, addPartner, removePartner, conversations, setConversations, sendMessage, markConversationRead,
+    announcements, setAnnouncements, dismissAnnouncement, notifications, setNotifications, markNotificationRead,
+    clearNotifications, weather, analytics,
+    programs, setPrograms, addProgram, cancelProgram, enrollInProgram, withdrawFromProgram,
+    notificationPreferences, setNotificationPreferences,
+    isLoaded, refreshData,
+  }), [
+    currentUser, members, courts, bookings, events, partners, conversations,
+    announcements, notifications, weather, analytics, programs, notificationPreferences, isLoaded,
+    updateCurrentUser, login, logout, addBooking, cancelBooking, toggleRsvp,
+    addPartner, removePartner, sendMessage, markConversationRead, dismissAnnouncement,
+    markNotificationRead, clearNotifications, addProgram, cancelProgram,
+    enrollInProgram, withdrawFromProgram, refreshData,
+  ]);
+
   return (
-    <AppContext.Provider value={{
-      currentUser, updateCurrentUser, login, logout, members, setMembers, courts, setCourts, bookings, setBookings, addBooking, cancelBooking,
-      events, setEvents, toggleRsvp, partners, setPartners, addPartner, removePartner, conversations, setConversations, sendMessage, markConversationRead,
-      announcements, setAnnouncements, dismissAnnouncement, notifications, setNotifications, markNotificationRead,
-      clearNotifications, weather, analytics,
-      programs, setPrograms, addProgram, cancelProgram, enrollInProgram, withdrawFromProgram,
-      notificationPreferences, setNotificationPreferences,
-      isLoaded, refreshData,
-    }}>
+    <AppContext.Provider value={contextValue}>
       {children}
     </AppContext.Provider>
   );
