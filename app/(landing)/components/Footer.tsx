@@ -7,7 +7,7 @@ export default function Footer() {
         {/* Top Row */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-8 md:gap-12 mb-16">
           {/* Description */}
-          <div className="col-span-2 md:col-span-1">
+          <div className="col-span-2 md:col-span-1 fade-in" style={{ transitionDelay: '0.1s' }}>
             <div className="headline-font text-3xl mb-4" style={{ color: '#d4e157' }}>
               Mono Tennis Club
             </div>
@@ -17,7 +17,7 @@ export default function Footer() {
           </div>
 
           {/* Club Links */}
-          <div className="md:text-center">
+          <div className="md:text-center fade-in" style={{ transitionDelay: '0.25s' }}>
             <h5 className="text-base font-bold uppercase tracking-wider mb-5" style={{ color: '#d4e157' }}>
               Club
             </h5>
@@ -41,7 +41,7 @@ export default function Footer() {
           </div>
 
           {/* Location */}
-          <div className="md:text-right min-w-0">
+          <div className="md:text-right min-w-0 fade-in" style={{ transitionDelay: '0.4s' }}>
             <h5 className="text-base font-bold uppercase tracking-wider mb-5" style={{ color: '#d4e157' }}>
               Location
             </h5>

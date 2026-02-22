@@ -88,6 +88,28 @@ html, body {
 .hero-content.visible h1 span:nth-child(2) { transition-delay: 0.2s; }
 .hero-content.visible h1 span:nth-child(3) { transition-delay: 0.3s; }
 
+/* Hero heading shimmer — subtle light sweep over text */
+.hero-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.hero-shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(212, 225, 87, 0.15), transparent);
+  animation: heroShimmer 5s ease-in-out infinite;
+  animation-delay: 3s;
+  pointer-events: none;
+}
+@keyframes heroShimmer {
+  0%, 100% { left: -100%; }
+  50% { left: 150%; }
+}
+
 /* Hero subtext animation */
 .hero-content p {
   opacity: 0;
