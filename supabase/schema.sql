@@ -226,10 +226,6 @@ begin
   insert into public.notification_preferences (user_id)
   values (new.id);
 
-  -- Create payment record
-  insert into public.payments (user_id, user_name, balance)
-  values (new.id, coalesce(new.raw_user_meta_data->>'name', split_part(new.email, '@', 1)), 0);
-
   return new;
 end;
 $$ language plpgsql security definer;
@@ -255,7 +251,10 @@ insert into club_settings (key, value) values ('gate_code', '1234') on conflict 
 create or replace function delete_member(target_user_id uuid)
 returns void as $$
 begin
-  -- Only admin can call this (RLS on profiles enforces admin check)
+  -- Verify caller is admin (SECURITY DEFINER bypasses RLS, so we must check explicitly)
+  if not is_admin() then
+    raise exception 'Unauthorized: admin only';
+  end if;
   delete from auth.users where id = target_user_id;
 end;
 $$ language plpgsql security definer;

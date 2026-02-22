@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo, useRef, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { useApp } from '../lib/store';
 import DashboardHeader from '../components/DashboardHeader';
 import { TIME_SLOTS, COURTS_CONFIG, FEES } from '../lib/types';
@@ -11,9 +12,10 @@ import {
   formatDateShort, isToday,
 } from './components/booking-utils';
 import BookingLegend from './components/BookingLegend';
-import BookingModal from './components/BookingModal';
 import BookingSidebar from './components/BookingSidebar';
-import SuccessModal from './components/SuccessModal';
+
+const BookingModal = dynamic(() => import('./components/BookingModal'), { ssr: false });
+const SuccessModal = dynamic(() => import('./components/SuccessModal'), { ssr: false });
 
 export default function BookCourtPage() {
   const { currentUser, members, bookings, courts, events, addBooking, cancelBooking, showToast } = useApp();
@@ -471,14 +473,14 @@ export default function BookCourtPage() {
 
       {/* Cancel Confirmation Modal */}
       {cancelTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.4)' }} onClick={() => setCancelTarget(null)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.4)' }} onClick={() => setCancelTarget(null)} role="dialog" aria-modal="true" aria-labelledby="cancel-modal-title">
           <div className="w-full max-w-sm rounded-2xl p-6 animate-scaleIn" style={{ background: '#fff' }} onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 rounded-full" style={{ background: 'rgba(239,68,68,0.1)' }}>
-              <svg className="w-6 h-6" fill="none" stroke="#ef4444" viewBox="0 0 24 24" strokeWidth="1.5">
+              <svg className="w-6 h-6" fill="none" stroke="#ef4444" viewBox="0 0 24 24" strokeWidth="1.5" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
               </svg>
             </div>
-            <h3 className="text-center font-semibold text-lg mb-1" style={{ color: '#2a2f1e' }}>Cancel Booking?</h3>
+            <h3 id="cancel-modal-title" className="text-center font-semibold text-lg mb-1" style={{ color: '#2a2f1e' }}>Cancel Booking?</h3>
             <p className="text-center text-sm mb-5" style={{ color: '#6b7266' }}>
               {cancelTarget.courtName} on {new Date(cancelTarget.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} at {cancelTarget.time}
             </p>

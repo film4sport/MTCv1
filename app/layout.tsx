@@ -1,5 +1,12 @@
 import './globals.css'
 import type { Viewport, Metadata } from 'next'
+import { Inter } from 'next/font/google'
+
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
+  display: 'swap',
+})
 
 const SITE_URL = 'https://monotennisclub.ca';
 
@@ -58,12 +65,9 @@ export default function RootLayout({
         {/* Preconnect to external origins for faster resource loading */}
         <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://api.open-meteo.com" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
       </head>
-      <body style={{ fontFamily: "'Inter', sans-serif", backgroundColor: '#1a1f12' }}>
+      <body className={inter.className} style={{ backgroundColor: '#1a1f12' }}>
         {children}
         <script
           dangerouslySetInnerHTML={{

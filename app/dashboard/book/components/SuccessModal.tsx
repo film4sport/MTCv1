@@ -1,5 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { downloadICS } from '../../lib/calendar';
+import { useFocusTrap } from '../../lib/utils';
 
 interface SuccessModalProps {
   courtName: string;
@@ -10,6 +11,9 @@ interface SuccessModalProps {
 }
 
 export default function SuccessModal({ courtName, date, time, participants, onClose }: SuccessModalProps) {
+  const trapRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(trapRef);
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', handler);
@@ -17,8 +21,8 @@ export default function SuccessModal({ courtName, date, time, participants, onCl
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.4)' }} onClick={onClose}>
-      <div className="rounded-2xl p-6 w-full max-w-sm text-center animate-scaleIn" style={{ background: '#fff' }} onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.4)' }} onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="success-modal-title">
+      <div ref={trapRef} className="rounded-2xl p-6 w-full max-w-sm text-center animate-scaleIn" style={{ background: '#fff' }} onClick={e => e.stopPropagation()}>
         {/* Confetti burst */}
         <div className="relative w-full h-0 overflow-visible pointer-events-none">
           {['#6b7a3d', '#d4e157', '#16a34a', '#fbbf24', '#6b7a3d', '#d4e157'].map((color, i) => (
@@ -41,7 +45,7 @@ export default function SuccessModal({ courtName, date, time, participants, onCl
             <path className="success-check" strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <h3 className="font-semibold text-lg mb-1" style={{ color: '#2a2f1e' }}>Booked!</h3>
+        <h3 id="success-modal-title" className="font-semibold text-lg mb-1" style={{ color: '#2a2f1e' }}>Booked!</h3>
         <p className="text-sm mb-2" style={{ color: '#6b7266' }}>
           {courtName} on{' '}
           {new Date(date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}{' '}

@@ -9,11 +9,15 @@
 
 ## Demo Accounts
 
+Demo login buttons are available directly on the **login page** — just tap the account you want to use.
+
 | Role   | Email            | Password   | What you can do                              |
 |--------|------------------|------------|----------------------------------------------|
 | Member | member@mtc.ca    | member123  | Book courts, RSVP to events, message members |
 | Coach  | coach@mtc.ca     | coach123   | Book lesson slots on courts                  |
 | Admin  | admin@mtc.ca     | admin123   | Manage members, courts, announcements        |
+
+You can also **create your own account** via the signup flow at `/info?tab=membership` — your account is stored in Supabase and will persist across sessions.
 
 ---
 
@@ -31,7 +35,7 @@
 ### 2. Info Page (no login needed)
 - **URL:** `/info`
 - Test all tabs: About, Membership, Coaching, FAQ, Rules, Privacy, Terms
-- **Membership tab:** Click "Become a Member" and go through the 5-step signup flow (don't submit — it creates a real account)
+- **Membership tab:** Click "Become a Member" and go through the 5-step signup flow (creates a real account)
 - **FAQ tab:** Expand/collapse questions, check the Google Maps embed
 - **Coaching tab:** Should mention "Lessons" tab (not "Programs")
 
@@ -51,7 +55,7 @@
 - **Profile:** View your profile info
 - **Settings:** Toggle notification preferences, toggle haptic feedback on/off
 - **Settings:** Try "Install MTC App" button — should show inline instructions (not a browser alert)
-- **Refresh button:** Tap the refresh icon (↻) in the header to reload data from Supabase
+- **Refresh button:** Tap the refresh icon in the header to reload data from Supabase
 - **Keyboard:** Press `Escape` to close any open modal or dialog
 
 ### 4. Coach Dashboard
@@ -79,7 +83,7 @@
 
 ### 7. Mobile-Specific Tests
 - **Haptic feedback** (Android only): Tap booking slots, RSVP buttons, send messages — should feel a light vibration
-- Haptic can be disabled in **Settings → Preferences → Haptic Feedback**
+- Haptic can be disabled in **Settings > Preferences > Haptic Feedback**
 - **Animations:** Empty states should animate in, partner cards should fade out on removal
 - **Modals:** All modals should be scrollable on small screens
 
@@ -87,7 +91,6 @@
 
 ## Known Limitations
 - **Profile NTRP rating** is hardcoded at 3.5 — editing not yet implemented
-- **Signup flow** creates a real Supabase account — use test emails if testing signup
 - **Weather widget** requires internet connection (Open-Meteo API)
 - **Demo data** resets periodically — bookings you make may disappear
 - **Haptic feedback** only works on Android Chrome — iOS Safari does not support the Vibration API
