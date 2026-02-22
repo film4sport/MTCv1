@@ -93,12 +93,16 @@ test.describe('Hero Section', () => {
   });
 
   test('hero bottom bar has tennis info and scroll indicator', async ({ page }) => {
-    const tennis = page.getByText('// Tennis');
-    await expect(tennis).toBeVisible();
-    const year = page.getByText('// 2026');
-    await expect(year).toBeVisible();
     const scrollDown = page.getByText('Scroll Down');
     await expect(scrollDown).toBeVisible();
+    // "// Tennis" and "// 2026" are hidden on mobile (hidden sm:inline)
+    const viewportWidth = page.viewportSize()?.width ?? 1280;
+    if (viewportWidth >= 640) {
+      const tennis = page.getByText('// Tennis');
+      await expect(tennis).toBeVisible();
+      const year = page.getByText('// 2026');
+      await expect(year).toBeVisible();
+    }
   });
 });
 
