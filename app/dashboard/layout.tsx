@@ -21,9 +21,35 @@ function DashboardGuard({ children }: { children: React.ReactNode }) {
     }
   }, [isLoaded, currentUser, router]);
 
-  // Show blank screen while loading or redirecting (logout does hard redirect, so this is brief)
+  // Loading skeleton while auth check runs
   if (!isLoaded || !currentUser) {
-    return <div className="min-h-screen" style={{ backgroundColor: '#f5f2eb' }} />;
+    return (
+      <div className="min-h-screen flex" style={{ backgroundColor: '#f5f2eb' }}>
+        {/* Sidebar skeleton */}
+        <div className="hidden lg:block w-[72px] min-h-screen" style={{ backgroundColor: '#1a1f12' }} />
+        <div className="flex-1">
+          {/* Header skeleton */}
+          <div className="h-16 border-b flex items-center justify-between px-6" style={{ backgroundColor: '#faf8f3', borderColor: '#e0dcd3' }}>
+            <div className="skeleton w-9 h-9 rounded-full" />
+            <div className="flex gap-2">
+              <div className="skeleton w-10 h-10 rounded-xl" />
+              <div className="skeleton w-10 h-10 rounded-xl" />
+            </div>
+          </div>
+          {/* Content skeleton */}
+          <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+            <div className="skeleton w-48 h-7 rounded-lg" />
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              {[1,2,3,4].map(i => <div key={i} className="skeleton h-24 rounded-2xl" />)}
+            </div>
+            <div className="grid lg:grid-cols-2 gap-6">
+              <div className="skeleton h-48 rounded-2xl" />
+              <div className="skeleton h-48 rounded-2xl" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   // Paused membership screen

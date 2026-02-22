@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { clubRules, constitutionArticles } from '../data';
 
 export default function RulesTab() {
   const [activeConstitution, setActiveConstitution] = useState<number | null>(null);
+  const articleRefs = useRef<Record<number, HTMLDivElement | null>>({});
 
   const toggleConstitution = (index: number) => {
     setActiveConstitution(activeConstitution === index ? null : index);
@@ -56,7 +57,7 @@ export default function RulesTab() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                   </svg>
                 </button>
-                <div className="faq-answer" id={`constitution-answer-${i}`} role="region" aria-labelledby={`constitution-q-${i}`} style={{ maxHeight: activeConstitution === i ? '300px' : '0', color: '#555' }}>
+                <div className="faq-answer" id={`constitution-answer-${i}`} role="region" aria-labelledby={`constitution-q-${i}`} ref={(el) => { articleRefs.current[i] = el; }} style={{ maxHeight: activeConstitution === i ? `${articleRefs.current[i]?.scrollHeight || 500}px` : '0', color: '#555' }}>
                   <p>{article.content}</p>
                 </div>
               </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { signIn, resetPassword } from '../dashboard/lib/auth';
 
@@ -32,6 +32,25 @@ export default function LoginPage() {
   const [resetSent, setResetSent] = useState(false);
   const [resetError, setResetError] = useState('');
   const [resetLoading, setResetLoading] = useState(false);
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  // Focus trap for forgot password modal
+  useEffect(() => {
+    if (!showForgotPassword || !modalRef.current) return;
+    const focusable = modalRef.current.querySelectorAll<HTMLElement>('input, button, a, [tabindex]:not([tabindex="-1"])');
+    if (focusable.length > 0) focusable[0].focus();
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { setShowForgotPassword(false); return; }
+      if (e.key !== 'Tab' || !focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [showForgotPassword, resetSent]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -389,7 +408,7 @@ export default function LoginPage() {
         </div>
 
         {/* Right Side: Login Form */}
-        <div className="w-full lg:w-1/2 xl:w-2/5 flex flex-col justify-center px-6 sm:px-8 md:px-16 lg:px-12 xl:px-20 py-8 lg:py-12">
+        <div className="w-full lg:w-1/2 xl:w-2/5 flex flex-col justify-center px-6 sm:px-8 md:px-16 lg:px-12 xl:px-20 py-8 lg:py-12 animate-slideUp">
 
           {/* Back Link */}
           <a href="/" className="inline-flex items-center gap-2 text-sm mb-6 lg:mb-8 transition-all hover:text-[#2a2f1e]" style={{ color: '#6b7266', textDecoration: 'none' }}>
@@ -519,8 +538,8 @@ export default function LoginPage() {
 
           {/* Forgot Password Modal */}
           {showForgotPassword && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowForgotPassword(false)}>
-              <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm mx-4" onClick={(e) => e.stopPropagation()}>
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowForgotPassword(false)} role="dialog" aria-modal="true" aria-label="Reset password">
+              <div ref={modalRef} className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm mx-4" onClick={(e) => e.stopPropagation()}>
                 <h2 className="text-lg font-semibold mb-1" style={{ color: '#2a2f1e' }}>Reset Password</h2>
                 <p className="text-sm mb-4" style={{ color: '#6b7266' }}>
                   Enter your email and we&apos;ll send a reset link.
