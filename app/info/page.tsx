@@ -110,6 +110,11 @@ function InfoPageContent() {
         <p className="max-w-2xl mx-auto text-sm leading-relaxed" style={{ color: '#6b7266' }}>
           {currentHero.subtitle}
         </p>
+        {activeTab === 'faq' && (
+          <p className="headline-font text-xl md:text-2xl mt-6 italic" style={{ color: '#6b7a3d' }}>
+            All the A&apos;s to Your Q&apos;s
+          </p>
+        )}
       </section>
 
       {/* Tab Navigation */}
