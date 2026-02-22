@@ -53,7 +53,8 @@
       "mcp__Claude_Preview__preview_start",
       "Bash(npm run build:mobile:*)",
       "Bash(cmd //c \"for /f \"\"tokens=5\"\" %a in \\(''netstat -ano ^| findstr :3000 ^| findstr LISTENING''\\) do taskkill /PID %a /F\")",
-      "Bash(cmd //c \"netstat -ano | findstr :3000 | findstr LISTENING\")"
+      "Bash(cmd //c \"netstat -ano | findstr :3000 | findstr LISTENING\")",
+      "Bash(git mv:*)"
     ]
   }
 }
