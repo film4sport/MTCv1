@@ -56,11 +56,12 @@ When new project rules or conventions are established, add them to this file AND
   - Best for: real-time page inspection, verifying hover states, checking interactive elements
 - **Workflow**: Playwright for automated screenshots + BDG for live visual spot-checks
 
-## #12: VISUAL VERIFICATION — USE WHATEVER WORKS, DON'T STALL
-- **NEVER use `preview_screenshot`** — it hangs/stalls every time. Do NOT call it.
-- **For screenshots**: Use **Playwright** inline scripts (`node -e "..."` with `chromium.launch()`) or **BDG** (`computer` action `screenshot`). Both work reliably.
+## #12: VISUAL VERIFICATION — PLAYWRIGHT OR BDG ONLY
+- **ONLY use Playwright or BDG (Claude in Chrome) for ALL visual verification.** No exceptions.
+- **NEVER use `preview_screenshot`** — hangs every time.
+- **NEVER use `preview_snapshot`/`preview_inspect`/`preview_eval` for visual verification** — user does NOT want these flooding the output. Only use for quick non-visual checks (e.g. confirming a CSS value) when absolutely necessary.
+- **For screenshots**: Use **Playwright** inline scripts (`node -e "..."` with `chromium.launch()`) or **BDG** (`computer` action `screenshot`).
 - **BDG** for live interaction (hover states, clicking, reading page). Known issues: Loader blocks page (remove via JS), `dynamic()` ssr:false components may not render.
-- **`preview_snapshot`/`preview_inspect`/`preview_eval`** are OK for non-screenshot tasks (accessibility tree, CSS checks, JS eval).
 - **Key rule**: If ANY tool stalls, switch immediately. Never retry the same broken approach.
 - User runs `next dev` on port 3000. `preview_start` uses port 3001 via launch.json.
 
