@@ -48,7 +48,7 @@ describe('auth — signIn', () => {
     });
     const profileBuilder = createQueryBuilder({
       id: 'u1', name: 'Alice', email: 'a@b.com', role: 'member', status: 'active',
-      ntrp: null, member_since: '2024-01', avatar: null,
+      ntrp: null, skill_level: null, member_since: '2024-01', avatar: null,
     });
     mockFrom.mockReturnValueOnce(profileBuilder);
 
@@ -145,7 +145,7 @@ describe('auth — getCurrentUser', () => {
     });
     const profileBuilder = createQueryBuilder({
       id: 'u1', name: 'Alice', email: 'a@b.com', role: 'admin', status: 'active',
-      ntrp: 4.0, member_since: '2023-06', avatar: 'pic.jpg',
+      ntrp: 4.0, skill_level: 'advanced', member_since: '2023-06', avatar: 'pic.jpg',
     });
     mockFrom.mockReturnValueOnce(profileBuilder);
 
@@ -153,6 +153,7 @@ describe('auth — getCurrentUser', () => {
     expect(user).not.toBeNull();
     expect(user.role).toBe('admin');
     expect(user.ntrp).toBe(4.0);
+    expect(user.skillLevel).toBe('advanced');
     expect(user.avatar).toBe('pic.jpg');
   });
 });
