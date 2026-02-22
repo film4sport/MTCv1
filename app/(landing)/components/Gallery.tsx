@@ -116,7 +116,8 @@ export default function Gallery({ onOpenLightbox }: GalleryProps) {
           <div ref={headingRef} style={{ willChange: 'transform' }}>
             <span className="section-label">// Gallery</span>
             <h2 className="headline-font text-3xl md:text-4xl mt-4 text-gray-900">Life at Mono Tennis Club</h2>
-            <p className="text-gray-600 mt-4 max-w-2xl mx-auto">
+            <div className="w-12 h-0.5 mx-auto mt-4" style={{ backgroundColor: '#6b7a3d' }} />
+            <p className="text-gray-600 mt-4 max-w-2xl mx-auto text-base">
               Capturing the moments that make our community special
             </p>
           </div>

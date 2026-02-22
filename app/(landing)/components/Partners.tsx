@@ -33,16 +33,27 @@ export default function Partners() {
           </h3>
         </div>
 
-        <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 fade-in">
+        <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12 fade-in">
           {partners.map((p) => (
-            <a key={p.name} href={p.url} target="_blank" rel="noopener noreferrer" className="partner-logo">
-              <Image
-                src={p.logo}
-                alt={p.name}
-                width={160}
-                height={80}
-                className="h-16 md:h-20 w-auto rounded-lg object-contain"
-              />
+            <a
+              key={p.name}
+              href={p.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="partner-logo group"
+            >
+              <div className="bg-white rounded-xl p-6 md:p-8 shadow-sm border border-gray-100 transition-all duration-400 group-hover:shadow-lg group-hover:border-[#d4e157]/30">
+                <Image
+                  src={p.logo}
+                  alt={p.name}
+                  width={180}
+                  height={90}
+                  className="h-16 md:h-20 w-auto rounded-lg object-contain"
+                />
+              </div>
+              <p className="text-center text-xs text-gray-400 mt-3 transition-colors duration-300 group-hover:text-gray-600">
+                {p.name}
+              </p>
             </a>
           ))}
         </div>
