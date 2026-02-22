@@ -4,12 +4,20 @@ import { useState, useEffect, useRef } from 'react';
 import { useApp } from '../lib/store';
 import { useToast } from '../lib/toast';
 import DashboardHeader from '../components/DashboardHeader';
+import { AvatarDisplay } from '../lib/avatars';
 import Link from 'next/link';
 import { generateId, haptic, useFocusTrap } from '../lib/utils';
+import type { SkillLevel } from '../lib/types';
 
 type FilterType = 'all' | 'singles' | 'doubles' | 'mixed';
-type SkillLevel = 'beginner' | 'intermediate' | 'advanced';
 type SkillFilter = 'all' | SkillLevel;
+
+const SKILL_BADGES: Record<SkillLevel, { bg: string; color: string; label: string }> = {
+  beginner: { bg: 'rgba(34, 197, 94, 0.1)', color: '#16a34a', label: 'Beginner' },
+  intermediate: { bg: 'rgba(59, 175, 218, 0.1)', color: '#3BAFDA', label: 'Intermediate' },
+  advanced: { bg: 'rgba(245, 158, 11, 0.1)', color: '#d97706', label: 'Advanced' },
+  competitive: { bg: 'rgba(239, 68, 68, 0.1)', color: '#dc2626', label: 'Competitive' },
+};
 
 export default function PartnersPage() {
   const { partners, currentUser, addPartner, removePartner } = useApp();
@@ -31,25 +39,10 @@ export default function PartnersPage() {
     return () => window.removeEventListener('keydown', handler);
   }, [showPost]);
 
-  const getSkillLevel = (ntrp: number): SkillLevel => {
-    if (ntrp <= 2.5) return 'beginner';
-    if (ntrp <= 3.5) return 'intermediate';
-    return 'advanced';
-  };
-
-  const getSkillBadge = (ntrp: number) => {
-    const level = getSkillLevel(ntrp);
-    const colors = {
-      beginner: { bg: 'rgba(34, 197, 94, 0.1)', color: '#16a34a' },
-      intermediate: { bg: 'rgba(245, 158, 11, 0.1)', color: '#d97706' },
-      advanced: { bg: 'rgba(239, 68, 68, 0.1)', color: '#dc2626' },
-    };
-    return { ...colors[level], label: level.charAt(0).toUpperCase() + level.slice(1) };
-  };
-
   const filtered = partners.filter(p => {
     if (filter !== 'all' && p.matchType !== filter && p.matchType !== 'any') return false;
-    if (skillFilter !== 'all' && getSkillLevel(p.ntrp) !== skillFilter) return false;
+    const level = p.skillLevel ?? 'intermediate';
+    if (skillFilter !== 'all' && level !== skillFilter) return false;
     return true;
   });
 
@@ -80,7 +73,7 @@ export default function PartnersPage() {
             </div>
             {/* Skill Level filters */}
             <div className="flex items-center gap-1.5 p-1 rounded-xl" style={{ background: '#fff', border: '1px solid #e0dcd3' }}>
-              {(['all', 'beginner', 'intermediate', 'advanced'] as SkillFilter[]).map(s => (
+              {(['all', 'beginner', 'intermediate', 'advanced', 'competitive'] as SkillFilter[]).map(s => (
                 <button
                   key={s}
                   onClick={() => setSkillFilter(s)}
@@ -121,17 +114,16 @@ export default function PartnersPage() {
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {filtered.map(p => {
-              const badge = getSkillBadge(p.ntrp);
+              const level = p.skillLevel ?? 'intermediate';
+              const badge = SKILL_BADGES[level];
               return (
                 <div key={p.id} className={`rounded-2xl border p-5 card-hover ${removingId === p.id ? 'animate-exit' : ''}`} style={{ background: '#fff', borderColor: '#e0dcd3' }}>
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold" style={{ background: 'rgba(107, 122, 61, 0.1)', color: '#6b7a3d' }}>
-                        {p.name.split(' ').map(n => n[0]).join('')}
-                      </div>
+                      <AvatarDisplay avatar={p.avatar} name={p.name} size={40} />
                       <div>
                         <p className="font-medium text-sm" style={{ color: '#2a2f1e' }}>{p.name}</p>
-                        <p className="text-xs" style={{ color: '#6b7266' }}>NTRP {p.ntrp}</p>
+                        <p className="text-xs" style={{ color: badge.color }}>{badge.label}</p>
                       </div>
                     </div>
                     <span className="text-[0.65rem] px-2 py-0.5 rounded-full font-medium" style={{ background: badge.bg, color: badge.color }}>
@@ -246,8 +238,6 @@ export default function PartnersPage() {
                     showToast('Cannot post for a past date', 'error');
                     return;
                   }
-                  // Also check if time has passed for today
-                  // <input type="time"> returns HH:MM in 24-hour format
                   if (postDateTime.getTime() === today.getTime() && postTime) {
                     const [hours, minutes] = postTime.split(':').map(Number);
                     if (!isNaN(hours) && !isNaN(minutes)) {
@@ -264,10 +254,12 @@ export default function PartnersPage() {
                     userId: currentUser.id,
                     name: currentUser.name,
                     ntrp: currentUser.ntrp ?? 3.0,
+                    skillLevel: currentUser.skillLevel ?? 'intermediate',
                     availability: new Date(postDate + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) + ' at ' + postTime,
                     matchType: postType,
                     date: postDate,
                     time: postTime,
+                    avatar: currentUser.avatar,
                     status: 'available',
                   };
                   addPartner(partner);

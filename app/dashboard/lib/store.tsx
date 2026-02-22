@@ -14,6 +14,7 @@ import * as db from './db';
 interface AppState {
   // Auth
   currentUser: User | null;
+  updateCurrentUser: (updates: Partial<User>) => void;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
 
@@ -143,11 +144,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setMembers(members.length ? members : DEFAULT_MEMBERS);
         setBookings(bookings);
         setEvents(events.length ? events : DEFAULT_EVENTS);
-        setPartners(partners);
-        setConversations(conversations);
-        setAnnouncements(announcements);
-        setNotifications(notifications);
-        setPrograms(programs);
+        setPartners(partners.length ? partners : DEFAULT_PARTNERS);
+        setConversations(conversations.length ? conversations : DEFAULT_CONVERSATIONS);
+        setAnnouncements(announcements.length ? announcements : DEFAULT_ANNOUNCEMENTS);
+        setNotifications(notifications.length ? notifications : DEFAULT_NOTIFICATIONS);
+        setPrograms(programs.length ? programs : DEFAULT_PROGRAMS);
         if (notifPrefs) setNotificationPreferences(notifPrefs);
       } else if (savedUser) {
         // Supabase session expired — clear cached user
@@ -175,6 +176,45 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (currentUser) db.updateNotificationPreferences(currentUser.id, notificationPreferences).catch((err) => reportError(err, 'Supabase'));
     }
   }, [notificationPreferences, isLoaded, currentUser]);
+
+  // Supabase Realtime — live updates from other users
+  useEffect(() => {
+    if (!isLoaded || !currentUser) return;
+
+    const channel = supabase.channel('dashboard-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, () => {
+        db.fetchBookings().then(b => setBookings(b)).catch(err => reportError(err, 'Realtime bookings'));
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, () => {
+        if (currentUser) {
+          db.fetchConversations(currentUser.id).then(c => {
+            setConversations(c.length ? c : DEFAULT_CONVERSATIONS);
+          }).catch(err => reportError(err, 'Realtime messages'));
+        }
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications' }, () => {
+        if (currentUser) {
+          db.fetchNotifications(currentUser.id).then(n => {
+            setNotifications(n.length ? n : DEFAULT_NOTIFICATIONS);
+          }).catch(err => reportError(err, 'Realtime notifications'));
+        }
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'announcements' }, () => {
+        if (currentUser) {
+          db.fetchAnnouncements(currentUser.id).then(a => {
+            setAnnouncements(a.length ? a : DEFAULT_ANNOUNCEMENTS);
+          }).catch(err => reportError(err, 'Realtime announcements'));
+        }
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'partners' }, () => {
+        db.fetchPartners().then(p => {
+          setPartners(p.length ? p : DEFAULT_PARTNERS);
+        }).catch(err => reportError(err, 'Realtime partners'));
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [isLoaded, currentUser]);
 
   // Fetch weather
   useEffect(() => {
@@ -217,6 +257,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
     fetchWeather();
     const interval = setInterval(fetchWeather, 30 * 60 * 1000);
     return () => clearInterval(interval);
+  }, []);
+
+  // Update current user fields (e.g. NTRP rating) in state + localStorage
+  const updateCurrentUser = useCallback((updates: Partial<User>) => {
+    setCurrentUser(prev => {
+      if (!prev) return prev;
+      const updated = { ...prev, ...updates };
+      saveJSON('mtc-current-user', updated);
+      return updated;
+    });
   }, []);
 
   // Auth — uses Supabase signIn from auth.ts
@@ -590,11 +640,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (m.length) setMembers(m);
       setBookings(b);
       if (ev.length) setEvents(ev);
-      setPartners(p);
-      setConversations(c);
-      setAnnouncements(a);
-      setNotifications(n);
-      setPrograms(pr);
+      setPartners(p.length ? p : DEFAULT_PARTNERS);
+      setConversations(c.length ? c : DEFAULT_CONVERSATIONS);
+      setAnnouncements(a.length ? a : DEFAULT_ANNOUNCEMENTS);
+      setNotifications(n.length ? n : DEFAULT_NOTIFICATIONS);
+      setPrograms(pr.length ? pr : DEFAULT_PROGRAMS);
       if (np) setNotificationPreferences(np);
     } catch (err) {
       reportError(err, 'Refresh');
@@ -603,7 +653,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   return (
     <AppContext.Provider value={{
-      currentUser, login, logout, members, setMembers, courts, setCourts, bookings, setBookings, addBooking, cancelBooking,
+      currentUser, updateCurrentUser, login, logout, members, setMembers, courts, setCourts, bookings, setBookings, addBooking, cancelBooking,
       events, setEvents, toggleRsvp, partners, setPartners, addPartner, removePartner, conversations, setConversations, sendMessage, markConversationRead,
       announcements, setAnnouncements, dismissAnnouncement, notifications, setNotifications, markNotificationRead,
       clearNotifications, weather, analytics,

@@ -1,6 +1,6 @@
 import { supabase } from '../../lib/supabase';
 import { reportError } from '../../lib/errorReporter';
-import type { Booking, ClubEvent, Partner, Conversation, Message, Announcement, Notification, CoachingProgram, NotificationPreferences, User } from './types';
+import type { Booking, ClubEvent, Partner, Conversation, Message, Announcement, Notification, CoachingProgram, NotificationPreferences, User, SkillLevel } from './types';
 
 // ─── Profiles ───────────────────────────────────────────
 
@@ -14,13 +14,25 @@ export async function fetchMembers(): Promise<User[]> {
     role: p.role as User['role'],
     status: (p.status as User['status']) || 'active',
     ntrp: p.ntrp ?? undefined,
+    skillLevel: (p.skill_level as SkillLevel) ?? undefined,
     memberSince: p.member_since ?? undefined,
     avatar: p.avatar ?? undefined,
   }));
 }
 
-export async function updateProfile(userId: string, updates: { ntrp?: number; name?: string }): Promise<void> {
+export async function updateProfile(userId: string, updates: { ntrp?: number; name?: string; skill_level?: string; avatar?: string }): Promise<void> {
   await supabase.from('profiles').update(updates).eq('id', userId);
+}
+
+// ─── Avatar Upload ─────────────────────────────────────
+
+export async function uploadAvatar(userId: string, file: File): Promise<string> {
+  const ext = file.name.split('.').pop() || 'jpg';
+  const path = `${userId}/avatar.${ext}`;
+  const { error } = await supabase.storage.from('avatars').upload(path, file, { upsert: true });
+  if (error) throw error;
+  const { data } = supabase.storage.from('avatars').getPublicUrl(path);
+  return data.publicUrl;
 }
 
 // ─── Bookings ───────────────────────────────────────────
@@ -131,6 +143,7 @@ export async function fetchPartners(): Promise<Partner[]> {
     userId: p.user_id,
     name: p.name,
     ntrp: p.ntrp,
+    skillLevel: (p.skill_level as SkillLevel) ?? undefined,
     availability: p.availability,
     matchType: p.match_type as Partner['matchType'],
     date: p.date,
@@ -146,6 +159,7 @@ export async function createPartner(partner: Partner): Promise<void> {
     user_id: partner.userId,
     name: partner.name,
     ntrp: partner.ntrp,
+    skill_level: partner.skillLevel || 'intermediate',
     availability: partner.availability,
     match_type: partner.matchType,
     date: partner.date,

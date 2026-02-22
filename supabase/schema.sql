@@ -16,6 +16,7 @@ create table if not exists profiles (
   role text not null default 'member' check (role in ('member', 'coach', 'admin')),
   status text not null default 'active' check (status in ('active', 'paused')),
   ntrp numeric(2,1) check (ntrp >= 1.0 and ntrp <= 7.0),
+  skill_level text default 'intermediate' check (skill_level in ('beginner', 'intermediate', 'advanced', 'competitive')),
   member_since text,
   avatar text,
   created_at timestamptz default now()
@@ -83,6 +84,7 @@ create table if not exists partners (
   user_id uuid not null references profiles(id),
   name text not null,
   ntrp numeric(2,1) not null,
+  skill_level text default 'intermediate' check (skill_level in ('beginner', 'intermediate', 'advanced', 'competitive')),
   availability text not null,
   match_type text not null check (match_type in ('singles', 'doubles', 'mixed', 'any')),
   date text not null,
@@ -213,12 +215,14 @@ create index if not exists idx_profiles_role on profiles(role);
 create or replace function public.handle_new_user()
 returns trigger as $$
 begin
-  insert into public.profiles (id, name, email, role, member_since)
+  insert into public.profiles (id, name, email, role, skill_level, avatar, member_since)
   values (
     new.id,
     coalesce(new.raw_user_meta_data->>'name', split_part(new.email, '@', 1)),
     new.email,
     coalesce(new.raw_user_meta_data->>'role', 'member'),
+    'intermediate',
+    'tennis-male-1',
     to_char(now(), 'YYYY-MM')
   );
 
@@ -302,3 +306,19 @@ begin
   );
 end;
 $$ language plpgsql security definer;
+
+-- ─── Avatar Storage Bucket ──────────────────────────────
+-- Create via Supabase dashboard or migration:
+-- INSERT INTO storage.buckets (id, name, public) VALUES ('avatars', 'avatars', true) ON CONFLICT DO NOTHING;
+-- RLS policies for avatar bucket:
+-- CREATE POLICY "Users can upload own avatar" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'avatars' AND (storage.foldername(name))[1] = auth.uid()::text);
+-- CREATE POLICY "Avatars are public" ON storage.objects FOR SELECT USING (bucket_id = 'avatars');
+-- CREATE POLICY "Users can update own avatar" ON storage.objects FOR UPDATE USING (bucket_id = 'avatars' AND (storage.foldername(name))[1] = auth.uid()::text);
+-- CREATE POLICY "Users can delete own avatar" ON storage.objects FOR DELETE USING (bucket_id = 'avatars' AND (storage.foldername(name))[1] = auth.uid()::text);
+
+-- ─── Realtime (enable on key tables) ────────────────────
+alter table bookings replica identity full;
+alter table messages replica identity full;
+alter table notifications replica identity full;
+alter table announcements replica identity full;
+alter table partners replica identity full;

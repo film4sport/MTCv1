@@ -1,12 +1,15 @@
 // Dashboard TypeScript interfaces
 
+export type SkillLevel = 'beginner' | 'intermediate' | 'advanced' | 'competitive';
+
 export interface User {
   id: string;
   name: string;
   email: string;
   role: 'member' | 'coach' | 'admin';
   status?: 'active' | 'paused'; // undefined treated as 'active'
-  ntrp?: number; // skill rating 1.0 - 7.0
+  ntrp?: number; // legacy — kept for backwards compat
+  skillLevel?: SkillLevel;
   memberSince?: string;
   avatar?: string;
 }
@@ -52,7 +55,8 @@ export interface Partner {
   id: string;
   userId: string;
   name: string;
-  ntrp: number;
+  ntrp: number; // legacy — kept for DB compat
+  skillLevel?: SkillLevel;
   availability: string;
   matchType: 'singles' | 'doubles' | 'mixed' | 'any';
   date: string;
