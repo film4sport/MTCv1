@@ -65,13 +65,25 @@
       "name": "Book a Court",
       "short_name": "Book",
       "url": "/mobile-app/index.html#book",
-      "icons": []
+      "icons": [{ "src": "/mobile-app/icons/shortcut-book.png", "sizes": "192x192", "type": "image/png" }]
     },
     {
       "name": "My Schedule",
       "short_name": "Schedule",
       "url": "/mobile-app/index.html#schedule",
-      "icons": []
+      "icons": [{ "src": "/mobile-app/icons/shortcut-schedule.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Messages",
+      "short_name": "Messages",
+      "url": "/mobile-app/index.html#messages",
+      "icons": [{ "src": "/mobile-app/icons/shortcut-messages.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Find Partners",
+      "short_name": "Partners",
+      "url": "/mobile-app/index.html#partners",
+      "icons": [{ "src": "/mobile-app/icons/shortcut-partners.png", "sizes": "192x192", "type": "image/png" }]
     }
   ]
 }

@@ -49,7 +49,8 @@
       "Bash(npm run deps:check:*)",
       "Bash(npm run test:coverage:*)",
       "Bash(xargs:*)",
-      "Bash(npx vitest:*)"
+      "Bash(npx vitest:*)",
+      "mcp__Claude_Preview__preview_start"
     ]
   }
 }
