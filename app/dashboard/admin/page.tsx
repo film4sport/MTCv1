@@ -125,8 +125,8 @@ export default function AdminPage() {
 
   const exportMembers = () => {
     exportToCsv('mtc-members.csv',
-      ['Name', 'Email', 'Role', 'NTRP', 'Member Since'],
-      members.map(m => [m.name, m.email, m.role, String(m.ntrp || ''), m.memberSince || ''])
+      ['Name', 'Email', 'Role', 'Skill Level', 'Member Since'],
+      members.map(m => [m.name, m.email, m.role, m.skillLevel || '', m.memberSince || ''])
     );
   };
 
@@ -429,7 +429,7 @@ export default function AdminPage() {
                     <th className="text-left px-4 py-3 text-xs font-medium" style={{ color: '#6b7266' }}>Name</th>
                     <th className="text-left px-4 py-3 text-xs font-medium" style={{ color: '#6b7266' }}>Email</th>
                     <th className="text-left px-4 py-3 text-xs font-medium" style={{ color: '#6b7266' }}>Role</th>
-                    <th className="text-left px-4 py-3 text-xs font-medium" style={{ color: '#6b7266' }}>NTRP</th>
+                    <th className="text-left px-4 py-3 text-xs font-medium" style={{ color: '#6b7266' }}>Skill</th>
                     <th className="text-left px-4 py-3 text-xs font-medium" style={{ color: '#6b7266' }}>Status</th>
                     <th className="text-left px-4 py-3 text-xs font-medium" style={{ color: '#6b7266' }}>Since</th>
                     <th className="text-right px-4 py-3 text-xs font-medium" style={{ color: '#6b7266' }}>Actions</th>
@@ -455,7 +455,14 @@ export default function AdminPage() {
                           {m.role}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-sm" style={{ color: '#2a2f1e' }}>{m.ntrp || '—'}</td>
+                      <td className="px-4 py-3">
+                        <span className="text-xs px-2 py-0.5 rounded-full font-medium capitalize" style={{
+                          background: m.skillLevel === 'beginner' ? 'rgba(34, 197, 94, 0.1)' : m.skillLevel === 'intermediate' ? 'rgba(59, 175, 218, 0.1)' : m.skillLevel === 'advanced' ? 'rgba(245, 158, 11, 0.1)' : m.skillLevel === 'competitive' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(107, 122, 61, 0.1)',
+                          color: m.skillLevel === 'beginner' ? '#16a34a' : m.skillLevel === 'intermediate' ? '#3BAFDA' : m.skillLevel === 'advanced' ? '#d97706' : m.skillLevel === 'competitive' ? '#dc2626' : '#6b7266',
+                        }}>
+                          {m.skillLevel || '—'}
+                        </span>
+                      </td>
                       <td className="px-4 py-3">
                         <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{
                           background: (m.status || 'active') === 'active' ? 'rgba(34, 197, 94, 0.1)' : 'rgba(245, 158, 11, 0.1)',
