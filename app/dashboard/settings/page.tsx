@@ -7,9 +7,10 @@ import { useApp } from '../lib/store';
 import DashboardHeader from '../components/DashboardHeader';
 
 export default function SettingsPage() {
-  const { currentUser, logout, notificationPreferences, setNotificationPreferences } = useApp();
+  const { currentUser, bookings, conversations, logout, notificationPreferences, setNotificationPreferences } = useApp();
   const router = useRouter();
   const [showInstallTip, setShowInstallTip] = useState(false);
+  const [downloading, setDownloading] = useState(false);
   const [hapticEnabled, setHapticEnabled] = useState(() => {
     if (typeof localStorage !== 'undefined') return localStorage.getItem('mtc-haptic') !== 'off';
     return true;
@@ -22,6 +23,36 @@ export default function SettingsPage() {
   const handleLogout = () => {
     logout();
     router.replace('/login');
+  };
+
+  const downloadMyData = async () => {
+    if (!currentUser) return;
+    setDownloading(true);
+    try {
+      const myBookings = bookings.filter(b => b.userId === currentUser.id);
+      const myConversations = conversations.map(c => ({
+        with: c.memberName,
+        messages: c.messages.map(m => ({ from: m.fromId === currentUser.id ? 'You' : m.from, text: m.text, date: m.timestamp })),
+      }));
+      const data = {
+        exportedAt: new Date().toISOString(),
+        profile: { name: currentUser.name, email: currentUser.email, role: currentUser.role, skillLevel: currentUser.skillLevel, memberSince: currentUser.memberSince },
+        bookings: myBookings.map(b => ({ court: b.courtName, date: b.date, time: b.time, status: b.status, type: b.type })),
+        conversations: myConversations,
+        notificationPreferences,
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `mtc-my-data-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      // silent fail
+    } finally {
+      setDownloading(false);
+    }
   };
 
   return (
@@ -143,6 +174,25 @@ export default function SettingsPage() {
               />
             </button>
           </div>
+        </div>
+
+        {/* Your Data (PIPEDA) */}
+        <div className="rounded-2xl border p-6 section-card" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
+          <h3 className="font-semibold mb-2" style={{ color: '#2a2f1e' }}>Your Data</h3>
+          <p className="text-xs mb-4" style={{ color: '#6b7266' }}>
+            Download a copy of your profile, bookings, and messages as a JSON file.
+          </p>
+          <button
+            onClick={downloadMyData}
+            disabled={downloading}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors hover:opacity-90"
+            style={{ background: '#6b7a3d', color: '#fff' }}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            {downloading ? 'Preparing...' : 'Download My Data'}
+          </button>
         </div>
 
         {/* Legal */}
