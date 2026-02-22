@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import Image from 'next/image';
 import '../(landing)/styles/landing.css';
 
 import AboutTab from './components/AboutTab';
@@ -17,7 +18,7 @@ const heroTitles: Record<string, { title: string; subtitle: string }> = {
   membership: { title: 'Membership & News', subtitle: 'Everything you need to know about joining Mono Tennis Club, our facilities, fees, and the latest club news.' },
   rules: { title: 'Rules & Constitution', subtitle: 'Club rules, regulations, and our constitution governing the operation of Mono Tennis Club.' },
   coaching: { title: 'Coaching & Camps', subtitle: 'Meet our coaching staff and learn about programs for players of all ages and skill levels.' },
-  faq: { title: 'FAQ & Directions', subtitle: 'Find answers to common questions and directions to the club.' },
+  faq: { title: 'FAQ & Directions', subtitle: 'All the A\'s to Your Q\'s' },
   privacy: { title: 'Privacy Policy', subtitle: 'How Mono Tennis Club collects, uses, and protects your personal information.' },
   terms: { title: 'Terms of Service', subtitle: 'The terms and conditions governing your use of Mono Tennis Club services.' },
 };
@@ -90,8 +91,8 @@ function InfoPageContent() {
     <div ref={pageRef} style={{ backgroundColor: '#f5f2eb', minHeight: '100vh' }}>
       {/* Header / Nav Bar */}
       <nav className="sticky top-0 z-50 flex items-center justify-between px-8 lg:px-16 py-4" style={{ backgroundColor: 'rgba(26, 31, 18, 0.95)', backdropFilter: 'blur(10px)', borderBottom: '1px solid rgba(232, 228, 217, 0.08)' }}>
-        <a href="/" className="headline-font text-xl font-bold tracking-wide" style={{ color: '#e8e4d9', textDecoration: 'none' }}>
-          <span>M</span><span>T</span><span>C</span>
+        <a href="/">
+          <Image src="/mono-logo-transparent.png" alt="Mono Tennis Club" width={48} height={48} className="h-10 w-auto" style={{ filter: 'brightness(0) invert(1)' }} />
         </a>
         <a href="/" className="inline-flex items-center gap-2 text-sm font-medium hover:opacity-80 transition-opacity" style={{ color: '#d4e157' }}>
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -110,11 +111,6 @@ function InfoPageContent() {
         <p className="max-w-2xl mx-auto text-sm leading-relaxed" style={{ color: '#6b7266' }}>
           {currentHero.subtitle}
         </p>
-        {activeTab === 'faq' && (
-          <p className="headline-font text-xl md:text-2xl mt-6 italic" style={{ color: '#6b7a3d' }}>
-            All the A&apos;s to Your Q&apos;s
-          </p>
-        )}
       </section>
 
       {/* Tab Navigation */}
@@ -153,24 +149,20 @@ function InfoPageContent() {
       {activeTab === 'terms' && <div role="tabpanel" id="tabpanel-terms" aria-labelledby="tab-terms" className="animate-fadeIn"><TermsTab /></div>}
 
       {/* Back to Home CTA */}
-      <section className="py-16 lg:py-20 px-8 lg:px-16" style={{ backgroundColor: '#f5f2eb' }}>
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-8 fade-in rounded-2xl p-10 lg:p-14" style={{ background: 'linear-gradient(135deg, rgba(107, 122, 61, 0.15), rgba(212, 225, 87, 0.08))', border: '1px solid rgba(107, 122, 61, 0.2)' }}>
-            <div>
-              <h2 className="headline-font text-2xl md:text-3xl lg:text-4xl text-center md:text-left" style={{ color: '#2a2f1e' }}>
-                Ready to Play?
-              </h2>
-              <p className="mt-3 text-sm text-center md:text-left" style={{ color: '#6b7266' }}>
-                Join Mono Tennis Club and get access to courts, events, and more.
-              </p>
-            </div>
-            <div className="flex items-center gap-4">
-              <a href="/signup" className="px-8 py-3 rounded-full text-sm font-medium transition-all hover:opacity-90 hover:shadow-lg" style={{ backgroundColor: '#6b7a3d', color: '#fff' }}>
-                Become a Member
-              </a>
-            </div>
-          </div>
-        </div>
+      <section className="py-20 lg:py-28 px-8 lg:px-16 text-center fade-in" style={{ backgroundColor: '#1a1f12' }}>
+        <h2 className="headline-font text-3xl md:text-4xl lg:text-5xl" style={{ color: '#e8e4d9' }}>
+          Ready to Play?
+        </h2>
+        <p className="mt-4 text-sm max-w-md mx-auto" style={{ color: 'rgba(232, 228, 217, 0.6)' }}>
+          Join Mono Tennis Club and get access to courts, events, and a community that loves the game.
+        </p>
+        <a
+          href="/signup"
+          className="inline-block mt-8 px-10 py-3.5 rounded-full text-sm font-semibold transition-all hover:-translate-y-0.5 hover:shadow-xl"
+          style={{ backgroundColor: '#d4e157', color: '#2a2f1e' }}
+        >
+          Become a Member
+        </a>
       </section>
 
       {/* Footer */}
