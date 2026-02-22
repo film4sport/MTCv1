@@ -109,7 +109,9 @@ function DashboardGuard({ children }: { children: React.ReactNode }) {
         }`}
       >
         <MobileAppBanner />
-        {children}
+        <div className="animate-fadeIn">
+          {children}
+        </div>
       </main>
       <Toast />
     </div>
