@@ -8,7 +8,7 @@ import AboutTab from './components/AboutTab';
 import MembershipTab from './components/MembershipTab';
 import RulesTab from './components/RulesTab';
 import CoachingTab from './components/CoachingTab';
-import FaqTab from './components/FaqTab';
+import FaqTab from './components/FAQTab';
 import PrivacyTab from './components/PrivacyTab';
 import TermsTab from './components/TermsTab';
 
@@ -113,7 +113,9 @@ function InfoPageContent() {
       </section>
 
       {/* Tab Navigation */}
-      <div className="sticky top-[61px] z-40 px-8 lg:px-16 py-3" style={{ backgroundColor: '#f5f2eb', borderBottom: '1px solid #e0dcd3' }}>
+      <div className="sticky top-[61px] z-40 px-8 lg:px-16 py-3 relative" style={{ backgroundColor: '#f5f2eb', borderBottom: '1px solid #e0dcd3' }}>
+        {/* Right fade indicator for horizontal scroll on mobile */}
+        <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-12 lg:hidden z-10" style={{ background: 'linear-gradient(to right, transparent, #f5f2eb)' }} />
         <div className="max-w-7xl mx-auto flex justify-center gap-3 overflow-x-auto" role="tablist" aria-label="Info page sections" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}>
           {tabs.map((t) => (
             <button
@@ -137,13 +139,13 @@ function InfoPageContent() {
       </div>
 
       {/* Tab Panels */}
-      {activeTab === 'about' && <div role="tabpanel" id="tabpanel-about" aria-labelledby="tab-about"><AboutTab /></div>}
-      {activeTab === 'membership' && <div role="tabpanel" id="tabpanel-membership" aria-labelledby="tab-membership"><MembershipTab /></div>}
-      {activeTab === 'rules' && <div role="tabpanel" id="tabpanel-rules" aria-labelledby="tab-rules"><RulesTab /></div>}
-      {activeTab === 'coaching' && <div role="tabpanel" id="tabpanel-coaching" aria-labelledby="tab-coaching"><CoachingTab /></div>}
-      {activeTab === 'faq' && <div role="tabpanel" id="tabpanel-faq" aria-labelledby="tab-faq"><FaqTab /></div>}
-      {activeTab === 'privacy' && <div role="tabpanel" id="tabpanel-privacy" aria-labelledby="tab-privacy"><PrivacyTab /></div>}
-      {activeTab === 'terms' && <div role="tabpanel" id="tabpanel-terms" aria-labelledby="tab-terms"><TermsTab /></div>}
+      {activeTab === 'about' && <div role="tabpanel" id="tabpanel-about" aria-labelledby="tab-about" className="animate-fadeIn"><AboutTab /></div>}
+      {activeTab === 'membership' && <div role="tabpanel" id="tabpanel-membership" aria-labelledby="tab-membership" className="animate-fadeIn"><MembershipTab /></div>}
+      {activeTab === 'rules' && <div role="tabpanel" id="tabpanel-rules" aria-labelledby="tab-rules" className="animate-fadeIn"><RulesTab /></div>}
+      {activeTab === 'coaching' && <div role="tabpanel" id="tabpanel-coaching" aria-labelledby="tab-coaching" className="animate-fadeIn"><CoachingTab /></div>}
+      {activeTab === 'faq' && <div role="tabpanel" id="tabpanel-faq" aria-labelledby="tab-faq" className="animate-fadeIn"><FaqTab /></div>}
+      {activeTab === 'privacy' && <div role="tabpanel" id="tabpanel-privacy" aria-labelledby="tab-privacy" className="animate-fadeIn"><PrivacyTab /></div>}
+      {activeTab === 'terms' && <div role="tabpanel" id="tabpanel-terms" aria-labelledby="tab-terms" className="animate-fadeIn"><TermsTab /></div>}
 
       {/* Back to Home CTA */}
       <section className="py-16 lg:py-20 px-8 lg:px-16" style={{ backgroundColor: '#f5f2eb' }}>

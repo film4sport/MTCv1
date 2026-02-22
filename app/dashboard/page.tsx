@@ -53,8 +53,8 @@ export default function DashboardHome() {
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
           backgroundBlendMode: 'multiply',
-          opacity: 0.7,
-          filter: 'sepia(1) hue-rotate(60deg) saturate(0.6) brightness(0.95)',
+          opacity: 0.35,
+          filter: 'sepia(1) hue-rotate(60deg) saturate(0.4) brightness(1.05)',
         }}
       />
 
@@ -181,6 +181,19 @@ export default function DashboardHome() {
               <h3 className="font-semibold" style={{ color: '#2a2f1e' }}>Upcoming Events</h3>
               <Link href="/dashboard/events" className="text-xs font-medium hover:underline" style={{ color: '#6b7a3d' }}>View All</Link>
             </div>
+            {upcomingEvents.length === 0 ? (
+              <div className="text-center py-8 animate-fadeIn">
+                <div className="w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center" style={{ background: 'rgba(212, 225, 87, 0.12)' }}>
+                  <svg className="w-6 h-6" fill="none" stroke="#6b7a3d" viewBox="0 0 24 24" strokeWidth="1.5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                  </svg>
+                </div>
+                <p className="text-sm mb-1" style={{ color: '#6b7266' }}>No upcoming events</p>
+                <Link href="/dashboard/events" className="inline-block mt-2 px-4 py-2 rounded-xl text-xs font-medium text-white btn-press" style={{ background: '#6b7a3d' }}>
+                  View Events
+                </Link>
+              </div>
+            ) : (
             <div className="space-y-3">
               {upcomingEvents.map(ev => {
                 const bc = badgeColors[ev.badge] || badgeColors['members'];
@@ -221,6 +234,7 @@ export default function DashboardHome() {
                 );
               })}
             </div>
+            )}
           </div>
         </div>
       </div>

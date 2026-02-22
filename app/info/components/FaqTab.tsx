@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { faqItems } from '../data';
 
 export default function FaqTab() {
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [faqSearch, setFaqSearch] = useState('');
+  const answerRefs = useRef<Record<number, HTMLDivElement | null>>({});
 
   const toggleFaq = (index: number) => {
     setActiveFaq(activeFaq === index ? null : index);
@@ -73,7 +74,7 @@ export default function FaqTab() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                       </svg>
                     </button>
-                    <div className="faq-answer" id={`faq-answer-${originalIndex}`} role="region" aria-labelledby={`faq-q-${originalIndex}`} style={{ maxHeight: activeFaq === originalIndex ? '200px' : '0', color: '#555' }}>
+                    <div className="faq-answer" id={`faq-answer-${originalIndex}`} role="region" aria-labelledby={`faq-q-${originalIndex}`} ref={(el) => { answerRefs.current[originalIndex] = el; }} style={{ maxHeight: activeFaq === originalIndex ? `${answerRefs.current[originalIndex]?.scrollHeight || 500}px` : '0', color: '#555' }}>
                       <p>{item.answer}</p>
                     </div>
                   </div>
