@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 
-const SITE_URL = 'https://monotennisclub.ca';
+const SITE_URL = 'https://www.monotennisclub.com';
 const CDN = 'https://cdn.jsdelivr.net/gh/film4sport/my-webapp-images@main/mtc-images';
 
 export const metadata: Metadata = {
@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     canonical: '/info',
   },
   openGraph: {
-    title: 'Club Info — Membership, FAQ & About | Mono Tennis Club',  // Full title for social sharing
+    title: 'Club Info — Membership, FAQ & About | Mono Tennis Club',
     description:
       'Membership details, facilities, FAQ, and directions. Join the Caledon-Dufferin tennis community at Mono Tennis Club.',
     url: `${SITE_URL}/info`,
@@ -26,10 +26,28 @@ export const metadata: Metadata = {
   },
 };
 
+// BreadcrumbList helps Google show navigation hierarchy in search results
+const breadcrumbJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+    { '@type': 'ListItem', position: 2, name: 'Club Info', item: `${SITE_URL}/info` },
+  ],
+};
+
 export default function InfoLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+      {children}
+    </>
+  );
 }

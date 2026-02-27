@@ -166,7 +166,7 @@ export default function DashboardHome() {
                       <p className="font-medium text-sm" style={{ color: '#2a2f1e' }}>{b.courtName}</p>
                       <p className="text-xs" style={{ color: '#6b7266' }}>{formatDate(b.date)} &bull; {b.time}</p>
                     </div>
-                    <span className="text-xs px-2.5 py-1 rounded-full font-medium" style={{ background: '#f0fdf4', color: '#16a34a' }}>
+                    <span className="text-xs px-2.5 py-1 rounded-full font-medium" style={{ background: 'rgba(245, 158, 11, 0.1)', color: '#d97706' }}>
                       Confirmed
                     </span>
                   </div>
@@ -210,12 +210,7 @@ export default function DashboardHome() {
                       </span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="font-medium text-sm truncate" style={{ color: '#2a2f1e' }}>{ev.title}</p>
-                        <span className="text-[0.65rem] px-2 py-0.5 rounded-full shrink-0 font-medium" style={{ background: bc.bg, color: bc.color }}>
-                          {ev.price}
-                        </span>
-                      </div>
+                      <p className="font-medium text-sm truncate" style={{ color: '#2a2f1e' }}>{ev.title}</p>
                       <p className="text-xs mt-0.5" style={{ color: '#6b7266' }}>{ev.time} &bull; {ev.location}</p>
                       <div className="flex items-center gap-3 mt-1.5">
                         {spotsLeft != null && (
@@ -224,8 +219,8 @@ export default function DashboardHome() {
                           </span>
                         )}
                         {attending && (
-                          <span className="text-[0.65rem] px-2 py-0.5 rounded-full font-medium" style={{ background: 'rgba(107, 122, 61, 0.1)', color: '#6b7a3d' }}>
-                            Going
+                          <span className="text-[0.65rem] px-2 py-0.5 rounded-full font-medium" style={{ background: 'rgba(245, 158, 11, 0.1)', color: '#d97706' }}>
+                            ✓ Going
                           </span>
                         )}
                       </div>

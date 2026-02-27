@@ -14,8 +14,8 @@ import PrivacyTab from './components/PrivacyTab';
 import TermsTab from './components/TermsTab';
 
 const heroTitles: Record<string, { title: string; subtitle: string }> = {
-  about: { title: 'About Us', subtitle: 'Learn about Mono Tennis Club, our mission, facilities, and community.' },
-  membership: { title: 'Membership & News', subtitle: 'Everything you need to know about joining Mono Tennis Club, our facilities, fees, and the latest club news.' },
+  about: { title: 'About Us', subtitle: 'Learn about Mono Tennis Club, our mission, facilities, news, and community.' },
+  membership: { title: 'Membership', subtitle: 'Everything you need to know about joining Mono Tennis Club, fees, and how to register.' },
   rules: { title: 'Rules & Constitution', subtitle: 'Club rules, regulations, and our constitution governing the operation of Mono Tennis Club.' },
   coaching: { title: 'Coaching & Camps', subtitle: 'Meet our coaching staff and learn about programs for players of all ages and skill levels.' },
   faq: { title: 'FAQ & Directions', subtitle: 'All the A\'s to Your Q\'s' },
@@ -149,16 +149,16 @@ function InfoPageContent() {
       {activeTab === 'terms' && <div role="tabpanel" id="tabpanel-terms" aria-labelledby="tab-terms" className="animate-fadeIn"><TermsTab /></div>}
 
       {/* Back to Home CTA */}
-      <section className="py-20 lg:py-28 px-8 lg:px-16 text-center fade-in" style={{ backgroundColor: '#1a1f12' }}>
-        <h2 className="headline-font text-3xl md:text-4xl lg:text-5xl" style={{ color: '#e8e4d9' }}>
+      <section className="py-12 lg:py-16 px-8 lg:px-16 text-center fade-in" style={{ backgroundColor: '#1a1f12' }}>
+        <h2 className="headline-font text-2xl md:text-3xl" style={{ color: '#e8e4d9' }}>
           Ready to Play?
         </h2>
-        <p className="mt-4 text-sm max-w-md mx-auto" style={{ color: 'rgba(232, 228, 217, 0.6)' }}>
+        <p className="mt-3 text-sm max-w-md mx-auto" style={{ color: 'rgba(232, 228, 217, 0.6)' }}>
           Join Mono Tennis Club and get access to courts, events, and a community that loves the game.
         </p>
         <a
           href="/signup"
-          className="inline-block mt-8 px-10 py-3.5 rounded-full text-sm font-semibold transition-all hover:-translate-y-0.5 hover:shadow-xl"
+          className="inline-block mt-6 px-8 py-3 rounded-full text-sm font-semibold transition-all hover:-translate-y-0.5 hover:shadow-xl"
           style={{ backgroundColor: '#d4e157', color: '#2a2f1e' }}
         >
           Become a Member

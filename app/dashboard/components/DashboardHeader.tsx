@@ -47,11 +47,13 @@ export default function DashboardHeader({ title }: DashboardHeaderProps) {
   return (
     <>
       <header className="h-16 flex items-center justify-between px-4 pl-14 sm:pl-6 lg:pl-6 border-b relative z-10" style={{ backgroundColor: '#faf8f3', borderColor: '#e0dcd3' }}>
-        {/* Logo + Title */}
-        <div className="flex items-center gap-3">
+        {/* Logo */}
+        <div className="flex items-center">
           <Image src="/mono-logo-transparent.png" alt="Mono Tennis Club" width={36} height={36} className="h-9 w-auto" style={{ filter: 'brightness(0.2)' }} />
-          <h1 className="text-lg font-semibold" style={{ color: '#2a2f1e' }}>{title}</h1>
         </div>
+
+        {/* Centered Title */}
+        <h1 className="absolute left-1/2 -translate-x-1/2 text-lg font-semibold" style={{ color: '#2a2f1e' }}>{title}</h1>
 
         {/* Right Side */}
         <div className="flex items-center gap-2">

@@ -6,4 +6,4 @@ Disallow: /login
 Disallow: /api/
 
 # Sitemap
-Sitemap: https://monotennisclub.ca/sitemap.xml
+Sitemap: https://www.monotennisclub.com/sitemap.xml

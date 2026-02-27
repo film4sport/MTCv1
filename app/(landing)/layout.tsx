@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import { ErrorBoundary } from '../dashboard/components/ErrorBoundary';
 
-const SITE_URL = 'https://monotennisclub.ca';
+const SITE_URL = 'https://www.monotennisclub.com';
 const CDN = 'https://cdn.jsdelivr.net/gh/film4sport/my-webapp-images@main/mtc-images';
 
 export const metadata: Metadata = {
@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     absolute: 'Mono Tennis Club | Premier Tennis in Caledon, Dufferin & Mono, Ontario',
   },
   description:
-    'Mono Tennis Club is a not-for-profit community tennis club in Mono, Ontario — serving Caledon, Dufferin County, Orangeville and the GTA since 1980. Tournaments, camps, social round robins, court bookings, and a welcoming tennis community for all skill levels.',
+    'Mono Tennis Club is a not-for-profit community tennis club in Mono, Ontario — serving Orangeville, Caledon, Shelburne, Bolton, Brampton, Dufferin County, and the GTA since 1980. 4 outdoor courts, tournaments, summer camps, coaching, and social round robins for all skill levels.',
   keywords: [
     'Mono Tennis Club',
     'tennis Mono Ontario',
@@ -29,6 +29,22 @@ export const metadata: Metadata = {
     'not-for-profit tennis club',
     'tennis lessons Caledon Dufferin',
     'court booking Ontario tennis',
+    'tennis Bolton Ontario',
+    'tennis Brampton north',
+    'tennis Shelburne Ontario',
+    'tennis Alliston Ontario',
+    'tennis Tottenham Ontario',
+    'tennis Headwaters region',
+    'outdoor tennis courts near Brampton',
+    'tennis club Hockley Valley',
+    'tennis Adjala-Tosorontio',
+    'tennis Erin Ontario',
+    'tennis Grand Valley Ontario',
+    'tennis Amaranth Ontario',
+    'tennis Mono Cliffs',
+    'tennis Belfountain Ontario',
+    'tennis Caledon Village',
+    'tennis Palgrave Ontario',
   ],
   authors: [{ name: 'Mono Tennis Club' }],
   creator: 'Mono Tennis Club',
@@ -93,9 +109,9 @@ const jsonLd = {
       logo: `${SITE_URL}/favicon.png`,
       image: `${CDN}/hero-aerial-court.png`,
       description:
-        'A not-for-profit community tennis club located in Mono, Ontario, serving Caledon, Dufferin County, Orangeville, and the GTA since 1980. Offering tournaments, camps, coaching, social round robins, and court bookings.',
+        'A not-for-profit community tennis club located in Mono, Ontario, serving Orangeville, Caledon, Bolton, Shelburne, Brampton, Dufferin County, the Headwaters region, and the GTA since 1980. 4 outdoor courts with lights, tournaments, summer camps, coaching, and social round robins.',
       telephone: '',
-      email: 'info@monotennisclub.ca',
+      email: 'info@monotennisclub.com',
       address: {
         '@type': 'PostalAddress',
         streetAddress: '754883 Mono Centre Road',
@@ -113,7 +129,18 @@ const jsonLd = {
         { '@type': 'City', name: 'Mono', containedInPlace: { '@type': 'AdministrativeArea', name: 'Dufferin County' } },
         { '@type': 'City', name: 'Orangeville' },
         { '@type': 'City', name: 'Caledon' },
+        { '@type': 'City', name: 'Bolton' },
+        { '@type': 'City', name: 'Brampton' },
+        { '@type': 'City', name: 'Shelburne' },
+        { '@type': 'City', name: 'Alliston' },
+        { '@type': 'City', name: 'Tottenham' },
+        { '@type': 'City', name: 'Erin' },
+        { '@type': 'City', name: 'Grand Valley' },
+        { '@type': 'Place', name: 'Belfountain' },
+        { '@type': 'Place', name: 'Caledon Village' },
+        { '@type': 'Place', name: 'Palgrave' },
         { '@type': 'AdministrativeArea', name: 'Dufferin County' },
+        { '@type': 'AdministrativeArea', name: 'Headwaters Region' },
         { '@type': 'AdministrativeArea', name: 'Greater Toronto Area' },
       ],
       sport: 'Tennis',
@@ -122,7 +149,15 @@ const jsonLd = {
         { '@type': 'LocationFeatureSpecification', name: 'Clubhouse', value: true },
         { '@type': 'LocationFeatureSpecification', name: 'Free Parking', value: true },
         { '@type': 'LocationFeatureSpecification', name: 'Wheelchair Accessible', value: true },
+        { '@type': 'LocationFeatureSpecification', name: 'Court Lighting', value: true },
       ],
+      numberOfCourts: 4,
+      openingHoursSpecification: [
+        // Season: May through October, daily
+        { '@type': 'OpeningHoursSpecification', dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], opens: '09:30', closes: '22:00', validFrom: '2026-05-01', validThrough: '2026-10-31' },
+      ],
+      hasMap: 'https://www.google.com/maps?q=754883+Mono+Centre+Road,+Mono,+ON',
+      priceRange: '$',
       foundingDate: '1980',
       nonprofitStatus: 'Nonprofit501c3',
       sameAs: [],
@@ -143,7 +178,7 @@ const jsonLd = {
       isPartOf: { '@id': `${SITE_URL}/#website` },
       about: { '@id': `${SITE_URL}/#organization` },
       description:
-        'Mono Tennis Club is a not-for-profit community tennis club in Mono, Ontario — serving Caledon, Dufferin County, Orangeville and the GTA since 1980.',
+        'Mono Tennis Club is a not-for-profit community tennis club in Mono, Ontario — serving Orangeville, Caledon, Bolton, Shelburne, Brampton, Dufferin County, and the GTA since 1980.',
       inLanguage: 'en-CA',
     },
     {
@@ -176,6 +211,19 @@ const jsonLd = {
       eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
       eventStatus: 'https://schema.org/EventScheduled',
       organizer: { '@id': `${SITE_URL}/#organization` },
+    },
+    {
+      '@type': 'SportsEvent',
+      name: 'Opening Day BBQ',
+      description: 'Kick off the 2026 tennis season with a BBQ social at Mono Tennis Club. Meet fellow members, enjoy food, and hit the courts.',
+      startDate: '2026-05-09T13:00:00-04:00',
+      endDate: '2026-05-09T15:00:00-04:00',
+      location: { '@id': `${SITE_URL}/#organization` },
+      sport: 'Tennis',
+      eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+      eventStatus: 'https://schema.org/EventScheduled',
+      organizer: { '@id': `${SITE_URL}/#organization` },
+      isAccessibleForFree: true,
     },
   ],
 };

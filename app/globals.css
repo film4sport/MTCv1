@@ -469,11 +469,19 @@ html {
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
-/* Subtle gradient background for dashboard pages — gives glass cards something to blur */
+/* RSVP button — green default, orange glow on hover */
+.rsvp-btn:hover:not(:disabled) {
+  border-color: #d97706 !important;
+  background: rgba(245, 158, 11, 0.10) !important;
+  color: #d97706 !important;
+}
+
+/* Gradient background for dashboard pages — gives glass cards something to blur */
 .dashboard-gradient-bg {
   background:
-    radial-gradient(ellipse at 70% 0%, rgba(212, 225, 87, 0.07) 0%, transparent 50%),
-    radial-gradient(ellipse at 20% 100%, rgba(107, 122, 61, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 75% -5%, rgba(212, 225, 87, 0.14) 0%, transparent 45%),
+    radial-gradient(ellipse at 15% 95%, rgba(107, 122, 61, 0.10) 0%, transparent 45%),
+    radial-gradient(ellipse at 50% 50%, rgba(200, 209, 160, 0.06) 0%, transparent 60%),
     #f5f2eb;
 }
 
