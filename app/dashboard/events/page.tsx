@@ -286,24 +286,19 @@ export default function EventsPage() {
                   style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)', opacity: isPast ? 0.6 : 1 }}
                   onClick={() => setSelectedEvent(ev.id)}
                 >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-xl flex flex-col items-center justify-center" style={{ background: '#f5f2eb' }}>
-                        <span className="text-[0.6rem] font-semibold uppercase" style={{ color: '#6b7266' }}>
-                          {new Date(ev.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short' })}
-                        </span>
-                        <span className="text-sm font-bold leading-none" style={{ color: '#2a2f1e' }}>
-                          {new Date(ev.date + 'T00:00:00').getDate()}
-                        </span>
-                      </div>
-                      <div>
-                        <p className="font-medium text-sm" style={{ color: '#2a2f1e' }}>{ev.title}</p>
-                        <p className="text-xs" style={{ color: '#6b7266' }}>{ev.time}</p>
-                      </div>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-12 h-12 rounded-xl flex flex-col items-center justify-center" style={{ background: '#f5f2eb' }}>
+                      <span className="text-[0.6rem] font-semibold uppercase" style={{ color: '#6b7266' }}>
+                        {new Date(ev.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short' })}
+                      </span>
+                      <span className="text-sm font-bold leading-none" style={{ color: '#2a2f1e' }}>
+                        {new Date(ev.date + 'T00:00:00').getDate()}
+                      </span>
                     </div>
-                    <span className="text-[0.65rem] px-2 py-0.5 rounded-full font-medium shrink-0" style={{ background: bc.bg, color: bc.color }}>
-                      {ev.price}
-                    </span>
+                    <div>
+                      <p className="font-medium text-sm" style={{ color: '#2a2f1e' }}>{ev.title}</p>
+                      <p className="text-xs" style={{ color: '#6b7266' }}>{ev.time}</p>
+                    </div>
                   </div>
 
                   <p className="text-xs mb-3" style={{ color: '#6b7266' }}>{ev.location}</p>
@@ -321,13 +316,14 @@ export default function EventsPage() {
                         }
                       }}
                       disabled={isPast}
-                      className="px-4 py-1.5 rounded-lg text-xs font-medium transition-colors"
+                      className={`rsvp-btn px-4 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${isPast ? 'opacity-50' : ''}`}
                       style={{
-                        background: attending ? '#6b7a3d' : 'rgba(107, 122, 61, 0.1)',
+                        background: attending ? '#d97706' : 'rgba(107, 122, 61, 0.1)',
                         color: attending ? '#fff' : '#6b7a3d',
+                        border: attending ? '1.5px solid #d97706' : '1.5px solid transparent',
                       }}
                     >
-                      {attending ? 'Going' : 'RSVP'}
+                      {attending ? '✓ Going' : 'RSVP'}
                     </button>
                   </div>
                 </div>

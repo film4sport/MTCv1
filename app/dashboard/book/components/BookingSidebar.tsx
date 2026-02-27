@@ -5,39 +5,42 @@ import { canCancel } from './booking-utils';
 
 interface BookingSidebarProps {
   myUpcoming: Booking[];
-  nextAvailableSlot: { date: string; time: string; courtId: number; courtName: string } | null;
-  courtName: string;
-  onSlotClick: (courtId: number, courtName: string, date: string, time: string) => void;
   onCancelBooking: (id: string) => void;
 }
 
-export default function BookingSidebar({ myUpcoming, nextAvailableSlot, courtName, onSlotClick, onCancelBooking }: BookingSidebarProps) {
+export default function BookingSidebar({ myUpcoming, onCancelBooking }: BookingSidebarProps) {
   const { showToast } = useToast();
   return (
     <div className="hidden lg:block w-72 shrink-0">
       <div className="space-y-4 sticky top-6">
 
-        {/* Quick Book Card */}
-        {nextAvailableSlot && (
-          <div className="rounded-2xl border p-4" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
-            <p className="text-xs font-semibold mb-2 flex items-center gap-1.5" style={{ color: '#6b7a3d' }}>
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-              Quick Book
-            </p>
-            <p className="text-[0.7rem] mb-3" style={{ color: '#9ca3a0' }}>
-              Next available on {courtName}
-            </p>
-            <button
-              onClick={() => onSlotClick(nextAvailableSlot.courtId, nextAvailableSlot.courtName, nextAvailableSlot.date, nextAvailableSlot.time)}
-              className="w-full py-2.5 rounded-xl text-sm font-medium transition-all duration-200 hover:opacity-90 active:scale-[0.98]"
-              style={{ background: '#6b7a3d', color: '#fff' }}
-            >
-              {new Date(nextAvailableSlot.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} at {nextAvailableSlot.time}
-            </button>
+        {/* Court Info Card */}
+        <div className="glass-card rounded-2xl border p-4" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
+          <p className="text-xs font-semibold mb-3 flex items-center gap-1.5" style={{ color: '#2a2f1e' }}>
+            <svg className="w-3.5 h-3.5" style={{ color: '#6b7a3d' }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Booking Info
+          </p>
+          <div className="space-y-2.5">
+            <div className="flex items-start gap-2.5">
+              <span className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" style={{ background: '#6b7a3d' }} />
+              <p className="text-[0.7rem] leading-relaxed" style={{ color: '#6b7266' }}>Guest fee: <span className="font-medium" style={{ color: '#2a2f1e' }}>${FEES.guest} per visit</span></p>
+            </div>
+            <div className="flex items-start gap-2.5">
+              <span className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" style={{ background: '#6b7a3d' }} />
+              <p className="text-[0.7rem] leading-relaxed" style={{ color: '#6b7266' }}>Cancel up to <span className="font-medium" style={{ color: '#2a2f1e' }}>{FEES.cancelWindowHours}h</span> before your slot</p>
+            </div>
+            <div className="flex items-start gap-2.5">
+              <span className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" style={{ background: '#6b7a3d' }} />
+              <p className="text-[0.7rem] leading-relaxed" style={{ color: '#6b7266' }}>Max <span className="font-medium" style={{ color: '#2a2f1e' }}>3 participants</span> per booking</p>
+            </div>
+            <div className="flex items-start gap-2.5">
+              <span className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" style={{ background: '#6b7a3d' }} />
+              <p className="text-[0.7rem] leading-relaxed" style={{ color: '#6b7266' }}>Courts 1-2 til <span className="font-medium" style={{ color: '#2a2f1e' }}>10 PM</span>, Courts 3-4 til <span className="font-medium" style={{ color: '#2a2f1e' }}>8 PM</span></p>
+            </div>
           </div>
-        )}
+        </div>
 
         {/* My Bookings */}
         <div className="rounded-2xl border p-5" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>

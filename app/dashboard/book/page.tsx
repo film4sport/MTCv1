@@ -114,22 +114,6 @@ export default function BookCourtPage() {
   const courtConfig = COURTS_CONFIG.find(c => c.id === selectedCourt)!;
   const slotsForCourt = TIME_SLOTS.filter(t => !isCourtClosed(selectedCourt, t));
 
-  const nextAvailableSlot = useMemo(() => {
-    const today = new Date();
-    for (let d = 0; d < 8; d++) {
-      const date = new Date(today);
-      date.setDate(date.getDate() + d);
-      const dateStr = date.toISOString().split('T')[0];
-      for (const time of slotsForCourt) {
-        if (!isSlotPast(dateStr, time) && !isSlotBooked(bookings, selectedCourt, dateStr, time) && !isCourtClosed(selectedCourt, time)) {
-          return { date: dateStr, time, courtId: selectedCourt, courtName: courtConfig.name };
-        }
-      }
-    }
-    return null;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedCourt, bookings, slotsForCourt]);
-
   // Calendar helpers
   const calDays = useMemo(() => {
     const year = calMonth.getFullYear();
@@ -261,7 +245,7 @@ export default function BookCourtPage() {
                                     onMouseEnter={() => (booked && !mine) ? handleSlotHover(slotKey) : undefined}
                                     onMouseLeave={() => handleSlotHover(null)}
                                     disabled={(!mine && !!booked) || past || closed}
-                                    className={`slot-cell w-full rounded-lg text-xs font-medium py-2.5 px-2 transition-all duration-150 relative overflow-hidden ${mine ? 'slot-booked-pulse' : ''} ${available ? 'hover:border-[#6b7a3d] hover:border-solid hover:bg-[#6b7a3d]/[0.04]' : ''}`}
+                                    className={`slot-cell w-full rounded-lg text-xs font-medium py-2.5 px-2 transition-all duration-150 relative overflow-hidden ${mine ? 'slot-booked-pulse' : ''} ${available ? 'hover:border-[#d97706] hover:border-solid hover:bg-[#d97706]/[0.04]' : ''}`}
                                     style={{
                                       background: mine ? '#6b7a3d' : courtClosed ? '#f0ede6' : isLesson ? 'rgba(59, 130, 246, 0.08)' : isProgram ? 'rgba(245, 158, 11, 0.08)' : booked ? '#f5f3ee' : 'transparent',
                                       color: mine ? '#fff' : courtClosed ? '#c5c0b5' : isLesson ? '#3b82f6' : isProgram ? '#d97706' : booked ? '#b5b0a5' : past || closed ? '#d5d0c8' : '#6b7a3d',
@@ -281,7 +265,7 @@ export default function BookCourtPage() {
                                     ) : past || closed ? (
                                       <span style={{ opacity: 0.3 }}>—</span>
                                     ) : (
-                                      <span className="slot-book-label opacity-0 transition-opacity duration-150" style={{ color: '#6b7a3d' }}>Book</span>
+                                      <span className="slot-book-label opacity-0 transition-opacity duration-150" style={{ color: '#d97706' }}>Book</span>
                                     )}
                                   </button>
 
@@ -437,9 +421,6 @@ export default function BookCourtPage() {
           {/* Sidebar */}
           <BookingSidebar
             myUpcoming={myUpcoming}
-            nextAvailableSlot={nextAvailableSlot}
-            courtName={courtConfig.name}
-            onSlotClick={handleSlotClick}
             onCancelBooking={(id) => cancelBooking(id)}
           />
         </div>

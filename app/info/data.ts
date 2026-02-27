@@ -13,7 +13,7 @@ export const privacySections = [
   },
   {
     title: 'Your Rights Under PIPEDA',
-    content: 'Under Canada\'s Personal Information Protection and Electronic Documents Act (PIPEDA), you have the right to access your personal information, request corrections, and withdraw consent for its use. To exercise these rights, contact us at info@monotennisclub.ca.',
+    content: 'Under Canada\'s Personal Information Protection and Electronic Documents Act (PIPEDA), you have the right to access your personal information, request corrections, and withdraw consent for its use. To exercise these rights, contact us at info@monotennisclub.com.',
   },
   {
     title: 'Data Security',
@@ -25,7 +25,7 @@ export const privacySections = [
   },
   {
     title: 'Contact Us',
-    content: 'For privacy-related questions or concerns, contact our Privacy Officer at info@monotennisclub.ca or write to: Mono Tennis Club, 754883 Mono Centre Road, Mono, Ontario, L9W 6S3.',
+    content: 'For privacy-related questions or concerns, contact our Privacy Officer at info@monotennisclub.com or write to: Mono Tennis Club, 754883 Mono Centre Road, Mono, Ontario, L9W 6S3.',
   },
 ];
 

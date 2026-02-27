@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next';
 
-const SITE_URL = 'https://monotennisclub.ca';
+const SITE_URL = 'https://www.monotennisclub.com';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [

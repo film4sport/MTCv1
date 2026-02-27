@@ -87,7 +87,7 @@ export default function FaqTab() {
             <h3 className="font-semibold text-lg mb-6" style={{ color: '#2a2f1e' }}>Find Us</h3>
             <div className="rounded-2xl overflow-hidden shadow-lg h-[400px] lg:h-full lg:min-h-[450px]">
               <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2871.8904!2d-80.0731!3d43.9981!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x882a7a2e7e8e8e8d%3A0x8e8e8e8e8e8e8e8e!2s754883%20Mono%20Centre%20Rd%2C%20Mono%2C%20ON%20L9W%206S3!5e0!3m2!1sen!2sca!4v1234567890"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2868.6773368225654!2d-80.074593724488!3d44.028061871086685!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x882aff3ec22e5bbd%3A0x512ba1b014b14562!2s754883%20Mono%20Centre%20Rd%2C%20Orangeville%2C%20ON%20L9W%202Y8!5e0!3m2!1sen!2sca!4v1772075563936!5m2!1sen!2sca"
                 width="100%" height="100%" style={{ border: 0 }} allowFullScreen loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade" title="Mono Tennis Club Location"
               />
@@ -97,8 +97,8 @@ export default function FaqTab() {
                 <strong style={{ color: '#2a2f1e' }}>754883 Mono Centre Road</strong>
                 <br />Mono, Ontario L9W 6S3
                 <br />
-                <a href="mailto:info@monotennisclub.ca" className="hover:underline" style={{ color: '#6b7a3d' }}>
-                  info@monotennisclub.ca
+                <a href="mailto:info@monotennisclub.com" className="hover:underline" style={{ color: '#6b7a3d' }}>
+                  info@monotennisclub.com
                 </a>
               </p>
               <p className="text-sm mt-3 flex items-center gap-2" style={{ color: '#6b7a3d' }}>

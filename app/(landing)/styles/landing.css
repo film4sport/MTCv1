@@ -315,7 +315,8 @@ html, body {
 .wave-divider svg {
   position: relative;
   display: block;
-  width: calc(100% + 1.3px);
+  width: calc(100% + 32px);
+  margin-left: -16px;
   height: 60px; /* default, overridden by inline style when custom height is set */
   animation: waveFloat 4s ease-in-out infinite;
 }
