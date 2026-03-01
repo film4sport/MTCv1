@@ -5,6 +5,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 const categoryColors: Record<string, { accent: string; bg: string; text: string }> = {
   tournament: { accent: '#6b7a3d', bg: 'rgba(107, 122, 61, 0.08)', text: '#4a5528' },
   camp: { accent: '#d4e157', bg: 'rgba(212, 225, 87, 0.12)', text: '#3b4229' },
+  coaching: { accent: '#6b7a3d', bg: 'rgba(107, 122, 61, 0.08)', text: '#4a5528' },
   social: { accent: '#1a1f12', bg: 'rgba(26, 31, 18, 0.05)', text: '#1a1f12' },
 };
 
@@ -42,6 +43,14 @@ const events = [
     highlight: '8:30am - 3:30pm',
   },
   {
+    category: 'coaching',
+    date: 'Spring/Summer 2026',
+    title: 'Weekly Tennis Programs',
+    description:
+      'Classes for all ages — Munchkins, Red/Orange/Green ball, Teens, Adults, Live Ball, Team Practice & House League. Mon/Tue/Thu/Fri.',
+    highlight: 'Mon · Tue · Thu · Fri',
+  },
+  {
     category: 'social',
     date: 'Ongoing',
     title: 'Social Round Robin',
@@ -60,6 +69,7 @@ export default function Events() {
     { label: 'All Events', value: 'all' },
     { label: 'Tournaments', value: 'tournament' },
     { label: 'Camps', value: 'camp' },
+    { label: 'Coaching', value: 'coaching' },
     { label: 'Social', value: 'social' },
   ];
 

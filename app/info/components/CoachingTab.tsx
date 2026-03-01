@@ -81,38 +81,64 @@ export default function CoachingTab() {
           <div className="text-center mb-12 fade-in">
             <span className="section-label">// Programs</span>
             <h2 className="headline-font text-2xl md:text-3xl lg:text-4xl leading-tight mt-4 mb-4" style={{ color: '#2a2f1e' }}>
-              Summer Tennis Camp
+              Spring/Summer Tennis Programs
             </h2>
+            <p className="max-w-2xl mx-auto text-sm leading-relaxed" style={{ color: '#6b7266' }}>
+              Classes for all ages and skill levels, running weekly at the Mono Tennis Club.
+            </p>
           </div>
 
-          <div className="fade-in rounded-xl p-8" style={{ background: '#faf8f3', border: '1px solid #e0dcd3' }}>
-            <div className="grid md:grid-cols-2 gap-6 mb-6">
-              <div>
-                <span className="text-xs font-medium" style={{ color: '#999' }}>Dates</span>
-                <p className="font-semibold mt-1" style={{ color: '#2a2f1e' }}>July 28 – Aug 1, 2026</p>
+          <div className="grid md:grid-cols-2 gap-6 fade-in">
+            {[
+              { day: 'Monday', classes: [{ name: 'Live Ball', time: '9:30 – 11:00 AM' }, { name: 'Team Practice', time: '11:00 AM – 1:00 PM' }, { name: 'Teen', time: '5:00 – 6:00 PM' }, { name: 'Live Ball', time: '6:00 – 7:30 PM' }] },
+              { day: 'Tuesday', classes: [{ name: 'Orange', time: '4:00 – 5:00 PM' }, { name: 'Green', time: '5:00 – 6:00 PM' }, { name: 'Teen', time: '6:00 – 7:00 PM' }, { name: 'Live Ball', time: '7:00 – 8:30 PM' }, { name: 'Adult', time: '8:30 – 9:30 PM' }] },
+              { day: 'Thursday', classes: [{ name: 'Munchkin', time: '4:30 – 5:00 PM' }, { name: 'Red Ball', time: '5:00 – 6:00 PM' }] },
+              { day: 'Friday', classes: [{ name: 'Teen', time: '4:30 – 5:30 PM' }, { name: 'Live Ball', time: '5:30 – 7:00 PM' }, { name: 'House League', time: '7:00 – 9:00 PM' }] },
+            ].map((day) => (
+              <div key={day.day} className="rounded-xl p-6" style={{ background: '#faf8f3', border: '1px solid #e0dcd3' }}>
+                <h3 className="font-bold text-lg mb-4 flex items-center gap-2" style={{ color: '#2a2f1e' }}>
+                  <span className="w-2 h-2 rounded-full" style={{ background: '#6b7a3d' }} />
+                  {day.day}
+                </h3>
+                <div className="space-y-2.5">
+                  {day.classes.map((cls, i) => (
+                    <div key={i} className="flex items-center justify-between text-sm">
+                      <span className="font-medium" style={{ color: '#2a2f1e' }}>{cls.name}</span>
+                      <span style={{ color: '#6b7266' }}>{cls.time}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div>
-                <span className="text-xs font-medium" style={{ color: '#999' }}>Daily Schedule</span>
-                <p className="font-semibold mt-1" style={{ color: '#2a2f1e' }}>8:30 AM – 3:30 PM</p>
-              </div>
-            </div>
-            <p className="text-sm leading-relaxed mb-6" style={{ color: '#6b7266' }}>
-              Make memories, build skills, gain confidence, and have fun! Our summer camp is perfect for young players looking to improve their game in a supportive, energetic environment.
-            </p>
-            <div className="rounded-lg p-5" style={{ backgroundColor: 'rgba(107, 122, 61, 0.08)', border: '1px solid rgba(107, 122, 61, 0.2)' }}>
-              <p className="text-sm font-medium mb-1" style={{ color: '#4a5528' }}>Register for Coaching & Camps</p>
-              <p className="text-sm" style={{ color: '#6b7266' }}>
-                To register for classes and summer camps,{' '}
-                <a href="/dashboard/events" className="font-semibold hover:underline" style={{ color: '#6b7a3d' }}>
-                  log in to your member dashboard
+            ))}
+          </div>
+
+          <div className="mt-8 fade-in rounded-xl p-6" style={{ backgroundColor: 'rgba(107, 122, 61, 0.08)', border: '1px solid rgba(107, 122, 61, 0.2)' }}>
+            <p className="text-sm font-medium mb-3" style={{ color: '#4a5528' }}>Sign Up & Contact</p>
+            <div className="space-y-2">
+              <p className="text-sm leading-relaxed" style={{ color: '#6b7266' }}>
+                If you would like to sign up for any of these programs or would like more information, please email{' '}
+                <a href="mailto:Taylor.suzanne.tennis@gmail.com" className="font-semibold hover:underline" style={{ color: '#6b7a3d' }}>
+                  Suzanne Taylor
                 </a>
-                {' '}and visit the Lessons tab. For questions,{' '}
-                <a href="/dashboard/messages" className="font-semibold hover:underline" style={{ color: '#6b7a3d' }}>
-                  message Coach Mark
+                {' '}at{' '}
+                <a href="mailto:Taylor.suzanne.tennis@gmail.com" className="font-medium hover:underline" style={{ color: '#6b7a3d' }}>
+                  Taylor.suzanne.tennis@gmail.com
                 </a>
-                {' '}through the dashboard
+              </p>
+              <p className="text-sm leading-relaxed" style={{ color: '#6b7266' }}>
+                To contact our Head Pro, please email{' '}
+                <a href="mailto:Taylor.mark.tennis@gmail.com" className="font-semibold hover:underline" style={{ color: '#6b7a3d' }}>
+                  Mark Taylor
+                </a>
+                {' '}at{' '}
+                <a href="mailto:Taylor.mark.tennis@gmail.com" className="font-medium hover:underline" style={{ color: '#6b7a3d' }}>
+                  Taylor.mark.tennis@gmail.com
+                </a>
               </p>
             </div>
+            <p className="text-xs mt-4" style={{ color: '#999' }}>
+              Summer camp dates coming soon — pros confirming availability.
+            </p>
           </div>
         </div>
       </section>
