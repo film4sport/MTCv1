@@ -82,8 +82,17 @@ export async function signOut(): Promise<void> {
  */
 export async function resetPassword(email: string): Promise<string | null> {
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${window.location.origin}/login`,
+    redirectTo: `${window.location.origin}/auth/callback?type=recovery`,
   });
+  return error ? error.message : null;
+}
+
+/**
+ * Update the current user's password (used after reset link click).
+ * Requires an active recovery session.
+ */
+export async function updatePassword(newPassword: string): Promise<string | null> {
+  const { error } = await supabase.auth.updateUser({ password: newPassword });
   return error ? error.message : null;
 }
 

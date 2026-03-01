@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import { signIn, resetPassword } from '../dashboard/lib/auth';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { signIn, resetPassword, updatePassword } from '../dashboard/lib/auth';
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [emailError, setEmailError] = useState(false);
@@ -13,6 +14,23 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  // Password reset mode
+  const [resetMode, setResetMode] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
+  const [resetUpdateError, setResetUpdateError] = useState('');
+  const [resetUpdateLoading, setResetUpdateLoading] = useState(false);
+  const [resetSuccess, setResetSuccess] = useState(false);
+
+  // Detect recovery mode from URL
+  useEffect(() => {
+    if (searchParams.get('reset') === 'true') {
+      setResetMode(true);
+    }
+  }, [searchParams]);
 
   // Restore remembered email on mount
   useEffect(() => {
@@ -480,6 +498,123 @@ export default function LoginPage() {
             </div>
           </div>
 
+          {/* Password Reset Mode */}
+          {resetMode ? (
+            <div>
+              <div className="mb-6 lg:mb-8">
+                <h1 className="text-xl sm:text-2xl font-semibold" style={{ color: '#2a2f1e' }}>
+                  {resetSuccess ? 'Password Updated!' : 'Set New Password'}
+                </h1>
+                <p className="mt-2 text-sm sm:text-base" style={{ color: '#6b7266' }}>
+                  {resetSuccess ? 'You can now sign in with your new password.' : 'Enter your new password below.'}
+                </p>
+              </div>
+
+              {resetSuccess ? (
+                <button
+                  onClick={() => { setResetMode(false); setPassword(''); setResetSuccess(false); }}
+                  className="w-full py-4 rounded-xl font-semibold text-base text-white transition-all hover:-translate-y-0.5"
+                  style={{ background: '#6b7a3d' }}
+                >
+                  Sign In
+                </button>
+              ) : (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm mb-2" style={{ color: '#2a2f1e' }}>New Password</label>
+                    <div className="relative">
+                      <input
+                        type={showNewPassword ? 'text' : 'password'}
+                        value={newPassword}
+                        onChange={(e) => { setNewPassword(e.target.value); setResetUpdateError(''); }}
+                        placeholder="Min. 8 chars, uppercase, lowercase & number"
+                        maxLength={128}
+                        className="w-full px-5 py-4 pr-12 rounded-xl text-base transition-all focus:outline-none"
+                        style={{ background: '#fff', border: '1px solid #e0dcd3', color: '#2a2f1e' }}
+                        onFocus={(e) => { e.currentTarget.style.borderColor = '#6b7a3d'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(107,122,61,0.15)'; }}
+                        onBlur={(e) => { e.currentTarget.style.borderColor = '#e0dcd3'; e.currentTarget.style.boxShadow = 'none'; }}
+                      />
+                      <button type="button" onClick={() => setShowNewPassword(!showNewPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 p-1" style={{ color: '#6b7266' }} aria-label={showNewPassword ? 'Hide password' : 'Show password'}>
+                        {showNewPassword ? (
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5"><path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" /></svg>
+                        ) : (
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5"><path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm mb-2" style={{ color: '#2a2f1e' }}>Confirm New Password</label>
+                    <div className="relative">
+                      <input
+                        type={showConfirmNewPassword ? 'text' : 'password'}
+                        value={confirmNewPassword}
+                        onChange={(e) => { setConfirmNewPassword(e.target.value); setResetUpdateError(''); }}
+                        placeholder="Re-enter your new password"
+                        maxLength={128}
+                        className="w-full px-5 py-4 pr-12 rounded-xl text-base transition-all focus:outline-none"
+                        style={{
+                          background: '#fff',
+                          border: `1px solid ${confirmNewPassword && confirmNewPassword !== newPassword ? '#ef4444' : '#e0dcd3'}`,
+                          color: '#2a2f1e',
+                        }}
+                        onFocus={(e) => { e.currentTarget.style.boxShadow = '0 0 0 3px rgba(107,122,61,0.15)'; }}
+                        onBlur={(e) => { e.currentTarget.style.boxShadow = 'none'; }}
+                      />
+                      <button type="button" onClick={() => setShowConfirmNewPassword(!showConfirmNewPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 p-1" style={{ color: '#6b7266' }} aria-label={showConfirmNewPassword ? 'Hide password' : 'Show password'}>
+                        {showConfirmNewPassword ? (
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5"><path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" /></svg>
+                        ) : (
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5"><path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                        )}
+                      </button>
+                    </div>
+                    {confirmNewPassword && confirmNewPassword !== newPassword && (
+                      <p className="text-xs mt-2" style={{ color: '#ef4444' }}>Passwords do not match</p>
+                    )}
+                  </div>
+                  {resetUpdateError && <p className="text-sm text-center" style={{ color: '#ef4444' }}>{resetUpdateError}</p>}
+                  <button
+                    onClick={async () => {
+                      const pwd = newPassword;
+                      if (pwd.length < 8 || !/[A-Z]/.test(pwd) || !/[a-z]/.test(pwd) || !/[0-9]/.test(pwd)) {
+                        setResetUpdateError('Password must be at least 8 characters with uppercase, lowercase, and a number');
+                        return;
+                      }
+                      if (confirmNewPassword !== newPassword) {
+                        setResetUpdateError('Passwords do not match');
+                        return;
+                      }
+                      setResetUpdateLoading(true);
+                      const err = await updatePassword(newPassword);
+                      setResetUpdateLoading(false);
+                      if (err) {
+                        setResetUpdateError(err);
+                      } else {
+                        setResetSuccess(true);
+                      }
+                    }}
+                    disabled={resetUpdateLoading || newPassword.length < 8 || confirmNewPassword !== newPassword}
+                    className="w-full py-4 rounded-xl font-semibold text-base text-white transition-all hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none mt-2"
+                    style={{
+                      background: newPassword.length >= 8 && confirmNewPassword === newPassword ? '#6b7a3d' : '#e0dcd3',
+                      color: newPassword.length >= 8 && confirmNewPassword === newPassword ? '#fff' : '#999',
+                    }}
+                  >
+                    {resetUpdateLoading ? 'Updating...' : 'Update Password'}
+                  </button>
+                  <button
+                    onClick={() => { setResetMode(false); setNewPassword(''); setConfirmNewPassword(''); }}
+                    className="w-full text-center text-sm mt-2 hover:underline"
+                    style={{ color: '#6b7266', background: 'none', border: 'none', cursor: 'pointer' }}
+                  >
+                    Back to Sign In
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+          <>
           {/* Logo / Welcome */}
           <div className="mb-6 lg:mb-8">
             <h1 className="text-xl sm:text-2xl font-semibold" style={{ color: '#2a2f1e' }}>Welcome Back</h1>
@@ -686,6 +821,8 @@ export default function LoginPage() {
               Become a Member
             </a>
           </p>
+          </>
+          )}
 
         </div>
       </div>
