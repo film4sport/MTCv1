@@ -5,11 +5,11 @@ import dynamic from 'next/dynamic';
 import { useApp } from '../lib/store';
 import { useToast } from '../lib/toast';
 import DashboardHeader from '../components/DashboardHeader';
-import { TIME_SLOTS, COURTS_CONFIG, FEES } from '../lib/types';
+import { TIME_SLOTS, COURTS_CONFIG, FEES, BOOKING_RULES } from '../lib/types';
 import { generateId } from '../lib/utils';
 import {
-  ViewMode, COURT_COLORS, getTimeRange,
-  isSlotBooked, isSlotMine, isSlotPast, isCourtClosed, isCourtInMaintenance, canCancel,
+  ViewMode, COURT_COLORS, getTimeRange, formatDuration,
+  isSlotBooked, isSlotMine, isSlotPast, isCourtClosed, isCourtInMaintenance, canCancel, canBookDate,
   formatDateShort, isToday,
 } from './components/booking-utils';
 import BookingLegend from './components/BookingLegend';
@@ -21,7 +21,7 @@ const SuccessModal = dynamic(() => import('./components/SuccessModal'), { ssr: f
 export default function BookCourtPage() {
   const { currentUser, members, bookings, courts, events, addBooking, cancelBooking } = useApp();
   const { showToast } = useToast();
-  const [bookingSuccess, setBookingSuccess] = useState<{ courtName: string; date: string; time: string; participants?: { id: string; name: string }[] } | null>(null);
+  const [bookingSuccess, setBookingSuccess] = useState<{ courtName: string; date: string; time: string; participants?: { id: string; name: string }[]; duration?: number; matchType?: 'singles' | 'doubles' } | null>(null);
   const [view, setView] = useState<ViewMode>('week');
   const [weekStart, setWeekStart] = useState(() => {
     const d = new Date();
@@ -74,11 +74,15 @@ export default function BookCourtPage() {
     }
     if (isCourtInMaintenance(courts, courtId)) { showToast('This court is currently closed', 'error'); return; }
     if (isSlotBooked(bookings, courtId, date, time) || isSlotPast(date, time) || isCourtClosed(courtId, time)) return;
+    if (!canBookDate(date)) {
+      showToast(`Bookings can only be made up to ${BOOKING_RULES.maxAdvanceDays} days in advance`, 'error');
+      return;
+    }
     setModalData({ courtId, courtName, date, time });
     setShowModal(true);
   };
 
-  const confirmBooking = (isGuest: boolean, guestName: string, participants: { id: string; name: string }[]) => {
+  const confirmBooking = (isGuest: boolean, guestName: string, participants: { id: string; name: string }[], matchType: 'singles' | 'doubles', duration: number) => {
     if (!modalData || !currentUser || bookingLoading) return;
     if (isGuest && !guestName.trim()) return;
     const alreadyBooked = isSlotBooked(bookings, modalData.courtId, modalData.date, modalData.time);
@@ -100,11 +104,13 @@ export default function BookCourtPage() {
       participants: participants.length > 0 ? participants : undefined,
       status: 'confirmed' as const,
       type: 'court' as const,
+      matchType,
+      duration,
     });
     setBookingLoading(false);
     setShowModal(false);
-    setBookingSuccess({ courtName: modalData.courtName, date: modalData.date, time: modalData.time, participants: participants.length > 0 ? participants : undefined });
-    showToast(`Court booked for ${modalData.time}`);
+    setBookingSuccess({ courtName: modalData.courtName, date: modalData.date, time: modalData.time, participants: participants.length > 0 ? participants : undefined, duration, matchType });
+    showToast(`Court booked: ${getTimeRange(modalData.time, duration)}`);
   };
 
   const myUpcoming = bookings
@@ -231,10 +237,11 @@ export default function BookCourtPage() {
                               const mine = isSlotMine(bookings, selectedCourt, dateStr, time, currentUser?.id);
                               const past = isSlotPast(dateStr, time);
                               const closed = isCourtClosed(selectedCourt, time) || courtClosed;
+                              const beyondWindow = !canBookDate(dateStr);
                               const isProgram = booked?.type === 'program';
                               const isLesson = booked?.type === 'lesson';
                               const today = isToday(day);
-                              const available = !booked && !past && !closed;
+                              const available = !booked && !past && !closed && !beyondWindow;
                               const slotKey = `${selectedCourt}-${dateStr}-${time}`;
                               const showTooltipHere = hoveredSlot === slotKey && booked && !mine;
 
@@ -248,7 +255,7 @@ export default function BookCourtPage() {
                                     className={`slot-cell w-full rounded-lg text-xs font-medium py-2.5 px-2 transition-all duration-150 relative overflow-hidden ${mine ? 'slot-booked-pulse' : ''} ${available ? 'hover:border-[#d97706] hover:border-solid hover:bg-[#d97706]/[0.04]' : ''}`}
                                     style={{
                                       background: mine ? '#6b7a3d' : courtClosed ? '#f0ede6' : isLesson ? 'rgba(59, 130, 246, 0.08)' : isProgram ? 'rgba(245, 158, 11, 0.08)' : booked ? '#f5f3ee' : 'transparent',
-                                      color: mine ? '#fff' : courtClosed ? '#c5c0b5' : isLesson ? '#3b82f6' : isProgram ? '#d97706' : booked ? '#b5b0a5' : past || closed ? '#d5d0c8' : '#6b7a3d',
+                                      color: mine ? '#fff' : courtClosed ? '#c5c0b5' : isLesson ? '#3b82f6' : isProgram ? '#d97706' : booked ? '#b5b0a5' : past || closed || beyondWindow ? '#d5d0c8' : '#6b7a3d',
                                       cursor: available ? 'pointer' : mine ? 'pointer' : 'default',
                                       border: mine ? '1.5px solid #6b7a3d' : available ? '1.5px dashed #d4d0c7' : courtClosed ? '1.5px solid #e0dcd3' : '1.5px solid transparent',
                                     }}
@@ -262,7 +269,7 @@ export default function BookCourtPage() {
                                       <span style={{ opacity: 0.4 }}>Closed</span>
                                     ) : isLesson ? 'Lesson' : isProgram ? 'Program' : booked ? (
                                       <span className="flex items-center justify-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-current opacity-40" />Taken</span>
-                                    ) : past || closed ? (
+                                    ) : past || closed || beyondWindow ? (
                                       <span style={{ opacity: 0.3 }}>—</span>
                                     ) : (
                                       <span className="slot-book-label opacity-0 transition-opacity duration-150" style={{ color: '#d97706' }}>Book</span>
@@ -272,7 +279,7 @@ export default function BookCourtPage() {
                                   {showTooltipHere && booked && (
                                     <div className="absolute z-30 bottom-full left-1/2 -translate-x-1/2 mb-1 px-2.5 py-1.5 rounded-lg text-[0.65rem] font-medium whitespace-nowrap shadow-lg pointer-events-none animate-fadeIn" style={{ background: '#2a2f1e', color: '#e8e4d9' }}>
                                       {isLesson ? 'Lesson' : isProgram ? 'Program session' : booked.userName}
-                                      <span className="block text-[0.55rem] font-normal" style={{ color: '#9ca3a0' }}>{getTimeRange(time)}</span>
+                                      <span className="block text-[0.55rem] font-normal" style={{ color: '#9ca3a0' }}>{getTimeRange(time, booked?.duration)}</span>
                                       <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent" style={{ borderTopColor: '#2a2f1e' }} />
                                     </div>
                                   )}
@@ -308,11 +315,11 @@ export default function BookCourtPage() {
                       <p className="text-[0.65rem] mt-0.5" style={{ color: '#9ca3a0' }}>{courtConfig.name} &bull; {courtConfig.floodlight ? 'Lights til 10 PM' : 'Closes 8 PM'}</p>
                     </div>
                     <div className="divide-y" style={{ borderColor: '#f7f5f0' }}>
-                      {(() => { const mobileCourtClosed = isCourtInMaintenance(courts, selectedCourt); return slotsForCourt.map(time => {
+                      {(() => { const mobileCourtClosed = isCourtInMaintenance(courts, selectedCourt); const mobileBeyondWindow = !canBookDate(mobileDateStr); return slotsForCourt.map(time => {
                         const booked = isSlotBooked(bookings, selectedCourt, mobileDateStr, time);
                         const mine = isSlotMine(bookings, selectedCourt, mobileDateStr, time, currentUser?.id);
                         const past = isSlotPast(mobileDateStr, time);
-                        const available = !booked && !past && !mobileCourtClosed;
+                        const available = !booked && !past && !mobileCourtClosed && !mobileBeyondWindow;
                         const isLesson = booked?.type === 'lesson';
                         const isProgram = booked?.type === 'program';
 
@@ -326,7 +333,7 @@ export default function BookCourtPage() {
                               </div>
                             </div>
                             <span className="text-xs font-medium" style={{ color: mine ? '#6b7a3d' : mobileCourtClosed ? '#c5c0b5' : isLesson ? '#3b82f6' : isProgram ? '#d97706' : available ? '#9ca3a0' : '#d1d5db' }}>
-                              {mine ? 'Your Booking ✓' : mobileCourtClosed ? 'Closed' : isLesson ? 'Lesson' : isProgram ? 'Program' : booked ? booked.userName : past ? 'Past' : 'Available'}
+                              {mine ? 'Your Booking ✓' : mobileCourtClosed ? 'Closed' : isLesson ? 'Lesson' : isProgram ? 'Program' : booked ? booked.userName : past ? 'Past' : mobileBeyondWindow ? 'Too far ahead' : 'Available'}
                             </span>
                           </button>
                         );
@@ -389,7 +396,8 @@ export default function BookCourtPage() {
                         const booked = isSlotBooked(bookings, selectedCourt, calSelectedDate, time);
                         const mine = isSlotMine(bookings, selectedCourt, calSelectedDate, time, currentUser?.id);
                         const past = isSlotPast(calSelectedDate, time);
-                        const available = !booked && !past;
+                        const calBeyondWindow = !canBookDate(calSelectedDate);
+                        const available = !booked && !past && !calBeyondWindow;
                         const isLesson = booked?.type === 'lesson';
                         const isProgram = booked?.type === 'program';
 
@@ -432,6 +440,7 @@ export default function BookCourtPage() {
           modalData={modalData}
           members={members}
           currentUser={currentUser}
+          bookings={bookings}
           onConfirm={confirmBooking}
           onCancel={() => setShowModal(false)}
           loading={bookingLoading}
@@ -444,6 +453,8 @@ export default function BookCourtPage() {
           courtName={bookingSuccess.courtName}
           date={bookingSuccess.date}
           time={bookingSuccess.time}
+          duration={bookingSuccess.duration}
+          matchType={bookingSuccess.matchType}
           participants={bookingSuccess.participants}
           onClose={() => setBookingSuccess(null)}
         />

@@ -81,9 +81,9 @@
   const clubEventsData = {
     'opening-day-bbq': {
       id: 'opening-day-bbq',
-      title: 'Opening Day BBQ & Meet the Pros',
+      title: 'Opening Day BBQ & Round Robin',
       date: '2026-05-09',
-      time: '1:00 PM - 3:00 PM',
+      time: '12:30 PM - 3:00 PM',
       location: 'All Courts & Clubhouse',
       badge: 'free',
       price: 'Free',
@@ -91,6 +91,32 @@
       spotsTaken: 38,
       description: 'Kick off the 2026 season! BBQ, music, and meet our coaching staff including Mark Taylor. All members, families, and guests welcome.',
       attendees: ['Mike Chen', 'Sarah Wilson', 'James Park', 'Emily Rodriguez', 'Lisa Thompson']
+    },
+    'french-open-rr': {
+      id: 'french-open-rr',
+      title: 'French Open Round Robin Social',
+      date: '2026-06-07',
+      time: '1:00 PM - 4:00 PM',
+      location: 'All Courts',
+      badge: 'free',
+      price: 'Free',
+      spotsTotal: 40,
+      spotsTaken: 0,
+      description: 'Celebrate the French Open with a themed round robin social! Mixed doubles, prizes, and refreshments. All skill levels welcome.',
+      attendees: []
+    },
+    'wimbledon-rr': {
+      id: 'wimbledon-rr',
+      title: 'Wimbledon Open Round Robin',
+      date: '2026-07-12',
+      time: '1:00 PM - 4:00 PM',
+      location: 'All Courts',
+      badge: 'free',
+      price: 'Free',
+      spotsTotal: 40,
+      spotsTaken: 0,
+      description: 'Wimbledon-themed round robin! Whites encouraged. Mixed doubles play, strawberries & cream, and great prizes.',
+      attendees: []
     },
     'mens-round-robin': {
       id: 'mens-round-robin',

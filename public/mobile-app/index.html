@@ -20,7 +20,7 @@
     if ('serviceWorker' in navigator) {
       caches.keys().then(function(names) {
         names.forEach(function(name) {
-          if (name.indexOf('mtc-court-761db4e1') === -1) {
+          if (name.indexOf('mtc-court-401abc24') === -1) {
             caches.delete(name);
             console.log('[CacheBust] Deleted old cache:', name);
           }
@@ -610,7 +610,7 @@
           </div>
           <div class="event-info event-info-flex">
             <div class="event-name">Opening Day BBQ</div>
-            <div class="event-details">1:00 PM • All Courts • Free</div>
+            <div class="event-details">12:30 PM • All Courts • Free</div>
           </div>
           <button class="event-rsvp-btn" aria-label="RSVP to event" onclick="event.stopPropagation(); rsvpToEvent('bbq', this)">RSVP</button>
         </div>
@@ -1364,8 +1364,8 @@
                 <div class="event-card-day">9</div>
               </div>
               <div class="event-card-info">
-                <div class="event-card-title">Opening Day BBQ &amp; Meet the Pros</div>
-                <div class="event-card-meta">Saturday 1:00 - 3:00 PM • All Courts</div>
+                <div class="event-card-title">Opening Day BBQ &amp; Round Robin</div>
+                <div class="event-card-meta">Saturday 12:30 - 3:00 PM • All Courts</div>
               </div>
               <div class="event-card-badge free">Free</div>
             </div>
@@ -1381,6 +1381,42 @@
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
                 </div>
               </div>
+            </div>
+          </div>
+
+          <div class="event-card" onclick="showEventModal('french-open-rr')" tabindex="0" role="button">
+            <div class="event-card-header">
+              <div class="event-card-date">
+                <div class="event-card-month">JUN</div>
+                <div class="event-card-day">7</div>
+              </div>
+              <div class="event-card-info">
+                <div class="event-card-title">French Open Round Robin Social</div>
+                <div class="event-card-meta">Saturday 1:00 - 4:00 PM • All Courts</div>
+              </div>
+              <div class="event-card-badge free">Free</div>
+            </div>
+            <div class="event-card-footer-mini">
+              <span class="event-card-spots-mini">All skill levels welcome</span>
+              <span class="event-card-tap">Tap for details →</span>
+            </div>
+          </div>
+
+          <div class="event-card" onclick="showEventModal('wimbledon-rr')" tabindex="0" role="button">
+            <div class="event-card-header">
+              <div class="event-card-date">
+                <div class="event-card-month">JUL</div>
+                <div class="event-card-day">12</div>
+              </div>
+              <div class="event-card-info">
+                <div class="event-card-title">Wimbledon Open Round Robin</div>
+                <div class="event-card-meta">Saturday 1:00 - 4:00 PM • All Courts</div>
+              </div>
+              <div class="event-card-badge free">Free</div>
+            </div>
+            <div class="event-card-footer-mini">
+              <span class="event-card-spots-mini">Whites encouraged!</span>
+              <span class="event-card-tap">Tap for details →</span>
             </div>
           </div>
 
@@ -2115,7 +2151,7 @@
         <div class="protip-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
         </div>
-        <div class="protip-title">HOW BOOKING PAYMENTS WORK</div>
+        <div class="protip-title">BOOKING TIPS</div>
         <div class="protip-steps">
           <div class="protip-step">
             <div class="protip-step-num">1</div>
@@ -2123,18 +2159,10 @@
           </div>
           <div class="protip-step">
             <div class="protip-step-num">2</div>
-            <div class="protip-step-text"><strong>Guests pay $10/hr</strong> — add a guest to your booking if bringing someone.</div>
-          </div>
-          <div class="protip-step">
-            <div class="protip-step-num">3</div>
-            <div class="protip-step-text"><strong>Pay when ready</strong> — send one e-transfer to <strong>monotennis.payment@gmail.com</strong> for your tab total (e.g. $20 for 4 bookings).</div>
-          </div>
-          <div class="protip-step">
-            <div class="protip-step-num">4</div>
-            <div class="protip-step-text"><strong>Cancel 24+ hrs ahead?</strong> Charge is removed from your tab. Late cancel stays on tab.</div>
+            <div class="protip-step-text"><strong>Guests pay $10/hr</strong> — e-transfer guest fees to <strong>monotennis.payment@gmail.com</strong></div>
           </div>
         </div>
-        <div class="protip-note">⚠️ Bookings are <strong>paused</strong> if your tab reaches <strong>$25</strong>. Overpayments carry forward as <strong>credit</strong>.</div>
+        <div class="protip-note">Please cancel bookings you no longer need so others can use the court.</div>
         <button class="protip-dismiss-btn" onclick="dismissBookingProTip(true)">GOT IT</button>
         <button class="protip-never-btn" onclick="dismissBookingProTip(false)">DON'T SHOW ME AGAIN</button>
       </div>

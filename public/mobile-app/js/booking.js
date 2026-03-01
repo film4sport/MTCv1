@@ -122,10 +122,18 @@
     // SPECIAL EVENTS (one-off, fixed dates)
     // ============================================
     const specialEvents = [
-      { date:'2026-05-09', start:'13:00', end:'15:00', courts:[1,2,3,4], type:'openplay',
-        title:'Opening Day BBQ & Meet the Pros', fee:0, guestFee:0,
+      { date:'2026-05-09', start:'12:30', end:'15:00', courts:[1,2,3,4], type:'openplay',
+        title:'Opening Day BBQ & Round Robin', fee:0, guestFee:0,
         coach: null, regKey:null,
-        desc:'Kick off the season! BBQ, music, and meet our coaching staff. All members, families, and guests welcome.' }
+        desc:'Kick off the season! BBQ, music, and meet our coaching staff. All members, families, and guests welcome.' },
+      { date:'2026-06-07', start:'13:00', end:'16:00', courts:[1,2,3,4], type:'roundrobin',
+        title:'French Open Round Robin Social', fee:0, guestFee:0,
+        coach: null, regKey:null,
+        desc:'Celebrate the French Open with a themed round robin social! Mixed doubles, prizes, and refreshments.' },
+      { date:'2026-07-12', start:'13:00', end:'16:00', courts:[1,2,3,4], type:'roundrobin',
+        title:'Wimbledon Open Round Robin', fee:0, guestFee:0,
+        coach: null, regKey:null,
+        desc:'Wimbledon-themed round robin! Whites encouraged. Mixed doubles play, strawberries & cream, and great prizes.' }
     ];
 
     specialEvents.forEach(function(e) {

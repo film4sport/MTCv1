@@ -1,4 +1,4 @@
-import { TIME_SLOTS, COURT_HOURS, FEES } from '../../lib/types';
+import { TIME_SLOTS, COURT_HOURS, FEES, BOOKING_RULES } from '../../lib/types';
 import type { Booking, Court } from '../../lib/types';
 
 export type ViewMode = 'week' | 'calendar';
@@ -11,23 +11,40 @@ export const COURT_COLORS: Record<number, { bg: string; accent: string; dot: str
   4: { bg: 'rgba(180, 140, 80, 0.06)', accent: '#b48c50', dot: '#c4a060' },
 };
 
-/** Compute end time for a given slot (next slot or +1 hour) */
-export function getTimeRange(time: string): string {
+/** Compute end time for a given start slot + duration in slots */
+export function getTimeRange(time: string, durationSlots: number = 1): string {
   const idx = TIME_SLOTS.indexOf(time as typeof TIME_SLOTS[number]);
-  if (idx >= 0 && idx < TIME_SLOTS.length - 1) {
-    return `${time} – ${TIME_SLOTS[idx + 1]}`;
+  const endIdx = idx + durationSlots;
+  if (idx >= 0 && endIdx < TIME_SLOTS.length) {
+    return `${time} – ${TIME_SLOTS[endIdx]}`;
   }
-  const match = time.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
-  if (!match) return time;
-  let hour = parseInt(match[1]);
-  const min = match[2];
-  const ampm = match[3].toUpperCase();
-  hour += 1;
-  let newAmpm = ampm;
-  if (hour === 12 && ampm === 'AM') newAmpm = 'PM';
-  if (hour === 13) { hour = 1; if (ampm === 'PM') newAmpm = 'PM'; }
-  if (hour > 12) hour -= 12;
-  return `${time} – ${hour}:${min} ${newAmpm}`;
+  if (idx >= 0 && endIdx >= TIME_SLOTS.length) {
+    // Last slot — compute manually
+    const match = TIME_SLOTS[TIME_SLOTS.length - 1].match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+    if (match) {
+      let h = parseInt(match[1]);
+      const m = parseInt(match[2]);
+      const pm = match[3].toUpperCase() === 'PM';
+      if (pm && h !== 12) h += 12;
+      if (!pm && h === 12) h = 0;
+      const endMin = (h * 60 + m) + BOOKING_RULES.slotMinutes;
+      const eh = Math.floor(endMin / 60);
+      const em = endMin % 60;
+      const eAmPm = eh >= 12 ? 'PM' : 'AM';
+      const eH12 = eh > 12 ? eh - 12 : eh === 0 ? 12 : eh;
+      return `${time} – ${eH12}:${em.toString().padStart(2, '0')} ${eAmPm}`;
+    }
+  }
+  return time;
+}
+
+/** Format duration slots as human-readable string */
+export function formatDuration(slots: number): string {
+  const hours = (slots * BOOKING_RULES.slotMinutes) / 60;
+  if (hours === 1) return '1 hour';
+  if (hours === 1.5) return '1.5 hours';
+  if (hours === 2) return '2 hours';
+  return `${hours} hours`;
 }
 
 /** Parse time string into 24h hour number */
@@ -41,12 +58,65 @@ export function parseTimeHour(time: string): number {
   return hour;
 }
 
-export function isSlotBooked(bookings: Booking[], courtId: number, date: string, time: string) {
-  return bookings.find(b => b.courtId === courtId && b.date === date && b.time === time && b.status === 'confirmed');
+/** Parse time string into total minutes from midnight */
+export function parseTimeMinutes(time: string): number {
+  const match = time.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+  if (!match) return 0;
+  let hour = parseInt(match[1]);
+  const min = parseInt(match[2]);
+  const isPM = match[3].toUpperCase() === 'PM';
+  if (isPM && hour !== 12) hour += 12;
+  if (!isPM && hour === 12) hour = 0;
+  return hour * 60 + min;
 }
 
+/** Check if a slot is covered by any confirmed booking (including multi-slot bookings) */
+export function isSlotBooked(bookings: Booking[], courtId: number, date: string, time: string) {
+  const tIdx = TIME_SLOTS.indexOf(time as typeof TIME_SLOTS[number]);
+  return bookings.find(b => {
+    if (b.courtId !== courtId || b.date !== date || b.status !== 'confirmed') return false;
+    const bIdx = TIME_SLOTS.indexOf(b.time as typeof TIME_SLOTS[number]);
+    if (bIdx < 0) return false;
+    const dur = b.duration || 1;
+    return tIdx >= bIdx && tIdx < bIdx + dur;
+  });
+}
+
+/** Check if a slot is my booking (including multi-slot bookings) */
 export function isSlotMine(bookings: Booking[], courtId: number, date: string, time: string, userId?: string) {
-  return bookings.find(b => b.courtId === courtId && b.date === date && b.time === time && b.status === 'confirmed' && b.userId === userId);
+  const tIdx = TIME_SLOTS.indexOf(time as typeof TIME_SLOTS[number]);
+  return bookings.find(b => {
+    if (b.courtId !== courtId || b.date !== date || b.status !== 'confirmed' || b.userId !== userId) return false;
+    const bIdx = TIME_SLOTS.indexOf(b.time as typeof TIME_SLOTS[number]);
+    if (bIdx < 0) return false;
+    const dur = b.duration || 1;
+    return tIdx >= bIdx && tIdx < bIdx + dur;
+  });
+}
+
+/** Check if all consecutive slots needed for a booking are available */
+export function areSlotsAvailable(bookings: Booking[], courtId: number, date: string, time: string, durationSlots: number): boolean {
+  const startIdx = TIME_SLOTS.indexOf(time as typeof TIME_SLOTS[number]);
+  if (startIdx < 0) return false;
+  for (let i = 0; i < durationSlots; i++) {
+    const slotIdx = startIdx + i;
+    if (slotIdx >= TIME_SLOTS.length) return false;
+    const slotTime = TIME_SLOTS[slotIdx];
+    if (isSlotBooked(bookings, courtId, date, slotTime)) return false;
+    if (isSlotPast(date, slotTime)) return false;
+    if (isCourtClosed(courtId, slotTime)) return false;
+  }
+  return true;
+}
+
+/** Check if a date is within the advance booking window */
+export function canBookDate(date: string): boolean {
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  const bookDate = new Date(date + 'T00:00:00');
+  const maxAdvance = new Date(now);
+  maxAdvance.setDate(maxAdvance.getDate() + BOOKING_RULES.maxAdvanceDays);
+  return bookDate <= maxAdvance;
 }
 
 export function isSlotPast(date: string, time: string): boolean {

@@ -43,6 +43,8 @@ create table if not exists bookings (
   status text not null default 'confirmed' check (status in ('confirmed', 'cancelled')),
   type text not null default 'court' check (type in ('court', 'partner', 'program', 'lesson')),
   program_id text,
+  match_type text check (match_type in ('singles', 'doubles')),
+  duration integer check (duration >= 1 and duration <= 4),
   created_at timestamptz default now()
 );
 

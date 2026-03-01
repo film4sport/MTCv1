@@ -48,6 +48,8 @@ export async function fetchBookings(): Promise<Booking[]> {
     status: b.status as Booking['status'],
     type: b.type as Booking['type'],
     programId: b.program_id ?? undefined,
+    matchType: (b.match_type as Booking['matchType']) ?? undefined,
+    duration: b.duration ?? undefined,
   }));
 }
 
@@ -64,6 +66,8 @@ export async function createBooking(booking: Booking): Promise<void> {
     status: booking.status,
     type: booking.type,
     program_id: booking.programId || null,
+    match_type: booking.matchType || null,
+    duration: booking.duration || null,
   });
 
   // Insert participants

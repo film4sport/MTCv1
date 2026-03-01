@@ -606,7 +606,7 @@
     },
     '95-mixed-doubles': {
       name: '95+ Mixed Doubles Tournament',
-      date: 'Saturday, June 14, 2026',
+      date: 'Saturday, July 18, 2026',
       time: '9:00 AM - 5:00 PM',
       type: 'tournament',
       volunteersNeeded: [
@@ -628,9 +628,9 @@
       rsvpList: ['Mike Chen', 'Sarah Wilson', 'James Park', 'Emily Rodriguez', 'David Kim', 'Lisa Thompson']
     },
     'opening-day-bbq': {
-      name: 'Opening Day BBQ & Meet the Pros',
+      name: 'Opening Day BBQ & Round Robin',
       date: 'Saturday, May 9, 2026',
-      time: '1:00 PM - 3:00 PM',
+      time: '12:30 PM - 3:00 PM',
       type: 'social',
       volunteersNeeded: [
         { id: 't1', name: 'Parking Attendant', icon: '&#128663;', iconClass: 'parking', assigned: null }
@@ -648,6 +648,26 @@
         'New members meet & greet at 3 PM'
       ],
       rsvpList: ['Mike Chen', 'Sarah Wilson', 'James Park', 'Emily Rodriguez', 'Lisa Thompson']
+    },
+    'french-open-rr': {
+      name: 'French Open Round Robin Social',
+      date: 'Saturday, June 7, 2026',
+      time: '1:00 PM - 4:00 PM',
+      type: 'social',
+      volunteersNeeded: [],
+      assignedTasks: [],
+      instructions: ['All skill levels welcome', 'Mixed doubles round robin format', 'Refreshments provided', 'Prizes for winners'],
+      rsvpList: []
+    },
+    'wimbledon-rr': {
+      name: 'Wimbledon Open Round Robin',
+      date: 'Saturday, July 12, 2026',
+      time: '1:00 PM - 4:00 PM',
+      type: 'social',
+      volunteersNeeded: [],
+      assignedTasks: [],
+      instructions: ['Whites encouraged!', 'Mixed doubles round robin format', 'Strawberries & cream provided', 'Prizes for winners'],
+      rsvpList: []
     }
   };
 

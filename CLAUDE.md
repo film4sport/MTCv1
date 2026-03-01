@@ -54,10 +54,14 @@ When new project rules or conventions are established, add them to this file AND
   - Best for: automated screenshots, regression testing, pre-deploy checks
 - **Claude in Chrome (BDG)** — Use for live visual verification and interactive checks:
   - Best for: real-time page inspection, verifying hover states, checking interactive elements
-- **Workflow**: Playwright for automated screenshots + BDG for live visual spot-checks
+- **Cowork (Claude Desktop)** — Use for exploratory visual QA when subjective judgment is needed:
+  - Best for: "does this look right?" checks, hover/animation rendering, full-page scrollthroughs, font/glass morphism accuracy
+  - Runs a real Chrome browser (not headless), so rendering is more accurate than Playwright screenshots
+  - Defer to Cowork for subjective visual checks; use Playwright for automated regression checks
+- **Workflow**: Playwright for automated regression tests → Cowork for exploratory visual QA → BDG for quick live spot-checks
 
 ## #12: VISUAL VERIFICATION — PLAYWRIGHT OR BDG ONLY
-- **ONLY use Playwright or BDG (Claude in Chrome) for ALL visual verification.** No exceptions.
+- **ONLY use Playwright, BDG (Claude in Chrome), or Cowork for ALL visual verification.** No exceptions.
 - **NEVER use `preview_screenshot`** — hangs every time.
 - **NEVER use `preview_snapshot`/`preview_inspect`/`preview_eval` for visual verification** — user does NOT want these flooding the output. Only use for quick non-visual checks (e.g. confirming a CSS value) when absolutely necessary.
 - **For screenshots**: Use **Playwright** inline scripts (`node -e "..."` with `chromium.launch()`) or **BDG** (`computer` action `screenshot`).
@@ -71,6 +75,14 @@ After making code changes, verify they won't break GitHub Actions CI:
 - Check that existing test assertions still match (text content, selectors, element counts)
 - If a CSS/layout change could affect the mobile overflow test (`mobile.spec.js:24`), verify `body.scrollWidth <= viewport + 1` won't fail
 - CI runs: `npm run build` → `npm run test:unit` → `npx playwright test` (see `.github/workflows/ci.yml`)
+
+## #14: CROSS-PLATFORM DATA CONSISTENCY
+**Event dates, times, titles, and details MUST be updated across ALL THREE platforms in one pass:**
+1. **Landing page**: `Events.tsx`, `Schedule.tsx`, `layout.tsx` (JSON-LD)
+2. **Dashboard**: `data.ts` (DEFAULT_EVENTS)
+3. **Mobile PWA**: `index.html`, `events.js`, `booking.js`, `events-registration.js`, `admin.js`, `avatar.js`
+
+Use grep to find all occurrences before editing. Verify 0 stale values remain after.
 
 ## #11: MAINTENANCE CONVENTIONS
 - **Supabase schema**: `supabase/schema.sql` is the single source of truth. All DB changes go there FIRST, then apply to Supabase. No ad-hoc ALTER TABLEs.

@@ -10,8 +10,24 @@ const categoryColors: Record<string, { accent: string; bg: string; text: string 
 
 const events = [
   {
+    category: 'social',
+    date: 'June 7, 2026',
+    title: 'French Open Round Robin Social',
+    description:
+      'Celebrate the French Open with a themed round robin social! Mixed doubles, prizes, and refreshments. All skill levels welcome.',
+    highlight: '1:00 - 4:00 PM',
+  },
+  {
+    category: 'social',
+    date: 'July 12, 2026',
+    title: 'Wimbledon Open Round Robin',
+    description:
+      'Whites encouraged! Join our Wimbledon-themed round robin with mixed doubles play, strawberries & cream, and great prizes.',
+    highlight: '1:00 - 4:00 PM',
+  },
+  {
     category: 'tournament',
-    date: 'July 26-27, 2026',
+    date: 'July 18-19, 2026',
     title: '95+ Mixed Doubles Tournament',
     description:
       '$180/Team — 2 Matches Guaranteed. A+B Draw, Over 95 Mixed Doubles. Includes lunches at Mono Cliffs Inn and great prizes!',
