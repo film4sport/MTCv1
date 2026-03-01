@@ -81,9 +81,8 @@ export async function signOut(): Promise<void> {
  * Returns an error message or null on success.
  */
 export async function resetPassword(email: string): Promise<string | null> {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${siteUrl}/auth/callback?type=recovery`,
+    redirectTo: 'https://www.monotennisclub.com/auth/callback?type=recovery',
   });
   return error ? error.message : null;
 }
