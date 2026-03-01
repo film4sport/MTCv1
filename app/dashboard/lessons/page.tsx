@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import DashboardHeader from '../components/DashboardHeader';
 
 const coaches = [
@@ -108,28 +107,72 @@ export default function LessonsPage() {
           </div>
         ))}
 
-        {/* Ready to Enroll CTA */}
-        <div className="rounded-2xl border p-6 text-center" style={{ background: 'linear-gradient(135deg, rgba(107, 122, 61, 0.12), rgba(212, 225, 87, 0.06))', borderColor: 'rgba(107, 122, 61, 0.2)' }}>
-          <h3 className="font-semibold text-lg mb-2" style={{ color: '#2a2f1e' }}>Ready to Enroll?</h3>
-          <p className="text-sm mb-4" style={{ color: '#6b7266' }}>
-            Browse available clinics, camps, and coaching programs and sign up directly.
-          </p>
-          <Link
-            href="/dashboard/events"
-            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-medium transition-all hover:opacity-90"
-            style={{ background: '#6b7a3d', color: '#fff' }}
-          >
-            View Programs
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-            </svg>
-          </Link>
+        {/* Spring/Summer Schedule */}
+        <div className="glass-card rounded-2xl border p-6" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
+          <h3 className="font-semibold text-lg mb-5 flex items-center gap-2" style={{ color: '#2a2f1e' }}>
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'rgba(107, 122, 61, 0.1)' }}>
+              <svg className="w-4 h-4" fill="none" stroke="#6b7a3d" viewBox="0 0 24 24" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+            Spring/Summer Schedule
+          </h3>
+          <div className="grid sm:grid-cols-2 gap-4">
+            {[
+              { day: 'Monday', classes: [{ name: 'Live Ball', time: '9:30 – 11:00 AM' }, { name: 'Team Practice', time: '11:00 AM – 1:00 PM' }, { name: 'Teen', time: '5:00 – 6:00 PM' }, { name: 'Live Ball', time: '6:00 – 7:30 PM' }] },
+              { day: 'Tuesday', classes: [{ name: 'Orange', time: '4:00 – 5:00 PM' }, { name: 'Green', time: '5:00 – 6:00 PM' }, { name: 'Teen', time: '6:00 – 7:00 PM' }, { name: 'Live Ball', time: '7:00 – 8:30 PM' }, { name: 'Adult', time: '8:30 – 9:30 PM' }] },
+              { day: 'Thursday', classes: [{ name: 'Munchkin', time: '4:30 – 5:00 PM' }, { name: 'Red Ball', time: '5:00 – 6:00 PM' }] },
+              { day: 'Friday', classes: [{ name: 'Teen', time: '4:30 – 5:30 PM' }, { name: 'Live Ball', time: '5:30 – 7:00 PM' }, { name: 'House League', time: '7:00 – 9:00 PM' }] },
+            ].map((day) => (
+              <div key={day.day} className="rounded-xl p-4" style={{ background: '#faf8f3', border: '1px solid #e8e4d9' }}>
+                <p className="font-semibold text-sm mb-3 flex items-center gap-2" style={{ color: '#2a2f1e' }}>
+                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#6b7a3d' }} />
+                  {day.day}
+                </p>
+                <div className="space-y-1.5">
+                  {day.classes.map((cls, i) => (
+                    <div key={i} className="flex items-center justify-between text-xs">
+                      <span className="font-medium" style={{ color: '#2a2f1e' }}>{cls.name}</span>
+                      <span style={{ color: '#6b7266' }}>{cls.time}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Sign Up & Contact */}
+        <div className="rounded-2xl border p-6" style={{ background: 'linear-gradient(135deg, rgba(107, 122, 61, 0.12), rgba(212, 225, 87, 0.06))', borderColor: 'rgba(107, 122, 61, 0.2)' }}>
+          <h3 className="font-semibold text-lg mb-3" style={{ color: '#2a2f1e' }}>Sign Up & Contact</h3>
+          <div className="space-y-2">
+            <p className="text-sm leading-relaxed" style={{ color: '#6b7266' }}>
+              If you would like to sign up for any of these programs or would like more information, please email{' '}
+              <a href="mailto:Taylor.suzanne.tennis@gmail.com" className="font-semibold hover:underline" style={{ color: '#6b7a3d' }}>
+                Suzanne Taylor
+              </a>
+              {' '}at{' '}
+              <a href="mailto:Taylor.suzanne.tennis@gmail.com" className="font-medium hover:underline" style={{ color: '#6b7a3d' }}>
+                Taylor.suzanne.tennis@gmail.com
+              </a>
+            </p>
+            <p className="text-sm leading-relaxed" style={{ color: '#6b7266' }}>
+              To contact our Head Pro, please email{' '}
+              <a href="mailto:Taylor.mark.tennis@gmail.com" className="font-semibold hover:underline" style={{ color: '#6b7a3d' }}>
+                Mark Taylor
+              </a>
+              {' '}at{' '}
+              <a href="mailto:Taylor.mark.tennis@gmail.com" className="font-medium hover:underline" style={{ color: '#6b7a3d' }}>
+                Taylor.mark.tennis@gmail.com
+              </a>
+            </p>
+          </div>
         </div>
 
         {/* Note */}
         <div className="rounded-xl p-4 text-center" style={{ background: 'rgba(107, 122, 61, 0.06)', border: '1px solid rgba(107, 122, 61, 0.12)' }}>
           <p className="text-xs" style={{ color: '#6b7266' }}>
-            Lesson rates and seasonal schedules will be available soon. Contact a coach for current availability.
+            Summer camp dates coming soon — pros confirming availability.
           </p>
         </div>
       </div>
