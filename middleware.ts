@@ -46,8 +46,12 @@ export async function middleware(request: NextRequest) {
   }
 
   // Redirect logged-in users from login page to dashboard
+  // BUT allow /login?reset=true so they can set a new password after recovery
   if (pathname === '/login' && user) {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
+    const isReset = request.nextUrl.searchParams.get('reset') === 'true';
+    if (!isReset) {
+      return NextResponse.redirect(new URL('/dashboard', request.url));
+    }
   }
 
   return response;
