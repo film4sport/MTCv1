@@ -506,11 +506,9 @@
 
           '<label style="font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; display: block;">MEMBERSHIP TYPE</label>' +
           '<select id="newMemberType" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); font-size: 14px; margin-bottom: 16px;">' +
-            '<option value="adult">Adult - $150/season</option>' +
-            '<option value="family">Family - $300/season</option>' +
-            '<option value="junior">Junior - $75/season</option>' +
-            '<option value="senior">Senior (65+) - $100/season</option>' +
-            '<option value="student">Student - $75/season</option>' +
+            '<option value="adult">Adult (Single) - $120/season</option>' +
+            '<option value="family">Family - $240/season</option>' +
+            '<option value="junior">Junior (18 & under) - $55/season</option>' +
           '</select>' +
 
           '<label style="font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; display: block;">SKILL LEVEL</label>' +

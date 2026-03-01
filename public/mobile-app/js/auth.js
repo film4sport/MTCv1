@@ -95,12 +95,19 @@
         .catch(function() {
           if (loginBtn) { loginBtn.disabled = false; loginBtn.textContent = 'Sign In'; }
           // Offline fallback: only resume a previously authenticated session
-          // New logins ALWAYS require server verification — no offline bypass
+          // Requires exact email match + session not expired (24 hours)
           var stored = MTC.storage.get('mtc-user', null);
-          if (stored && stored.email === email.toLowerCase()) {
+          var sessionTime = MTC.storage.get('mtc-session-time', 0);
+          var sessionAge = Date.now() - sessionTime;
+          var MAX_SESSION_AGE = 24 * 60 * 60 * 1000; // 24 hours
+          if (stored && stored.email === email.toLowerCase() && sessionAge < MAX_SESSION_AGE) {
             showToast('Offline — resuming cached session');
             finishLogin(email, stored);
           } else {
+            if (sessionAge >= MAX_SESSION_AGE) {
+              MTC.storage.remove('mtc-user');
+              MTC.storage.remove('mtc-session-time');
+            }
             showToast('Cannot connect to server. Please try again when online.');
           }
         });
@@ -141,8 +148,9 @@
           window.currentUser = currentUser;
         }
 
-        // Always persist session
+        // Always persist session + timestamp for offline expiry
         MTC.storage.set('mtc-user', currentUser);
+        MTC.storage.set('mtc-session-time', Date.now());
 
         // Sync membership status to payment data
         if (typeof memberPaymentData !== 'undefined') {
@@ -196,7 +204,10 @@
     currentUser = null;
     MTC.state.currentUser = null;
     window.currentUser = null;
-    MTC.storage.remove('mtc-user');
+    // Clear all app-related data on logout (prevents data leaks on shared devices)
+    ['mtc-user', 'mtc-session-time', 'mtc-bookings', 'mtc-conversations', 'mtc-notifications',
+     'mtc-rsvps', 'mtc-profile', 'mtc-partner-joins', 'mtc-settings',
+     'mtc-onboarding-done'].forEach(function(key) { MTC.storage.remove(key); });
 
     document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
     document.getElementById('bottomNav').style.display = 'none';

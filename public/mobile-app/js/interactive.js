@@ -139,14 +139,8 @@
   // ============================================
   function registerServiceWorker() {
     if ('serviceWorker' in navigator) {
-      // Force clear old caches
-      caches.keys().then(function(names) {
-        names.forEach(function(name) {
-          if (name !== 'mtc-court-v148') {
-            caches.delete(name);
-          }
-        });
-      });
+      // Old cache cleanup is now handled by the service worker's activate event.
+      // Removed hardcoded cache name that would fall out of sync with auto-bumped SW cache.
 
       navigator.serviceWorker.register('/mobile-app/sw.js', { scope: '/mobile-app/' })
         .then(function(registration) {

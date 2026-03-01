@@ -213,6 +213,17 @@ const jsonLd = {
       organizer: { '@id': `${SITE_URL}/#organization` },
     },
     {
+      '@type': 'Event',
+      name: 'Euchre Tournament',
+      description: 'Pre-season Euchre tournament at Mono Tennis Club. Open to members and guests. Prizes for top teams.',
+      startDate: '2026-03-14',
+      location: { '@id': `${SITE_URL}/#organization` },
+      eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+      eventStatus: 'https://schema.org/EventScheduled',
+      organizer: { '@id': `${SITE_URL}/#organization` },
+      isAccessibleForFree: true,
+    },
+    {
       '@type': 'SportsEvent',
       name: 'Opening Day BBQ & Round Robin',
       description: 'Kick off the 2026 tennis season with a BBQ and round robin at Mono Tennis Club. Meet fellow members, enjoy food, and hit the courts.',

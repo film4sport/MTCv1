@@ -1,5 +1,5 @@
 // MTC Court Service Worker v48 (monorepo edition — served from /mobile-app/)
-const CACHE_NAME = 'mtc-court-401abc24';
+const CACHE_NAME = 'mtc-court-8ef38afa';
 const OFFLINE_URL = '/mobile-app/offline.html';
 
 // Assets to cache immediately on install (bundles built by scripts/build-mobile.js)
@@ -17,7 +17,7 @@ const PRECACHE_ASSETS = [
 
 // Install event - cache core assets
 self.addEventListener('install', (event) => {
-  console.log('[ServiceWorker] Installing mtc-court-401abc24...');
+  console.log('[ServiceWorker] Installing mtc-court-8ef38afa...');
 
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -34,7 +34,7 @@ self.addEventListener('install', (event) => {
 
 // Activate event - clean up ALL old caches
 self.addEventListener('activate', (event) => {
-  console.log('[ServiceWorker] Activating mtc-court-401abc24...');
+  console.log('[ServiceWorker] Activating mtc-court-8ef38afa...');
 
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -85,7 +85,8 @@ self.addEventListener('fetch', (event) => {
     fetch(event.request)
       .then((response) => {
         if (!response || response.status !== 200) {
-          return response;
+          // On HTTP error, try returning cached version instead of the error
+          return caches.match(event.request).then((cached) => cached || response);
         }
         const responseToCache = response.clone();
         caches.open(CACHE_NAME).then((cache) => {

@@ -8,6 +8,7 @@ const MONTH_NAMES = [
 ];
 
 const specialEvents = [
+  { date: '2026-03-14', title: 'Euchre Tournament', time: 'Evening', type: 'social' },
   { date: '2026-05-09', title: 'Opening Day BBQ & Round Robin', time: '12:30 - 3:00 PM', type: 'special' },
   { date: '2026-06-07', title: 'French Open Round Robin Social', time: '1:00 - 4:00 PM', type: 'social' },
   { date: '2026-07-12', title: 'Wimbledon Open Round Robin', time: '1:00 - 4:00 PM', type: 'social' },
@@ -90,14 +91,19 @@ export default function Schedule() {
 
   // Fetch live booking slots for current month
   const fetchBookings = useCallback(async (year: number, month: number) => {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
     try {
-      const res = await fetch(`/api/public-calendar?year=${year}&month=${month + 1}`);
+      const res = await fetch(`/api/public-calendar?year=${year}&month=${month + 1}`, { signal: controller.signal });
       if (res.ok) {
         const data = await res.json();
         setBookingData(data);
       }
+      // Non-OK responses: calendar still shows events without booking data
     } catch {
-      // Silently fail — calendar still shows events without booking data
+      // Network error or timeout: calendar still shows events without booking data
+    } finally {
+      clearTimeout(timeout);
     }
   }, []);
 

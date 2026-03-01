@@ -79,6 +79,19 @@
   }
 
   const clubEventsData = {
+    'euchre-tournament': {
+      id: 'euchre-tournament',
+      title: 'Euchre Tournament',
+      date: '2026-03-14',
+      time: 'Evening',
+      location: 'Clubhouse',
+      badge: 'free',
+      price: 'Free',
+      spotsTotal: 40,
+      spotsTaken: 0,
+      description: 'Pre-season Euchre tournament! Open to members and guests. Prizes for top teams.',
+      attendees: []
+    },
     'opening-day-bbq': {
       id: 'opening-day-bbq',
       title: 'Opening Day BBQ & Round Robin',

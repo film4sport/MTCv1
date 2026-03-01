@@ -574,7 +574,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       timestamp: new Date().toISOString(),
       read: true,
     };
-    const snapshot = conversations;
+    const msgId = msg.id;
     setConversations(prev => {
       const existing = prev.find(c => c.memberId === toId);
       if (existing) {
@@ -587,16 +587,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
         memberId: toId, memberName: member?.name || '', lastMessage: text, lastTimestamp: msg.timestamp, unread: 0, messages: [msg],
       }];
     });
-    // Persist message to Supabase
+    // Persist message to Supabase — targeted rollback removes only the failed message (not entire snapshot)
     db.sendMessageByUsers({
       id: msg.id, fromId: currentUser.id, fromName: currentUser.name,
       toId, toName, text,
     }).catch((err) => {
       reportError(err, 'Supabase');
-      setConversations(snapshot);
+      setConversations(prev => prev.map(c => {
+        if (c.memberId !== toId) return c;
+        const filtered = c.messages.filter(m => m.id !== msgId);
+        const last = filtered[filtered.length - 1];
+        return { ...c, messages: filtered, lastMessage: last?.text || '', lastTimestamp: last?.timestamp || c.lastTimestamp };
+      }));
       showToast('Failed to send message. Please try again.', 'error');
     });
-  }, [currentUser, members, conversations]);
+  }, [currentUser, members]);
 
   const markConversationRead = useCallback((memberId: string) => {
     setConversations(prev => prev.map(c => {
