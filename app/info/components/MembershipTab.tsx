@@ -58,7 +58,7 @@ export default function MembershipTab() {
               </div>
               <h3 className="font-bold text-xl mb-4" style={{ color: '#2a2f1e' }}>How to Join</h3>
               <ul className="space-y-3 text-sm leading-relaxed" style={{ color: '#6b7266' }}>
-                {['Registration opens March 1st each year', 'Pay by Interac e-transfer or credit/debit card', 'Guest passes available for $10 per visit', 'All members must sign a waiver'].map((item, i) => (
+                {['Registration opens March 1st each year', 'Pay by Interac e-transfer', 'Guest passes available for $10 per visit', 'All members must sign a waiver'].map((item, i) => (
                   <li key={i} className="flex items-start gap-2">
                     <svg className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: '#6b7a3d' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
