@@ -92,6 +92,7 @@ create table if not exists partners (
   date text not null,
   time text not null,
   avatar text,
+  message text,
   status text not null default 'available' check (status in ('available', 'matched')),
   created_at timestamptz default now()
 );

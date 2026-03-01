@@ -28,6 +28,8 @@ export default function PartnersPage() {
   const [postDate, setPostDate] = useState('');
   const [postTime, setPostTime] = useState('');
   const [postType, setPostType] = useState<'singles' | 'doubles' | 'mixed' | 'any'>('any');
+  const [postSkillLevel, setPostSkillLevel] = useState<SkillLevel | 'any'>('any');
+  const [postMessage, setPostMessage] = useState('');
   const postModalRef = useRef<HTMLDivElement>(null);
   useFocusTrap(postModalRef, showPost);
   const [removingId, setRemovingId] = useState<string | null>(null);
@@ -41,8 +43,7 @@ export default function PartnersPage() {
 
   const filtered = partners.filter(p => {
     if (filter !== 'all' && p.matchType !== filter && p.matchType !== 'any') return false;
-    const level = p.skillLevel ?? 'intermediate';
-    if (skillFilter !== 'all' && level !== skillFilter) return false;
+    if (skillFilter !== 'all' && p.skillLevel && p.skillLevel !== skillFilter) return false;
     return true;
   });
 
@@ -114,8 +115,7 @@ export default function PartnersPage() {
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {filtered.map(p => {
-              const level = p.skillLevel ?? 'intermediate';
-              const badge = SKILL_BADGES[level];
+              const badge = p.skillLevel ? SKILL_BADGES[p.skillLevel] : null;
               return (
                 <div key={p.id} className={`glass-card rounded-2xl border p-5 card-hover ${removingId === p.id ? 'animate-exit' : ''}`} style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
                   <div className="flex items-start justify-between mb-3">
@@ -123,12 +123,20 @@ export default function PartnersPage() {
                       <AvatarDisplay avatar={p.avatar} name={p.name} size={40} />
                       <div>
                         <p className="font-medium text-sm" style={{ color: '#2a2f1e' }}>{p.name}</p>
-                        <p className="text-xs" style={{ color: badge.color }}>{badge.label}</p>
+                        <p className="text-xs" style={{ color: badge?.color ?? '#6b7a3d' }}>
+                          {badge ? `Looking for ${badge.label}` : 'Any level'}
+                        </p>
                       </div>
                     </div>
-                    <span className="text-[0.65rem] px-2 py-0.5 rounded-full font-medium" style={{ background: badge.bg, color: badge.color }}>
-                      {badge.label}
-                    </span>
+                    {badge ? (
+                      <span className="text-[0.65rem] px-2 py-0.5 rounded-full font-medium" style={{ background: badge.bg, color: badge.color }}>
+                        {badge.label}
+                      </span>
+                    ) : (
+                      <span className="text-[0.65rem] px-2 py-0.5 rounded-full font-medium" style={{ background: 'rgba(107, 122, 61, 0.1)', color: '#6b7a3d' }}>
+                        Any Level
+                      </span>
+                    )}
                   </div>
 
                   <div className="space-y-2 mb-4">
@@ -144,6 +152,11 @@ export default function PartnersPage() {
                       </svg>
                       {p.matchType === 'any' ? 'Any format' : p.matchType.charAt(0).toUpperCase() + p.matchType.slice(1)}
                     </div>
+                    {p.message && (
+                      <p className="text-xs italic mt-1" style={{ color: '#6b7266' }}>
+                        &ldquo;{p.message}&rdquo;
+                      </p>
+                    )}
                   </div>
 
                   {p.userId === currentUser?.id ? (
@@ -206,17 +219,55 @@ export default function PartnersPage() {
               </div>
               <div>
                 <label className="block text-sm mb-1.5" style={{ color: '#2a2f1e' }}>Match Type</label>
-                <select
-                  value={postType}
-                  onChange={(e) => setPostType(e.target.value as typeof postType)}
-                  className="w-full px-3 py-2 rounded-lg text-sm border focus:outline-none focus:ring-2 focus:ring-[#6b7a3d]/20"
+                <div className="flex flex-wrap gap-2">
+                  {(['any', 'singles', 'doubles', 'mixed'] as const).map(t => (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => setPostType(t)}
+                      className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200"
+                      style={{
+                        background: postType === t ? '#6b7a3d' : 'rgba(245, 242, 235, 0.8)',
+                        color: postType === t ? '#fff' : '#6b7266',
+                        border: `1px solid ${postType === t ? '#6b7a3d' : '#e0dcd3'}`,
+                      }}
+                    >
+                      {t === 'any' ? 'Any' : t === 'mixed' ? 'Mixed Doubles' : t.charAt(0).toUpperCase() + t.slice(1)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm mb-1.5" style={{ color: '#2a2f1e' }}>Preferred Skill Level</label>
+                <div className="flex flex-wrap gap-2">
+                  {(['any', 'beginner', 'intermediate', 'advanced', 'competitive'] as const).map(s => (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => setPostSkillLevel(s)}
+                      className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200"
+                      style={{
+                        background: postSkillLevel === s ? '#6b7a3d' : 'rgba(245, 242, 235, 0.8)',
+                        color: postSkillLevel === s ? '#fff' : '#6b7266',
+                        border: `1px solid ${postSkillLevel === s ? '#6b7a3d' : '#e0dcd3'}`,
+                      }}
+                    >
+                      {s === 'any' ? 'Any Level' : s.charAt(0).toUpperCase() + s.slice(1)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm mb-1.5" style={{ color: '#2a2f1e' }}>Message <span className="text-xs font-normal" style={{ color: '#6b7266' }}>(optional)</span></label>
+                <textarea
+                  value={postMessage}
+                  onChange={(e) => setPostMessage(e.target.value)}
+                  placeholder="Looking for a rally partner..."
+                  maxLength={200}
+                  rows={2}
+                  className="w-full px-3 py-2 rounded-lg text-sm border focus:outline-none focus:ring-2 focus:ring-[#6b7a3d]/20 resize-none"
                   style={{ borderColor: '#e0dcd3', color: '#2a2f1e' }}
-                >
-                  <option value="any">Any</option>
-                  <option value="singles">Singles</option>
-                  <option value="doubles">Doubles</option>
-                  <option value="mixed">Mixed Doubles</option>
-                </select>
+                />
               </div>
             </div>
 
@@ -253,12 +304,13 @@ export default function PartnersPage() {
                     userId: currentUser.id,
                     name: currentUser.name,
                     ntrp: currentUser.ntrp ?? 3.0,
-                    skillLevel: currentUser.skillLevel ?? 'intermediate',
+                    skillLevel: postSkillLevel === 'any' ? undefined : postSkillLevel,
                     availability: new Date(postDate + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) + ' at ' + postTime,
                     matchType: postType,
                     date: postDate,
                     time: postTime,
                     avatar: currentUser.avatar,
+                    message: postMessage.trim() || undefined,
                     status: 'available',
                   };
                   addPartner(partner);
@@ -266,6 +318,8 @@ export default function PartnersPage() {
                   setPostDate('');
                   setPostTime('');
                   setPostType('any');
+                  setPostSkillLevel('any');
+                  setPostMessage('');
                   showToast('Partner request posted!');
                 }}
                 disabled={!postDate || !postTime}
