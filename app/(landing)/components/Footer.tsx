@@ -53,11 +53,11 @@ export default function Footer() {
               L9W 6S3
             </address>
             <a
-              href="mailto:monotennis.payment@gmail.com"
+              href="mailto:monotennisclub1@gmail.com"
               className="footer-link text-base block mt-4 break-all"
               style={{ color: 'rgba(232, 228, 217, 0.7)' }}
             >
-              monotennis.payment@gmail.com
+              monotennisclub1@gmail.com
             </a>
           </div>
         </div>

@@ -108,7 +108,7 @@ export default function AboutTab() {
 
           <div className="grid md:grid-cols-3 gap-8 fade-in">
             {[
-              { badge: 'Announcement', date: 'March 2026', title: 'Registration Opens March 1st', desc: 'The 2026 season registration opens on March 1st. Pay online via Interac e-transfer or credit/debit card. Early bird discounts may apply.' },
+              { badge: 'Announcement', date: 'March 2026', title: 'Registration Opens March 1st', desc: 'The 2026 season registration opens on March 1st. Pay online via Interac e-transfer. Early bird discounts may apply.' },
               { badge: 'Newsletter', date: 'April 2026', title: 'Spring Newsletter', desc: 'Get the latest updates on the upcoming season, new programs, coaching staff changes, and social events planned for the summer.' },
               { badge: 'Fundraiser', date: 'Ongoing', title: 'Court Resurfacing Fund', desc: 'Help us maintain and improve our courts. Donations go toward resurfacing and upgrading our facilities for future seasons.' },
             ].map((news, i) => (
@@ -140,7 +140,7 @@ export default function AboutTab() {
             {[
               { name: 'Patti Powell', role: 'President' },
               { name: 'Peter Gibson', role: 'Past President' },
-              { name: 'Jan Howard', role: 'Treasurer' },
+              { name: 'Lisa Conrad', role: 'Treasurer' },
               { name: 'Kelly Kamstra-Lloyd', role: 'Member at Large' },
               { name: 'Patrick Minshall', role: 'Member at Large' },
               { name: 'Phil Primmer', role: 'Member at Large' },
