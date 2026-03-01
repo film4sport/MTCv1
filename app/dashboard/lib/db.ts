@@ -142,6 +142,7 @@ export async function fetchPartners(): Promise<Partner[]> {
     date: p.date,
     time: p.time,
     avatar: p.avatar ?? undefined,
+    message: p.message ?? undefined,
     status: p.status as Partner['status'],
   }));
 }
@@ -158,6 +159,7 @@ export async function createPartner(partner: Partner): Promise<void> {
     date: partner.date,
     time: partner.time,
     avatar: partner.avatar || null,
+    message: partner.message || null,
     status: partner.status,
   });
 }

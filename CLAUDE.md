@@ -44,6 +44,12 @@ All external links to clubspark.ca have been removed. ClubSpark was only used as
 ## #9: ALWAYS UPDATE CLAUDE.md
 When new project rules or conventions are established, add them to this file AND MEMORY.md.
 
+## #15: SHARED MEMORY FILE
+**`MEMORY.md` in the project root is the single source of truth for session context, status, and decisions.**
+- Both Cowork and Claude Code read and write to `MTCv1/MEMORY.md`
+- **Do NOT use** Claude Code's internal `.claude/projects/` memory path — all updates go to the project root `MEMORY.md`
+- After completing work, update MEMORY.md with: what was changed, what still needs doing, and any decisions made
+
 ## #10: VERIFY BEFORE REPORTING — PLAYWRIGHT + BDG COMBO
 **Never tell the user "it's done" without verifying visually.**
 - **Playwright** — Primary tool for visual verification and regression testing:

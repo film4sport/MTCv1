@@ -97,8 +97,10 @@ function saveJSON(key: string, value: unknown) {
 }
 
 /** When Supabase is configured, return empty array for empty results (real empty state).
- *  When NOT configured (demo/dev), return demo data as fallback. */
+ *  When NOT configured (demo/dev), return demo data as fallback.
+ *  Defensive: if data is corrupted (not an array), fall back safely. */
 function demoFallback<T>(data: T[], demo: T[]): T[] {
+  if (!Array.isArray(data)) return isSupabaseConfigured ? [] : demo;
   return data.length ? data : (isSupabaseConfigured ? [] : demo);
 }
 
@@ -148,7 +150,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
         // Overwrite state with Supabase data (source of truth)
         setMembers(demoFallback(members, DEFAULT_MEMBERS));
-        setBookings(bookings);
+        setBookings(Array.isArray(bookings) ? bookings : []);
         setEvents(demoFallback(events, DEFAULT_EVENTS));
         setPartners(demoFallback(partners, DEFAULT_PARTNERS));
         setConversations(demoFallback(conversations, DEFAULT_CONVERSATIONS));
@@ -200,7 +202,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     const channel = supabase.channel('dashboard-realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, () => {
-        db.fetchBookings().then(b => setBookings(b)).catch(err => reportError(err, 'Realtime bookings'));
+        db.fetchBookings().then(b => setBookings(Array.isArray(b) ? b : [])).catch(err => reportError(err, 'Realtime bookings'));
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, () => {
         db.fetchConversations(userId).then(c => {
@@ -656,7 +658,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         db.fetchNotificationPreferences(currentUser.id),
       ]);
       setMembers(demoFallback(m, DEFAULT_MEMBERS));
-      setBookings(b);
+      setBookings(Array.isArray(b) ? b : []);
       setEvents(demoFallback(ev, DEFAULT_EVENTS));
       setPartners(demoFallback(p, DEFAULT_PARTNERS));
       setConversations(demoFallback(c, DEFAULT_CONVERSATIONS));

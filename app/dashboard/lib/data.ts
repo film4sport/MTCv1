@@ -287,9 +287,9 @@ export const DEFAULT_EVENTS: ClubEvent[] = [
 
 // ─── Partner Requests ───────────────────────────────────
 export const DEFAULT_PARTNERS: Partner[] = [
-  { id: 'p1', userId: 'sarah', name: 'Sarah Wilson', ntrp: 3.5, skillLevel: 'intermediate', availability: 'Tomorrow, 10am', matchType: 'singles', date: 'Tomorrow', time: '10:00 AM', avatar: 'tennis-female-1', status: 'available' },
+  { id: 'p1', userId: 'sarah', name: 'Sarah Wilson', ntrp: 3.5, skillLevel: 'intermediate', availability: 'Tomorrow, 10am', matchType: 'singles', date: 'Tomorrow', time: '10:00 AM', avatar: 'tennis-female-1', message: 'Looking for a practice partner before league night!', status: 'available' },
   { id: 'p2', userId: 'mike', name: 'Mike Chen', ntrp: 4.0, skillLevel: 'advanced', availability: 'Saturday, 2pm', matchType: 'doubles', date: 'Saturday', time: '2:00 PM', avatar: 'tennis-male-2', status: 'available' },
-  { id: 'p3', userId: 'emily', name: 'Emily Rodriguez', ntrp: 3.0, skillLevel: 'beginner', availability: 'Sunday, 9am', matchType: 'any', date: 'Sunday', time: '9:00 AM', avatar: 'tennis-female-2', status: 'available' },
+  { id: 'p3', userId: 'emily', name: 'Emily Rodriguez', ntrp: 3.0, availability: 'Sunday, 9am', matchType: 'any', date: 'Sunday', time: '9:00 AM', avatar: 'tennis-female-2', message: 'New to the club, happy to play with anyone!', status: 'available' },
   { id: 'p4', userId: 'david', name: 'David Kim', ntrp: 4.0, skillLevel: 'advanced', availability: 'Monday, 6pm', matchType: 'singles', date: 'Monday', time: '6:00 PM', avatar: 'tennis-male-2', status: 'available' },
   { id: 'p5', userId: 'ryan', name: "Ryan O'Connor", ntrp: 3.5, skillLevel: 'intermediate', availability: 'Wednesday, 4pm', matchType: 'mixed', date: 'Wednesday', time: '4:00 PM', avatar: 'tennis-male-1', status: 'available' },
 ];

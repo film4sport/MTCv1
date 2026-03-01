@@ -64,6 +64,7 @@ export interface Partner {
   date: string;
   time: string;
   avatar?: string;
+  message?: string;
   status: 'available' | 'matched';
 }
 
