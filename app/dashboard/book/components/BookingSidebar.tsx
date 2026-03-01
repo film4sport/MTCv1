@@ -1,7 +1,7 @@
 import type { Booking } from '../../lib/types';
-import { FEES } from '../../lib/types';
+import { FEES, BOOKING_RULES } from '../../lib/types';
 import { useToast } from '../../lib/toast';
-import { canCancel } from './booking-utils';
+import { canCancel, getTimeRange, formatDuration } from './booking-utils';
 
 interface BookingSidebarProps {
   myUpcoming: Booking[];
@@ -25,15 +25,15 @@ export default function BookingSidebar({ myUpcoming, onCancelBooking }: BookingS
           <div className="space-y-2.5">
             <div className="flex items-start gap-2.5">
               <span className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" style={{ background: '#6b7a3d' }} />
-              <p className="text-[0.7rem] leading-relaxed" style={{ color: '#6b7266' }}>Guest fee: <span className="font-medium" style={{ color: '#2a2f1e' }}>${FEES.guest} per visit</span></p>
+              <p className="text-[0.7rem] leading-relaxed" style={{ color: '#6b7266' }}>Guest fee: <span className="font-medium" style={{ color: '#2a2f1e' }}>${FEES.guest}/visit</span> — e-transfer to <span className="font-medium" style={{ color: '#2a2f1e' }}>monotennis.payment@gmail.com</span></p>
             </div>
             <div className="flex items-start gap-2.5">
               <span className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" style={{ background: '#6b7a3d' }} />
-              <p className="text-[0.7rem] leading-relaxed" style={{ color: '#6b7266' }}>Cancel up to <span className="font-medium" style={{ color: '#2a2f1e' }}>{FEES.cancelWindowHours}h</span> before your slot</p>
+              <p className="text-[0.7rem] leading-relaxed" style={{ color: '#6b7266' }}>Singles: up to <span className="font-medium" style={{ color: '#2a2f1e' }}>1.5 hrs</span>, Doubles: up to <span className="font-medium" style={{ color: '#2a2f1e' }}>2 hrs</span></p>
             </div>
             <div className="flex items-start gap-2.5">
               <span className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" style={{ background: '#6b7a3d' }} />
-              <p className="text-[0.7rem] leading-relaxed" style={{ color: '#6b7266' }}>Max <span className="font-medium" style={{ color: '#2a2f1e' }}>3 participants</span> per booking</p>
+              <p className="text-[0.7rem] leading-relaxed" style={{ color: '#6b7266' }}>Book up to <span className="font-medium" style={{ color: '#2a2f1e' }}>{BOOKING_RULES.maxAdvanceDays} days</span> in advance</p>
             </div>
             <div className="flex items-start gap-2.5">
               <span className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" style={{ background: '#6b7a3d' }} />
@@ -71,7 +71,7 @@ export default function BookingSidebar({ myUpcoming, onCancelBooking }: BookingS
                     <div>
                       <p className="font-semibold text-sm" style={{ color: '#2a2f1e' }}>{b.courtName}</p>
                       <p className="text-xs mt-0.5" style={{ color: '#6b7266' }}>
-                        {new Date(b.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} &bull; {b.time}
+                        {new Date(b.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} &bull; {getTimeRange(b.time, b.duration)}
                       </p>
                       {b.guestName && (
                         <p className="text-xs mt-1 flex items-center gap-1" style={{ color: '#d97706' }}>

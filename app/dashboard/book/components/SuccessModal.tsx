@@ -1,16 +1,20 @@
 import { useEffect, useRef } from 'react';
 import { downloadICS } from '../../lib/calendar';
 import { useFocusTrap } from '../../lib/utils';
+import { getTimeRange, formatDuration } from './booking-utils';
+import { BOOKING_RULES } from '../../lib/types';
 
 interface SuccessModalProps {
   courtName: string;
   date: string;
   time: string;
+  duration?: number;
+  matchType?: 'singles' | 'doubles';
   participants?: { id: string; name: string }[];
   onClose: () => void;
 }
 
-export default function SuccessModal({ courtName, date, time, participants, onClose }: SuccessModalProps) {
+export default function SuccessModal({ courtName, date, time, duration, matchType, participants, onClose }: SuccessModalProps) {
   const trapRef = useRef<HTMLDivElement>(null);
   useFocusTrap(trapRef);
 
@@ -46,10 +50,12 @@ export default function SuccessModal({ courtName, date, time, participants, onCl
           </svg>
         </div>
         <h3 id="success-modal-title" className="font-semibold text-lg mb-1" style={{ color: '#2a2f1e' }}>Booked!</h3>
-        <p className="text-sm mb-2" style={{ color: '#6b7266' }}>
+        <p className="text-sm mb-1" style={{ color: '#6b7266' }}>
           {courtName} on{' '}
-          {new Date(date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}{' '}
-          at {time}
+          {new Date(date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+        </p>
+        <p className="text-sm mb-2" style={{ color: '#2a2f1e', fontWeight: 500 }}>
+          {getTimeRange(time, duration)} {matchType && duration ? `· ${matchType === 'singles' ? 'Singles' : 'Doubles'} · ${formatDuration(duration)}` : ''}
         </p>
         {participants && participants.length > 0 && (
           <p className="text-xs mb-4" style={{ color: '#6b7a3d' }}>
@@ -61,10 +67,10 @@ export default function SuccessModal({ courtName, date, time, participants, onCl
           <button
             onClick={() => {
               downloadICS([{
-                title: `Tennis — ${courtName}`,
+                title: `Tennis ${matchType ? (matchType === 'singles' ? 'Singles' : 'Doubles') : ''} — ${courtName}`,
                 date,
                 time,
-                duration: 60,
+                duration: duration ? duration * BOOKING_RULES.slotMinutes : 60,
                 location: `${courtName} — Mono Tennis Club`,
               }], 'mtc-booking.ics');
             }}

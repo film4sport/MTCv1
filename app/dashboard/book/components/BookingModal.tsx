@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { FEES } from '../../lib/types';
-import type { User } from '../../lib/types';
-import { getTimeRange } from './booking-utils';
+import { FEES, BOOKING_RULES } from '../../lib/types';
+import type { User, Booking } from '../../lib/types';
+import { getTimeRange, formatDuration, areSlotsAvailable } from './booking-utils';
 import { useFocusTrap } from '../../lib/utils';
 
 interface ModalData {
@@ -15,12 +15,17 @@ interface BookingModalProps {
   modalData: ModalData;
   members: User[];
   currentUser: User | null;
-  onConfirm: (isGuest: boolean, guestName: string, participants: { id: string; name: string }[]) => void;
+  bookings: Booking[];
+  onConfirm: (isGuest: boolean, guestName: string, participants: { id: string; name: string }[], matchType: 'singles' | 'doubles', duration: number) => void;
   onCancel: () => void;
   loading: boolean;
 }
 
-export default function BookingModal({ modalData, members, currentUser, onConfirm, onCancel, loading }: BookingModalProps) {
+const DURATION_LABELS: Record<number, string> = { 2: '1 hr', 3: '1.5 hrs', 4: '2 hrs' };
+
+export default function BookingModal({ modalData, members, currentUser, bookings, onConfirm, onCancel, loading }: BookingModalProps) {
+  const [matchType, setMatchType] = useState<'singles' | 'doubles'>('singles');
+  const [duration, setDuration] = useState(2); // slots (2=1h default)
   const [isGuest, setIsGuest] = useState(false);
   const [guestName, setGuestName] = useState('');
   const [selectedParticipants, setSelectedParticipants] = useState<{ id: string; name: string }[]>([]);
@@ -28,6 +33,30 @@ export default function BookingModal({ modalData, members, currentUser, onConfir
   const [activeIndex, setActiveIndex] = useState(-1);
   const trapRef = useRef<HTMLDivElement>(null);
   useFocusTrap(trapRef);
+
+  const rules = BOOKING_RULES[matchType];
+  const maxParticipants = rules.maxParticipants;
+  const availableDurations = rules.durations;
+
+  // Reset duration when switching match type if current duration isn't valid
+  useEffect(() => {
+    if (!(availableDurations as readonly number[]).includes(duration)) {
+      setDuration(availableDurations[0]);
+    }
+  }, [matchType, availableDurations, duration]);
+
+  // Trim participants if switching to singles and over limit
+  useEffect(() => {
+    if (selectedParticipants.length > maxParticipants) {
+      setSelectedParticipants(prev => prev.slice(0, maxParticipants));
+    }
+  }, [maxParticipants, selectedParticipants.length]);
+
+  // Check which durations have available slots
+  const durationAvailability = availableDurations.map(d => ({
+    slots: d,
+    available: areSlotsAvailable(bookings, modalData.courtId, modalData.date, modalData.time, d),
+  }));
 
   // Compute participant search results
   const participantResults = participantSearch.trim().length >= 2
@@ -65,12 +94,57 @@ export default function BookingModal({ modalData, members, currentUser, onConfir
     return () => window.removeEventListener('keydown', handler);
   }, [onCancel]);
 
+  const canConfirm = durationAvailability.find(d => d.slots === duration)?.available && !(isGuest && !guestName.trim());
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.4)' }} role="dialog" aria-modal="true" aria-labelledby="booking-modal-title">
-      <div ref={trapRef} className="rounded-2xl p-6 w-full max-w-md animate-scaleIn" style={{ background: '#fff' }}>
+      <div ref={trapRef} className="rounded-2xl p-6 w-full max-w-md animate-scaleIn max-h-[90vh] overflow-y-auto" style={{ background: '#fff' }}>
         <h3 id="booking-modal-title" className="font-semibold text-lg mb-4" style={{ color: '#2a2f1e' }}>Confirm Booking</h3>
 
-        <div className="space-y-3 mb-6">
+        {/* Match Type Toggle */}
+        <div className="rounded-xl p-1 mb-4 flex gap-1" style={{ background: '#f0ede6' }}>
+          {(['singles', 'doubles'] as const).map(type => (
+            <button
+              key={type}
+              onClick={() => setMatchType(type)}
+              className="flex-1 py-2.5 rounded-lg text-sm font-medium transition-all"
+              style={{
+                background: matchType === type ? '#fff' : 'transparent',
+                color: matchType === type ? '#2a2f1e' : '#8b8780',
+                boxShadow: matchType === type ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+              }}
+            >
+              {type === 'singles' ? 'Singles' : 'Doubles'}
+            </button>
+          ))}
+        </div>
+
+        {/* Duration Selector */}
+        <div className="mb-4">
+          <p className="text-xs font-medium mb-2" style={{ color: '#6b7266' }}>Duration</p>
+          <div className="flex gap-2">
+            {durationAvailability.map(({ slots, available }) => (
+              <button
+                key={slots}
+                onClick={() => available && setDuration(slots)}
+                disabled={!available}
+                className="flex-1 py-2.5 rounded-lg text-sm font-medium transition-all border"
+                style={{
+                  background: duration === slots ? '#6b7a3d' : available ? '#fff' : '#f5f2eb',
+                  color: duration === slots ? '#fff' : available ? '#2a2f1e' : '#c4c0b8',
+                  borderColor: duration === slots ? '#6b7a3d' : '#e0dcd3',
+                  cursor: available ? 'pointer' : 'not-allowed',
+                }}
+              >
+                {DURATION_LABELS[slots]}
+                {!available && <span className="block text-[10px] mt-0.5">Unavailable</span>}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Booking Summary */}
+        <div className="space-y-3 mb-4 rounded-xl p-4" style={{ background: '#faf8f3', border: '1px solid #e0dcd3' }}>
           <div className="flex justify-between text-sm">
             <span style={{ color: '#6b7266' }}>Court</span>
             <span className="font-medium" style={{ color: '#2a2f1e' }}>{modalData.courtName}</span>
@@ -83,7 +157,11 @@ export default function BookingModal({ modalData, members, currentUser, onConfir
           </div>
           <div className="flex justify-between text-sm">
             <span style={{ color: '#6b7266' }}>Time</span>
-            <span className="font-medium" style={{ color: '#2a2f1e' }}>{getTimeRange(modalData.time)}</span>
+            <span className="font-medium" style={{ color: '#2a2f1e' }}>{getTimeRange(modalData.time, duration)}</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span style={{ color: '#6b7266' }}>Type</span>
+            <span className="font-medium capitalize" style={{ color: '#2a2f1e' }}>{matchType} · {formatDuration(duration)}</span>
           </div>
           <div className="flex justify-between text-sm">
             <span style={{ color: '#6b7266' }}>Cost</span>
@@ -121,9 +199,11 @@ export default function BookingModal({ modalData, members, currentUser, onConfir
 
         {/* Add Participants */}
         <div className="rounded-xl p-4 mb-6" style={{ background: '#faf8f3', border: '1px solid #e0dcd3' }}>
-          <p className="text-sm font-medium mb-2" style={{ color: '#2a2f1e' }}>Add Participants</p>
-          <p className="text-xs mb-3" style={{ color: '#6b7266' }}>Search members to add (max 3)</p>
-          {selectedParticipants.length < 3 && (
+          <p className="text-sm font-medium mb-1" style={{ color: '#2a2f1e' }}>Add Participants</p>
+          <p className="text-xs mb-3" style={{ color: '#6b7266' }}>
+            Search members to add (max {maxParticipants})
+          </p>
+          {selectedParticipants.length < maxParticipants && (
             <div className="relative">
               <input
                 type="text"
@@ -191,8 +271,8 @@ export default function BookingModal({ modalData, members, currentUser, onConfir
             Cancel
           </button>
           <button
-            onClick={() => onConfirm(isGuest, guestName, selectedParticipants)}
-            disabled={(isGuest && !guestName.trim()) || loading}
+            onClick={() => canConfirm && onConfirm(isGuest, guestName, selectedParticipants, matchType, duration)}
+            disabled={!canConfirm || loading}
             className="flex-1 py-3 rounded-xl text-sm font-medium text-white transition-colors hover:opacity-90 disabled:opacity-50"
             style={{ background: '#6b7a3d' }}
           >

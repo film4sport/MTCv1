@@ -8,9 +8,11 @@ const MONTH_NAMES = [
 ];
 
 const specialEvents = [
-  { date: '2026-05-09', title: 'Opening Day BBQ & Meet the Pros', time: '1:00 - 3:00 PM', type: 'special' },
-  { date: '2026-07-26', title: '95+ Mixed Doubles Tournament (Day 1)', time: 'All Day', type: 'tournament' },
-  { date: '2026-07-27', title: '95+ Mixed Doubles Tournament (Day 2)', time: 'All Day', type: 'tournament' },
+  { date: '2026-05-09', title: 'Opening Day BBQ & Round Robin', time: '12:30 - 3:00 PM', type: 'special' },
+  { date: '2026-06-07', title: 'French Open Round Robin Social', time: '1:00 - 4:00 PM', type: 'social' },
+  { date: '2026-07-12', title: 'Wimbledon Open Round Robin', time: '1:00 - 4:00 PM', type: 'social' },
+  { date: '2026-07-18', title: '95+ Mixed Doubles Tournament (Day 1)', time: 'All Day', type: 'tournament' },
+  { date: '2026-07-19', title: '95+ Mixed Doubles Tournament (Day 2)', time: 'All Day', type: 'tournament' },
   { date: '2026-07-28', title: 'Summer Tennis Camp (Day 1)', time: '8:30 AM - 3:30 PM', type: 'camp' },
   { date: '2026-07-29', title: 'Summer Tennis Camp (Day 2)', time: '8:30 AM - 3:30 PM', type: 'camp' },
   { date: '2026-07-30', title: 'Summer Tennis Camp (Day 3)', time: '8:30 AM - 3:30 PM', type: 'camp' },

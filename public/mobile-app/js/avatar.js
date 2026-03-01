@@ -80,7 +80,7 @@
         info = { name: ev.title, date: ev.date, time: ev.time.split(' - ')[0], location: ev.location };
       } else {
         const fallback = {
-          'bbq':      { name: 'Opening Day BBQ',   date: homeEventDates.bbq.toISOString().split('T')[0],      time: '1:00 PM' },
+          'bbq':      { name: 'Opening Day BBQ',   date: homeEventDates.bbq.toISOString().split('T')[0],      time: '12:30 PM' },
           'mensrr':   { name: "Men's Round Robin",  date: homeEventDates.mensrr.toISOString().split('T')[0],   time: '9:00 AM' },
           'frimixed': { name: 'Friday Night Mixed',  date: homeEventDates.frimixed.toISOString().split('T')[0], time: '6:00 PM' }
         };
