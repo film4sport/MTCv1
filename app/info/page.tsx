@@ -69,7 +69,7 @@ function InfoPageContent() {
 
     const descriptions: Record<string, string> = {
       about: 'Learn about Mono Tennis Club — our history since 1980, 4 courts, clubhouse facilities, and volunteer Board of Directors in Mono, Ontario.',
-      membership: 'Join Mono Tennis Club — membership fees from $50/year, family plans, guest passes, and online registration for the Caledon-Dufferin tennis community.',
+      membership: 'Join Mono Tennis Club — membership fees from $55/year, family plans, guest passes, and online registration for the Caledon-Dufferin tennis community.',
       coaching: 'Tennis coaching at Mono Tennis Club — lessons with Mark Taylor, summer camps for juniors, clinics for all levels in Mono, Ontario.',
       faq: 'Frequently asked questions about Mono Tennis Club — hours, equipment, booking, guest policy, and directions to 754883 Mono Centre Road.',
       rules: 'Mono Tennis Club constitution, court rules, regulations, and member code of conduct.',

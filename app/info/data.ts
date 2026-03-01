@@ -181,9 +181,9 @@ By becoming a member of the Mono Tennis Club, I acknowledge and agree to the fol
 By clicking "I Agree" below, I confirm that I have read and understood this Acknowledgement Agreement and voluntarily agree to its terms as a condition of my membership in the Mono Tennis Club.`;
 
 export const membershipTypes = [
-  { key: 'adult', label: 'Adult (Single)', price: 100 },
-  { key: 'family', label: 'Family', price: 200 },
-  { key: 'student', label: 'Student (18 & under)', price: 50 },
+  { key: 'adult', label: 'Adult (Single)', price: 120 },
+  { key: 'family', label: 'Family', price: 240 },
+  { key: 'junior', label: 'Junior (18 & under)', price: 55 },
   { key: 'guest', label: 'Guest Pass', price: 10 },
 ];
 

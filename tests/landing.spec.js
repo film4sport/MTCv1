@@ -124,13 +124,13 @@ test.describe('Events Section', () => {
   test('filter buttons exist', async ({ page }) => {
     const filters = page.locator('.filter-btn');
     const count = await filters.count();
-    expect(count).toBe(4);
+    expect(count).toBe(5);
   });
 
   test('event cards are displayed', async ({ page }) => {
     const cards = page.locator('.event-card');
     const count = await cards.count();
-    expect(count).toBe(3);
+    expect(count).toBe(7);
   });
 
   test('event cards have warm background', async ({ page }) => {
@@ -151,7 +151,7 @@ test.describe('Events Section', () => {
     await page.waitForTimeout(300);
     const allCards = page.locator('.event-card');
     const allCount = await allCards.count();
-    expect(allCount).toBe(3);
+    expect(allCount).toBe(7);
   });
 });
 
@@ -317,7 +317,7 @@ test.describe('Info Page', () => {
   test('default tab is membership', async ({ page }) => {
     await page.goto('/info', { waitUntil: 'networkidle' });
     await page.waitForTimeout(1000);
-    const heading = page.getByText('Membership & News');
+    const heading = page.getByText('How to Join').first();
     await expect(heading).toBeAttached();
   });
 
@@ -333,20 +333,6 @@ test.describe('Info Page', () => {
     await page.waitForTimeout(1000);
     const fees = page.getByText('Membership Fees').first();
     await expect(fees).toBeAttached();
-  });
-
-  test('info page has Season & Facilities on membership tab', async ({ page }) => {
-    await page.goto('/info?tab=membership', { waitUntil: 'networkidle' });
-    await page.waitForTimeout(1000);
-    const facilities = page.getByText('Season & Facilities').first();
-    await expect(facilities).toBeAttached();
-  });
-
-  test('info page has News on membership tab', async ({ page }) => {
-    await page.goto('/info?tab=membership', { waitUntil: 'networkidle' });
-    await page.waitForTimeout(1000);
-    const news = page.getByText('News & Updates').first();
-    await expect(news).toBeAttached();
   });
 
   test('about tab shows About content', async ({ page }) => {

@@ -6,7 +6,7 @@ const CDN = 'https://cdn.jsdelivr.net/gh/film4sport/my-webapp-images@main/mtc-im
 export const metadata: Metadata = {
   title: 'Join Mono Tennis Club — Become a Member',
   description:
-    'Register for Mono Tennis Club membership. Season runs May through October with 4 courts, coaching, tournaments, and a welcoming community in Mono, Ontario. Fees from $50/year.',
+    'Register for Mono Tennis Club membership. Season runs May through October with 4 courts, coaching, tournaments, and a welcoming community in Mono, Ontario. Fees from $55/year.',
   alternates: {
     canonical: '/signup',
   },

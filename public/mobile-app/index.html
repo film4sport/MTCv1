@@ -20,7 +20,7 @@
     if ('serviceWorker' in navigator) {
       caches.keys().then(function(names) {
         names.forEach(function(name) {
-          if (name.indexOf('mtc-court-401abc24') === -1) {
+          if (name.indexOf('mtc-court-8ef38afa') === -1) {
             caches.delete(name);
             console.log('[CacheBust] Deleted old cache:', name);
           }
@@ -1352,6 +1352,33 @@
 
         <!-- Events List View -->
         <div class="events-view active" id="eventsListView">
+          <!-- Pre-Season Event -->
+          <div class="section-header">
+            <h3 class="section-title">PRE-SEASON</h3>
+          </div>
+
+          <div class="event-card" onclick="showEventModal('euchre-tournament')" tabindex="0" role="button">
+            <div class="event-card-header">
+              <div class="event-card-date">
+                <div class="event-card-month">MAR</div>
+                <div class="event-card-day">14</div>
+              </div>
+              <div class="event-card-info">
+                <div class="event-card-title">Euchre Tournament</div>
+                <div class="event-card-meta">Saturday Evening • Clubhouse</div>
+              </div>
+              <div class="event-card-badge free">Free</div>
+            </div>
+            <div class="event-card-body">
+              <p class="event-card-desc">Pre-season Euchre tournament! Open to members and guests. Prizes for top teams.</p>
+              <div class="event-card-footer">
+                <div class="event-card-action">
+                  <span class="action-text">Details →</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Featured Event -->
           <div class="section-header">
             <h3 class="section-title">SEASON OPENER</h3>

@@ -1,32 +1,33 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import Image from 'next/image';
 
 export default function Loader() {
   const [ballHit, setBallHit] = useState(false);
   const [fadeOut, setFadeOut] = useState(false);
   const imgLoaded = useRef(false);
+  const triggered = useRef(false);
+
+  const triggerExit = useCallback(() => {
+    if (triggered.current) return; // Prevent double-trigger from race
+    triggered.current = true;
+    setBallHit(true);
+    setTimeout(() => setFadeOut(true), 400);
+  }, []);
 
   useEffect(() => {
     // Ball flies away after 1s minimum (if image loaded)
     const minDelay = setTimeout(() => {
-      if (imgLoaded.current) {
-        setBallHit(true);
-        // Loader fades out 400ms after ball starts flying
-        setTimeout(() => setFadeOut(true), 400);
-      }
+      if (imgLoaded.current) triggerExit();
     }, 1000);
     // Hard fallback — never show loader longer than 2.5s even if image fails
-    const fallback = setTimeout(() => {
-      setBallHit(true);
-      setTimeout(() => setFadeOut(true), 400);
-    }, 2500);
+    const fallback = setTimeout(() => triggerExit(), 2500);
     return () => {
       clearTimeout(minDelay);
       clearTimeout(fallback);
     };
-  }, []);
+  }, [triggerExit]);
 
   const handleImgLoad = () => {
     imgLoaded.current = true;

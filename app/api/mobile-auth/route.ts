@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { timingSafeEqual } from 'crypto';
 
 /**
  * Mobile PWA Auth Proxy
@@ -79,7 +80,10 @@ export async function POST(request: NextRequest) {
     if (!account) {
       return NextResponse.json({ error: 'unknown_account' }, { status: 401 });
     }
-    if (account.password !== password) {
+    // Timing-safe comparison to prevent timing attacks
+    const expected = Buffer.from(account.password);
+    const received = Buffer.from(password);
+    if (expected.length !== received.length || !timingSafeEqual(expected, received)) {
       return NextResponse.json({ error: 'invalid_password' }, { status: 401 });
     }
 

@@ -46,8 +46,15 @@ export default function LandingPage() {
     // Observe elements already in the DOM
     observeAll();
 
-    // Watch for new elements added by dynamic imports
-    const mo = new MutationObserver(observeAll);
+    // Watch for new elements added by dynamic imports (debounced to avoid perf issues during animations)
+    let moRaf: number | null = null;
+    const mo = new MutationObserver(() => {
+      if (moRaf) return;
+      moRaf = requestAnimationFrame(() => {
+        observeAll();
+        moRaf = null;
+      });
+    });
     mo.observe(document.body, { childList: true, subtree: true });
 
     return () => { io.disconnect(); mo.disconnect(); };

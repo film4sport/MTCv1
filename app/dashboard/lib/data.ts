@@ -136,6 +136,18 @@ function generateRecurringEvents(): ClubEvent[] {
 export const DEFAULT_EVENTS: ClubEvent[] = [
   // ── Special Events ──
   {
+    id: 'euchre-tournament',
+    title: 'Euchre Tournament',
+    date: '2026-03-14',
+    time: 'Evening',
+    location: 'Clubhouse',
+    badge: 'free',
+    price: 'Free',
+    description: 'Pre-season Euchre tournament! Open to members and guests. Prizes for top teams.',
+    attendees: [],
+    type: 'social',
+  },
+  {
     id: 'opening-day-bbq',
     title: 'Opening Day BBQ & Round Robin',
     date: '2026-05-09',

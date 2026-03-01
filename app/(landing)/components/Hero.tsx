@@ -15,11 +15,17 @@ export default function Hero() {
   }, []);
 
   useEffect(() => {
+    let ticking = false;
     const handleScroll = () => {
-      const scrolled = window.scrollY;
-      if (heroBgRef.current && scrolled < window.innerHeight) {
-        heroBgRef.current.style.transform = `translateY(${scrolled * 0.4}px)`;
-      }
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const scrolled = window.scrollY;
+        if (heroBgRef.current && scrolled < window.innerHeight) {
+          heroBgRef.current.style.transform = `translateY(${scrolled * 0.4}px)`;
+        }
+        ticking = false;
+      });
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);

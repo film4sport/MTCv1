@@ -38,7 +38,7 @@ test.describe('Signup Flow — /info?tab=membership', () => {
   test('coaching tab has coach info', async ({ page }) => {
     await page.getByText('Coaching', { exact: true }).click();
     await page.waitForTimeout(300);
-    await expect(page.getByText('Mark Taylor')).toBeAttached();
+    await expect(page.getByRole('heading', { name: 'Mark Taylor' })).toBeAttached();
   });
 
   test('back to home link exists', async ({ page }) => {

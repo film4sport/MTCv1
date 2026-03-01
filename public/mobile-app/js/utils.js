@@ -127,7 +127,9 @@ MTC.storage = {
       if (raw === null) return fallback !== undefined ? fallback : null;
       return JSON.parse(raw);
     } catch(e) {
-      console.warn('MTC storage parse error for ' + key);
+      console.warn('MTC storage parse error for ' + key, e);
+      // Clear corrupted data to prevent repeated failures
+      try { localStorage.removeItem(key); } catch(e2) {}
       return fallback !== undefined ? fallback : null;
     }
   },

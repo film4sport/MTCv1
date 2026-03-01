@@ -118,8 +118,9 @@
     // Update header
     document.getElementById('conversationName').textContent = member.name;
     const avatarEl = document.getElementById('conversationAvatar');
-    if (avatarSVGs[member.avatar]) {
-      avatarEl.innerHTML = avatarSVGs[member.avatar];
+    var avatars = (typeof MTC !== 'undefined' && MTC.state && MTC.state.avatarSVGs) || (typeof avatarSVGs !== 'undefined' ? avatarSVGs : {});
+    if (avatarEl && avatars[member.avatar]) {
+      avatarEl.innerHTML = avatars[member.avatar];
     }
 
     // Load messages
