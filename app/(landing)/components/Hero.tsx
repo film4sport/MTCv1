@@ -32,7 +32,7 @@ export default function Hero() {
   }, []);
 
   return (
-    <section className="relative h-screen w-full overflow-hidden texture-overlay" style={{ zIndex: 0 }}>
+    <section className="relative h-dvh w-full overflow-hidden texture-overlay" style={{ zIndex: 0 }}>
       {/* Background Image with Parallax */}
       <div className="absolute inset-0 parallax-bg" ref={heroBgRef}>
         <Image
