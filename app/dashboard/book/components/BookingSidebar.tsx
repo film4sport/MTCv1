@@ -29,6 +29,10 @@ export default function BookingSidebar({ myUpcoming, onCancelBooking }: BookingS
             </div>
             <div className="flex items-start gap-2.5">
               <span className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" style={{ background: '#6b7a3d' }} />
+              <p className="text-[0.7rem] leading-relaxed" style={{ color: '#6b7266' }}>Cancel up to <span className="font-medium" style={{ color: '#2a2f1e' }}>{FEES.cancelWindowHours}h</span> before your slot</p>
+            </div>
+            <div className="flex items-start gap-2.5">
+              <span className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" style={{ background: '#6b7a3d' }} />
               <p className="text-[0.7rem] leading-relaxed" style={{ color: '#6b7266' }}>Singles: up to <span className="font-medium" style={{ color: '#2a2f1e' }}>1.5 hrs</span>, Doubles: up to <span className="font-medium" style={{ color: '#2a2f1e' }}>2 hrs</span></p>
             </div>
             <div className="flex items-start gap-2.5">
@@ -38,6 +42,10 @@ export default function BookingSidebar({ myUpcoming, onCancelBooking }: BookingS
             <div className="flex items-start gap-2.5">
               <span className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" style={{ background: '#6b7a3d' }} />
               <p className="text-[0.7rem] leading-relaxed" style={{ color: '#6b7266' }}>Courts 1-2 til <span className="font-medium" style={{ color: '#2a2f1e' }}>10 PM</span>, Courts 3-4 til <span className="font-medium" style={{ color: '#2a2f1e' }}>8 PM</span></p>
+            </div>
+            <div className="flex items-start gap-2.5">
+              <span className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" style={{ background: '#d97706' }} />
+              <p className="text-[0.7rem] leading-relaxed" style={{ color: '#6b7266' }}>Please cancel bookings you no longer need so others can use the court</p>
             </div>
           </div>
         </div>

@@ -181,7 +181,7 @@ export default function BookingModal({ modalData, members, currentUser, bookings
             />
             <div>
               <p className="text-sm font-medium" style={{ color: '#2a2f1e' }}>Bringing a guest?</p>
-              <p className="text-xs" style={{ color: '#6b7266' }}>Guest fee: ${FEES.guest}</p>
+              <p className="text-xs" style={{ color: '#6b7266' }}>Guest fee: ${FEES.guest} — e-transfer to monotennis.payment@gmail.com</p>
             </div>
           </label>
           {isGuest && (
