@@ -16,9 +16,9 @@ const eventsData = [
     category: 'camp',
     image: `${CDN}/event-summer-camp.jpeg`,
     badge: 'Camp',
-    date: 'July 28 - Aug 1, 2026',
+    date: 'TBC',
     title: 'Summer Tennis Camp',
-    description: '8:30am - 3:30pm daily.',
+    description: 'Dates coming soon.',
   },
   {
     category: 'social',
