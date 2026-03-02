@@ -38,6 +38,13 @@ export interface Booking {
   duration?: number; // in slots (2=1h, 3=1.5h, 4=2h)
 }
 
+export interface VolunteerTask {
+  id: string;
+  name: string;
+  icon: string;
+  assigned: string | null;
+}
+
 export interface ClubEvent {
   id: string;
   title: string;
@@ -51,6 +58,12 @@ export interface ClubEvent {
   description: string;
   attendees: string[];
   type: 'social' | 'match' | 'roundrobin' | 'lesson' | 'tournament';
+  // Interclub-specific fields
+  opponent?: string;
+  format?: string;
+  instructions?: string[];
+  volunteersNeeded?: VolunteerTask[];
+  assignedTasks?: VolunteerTask[];
 }
 
 export interface Partner {

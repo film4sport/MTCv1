@@ -628,96 +628,258 @@ export default function EventsPage() {
       })()}
 
       {/* Event Detail Modal */}
-      {detail && (
+      {detail && (() => {
+        const isInterclub = !!detail.opponent;
+        const isAttending = detail.attendees.includes(currentUser?.name || '');
+        const getInitials = (name: string) => name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+        const avatarColors = ['#6b7a3d', '#d97706', '#2563eb', '#7c3aed', '#dc2626', '#0891b2', '#4f46e5', '#059669'];
+        const getAvatarColor = (name: string) => avatarColors[name.split('').reduce((a, c) => a + c.charCodeAt(0), 0) % avatarColors.length];
+
+        return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.4)' }} onClick={() => setSelectedEvent(null)} role="dialog" aria-modal="true" aria-labelledby="event-modal-title">
-          <div ref={eventModalRef} className="rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto" style={{ background: '#fff' }} onClick={e => e.stopPropagation()}>
-            <div className="flex items-start justify-between mb-4">
-              <div>
-                <h3 id="event-modal-title" className="font-semibold text-lg" style={{ color: '#2a2f1e' }}>{detail.title}</h3>
-                <p className="text-sm mt-1" style={{ color: '#6b7266' }}>
-                  {new Date(detail.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
-                </p>
-              </div>
-              <button onClick={() => setSelectedEvent(null)} className="p-1 rounded-lg hover:bg-gray-100" aria-label="Close">
-                <svg className="w-5 h-5" fill="none" stroke="#6b7266" viewBox="0 0 24 24" strokeWidth="2" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-              </button>
-            </div>
+          <div ref={eventModalRef} className="rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto" style={{ background: '#fff' }} onClick={e => e.stopPropagation()}>
 
-            <div className="space-y-3 mb-6">
-              <div className="flex gap-2 text-sm" style={{ color: '#6b7266' }}>
-                <svg className="w-4 h-4 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                {detail.time}
-              </div>
-              <div className="flex gap-2 text-sm" style={{ color: '#6b7266' }}>
-                <svg className="w-4 h-4 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                </svg>
-                {detail.location}
-              </div>
-              <p className="text-sm" style={{ color: '#2a2f1e' }}>{detail.description}</p>
-            </div>
-
-            {/* Headcount in modal */}
-            {detail.spotsTotal != null && (
-              <div className="mb-4 p-3 rounded-xl" style={{ background: '#faf8f3' }}>
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-xs font-medium" style={{ color: '#2a2f1e' }}>
-                    {detail.spotsTaken ?? detail.attendees.length} / {detail.spotsTotal} going
-                  </span>
-                  <span className="text-xs" style={{ color: (detail.spotsTotal - (detail.spotsTaken ?? detail.attendees.length)) <= 3 ? '#ef4444' : '#6b7266' }}>
-                    {detail.spotsTotal - (detail.spotsTaken ?? detail.attendees.length)} spots left
-                  </span>
+            {/* Header — dark gradient for interclub, standard for others */}
+            {isInterclub ? (
+              <div className="relative rounded-t-2xl p-6 pb-5" style={{ background: 'linear-gradient(135deg, #1a2e0a 0%, #2a3f1a 100%)' }}>
+                <button onClick={() => setSelectedEvent(null)} className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.15)' }} aria-label="Close">
+                  <svg className="w-4 h-4" fill="none" stroke="#fff" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+                <h3 id="event-modal-title" className="font-semibold text-xl text-white mb-2">{detail.title}</h3>
+                <div className="flex items-center gap-2 text-sm" style={{ color: 'rgba(255,255,255,0.8)' }}>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                  {new Date(detail.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} &bull; {detail.time}
                 </div>
-                <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: '#e0dcd3' }}>
-                  <div
-                    className="h-full rounded-full transition-all duration-500"
-                    style={{
-                      width: `${Math.min(100, ((detail.spotsTaken ?? detail.attendees.length) / detail.spotsTotal) * 100)}%`,
-                      background: ((detail.spotsTaken ?? detail.attendees.length) / detail.spotsTotal) > 0.8 ? '#ef4444' : '#6b7a3d',
-                    }}
-                  />
+              </div>
+            ) : (
+              <div className="p-6 pb-0">
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <h3 id="event-modal-title" className="font-semibold text-lg" style={{ color: '#2a2f1e' }}>{detail.title}</h3>
+                    <p className="text-sm mt-1" style={{ color: '#6b7266' }}>
+                      {new Date(detail.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+                    </p>
+                  </div>
+                  <button onClick={() => setSelectedEvent(null)} className="p-1 rounded-lg hover:bg-gray-100" aria-label="Close">
+                    <svg className="w-5 h-5" fill="none" stroke="#6b7266" viewBox="0 0 24 24" strokeWidth="2" aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                  </button>
                 </div>
               </div>
             )}
 
-            <div className="mb-6">
-              <p className="text-sm font-medium mb-2" style={{ color: '#2a2f1e' }}>
-                Attendees ({detail.attendees.length})
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {detail.attendees.map(name => (
-                  <span key={name} className="text-xs px-3 py-1 rounded-full" style={{ background: '#f5f2eb', color: '#2a2f1e' }}>
-                    {name}
-                  </span>
-                ))}
-                {detail.attendees.length === 0 && (
-                  <p className="text-xs" style={{ color: '#6b7266' }}>No attendees yet</p>
-                )}
-              </div>
-            </div>
+            <div className="p-6 pt-4">
+              {/* Info grid — interclub shows opponent/format/team size, others show time/location */}
+              {isInterclub ? (
+                <div className="grid grid-cols-2 gap-3 mb-5">
+                  {[
+                    { label: 'Location', value: detail.location },
+                    { label: 'Opponent', value: detail.opponent || '—' },
+                    { label: 'Format', value: detail.format || '—' },
+                    { label: 'Team Size', value: `${detail.attendees.length} confirmed` },
+                  ].map(item => (
+                    <div key={item.label} className="p-3 rounded-xl" style={{ background: '#faf8f3' }}>
+                      <p className="text-[0.65rem] font-medium uppercase tracking-wide mb-0.5" style={{ color: '#6b7266' }}>{item.label}</p>
+                      <p className="text-sm font-semibold" style={{ color: '#2a2f1e' }}>{item.value}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-3 mb-5">
+                  <div className="flex gap-2 text-sm" style={{ color: '#6b7266' }}>
+                    <svg className="w-4 h-4 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    {detail.time}
+                  </div>
+                  <div className="flex gap-2 text-sm" style={{ color: '#6b7266' }}>
+                    <svg className="w-4 h-4 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    {detail.location}
+                  </div>
+                  <p className="text-sm" style={{ color: '#2a2f1e' }}>{detail.description}</p>
+                </div>
+              )}
 
-            <button
-              onClick={() => {
-                const wasAttending = detail.attendees.includes(currentUser?.name || '');
-                toggleRsvp(detail.id, currentUser?.name || '');
-                showToast(wasAttending ? 'RSVP cancelled' : `RSVP'd to ${detail.title}`);
-              }}
-              className="w-full py-3 rounded-xl text-sm font-medium transition-colors"
-              style={{
-                background: detail.attendees.includes(currentUser?.name || '') ? '#ef4444' : '#6b7a3d',
-                color: '#fff',
-              }}
-            >
-              {detail.attendees.includes(currentUser?.name || '') ? 'Cancel RSVP' : 'RSVP to Event'}
-            </button>
+              {/* Instructions (interclub + any event with instructions) */}
+              {detail.instructions && detail.instructions.length > 0 && (
+                <div className="mb-5 p-4 rounded-xl" style={{ background: '#faf8f3', border: '1px solid #f0ede6' }}>
+                  <div className="flex items-center gap-2 mb-2">
+                    <svg className="w-4 h-4" fill="none" stroke="#6b7a3d" viewBox="0 0 24 24" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                    <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: '#6b7a3d' }}>Important</p>
+                  </div>
+                  <ul className="space-y-1.5">
+                    {detail.instructions.map((inst, i) => (
+                      <li key={i} className="text-xs flex items-start gap-2" style={{ color: '#2a2f1e' }}>
+                        <span style={{ color: '#6b7a3d' }}>&bull;</span> {inst}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Volunteer tasks — assigned + open */}
+              {((detail.assignedTasks && detail.assignedTasks.length > 0) || (detail.volunteersNeeded && detail.volunteersNeeded.length > 0)) && (
+                <div className="mb-5">
+                  <p className="text-sm font-medium mb-3" style={{ color: '#2a2f1e' }}>Tasks & Volunteers</p>
+                  <div className="space-y-2">
+                    {detail.assignedTasks?.map(task => (
+                      <div key={task.id} className="flex items-center justify-between px-3 py-2.5 rounded-xl" style={{ background: '#f5f2eb' }}>
+                        <div className="flex items-center gap-2.5">
+                          <span className="text-base">{task.icon}</span>
+                          <span className="text-xs font-medium" style={{ color: '#2a2f1e' }}>{task.name}</span>
+                        </div>
+                        <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={{ background: 'rgba(107, 122, 61, 0.1)', color: '#6b7a3d' }}>
+                          {task.assigned}
+                        </span>
+                      </div>
+                    ))}
+                    {detail.volunteersNeeded?.map(task => (
+                      <div key={task.id} className="flex items-center justify-between px-3 py-2.5 rounded-xl" style={{ background: '#fff', border: '1px dashed #e0dcd3' }}>
+                        <div className="flex items-center gap-2.5">
+                          <span className="text-base">{task.icon}</span>
+                          <span className="text-xs font-medium" style={{ color: '#2a2f1e' }}>{task.name}</span>
+                        </div>
+                        <button
+                          onClick={() => {
+                            showToast(`Signed up for ${task.name}!`);
+                          }}
+                          className="text-[0.65rem] font-medium px-2.5 py-1 rounded-lg transition-colors hover:opacity-80"
+                          style={{ background: '#6b7a3d', color: '#fff' }}
+                        >
+                          Volunteer
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Headcount bar */}
+              {detail.spotsTotal != null && (
+                <div className="mb-4 p-3 rounded-xl" style={{ background: '#faf8f3' }}>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-xs font-medium" style={{ color: '#2a2f1e' }}>
+                      {detail.spotsTaken ?? detail.attendees.length} / {detail.spotsTotal} going
+                    </span>
+                    <span className="text-xs" style={{ color: (detail.spotsTotal - (detail.spotsTaken ?? detail.attendees.length)) <= 3 ? '#ef4444' : '#6b7266' }}>
+                      {detail.spotsTotal - (detail.spotsTaken ?? detail.attendees.length)} spots left
+                    </span>
+                  </div>
+                  <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: '#e0dcd3' }}>
+                    <div
+                      className="h-full rounded-full transition-all duration-500"
+                      style={{
+                        width: `${Math.min(100, ((detail.spotsTaken ?? detail.attendees.length) / detail.spotsTotal) * 100)}%`,
+                        background: ((detail.spotsTaken ?? detail.attendees.length) / detail.spotsTotal) > 0.8 ? '#ef4444' : '#6b7a3d',
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Attendees — avatar circles */}
+              <div className="mb-6">
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-sm font-medium" style={{ color: '#2a2f1e' }}>
+                    {isInterclub ? "Who's Playing" : 'Attendees'} ({detail.attendees.length})
+                  </p>
+                  {isInterclub && (
+                    <span className="text-xs font-medium" style={{ color: '#6b7a3d' }}>{detail.attendees.length} confirmed</span>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  {detail.attendees.slice(0, 8).map(name => (
+                    <div key={name} className="flex flex-col items-center gap-1 w-14">
+                      <div
+                        className="w-10 h-10 rounded-full flex items-center justify-center text-white text-xs font-semibold shrink-0"
+                        style={{ background: getAvatarColor(name) }}
+                      >
+                        {getInitials(name)}
+                      </div>
+                      <span className="text-[0.6rem] text-center leading-tight truncate w-full" style={{ color: '#2a2f1e' }}>
+                        {name.split(' ')[0]}
+                      </span>
+                    </div>
+                  ))}
+                  {detail.attendees.length > 8 && (
+                    <div className="flex flex-col items-center gap-1 w-14">
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center text-xs font-semibold" style={{ background: '#d4e157', color: '#2a2f1e' }}>
+                        +{detail.attendees.length - 8}
+                      </div>
+                      <span className="text-[0.6rem] text-center" style={{ color: '#6b7266' }}>more</span>
+                    </div>
+                  )}
+                  {detail.attendees.length === 0 && (
+                    <p className="text-xs" style={{ color: '#6b7266' }}>No attendees yet — be the first!</p>
+                  )}
+                </div>
+              </div>
+
+              {/* RSVP buttons — dual for interclub, single for others */}
+              {isInterclub ? (
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => {
+                      if (!isAttending) {
+                        toggleRsvp(detail.id, currentUser?.name || '');
+                        showToast("You're confirmed! See you there");
+                      }
+                    }}
+                    className="flex-1 py-3 rounded-xl text-sm font-medium transition-all flex items-center justify-center gap-2"
+                    style={{
+                      background: isAttending ? '#6b7a3d' : 'rgba(107, 122, 61, 0.1)',
+                      color: isAttending ? '#fff' : '#6b7a3d',
+                      border: isAttending ? '2px solid #6b7a3d' : '2px solid transparent',
+                    }}
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>
+                    {isAttending ? "I'm In!" : 'Count Me In'}
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (isAttending) {
+                        toggleRsvp(detail.id, currentUser?.name || '');
+                        showToast("No problem — we'll miss you!");
+                      } else {
+                        showToast("No problem — we'll miss you!");
+                        setSelectedEvent(null);
+                      }
+                    }}
+                    className="flex-1 py-3 rounded-xl text-sm font-medium transition-all flex items-center justify-center gap-2"
+                    style={{
+                      background: 'rgba(239, 68, 68, 0.06)',
+                      color: '#ef4444',
+                      border: '2px solid transparent',
+                    }}
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    Can&apos;t Make It
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => {
+                    toggleRsvp(detail.id, currentUser?.name || '');
+                    showToast(isAttending ? 'RSVP cancelled' : `RSVP'd to ${detail.title}`);
+                  }}
+                  className="w-full py-3 rounded-xl text-sm font-medium transition-colors"
+                  style={{
+                    background: isAttending ? '#ef4444' : '#6b7a3d',
+                    color: '#fff',
+                  }}
+                >
+                  {isAttending ? 'Cancel RSVP' : 'RSVP to Event'}
+                </button>
+              )}
+            </div>
           </div>
         </div>
-      )}
+        );
+      })()}
     </div>
   );
 }
