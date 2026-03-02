@@ -137,7 +137,7 @@ export default function CoachingTab() {
               </p>
             </div>
             <p className="text-xs mt-4" style={{ color: '#999' }}>
-              Summer Tennis Camp: July 28 – August 1. Contact Suzanne Taylor to register.
+              Summer camp dates coming soon — pros confirming availability.
             </p>
           </div>
         </div>

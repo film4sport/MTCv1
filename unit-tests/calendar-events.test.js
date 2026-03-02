@@ -7,11 +7,6 @@ const specialEvents = [
   { date: '2026-05-09', title: 'Opening Day BBQ & Meet the Pros', time: '1:00 - 3:00 PM', type: 'special' },
   { date: '2026-07-26', title: '95+ Mixed Doubles Tournament (Day 1)', time: 'All Day', type: 'tournament' },
   { date: '2026-07-27', title: '95+ Mixed Doubles Tournament (Day 2)', time: 'All Day', type: 'tournament' },
-  { date: '2026-07-28', title: 'Summer Tennis Camp (Day 1)', time: '8:30 AM - 3:30 PM', type: 'camp' },
-  { date: '2026-07-29', title: 'Summer Tennis Camp (Day 2)', time: '8:30 AM - 3:30 PM', type: 'camp' },
-  { date: '2026-07-30', title: 'Summer Tennis Camp (Day 3)', time: '8:30 AM - 3:30 PM', type: 'camp' },
-  { date: '2026-07-31', title: 'Summer Tennis Camp (Day 4)', time: '8:30 AM - 3:30 PM', type: 'camp' },
-  { date: '2026-08-01', title: 'Summer Tennis Camp (Day 5)', time: '8:30 AM - 3:30 PM', type: 'camp' },
 ];
 
 const recurringEvents = [
@@ -75,13 +70,13 @@ describe('Calendar Events', () => {
     expect(day2.some((e) => e.type === 'tournament')).toBe(true);
   });
 
-  it('should return camp events for all 5 days', () => {
+  it('should not have camp events on calendar (dates TBC)', () => {
     for (let day = 28; day <= 31; day++) {
       const events = getEventsForDate(2026, 6, day); // July 28-31
-      expect(events.some((e) => e.type === 'camp')).toBe(true);
+      expect(events.some((e) => e.type === 'camp')).toBe(false);
     }
     const aug1 = getEventsForDate(2026, 7, 1); // Aug 1
-    expect(aug1.some((e) => e.type === 'camp')).toBe(true);
+    expect(aug1.some((e) => e.type === 'camp')).toBe(false);
   });
 
   it('special event dates should have correct format', () => {

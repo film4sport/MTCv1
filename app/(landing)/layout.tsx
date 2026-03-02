@@ -201,18 +201,6 @@ const jsonLd = {
       },
     },
     {
-      '@type': 'SportsEvent',
-      name: 'Summer Tennis Camp',
-      description: '8:30am - 3:30pm daily. Make memories, build skills, gain confidence and have fun! Perfect for young players.',
-      startDate: '2026-07-28',
-      endDate: '2026-08-01',
-      location: { '@id': `${SITE_URL}/#organization` },
-      sport: 'Tennis',
-      eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
-      eventStatus: 'https://schema.org/EventScheduled',
-      organizer: { '@id': `${SITE_URL}/#organization` },
-    },
-    {
       '@type': 'Event',
       name: 'Euchre Tournament',
       description: 'Pre-season Euchre tournament at Mono Tennis Club. Open to members and guests. Prizes for top teams.',
