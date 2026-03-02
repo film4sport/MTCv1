@@ -88,7 +88,7 @@ export default function AboutTab() {
               <div>
                 <h4 className="font-bold text-lg mb-1" style={{ color: '#2a2f1e' }}>Location</h4>
                 <address className="not-italic text-sm leading-relaxed" style={{ color: '#6b7266' }}>
-                  754883 Mono Centre Road, Mono, Ontario, L9W 6S3
+                  754483 Mono Centre Rd, Mono, Ontario, L9W 5W9
                 </address>
               </div>
             </div>

@@ -603,9 +603,20 @@
           <div class="events-title">UPCOMING EVENTS</div>
           <div class="events-see-all" onclick="navigateTo('events')">See All →</div>
         </div>
+        <div class="event-item event-item-wrap" id="homeEvent-euchre" onclick="showRsvpListModal('euchre')" style="cursor:pointer;">
+          <div class="event-date-box">
+            <div class="event-date-month" data-home-event-month="euchre">MAR</div>
+            <div class="event-date-day" data-home-event-day="euchre">14</div>
+          </div>
+          <div class="event-info event-info-flex">
+            <div class="event-name">Euchre Tournament</div>
+            <div class="event-details">Saturday Evening • Clubhouse</div>
+          </div>
+          <button class="event-rsvp-btn" aria-label="RSVP to event" onclick="event.stopPropagation(); rsvpToEvent('euchre', this)">RSVP</button>
+        </div>
         <div class="event-item event-item-wrap" id="homeEvent-bbq" onclick="showRsvpListModal('bbq')" style="cursor:pointer;">
           <div class="event-date-box">
-            <div class="event-date-month" data-home-event-month="bbq">May</div>
+            <div class="event-date-month" data-home-event-month="bbq">MAY</div>
             <div class="event-date-day" data-home-event-day="bbq">9</div>
           </div>
           <div class="event-info event-info-flex">

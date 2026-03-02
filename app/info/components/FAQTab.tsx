@@ -94,8 +94,8 @@ export default function FaqTab() {
             </div>
             <div className="mt-4 p-4 rounded-xl" style={{ backgroundColor: 'rgba(107, 122, 61, 0.1)' }}>
               <p className="text-sm" style={{ color: '#555' }}>
-                <strong style={{ color: '#2a2f1e' }}>754883 Mono Centre Road</strong>
-                <br />Mono, Ontario L9W 6S3
+                <strong style={{ color: '#2a2f1e' }}>754483 Mono Centre Rd</strong>
+                <br />Mono, Ontario L9W 5W9
                 <br />
                 <a href="mailto:info@monotennisclub.com" className="hover:underline" style={{ color: '#6b7a3d' }}>
                   info@monotennisclub.com

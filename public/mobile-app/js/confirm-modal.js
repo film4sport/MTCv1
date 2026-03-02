@@ -227,6 +227,7 @@
       if (button.classList.contains('confirmed')) {
         // Look up event name from clubEventsData or fallback
         const eventNames = {
+          'euchre': 'Euchre Tournament',
           'bbq': 'Opening Day BBQ',
           'mensrr': "Men's Round Robin",
           'frimixed': 'Friday Night Mixed'
