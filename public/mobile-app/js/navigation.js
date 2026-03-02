@@ -27,7 +27,7 @@
       }
     }
     if (screen === 'matches') screen = 'home';
-    if (screen === 'coach') screen = 'home';
+    if (screen === 'coach') screen = 'lessons';
 
     // Show target screen
     const targetScreen = document.getElementById('screen-' + screen);

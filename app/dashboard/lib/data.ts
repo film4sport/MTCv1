@@ -179,7 +179,7 @@ export const DEFAULT_EVENTS: ClubEvent[] = [
     location: 'All Courts & Clubhouse',
     badge: 'free',
     price: 'Free',
-    description: 'Kick off the 2026 season! BBQ, music, round robin play, and meet our coaching staff. All members and families welcome.',
+    description: 'Kick off the 2026 season! BBQ, music, and meet our coaching staff including Mark Taylor. All members, families, and guests welcome.',
     attendees: ['Mike Chen', 'Sarah Wilson', 'James Park', 'Emily Rodriguez', 'Lisa Thompson'],
     type: 'social',
     instructions: ['All members and families welcome!', 'BBQ and refreshments provided', 'Casual play on all courts', 'New members meet & greet at 3 PM'],

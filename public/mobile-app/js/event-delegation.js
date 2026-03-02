@@ -181,13 +181,6 @@
     }
   });
 
-  // Register for coaching class
-  registerAction('registerForClass', function(el, data) {
-    if (typeof window.registerForClass === 'function') {
-      window.registerForClass(data.classId);
-    }
-  });
-
   // Interclub RSVP
   registerAction('rsvpInterclub', function(el, data) {
     if (typeof window.rsvpInterclub === 'function') {

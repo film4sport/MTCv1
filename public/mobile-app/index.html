@@ -498,6 +498,12 @@
             </div>
             <span class="menu-item-text">My Schedule</span>
           </div>
+          <div class="menu-item" role="button" tabindex="0" onclick="navigateTo('lessons'); closeMenu();">
+            <div class="menu-item-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+            </div>
+            <span class="menu-item-text">Lessons</span>
+          </div>
           <div class="menu-item admin-hidden" id="menuAdminItem" role="button" tabindex="0" onclick="navigateTo('admin'); closeMenu();">
             <div class="menu-item-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
@@ -1556,7 +1562,7 @@
             <h3 class="section-title">COACHING &amp; CAMPS</h3>
           </div>
 
-          <div class="event-card" onclick="showCoachRegistrationModal()" tabindex="0" role="button">
+          <div class="event-card" onclick="navigateTo('lessons')" tabindex="0" role="button">
             <div class="event-card-header">
               <div class="event-card-date event-card-date-volt">
                 <div class="event-card-month">PRO</div>
@@ -1564,13 +1570,13 @@
               </div>
               <div class="event-card-info">
                 <div class="event-card-title">Classes &amp; Summer Camps</div>
-                <div class="event-card-meta">Classes, clinics &amp; junior camps</div>
+                <div class="event-card-meta">Mark Taylor &bull; Full schedule &amp; registration</div>
               </div>
-              <div class="event-card-badge free">Register</div>
+              <div class="event-card-badge free">View</div>
             </div>
             <div class="event-card-footer-mini">
-              <span class="event-card-spots-mini">Contact Pro to register</span>
-              <span class="event-card-tap">Register →</span>
+              <span class="event-card-spots-mini">Classes, clinics &amp; junior camps</span>
+              <span class="event-card-tap">View Schedule →</span>
             </div>
           </div>
         </div>
@@ -1757,6 +1763,146 @@
     </div>
 
     <!-- ============================================
+         LESSONS SCREEN
+    ============================================ -->
+    <div class="screen" id="screen-lessons" aria-label="Lessons & Coaching">
+      <div class="screen-header">
+        <button class="back-btn" onclick="navigateTo('home')" aria-label="Go back to home">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+        <h2 class="screen-title">LESSONS</h2>
+      </div>
+
+      <div style="padding: 0 16px 100px;">
+
+        <!-- Head Pro Card -->
+        <div style="background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%); border-radius: 16px; padding: 20px; margin-bottom: 12px;">
+          <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 12px;">
+            <div style="width: 56px; height: 56px; border-radius: 50%; background: var(--volt); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 20px; color: #1a1a1a; flex-shrink: 0;">MT</div>
+            <div>
+              <div style="font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: #fff; line-height: 1.1;">Mark Taylor</div>
+              <div style="font-size: 12px; color: rgba(255,255,255,0.6);">Head Professional</div>
+            </div>
+          </div>
+          <p style="font-size: 13px; color: rgba(255,255,255,0.75); line-height: 1.5; margin-bottom: 14px;">
+            Tennis Canada certified professional. Competitive player in NCTA, OTA, FTQ tournaments and Circuit Canada Series. Competed in ITF Futures events. Trained with Bob Brett in San Remo, Italy. Coaches juniors through adults, beginner to elite level.
+          </p>
+          <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px;">
+            <span style="font-size: 10px; padding: 4px 10px; border-radius: 20px; background: rgba(200,255,0,0.15); color: var(--volt);">Tennis Instructor (2007)</span>
+            <span style="font-size: 10px; padding: 4px 10px; border-radius: 20px; background: rgba(200,255,0,0.15); color: var(--volt);">Club Professional 1</span>
+            <span style="font-size: 10px; padding: 4px 10px; border-radius: 20px; background: rgba(200,255,0,0.15); color: var(--volt);">Coach 2 (2011)</span>
+            <span style="font-size: 10px; padding: 4px 10px; border-radius: 20px; background: rgba(200,255,0,0.15); color: var(--volt);">TPA Member</span>
+          </div>
+          <a href="mailto:Taylor.mark.tennis@gmail.com" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 12px; background: var(--volt); color: #1a1a1a; font-weight: 700; font-size: 13px; text-decoration: none;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+            Contact Mark
+          </a>
+        </div>
+
+        <!-- Assistant Coach Card -->
+        <div style="background: var(--bg-secondary); border-radius: 16px; padding: 20px; margin-bottom: 20px;">
+          <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 12px;">
+            <div style="width: 48px; height: 48px; border-radius: 50%; background: #6366F1; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; color: #fff; flex-shrink: 0;">AS</div>
+            <div>
+              <div style="font-weight: 700; font-size: 16px; color: var(--text-primary);">Adrian Shelley</div>
+              <div style="font-size: 12px; color: var(--text-muted);">Coach</div>
+            </div>
+          </div>
+          <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
+            Over 40 years of experience as a player, instructor, and coach. Provincially ranked junior, competed nationally, and played varsity tennis at Brock University. Coached high school tennis at North Park S.S. for 23+ years, advancing his team to OFSAA 5 times. Focus on helping players of all abilities improve their skills, fitness, and enjoyment of the game.
+          </p>
+        </div>
+
+        <!-- Class Schedule -->
+        <div class="section-header">
+          <h3 class="section-title">CLASS SCHEDULE</h3>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
+          <div style="background: var(--bg-secondary); border-radius: 14px; padding: 14px;">
+            <div style="font-weight: 700; font-size: 13px; color: var(--volt); margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+              <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--volt);"></span>
+              Monday
+            </div>
+            <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.8;">
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Live Ball</span><span>9:30–11 AM</span></div>
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Team Practice</span><span>11 AM–1 PM</span></div>
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Teen</span><span>5–6 PM</span></div>
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Live Ball</span><span>6–7:30 PM</span></div>
+            </div>
+          </div>
+          <div style="background: var(--bg-secondary); border-radius: 14px; padding: 14px;">
+            <div style="font-weight: 700; font-size: 13px; color: var(--volt); margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+              <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--volt);"></span>
+              Tuesday
+            </div>
+            <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.8;">
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Orange</span><span>4–5 PM</span></div>
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Green</span><span>5–6 PM</span></div>
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Teen</span><span>6–7 PM</span></div>
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Live Ball</span><span>7–8:30 PM</span></div>
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Adult</span><span>8:30–9:30 PM</span></div>
+            </div>
+          </div>
+          <div style="background: var(--bg-secondary); border-radius: 14px; padding: 14px;">
+            <div style="font-weight: 700; font-size: 13px; color: var(--volt); margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+              <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--volt);"></span>
+              Thursday
+            </div>
+            <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.8;">
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Munchkin</span><span>4:30–5 PM</span></div>
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Red Ball</span><span>5–6 PM</span></div>
+            </div>
+          </div>
+          <div style="background: var(--bg-secondary); border-radius: 14px; padding: 14px;">
+            <div style="font-weight: 700; font-size: 13px; color: var(--volt); margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+              <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--volt);"></span>
+              Friday
+            </div>
+            <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.8;">
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Teen</span><span>4:30–5:30 PM</span></div>
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Live Ball</span><span>5:30–7 PM</span></div>
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">House League</span><span>7–9 PM</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Summer Camps -->
+        <div class="section-header">
+          <h3 class="section-title">SUMMER CAMPS</h3>
+        </div>
+
+        <div style="background: var(--bg-secondary); border-radius: 14px; padding: 16px; margin-bottom: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+            <div>
+              <div style="font-weight: 700; font-size: 15px; color: var(--text-primary);">Summer Tennis Camp</div>
+              <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Ages 6-14 &bull; Jul 28 – Aug 1</div>
+            </div>
+            <div style="font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--volt); white-space: nowrap;">5 DAYS</div>
+          </div>
+          <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.4; margin-bottom: 10px;">8:30 AM – 3:30 PM daily. Instruction, drills, and match play for all ages and levels. Spots fill up fast!</p>
+          <a href="mailto:Taylor.suzanne.tennis@gmail.com?subject=Summer%20Tennis%20Camp%20Registration" class="modal-btn ripple" style="font-size: 13px; padding: 10px; text-decoration: none; display: block; text-align: center;">EMAIL TO REGISTER →</a>
+        </div>
+
+        <!-- Sign Up & Contact -->
+        <div style="background: linear-gradient(135deg, rgba(200,255,0,0.08), rgba(200,255,0,0.02)); border: 1px solid rgba(200,255,0,0.15); border-radius: 14px; padding: 16px; margin-bottom: 12px;">
+          <div style="font-weight: 700; font-size: 14px; color: var(--text-primary); margin-bottom: 10px;">Sign Up & Contact</div>
+          <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 8px;">
+            To sign up for classes or camps, email
+            <a href="mailto:Taylor.suzanne.tennis@gmail.com" style="color: var(--volt); font-weight: 600; text-decoration: none;">Suzanne Taylor</a>
+            at <a href="mailto:Taylor.suzanne.tennis@gmail.com" style="color: var(--volt); text-decoration: none;">Taylor.suzanne.tennis@gmail.com</a>
+          </p>
+          <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;">
+            Head Pro:
+            <a href="mailto:Taylor.mark.tennis@gmail.com" style="color: var(--volt); font-weight: 600; text-decoration: none;">Mark Taylor</a>
+            at <a href="mailto:Taylor.mark.tennis@gmail.com" style="color: var(--volt); text-decoration: none;">Taylor.mark.tennis@gmail.com</a>
+          </p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ============================================
          SETTINGS SCREEN
     ============================================ -->
     <div class="screen" id="screen-settings" aria-label="Settings">
@@ -1864,22 +2010,6 @@
           </div>
         </div>
         
-        <div class="section-header admin-section-header">
-          <h3 class="section-title">COACHING — CLASS REGISTRATIONS</h3>
-        </div>
-
-        <div id="adminClassRegistrations" class="settings-group">
-          <div class="admin-empty-state">Loading class data...</div>
-        </div>
-
-        <div class="section-header admin-section-header">
-          <h3 class="section-title">COACH NOTIFICATIONS</h3>
-        </div>
-
-        <div id="adminCoachNotifications" class="settings-group">
-          <div class="admin-empty-state">No notifications</div>
-        </div>
-
         <div class="admin-info-box">
           <div class="admin-info-text">
             <svg class="admin-info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
