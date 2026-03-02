@@ -371,7 +371,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
         });
       }
     }
-  }, []);
+    // Send booking confirmation email + .ics (fire and forget)
+    if (currentUser?.email && booking.type === 'court') {
+      fetch('/api/booking-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: currentUser.email,
+          userName: currentUser.name,
+          courtName: booking.courtName,
+          date: booking.date,
+          time: booking.time,
+          duration: booking.duration,
+          matchType: booking.matchType,
+          participants: booking.participants,
+        }),
+      }).catch(() => { /* email is best-effort */ });
+    }
+  }, [currentUser]);
 
   const cancelBooking = useCallback((id: string) => {
     // Read current booking before state update to avoid setState-inside-setState
@@ -528,7 +545,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setPartners(prev => prev.filter(p => p.id !== partner.id));
       showToast('Failed to post partner request. Please try again.', 'error');
     });
-  }, []);
+    // Create notification for the partner request poster
+    if (currentUser) {
+      const notif: Notification = {
+        id: generateId('n'),
+        type: 'partner',
+        title: 'Partner Request Posted',
+        body: `Looking for ${partner.matchType === 'any' ? 'any match type' : partner.matchType} on ${partner.date} at ${partner.time}.`,
+        timestamp: new Date().toISOString(),
+        read: false,
+      };
+      setNotifications(prev => [notif, ...prev]);
+      db.createNotification(currentUser.id, notif).catch(err => reportError(err, 'Supabase'));
+    }
+  }, [currentUser]);
 
   const removePartner = useCallback((partnerId: string) => {
     const removed = partners.find(p => p.id === partnerId);
@@ -547,6 +577,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const updated = prev.map(e => {
         if (e.id !== eventId) return e;
         const attending = e.attendees.includes(userName);
+        // Create notification when RSVPing (not when un-RSVPing)
+        if (!attending && currentUser) {
+          const notif: Notification = {
+            id: generateId('n'),
+            type: 'event',
+            title: `RSVP Confirmed — ${e.title}`,
+            body: `${e.date} at ${e.time}, ${e.location}. ${(e.spotsTaken ?? 0) + 1} members going.`,
+            timestamp: new Date().toISOString(),
+            read: false,
+          };
+          setNotifications(p => [notif, ...p]);
+          db.createNotification(currentUser.id, notif).catch(err => reportError(err, 'Supabase'));
+        }
         return {
           ...e,
           attendees: attending ? e.attendees.filter(a => a !== userName) : [...e.attendees, userName],
@@ -561,7 +604,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       });
       return updated;
     });
-  }, []);
+  }, [currentUser]);
 
   const sendMessage = useCallback((toId: string, text: string) => {
     if (!currentUser) return;

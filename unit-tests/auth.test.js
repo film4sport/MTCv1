@@ -158,17 +158,24 @@ describe('auth — getCurrentUser', () => {
   });
 });
 
-// ─── resetPassword ──────────────────────────────────────────
+// ─── resetPassword (calls /api/reset-password) ─────────────
 
 describe('auth — resetPassword', () => {
   it('returns null on success', async () => {
-    mockResetPasswordForEmail.mockResolvedValueOnce({ error: null });
+    global.fetch = vi.fn().mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve({ success: true }),
+    });
     const result = await auth.resetPassword('a@b.com');
     expect(result).toBeNull();
+    expect(global.fetch).toHaveBeenCalledWith('/api/reset-password', expect.objectContaining({ method: 'POST' }));
   });
 
   it('returns error message on failure', async () => {
-    mockResetPasswordForEmail.mockResolvedValueOnce({ error: { message: 'Rate limited' } });
+    global.fetch = vi.fn().mockResolvedValueOnce({
+      ok: false,
+      json: () => Promise.resolve({ error: 'Rate limited' }),
+    });
     const result = await auth.resetPassword('a@b.com');
     expect(result).toBe('Rate limited');
   });

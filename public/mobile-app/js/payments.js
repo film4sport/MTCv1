@@ -391,8 +391,8 @@
           html += '  <div class="booking-card-footer">';
           html += '    <span class="booking-ref">' + b.id + '</span>';
           html += '    <div class="booking-card-actions">';
-          html += '      <button class="booking-action-btn modify" onclick="showModifyModal(\'' + b.id + '\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>Modify</button>';
-          html += '      <button class="booking-action-btn cancel" onclick="showCancelModal(\'' + b.id + '\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>Cancel</button>';
+          html += '      <button class="booking-action-btn modify" data-action="showModifyModal" data-booking-id="' + b.id + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>Modify</button>';
+          html += '      <button class="booking-action-btn cancel" data-action="showCancelModal" data-booking-id="' + b.id + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>Cancel</button>';
           html += '    </div>';
           html += '  </div>';
           html += '</div>';
@@ -764,19 +764,19 @@
       html += '    <div class="payment-member-balance ' + balanceClass + '">' + balanceText + '</div>';
       html += '  </div>';
       html += '  <div class="payment-member-actions">';
-      html += '    <button class="payment-action-btn mark-paid" onclick="adminMarkPaid(' + member.id + ')">';
+      html += '    <button class="payment-action-btn mark-paid" data-action="adminMarkPaid" data-member-id="' + member.id + '">';
       html += '      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="20 6 9 17 4 12"></polyline></svg>Mark Paid';
       html += '    </button>';
       if (member.flagged) {
-        html += '    <button class="payment-action-btn unflag" onclick="adminUnflagMember(' + member.id + ')">';
+        html += '    <button class="payment-action-btn unflag" data-action="adminUnflagMember" data-member-id="' + member.id + '">';
         html += '      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M18.36 5.64a9 9 0 11-12.73 0"></path><line x1="12" y1="2" x2="12" y2="12"></line></svg>Unblock';
         html += '    </button>';
       } else if (member.tab >= TAB_WARNING_THRESHOLD) {
-        html += '    <button class="payment-action-btn flag" onclick="adminFlagMember(' + member.id + ')">';
+        html += '    <button class="payment-action-btn flag" data-action="adminFlagMember" data-member-id="' + member.id + '">';
         html += '      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" y1="22" x2="4" y2="15"></line></svg>Block';
         html += '    </button>';
       }
-      html += '    <button class="payment-action-btn" onclick="adminSendReminder(' + member.id + ')" style="color: var(--text-secondary);">';
+      html += '    <button class="payment-action-btn" data-action="adminSendReminder" data-member-id="' + member.id + '" style="color: var(--text-secondary);">';
       html += '      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>Remind';
       html += '    </button>';
       html += '  </div>';

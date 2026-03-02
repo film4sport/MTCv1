@@ -1,0 +1,101 @@
+import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+
+const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || '';
+const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY || '';
+const VAPID_EMAIL = process.env.VAPID_EMAIL || 'mailto:admin@monotennisclub.ca';
+
+// Rate limit: 50 pushes per minute globally
+let pushCount = 0;
+let pushResetAt = Date.now() + 60000;
+
+export async function POST(request: Request) {
+  try {
+    const body = await request.json();
+    const { userId, title, body: messageBody, icon, url, tag } = body;
+
+    if (!userId || !title) {
+      return NextResponse.json({ error: 'Missing userId or title' }, { status: 400 });
+    }
+
+    // Rate limit
+    const now = Date.now();
+    if (now > pushResetAt) { pushCount = 0; pushResetAt = now + 60000; }
+    if (++pushCount > 50) {
+      return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
+    }
+
+    if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
+      return NextResponse.json({ error: 'VAPID keys not configured. Run: npx web-push generate-vapid-keys' }, { status: 500 });
+    }
+
+    // Get user's push subscriptions from Supabase
+    const supabase = createClient(supabaseUrl, supabaseKey);
+    const { data: subscriptions, error } = await supabase
+      .from('push_subscriptions')
+      .select('endpoint, p256dh, auth')
+      .eq('user_id', userId);
+
+    if (error || !subscriptions?.length) {
+      return NextResponse.json({ error: 'No push subscriptions found for user' }, { status: 404 });
+    }
+
+    // Try to load web-push (requires npm install web-push)
+    let sentCount = 0;
+    let failedCount = 0;
+
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const webpush = require('web-push') as {
+        setVapidDetails: (subject: string, publicKey: string, privateKey: string) => void;
+        sendNotification: (sub: object, payload: string) => Promise<void>;
+      };
+
+      webpush.setVapidDetails(VAPID_EMAIL, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
+
+      const payload = JSON.stringify({
+        title,
+        body: messageBody || '',
+        icon: icon || '/mobile-app/icons/icon-192x192.png',
+        badge: '/mobile-app/icons/icon-72x72.png',
+        url: url || '/mobile-app/index.html',
+        tag: tag || 'mtc-notification',
+      });
+
+      const results = await Promise.allSettled(
+        subscriptions.map(sub =>
+          webpush.sendNotification(
+            { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
+            payload
+          )
+        )
+      );
+
+      results.forEach((result, i) => {
+        if (result.status === 'fulfilled') {
+          sentCount++;
+        } else {
+          failedCount++;
+          // Remove expired subscriptions (410 Gone)
+          const statusCode = (result.reason as { statusCode?: number })?.statusCode;
+          if (statusCode === 410 || statusCode === 404) {
+            supabase
+              .from('push_subscriptions')
+              .delete()
+              .eq('endpoint', subscriptions[i].endpoint)
+              .then(() => { /* cleanup */ });
+          }
+        }
+      });
+    } catch {
+      return NextResponse.json({ error: 'web-push not installed. Run: npm install web-push' }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true, sent: sentCount, failed: failedCount });
+  } catch {
+    return NextResponse.json({ error: 'Failed to send push' }, { status: 500 });
+  }
+}

@@ -303,6 +303,29 @@ export default function EventsPage() {
 
                   <p className="text-xs mb-3" style={{ color: '#6b7266' }}>{ev.location}</p>
 
+                  {/* Headcount */}
+                  {ev.spotsTotal != null && (
+                    <div className="mb-3">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-[0.65rem]" style={{ color: '#6b7266' }}>
+                          {ev.spotsTaken ?? ev.attendees.length}/{ev.spotsTotal} spots filled
+                        </span>
+                        <span className="text-[0.65rem] font-medium" style={{ color: (ev.spotsTotal - (ev.spotsTaken ?? ev.attendees.length)) <= 3 ? '#ef4444' : '#6b7a3d' }}>
+                          {ev.spotsTotal - (ev.spotsTaken ?? ev.attendees.length)} left
+                        </span>
+                      </div>
+                      <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ background: '#f0ede6' }}>
+                        <div
+                          className="h-full rounded-full transition-all duration-500"
+                          style={{
+                            width: `${Math.min(100, ((ev.spotsTaken ?? ev.attendees.length) / ev.spotsTotal) * 100)}%`,
+                            background: ((ev.spotsTaken ?? ev.attendees.length) / ev.spotsTotal) > 0.8 ? '#ef4444' : '#6b7a3d',
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )}
+
                   <div className="flex items-center justify-between">
                     <span className="text-[0.65rem] px-2 py-0.5 rounded-full" style={{ background: '#f5f2eb', color: '#6b7266' }}>
                       {typeLabels[ev.type] || ev.type}
@@ -639,9 +662,32 @@ export default function EventsPage() {
               <p className="text-sm" style={{ color: '#2a2f1e' }}>{detail.description}</p>
             </div>
 
+            {/* Headcount in modal */}
+            {detail.spotsTotal != null && (
+              <div className="mb-4 p-3 rounded-xl" style={{ background: '#faf8f3' }}>
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-xs font-medium" style={{ color: '#2a2f1e' }}>
+                    {detail.spotsTaken ?? detail.attendees.length} / {detail.spotsTotal} going
+                  </span>
+                  <span className="text-xs" style={{ color: (detail.spotsTotal - (detail.spotsTaken ?? detail.attendees.length)) <= 3 ? '#ef4444' : '#6b7266' }}>
+                    {detail.spotsTotal - (detail.spotsTaken ?? detail.attendees.length)} spots left
+                  </span>
+                </div>
+                <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: '#e0dcd3' }}>
+                  <div
+                    className="h-full rounded-full transition-all duration-500"
+                    style={{
+                      width: `${Math.min(100, ((detail.spotsTaken ?? detail.attendees.length) / detail.spotsTotal) * 100)}%`,
+                      background: ((detail.spotsTaken ?? detail.attendees.length) / detail.spotsTotal) > 0.8 ? '#ef4444' : '#6b7a3d',
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+
             <div className="mb-6">
               <p className="text-sm font-medium mb-2" style={{ color: '#2a2f1e' }}>
-                Attendees
+                Attendees ({detail.attendees.length})
               </p>
               <div className="flex flex-wrap gap-2">
                 {detail.attendees.map(name => (

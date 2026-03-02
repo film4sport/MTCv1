@@ -159,7 +159,7 @@
         '<div style="display: flex; flex-direction: column; gap: 10px; margin: 16px 0;">' +
           '<button class="modal-btn ripple" style="background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border-color);" onclick="closeAdminModal(\'adminModifyModal\', function() { showToast(\'Select new time on booking calendar\'); navigateTo(\'book\'); })">Change Time</button>' +
           '<button class="modal-btn ripple" style="background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border-color);" onclick="closeAdminModal(\'adminModifyModal\', function() { showToast(\'Select new court on booking calendar\'); navigateTo(\'book\'); })">Change Court</button>' +
-          '<button class="modal-btn ripple" style="background: var(--coral); color: #fff;" onclick="closeAdminModal(\'adminModifyModal\', function() { adminCancelBooking(\'' + sanitizeHTML(id) + '\'); })">Cancel Booking</button>' +
+          '<button class="modal-btn ripple" style="background: var(--coral); color: #fff;" onclick="closeAdminModal(\'adminModifyModal\', function() { adminCancelBooking(\'' + sanitizeHTML(id).replace(/'/g, '&#039;') + '\'); })">Cancel Booking</button>' +
         '</div>' +
         '<button class="modal-btn ripple" style="background: transparent; color: var(--text-muted);" onclick="closeAdminModal(\'adminModifyModal\')">CLOSE</button>' +
       '</div>';
@@ -684,7 +684,7 @@
           '<div class="task-name">' + sanitizeHTML(task.name) + '</div>' +
           '<div class="task-status">Needs Volunteer</div>' +
         '</div>' +
-        '<button class="task-action-btn assign" onclick="showAssignTaskModal(\'' + sanitizeHTML(eventId) + '\', \'' + sanitizeHTML(task.id) + '\', \'' + sanitizeHTML(task.name) + '\')">Assign</button>' +
+        '<button class="task-action-btn assign" data-action="showAssignTaskModal" data-event-id="' + sanitizeHTML(eventId) + '" data-task-id="' + sanitizeHTML(task.id) + '" data-task-name="' + sanitizeHTML(task.name) + '">Assign</button>' +
       '</div>';
     }).join('');
 
@@ -695,7 +695,7 @@
           '<div class="task-name">' + sanitizeHTML(task.name) + '</div>' +
           '<div class="task-assignee">' + sanitizeHTML(task.assigned) + '</div>' +
         '</div>' +
-        '<button class="task-action-btn assigned" onclick="showReassignTaskModal(\'' + sanitizeHTML(eventId) + '\', \'' + sanitizeHTML(task.id) + '\', \'' + sanitizeHTML(task.name) + '\', \'' + sanitizeHTML(task.assigned) + '\')">Change</button>' +
+        '<button class="task-action-btn assigned" data-action="showReassignTaskModal" data-event-id="' + sanitizeHTML(eventId) + '" data-task-id="' + sanitizeHTML(task.id) + '" data-task-name="' + sanitizeHTML(task.name) + '" data-assigned="' + sanitizeHTML(task.assigned) + '">Change</button>' +
       '</div>';
     }).join('');
 
@@ -735,7 +735,7 @@
             '</div>'
           : '') +
 
-          '<button onclick="showAddTaskModal(\'' + sanitizeHTML(eventId) + '\')" style="width: 100%; padding: 14px; border-radius: 12px; border: 2px dashed var(--border-color); background: transparent; color: var(--text-muted); font-size: 14px; font-weight: 600; cursor: pointer; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; gap: 8px;">' +
+          '<button data-action="showAddTaskModal" data-event-id="' + sanitizeHTML(eventId) + '" style="width: 100%; padding: 14px; border-radius: 12px; border: 2px dashed var(--border-color); background: transparent; color: var(--text-muted); font-size: 14px; font-weight: 600; cursor: pointer; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; gap: 8px;">' +
             '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>' +
             'Add New Task' +
           '</button>' +
@@ -764,7 +764,7 @@
     ];
 
     const membersHtml = members.map(function(m) {
-      return '<div class="admin-list-item" onclick="assignTask(\'' + sanitizeHTML(eventId) + '\', \'' + sanitizeHTML(taskId) + '\', \'' + sanitizeHTML(m) + '\')" style="cursor: pointer; margin-bottom: 8px;">' +
+      return '<div class="admin-list-item" data-action="assignTask" data-event-id="' + sanitizeHTML(eventId) + '" data-task-id="' + sanitizeHTML(taskId) + '" data-member="' + sanitizeHTML(m) + '" style="cursor: pointer; margin-bottom: 8px;">' +
         '<span style="width: 36px; height: 36px;">' + getAvatar(m) + '</span>' +
         '<div class="admin-list-info">' +
           '<div class="admin-list-name">' + sanitizeHTML(m) + '</div>' +
@@ -836,7 +836,7 @@
     ];
 
     const tasksHtml = taskTypes.map(function(t) {
-      return '<div class="task-item" onclick="addTaskToEvent(\'' + sanitizeHTML(eventId) + '\', \'' + sanitizeHTML(t.name) + '\', \'' + sanitizeHTML(t.icon) + '\', \'' + sanitizeHTML(t.iconClass) + '\')" style="cursor: pointer;">' +
+      return '<div class="task-item" data-action="addTaskToEvent" data-event-id="' + sanitizeHTML(eventId) + '" data-task-name="' + sanitizeHTML(t.name) + '" data-icon="' + sanitizeHTML(t.icon) + '" data-icon-class="' + sanitizeHTML(t.iconClass) + '" style="cursor: pointer;">' +
         '<div class="task-icon ' + t.iconClass + '">' + t.icon + '</div>' +
         '<div class="task-info">' +
           '<div class="task-name">' + sanitizeHTML(t.name) + '</div>' +

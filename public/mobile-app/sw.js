@@ -1,5 +1,5 @@
 // MTC Court Service Worker v48 (monorepo edition — served from /mobile-app/)
-const CACHE_NAME = 'mtc-court-8ef38afa';
+const CACHE_NAME = 'mtc-court-3db48868';
 const OFFLINE_URL = '/mobile-app/offline.html';
 
 // Assets to cache immediately on install (bundles built by scripts/build-mobile.js)
@@ -17,7 +17,7 @@ const PRECACHE_ASSETS = [
 
 // Install event - cache core assets
 self.addEventListener('install', (event) => {
-  console.log('[ServiceWorker] Installing mtc-court-8ef38afa...');
+  console.log('[ServiceWorker] Installing mtc-court-3db48868...');
 
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -34,7 +34,7 @@ self.addEventListener('install', (event) => {
 
 // Activate event - clean up ALL old caches
 self.addEventListener('activate', (event) => {
-  console.log('[ServiceWorker] Activating mtc-court-8ef38afa...');
+  console.log('[ServiceWorker] Activating mtc-court-3db48868...');
 
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -110,37 +110,96 @@ self.addEventListener('fetch', (event) => {
 self.addEventListener('sync', (event) => {
   if (event.tag === 'sync-bookings') {
     console.log('[ServiceWorker] Syncing bookings...');
+    event.waitUntil(syncPendingBookings());
+  }
+  if (event.tag === 'sync-messages') {
+    console.log('[ServiceWorker] Syncing messages...');
+    event.waitUntil(syncPendingMessages());
   }
 });
 
-// Push notifications
+// Sync pending bookings from IndexedDB/localStorage queue
+async function syncPendingBookings() {
+  try {
+    const allClients = await self.clients.matchAll();
+    // Notify the app to flush its pending booking queue
+    allClients.forEach((client) => {
+      client.postMessage({ type: 'SYNC_BOOKINGS' });
+    });
+  } catch (e) {
+    console.warn('[ServiceWorker] Booking sync failed:', e);
+  }
+}
+
+// Sync pending messages
+async function syncPendingMessages() {
+  try {
+    const allClients = await self.clients.matchAll();
+    allClients.forEach((client) => {
+      client.postMessage({ type: 'SYNC_MESSAGES' });
+    });
+  } catch (e) {
+    console.warn('[ServiceWorker] Message sync failed:', e);
+  }
+}
+
+// Push notifications — parse JSON payload for rich notifications
 self.addEventListener('push', (event) => {
-  const options = {
-    body: event.data ? event.data.text() : 'New notification from MTC Court',
+  let title = 'MTC Court';
+  let options = {
+    body: 'New notification',
     icon: '/mobile-app/icon-192.png',
     badge: '/mobile-app/badge-72.png',
-    data: {
-      dateOfArrival: Date.now(),
-      primaryKey: 1
-    },
+    data: { url: '/mobile-app/' },
     actions: [
       { action: 'view', title: 'View' },
       { action: 'close', title: 'Close' }
     ]
   };
 
+  if (event.data) {
+    try {
+      const payload = event.data.json();
+      title = payload.title || title;
+      options.body = payload.body || options.body;
+      if (payload.url) options.data.url = payload.url;
+      if (payload.tag) options.tag = payload.tag; // collapse duplicate notifications
+    } catch {
+      // Not JSON — use raw text
+      options.body = event.data.text();
+    }
+  }
+
   event.waitUntil(
-    self.registration.showNotification('MTC Court', options)
+    self.registration.showNotification(title, options)
   );
 });
 
-// Handle notification click
+// Handle notification click — open app to the right screen
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
-  if (event.action === 'view') {
-    event.waitUntil(
-      clients.openWindow('/mobile-app/')
-    );
+  const url = (event.notification.data && event.notification.data.url) || '/mobile-app/';
+
+  if (event.action === 'close') return;
+
+  // Focus existing window or open new one
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      for (const client of clientList) {
+        if (client.url.includes('/mobile-app/') && 'focus' in client) {
+          client.postMessage({ type: 'NAVIGATE', url: url });
+          return client.focus();
+        }
+      }
+      return self.clients.openWindow(url);
+    })
+  );
+});
+
+// Listen for messages from the app
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
   }
 });

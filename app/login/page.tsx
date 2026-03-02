@@ -33,10 +33,13 @@ function LoginContent() {
   const [resetUpdateLoading, setResetUpdateLoading] = useState(false);
   const [resetSuccess, setResetSuccess] = useState(false);
 
-  // Detect recovery mode from URL
+  // Detect recovery mode or error from URL
   useEffect(() => {
     if (searchParams.get('reset') === 'true') {
       setResetMode(true);
+    }
+    if (searchParams.get('error') === 'expired_link') {
+      setLoginError('Your reset link has expired. Please request a new one.');
     }
   }, [searchParams]);
 
@@ -44,9 +47,9 @@ function LoginContent() {
   useEffect(() => {
     try {
       const saved = localStorage.getItem('mtc-remember-email');
-      const savedPwd = localStorage.getItem('mtc-remember-pwd');
       if (saved) { setEmail(saved); setRememberMe(true); }
-      if (savedPwd) { setPassword(atob(savedPwd)); }
+      // Clean up legacy password storage (never store passwords client-side)
+      localStorage.removeItem('mtc-remember-pwd');
     } catch { /* ignore */ }
   }, []);
 
@@ -70,7 +73,15 @@ function LoginContent() {
   const [resetSent, setResetSent] = useState(false);
   const [resetError, setResetError] = useState('');
   const [resetLoading, setResetLoading] = useState(false);
+  const [resetCooldown, setResetCooldown] = useState(0);
   const modalRef = useRef<HTMLDivElement>(null);
+
+  // Cooldown timer for password reset rate limiting
+  useEffect(() => {
+    if (resetCooldown <= 0) return;
+    const timer = setTimeout(() => setResetCooldown(c => c - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [resetCooldown]);
 
   // Focus trap for forgot password modal
   useEffect(() => {
@@ -106,8 +117,9 @@ function LoginContent() {
     if (!valid) return;
 
     setLoading(true);
+    setLoginError('');
 
-    const user = await signIn(email, password);
+    const user = await signIn(email.trim().toLowerCase(), password);
     if (!user) {
       setLoginError('Invalid email or password');
       setPasswordError(true);
@@ -118,14 +130,13 @@ function LoginContent() {
     // Cache user in localStorage for instant hydration
     localStorage.setItem('mtc-current-user', JSON.stringify(user));
 
-    // Remember credentials if checked
+    // Remember email only if checked (never store passwords client-side)
     if (rememberMe) {
-      localStorage.setItem('mtc-remember-email', email);
-      localStorage.setItem('mtc-remember-pwd', btoa(password));
+      localStorage.setItem('mtc-remember-email', email.trim().toLowerCase());
     } else {
       localStorage.removeItem('mtc-remember-email');
-      localStorage.removeItem('mtc-remember-pwd');
     }
+    localStorage.removeItem('mtc-remember-pwd'); // Clean up legacy password storage
 
     setTimeout(() => {
       router.push('/dashboard');
@@ -537,6 +548,7 @@ function LoginContent() {
                         onChange={(e) => { setNewPassword(e.target.value); setResetUpdateError(''); }}
                         placeholder="Min. 8 chars, uppercase, lowercase & number"
                         maxLength={128}
+                        autoComplete="new-password"
                         className="w-full px-5 py-4 pr-12 rounded-xl text-base transition-all focus:outline-none"
                         style={{ background: '#fff', border: '1px solid #e0dcd3', color: '#2a2f1e' }}
                         onFocus={(e) => { e.currentTarget.style.borderColor = '#6b7a3d'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(107,122,61,0.15)'; }}
@@ -560,6 +572,7 @@ function LoginContent() {
                         onChange={(e) => { setConfirmNewPassword(e.target.value); setResetUpdateError(''); }}
                         placeholder="Re-enter your new password"
                         maxLength={128}
+                        autoComplete="new-password"
                         className="w-full px-5 py-4 pr-12 rounded-xl text-base transition-all focus:outline-none"
                         style={{
                           background: '#fff',
@@ -774,12 +787,13 @@ function LoginContent() {
                       </button>
                       <button
                         type="button"
-                        disabled={resetLoading}
+                        disabled={resetLoading || resetCooldown > 0}
                         onClick={async () => {
                           if (!resetEmail || !emailRegex.test(resetEmail)) {
                             setResetError('Please enter a valid email');
                             return;
                           }
+                          if (resetCooldown > 0) return;
                           setResetLoading(true);
                           const err = await resetPassword(resetEmail);
                           setResetLoading(false);
@@ -787,12 +801,13 @@ function LoginContent() {
                             setResetError(err);
                           } else {
                             setResetSent(true);
+                            setResetCooldown(60); // 60-second cooldown between requests
                           }
                         }}
                         className="flex-1 py-2.5 rounded-xl text-sm font-medium text-white disabled:opacity-60"
                         style={{ background: '#6b7a3d' }}
                       >
-                        {resetLoading ? 'Sending...' : 'Send Reset Link'}
+                        {resetLoading ? 'Sending...' : resetCooldown > 0 ? `Wait ${resetCooldown}s` : 'Send Reset Link'}
                       </button>
                     </div>
                   </>

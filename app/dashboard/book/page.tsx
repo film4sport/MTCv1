@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo, useRef, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { useApp } from '../lib/store';
 import { useToast } from '../lib/toast';
@@ -19,6 +20,7 @@ const BookingModal = dynamic(() => import('./components/BookingModal'), { ssr: f
 const SuccessModal = dynamic(() => import('./components/SuccessModal'), { ssr: false });
 
 export default function BookCourtPage() {
+  const searchParams = useSearchParams();
   const { currentUser, members, bookings, courts, events, addBooking, cancelBooking } = useApp();
   const { showToast } = useToast();
   const [bookingSuccess, setBookingSuccess] = useState<{ courtName: string; date: string; time: string; participants?: { id: string; name: string }[]; duration?: number; matchType?: 'singles' | 'doubles' } | null>(null);
@@ -54,6 +56,28 @@ export default function BookCourtPage() {
   const nextWeek = () => { const d = new Date(weekStart); d.setDate(d.getDate() + 7); setWeekStart(d); setContentKey(k => k + 1); };
 
   useEffect(() => { setContentKey(k => k + 1); }, [selectedCourt, view]);
+
+  // Pre-select date from URL params (e.g. ?date=2026-03-15)
+  const prefilledRef = useRef(false);
+  useEffect(() => {
+    if (prefilledRef.current) return;
+    const dateParam = searchParams.get('date');
+    if (dateParam && /^\d{4}-\d{2}-\d{2}$/.test(dateParam)) {
+      prefilledRef.current = true;
+      const target = new Date(dateParam + 'T00:00:00');
+      if (!isNaN(target.getTime())) {
+        // Navigate week view to include that date
+        const day = target.getDay();
+        const weekStartDate = new Date(target);
+        weekStartDate.setDate(weekStartDate.getDate() - day);
+        setWeekStart(weekStartDate);
+        setMobileDayIdx(day);
+        // Also set calendar view
+        setCalMonth(new Date(target.getFullYear(), target.getMonth()));
+        setCalSelectedDate(dateParam);
+      }
+    }
+  }, [searchParams]);
 
   // Esc key closes cancel confirmation dialog
   useEffect(() => {

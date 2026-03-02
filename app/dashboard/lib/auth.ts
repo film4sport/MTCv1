@@ -77,14 +77,22 @@ export async function signOut(): Promise<void> {
 }
 
 /**
- * Send a password reset email via Supabase Auth.
+ * Send a password reset email via server-side API (rate-limited).
  * Returns an error message or null on success.
  */
 export async function resetPassword(email: string): Promise<string | null> {
-  const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: 'https://www.monotennisclub.com/auth/callback?type=recovery',
-  });
-  return error ? error.message : null;
+  try {
+    const res = await fetch('/api/reset-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email.trim().toLowerCase() }),
+    });
+    const data = await res.json();
+    if (!res.ok) return data.error || 'Failed to send reset email';
+    return null;
+  } catch {
+    return 'Network error. Please try again.';
+  }
 }
 
 /**

@@ -6,36 +6,31 @@ const infoFile = readFileSync(join(__dirname, '..', 'app', 'info', 'page.tsx'), 
 const coachingFile = readFileSync(join(__dirname, '..', 'app', 'info', 'components', 'CoachingTab.tsx'), 'utf-8');
 const settingsFile = readFileSync(join(__dirname, '..', 'app', 'dashboard', 'settings', 'page.tsx'), 'utf-8');
 
-// ─── Coaching tab: email replaced with dashboard link ───
-describe('Coaching tab — no exposed email', () => {
-  it('should not contain Mark Taylor personal email', () => {
-    expect(coachingFile).not.toContain('Taylor.Mark.Tennis@gmail.com');
+// ─── Coaching tab: contact section has real coach emails ───
+describe('Coaching tab — coach contact info', () => {
+  it('should contain Suzanne Taylor signup email', () => {
+    expect(coachingFile).toContain('Taylor.suzanne.tennis@gmail.com');
   });
 
-  it('coaching section should not have any mailto: links', () => {
-    expect(coachingFile).not.toContain('mailto:');
+  it('should contain Mark Taylor contact email', () => {
+    expect(coachingFile).toContain('Taylor.mark.tennis@gmail.com');
   });
 
-  it('should link to /dashboard/messages instead', () => {
-    // Find the coaching registration section
-    const registerSection = coachingFile.match(/Register for Coaching[\s\S]*?<\/div>/);
-    expect(registerSection).toBeTruthy();
-    expect(registerSection[0]).toContain('/dashboard/messages');
+  it('should have a Sign Up & Contact section', () => {
+    expect(coachingFile).toContain('Sign Up & Contact');
   });
 
-  it('should say "message Coach Mark" not "email Mark"', () => {
-    expect(coachingFile).toContain('message Coach Mark');
-    expect(coachingFile).not.toContain('email Mark');
+  it('should have mailto: links for coach emails', () => {
+    expect(coachingFile).toContain('mailto:Taylor.suzanne.tennis@gmail.com');
+    expect(coachingFile).toContain('mailto:Taylor.mark.tennis@gmail.com');
   });
 
-  it('should still link to /dashboard/events for registration', () => {
-    const registerSection = coachingFile.match(/Register for Coaching[\s\S]*?<\/div>/);
-    expect(registerSection).toBeTruthy();
-    expect(registerSection[0]).toContain('/dashboard/events');
+  it('should mention Head Pro title', () => {
+    expect(coachingFile).toContain('Head Professional');
   });
 
-  it('should mention "through the dashboard" for context', () => {
-    expect(coachingFile).toContain('through the dashboard');
+  it('should mention summer camp dates TBC', () => {
+    expect(coachingFile).toContain('Summer camp dates coming soon');
   });
 });
 

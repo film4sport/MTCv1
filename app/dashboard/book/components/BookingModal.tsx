@@ -94,6 +94,9 @@ export default function BookingModal({ modalData, members, currentUser, bookings
     return () => window.removeEventListener('keydown', handler);
   }, [onCancel]);
 
+  // Sanitize guest name: strip HTML tags, limit length
+  const sanitizeGuestName = (name: string) => name.replace(/<[^>]*>/g, '').replace(/[<>"'&]/g, '').trim().slice(0, 100);
+
   const canConfirm = durationAvailability.find(d => d.slots === duration)?.available && !(isGuest && !guestName.trim());
 
   return (
@@ -271,7 +274,7 @@ export default function BookingModal({ modalData, members, currentUser, bookings
             Cancel
           </button>
           <button
-            onClick={() => canConfirm && onConfirm(isGuest, guestName, selectedParticipants, matchType, duration)}
+            onClick={() => canConfirm && onConfirm(isGuest, sanitizeGuestName(guestName), selectedParticipants, matchType, duration)}
             disabled={!canConfirm || loading}
             className="flex-1 py-3 rounded-xl text-sm font-medium text-white transition-colors hover:opacity-90 disabled:opacity-50"
             style={{ background: '#6b7a3d' }}

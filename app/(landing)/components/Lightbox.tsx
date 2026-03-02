@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 
 interface LightboxProps {
   src: string;
@@ -12,19 +12,30 @@ interface LightboxProps {
 
 export default function Lightbox({ src, alt, caption, isOpen, onClose }: LightboxProps) {
   const closeRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  // Focus trap: cycle through all focusable elements inside the lightbox
+  const handleKeydown = useCallback((e: KeyboardEvent) => {
+    if (e.key === 'Escape' && isOpen) { onClose(); return; }
+    if (e.key === 'Tab' && isOpen && dialogRef.current) {
+      const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey) {
+        if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+      } else {
+        if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    }
+  }, [isOpen, onClose]);
 
   useEffect(() => {
-    const handleKeydown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) onClose();
-      // Focus trap: keep focus inside lightbox
-      if (e.key === 'Tab' && isOpen) {
-        e.preventDefault();
-        closeRef.current?.focus();
-      }
-    };
     document.addEventListener('keydown', handleKeydown);
     return () => document.removeEventListener('keydown', handleKeydown);
-  }, [isOpen, onClose]);
+  }, [handleKeydown]);
 
   // Move focus to close button when lightbox opens
   useEffect(() => {
@@ -41,6 +52,7 @@ export default function Lightbox({ src, alt, caption, isOpen, onClose }: Lightbo
 
   return (
     <div
+      ref={dialogRef}
       className={`lightbox${isOpen ? ' active' : ''}`}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();

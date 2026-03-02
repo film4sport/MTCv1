@@ -43,7 +43,7 @@ describe('Store: all mutations follow rollback pattern', () => {
     { name: 'addPartner', rollbackMarker: 'setPartners(prev =>' },
     { name: 'removePartner', rollbackMarker: 'setPartners(prev => [...prev, removed]' },
     { name: 'toggleRsvp', rollbackMarker: 'setEvents(snapshot)' },
-    { name: 'sendMessage', rollbackMarker: 'setConversations(snapshot)' },
+    { name: 'sendMessage', rollbackMarker: 'setConversations(prev => prev.map(c =>' },
     { name: 'dismissAnnouncement', rollbackMarker: 'setAnnouncements(prev =>' },
   ];
 

@@ -75,7 +75,10 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Fallback to demo credentials
+    // Fallback to demo credentials (development only)
+    if (process.env.NODE_ENV !== 'development') {
+      return NextResponse.json({ error: 'unknown_account' }, { status: 401 });
+    }
     const account = DEMO_CREDENTIALS[emailLower];
     if (!account) {
       return NextResponse.json({ error: 'unknown_account' }, { status: 401 });
