@@ -1,7 +1,7 @@
 // Default mock data for the dashboard
 // In production, this will be replaced with Supabase queries
 
-import type { Court, Booking, ClubEvent, Partner, Conversation, Announcement, Notification, AdminAnalytics, User, CoachingProgram } from './types';
+import type { Court, Booking, ClubEvent, Partner, Conversation, Announcement, Notification, AdminAnalytics, User, CoachingProgram, VolunteerTask } from './types';
 
 // ─── Members ────────────────────────────────────────────
 export const DEFAULT_MEMBERS: User[] = [
@@ -95,11 +95,30 @@ function generateRecurringEvents(): ClubEvent[] {
   const SEASON_START = new Date(2026, 4, 9); // May 9 opening day
   const SEASON_END = new Date(2026, 9, 31);  // Oct 31
 
+  // Interclub-specific metadata
+  const interclubMeta = {
+    opponent: 'Orangeville TC',
+    format: 'A & B Teams',
+    instructions: [
+      'Arrive by 6:30 PM for warm-up',
+      'Post-match social at clubhouse',
+    ],
+    volunteersNeeded: [
+      { id: 'ic-t1', name: 'Snacks & Refreshments', icon: '🍊', assigned: null },
+      { id: 'ic-t2', name: 'Court Setup', icon: '🎾', assigned: null },
+      { id: 'ic-t3', name: 'Clean Up', icon: '🧹', assigned: null },
+    ] as VolunteerTask[],
+    assignedTasks: [
+      { id: 'ic-t4', name: 'Scorekeeper', icon: '📊', assigned: 'Kelly K.' },
+      { id: 'ic-t5', name: 'Team Captain A', icon: '👑', assigned: 'Patti P.' },
+    ] as VolunteerTask[],
+  };
+
   // Recurring event templates (dayOfWeek: 0=Sun, 2=Tue, 4=Thu, 5=Fri)
-  const templates: { dayOfWeek: number; id: string; title: string; time: string; location: string; badge: 'free' | 'members' | 'paid'; price: string; description: string; type: ClubEvent['type'] }[] = [
+  const templates: { dayOfWeek: number; id: string; title: string; time: string; location: string; badge: 'free' | 'members' | 'paid'; price: string; description: string; type: ClubEvent['type']; opponent?: string; format?: string; instructions?: string[]; volunteersNeeded?: VolunteerTask[]; assignedTasks?: VolunteerTask[] }[] = [
     { dayOfWeek: 2, id: 'mens-rr', title: "Men's Round Robin", time: '9:00 AM - 11:00 AM', location: 'Courts 1-2', badge: 'members', price: 'Members', description: "Weekly men's round robin every Tuesday morning. All skill levels welcome.", type: 'roundrobin' },
     { dayOfWeek: 4, id: 'freedom-55', title: 'Freedom 55 League', time: '9:00 AM - 11:00 AM', location: 'Courts 1-2', badge: 'members', price: 'Members', description: 'Thursday morning league for the 55+ crowd. Fun and social tennis.', type: 'roundrobin' },
-    { dayOfWeek: 4, id: 'interclub', title: 'Interclub Competitive League', time: '7:00 PM - 9:30 PM', location: 'Courts 1-2', badge: 'members', price: 'Team Only', description: 'A & B teams interclub competitive league. RSVP required for team selection.', type: 'match' },
+    { dayOfWeek: 4, id: 'interclub', title: 'Interclub Competitive League', time: '7:00 PM - 9:30 PM', location: 'Courts 1-2', badge: 'members', price: 'Team Only', description: 'A & B teams interclub competitive league. RSVP required for team selection.', type: 'match', ...interclubMeta },
     { dayOfWeek: 5, id: 'ladies-rr', title: "Ladies Round Robin", time: '9:00 AM - 11:00 AM', location: 'Courts 1-2', badge: 'members', price: 'Members', description: "Weekly ladies round robin every Friday morning. All skill levels welcome.", type: 'roundrobin' },
     { dayOfWeek: 5, id: 'friday-mixed', title: 'Friday Night Mixed Round Robin', time: '6:00 PM - 9:00 PM', location: 'All Courts', badge: 'members', price: 'Members', description: 'Mixed doubles round robin every Friday evening. Rotating partners, fun format!', type: 'roundrobin' },
   ];
@@ -122,8 +141,13 @@ function generateRecurringEvents(): ClubEvent[] {
           badge: t.badge,
           price: t.price,
           description: t.description,
-          attendees: [],
+          attendees: t.id === 'interclub' ? ['Kelly K.', 'Patrick M.', 'Michael H.', 'Phil P.', 'Peter G.', 'Jan H.', 'Sarah Wilson', 'Mike Chen', 'James Park'] : [],
           type: t.type,
+          ...(t.opponent ? { opponent: t.opponent } : {}),
+          ...(t.format ? { format: t.format } : {}),
+          ...(t.instructions ? { instructions: t.instructions } : {}),
+          ...(t.volunteersNeeded ? { volunteersNeeded: t.volunteersNeeded.map(v => ({ ...v })) } : {}),
+          ...(t.assignedTasks ? { assignedTasks: t.assignedTasks.map(v => ({ ...v })) } : {}),
         });
       }
     }
@@ -158,6 +182,16 @@ export const DEFAULT_EVENTS: ClubEvent[] = [
     description: 'Kick off the 2026 season! BBQ, music, and meet our coaching staff.',
     attendees: ['Mike Chen', 'Sarah Wilson', 'James Park', 'Emily Rodriguez', 'Lisa Thompson'],
     type: 'social',
+    instructions: ['All members and families welcome!', 'BBQ and refreshments provided', 'Casual play on all courts', 'New members meet & greet at 3 PM'],
+    assignedTasks: [
+      { id: 'od-t1', name: 'BBQ Grill Master', icon: '🍔', assigned: 'Patrick M.' },
+      { id: 'od-t2', name: 'Drinks Station', icon: '🥤', assigned: 'Michael H.' },
+      { id: 'od-t3', name: 'Welcome & Sign-in', icon: '👋', assigned: 'Kelly K.' },
+      { id: 'od-t4', name: 'Clean Up Crew', icon: '🧹', assigned: 'Peter G.' },
+    ],
+    volunteersNeeded: [
+      { id: 'od-t5', name: 'Parking Attendant', icon: '🚗', assigned: null },
+    ],
   },
   {
     id: 'french-open-rr',

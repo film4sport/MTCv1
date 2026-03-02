@@ -12,6 +12,22 @@ const categoryColors: Record<string, { accent: string; bg: string; text: string 
 const events = [
   {
     category: 'social',
+    date: 'March 14, 2026',
+    title: 'Euchre Tournament',
+    description:
+      'Pre-season Euchre tournament! Open to members and guests. Prizes for top teams. Come kick off the new season.',
+    highlight: 'Evening',
+  },
+  {
+    category: 'social',
+    date: 'May 9, 2026',
+    title: 'Opening Day BBQ & Round Robin',
+    description:
+      'Kick off the 2026 season! BBQ, music, round robin play, and meet our coaching staff. All members and families welcome.',
+    highlight: '12:30 - 3:00 PM',
+  },
+  {
+    category: 'social',
     date: 'June 7, 2026',
     title: 'French Open Round Robin Social',
     description:
