@@ -124,10 +124,14 @@ Enhanced the dashboard partner page (`/dashboard/partners`) with skill level pre
 **Feature 1: Notification Bell Enhancements**
 - `app/dashboard/lib/store.tsx` — `toggleRsvp()` now creates event notification when RSVPing; `addPartner()` now creates partner notification. `enrollInProgram()` already had it.
 
-**Feature 2: Booking Confirmation Email + .ics**
-- `app/api/booking-email/route.ts` — NEW API route: generates .ics calendar invite, sends HTML confirmation email via nodemailer (SMTP). Gracefully degrades if nodemailer not installed.
-- `app/dashboard/lib/store.tsx` — `addBooking()` now fires POST to `/api/booking-email` after court bookings (fire-and-forget).
-- **NEEDS:** `npm install nodemailer @types/nodemailer` + SMTP env vars (`SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`) in `.env.local`
+**Feature 2: Booking Confirmation + Cancellation Emails (cream theme)**
+- `app/api/booking-email/route.ts` — Rewritten: multi-recipient support (booker + all participants get personalized emails). Cream theme (#faf8f3/#f5f2eb) matching site design. POST for confirmations, DELETE for cancellations with METHOD:CANCEL ICS to auto-remove from calendars.
+- `app/dashboard/lib/store.tsx` — `addBooking()` sends emails to booker + all participants (looks up emails from members list). `cancelBooking()` sends cancellation emails + enriched messages with calendar details to all participants.
+- Participant messages now include full calendar details (date, time, duration, court, match type, all players).
+- Cancellation messages include ❌ CANCELLED formatting with full booking details.
+- `supabase/email-templates/confirm-signup.html` — Cream-themed Supabase email template for signup confirmation
+- `supabase/email-templates/reset-password.html` — Cream-themed Supabase email template for password reset
+- **To apply Supabase templates:** Copy HTML from `supabase/email-templates/` into Supabase Dashboard → Authentication → Email Templates
 
 **Feature 3: New Member Onboarding Tour**
 - `app/dashboard/components/OnboardingTour.tsx` — NEW component: 5-step tooltip tour with backdrop, step indicators, skip/next. Uses `data-tour` selectors. Persisted via `localStorage('mtc-onboarding-done')`.

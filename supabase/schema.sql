@@ -80,6 +80,14 @@ create table if not exists event_attendees (
   unique(event_id, user_name)
 );
 
+-- RLS: authenticated users can read all, but only manage their own RSVPs
+alter table event_attendees enable row level security;
+create policy "event_attendees_select" on event_attendees for select using (true);
+create policy "event_attendees_insert" on event_attendees for insert
+  with check (user_name = (select name from public.profiles where id = auth.uid()));
+create policy "event_attendees_delete" on event_attendees for delete
+  using (user_name = (select name from public.profiles where id = auth.uid()) or is_admin());
+
 -- ─── Partners ───────────────────────────────────────────
 create table if not exists partners (
   id text primary key,
@@ -148,6 +156,17 @@ create table if not exists notifications (
   read boolean not null default false
 );
 
+-- RLS: users can read/manage their own notifications, system can create
+alter table notifications enable row level security;
+create policy "notifications_select_own" on notifications for select
+  using (user_id = auth.uid());
+create policy "notifications_insert" on notifications for insert
+  with check (user_id = auth.uid());
+create policy "notifications_update_own" on notifications for update
+  using (user_id = auth.uid());
+create policy "notifications_delete_own" on notifications for delete
+  using (user_id = auth.uid());
+
 -- ─── Coaching Programs ──────────────────────────────────
 create table if not exists coaching_programs (
   id text primary key,
@@ -192,6 +211,21 @@ create table if not exists notification_preferences (
   programs boolean not null default true
 );
 
+-- ─── RLS Helper Functions ──────────────────────────────
+create or replace function is_admin()
+returns boolean as $$
+  select exists (
+    select 1 from public.profiles where id = auth.uid() and role = 'admin'
+  );
+$$ language sql security definer set search_path = '';
+
+create or replace function is_coach()
+returns boolean as $$
+  select exists (
+    select 1 from public.profiles where id = auth.uid() and role = 'coach'
+  );
+$$ language sql security definer set search_path = '';
+
 -- ─── Indexes ────────────────────────────────────────────
 create index if not exists idx_bookings_user on bookings(user_id);
 create index if not exists idx_bookings_date on bookings(date);
@@ -235,7 +269,7 @@ begin
 
   return new;
 end;
-$$ language plpgsql security definer;
+$$ language plpgsql security definer set search_path = '';
 
 -- Trigger: create profile when a new auth user signs up
 drop trigger if exists on_auth_user_created on auth.users;
@@ -271,7 +305,7 @@ begin
   end if;
   delete from auth.users where id = target_user_id;
 end;
-$$ language plpgsql security definer;
+$$ language plpgsql security definer set search_path = '';
 
 -- ─── Send Welcome Message (Signup RPC) ────────────────────
 create or replace function send_welcome_message(new_user_id uuid, new_user_name text)
@@ -283,11 +317,11 @@ declare
   v_msg text;
 begin
   -- Find first admin
-  select id into v_admin_id from profiles where role = 'admin' limit 1;
+  select id into v_admin_id from public.profiles where role = 'admin' limit 1;
   if v_admin_id is null then return; end if;
 
   -- Get gate code
-  select value into v_gate_code from club_settings where key = 'gate_code';
+  select value into v_gate_code from public.club_settings where key = 'gate_code';
 
   -- Build message
   v_msg := 'Welcome to Mono Tennis Club, ' || split_part(new_user_name, ' ', 1) || '!';
@@ -297,12 +331,12 @@ begin
   v_msg := v_msg || ' See you on the court!';
 
   -- Create conversation
-  insert into conversations (member_a, member_b, last_message, last_timestamp)
+  insert into public.conversations (member_a, member_b, last_message, last_timestamp)
   values (v_admin_id, new_user_id, v_msg, now())
   returning id into v_conv_id;
 
   -- Insert message
-  insert into messages (id, conversation_id, from_id, from_name, to_id, to_name, text, timestamp, read)
+  insert into public.messages (id, conversation_id, from_id, from_name, to_id, to_name, text, timestamp, read)
   values (
     'welcome-' || new_user_id::text,
     v_conv_id,
@@ -315,7 +349,7 @@ begin
     false
   );
 end;
-$$ language plpgsql security definer;
+$$ language plpgsql security definer set search_path = '';
 
 -- ─── Avatar Storage Bucket ──────────────────────────────
 -- Create via Supabase dashboard or migration:

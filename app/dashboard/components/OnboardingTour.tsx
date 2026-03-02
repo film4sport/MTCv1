@@ -11,7 +11,7 @@ interface TourStep {
 
 const STEPS: TourStep[] = [
   {
-    title: 'Welcome to MTC!',
+    title: 'Welcome to MTC Court!',
     body: 'Let\'s take a quick look around your dashboard. This is where you\'ll manage everything — courts, events, and more.',
     target: 'center',
     position: 'center',
@@ -32,6 +32,12 @@ const STEPS: TourStep[] = [
     title: 'Stay Connected',
     body: 'Message other members directly. Coordinate matches, share tips, or just say hello.',
     target: '[data-tour="messages"]',
+    position: 'right',
+  },
+  {
+    title: 'Your Preferences',
+    body: 'Head to Settings to manage your notification preferences and access the MTC Court mobile app.',
+    target: '[data-tour="settings"]',
     position: 'right',
   },
   {
