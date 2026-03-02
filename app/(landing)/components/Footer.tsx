@@ -46,11 +46,11 @@ export default function Footer() {
               Location
             </h5>
             <address className="not-italic text-base leading-relaxed" style={{ color: 'rgba(232, 228, 217, 0.7)' }}>
-              754883 Mono Centre Road
+              754483 Mono Centre Rd
               <br />
               Mono, Ontario
               <br />
-              L9W 6S3
+              L9W 5W9
             </address>
             <a
               href="mailto:monotennisclub1@gmail.com"

@@ -114,10 +114,10 @@ const jsonLd = {
       email: 'info@monotennisclub.com',
       address: {
         '@type': 'PostalAddress',
-        streetAddress: '754883 Mono Centre Road',
+        streetAddress: '754483 Mono Centre Rd',
         addressLocality: 'Mono',
         addressRegion: 'ON',
-        postalCode: 'L9W 6S3',
+        postalCode: 'L9W 5W9',
         addressCountry: 'CA',
       },
       geo: {
@@ -156,7 +156,7 @@ const jsonLd = {
         // Season: May through October, daily
         { '@type': 'OpeningHoursSpecification', dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], opens: '09:30', closes: '22:00', validFrom: '2026-05-01', validThrough: '2026-10-31' },
       ],
-      hasMap: 'https://www.google.com/maps?q=754883+Mono+Centre+Road,+Mono,+ON',
+      hasMap: 'https://www.google.com/maps?q=754483+Mono+Centre+Rd,+Mono,+ON',
       priceRange: '$',
       foundingDate: '1980',
       nonprofitStatus: 'Nonprofit501c3',

@@ -25,7 +25,7 @@ export const privacySections = [
   },
   {
     title: 'Contact Us',
-    content: 'For privacy-related questions or concerns, contact our Privacy Officer at info@monotennisclub.com or write to: Mono Tennis Club, 754883 Mono Centre Road, Mono, Ontario, L9W 6S3.',
+    content: 'For privacy-related questions or concerns, contact our Privacy Officer at info@monotennisclub.com or write to: Mono Tennis Club, 754483 Mono Centre Rd, Mono, Ontario, L9W 5W9.',
   },
 ];
 

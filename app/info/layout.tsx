@@ -6,7 +6,7 @@ const CDN = 'https://cdn.jsdelivr.net/gh/film4sport/my-webapp-images@main/mtc-im
 export const metadata: Metadata = {
   title: 'Club Info — Membership, FAQ & About',
   description:
-    'Everything you need to know about Mono Tennis Club: membership fees, facilities, club history since 1980, FAQ, directions to 754883 Mono Centre Road, and how to join the Caledon-Dufferin tennis community.',
+    'Everything you need to know about Mono Tennis Club: membership fees, facilities, club history since 1980, FAQ, directions to 754483 Mono Centre Rd, and how to join the Caledon-Dufferin tennis community.',
   alternates: {
     canonical: '/info',
   },

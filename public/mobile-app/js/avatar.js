@@ -35,6 +35,7 @@
   // Map home screen short IDs to real clubEventsData IDs
   // Shared state (read by events.js, confirm-modal.js)
   MTC.state.homeToClubEventMap = {
+    'euchre': 'euchre-tournament',
     'bbq': 'opening-day-bbq',
     'mensrr': 'mens-round-robin',
     'frimixed': 'friday-mixed'

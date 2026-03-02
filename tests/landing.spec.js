@@ -278,7 +278,7 @@ test.describe('Footer', () => {
   test('footer has correct address', async ({ page }) => {
     const address = page.locator('footer address');
     const text = await address.textContent();
-    expect(text).toContain('754883 Mono Centre Road');
+    expect(text).toContain('754483 Mono Centre Rd');
     expect(text).toContain('Mono, Ontario');
   });
 });
