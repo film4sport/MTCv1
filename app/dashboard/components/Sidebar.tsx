@@ -112,7 +112,7 @@ export default function Sidebar() {
                     href={item.href}
                     onClick={closeMobileSidebar}
                     aria-current={isActive ? 'page' : undefined}
-                    data-tour={item.label === 'Messages' ? 'messages' : undefined}
+                    data-tour={item.label === 'Messages' ? 'messages' : item.label === 'Settings' ? 'settings' : undefined}
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative ${
                       isActive
                         ? 'font-semibold'

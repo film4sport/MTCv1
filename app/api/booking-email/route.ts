@@ -19,7 +19,7 @@ function toLocalICSDate(date: string, hour: number, minute: number): string {
   return `${y}${m}${d}T${String(hour).padStart(2, '0')}${String(minute).padStart(2, '0')}00`;
 }
 
-function generateICS(event: { title: string; date: string; time: string; duration?: number; location?: string; description?: string }): string {
+function generateICS(event: { title: string; date: string; time: string; duration?: number; location?: string; description?: string; attendees?: string[] }): string {
   const duration = event.duration || 60;
   const { hour, minute } = parseTime(event.time);
   const dtStart = toLocalICSDate(event.date, hour, minute);
@@ -27,12 +27,13 @@ function generateICS(event: { title: string; date: string; time: string; duratio
   const dtEnd = toLocalICSDate(event.date, Math.floor(totalMinutes / 60), totalMinutes % 60);
   const uid = `${Date.now()}-${Math.random().toString(36).slice(2)}@mtc.ca`;
 
-  return [
+  const lines = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
     'PRODID:-//Mono Tennis Club//MTC//EN',
     'CALSCALE:GREGORIAN',
     `X-WR-TIMEZONE:${TIMEZONE}`,
+    'METHOD:REQUEST',
     'BEGIN:VEVENT',
     `UID:${uid}`,
     `DTSTART;TZID=${TIMEZONE}:${dtStart}`,
@@ -40,54 +41,169 @@ function generateICS(event: { title: string; date: string; time: string; duratio
     `SUMMARY:${event.title}`,
     event.location ? `LOCATION:${event.location}` : '',
     event.description ? `DESCRIPTION:${event.description.replace(/\n/g, '\\n')}` : '',
-    'END:VEVENT',
-    'END:VCALENDAR',
-  ].filter(Boolean).join('\r\n') + '\r\n';
+    'STATUS:CONFIRMED',
+  ];
+
+  // Add attendees to ICS for calendar integration
+  if (event.attendees) {
+    event.attendees.forEach(email => {
+      lines.push(`ATTENDEE;RSVP=TRUE:mailto:${email}`);
+    });
+  }
+
+  lines.push('END:VEVENT', 'END:VCALENDAR');
+  return lines.filter(Boolean).join('\r\n') + '\r\n';
 }
 
-// Rate limiting: 10 emails per user per hour
+// Rate limiting: 20 emails per IP per hour (raised for multi-recipient)
 const emailLimits = new Map<string, { count: number; resetAt: number }>();
+
+interface Recipient {
+  email: string;
+  name: string;
+  role: 'booker' | 'participant';
+}
+
+// Shared email HTML template — cream theme matching site design
+function buildEmailHTML(recipient: Recipient, courtName: string, formattedDate: string, time: string, matchType: string | undefined, durationMinutes: number, bookerName: string, allParticipantNames: string[]): string {
+  const isBooker = recipient.role === 'booker';
+  const heading = isBooker ? 'Booking Confirmed' : 'You\'ve Been Added to a Booking';
+  const greeting = `Hi ${recipient.name.split(' ')[0]},`;
+  const subtext = isBooker
+    ? 'Your court has been reserved. A calendar invite is attached.'
+    : `${bookerName} added you to a court booking. A calendar invite is attached.`;
+
+  const playersSection = allParticipantNames.length > 0
+    ? `<tr><td style="padding: 6px 0; font-size: 13px; color: #6b7266;">Playing with</td><td style="padding: 6px 0; font-size: 13px; font-weight: 500; color: #2a2f1e; text-align: right;">${allParticipantNames.filter(n => n !== recipient.name).join(', ') || 'None listed'}</td></tr>`
+    : '';
+
+  return `
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin: 0; padding: 0; background-color: #f5f2eb; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f2eb; padding: 40px 16px;">
+    <tr><td align="center">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width: 480px; background-color: #faf8f3; border-radius: 16px; border: 1px solid #e0dcd3; overflow: hidden;">
+
+        <!-- Header accent bar -->
+        <tr><td style="height: 4px; background: linear-gradient(90deg, #6b7a3d, #d4e157);"></td></tr>
+
+        <!-- Logo -->
+        <tr><td style="padding: 28px 28px 0; text-align: center;">
+          <img src="https://www.monotennisclub.com/mono-logo-black.png" alt="Mono Tennis Club" width="140" height="auto" style="width: 140px; height: auto;" />
+        </td></tr>
+
+        <!-- Content -->
+        <tr><td style="padding: 24px 28px 8px;">
+          <h1 style="font-size: 20px; font-weight: 600; color: #2a2f1e; margin: 0 0 6px;">${heading}</h1>
+          <p style="font-size: 14px; color: #6b7266; margin: 0 0 4px;">${greeting}</p>
+          <p style="font-size: 13px; color: #9ca3a0; margin: 0;">${subtext}</p>
+        </td></tr>
+
+        <!-- Booking details card -->
+        <tr><td style="padding: 16px 28px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #fff; border: 1px solid #e8e4d9; border-radius: 12px;">
+            <tr><td style="padding: 20px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="padding: 6px 0; font-size: 13px; color: #6b7266;">Court</td>
+                  <td style="padding: 6px 0; font-size: 14px; font-weight: 600; color: #2a2f1e; text-align: right;">${courtName}</td>
+                </tr>
+                <tr><td colspan="2" style="border-bottom: 1px solid #f0ede6; height: 1px;"></td></tr>
+                <tr>
+                  <td style="padding: 6px 0; font-size: 13px; color: #6b7266;">Date</td>
+                  <td style="padding: 6px 0; font-size: 13px; font-weight: 500; color: #2a2f1e; text-align: right;">${formattedDate}</td>
+                </tr>
+                <tr><td colspan="2" style="border-bottom: 1px solid #f0ede6; height: 1px;"></td></tr>
+                <tr>
+                  <td style="padding: 6px 0; font-size: 13px; color: #6b7266;">Time</td>
+                  <td style="padding: 6px 0; font-size: 13px; font-weight: 500; color: #2a2f1e; text-align: right;">${time}</td>
+                </tr>
+                ${matchType ? `<tr><td colspan="2" style="border-bottom: 1px solid #f0ede6; height: 1px;"></td></tr>
+                <tr>
+                  <td style="padding: 6px 0; font-size: 13px; color: #6b7266;">Type</td>
+                  <td style="padding: 6px 0; font-size: 13px; font-weight: 500; color: #6b7a3d; text-align: right;">${matchType.charAt(0).toUpperCase() + matchType.slice(1)} &bull; ${durationMinutes} min</td>
+                </tr>` : ''}
+                ${playersSection ? `<tr><td colspan="2" style="border-bottom: 1px solid #f0ede6; height: 1px;"></td></tr>${playersSection}` : ''}
+              </table>
+            </td></tr>
+          </table>
+        </td></tr>
+
+        <!-- Calendar badge -->
+        <tr><td style="padding: 0 28px 12px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: rgba(107, 122, 61, 0.06); border-radius: 10px;">
+            <tr><td style="padding: 14px 16px; text-align: center;">
+              <span style="font-size: 12px; color: #6b7a3d; font-weight: 500;">&#128197; Calendar invite (.ics) attached — add to your calendar</span>
+            </td></tr>
+          </table>
+        </td></tr>
+
+        <!-- Footer -->
+        <tr><td style="padding: 16px 28px 28px; text-align: center; border-top: 1px solid #f0ede6;">
+          <p style="font-size: 11px; color: #b5b0a5; margin: 0;">Mono Tennis Club &bull; Mono, Ontario</p>
+          <p style="font-size: 11px; color: #c5c0b5; margin: 6px 0 0;">You can manage notification preferences in your dashboard settings.</p>
+        </td></tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body></html>`;
+}
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { email, userName, courtName, date, time, duration, matchType, participants } = body;
+    const { recipients, bookerName, courtName, date, time, duration, matchType } = body;
 
-    if (!email || !courtName || !date || !time) {
+    // Support both old format (single email) and new format (recipients array)
+    const recipientList: Recipient[] = recipients
+      ? recipients as Recipient[]
+      : body.email
+        ? [{ email: body.email, name: body.userName || 'Member', role: 'booker' as const }]
+        : [];
+
+    if (recipientList.length === 0 || !courtName || !date || !time) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // Rate limit check
+    // Rate limit: 20 emails per hour per booker
+    const rateLimitKey = recipientList[0]?.email || 'unknown';
     const now = Date.now();
-    const limit = emailLimits.get(email);
+    const limit = emailLimits.get(rateLimitKey);
     if (limit && now < limit.resetAt) {
-      if (limit.count >= 10) {
+      if (limit.count >= 20) {
         return NextResponse.json({ error: 'Too many emails. Try again later.' }, { status: 429 });
       }
-      limit.count++;
+      limit.count += recipientList.length;
     } else {
-      emailLimits.set(email, { count: 1, resetAt: now + 60 * 60 * 1000 });
+      emailLimits.set(rateLimitKey, { count: recipientList.length, resetAt: now + 60 * 60 * 1000 });
     }
 
-    // Generate ICS
+    // Generate ICS with all attendee emails
     const durationMinutes = duration ? duration * 30 : 60;
+    const allEmails = recipientList.map(r => r.email);
+    const allNames = recipientList.map(r => r.name);
+    const actualBookerName = bookerName || recipientList.find(r => r.role === 'booker')?.name || 'A member';
+
     const icsContent = generateICS({
       title: `Tennis — ${courtName}`,
       date,
       time,
       duration: durationMinutes,
       location: `${courtName} — Mono Tennis Club, Mono, Ontario`,
-      description: `${matchType || 'Singles'} booking${participants?.length ? ` with ${participants.map((p: { name: string }) => p.name).join(', ')}` : ''}`,
+      description: `${matchType || 'Singles'} booking. Players: ${allNames.join(', ')}`,
+      attendees: allEmails,
     });
 
     // Format date for email
     const dateObj = new Date(date + 'T00:00:00');
     const formattedDate = dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
 
-    // Try to send email via nodemailer (requires npm install nodemailer)
-    let emailSent = false;
+    let sentCount = 0;
+    let failedCount = 0;
+
     try {
-      // Dynamic import so the app doesn't crash if nodemailer isn't installed yet
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const nodemailer = require('nodemailer') as { default?: { createTransport: (opts: Record<string, unknown>) => { sendMail: (opts: Record<string, unknown>) => Promise<void> } }; createTransport: (opts: Record<string, unknown>) => { sendMail: (opts: Record<string, unknown>) => Promise<void> } };
 
@@ -105,45 +221,214 @@ export async function POST(request: Request) {
           auth: { user: smtpUser, pass: smtpPass },
         });
 
-        await transporter.sendMail({
-          from: `"Mono Tennis Club" <${smtpUser}>`,
-          to: email,
-          subject: `Booking Confirmed — ${courtName} on ${formattedDate}`,
-          html: `
-            <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 500px; margin: 0 auto; padding: 32px 24px; background: #faf8f3; border-radius: 16px;">
-              <h1 style="font-size: 20px; color: #1a1f12; margin: 0 0 8px;">Booking Confirmed</h1>
-              <p style="font-size: 14px; color: #6b7266; margin: 0 0 24px;">Hi ${userName || 'there'},</p>
+        // Send to each recipient with personalized content
+        const results = await Promise.allSettled(
+          recipientList.map(recipient => {
+            const isBooker = recipient.role === 'booker';
+            const subject = isBooker
+              ? `Booking Confirmed — ${courtName}, ${formattedDate}`
+              : `Added to Booking — ${courtName}, ${formattedDate}`;
 
-              <div style="background: #fff; border: 1px solid #e0dcd3; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
-                <p style="font-size: 16px; font-weight: 600; color: #2a2f1e; margin: 0 0 4px;">${courtName}</p>
-                <p style="font-size: 14px; color: #6b7266; margin: 0;">${formattedDate} at ${time}</p>
-                ${matchType ? `<p style="font-size: 13px; color: #6b7a3d; margin: 8px 0 0;">${matchType.charAt(0).toUpperCase() + matchType.slice(1)} • ${durationMinutes} minutes</p>` : ''}
-                ${participants?.length ? `<p style="font-size: 13px; color: #6b7266; margin: 4px 0 0;">With: ${participants.map((p: { name: string }) => p.name).join(', ')}</p>` : ''}
-              </div>
+            return transporter.sendMail({
+              from: `"Mono Tennis Club" <${smtpUser}>`,
+              to: recipient.email,
+              subject,
+              html: buildEmailHTML(recipient, courtName, formattedDate, time, matchType, durationMinutes, actualBookerName, allNames),
+              icalEvent: {
+                filename: 'mtc-booking.ics',
+                method: 'REQUEST',
+                content: icsContent,
+              },
+            });
+          })
+        );
 
-              <p style="font-size: 12px; color: #9ca3a0; margin: 0;">A calendar invite (.ics) is attached. See you on the court!</p>
-              <p style="font-size: 12px; color: #9ca3a0; margin: 8px 0 0;">— Mono Tennis Club</p>
-            </div>
-          `,
-          icalEvent: {
-            filename: 'mtc-booking.ics',
-            method: 'REQUEST',
-            content: icsContent,
-          },
+        results.forEach(r => {
+          if (r.status === 'fulfilled') sentCount++;
+          else failedCount++;
         });
-        emailSent = true;
       }
     } catch {
-      // nodemailer not installed or SMTP not configured — return ICS only
+      // nodemailer not installed or SMTP not configured
     }
 
     return NextResponse.json({
       success: true,
-      emailSent,
+      sent: sentCount,
+      failed: failedCount,
+      totalRecipients: recipientList.length,
       ics: icsContent,
-      message: emailSent ? 'Confirmation email sent' : 'Email not configured — ICS generated',
+      message: sentCount > 0 ? `${sentCount} confirmation email(s) sent` : 'Email not configured — ICS generated',
     });
   } catch {
     return NextResponse.json({ error: 'Failed to process booking email' }, { status: 500 });
+  }
+}
+
+// Cancellation email — sends METHOD:CANCEL ICS to remove from calendars
+function buildCancelEmailHTML(recipientName: string, cancelledBy: string, courtName: string, formattedDate: string, time: string): string {
+  const isSelf = recipientName === cancelledBy;
+  const heading = 'Booking Cancelled';
+  const subtext = isSelf
+    ? 'Your court booking has been cancelled.'
+    : `${cancelledBy} cancelled a booking you were part of.`;
+
+  return `
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin: 0; padding: 0; background-color: #f5f2eb; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f2eb; padding: 40px 16px;">
+    <tr><td align="center">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width: 480px; background-color: #faf8f3; border-radius: 16px; border: 1px solid #e0dcd3; overflow: hidden;">
+
+        <!-- Red accent bar for cancellation -->
+        <tr><td style="height: 4px; background: linear-gradient(90deg, #ef4444, #f87171);"></td></tr>
+
+        <!-- Logo -->
+        <tr><td style="padding: 28px 28px 0; text-align: center;">
+          <img src="https://www.monotennisclub.com/mono-logo-black.png" alt="Mono Tennis Club" width="140" height="auto" style="width: 140px; height: auto;" />
+        </td></tr>
+
+        <!-- Content -->
+        <tr><td style="padding: 24px 28px 8px;">
+          <h1 style="font-size: 20px; font-weight: 600; color: #2a2f1e; margin: 0 0 6px;">${heading}</h1>
+          <p style="font-size: 14px; color: #6b7266; margin: 0 0 4px;">Hi ${recipientName.split(' ')[0]},</p>
+          <p style="font-size: 13px; color: #9ca3a0; margin: 0;">${subtext}</p>
+        </td></tr>
+
+        <!-- Cancelled booking details -->
+        <tr><td style="padding: 16px 28px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #fff; border: 1px solid #fecaca; border-radius: 12px;">
+            <tr><td style="padding: 20px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="padding: 6px 0; font-size: 13px; color: #6b7266;">Court</td>
+                  <td style="padding: 6px 0; font-size: 14px; font-weight: 600; color: #9ca3a0; text-align: right; text-decoration: line-through;">${courtName}</td>
+                </tr>
+                <tr><td colspan="2" style="border-bottom: 1px solid #f0ede6; height: 1px;"></td></tr>
+                <tr>
+                  <td style="padding: 6px 0; font-size: 13px; color: #6b7266;">Date</td>
+                  <td style="padding: 6px 0; font-size: 13px; color: #9ca3a0; text-align: right; text-decoration: line-through;">${formattedDate}</td>
+                </tr>
+                <tr><td colspan="2" style="border-bottom: 1px solid #f0ede6; height: 1px;"></td></tr>
+                <tr>
+                  <td style="padding: 6px 0; font-size: 13px; color: #6b7266;">Time</td>
+                  <td style="padding: 6px 0; font-size: 13px; color: #9ca3a0; text-align: right; text-decoration: line-through;">${time}</td>
+                </tr>
+                <tr><td colspan="2" style="border-bottom: 1px solid #f0ede6; height: 1px;"></td></tr>
+                <tr>
+                  <td style="padding: 6px 0; font-size: 13px; color: #ef4444; font-weight: 500;" colspan="2">&#10060; This booking has been cancelled</td>
+                </tr>
+              </table>
+            </td></tr>
+          </table>
+        </td></tr>
+
+        <!-- Rebook CTA -->
+        <tr><td style="padding: 0 28px 8px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: rgba(107, 122, 61, 0.06); border-radius: 10px;">
+            <tr><td style="padding: 14px 16px; text-align: center;">
+              <span style="font-size: 12px; color: #6b7a3d; font-weight: 500;">The calendar event has been removed. You can rebook from your dashboard anytime.</span>
+            </td></tr>
+          </table>
+        </td></tr>
+
+        <!-- Footer -->
+        <tr><td style="padding: 16px 28px 28px; text-align: center; border-top: 1px solid #f0ede6;">
+          <p style="font-size: 11px; color: #b5b0a5; margin: 0;">Mono Tennis Club &bull; Mono, Ontario</p>
+        </td></tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body></html>`;
+}
+
+function generateCancelICS(event: { title: string; date: string; time: string; uid?: string }): string {
+  const { hour, minute } = parseTime(event.time);
+  const dtStart = toLocalICSDate(event.date, hour, minute);
+  const uid = event.uid || `${Date.now()}-${Math.random().toString(36).slice(2)}@mtc.ca`;
+
+  return [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Mono Tennis Club//MTC//EN',
+    'CALSCALE:GREGORIAN',
+    `X-WR-TIMEZONE:${TIMEZONE}`,
+    'METHOD:CANCEL',
+    'BEGIN:VEVENT',
+    `UID:${uid}`,
+    `DTSTART;TZID=${TIMEZONE}:${dtStart}`,
+    `SUMMARY:${event.title}`,
+    'STATUS:CANCELLED',
+    'END:VEVENT',
+    'END:VCALENDAR',
+  ].join('\r\n') + '\r\n';
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const body = await request.json();
+    const { recipients, cancelledBy, courtName, date, time } = body;
+
+    const recipientList = (recipients || []) as { email: string; name: string }[];
+    if (recipientList.length === 0 || !courtName || !date || !time) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    }
+
+    const dateObj = new Date(date + 'T00:00:00');
+    const formattedDate = dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+
+    const cancelICS = generateCancelICS({
+      title: `Tennis — ${courtName} (CANCELLED)`,
+      date,
+      time,
+    });
+
+    let sentCount = 0;
+
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const nodemailer = require('nodemailer') as { default?: { createTransport: (opts: Record<string, unknown>) => { sendMail: (opts: Record<string, unknown>) => Promise<void> } }; createTransport: (opts: Record<string, unknown>) => { sendMail: (opts: Record<string, unknown>) => Promise<void> } };
+
+      const smtpHost = process.env.SMTP_HOST;
+      const smtpPort = parseInt(process.env.SMTP_PORT || '587');
+      const smtpUser = process.env.SMTP_USER;
+      const smtpPass = process.env.SMTP_PASS;
+
+      if (smtpHost && smtpUser && smtpPass) {
+        const nm = nodemailer.default || nodemailer;
+        const transporter = nm.createTransport({
+          host: smtpHost,
+          port: smtpPort,
+          secure: smtpPort === 465,
+          auth: { user: smtpUser, pass: smtpPass },
+        });
+
+        const results = await Promise.allSettled(
+          recipientList.map(recipient =>
+            transporter.sendMail({
+              from: `"Mono Tennis Club" <${smtpUser}>`,
+              to: recipient.email,
+              subject: `Booking Cancelled — ${courtName}, ${formattedDate}`,
+              html: buildCancelEmailHTML(recipient.name, cancelledBy || 'A member', courtName, formattedDate, time),
+              icalEvent: {
+                filename: 'mtc-cancellation.ics',
+                method: 'CANCEL',
+                content: cancelICS,
+              },
+            })
+          )
+        );
+
+        sentCount = results.filter(r => r.status === 'fulfilled').length;
+      }
+    } catch {
+      // nodemailer not installed
+    }
+
+    return NextResponse.json({ success: true, sent: sentCount });
+  } catch {
+    return NextResponse.json({ error: 'Failed to send cancellation email' }, { status: 500 });
   }
 }

@@ -354,41 +354,57 @@ export function AppProvider({ children }: { children: ReactNode }) {
           db.createNotification(p.id, participantNotifs[i]).catch((err) => reportError(err, 'Supabase'));
         });
 
-        // Send message to each participant with calendar marker
+        // Send message to each participant with full calendar invite details
+        const formattedDate = new Date(booking.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+        const durationText = booking.duration ? `${booking.duration * 30} min` : '60 min';
+        const matchLabel = booking.matchType ? booking.matchType.charAt(0).toUpperCase() + booking.matchType.slice(1) : 'Singles';
+        const allPlayerNames = [booking.userName, ...booking.participants.map(p => p.name)];
+
         booking.participants.forEach((participant) => {
+          const otherPlayers = allPlayerNames.filter(n => n !== participant.name).join(', ');
           const msg = {
             id: generateId('msg'),
             from: booking.userName,
             fromId: booking.userId,
             to: participant.name,
             toId: participant.id,
-            text: `You've been added to a court booking!\n${booking.courtName} — ${new Date(booking.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} at ${booking.time}.\n[booking:${booking.courtName}:${booking.date}:${booking.time}]`,
+            text: `You've been added to a court booking!\n\n📅 ${formattedDate}\n⏰ ${booking.time} (${durationText})\n📍 ${booking.courtName} — Mono Tennis Club\n🎾 ${matchLabel}\n👥 Playing with: ${otherPlayers}\n\nA confirmation email with a calendar invite has been sent to your email. You can also add this to your calendar from Dashboard → Schedule.\n[booking:${booking.courtName}:${booking.date}:${booking.time}]`,
             timestamp: new Date().toISOString(),
             read: false,
           };
-          // Persist to Supabase
           db.sendMessageByUsers({ id: msg.id, fromId: booking.userId, fromName: booking.userName, toId: participant.id, toName: participant.name, text: msg.text }).catch((err) => reportError(err, 'Supabase'));
         });
       }
     }
-    // Send booking confirmation email + .ics (fire and forget)
+    // Send booking confirmation emails to booker + all participants (fire and forget)
     if (currentUser?.email && booking.type === 'court') {
+      const recipients: { email: string; name: string; role: 'booker' | 'participant' }[] = [
+        { email: currentUser.email, name: currentUser.name, role: 'booker' },
+      ];
+      // Look up participant emails from members list
+      if (booking.participants && booking.participants.length > 0) {
+        booking.participants.forEach((p) => {
+          const member = members.find(m => m.id === p.id);
+          if (member?.email) {
+            recipients.push({ email: member.email, name: member.name, role: 'participant' });
+          }
+        });
+      }
       fetch('/api/booking-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          email: currentUser.email,
-          userName: currentUser.name,
+          recipients,
+          bookerName: currentUser.name,
           courtName: booking.courtName,
           date: booking.date,
           time: booking.time,
           duration: booking.duration,
           matchType: booking.matchType,
-          participants: booking.participants,
         }),
       }).catch(() => { /* email is best-effort */ });
     }
-  }, [currentUser]);
+  }, [currentUser, members]);
 
   const cancelBooking = useCallback((id: string) => {
     // Read current booking before state update to avoid setState-inside-setState
@@ -412,7 +428,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
             db.createNotification(p.id, cancelNotifs[i]).catch((err) => reportError(err, 'Supabase'));
           });
 
-          // Send cancellation message to each participant
+          // Send cancellation message to each participant with full details
+          const cancelDate = new Date(booking.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
           booking.participants!.forEach((participant) => {
             const msg = {
               id: generateId('msg'),
@@ -420,13 +437,38 @@ export function AppProvider({ children }: { children: ReactNode }) {
               fromId: booking.userId,
               to: participant.name,
               toId: participant.id,
-              text: `A court booking you were part of has been cancelled.\n${booking.courtName} — ${new Date(booking.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} at ${booking.time}.`,
+              text: `A court booking has been cancelled.\n\n❌ CANCELLED\n📅 ${cancelDate}\n⏰ ${booking.time}\n📍 ${booking.courtName} — Mono Tennis Club\n\nThe calendar invite has been removed. You can rebook from Dashboard → Book Court.`,
               timestamp: new Date().toISOString(),
               read: false,
             };
-            // Persist to Supabase
             db.sendMessageByUsers({ id: msg.id, fromId: booking.userId, fromName: booking.userName, toId: participant.id, toName: participant.name, text: msg.text }).catch((err) => reportError(err, 'Supabase'));
           });
+
+          // Send cancellation emails to booker + all participants (fire and forget)
+          const cancelRecipients: { email: string; name: string }[] = [];
+          const bookerMember = members.find(m => m.id === booking.userId);
+          if (bookerMember?.email) {
+            cancelRecipients.push({ email: bookerMember.email, name: bookerMember.name });
+          }
+          booking.participants!.forEach((p) => {
+            const member = members.find(m => m.id === p.id);
+            if (member?.email) {
+              cancelRecipients.push({ email: member.email, name: member.name });
+            }
+          });
+          if (cancelRecipients.length > 0) {
+            fetch('/api/booking-email', {
+              method: 'DELETE',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                recipients: cancelRecipients,
+                cancelledBy: booking.userName,
+                courtName: booking.courtName,
+                date: booking.date,
+                time: booking.time,
+              }),
+            }).catch(() => { /* cancellation email is best-effort */ });
+          }
         });
       }
 
@@ -438,7 +480,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setBookings(prev => prev.map(b => b.id === id ? { ...b, status: 'confirmed' as const } : b));
       showToast('Failed to cancel booking. Please try again.', 'error');
     });
-  }, []);
+  }, [members]);
 
   // Program CRUD
   const addProgram = useCallback((program: CoachingProgram) => {
