@@ -23,7 +23,7 @@ const events = [
     date: 'May 9, 2026',
     title: 'Opening Day BBQ & Round Robin',
     description:
-      'Kick off the 2026 season! BBQ, music, round robin play, and meet our coaching staff. All members and families welcome.',
+      'Kick off the 2026 season! BBQ, music, and meet our coaching staff including Mark Taylor. All members, families, and guests welcome.',
     highlight: '12:30 - 3:00 PM',
   },
   {
