@@ -44,6 +44,8 @@ const CSS_FILES = [
 const JS_FILES = [
   'utils.js',
   'config.js',
+  'event-delegation.js',
+  'api-client.js',
   'auth.js',
   'theme.js',
   'navigation.js',

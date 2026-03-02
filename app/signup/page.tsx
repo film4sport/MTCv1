@@ -85,7 +85,9 @@ export default function SignupPage() {
     setSignupLoading(true);
 
     try {
-      const { user, error, emailConfirmRequired } = await signUp(signupData.email, signupData.password, signupData.name, signupData.membershipType);
+      const trimmedEmail = signupData.email.trim().toLowerCase();
+      const trimmedName = signupData.name.trim();
+      const { user, error, emailConfirmRequired } = await signUp(trimmedEmail, signupData.password, trimmedName, signupData.membershipType);
       if (error || !user) {
         const msg = error?.toLowerCase() || '';
         if (msg.includes('already registered') || msg.includes('already been registered')) {
@@ -108,10 +110,10 @@ export default function SignupPage() {
         return;
       }
 
-      let loggedInUser = await signIn(signupData.email, signupData.password);
+      let loggedInUser = await signIn(trimmedEmail, signupData.password);
       if (!loggedInUser) {
         await new Promise(r => setTimeout(r, 1500));
-        loggedInUser = await signIn(signupData.email, signupData.password);
+        loggedInUser = await signIn(trimmedEmail, signupData.password);
       }
       if (!loggedInUser) {
         console.error('[MTC] signIn after signUp returned null — profile may not be ready yet');
@@ -327,7 +329,7 @@ export default function SignupPage() {
             )}
             <div className="flex items-center gap-4 mt-8">
               <button
-                onClick={() => setSignupStep(1)}
+                onClick={() => { setSignupError(''); setSignupStep(1); }}
                 className="px-6 py-3 rounded-full text-sm font-medium transition-all"
                 style={{ backgroundColor: '#faf8f3', color: '#6b7266', border: '1px solid #e0dcd3' }}
               >
@@ -412,7 +414,7 @@ export default function SignupPage() {
 
             <div className="flex items-center gap-4 mt-6">
               <button
-                onClick={() => setSignupStep(2)}
+                onClick={() => { setSignupError(''); setSignupStep(2); }}
                 className="px-6 py-3 rounded-full text-sm font-medium transition-all"
                 style={{ backgroundColor: '#faf8f3', color: '#6b7266', border: '1px solid #e0dcd3' }}
               >
@@ -458,7 +460,7 @@ export default function SignupPage() {
             )}
             <div className="flex items-center gap-4 mt-8">
               <button
-                onClick={() => setSignupStep(3)}
+                onClick={() => { setSignupError(''); setSignupStep(3); }}
                 className="px-6 py-3 rounded-full text-sm font-medium transition-all"
                 style={{ backgroundColor: '#faf8f3', color: '#6b7266', border: '1px solid #e0dcd3' }}
               >

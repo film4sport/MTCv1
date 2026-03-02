@@ -95,12 +95,16 @@
         .catch(function() {
           if (loginBtn) { loginBtn.disabled = false; loginBtn.textContent = 'Sign In'; }
           // Offline fallback: only resume a previously authenticated session
-          // Requires exact email match + session not expired (24 hours)
+          // Requires exact email match + password hash match + session not expired (24 hours)
           var stored = MTC.storage.get('mtc-user', null);
           var sessionTime = MTC.storage.get('mtc-session-time', 0);
           var sessionAge = Date.now() - sessionTime;
+          var storedHash = MTC.storage.get('mtc-session-hash', '');
           var MAX_SESSION_AGE = 24 * 60 * 60 * 1000; // 24 hours
-          if (stored && stored.email === email.toLowerCase() && sessionAge < MAX_SESSION_AGE) {
+          // Simple hash for offline password verification (not crypto-grade, just prevents casual bypass)
+          var inputHash = '';
+          for (var i = 0; i < password.length; i++) { inputHash += password.charCodeAt(i).toString(16); }
+          if (stored && stored.email === email.toLowerCase() && sessionAge < MAX_SESSION_AGE && storedHash && inputHash === storedHash) {
             showToast('Offline — resuming cached session');
             finishLogin(email, stored);
           } else {
@@ -151,6 +155,12 @@
         // Always persist session + timestamp for offline expiry
         MTC.storage.set('mtc-user', currentUser);
         MTC.storage.set('mtc-session-time', Date.now());
+        // Store password hash for offline re-authentication
+        if (password) {
+          var ph = '';
+          for (var pi = 0; pi < password.length; pi++) { ph += password.charCodeAt(pi).toString(16); }
+          MTC.storage.set('mtc-session-hash', ph);
+        }
 
         // Sync membership status to payment data
         if (typeof memberPaymentData !== 'undefined') {
@@ -197,6 +207,9 @@
     fetchWeather();
     showToast('Welcome, ' + currentUser.name + '!');
     scheduleWelcomeNotifications();
+
+    // Register push notifications (best-effort, non-blocking)
+    registerPushNotifications();
   }
 
   // onclick handler (index.html)
@@ -205,7 +218,7 @@
     MTC.state.currentUser = null;
     window.currentUser = null;
     // Clear all app-related data on logout (prevents data leaks on shared devices)
-    ['mtc-user', 'mtc-session-time', 'mtc-bookings', 'mtc-conversations', 'mtc-notifications',
+    ['mtc-user', 'mtc-session-time', 'mtc-session-hash', 'mtc-bookings', 'mtc-conversations', 'mtc-notifications',
      'mtc-rsvps', 'mtc-profile', 'mtc-partner-joins', 'mtc-settings',
      'mtc-onboarding-done'].forEach(function(key) { MTC.storage.remove(key); });
 
@@ -384,6 +397,64 @@
 
   // ============================================
   // ROLE (set via login credentials, no FAB)
+  // Push notification registration
+  // ============================================
+  function registerPushNotifications() {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+    if (!currentUser || !currentUser.id) return;
+
+    // Don't re-prompt if already denied
+    if (Notification.permission === 'denied') return;
+
+    // Ask permission if not granted yet
+    if (Notification.permission === 'default') {
+      // Delay prompt slightly so it doesn't fire during login animation
+      setTimeout(function() {
+        Notification.requestPermission().then(function(permission) {
+          if (permission === 'granted') subscribeToPush();
+        });
+      }, 3000);
+    } else if (Notification.permission === 'granted') {
+      subscribeToPush();
+    }
+  }
+
+  function subscribeToPush() {
+    navigator.serviceWorker.ready.then(function(registration) {
+      var vapidPublicKey = window.MTC_VAPID_PUBLIC_KEY || '';
+      if (!vapidPublicKey) {
+        console.warn('[Push] No VAPID public key configured');
+        return;
+      }
+
+      // Convert base64 VAPID key to Uint8Array
+      var padding = '='.repeat((4 - vapidPublicKey.length % 4) % 4);
+      var base64 = (vapidPublicKey + padding).replace(/-/g, '+').replace(/_/g, '/');
+      var rawData = atob(base64);
+      var outputArray = new Uint8Array(rawData.length);
+      for (var i = 0; i < rawData.length; ++i) outputArray[i] = rawData.charCodeAt(i);
+
+      registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: outputArray
+      }).then(function(subscription) {
+        // Send subscription to server
+        fetch('/api/push-subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: currentUser.id,
+            subscription: subscription.toJSON()
+          })
+        }).catch(function() { /* push registration is best-effort */ });
+      }).catch(function(err) {
+        console.warn('[Push] Subscribe failed:', err.message);
+      });
+    });
+  }
+
+  window.registerPushNotifications = registerPushNotifications;
+
   // ============================================
   MTC.state.currentRole = 'member';
   window.currentRole = 'member'; // Backward-compat alias

@@ -466,7 +466,7 @@
 
     const san = typeof sanitizeHTML === 'function' ? sanitizeHTML : function(s) { return s; };
     resultsContainer.innerHTML = filtered.map(function(m) {
-      return '<div class="search-result-item" onclick="viewMemberProfile(\'' + san(m.name).replace(/'/g, "\\'") + '\')">' +
+      return '<div class="search-result-item" data-action="viewMemberProfile" data-name="' + san(m.name).replace(/"/g, '&quot;') + '">' +
         '<div class="search-result-icon">' +
           '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>' +
         '</div>' +

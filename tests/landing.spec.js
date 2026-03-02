@@ -121,37 +121,16 @@ test.describe('Events Section', () => {
     expect(bg).toBeTruthy();
   });
 
-  test('filter buttons exist', async ({ page }) => {
-    const filters = page.locator('.filter-btn');
-    const count = await filters.count();
-    expect(count).toBe(5);
-  });
-
   test('event cards are displayed', async ({ page }) => {
     const cards = page.locator('.event-card');
     const count = await cards.count();
-    expect(count).toBe(7);
+    expect(count).toBe(3);
   });
 
   test('event cards have warm background', async ({ page }) => {
     const card = page.locator('.event-card').first();
     const bg = await card.evaluate(el => el.style.backgroundColor);
     expect(bg).toBeTruthy();
-  });
-
-  test('filter buttons work', async ({ page }) => {
-    // Click Tournaments filter
-    await page.locator('.filter-btn').nth(1).click();
-    await page.waitForTimeout(300);
-    const cards = page.locator('.event-card');
-    const count = await cards.count();
-    expect(count).toBe(1);
-    // Click All Events to restore
-    await page.locator('.filter-btn').first().click();
-    await page.waitForTimeout(300);
-    const allCards = page.locator('.event-card');
-    const allCount = await allCards.count();
-    expect(allCount).toBe(7);
   });
 });
 

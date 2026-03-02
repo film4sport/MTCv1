@@ -251,6 +251,13 @@ create table if not exists club_settings (
   updated_by uuid references profiles(id)
 );
 
+-- RLS: everyone can read, only admins can modify
+alter table club_settings enable row level security;
+create policy "club_settings_select" on club_settings for select using (true);
+create policy "club_settings_admin_modify" on club_settings for insert with check (is_admin());
+create policy "club_settings_admin_update" on club_settings for update using (is_admin());
+create policy "club_settings_admin_delete" on club_settings for delete using (is_admin());
+
 -- Seed default gate code
 insert into club_settings (key, value) values ('gate_code', '1234') on conflict do nothing;
 
@@ -325,3 +332,14 @@ alter table messages replica identity full;
 alter table notifications replica identity full;
 alter table announcements replica identity full;
 alter table partners replica identity full;
+
+-- Push notification subscriptions (for mobile PWA)
+create table if not exists push_subscriptions (
+  id serial primary key,
+  user_id uuid not null references profiles(id) on delete cascade,
+  endpoint text not null,
+  p256dh text not null,
+  auth text not null,
+  created_at timestamptz default now(),
+  unique(user_id, endpoint)
+);

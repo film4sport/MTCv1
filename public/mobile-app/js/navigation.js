@@ -373,7 +373,7 @@
             '<span class="skill-badge ' + sanitizeHTML(p.levelClass) + '">' + sanitizeHTML(p.level.charAt(0).toUpperCase() + p.level.slice(1)) + '</span>' +
           '</div>' +
         '</div>' +
-        '<button class="partner-join-btn" aria-label="Join session" onclick="joinPartner(\'' + sanitizeHTML(p.name).replace(/'/g, '&#039;') + '\', \'' + sanitizeHTML(p.time) + '\', this)">Join</button>';
+        '<button class="partner-join-btn" aria-label="Join session" data-action="joinPartner" data-name="' + sanitizeHTML(p.name).replace(/"/g, '&quot;') + '" data-time="' + sanitizeHTML(p.time).replace(/"/g, '&quot;') + '">Join</button>';
       // Animate in
       card.style.opacity = '0';
       card.style.transform = 'translateX(-20px)';

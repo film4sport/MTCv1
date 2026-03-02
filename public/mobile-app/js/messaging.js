@@ -272,7 +272,7 @@
     container.innerHTML = MTC.state.clubMembers
       .filter(function(m) { return m.id !== 'club'; })
       .map(function(member) {
-        return '<div class="member-result-item" onclick="startConversation(\'' + sanitizeHTML(member.id) + '\')">' +
+        return '<div class="member-result-item" data-action="startConversation" data-id="' + sanitizeHTML(member.id) + '">' +
           '<div class="member-result-avatar">' +
             (avatarSVGs[member.avatar] || avatarSVGs['default']) +
           '</div>' +
@@ -304,7 +304,7 @@
     }
 
     container.innerHTML = results.map(function(member) {
-      return '<div class="member-result-item" onclick="startConversation(\'' + sanitizeHTML(member.id) + '\')">' +
+      return '<div class="member-result-item" data-action="startConversation" data-id="' + sanitizeHTML(member.id) + '">' +
         '<div class="member-result-avatar">' +
           (avatarSVGs[member.avatar] || avatarSVGs['default']) +
         '</div>' +
