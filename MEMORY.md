@@ -185,7 +185,8 @@ Completed all remaining NEEDS items + fixed all 11 pre-existing test failures.
 **TypeScript:** Clean ✓
 
 **Still needs manual action:**
-- Create `push_subscriptions` table in Supabase (run SQL from `supabase/schema.sql` lines 330-338)
+- ~~Create `push_subscriptions` table in Supabase~~ ✅ DONE (2026-03-03)
+- ~~push_subscriptions RLS~~ ✅ DONE (2026-03-03)
 - Replace `SMTP_PASS=REPLACE_WITH_APP_PASSWORD` in `.env.local` with actual Google App Password
 
 ### Backend Production Readiness (2026-03-03)
@@ -219,14 +220,17 @@ Full backend production work: security fixes, seed data update, mobile API endpo
 - `public/mobile-app/js/booking.js` — Added `window.updateBookingsFromAPI()` and `window.updateAnnouncementsFromAPI()` receivers
 
 **TypeScript:** Clean ✓ (0 errors)
-**NEEDS `npm run build:mobile`** to rebuild the mobile bundle with new JS changes.
+**Mobile build done:** `npm run build:mobile` → `mtc-court-456207f1` ✅
 
 **User needs to do in Supabase:**
-1. Run the new `push_subscriptions` RLS SQL (copy from rls.sql lines 191-197)
-2. Re-run updated `seed.sql` to get correct events
-3. Create 3 auth users if not done: member@mtc.ca, coach@mtc.ca, admin@mtc.ca
-4. Add `SUPABASE_SERVICE_ROLE_KEY` to `.env.local` (for mobile API endpoints to bypass RLS)
-5. Set `SMTP_PASS` when ready
+1. ~~Run the new `push_subscriptions` RLS SQL~~ ✅ DONE (table + RLS created 2026-03-03)
+2. Re-run updated `seed.sql` to get correct events — STILL NEEDED
+3. ~~Create 3 auth users~~ OBSOLETE — demo accounts removed, user creates real accounts
+4. ~~Demo accounts deleted~~ ✅ DONE (member@mtc.ca, coach@mtc.ca, admin@mtc.ca removed 2026-03-03)
+5. Add `SUPABASE_SERVICE_ROLE_KEY` to `.env.local` — IN PROGRESS
+6. Set `SMTP_PASS` when ready
+7. Run security advisory SQL: `SET search_path` on functions + RLS for `club_settings`/`event_attendees`/`notifications` — STILL NEEDED
+8. Apply email templates from `supabase/email-templates/` into Auth → Email Templates — STILL NEEDED
 
 ### Demo Removal Session (2026-03-03)
 Stripped ALL demo/fake data from the entire codebase. Every platform now shows empty states when no real Supabase data exists — no more fake members, bookings, conversations, or names.
@@ -252,12 +256,19 @@ Stripped ALL demo/fake data from the entire codebase. Every platform now shows e
 - `supabase/seed.sql` — Removed v_alex/v_mark/v_admin variables and demo user profile updates. Coach lookup now generic (`role = 'coach' limit 1`).
 - `app/login/page.tsx` — Changed "David Kim"/"Lisa Thompson" → "Member" in decorative cards.
 
-**Verification:** TypeScript clean ✓, all IIFE closures intact, zero demo name references in source files.
-**NEEDS `npm run build:mobile`** to rebuild bundle.
+**Test files updated:**
+- `config.test.js` — Removed `credentials` test (property no longer exists in config.js)
+- `dashboard.spec.js` — Profile test no longer hardcodes "Alex Thompson", uses generic heading selector
+- `qa-full-flow.spec.js` — Profile + admin member list tests use generic assertions
+- `untested-flows.spec.js` — Removed CSV export demo name assertions
+
+**Verification:** TypeScript clean ✓, all IIFE closures intact, zero demo name references in source files or test files.
+**Mobile build done:** `npm run build:mobile` → `mtc-court-456207f1` (231KB JS, 191KB CSS)
 
 **User can now delete demo accounts from Supabase:**
 - Remove member@mtc.ca, coach@mtc.ca, admin@mtc.ca from Auth + profiles table
 - Item 3 from "User needs to do" list above is now OBSOLETE (don't create demo accounts)
+- E2E tests still use `member@mtc.ca` to log in — update credentials in test files when real accounts are set up
 
 ## Decisions Made
 - Double-booking prevention: DB-level partial unique index on `(court_id, date, time) WHERE status = 'confirmed'` — already implemented, no code change needed
