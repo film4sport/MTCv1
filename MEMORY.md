@@ -451,6 +451,20 @@ CREATE INDEX IF NOT EXISTS idx_email_logs_user ON email_logs(recipient_user_id);
 
 **TypeScript:** Clean ✓
 
+### Post-Email-Confirmation Welcome Flow (2026-03-03)
+Previously, when Supabase required email confirmation, the signup page returned early — no welcome message, no notification, no gate code. User only got redirected to dashboard with nothing waiting for them.
+
+**Fix (`app/auth/callback/route.ts`):**
+- After successful `exchangeCodeForSession`, if type is NOT 'recovery' (i.e. signup confirmation):
+  1. Calls `send_welcome_message` RPC → creates admin conversation with gate code
+  2. Inserts welcome notification → "Your email has been confirmed. Check your messages for your court gate code."
+  3. Logs to `email_logs` with status 'sent' and type 'signup_confirmation'
+- Uses service role key for server-side Supabase operations (bypasses RLS)
+- Non-blocking: failures logged to console, don't block redirect
+- Covers both desktop and mobile signups (Supabase sends same confirmation link)
+
+**TypeScript:** Clean ✓
+
 ## TODO / REMINDERS
 - **Junior Summer Camp dates**: User is waiting on real dates from Mark Taylor. When received, update the `junior-summer-camp` event across: `supabase/seed.sql`, `app/dashboard/lib/data.ts`, `public/mobile-app/js/events.js`, and run UPDATE SQL on live Supabase. Also update date/time in `app/(landing)/layout.tsx` JSON-LD if camp is featured there.
 
