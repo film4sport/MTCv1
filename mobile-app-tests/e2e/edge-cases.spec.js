@@ -1335,20 +1335,20 @@ test.describe('Interclub Event Type', () => {
 // ============================================
 test.describe('Spot Limit Enforcement', () => {
 
-  test('Paid coaching events still enforce spot limits', async ({ page }) => {
+  test('Paid events still enforce spot limits', async ({ page }) => {
     await freshStart(page);
 
-    // Set coaching class to full capacity
+    // Set tournament to full capacity
     const blocked = await page.evaluate(() => {
       if (typeof clubEventsData === 'undefined') return 'no-data';
-      var cls = clubEventsData['mark-taylor-classes'];
-      if (!cls) return 'no-class';
+      var ev = clubEventsData['mixed-doubles-tournament-day1'];
+      if (!ev) return 'no-event';
       // Fill it up
-      cls.spotsTaken = cls.spotsTotal;
+      ev.spotsTaken = ev.spotsTotal;
       // Try to register
-      toggleEventRsvp('mark-taylor-classes');
+      toggleEventRsvp('mixed-doubles-tournament-day1');
       // Check if it was blocked (user should NOT be in attendees)
-      return cls.attendees.indexOf('You') === -1 ? 'blocked' : 'registered';
+      return ev.attendees.indexOf('You') === -1 ? 'blocked' : 'registered';
     });
     expect(blocked).toBe('blocked');
   });

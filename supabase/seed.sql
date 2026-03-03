@@ -59,10 +59,7 @@ begin
      'Weekly ladies round robin every Friday morning. All skill levels welcome.', 'roundrobin'),
 
     ('friday-mixed', 'Friday Night Mixed Round Robin', '2026-05-15', '6:00 PM - 9:00 PM', 'All Courts', 'members', 'Members', null, null,
-     'Mixed doubles round robin every Friday evening. Rotating partners, fun format!', 'roundrobin'),
-
-    ('mark-taylor-classes', 'Mark Taylor Tennis Classes', '2026-05-11', 'Various Times', 'All Courts', 'paid', 'See Details', null, null,
-     'Weekly coaching classes by Head Pro Mark Taylor. See Coaching tab for full schedule.', 'lesson')
+     'Mixed doubles round robin every Friday evening. Rotating partners, fun format!', 'roundrobin')
   on conflict (id) do nothing;
 
   -- ─── Announcements ────────────────────────────────────
