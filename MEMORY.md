@@ -571,6 +571,24 @@ ALTER TABLE email_logs ADD CONSTRAINT email_logs_status_check CHECK (status IN (
 
 **Verification:** TypeScript clean ✓, Mobile build clean ✓
 
+### Time Slot Fix + Fake Data Cleanup (2026-03-03)
+
+**Time slots updated (9:30 AM start):**
+- `app/dashboard/lib/types.ts` — `TIME_SLOTS` now starts at `'9:30 AM'` (was `'10:00 AM'`)
+- `public/mobile-app/js/config.js` — `timeSlots` updated to match
+- Courts 1&2: bookable 9:30 AM – 10:00 PM (lights out 11 PM)
+- Courts 3&4: bookable 9:30 AM – 8:00 PM (no lights)
+
+**Supabase time format fix:**
+- Existing bookings had malformed time strings (`930am`, `11am`, `3pm`, `1030am`) that didn't match `TIME_SLOTS` format (`'9:30 AM'`, `'11:00 AM'` etc.)
+- Root cause of empty calendar grid: `isSlotBooked()` uses `TIME_SLOTS.indexOf(b.time)` which returns -1 for malformed formats
+- Fixed via SQL UPDATE in Supabase to convert all times to proper 12h format with space before AM/PM
+
+**Fake demo data cleanup:**
+- Alex Thompson and Peter Gibson bookings were fake demo data under admin0 account
+- User needs to DELETE from bookings + booking_participants + notifications in Supabase
+- Note: Peter Gibson is a real board member (Past President) — only the fake bookings are deleted, not his AboutTab/events.js entries
+
 ## TODO / REMINDERS
 - **Junior Summer Camp dates**: User is waiting on real dates from Mark Taylor. When received, update the `junior-summer-camp` event across: `supabase/seed.sql`, `app/dashboard/lib/data.ts`, `public/mobile-app/js/events.js`, and run UPDATE SQL on live Supabase. Also update date/time in `app/(landing)/layout.tsx` JSON-LD if camp is featured there.
 

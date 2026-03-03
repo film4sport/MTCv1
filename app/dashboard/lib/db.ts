@@ -24,16 +24,18 @@ export async function fetchMembers(): Promise<User[]> {
 }
 
 export async function updateProfile(userId: string, updates: { ntrp?: number; name?: string; skill_level?: string; skill_level_set?: boolean; membership_type?: string; family_id?: string; avatar?: string }): Promise<void> {
-  await supabase.from('profiles').update(updates).eq('id', userId);
+  const { error } = await supabase.from('profiles').update(updates).eq('id', userId);
+  if (error) throw error;
 }
 
 // ─── Bookings ───────────────────────────────────────────
 
 export async function fetchBookings(): Promise<Booking[]> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('bookings')
     .select('*, booking_participants(*)')
     .order('date', { ascending: true });
+  if (error) { console.error('[MTC] fetchBookings error:', error.message); throw error; }
   if (!data) return [];
   return data.map(b => ({
     id: b.id,
@@ -58,7 +60,7 @@ export async function fetchBookings(): Promise<Booking[]> {
 }
 
 export async function createBooking(booking: Booking): Promise<void> {
-  await supabase.from('bookings').insert({
+  const { error } = await supabase.from('bookings').insert({
     id: booking.id,
     court_id: booking.courtId,
     court_name: booking.courtName,
@@ -74,21 +76,24 @@ export async function createBooking(booking: Booking): Promise<void> {
     duration: booking.duration || null,
     booked_for: booking.bookedFor || null,
   });
+  if (error) throw error;
 
   // Insert participants
   if (booking.participants?.length) {
-    await supabase.from('booking_participants').insert(
+    const { error: pErr } = await supabase.from('booking_participants').insert(
       booking.participants.map(p => ({
         booking_id: booking.id,
         participant_id: p.id,
         participant_name: p.name,
       }))
     );
+    if (pErr) throw pErr;
   }
 }
 
 export async function cancelBooking(id: string): Promise<void> {
-  await supabase.from('bookings').update({ status: 'cancelled' }).eq('id', id);
+  const { error } = await supabase.from('bookings').update({ status: 'cancelled' }).eq('id', id);
+  if (error) throw error;
 }
 
 // ─── Events ─────────────────────────────────────────────
@@ -125,9 +130,11 @@ export async function toggleEventRsvp(eventId: string, userName: string): Promis
     .single();
 
   if (existing) {
-    await supabase.from('event_attendees').delete().eq('id', existing.id);
+    const { error } = await supabase.from('event_attendees').delete().eq('id', existing.id);
+    if (error) throw error;
   } else {
-    await supabase.from('event_attendees').insert({ event_id: eventId, user_name: userName });
+    const { error } = await supabase.from('event_attendees').insert({ event_id: eventId, user_name: userName });
+    if (error) throw error;
   }
 }
 
@@ -153,7 +160,7 @@ export async function fetchPartners(): Promise<Partner[]> {
 }
 
 export async function createPartner(partner: Partner): Promise<void> {
-  await supabase.from('partners').insert({
+  const { error } = await supabase.from('partners').insert({
     id: partner.id,
     user_id: partner.userId,
     name: partner.name,
@@ -167,19 +174,22 @@ export async function createPartner(partner: Partner): Promise<void> {
     message: partner.message || null,
     status: partner.status,
   });
+  if (error) throw error;
 }
 
 export async function deletePartner(partnerId: string): Promise<void> {
-  await supabase.from('partners').delete().eq('id', partnerId);
+  const { error } = await supabase.from('partners').delete().eq('id', partnerId);
+  if (error) throw error;
 }
 
 export async function markMessagesRead(conversationId: number, userId: string): Promise<void> {
-  await supabase
+  const { error } = await supabase
     .from('messages')
     .update({ read: true })
     .eq('conversation_id', conversationId)
     .eq('to_id', userId)
     .eq('read', false);
+  if (error) throw error;
 }
 
 // ─── Conversations & Messages ───────────────────────────
@@ -247,7 +257,7 @@ export async function sendMessageByUsers(message: {
     conversationId = newConv.id;
   }
 
-  await supabase.from('messages').insert({
+  const { error: msgErr } = await supabase.from('messages').insert({
     id: message.id,
     conversation_id: conversationId,
     from_id: message.fromId,
@@ -258,12 +268,14 @@ export async function sendMessageByUsers(message: {
     timestamp,
     read: false,
   });
+  if (msgErr) throw msgErr;
 
   // Update conversation's last message
-  await supabase.from('conversations').update({
+  const { error: convErr } = await supabase.from('conversations').update({
     last_message: message.text,
     last_timestamp: timestamp,
   }).eq('id', conversationId);
+  if (convErr) throw convErr;
 }
 
 // ─── Announcements ──────────────────────────────────────
@@ -288,25 +300,29 @@ export async function fetchAnnouncements(userId: string): Promise<Announcement[]
 }
 
 export async function dismissAnnouncement(announcementId: string, userId: string): Promise<void> {
-  await supabase.from('announcement_dismissals').insert({
+  const { error } = await supabase.from('announcement_dismissals').insert({
     announcement_id: announcementId,
     user_id: userId,
   });
+  if (error) throw error;
 }
 
 export async function createAnnouncement(announcement: Announcement): Promise<void> {
-  await supabase.from('announcements').insert({
+  const { error } = await supabase.from('announcements').insert({
     id: announcement.id,
     text: announcement.text,
     type: announcement.type,
     date: announcement.date,
   });
+  if (error) throw error;
 }
 
 export async function deleteAnnouncement(id: string): Promise<void> {
   // Delete dismissals first (FK), then the announcement
-  await supabase.from('announcement_dismissals').delete().eq('announcement_id', id);
-  await supabase.from('announcements').delete().eq('id', id);
+  const { error: dErr } = await supabase.from('announcement_dismissals').delete().eq('announcement_id', id);
+  if (dErr) throw dErr;
+  const { error } = await supabase.from('announcements').delete().eq('id', id);
+  if (error) throw error;
 }
 
 // ─── Courts ─────────────────────────────────────────────
@@ -323,7 +339,8 @@ export async function fetchCourts(): Promise<Court[]> {
 }
 
 export async function updateCourtStatus(courtId: number, status: string): Promise<void> {
-  await supabase.from('courts').update({ status }).eq('id', courtId);
+  const { error } = await supabase.from('courts').update({ status }).eq('id', courtId);
+  if (error) throw error;
 }
 
 // ─── Notifications ──────────────────────────────────────
@@ -346,7 +363,7 @@ export async function fetchNotifications(userId: string): Promise<Notification[]
 }
 
 export async function createNotification(userId: string, notification: Omit<Notification, 'read'>): Promise<void> {
-  await supabase.from('notifications').insert({
+  const { error } = await supabase.from('notifications').insert({
     id: notification.id,
     user_id: userId,
     type: notification.type,
@@ -355,14 +372,17 @@ export async function createNotification(userId: string, notification: Omit<Noti
     timestamp: notification.timestamp,
     read: false,
   });
+  if (error) throw error;
 }
 
 export async function markNotificationRead(id: string): Promise<void> {
-  await supabase.from('notifications').update({ read: true }).eq('id', id);
+  const { error } = await supabase.from('notifications').update({ read: true }).eq('id', id);
+  if (error) throw error;
 }
 
 export async function clearNotifications(userId: string): Promise<void> {
-  await supabase.from('notifications').update({ read: true }).eq('user_id', userId).eq('read', false);
+  const { error } = await supabase.from('notifications').update({ read: true }).eq('user_id', userId).eq('read', false);
+  if (error) throw error;
 }
 
 // ─── Coaching Programs ──────────────────────────────────
@@ -395,7 +415,7 @@ export async function fetchPrograms(): Promise<CoachingProgram[]> {
 }
 
 export async function createProgram(program: CoachingProgram): Promise<void> {
-  await supabase.from('coaching_programs').insert({
+  const { error } = await supabase.from('coaching_programs').insert({
     id: program.id,
     title: program.title,
     type: program.type,
@@ -408,9 +428,10 @@ export async function createProgram(program: CoachingProgram): Promise<void> {
     spots_total: program.spotsTotal,
     status: program.status,
   });
+  if (error) throw error;
 
   if (program.sessions.length) {
-    await supabase.from('program_sessions').insert(
+    const { error: sErr } = await supabase.from('program_sessions').insert(
       program.sessions.map(s => ({
         program_id: program.id,
         date: s.date,
@@ -418,25 +439,29 @@ export async function createProgram(program: CoachingProgram): Promise<void> {
         duration: s.duration,
       }))
     );
+    if (sErr) throw sErr;
   }
 }
 
 export async function cancelProgram(programId: string): Promise<void> {
-  await supabase.from('coaching_programs').update({ status: 'cancelled' }).eq('id', programId);
+  const { error } = await supabase.from('coaching_programs').update({ status: 'cancelled' }).eq('id', programId);
+  if (error) throw error;
 }
 
 export async function enrollInProgram(programId: string, memberId: string): Promise<void> {
-  await supabase.from('program_enrollments').insert({
+  const { error } = await supabase.from('program_enrollments').insert({
     program_id: programId,
     member_id: memberId,
   });
+  if (error) throw error;
 }
 
 export async function withdrawFromProgram(programId: string, memberId: string): Promise<void> {
-  await supabase.from('program_enrollments')
+  const { error } = await supabase.from('program_enrollments')
     .delete()
     .eq('program_id', programId)
     .eq('member_id', memberId);
+  if (error) throw error;
 }
 
 // ─── Notification Preferences ───────────────────────────
@@ -458,20 +483,23 @@ export async function fetchNotificationPreferences(userId: string): Promise<Noti
 }
 
 export async function updateNotificationPreferences(userId: string, prefs: NotificationPreferences): Promise<void> {
-  await supabase.from('notification_preferences').upsert({
+  const { error } = await supabase.from('notification_preferences').upsert({
     user_id: userId,
     ...prefs,
   });
+  if (error) throw error;
 }
 
 // ─── Member Management (Admin) ──────────────────────────
 
 export async function pauseMember(userId: string): Promise<void> {
-  await supabase.from('profiles').update({ status: 'paused' }).eq('id', userId);
+  const { error } = await supabase.from('profiles').update({ status: 'paused' }).eq('id', userId);
+  if (error) throw error;
 }
 
 export async function unpauseMember(userId: string): Promise<void> {
-  await supabase.from('profiles').update({ status: 'active' }).eq('id', userId);
+  const { error } = await supabase.from('profiles').update({ status: 'active' }).eq('id', userId);
+  if (error) throw error;
 }
 
 export async function deleteMember(userId: string): Promise<void> {
@@ -491,12 +519,13 @@ export async function getGateCode(): Promise<string | null> {
 }
 
 export async function updateGateCode(code: string, adminId: string): Promise<void> {
-  await supabase.from('club_settings').upsert({
+  const { error } = await supabase.from('club_settings').upsert({
     key: 'gate_code',
     value: code,
     updated_at: new Date().toISOString(),
     updated_by: adminId,
   });
+  if (error) throw error;
 }
 
 // ─── Family Management ──────────────────────────────────
@@ -560,8 +589,9 @@ export async function removeFamilyMember(memberId: string): Promise<void> {
 // ─── Welcome Message (Signup) ───────────────────────────
 
 export async function sendWelcomeMessage(userId: string, userName: string): Promise<void> {
-  await supabase.rpc('send_welcome_message', {
+  const { error } = await supabase.rpc('send_welcome_message', {
     new_user_id: userId,
     new_user_name: userName,
   });
+  if (error) throw error;
 }
