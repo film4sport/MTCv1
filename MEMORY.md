@@ -342,6 +342,20 @@ Two major features implemented across 10+ files:
 - RLS policies for families + family_members
 - Indexes
 
+### Polish Pass Session (2026-03-03)
+3 fixes applied:
+
+**Booking Emails:**
+- `app/api/booking-email/route.ts` — `buildEmailHTML` call now passes `bookedFor` param. Family member name shows in confirmation emails ("Court booked for [name]" / "Booked for" row in details table).
+
+**Admin Panel:**
+- `app/dashboard/admin/page.tsx` — Added "Membership" column to members table (Adult/Family/Junior badges with purple/blue/green colors). CSV export now includes Membership + Status columns.
+
+**Member Directory:**
+- `app/dashboard/directory/page.tsx` — Family membership badge shown on member cards (purple "Family" tag next to name).
+
+**Verification:** TypeScript clean ✓, mobile build done (mtc-court-04f8b3c1)
+
 ## TODO / REMINDERS
 - **Junior Summer Camp dates**: User is waiting on real dates from Mark Taylor. When received, update the `junior-summer-camp` event across: `supabase/seed.sql`, `app/dashboard/lib/data.ts`, `public/mobile-app/js/events.js`, and run UPDATE SQL on live Supabase. Also update date/time in `app/(landing)/layout.tsx` JSON-LD if camp is featured there.
 
