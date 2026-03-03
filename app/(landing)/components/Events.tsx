@@ -12,21 +12,21 @@ const categoryColors: Record<string, { accent: string; bg: string; text: string 
 const events = [
   {
     category: 'coaching',
-    isoDate: '2026-03-08',
-    date: 'March 1 - 22, 2026',
-    title: 'Beginner Group Clinic',
+    isoDate: '2026-05-09',
+    date: 'Mon / Tue / Thu / Fri',
+    title: 'Junior Programs',
     description:
-      '4-week beginner clinic with Coach Mark Taylor. Covers grips, strokes, footwork, and match play basics. Saturdays 10:00 AM on Court 3.',
-    highlight: '$120 · 4 Weeks',
+      'Munchkin (Thu 4:30-5), Red Ball (Thu 5-6), Orange (Tue 4-5), Green (Tue 5-6), Teen (Mon 5-6, Tue 6-7, Fri 4:30-5:30). All levels welcome!',
+    highlight: 'Ages 4-17',
   },
   {
     category: 'coaching',
-    isoDate: '2026-05-10',
-    date: 'Season 2026',
-    title: 'Private & Group Lessons',
+    isoDate: '2026-05-09',
+    date: 'Mon / Tue / Fri',
+    title: 'Adult Programs',
     description:
-      'Book private or group lessons with Coach Mark Taylor. All ages and skill levels. Contact the club to schedule your sessions.',
-    highlight: 'Contact to Book',
+      'Live Ball (Mon 9:30-11 AM & 6-7:30 PM, Fri 5:30-7), Team Practice (Mon 11-1), Adult lesson (Tue 8:30-9:30), House League (Fri 7-9).',
+    highlight: 'All Levels',
   },
   {
     category: 'social',
@@ -95,10 +95,10 @@ const events = [
     category: 'camp',
     isoDate: '2026-07-01',
     date: 'Summer 2026 · Dates TBA',
-    title: 'Junior Summer Camp',
+    title: 'Summer Camps',
     description:
-      'Intensive camp for juniors aged 8-14 with Mark Taylor. Daily drills, match play, fitness, and fun activities. All skill levels. Exact dates coming soon!',
-    highlight: 'Ages 8-14 · TBA',
+      'Junior camps coming this summer! Dates are being confirmed once pros are available. Stay tuned for registration details.',
+    highlight: 'Dates Coming Soon',
   },
   {
     category: 'social',

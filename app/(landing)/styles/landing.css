@@ -1081,15 +1081,10 @@ html, body {
 .learn-more-arrow { transition: transform 0.2s ease; }
 a:hover .learn-more-arrow { transform: translateX(4px); }
 
-/* ── Hero CTA Breathing Pulse ── */
+/* ── Hero CTA Static Glow ── */
 .hero-cta-pulse {
-  animation: ctaPulse 2.5s ease-in-out infinite;
+  box-shadow: 0 4px 24px rgba(212, 225, 87, 0.55), 0 0 40px rgba(212, 225, 87, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.4);
 }
-@keyframes ctaPulse {
-  0%, 100% { box-shadow: 0 4px 16px rgba(212, 225, 87, 0.3), inset 0 1px 2px rgba(255, 255, 255, 0.4); }
-  50% { box-shadow: 0 4px 24px rgba(212, 225, 87, 0.55), 0 0 40px rgba(212, 225, 87, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.4); }
-}
-.hero-cta-pulse:hover { animation: none; }
 
 /* ── Event Card Hover Border Shift ── */
 .event-card {
