@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signUp, signIn } from '../dashboard/lib/auth';
-import { sendWelcomeMessage } from '../dashboard/lib/db';
+import { sendWelcomeMessage, createFamily, addFamilyMember } from '../dashboard/lib/db';
 import { membershipTypes, signupMembershipTypes, waiverText, acknowledgementText } from '../info/data';
 
 export default function SignupPage() {
@@ -24,6 +24,9 @@ export default function SignupPage() {
   const [signupLoading, setSignupLoading] = useState(false);
   const [emailConfirmPending, setEmailConfirmPending] = useState(false);
   const [existingProfile, setExistingProfile] = useState<{ name: string; email: string; role?: string; status?: string } | null>(null);
+  const [familyMemberInputs, setFamilyMemberInputs] = useState<{ name: string; type: 'adult' | 'junior'; birthYear: string }[]>([]);
+  const isFamily = signupData.membershipType === 'family';
+  const totalSteps = isFamily ? 7 : 6;
 
   // Load existing profile from localStorage
   useEffect(() => {
@@ -35,7 +38,7 @@ export default function SignupPage() {
 
   // Auto-detect if waiver/ack content fits without scrolling (large screens)
   useEffect(() => {
-    if (signupStep === 4) {
+    if (signupStep === 5) {
       const checkFit = () => {
         if (waiverRef.current) {
           const { scrollHeight, clientHeight } = waiverRef.current;
@@ -52,7 +55,7 @@ export default function SignupPage() {
 
   // Auto-redirect to dashboard after signup completion (skip if email verification pending)
   useEffect(() => {
-    if (signupStep !== 6 || emailConfirmPending) return;
+    if (signupStep !== totalSteps || emailConfirmPending) return;
     const interval = setInterval(() => {
       setRedirectCount(prev => {
         if (prev <= 1) {
@@ -64,7 +67,7 @@ export default function SignupPage() {
       });
     }, 1000);
     return () => clearInterval(interval);
-  }, [signupStep, router, emailConfirmPending]);
+  }, [signupStep, totalSteps, router, emailConfirmPending]);
 
   const handleWaiverScroll = () => {
     if (waiverRef.current) {
@@ -106,7 +109,7 @@ export default function SignupPage() {
       if (emailConfirmRequired) {
         setEmailConfirmPending(true);
         setSignupLoading(false);
-        setSignupStep(6);
+        setSignupStep(totalSteps);
         return;
       }
 
@@ -123,7 +126,7 @@ export default function SignupPage() {
       localStorage.setItem('mtc-current-user', JSON.stringify(loggedInUser || user));
 
       setSignupLoading(false);
-      setSignupStep(6);
+      setSignupStep(totalSteps);
     } catch {
       setSignupError('Something went wrong. Please try again.');
       setSignupLoading(false);
@@ -177,10 +180,10 @@ export default function SignupPage() {
 
         {/* Progress Steps */}
         <div className="flex items-center justify-center gap-2 mb-10">
-          {[1, 2, 3, 4, 5, 6].map((step) => (
+          {Array.from({ length: totalSteps }, (_, i) => i + 1).map((step) => (
             <div key={step} className="flex items-center gap-2">
               <div
-                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors"
+                className={`${totalSteps > 6 ? 'w-6 h-6 sm:w-7 sm:h-7' : 'w-7 h-7 sm:w-8 sm:h-8'} rounded-full flex items-center justify-center text-xs font-bold transition-colors`}
                 style={
                   signupStep >= step
                     ? { backgroundColor: '#6b7a3d', color: '#fff' }
@@ -195,8 +198,8 @@ export default function SignupPage() {
                   step
                 )}
               </div>
-              {step < 6 && (
-                <div className="w-6 sm:w-8 h-0.5" style={{ backgroundColor: signupStep > step ? '#6b7a3d' : '#e0dcd3' }} />
+              {step < totalSteps && (
+                <div className={`${totalSteps > 6 ? 'w-4 sm:w-6' : 'w-6 sm:w-8'} h-0.5`} style={{ backgroundColor: signupStep > step ? '#6b7a3d' : '#e0dcd3' }} />
               )}
             </div>
           ))}
@@ -352,7 +355,7 @@ export default function SignupPage() {
                     return;
                   }
                   setSignupError('');
-                  setSignupStep(3);
+                  setSignupStep(isFamily ? 3 : 4);
                 }}
                 disabled={!signupData.name.trim() || !signupData.email.trim() || signupData.password.length < 8 || confirmPassword !== signupData.password}
                 className="flex-1 px-6 py-3 rounded-full text-sm font-semibold transition-all"
@@ -368,8 +371,123 @@ export default function SignupPage() {
           </div>
         )}
 
-        {/* Step 3: Skill Level */}
-        {signupStep === 3 && (
+        {/* Step 3: Family Members (family only) */}
+        {signupStep === 3 && isFamily && (
+          <div>
+            <h3 className="headline-font text-2xl mb-2 text-center" style={{ color: '#2a2f1e' }}>Family Members</h3>
+            <p className="text-sm text-center mb-8" style={{ color: '#6b7266' }}>
+              Add up to 1 additional adult and 4 juniors (under 18). You can also add members later from your dashboard.
+            </p>
+
+            <div className="space-y-4">
+              {familyMemberInputs.map((fm, idx) => (
+                <div key={idx} className="rounded-xl p-4 flex items-start gap-3" style={{ backgroundColor: '#faf8f3', border: '1px solid #e0dcd3' }}>
+                  <div className="flex-1 space-y-3">
+                    <input
+                      type="text"
+                      value={fm.name}
+                      onChange={e => {
+                        const updated = [...familyMemberInputs];
+                        updated[idx] = { ...updated[idx], name: e.target.value };
+                        setFamilyMemberInputs(updated);
+                      }}
+                      placeholder="Full name"
+                      maxLength={80}
+                      className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+                      style={{ backgroundColor: '#fff', border: '1px solid #e0dcd3', color: '#2a2f1e' }}
+                    />
+                    <div className="flex items-center gap-3">
+                      <div className="flex rounded-lg overflow-hidden" style={{ border: '1px solid #e0dcd3' }}>
+                        {(['adult', 'junior'] as const).map(t => (
+                          <button
+                            key={t}
+                            onClick={() => {
+                              const updated = [...familyMemberInputs];
+                              updated[idx] = { ...updated[idx], type: t };
+                              setFamilyMemberInputs(updated);
+                            }}
+                            className="px-3 py-1.5 text-xs font-medium transition-colors"
+                            style={fm.type === t ? { backgroundColor: '#6b7a3d', color: '#fff' } : { backgroundColor: '#fff', color: '#6b7266' }}
+                          >
+                            {t === 'adult' ? 'Adult' : 'Junior (< 18)'}
+                          </button>
+                        ))}
+                      </div>
+                      {fm.type === 'junior' && (
+                        <input
+                          type="number"
+                          value={fm.birthYear}
+                          onChange={e => {
+                            const updated = [...familyMemberInputs];
+                            updated[idx] = { ...updated[idx], birthYear: e.target.value };
+                            setFamilyMemberInputs(updated);
+                          }}
+                          placeholder="Birth year"
+                          min={1950}
+                          max={new Date().getFullYear()}
+                          className="w-24 px-3 py-1.5 rounded-lg text-xs outline-none"
+                          style={{ backgroundColor: '#fff', border: '1px solid #e0dcd3', color: '#2a2f1e' }}
+                        />
+                      )}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setFamilyMemberInputs(prev => prev.filter((_, i) => i !== idx))}
+                    className="p-1.5 rounded-lg hover:bg-red-50 transition-colors"
+                    style={{ color: '#ef4444' }}
+                    aria-label="Remove family member"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {/* Add member button */}
+            {familyMemberInputs.length < 5 && (
+              <button
+                onClick={() => {
+                  const adultCount = 1 + familyMemberInputs.filter(f => f.type === 'adult').length;
+                  const defaultType = adultCount >= 2 ? 'junior' : 'adult';
+                  setFamilyMemberInputs(prev => [...prev, { name: '', type: defaultType, birthYear: '' }]);
+                }}
+                disabled={
+                  familyMemberInputs.filter(f => f.type === 'adult').length >= 1 &&
+                  familyMemberInputs.filter(f => f.type === 'junior').length >= 4
+                }
+                className="mt-4 w-full py-3 rounded-xl text-sm font-medium transition-all hover:opacity-90 flex items-center justify-center gap-2"
+                style={{ backgroundColor: 'rgba(107, 122, 61, 0.08)', color: '#6b7a3d', border: '1px dashed rgba(107, 122, 61, 0.3)' }}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                Add Family Member
+              </button>
+            )}
+
+            <p className="text-xs text-center mt-3" style={{ color: '#999' }}>
+              {familyMemberInputs.length === 0 ? 'You can skip this and add family members later from your dashboard.' : `${familyMemberInputs.length} member${familyMemberInputs.length !== 1 ? 's' : ''} added`}
+            </p>
+
+            <div className="flex items-center gap-4 mt-8">
+              <button
+                onClick={() => setSignupStep(2)}
+                className="px-6 py-3 rounded-full text-sm font-medium transition-all"
+                style={{ backgroundColor: '#faf8f3', color: '#6b7266', border: '1px solid #e0dcd3' }}
+              >
+                Back
+              </button>
+              <button
+                onClick={() => setSignupStep(4)}
+                className="flex-1 px-6 py-3 rounded-full text-sm font-semibold transition-all"
+                style={{ backgroundColor: '#6b7a3d', color: '#fff' }}
+              >
+                {familyMemberInputs.length === 0 ? 'Skip for Now' : 'Continue'}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Step 4: Skill Level */}
+        {signupStep === 4 && (
           <div>
             <h3 className="headline-font text-2xl mb-2 text-center" style={{ color: '#2a2f1e' }}>Your Skill Level</h3>
             <p className="text-sm text-center mb-8" style={{ color: '#6b7266' }}>This helps us match you with the right partners and programs.</p>
@@ -400,14 +518,14 @@ export default function SignupPage() {
             <p className="text-xs text-center mt-4" style={{ color: '#999' }}>You can change this anytime in your Profile settings.</p>
             <div className="flex items-center gap-4 mt-8">
               <button
-                onClick={() => { setSignupStep(2); }}
+                onClick={() => { setSignupStep(isFamily ? 3 : 2); }}
                 className="px-6 py-3 rounded-full text-sm font-medium transition-all"
                 style={{ backgroundColor: '#faf8f3', color: '#6b7266', border: '1px solid #e0dcd3' }}
               >
                 Back
               </button>
               <button
-                onClick={() => setSignupStep(4)}
+                onClick={() => setSignupStep(5)}
                 disabled={!signupData.skillLevel}
                 className="flex-1 px-6 py-3 rounded-full text-sm font-semibold transition-all"
                 style={
@@ -422,8 +540,8 @@ export default function SignupPage() {
           </div>
         )}
 
-        {/* Step 4: Waiver */}
-        {signupStep === 4 && (
+        {/* Step 5: Waiver */}
+        {signupStep === 5 && (
           <div>
             <h3 className="headline-font text-2xl mb-2 text-center" style={{ color: '#2a2f1e' }}>Waiver & Acknowledgement</h3>
             <p className="text-sm text-center mb-8" style={{ color: '#6b7266' }}>Please read both documents carefully. Scroll to the bottom of each to proceed.</p>

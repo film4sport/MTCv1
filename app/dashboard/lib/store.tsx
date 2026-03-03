@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef, type ReactNode } from 'react';
-import type { User, Court, Booking, ClubEvent, Partner, Conversation, Announcement, Notification, WeatherData, AdminAnalytics, CoachingProgram, NotificationPreferences } from './types';
+import type { User, Court, Booking, ClubEvent, Partner, Conversation, Announcement, Notification, WeatherData, AdminAnalytics, CoachingProgram, NotificationPreferences, FamilyMember, ActiveProfile } from './types';
 import { CLUB_LOCATION, DEFAULT_NOTIFICATION_PREFS } from './types';
 import { DEFAULT_COURTS, DEFAULT_EVENTS, DEFAULT_ANNOUNCEMENTS, DEFAULT_ANALYTICS, DEFAULT_PROGRAMS } from './data';
 import { generateId } from './utils';
@@ -53,6 +53,15 @@ interface AppState {
   cancelProgram: (programId: string) => void;
   enrollInProgram: (programId: string, memberId: string, memberName: string) => void;
   withdrawFromProgram: (programId: string, memberId: string) => void;
+
+  // Family
+  familyMembers: FamilyMember[];
+  setFamilyMembers: (members: FamilyMember[]) => void;
+  activeProfile: ActiveProfile;
+  switchProfile: (profile: ActiveProfile) => void;
+  activeDisplayName: string;
+  activeAvatar: string;
+  activeSkillLevel: string;
 
   // Notification preferences
   notificationPreferences: NotificationPreferences;
@@ -118,6 +127,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [analytics] = useState<AdminAnalytics>(DEFAULT_ANALYTICS);
   const [programs, setPrograms] = useState<CoachingProgram[]>([]);
   const [notificationPreferences, setNotificationPreferences] = useState<NotificationPreferences>(DEFAULT_NOTIFICATION_PREFS);
+  const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
+  const [activeProfile, setActiveProfile] = useState<ActiveProfile>({ type: 'primary' });
   const { showToast } = useToast();
 
   // Load user from Supabase session on mount (localStorage as instant fallback)
@@ -155,6 +166,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setNotifications(safeArray(notifications));
         setPrograms(safeArray(programs));
         if (notifPrefs) setNotificationPreferences(notifPrefs);
+
+        // Fetch family members if user has a family membership
+        if (user.familyId) {
+          db.fetchFamilyMembers(user.familyId).then(fm => setFamilyMembers(safeArray(fm))).catch(err => reportError(err, 'Family'));
+        }
+
+        // Restore active profile from localStorage
+        const savedProfile = loadJSON<ActiveProfile>('mtc-active-profile', { type: 'primary' });
+        setActiveProfile(savedProfile);
       } else if (savedUser) {
         // Supabase session expired — clear cached user
         setCurrentUser(null);
@@ -281,6 +301,28 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  // Family — profile switching
+  const switchProfile = useCallback((profile: ActiveProfile) => {
+    setActiveProfile(profile);
+    saveJSON('mtc-active-profile', profile);
+  }, []);
+
+  // Computed: active display name, avatar, skill level based on activeProfile
+  const activeDisplayName = useMemo(() => {
+    if (activeProfile.type === 'family_member') return activeProfile.member.name;
+    return currentUser?.name || '';
+  }, [activeProfile, currentUser?.name]);
+
+  const activeAvatar = useMemo(() => {
+    if (activeProfile.type === 'family_member') return activeProfile.member.avatar || 'tennis-male-1';
+    return currentUser?.avatar || 'tennis-male-1';
+  }, [activeProfile, currentUser?.avatar]);
+
+  const activeSkillLevel = useMemo(() => {
+    if (activeProfile.type === 'family_member') return activeProfile.member.skillLevel || 'intermediate';
+    return currentUser?.skillLevel || 'intermediate';
+  }, [activeProfile, currentUser?.skillLevel]);
+
   // Auth — uses Supabase signIn from auth.ts
   const login = useCallback(async (email: string, password: string): Promise<boolean> => {
     const user = await signIn(email, password);
@@ -293,8 +335,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const logout = useCallback(async () => {
     await signOut();
     setCurrentUser(null);
+    setFamilyMembers([]);
+    setActiveProfile({ type: 'primary' });
     if (typeof window !== 'undefined') {
       localStorage.removeItem('mtc-current-user');
+      localStorage.removeItem('mtc-active-profile');
       // Hard redirect to login — avoids race condition with middleware cookie cleanup
       window.location.href = '/login';
     }
@@ -759,15 +804,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
     announcements, setAnnouncements, dismissAnnouncement, notifications, setNotifications, markNotificationRead,
     clearNotifications, weather, analytics,
     programs, setPrograms, addProgram, cancelProgram, enrollInProgram, withdrawFromProgram,
+    familyMembers, setFamilyMembers, activeProfile, switchProfile, activeDisplayName, activeAvatar, activeSkillLevel,
     notificationPreferences, setNotificationPreferences,
     isLoaded, refreshData,
   }), [
     currentUser, members, courts, bookings, events, partners, conversations,
     announcements, notifications, weather, analytics, programs, notificationPreferences, isLoaded,
+    familyMembers, activeProfile, activeDisplayName, activeAvatar, activeSkillLevel,
     updateCurrentUser, login, logout, addBooking, cancelBooking, toggleRsvp,
     addPartner, removePartner, sendMessage, markConversationRead, dismissAnnouncement,
     markNotificationRead, clearNotifications, addProgram, cancelProgram,
-    enrollInProgram, withdrawFromProgram, refreshData,
+    enrollInProgram, withdrawFromProgram, switchProfile, refreshData,
   ]);
 
   return (

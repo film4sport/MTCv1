@@ -27,6 +27,8 @@ export async function signIn(email: string, password: string): Promise<User | nu
     ntrp: profile.ntrp ?? undefined,
     skillLevel: (profile.skill_level as SkillLevel) ?? undefined,
     skillLevelSet: profile.skill_level_set ?? false,
+    membershipType: (profile.membership_type as User['membershipType']) ?? undefined,
+    familyId: profile.family_id ?? undefined,
     memberSince: profile.member_since ?? undefined,
     avatar: profile.avatar ?? undefined,
   };
@@ -47,7 +49,7 @@ export async function signUp(
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: { name, role: 'member', membership_type: membershipType || 'single', skill_level: skillLevel || undefined } },
+    options: { data: { name, role: 'member', membership_type: membershipType || 'adult', skill_level: skillLevel || undefined } },
   });
 
   if (error) return { user: null, error: error.message };
@@ -131,6 +133,8 @@ export async function getCurrentUser(): Promise<User | null> {
     ntrp: profile.ntrp ?? undefined,
     skillLevel: (profile.skill_level as SkillLevel) ?? undefined,
     skillLevelSet: profile.skill_level_set ?? false,
+    membershipType: (profile.membership_type as User['membershipType']) ?? undefined,
+    familyId: profile.family_id ?? undefined,
     memberSince: profile.member_since ?? undefined,
     avatar: profile.avatar ?? undefined,
   };

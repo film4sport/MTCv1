@@ -1,6 +1,6 @@
 import { supabase } from '../../lib/supabase';
 import { reportError } from '../../lib/errorReporter';
-import type { Booking, ClubEvent, Partner, Conversation, Message, Announcement, Notification, CoachingProgram, NotificationPreferences, User, SkillLevel } from './types';
+import type { Booking, ClubEvent, Partner, Conversation, Message, Announcement, Notification, CoachingProgram, NotificationPreferences, User, SkillLevel, FamilyMember } from './types';
 
 // ─── Profiles ───────────────────────────────────────────
 
@@ -16,12 +16,14 @@ export async function fetchMembers(): Promise<User[]> {
     ntrp: p.ntrp ?? undefined,
     skillLevel: (p.skill_level as SkillLevel) ?? undefined,
     skillLevelSet: p.skill_level_set ?? false,
+    membershipType: (p.membership_type as User['membershipType']) ?? undefined,
+    familyId: p.family_id ?? undefined,
     memberSince: p.member_since ?? undefined,
     avatar: p.avatar ?? undefined,
   }));
 }
 
-export async function updateProfile(userId: string, updates: { ntrp?: number; name?: string; skill_level?: string; skill_level_set?: boolean; avatar?: string }): Promise<void> {
+export async function updateProfile(userId: string, updates: { ntrp?: number; name?: string; skill_level?: string; skill_level_set?: boolean; membership_type?: string; family_id?: string; avatar?: string }): Promise<void> {
   await supabase.from('profiles').update(updates).eq('id', userId);
 }
 
@@ -482,6 +484,64 @@ export async function updateGateCode(code: string, adminId: string): Promise<voi
     updated_at: new Date().toISOString(),
     updated_by: adminId,
   });
+}
+
+// ─── Family Management ──────────────────────────────────
+
+export async function createFamily(primaryUserId: string, familyName: string): Promise<string | null> {
+  const { data, error } = await supabase
+    .from('families')
+    .insert({ primary_user_id: primaryUserId, name: familyName })
+    .select('id')
+    .single();
+  if (error) { reportError(error, 'createFamily'); return null; }
+  // Link the primary user's profile to this family
+  await supabase.from('profiles').update({ family_id: data.id, membership_type: 'family' }).eq('id', primaryUserId);
+  return data.id;
+}
+
+export async function fetchFamilyMembers(familyId: string): Promise<FamilyMember[]> {
+  const { data } = await supabase.from('family_members').select('*').eq('family_id', familyId).order('created_at');
+  if (!data) return [];
+  return data.map(m => ({
+    id: m.id,
+    familyId: m.family_id,
+    name: m.name,
+    type: m.type as 'adult' | 'junior',
+    skillLevel: (m.skill_level as SkillLevel) ?? undefined,
+    skillLevelSet: m.skill_level_set ?? false,
+    avatar: m.avatar ?? 'tennis-male-1',
+    birthYear: m.birth_year ?? undefined,
+  }));
+}
+
+export async function addFamilyMember(familyId: string, member: { name: string; type: 'adult' | 'junior'; birthYear?: number }): Promise<FamilyMember | null> {
+  const { data, error } = await supabase
+    .from('family_members')
+    .insert({ family_id: familyId, name: member.name, type: member.type, birth_year: member.birthYear ?? null })
+    .select('*')
+    .single();
+  if (error) { reportError(error, 'addFamilyMember'); return null; }
+  return {
+    id: data.id,
+    familyId: data.family_id,
+    name: data.name,
+    type: data.type as 'adult' | 'junior',
+    skillLevel: (data.skill_level as SkillLevel) ?? undefined,
+    skillLevelSet: data.skill_level_set ?? false,
+    avatar: data.avatar ?? 'tennis-male-1',
+    birthYear: data.birth_year ?? undefined,
+  };
+}
+
+export async function updateFamilyMember(memberId: string, updates: { name?: string; skill_level?: string; skill_level_set?: boolean; avatar?: string }): Promise<void> {
+  const { error } = await supabase.from('family_members').update(updates).eq('id', memberId);
+  if (error) reportError(error, 'updateFamilyMember');
+}
+
+export async function removeFamilyMember(memberId: string): Promise<void> {
+  const { error } = await supabase.from('family_members').delete().eq('id', memberId);
+  if (error) reportError(error, 'removeFamilyMember');
 }
 
 // ─── Welcome Message (Signup) ───────────────────────────
