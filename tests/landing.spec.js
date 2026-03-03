@@ -124,7 +124,7 @@ test.describe('Events Section', () => {
   test('event cards are displayed', async ({ page }) => {
     const cards = page.locator('.event-card');
     const count = await cards.count();
-    expect(count).toBe(5);
+    expect(count).toBe(3);
   });
 
   test('event cards have warm background', async ({ page }) => {
