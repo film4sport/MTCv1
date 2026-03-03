@@ -436,6 +436,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          bookingId: booking.id,
           recipients,
           bookerName: currentUser.name,
           bookedFor: booking.bookedFor || undefined,

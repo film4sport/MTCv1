@@ -128,10 +128,34 @@ const filters = [
   { label: 'Social', value: 'social' },
 ];
 
+function EventCardSkeleton() {
+  return (
+    <div className="rounded-2xl overflow-hidden flex" style={{ backgroundColor: '#faf8f3', border: '1px solid #e0dcd3' }}>
+      <div className="w-1.5 flex-shrink-0 rounded-l-2xl" style={{ backgroundColor: '#e0dcd3' }} />
+      <div className="p-6 flex-1 flex flex-col gap-3">
+        <div className="flex justify-between">
+          <div className="h-3 w-16 rounded" style={{ backgroundColor: '#e8e4d9' }} />
+          <div className="h-3 w-24 rounded" style={{ backgroundColor: '#e8e4d9' }} />
+        </div>
+        <div className="h-5 w-3/4 rounded" style={{ backgroundColor: '#e8e4d9' }} />
+        <div className="h-3 w-full rounded" style={{ backgroundColor: '#e8e4d9' }} />
+        <div className="h-3 w-5/6 rounded" style={{ backgroundColor: '#e8e4d9' }} />
+        <div className="flex justify-between mt-auto pt-2">
+          <div className="h-7 w-20 rounded-lg" style={{ backgroundColor: '#e8e4d9' }} />
+          <div className="h-4 w-24 rounded" style={{ backgroundColor: '#e8e4d9' }} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Events() {
   const [filter, setFilter] = useState('all');
   const [animKey, setAnimKey] = useState(0);
+  const [mounted, setMounted] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => { setMounted(true); }, []);
 
   const today = new Date().toISOString().slice(0, 10);
   const filtered = filter === 'all' ? events : events.filter(e => e.category === filter);
@@ -209,7 +233,17 @@ export default function Events() {
 
         {/* Events Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-          {upcoming.map((event, index) => {
+          {!mounted && (
+            <>{[0, 1, 2].map(i => <EventCardSkeleton key={i} />)}</>
+          )}
+          {mounted && upcoming.length === 0 && (
+            <div className="md:col-span-2 lg:col-span-3 text-center py-12">
+              <p className="text-base" style={{ color: '#8a8578' }}>
+                No upcoming {filter === 'all' ? '' : filter} events right now — check back soon!
+              </p>
+            </div>
+          )}
+          {mounted && upcoming.map((event, index) => {
             const colors = categoryColors[event.category] || categoryColors.social;
             return (
               <div
