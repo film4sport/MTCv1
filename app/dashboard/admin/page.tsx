@@ -105,8 +105,12 @@ export default function AdminPage() {
     );
   }
 
+  const [exportFromDate, setExportFromDate] = useState('');
+
+  const MEMBERSHIP_FEES: Record<string, number> = { adult: 120, family: 240, junior: 55 };
+
   const exportToCsv = (filename: string, headers: string[], rows: string[][]) => {
-    const csv = [headers.join(','), ...rows.map(r => r.map(c => `"${c}"`).join(','))].join('\n');
+    const csv = [headers.join(','), ...rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(','))].join('\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -114,26 +118,65 @@ export default function AdminPage() {
     a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
-  };
-
-  const exportBookings = () => {
-    exportToCsv('mtc-bookings.csv',
-      ['ID', 'Court', 'Date', 'Time', 'Member', 'Status', 'Type'],
-      bookings.map(b => [b.id, b.courtName, b.date, b.time, b.userName, b.status, b.type])
-    );
+    showToast(`${filename} downloaded.`);
   };
 
   const exportMembers = () => {
+    const filtered = exportFromDate
+      ? members.filter(m => m.memberSince && m.memberSince >= exportFromDate)
+      : members;
     exportToCsv('mtc-members.csv',
-      ['Name', 'Email', 'Role', 'Membership', 'Skill Level', 'Status', 'Member Since'],
-      members.map(m => [m.name, m.email, m.role, m.membershipType || 'adult', m.skillLevel || '', m.status || 'active', m.memberSince || ''])
+      ['Name', 'Email', 'Role', 'Membership Type', 'Annual Fee', 'Skill Level', 'Status', 'Member Since'],
+      filtered.map(m => {
+        const type = (m.membershipType as string) || 'adult';
+        const fee = MEMBERSHIP_FEES[type] || MEMBERSHIP_FEES.adult;
+        return [m.name, m.email, m.role, type, `$${fee}`, m.skillLevel || '', m.status || 'active', m.memberSince || ''];
+      })
     );
   };
 
-  const exportRevenue = () => {
-    exportToCsv('mtc-revenue.csv',
-      ['Category', 'Amount', 'Percentage'],
-      analytics.revenueBreakdown.map(r => [r.category, `$${r.amount}`, `${r.percentage}%`])
+  const exportPayments = () => {
+    // Summarise expected revenue from membership fees
+    const filtered = exportFromDate
+      ? members.filter(m => m.memberSince && m.memberSince >= exportFromDate)
+      : members;
+    const rows: string[][] = filtered.map(m => {
+      const type = (m.membershipType as string) || 'adult';
+      const fee = MEMBERSHIP_FEES[type] || MEMBERSHIP_FEES.adult;
+      return [m.name, m.email, type, `$${fee}`, m.memberSince || '', m.status || 'active'];
+    });
+    const totalFees = filtered.reduce((s, m) => s + (MEMBERSHIP_FEES[(m.membershipType as string) || 'adult'] || MEMBERSHIP_FEES.adult), 0);
+    rows.push(['', '', '', '', '', '']);
+    rows.push(['TOTAL', '', `${filtered.length} members`, `$${totalFees}`, '', '']);
+    exportToCsv('mtc-payments.csv',
+      ['Name', 'Email', 'Membership Type', 'Annual Fee', 'Member Since', 'Status'],
+      rows
+    );
+  };
+
+  const exportCourtUsage = () => {
+    const fromDate = exportFromDate || '';
+    const filtered = bookings.filter(b => b.status === 'confirmed' && (!fromDate || b.date >= fromDate));
+    // Per-court summary
+    const courtMap = new Map<string, { total: number; byType: Record<string, number> }>();
+    for (const b of filtered) {
+      const entry = courtMap.get(b.courtName) || { total: 0, byType: {} };
+      entry.total++;
+      entry.byType[b.type] = (entry.byType[b.type] || 0) + 1;
+      courtMap.set(b.courtName, entry);
+    }
+    const rows: string[][] = [];
+    Array.from(courtMap.entries())
+      .sort((a, b) => b[1].total - a[1].total)
+      .forEach(([name, data]) => {
+        const types = Object.entries(data.byType).map(([t, c]) => `${t}: ${c}`).join(', ');
+        rows.push([name, String(data.total), types]);
+      });
+    rows.push(['', '', '']);
+    rows.push(['TOTAL', String(filtered.length), `${fromDate ? `from ${fromDate}` : 'all time'}`]);
+    exportToCsv('mtc-court-usage.csv',
+      ['Court', 'Total Bookings', 'Breakdown by Type'],
+      rows
     );
   };
 
@@ -204,11 +247,24 @@ export default function AdminPage() {
         {tab === 'dashboard' && (
           <div className="space-y-6">
             {/* Export Buttons */}
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap items-center gap-3">
+              <label className="inline-flex items-center gap-1.5 text-xs" style={{ color: '#6b7266' }}>
+                From:
+                <input
+                  type="date"
+                  value={exportFromDate}
+                  onChange={e => setExportFromDate(e.target.value)}
+                  className="px-2 py-1.5 rounded-lg text-xs"
+                  style={{ background: '#faf8f3', border: '1px solid #e0dcd3', color: '#2a2f1e' }}
+                />
+                {exportFromDate && (
+                  <button onClick={() => setExportFromDate('')} className="text-xs underline" style={{ color: '#6b7a3d' }}>Clear</button>
+                )}
+              </label>
               {[
-                { label: 'Export Bookings', onClick: exportBookings },
                 { label: 'Export Members', onClick: exportMembers },
-                { label: 'Export Revenue', onClick: exportRevenue },
+                { label: 'Export Payments', onClick: exportPayments },
+                { label: 'Export Court Usage', onClick: exportCourtUsage },
               ].map(btn => (
                 <button
                   key={btn.label}
