@@ -70,14 +70,17 @@ interface Recipient {
 }
 
 // Shared email HTML template — cream theme matching site design
-function buildEmailHTML(recipient: Recipient, courtName: string, formattedDate: string, time: string, matchType: string | undefined, durationMinutes: number, bookerName: string, allParticipantNames: string[]): string {
+function buildEmailHTML(recipient: Recipient, courtName: string, formattedDate: string, time: string, matchType: string | undefined, durationMinutes: number, bookerName: string, allParticipantNames: string[], bookedFor?: string): string {
   const isBooker = recipient.role === 'booker';
   const heading = isBooker ? 'Booking Confirmed' : 'You\'ve Been Added to a Booking';
   const greeting = `Hi ${recipient.name.split(' ')[0]},`;
   const subtext = isBooker
-    ? 'Your court has been reserved. A calendar invite is attached.'
-    : `${bookerName} added you to a court booking. A calendar invite is attached.`;
+    ? bookedFor ? `Court booked for ${bookedFor}. A calendar invite is attached.` : 'Your court has been reserved. A calendar invite is attached.'
+    : `${bookerName} added you to a court booking${bookedFor ? ` for ${bookedFor}` : ''}. A calendar invite is attached.`;
 
+  const bookedForSection = bookedFor
+    ? `<tr><td style="padding: 6px 0; font-size: 13px; color: #6b7266;">Booked for</td><td style="padding: 6px 0; font-size: 13px; font-weight: 500; color: #2a2f1e; text-align: right;">${bookedFor}</td></tr>`
+    : '';
   const playersSection = allParticipantNames.length > 0
     ? `<tr><td style="padding: 6px 0; font-size: 13px; color: #6b7266;">Playing with</td><td style="padding: 6px 0; font-size: 13px; font-weight: 500; color: #2a2f1e; text-align: right;">${allParticipantNames.filter(n => n !== recipient.name).join(', ') || 'None listed'}</td></tr>`
     : '';
@@ -129,6 +132,7 @@ function buildEmailHTML(recipient: Recipient, courtName: string, formattedDate: 
                   <td style="padding: 6px 0; font-size: 13px; color: #6b7266;">Type</td>
                   <td style="padding: 6px 0; font-size: 13px; font-weight: 500; color: #6b7a3d; text-align: right;">${matchType.charAt(0).toUpperCase() + matchType.slice(1)} &bull; ${durationMinutes} min</td>
                 </tr>` : ''}
+                ${bookedForSection ? `<tr><td colspan="2" style="border-bottom: 1px solid #f0ede6; height: 1px;"></td></tr>${bookedForSection}` : ''}
                 ${playersSection ? `<tr><td colspan="2" style="border-bottom: 1px solid #f0ede6; height: 1px;"></td></tr>${playersSection}` : ''}
               </table>
             </td></tr>
@@ -159,7 +163,7 @@ function buildEmailHTML(recipient: Recipient, courtName: string, formattedDate: 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { recipients, bookerName, courtName, date, time, duration, matchType } = body;
+    const { recipients, bookerName, bookedFor, courtName, date, time, duration, matchType } = body;
 
     // Support both old format (single email) and new format (recipients array)
     const recipientList: Recipient[] = recipients
@@ -262,7 +266,7 @@ export async function POST(request: Request) {
               from: `"Mono Tennis Club" <${smtpUser}>`,
               to: recipient.email,
               subject,
-              html: buildEmailHTML(recipient, courtName, formattedDate, time, matchType, durationMinutes, actualBookerName, allNames),
+              html: buildEmailHTML(recipient, courtName, formattedDate, time, matchType, durationMinutes, actualBookerName, allNames, bookedFor),
               icalEvent: {
                 filename: 'mtc-booking.ics',
                 method: 'REQUEST',

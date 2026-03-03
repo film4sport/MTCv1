@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useApp } from '../lib/store';
 
 interface TourStep {
   title: string;
@@ -49,18 +50,22 @@ const STEPS: TourStep[] = [
 ];
 
 export default function OnboardingTour() {
+  const { currentUser } = useApp();
   const [step, setStep] = useState(0);
   const [visible, setVisible] = useState(false);
   const [tooltipPos, setTooltipPos] = useState<{ top: number; left: number } | null>(null);
 
   useEffect(() => {
+    if (!currentUser?.id) return;
     try {
-      if (localStorage.getItem('mtc-onboarding-done') === 'true') return;
+      // Per-user key so tour shows for each new account (not blocked by other accounts on same device)
+      const key = `mtc-onboarding-done-${currentUser.id}`;
+      if (localStorage.getItem(key) === 'true') return;
     } catch { /* ignore */ }
     // Small delay so dashboard renders first
-    const timer = setTimeout(() => setVisible(true), 800);
+    const timer = setTimeout(() => setVisible(true), 1200);
     return () => clearTimeout(timer);
-  }, []);
+  }, [currentUser?.id]);
 
   const positionTooltip = useCallback(() => {
     const current = STEPS[step];
@@ -95,7 +100,9 @@ export default function OnboardingTour() {
 
   const finish = () => {
     setVisible(false);
-    try { localStorage.setItem('mtc-onboarding-done', 'true'); } catch { /* ignore */ }
+    try {
+      if (currentUser?.id) localStorage.setItem(`mtc-onboarding-done-${currentUser.id}`, 'true');
+    } catch { /* ignore */ }
   };
 
   if (!visible) return null;

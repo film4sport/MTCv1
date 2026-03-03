@@ -644,9 +644,30 @@ export default function SignupPage() {
                 {getMembershipLabel()}
               </div>
 
-              <div className="rounded-lg p-5 mb-6" style={{ backgroundColor: '#edeae3', border: '1px solid #e0dcd3' }}>
+              <div className="rounded-lg p-5 mb-4" style={{ backgroundColor: '#edeae3', border: '1px solid #e0dcd3' }}>
                 <div className="text-sm mb-1" style={{ color: '#6b7266' }}>Send Interac e-transfer to:</div>
-                <div className="font-bold text-lg" style={{ color: '#2a2f1e' }}>monotennis.payment@gmail.com</div>
+                <div className="flex items-center justify-center gap-2 mt-2">
+                  <span className="font-bold text-lg" style={{ color: '#2a2f1e' }}>monotennis.payment@gmail.com</span>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText('monotennis.payment@gmail.com');
+                      const btn = document.getElementById('copy-email-btn');
+                      if (btn) { btn.textContent = 'Copied!'; setTimeout(() => { btn.textContent = 'Copy'; }, 2000); }
+                    }}
+                    id="copy-email-btn"
+                    className="text-xs px-3 py-1 rounded-lg font-medium transition-all hover:opacity-80"
+                    style={{ backgroundColor: '#6b7a3d', color: '#fff' }}
+                  >
+                    Copy
+                  </button>
+                </div>
+              </div>
+              <div className="text-left rounded-lg p-4 mb-6 space-y-2" style={{ backgroundColor: 'rgba(107, 122, 61, 0.06)', border: '1px solid rgba(107, 122, 61, 0.12)' }}>
+                <p className="text-xs font-semibold" style={{ color: '#4a5528' }}>Instructions:</p>
+                <p className="text-xs" style={{ color: '#6b7266' }}>1. Open your banking app and select Interac e-Transfer</p>
+                <p className="text-xs" style={{ color: '#6b7266' }}>2. Send <strong style={{ color: '#2a2f1e' }}>${getMembershipPrice()}</strong> to the email above</p>
+                <p className="text-xs" style={{ color: '#6b7266' }}>3. In the message field, include your <strong style={{ color: '#2a2f1e' }}>full name</strong></p>
+                <p className="text-xs" style={{ color: '#6b7266' }}>4. Click &quot;I&apos;ve Sent the E-Transfer&quot; below to complete signup</p>
               </div>
             </div>
 
