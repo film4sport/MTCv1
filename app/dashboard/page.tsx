@@ -94,7 +94,7 @@ export default function DashboardHome() {
         ))}
 
         {/* Skill Level Reminder */}
-        {currentUser && currentUser.skillLevelSet === false && (
+        {currentUser && currentUser.skillLevelSet !== true && (
           <div
             className="flex items-center justify-between rounded-xl px-5 py-3.5 border animate-slideUp"
             style={{ background: 'linear-gradient(135deg, rgba(107, 122, 61, 0.08), rgba(212, 225, 87, 0.06))', borderColor: 'rgba(107, 122, 61, 0.2)' }}
