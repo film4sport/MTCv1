@@ -320,6 +320,20 @@ Two major features implemented across 10+ files:
 
 **TypeScript:** Clean ✓
 
+**Pricing Display:**
+- `app/info/data.ts` — Added `desc` field to all membershipTypes ("Up to 2 adults + 4 juniors, one account with switchable profiles" for family)
+- `app/signup/page.tsx` — Step 1 cards now show description text under each membership label
+- `app/info/components/MembershipTab.tsx` — Fees table now shows description under each fee label
+
+**Mobile PWA Family Parity:**
+- `app/api/mobile-auth/route.ts` — Now returns `membershipType`, `familyId`, and `familyMembers[]` array after login
+- `public/mobile-app/js/auth.js` — Stores `membershipType`/`familyId` on currentUser, stores `familyMembers` + `activeFamilyMember` in MTC.state + localStorage, clears on logout, restores on re-login
+- `public/mobile-app/js/profile.js` — Added family profile switcher: `switchFamilyProfile()`, `renderFamilySwitcher()`, `getActiveDisplayName()`; pill-based UI in profile screen
+- `public/mobile-app/js/booking.js` — Booking toast shows active family member name when booking as a family member
+- `public/mobile-app/index.html` — Added `#familySwitcher` div in profile screen
+- `public/mobile-app/css/profile.css` — Family switcher pill styles (green theme, active state)
+- **Mobile build done:** `npm run build:mobile` → `mtc-court-592c70f8` (233KB JS, 192KB CSS)
+
 **User needs to run SQL in Supabase:**
 - CREATE TABLE families + family_members
 - ALTER TABLE profiles ADD membership_type + family_id

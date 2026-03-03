@@ -20,7 +20,7 @@
     if ('serviceWorker' in navigator) {
       caches.keys().then(function(names) {
         names.forEach(function(name) {
-          if (name.indexOf('mtc-court-456207f1') === -1) {
+          if (name.indexOf('mtc-court-592c70f8') === -1) {
             caches.delete(name);
             console.log('[CacheBust] Deleted old cache:', name);
           }
@@ -1641,7 +1641,10 @@
         </div>
         <div class="profile-name" id="profileName">—</div>
       </div>
-      
+
+      <!-- Family Profile Switcher (hidden if not family membership) -->
+      <div id="familySwitcher" style="display:none;"></div>
+
       <!-- Personal Info Section -->
       <div class="profile-section">
         <h3 class="profile-section-title">PERSONAL INFO</h3>

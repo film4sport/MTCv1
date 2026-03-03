@@ -50,17 +50,40 @@ export async function POST(request: NextRequest) {
         if (!error && data.user && data.session) {
           const { data: profile } = await supabase
             .from('profiles')
-            .select('name, role')
+            .select('name, role, membership_type, family_id')
             .eq('id', data.user.id)
             .single();
 
           if (profile) {
+            // Fetch family members if family membership
+            let familyMembers: { id: string; name: string; type: string; skillLevel: string; avatar: string; birthYear: number | null }[] = [];
+            if (profile.family_id) {
+              const { data: members } = await supabase
+                .from('family_members')
+                .select('*')
+                .eq('family_id', profile.family_id)
+                .order('created_at');
+              if (members) {
+                familyMembers = members.map((m: Record<string, unknown>) => ({
+                  id: m.id as string,
+                  name: m.name as string,
+                  type: m.type as string,
+                  skillLevel: (m.skill_level as string) || 'intermediate',
+                  avatar: (m.avatar as string) || 'tennis-male-1',
+                  birthYear: (m.birth_year as number) || null,
+                }));
+              }
+            }
+
             return NextResponse.json({
               role: profile.role || 'member',
               name: profile.name || emailLower.split('@')[0],
               email: emailLower,
               userId: data.user.id,
               accessToken: data.session.access_token,
+              membershipType: profile.membership_type || 'adult',
+              familyId: profile.family_id || null,
+              familyMembers,
             });
           }
         }
