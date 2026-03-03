@@ -85,7 +85,9 @@ create table if not exists booking_participants (
   id serial primary key,
   booking_id text not null references bookings(id) on delete cascade,
   participant_id uuid not null references profiles(id),
-  participant_name text not null
+  participant_name text not null,
+  confirmed_at timestamptz,          -- null = pending, timestamp = confirmed
+  confirmed_via text check (confirmed_via in ('email', 'dashboard', 'mobile'))
 );
 
 -- ─── Events ─────────────────────────────────────────────
@@ -435,10 +437,11 @@ create table if not exists email_logs (
   type text not null check (type in ('booking_confirmation', 'booking_cancellation', 'signup_confirmation', 'password_reset', 'push_notification', 'program_enrollment', 'program_withdrawal', 'event_rsvp')),
   recipient_email text,         -- email address (null for push notifications)
   recipient_user_id uuid references profiles(id) on delete set null,
-  status text not null default 'sent' check (status in ('sent', 'failed', 'requested')),
+  status text not null default 'sent' check (status in ('sent', 'failed', 'requested', 'opened')),
   subject text,                 -- email subject line or push title
   metadata jsonb default '{}',  -- extra context (booking_id, court, date, error message, etc.)
   error text,                   -- error message if failed
+  opened_at timestamptz,        -- timestamp when recipient clicked the tracking link
   created_at timestamptz default now()
 );
 
