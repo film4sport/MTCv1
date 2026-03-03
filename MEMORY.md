@@ -611,15 +611,37 @@ The Supabase JS client returns `{ data, error }` but does NOT throw on failure. 
 
 **TypeScript:** Clean ✓
 
-**Mobile PWA audit findings (NOT yet fixed — future work):**
-These mobile PWA operations are LOCAL-ONLY (localStorage/in-memory), NOT synced to Supabase:
-- Messages (sendMessage) — localStorage only, never calls API
-- Event RSVPs — localStorage only
-- Program enrollment — localStorage only
-- Admin functions (post/edit announcement, edit member, admin cancel) — placeholder stubs with fake success toasts
-- Privacy settings — localStorage only
-- Payment tab — in-memory only
-Dashboard versions of these features DO persist via store.tsx → db.ts → Supabase. Only mobile PWA is affected.
+**Mobile PWA audit findings — ALL CRITICAL ITEMS NOW WIRED ✅ (see Mobile PWA Persistence Wiring below)**
+Remaining LOCAL-ONLY (low priority, no Supabase equivalent):
+- Privacy settings — localStorage only (cosmetic preference)
+- Payment tab — in-memory display only (no real payment processing)
+
+### Mobile PWA Persistence Wiring (2026-03-03)
+Wired ALL remaining localStorage-only mobile PWA operations to Supabase API endpoints. Every user action in the mobile app now persists server-side.
+
+**Messages (`messaging.js`):**
+- `sendMessage()` → POST `/mobile/conversations` (creates/finds conversation, inserts message, updates last_message)
+
+**Events (`events.js`):**
+- `toggleEventRsvp()` → POST `/mobile/events` (toggle: insert if not attending, delete if already attending)
+
+**Programs (`partners.js`):**
+- `enrollInProgram()` / withdraw → POST `/mobile/programs` with `action: 'enroll' | 'withdraw'`
+- `app/api/mobile/programs/route.ts` — NEW endpoint: checks existing enrollment, validates spots, handles enroll + withdraw
+
+**Admin functions (`admin.js` + `confirm-modal.js`):**
+- `postAnnouncement()` → POST `/mobile/announcements` (was already wired in previous session)
+- `deleteAnnouncement()` → DELETE `/mobile/announcements` (confirm modal → API call)
+- `adminCancelBooking()` → DELETE `/mobile/bookings` (admin-only, no ownership check)
+- `saveEditMember()` → PATCH `/mobile/members` (NEW function, replaces fake toast-only save)
+- `app/api/mobile/bookings/route.ts` — Added DELETE handler (admin-only cancel)
+- `app/api/mobile/members/route.ts` — Added PATCH handler (admin-only profile update)
+
+**Build fix:**
+- `scripts/build-mobile.js` — Added `admin.js` to JS_FILES array (was missing from bundle!)
+- Mobile build: 27 JS files → `dist/app.bundle.js` (280KB minified), cache: `mtc-court-d3727c4a`
+
+**Verification:** TypeScript clean ✓, mobile build clean ✓, all 7 mobile API endpoints present in bundle
 
 ## TODO / REMINDERS
 - **Junior Summer Camp dates**: User is waiting on real dates from Mark Taylor. When received, update the `junior-summer-camp` event across: `supabase/seed.sql`, `app/dashboard/lib/data.ts`, `public/mobile-app/js/events.js`, and run UPDATE SQL on live Supabase. Also update date/time in `app/(landing)/layout.tsx` JSON-LD if camp is featured there.
