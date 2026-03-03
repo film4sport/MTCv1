@@ -643,6 +643,32 @@ Wired ALL remaining localStorage-only mobile PWA operations to Supabase API endp
 
 **Verification:** TypeScript clean ✓, mobile build clean ✓, all 7 mobile API endpoints present in bundle
 
+### Mobile Admin Functions — Full Supabase Wiring (2026-03-03)
+Wired ALL remaining fake/stub admin functions in mobile PWA to real Supabase API endpoints. Zero fake toasts remain.
+
+**CI Fix:**
+- `unit-tests/booking-data.test.js` — Updated time slot assertions: 24→25 slots, 10:00 AM→9:30 AM start (matching types.ts TIME_SLOTS change from earlier session)
+
+**New API endpoints:**
+- `app/api/mobile/events/route.ts` — Added PUT handler (admin/coach create event, maps PWA types to schema)
+- `app/api/mobile/members/route.ts` — Added POST handler (admin create user via `auth.admin.createUser` + optional password reset link), DELETE handler (admin remove member via `delete_member` RPC)
+- `app/api/mobile/settings/route.ts` — NEW file: GET/POST for `club_settings` key-value store (admin only for writes)
+
+**Wired functions in `admin.js`:**
+- `createEvent()` → PUT `/mobile/events` (optimistic local add + API persist, server ID replacement)
+- `addNewMember()` → POST `/mobile/members` (creates Supabase auth user + profile, optional welcome email)
+- `sendCoachAnnouncement()` → POST `/mobile/announcements` (persists as coaching-type announcement)
+- `sendAdminMessage()` → POST `/mobile/announcements` (broadcast message stored as announcement)
+- `assignTask()` → POST `/mobile/settings` (stores task data as JSON in `club_settings`)
+- `addTaskToEvent()` → POST `/mobile/settings` (same pattern, persists event task list)
+- `saveEtransferSettings()` → POST `/mobile/settings` (3 keys: email, auto_deposit, message)
+- `exportBookings()` → GET `/mobile/bookings` → generates real CSV + triggers browser download
+
+**Wired in `confirm-modal.js`:**
+- `removeMember()` → DELETE `/mobile/members` (calls `delete_member` RPC for cascading delete)
+
+**Verification:** TypeScript clean ✓, mobile build clean ✓ (27 files, 284KB JS, cache: mtc-court-41b5d428)
+
 ## TODO / REMINDERS
 - **Junior Summer Camp dates**: User is waiting on real dates from Mark Taylor. When received, update the `junior-summer-camp` event across: `supabase/seed.sql`, `app/dashboard/lib/data.ts`, `public/mobile-app/js/events.js`, and run UPDATE SQL on live Supabase. Also update date/time in `app/(landing)/layout.tsx` JSON-LD if camp is featured there.
 

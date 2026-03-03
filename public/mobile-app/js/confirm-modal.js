@@ -143,7 +143,16 @@
         cancelText: 'KEEP MEMBER',
         confirmClass: 'danger',
         onConfirm: function() {
-          showToast('Member removed successfully');
+          // Persist to Supabase
+          MTC.fn.apiRequest('/mobile/members', {
+            method: 'DELETE',
+            body: JSON.stringify({ memberId: id })
+          }).then(function() {
+            showToast('Member removed successfully');
+          }).catch(function(err) {
+            console.warn('[MTC] removeMember API error:', err);
+            showToast('Failed to remove member — ' + (err.message || 'try again'), 'error');
+          });
         }
       });
     };
