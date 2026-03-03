@@ -213,6 +213,19 @@
       spotsTaken: 16,
       description: '95+ combined age mixed doubles tournament. A+B Draw. Includes lunches at Mono Cliffs Inn and great prizes! Day 2 of 2.',
       attendees: []
+    },
+    'junior-summer-camp': {
+      id: 'junior-summer-camp',
+      title: 'Junior Summer Camp',
+      date: '2026-07-01',
+      time: 'Dates TBA',
+      location: 'All Courts',
+      badge: 'paid',
+      price: 'See Details',
+      spotsTotal: 12,
+      spotsTaken: 0,
+      description: 'Intensive camp for juniors aged 8-14 with Mark Taylor. Daily drills, match play, fitness, and fun activities. Exact dates coming soon!',
+      attendees: []
     }
   };
 

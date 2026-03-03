@@ -77,7 +77,7 @@ export interface ClubEvent {
   spotsTaken?: number;
   description: string;
   attendees: string[];
-  type: 'social' | 'match' | 'roundrobin' | 'lesson' | 'tournament';
+  type: 'social' | 'match' | 'roundrobin' | 'lesson' | 'tournament' | 'camp';
   // Interclub-specific fields
   opponent?: string;
   format?: string;

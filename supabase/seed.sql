@@ -59,7 +59,10 @@ begin
      'Weekly ladies round robin every Friday morning. All skill levels welcome.', 'roundrobin'),
 
     ('friday-mixed', 'Friday Night Mixed Round Robin', '2026-05-15', '6:00 PM - 9:00 PM', 'All Courts', 'members', 'Members', null, null,
-     'Mixed doubles round robin every Friday evening. Rotating partners, fun format!', 'roundrobin')
+     'Mixed doubles round robin every Friday evening. Rotating partners, fun format!', 'roundrobin'),
+
+    ('junior-summer-camp', 'Junior Summer Camp', '2026-07-01', 'Dates TBA', 'All Courts', 'paid', 'See Details', null, null,
+     'Intensive camp for juniors aged 8-14 with Mark Taylor. Daily drills, match play, fitness, and fun activities. Exact dates coming soon!', 'camp')
   on conflict (id) do nothing;
 
   -- ─── Announcements ────────────────────────────────────

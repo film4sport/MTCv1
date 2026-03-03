@@ -221,6 +221,20 @@ export const DEFAULT_EVENTS: ClubEvent[] = [
     attendees: [],
     type: 'tournament',
   },
+  {
+    id: 'junior-summer-camp',
+    title: 'Junior Summer Camp',
+    date: '2026-07-01',
+    time: 'Dates TBA',
+    location: 'All Courts',
+    badge: 'paid',
+    price: 'See Details',
+    spotsTotal: 12,
+    spotsTaken: 0,
+    description: 'Intensive camp for juniors aged 8-14 with Mark Taylor. Daily drills, match play, fitness, and fun activities. Exact dates coming soon!',
+    attendees: [],
+    type: 'camp',
+  },
   // ── Full-season recurring events (generated) ──
   ...generateRecurringEvents(),
 ];
