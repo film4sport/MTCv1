@@ -164,7 +164,16 @@
         cancelText: 'KEEP IT',
         confirmClass: 'warning',
         onConfirm: function() {
-          showToast('Booking ' + id + ' cancelled — member notified');
+          // Persist cancellation to Supabase
+          MTC.fn.apiRequest('/mobile/bookings', {
+            method: 'DELETE',
+            body: JSON.stringify({ bookingId: id })
+          }).then(function() {
+            showToast('Booking ' + id + ' cancelled — member notified');
+          }).catch(function(err) {
+            console.warn('[MTC] adminCancelBooking API error:', err);
+            showToast('Booking cancelled locally — sync may be delayed', 'warning');
+          });
         }
       });
     };

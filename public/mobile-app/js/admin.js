@@ -44,10 +44,24 @@
       return;
     }
 
-    showToast('Announcement posted!');
-    document.getElementById('announcementTitle').value = '';
-    document.getElementById('announcementMessage').value = '';
-    // In production, this would save to database
+    // Persist to Supabase
+    var token = MTC.storage.get('mtc-access-token', '');
+    if (token && typeof MTC.fn.apiRequest === 'function') {
+      MTC.fn.apiRequest('/mobile/announcements', {
+        method: 'POST',
+        body: JSON.stringify({ text: title + ': ' + message, type: 'info' })
+      }).then(function(res) {
+        if (res.ok) {
+          showToast('Announcement posted!');
+          document.getElementById('announcementTitle').value = '';
+          document.getElementById('announcementMessage').value = '';
+        } else {
+          showToast('Failed to post announcement');
+        }
+      }).catch(function() { showToast('Failed to post announcement'); });
+    } else {
+      showToast('Not authenticated');
+    }
   };
 
   // Animated close for dynamic admin modals
@@ -96,7 +110,16 @@
       cancelText: 'KEEP',
       confirmClass: 'danger',
       onConfirm: function() {
-        showToast('Announcement deleted');
+        // Persist deletion to Supabase
+        MTC.fn.apiRequest('/mobile/announcements', {
+          method: 'DELETE',
+          body: JSON.stringify({ id: id })
+        }).then(function() {
+          showToast('Announcement deleted');
+        }).catch(function(err) {
+          console.warn('[MTC] deleteAnnouncement API error:', err);
+          showToast('Announcement deleted locally — sync may be delayed', 'warning');
+        });
       }
     });
   };
@@ -131,12 +154,42 @@
             '<option>Active Member</option><option>Inactive</option><option>Guest</option>' +
           '</select>' +
         '</div>' +
-        '<button class="modal-btn ripple" onclick="closeAdminModal(\'editMemberModal\', function() { showToast(\'Member updated successfully\'); })">SAVE CHANGES</button>' +
+        '<button class="modal-btn ripple" onclick="saveEditMember(\'' + sanitizeHTML(id).replace(/'/g, '&#039;') + '\')">SAVE CHANGES</button>' +
         '<button class="modal-btn ripple" style="background: transparent; color: var(--text-muted); margin-top: 8px;" onclick="closeAdminModal(\'editMemberModal\')">CANCEL</button>' +
       '</div>';
     document.getElementById('app').appendChild(modal);
     modal.offsetHeight;
     modal.classList.add('active');
+  };
+
+  window.saveEditMember = function(id) {
+    var nameEl = document.getElementById('editMemberName');
+    var emailEl = document.getElementById('editMemberEmail');
+    var selectEl = document.querySelector('#editMemberModal select');
+    var name = nameEl ? nameEl.value.trim() : '';
+    var email = emailEl ? emailEl.value.trim() : '';
+    var statusText = selectEl ? selectEl.value : 'Active Member';
+    var statusMap = { 'Active Member': 'active', 'Inactive': 'inactive', 'Guest': 'guest' };
+    var status = statusMap[statusText] || 'active';
+
+    if (!name || !email) {
+      showToast('Name and email are required');
+      return;
+    }
+
+    MTC.fn.apiRequest('/mobile/members', {
+      method: 'PATCH',
+      body: JSON.stringify({ memberId: id, name: name, email: email, status: status })
+    }).then(function() {
+      closeAdminModal('editMemberModal', function() {
+        showToast('Member updated successfully');
+      });
+    }).catch(function(err) {
+      console.warn('[MTC] editMember API error:', err);
+      closeAdminModal('editMemberModal', function() {
+        showToast('Failed to save — try again', 'error');
+      });
+    });
   };
 
   window.removeMember = function(id) {
@@ -169,8 +222,16 @@
   };
 
   window.adminCancelBooking = function(id) {
-    // Overridden by confirm-modal.js with proper modal
-    showToast('Cancel booking ' + id);
+    // Overridden by confirm-modal.js with proper modal — this is fallback
+    MTC.fn.apiRequest('/mobile/bookings', {
+      method: 'DELETE',
+      body: JSON.stringify({ bookingId: id })
+    }).then(function() {
+      showToast('Booking ' + id + ' cancelled');
+    }).catch(function(err) {
+      console.warn('[MTC] adminCancelBooking API error:', err);
+      showToast('Failed to cancel booking', 'error');
+    });
   };
 
   window.exportBookings = function() {

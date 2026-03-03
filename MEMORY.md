@@ -585,9 +585,41 @@ ALTER TABLE email_logs ADD CONSTRAINT email_logs_status_check CHECK (status IN (
 - Fixed via SQL UPDATE in Supabase to convert all times to proper 12h format with space before AM/PM
 
 **Fake demo data cleanup:**
-- Alex Thompson and Peter Gibson bookings were fake demo data under admin0 account
-- User needs to DELETE from bookings + booking_participants + notifications in Supabase
-- Note: Peter Gibson is a real board member (Past President) — only the fake bookings are deleted, not his AboutTab/events.js entries
+- Alex Thompson and Peter Gibson bookings deleted from bookings + booking_participants + notifications in Supabase ✅
+- Note: Peter Gibson is a real board member (Past President) — only the fake bookings were deleted, not his AboutTab/events.js entries
+
+### CRITICAL: Silent Supabase Error Fix (2026-03-03)
+**Root cause of bookings (and potentially ALL writes) silently failing:**
+
+The Supabase JS client returns `{ data, error }` but does NOT throw on failure. Every write function in `db.ts` was ignoring the error — so INSERTs/UPDATEs would fail silently, optimistic UI would show success, but nothing persisted to the database. On re-login, data would vanish.
+
+**Fix: `app/dashboard/lib/db.ts`** — Added `if (error) throw error;` to ALL 26+ write functions:
+- `updateProfile`, `createBooking`, `cancelBooking`, `toggleEventRsvp`, `createPartner`, `deletePartner`
+- `markMessagesRead`, `sendMessageByUsers`, `dismissAnnouncement`, `createAnnouncement`, `deleteAnnouncement`
+- `updateCourtStatus`, `createNotification`, `markNotificationRead`, `clearNotifications`
+- `createProgram`, `cancelProgram`, `enrollInProgram`, `withdrawFromProgram`
+- `updateNotificationPreferences`, `pauseMember`, `unpauseMember`, `updateGateCode`, `sendWelcomeMessage`
+- `fetchBookings` also now logs + throws on error (was returning `[]` silently)
+- Functions that already had error checking (createFamily, addFamilyMember, etc.) left unchanged
+
+**Callers in `store.tsx` already had `.catch()` handlers** with rollback + error toasts — they just never fired before because no errors were thrown.
+
+**Missing Supabase columns found + fixed via ALTER TABLE:**
+- `bookings`: `match_type text`, `duration integer` — ADDED ✅
+- `profiles`: `status text DEFAULT 'active'` — ADDED ✅
+- `partners`: `skill_level text`, `message text` — ADDED ✅
+
+**TypeScript:** Clean ✓
+
+**Mobile PWA audit findings (NOT yet fixed — future work):**
+These mobile PWA operations are LOCAL-ONLY (localStorage/in-memory), NOT synced to Supabase:
+- Messages (sendMessage) — localStorage only, never calls API
+- Event RSVPs — localStorage only
+- Program enrollment — localStorage only
+- Admin functions (post/edit announcement, edit member, admin cancel) — placeholder stubs with fake success toasts
+- Privacy settings — localStorage only
+- Payment tab — in-memory only
+Dashboard versions of these features DO persist via store.tsx → db.ts → Supabase. Only mobile PWA is affected.
 
 ## TODO / REMINDERS
 - **Junior Summer Camp dates**: User is waiting on real dates from Mark Taylor. When received, update the `junior-summer-camp` event across: `supabase/seed.sql`, `app/dashboard/lib/data.ts`, `public/mobile-app/js/events.js`, and run UPDATE SQL on live Supabase. Also update date/time in `app/(landing)/layout.tsx` JSON-LD if camp is featured there.
