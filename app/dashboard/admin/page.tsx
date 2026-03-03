@@ -125,8 +125,8 @@ export default function AdminPage() {
 
   const exportMembers = () => {
     exportToCsv('mtc-members.csv',
-      ['Name', 'Email', 'Role', 'Skill Level', 'Member Since'],
-      members.map(m => [m.name, m.email, m.role, m.skillLevel || '', m.memberSince || ''])
+      ['Name', 'Email', 'Role', 'Membership', 'Skill Level', 'Status', 'Member Since'],
+      members.map(m => [m.name, m.email, m.role, m.membershipType || 'adult', m.skillLevel || '', m.status || 'active', m.memberSince || ''])
     );
   };
 
@@ -454,6 +454,14 @@ export default function AdminPage() {
                           color: m.role === 'admin' ? '#dc2626' : m.role === 'coach' ? '#d97706' : '#6b7a3d',
                         }}>
                           {m.role}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="text-xs px-2 py-0.5 rounded-full font-medium capitalize" style={{
+                          background: m.membershipType === 'family' ? 'rgba(147, 51, 234, 0.1)' : m.membershipType === 'junior' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(107, 122, 61, 0.1)',
+                          color: m.membershipType === 'family' ? '#7c3aed' : m.membershipType === 'junior' ? '#2563eb' : '#6b7a3d',
+                        }}>
+                          {m.membershipType || 'adult'}
                         </span>
                       </td>
                       <td className="px-4 py-3">
