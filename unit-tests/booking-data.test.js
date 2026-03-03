@@ -31,12 +31,12 @@ describe('Courts Config', () => {
 });
 
 describe('Time Slots', () => {
-  it('should have 24 half-hour time slots (10:00 AM - 9:30 PM)', () => {
-    expect(TIME_SLOTS).toHaveLength(24);
+  it('should have 25 half-hour time slots (9:30 AM - 9:30 PM)', () => {
+    expect(TIME_SLOTS).toHaveLength(25);
   });
 
-  it('should start at 10:00 AM', () => {
-    expect(TIME_SLOTS[0]).toBe('10:00 AM');
+  it('should start at 9:30 AM', () => {
+    expect(TIME_SLOTS[0]).toBe('9:30 AM');
   });
 
   it('should end at 9:30 PM', () => {
