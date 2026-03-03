@@ -125,6 +125,13 @@ export default function DirectoryPage() {
                             {member.role === 'admin' ? 'Admin' : 'Coach'}
                           </span>
                         )}
+                        {member.membershipType === 'family' && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded font-medium"
+                            style={{ backgroundColor: 'rgba(147, 51, 234, 0.1)', color: '#7c3aed' }}
+                          >
+                            Family
+                          </span>
+                        )}
                       </div>
 
                       {/* Skill Level */}
