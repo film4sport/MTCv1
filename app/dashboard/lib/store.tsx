@@ -88,7 +88,8 @@ function loadJSON<T>(key: string, fallback: T): T {
   try {
     const saved = localStorage.getItem(key);
     return saved ? JSON.parse(saved) : fallback;
-  } catch {
+  } catch (err) {
+    reportError(err, `localStorage parse: ${key}`);
     return fallback;
   }
 }
@@ -102,7 +103,9 @@ function saveJSON(key: string, value: unknown) {
   if (typeof window === 'undefined') return;
   try {
     localStorage.setItem(key, JSON.stringify(value));
-  } catch { /* ignore quota errors */ }
+  } catch (err) {
+    reportError(err, `localStorage quota: ${key}`);
+  }
 }
 
 /** Safely ensure data is always an array (defensive against corrupted data). */
@@ -279,11 +282,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
           await new Promise(r => setTimeout(r, 1000 * (attempt + 1))); // backoff
           continue;
         }
-      } catch {
+      } catch (err) {
         if (attempt < maxRetries) {
           await new Promise(r => setTimeout(r, 1000 * (attempt + 1)));
           continue;
         }
+        reportError(err, `${label} fetch failed after ${maxRetries + 1} attempts`);
       }
     }
     // All retries exhausted — show warning
@@ -466,7 +470,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
           setWeather({ tempC, tempF, condition, wind: windKmh, humidity: data.current.relative_humidity_2m, description, lastUpdated: new Date().toLocaleTimeString() });
         }
-      } catch {
+      } catch (err) {
+        reportError(err, 'Weather fetch');
         setWeather(prev => ({ ...prev, description: 'Weather unavailable' }));
       }
     };

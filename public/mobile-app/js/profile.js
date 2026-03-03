@@ -196,7 +196,7 @@
         }, 300);
       }
     }
-    } catch(e) { console.warn('editProfileField error:', e); }
+    } catch(e) { MTC.warn('editProfileField error:', e); }
   };
 
   // onclick handler (index.html)
@@ -255,7 +255,7 @@
     config.save(value);
     closeProfileEdit();
     showToast('Profile updated \u2713');
-    } catch(e) { console.warn('saveProfileEdit error:', e); }
+    } catch(e) { MTC.warn('saveProfileEdit error:', e); }
   };
 
   // ============================================
@@ -296,7 +296,7 @@
         if (el) el.innerHTML = sanitizeHTML(MTC.state.profileData.playstyle.join(' & ')) + chevronSvg;
         break;
     }
-    } catch(e) { console.warn('updateProfileDisplay error:', e); }
+    } catch(e) { MTC.warn('updateProfileDisplay error:', e); }
   }
 
   // Initialize profile display on page load
@@ -310,7 +310,7 @@
 
     const nameEl = document.getElementById('profileName');
     if (nameEl) nameEl.textContent = MTC.state.profileData.name.toUpperCase();
-    } catch(e) { console.warn('initProfileDisplay error:', e); }
+    } catch(e) { MTC.warn('initProfileDisplay error:', e); }
   }
 
   // Run init when DOM is ready

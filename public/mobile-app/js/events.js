@@ -481,10 +481,10 @@
         body: JSON.stringify({ eventId: eventId })
       }).then(function(res) {
         if (!res.ok) {
-          console.warn('[MTC] RSVP sync failed:', res.data);
+          MTC.warn('[MTC] RSVP sync failed:', res.data);
         }
       }).catch(function(err) {
-        console.warn('[MTC] RSVP sync error:', err);
+        MTC.warn('[MTC] RSVP sync error:', err);
       });
     }
 

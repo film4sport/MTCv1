@@ -86,7 +86,7 @@
     navigateTo('book');
     showToast('Old booking cancelled \u2014 select a new time');
     if (typeof renderMyBookings === 'function') setTimeout(renderMyBookings, 500);
-    } catch(e) { console.warn('changeBookingTime error:', e); }
+    } catch(e) { MTC.warn('changeBookingTime error:', e); }
   };
 
   // onclick handler (index.html)
@@ -113,7 +113,7 @@
     navigateTo('book');
     showToast('Old booking cancelled \u2014 select a new court');
     if (typeof renderMyBookings === 'function') setTimeout(renderMyBookings, 500);
-    } catch(e) { console.warn('changeBookingCourt error:', e); }
+    } catch(e) { MTC.warn('changeBookingCourt error:', e); }
   };
 
   // onclick handler (index.html)
@@ -206,7 +206,7 @@
     URL.revokeObjectURL(url);
 
     showToast('Calendar event downloaded! Open it to add to your calendar.');
-    } catch(e) { console.warn('addToCalendar error:', e); showToast('Could not generate calendar file'); }
+    } catch(e) { MTC.warn('addToCalendar error:', e); showToast('Could not generate calendar file'); }
   };
 
   // Private helper
@@ -342,7 +342,7 @@
           '</button>' +
         '</div>';
     }
-    } catch(e) { console.warn('renderEventBookings error:', e); MTC.fn.renderError(container, 'Could not load event bookings. Please try again.'); }
+    } catch(e) { MTC.warn('renderEventBookings error:', e); MTC.fn.renderError(container, 'Could not load event bookings. Please try again.'); }
   };
   window.renderEventBookings = MTC.fn.renderEventBookings;
 

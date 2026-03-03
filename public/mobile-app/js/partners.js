@@ -251,7 +251,7 @@
         MTC.fn.apiRequest('/mobile/programs', {
           method: 'POST',
           body: JSON.stringify({ programId: programId, action: 'withdraw' })
-        }).catch(function() { console.warn('[MTC] Withdrawal sync failed'); });
+        }).catch(function() { MTC.warn('[MTC] Withdrawal sync failed'); });
       }
     } else {
       let tabWarning = '';
@@ -282,7 +282,7 @@
           body: JSON.stringify({ programId: programId, action: 'enroll' })
         }).then(function(res) {
           if (!res.ok) {
-            console.warn('[MTC] Enrollment sync failed:', res.data);
+            MTC.warn('[MTC] Enrollment sync failed:', res.data);
             showToast('Enrollment may not have been saved');
           }
         }).catch(function() { showToast('Enrollment may not have been saved'); });
