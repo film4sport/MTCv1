@@ -163,7 +163,7 @@ function buildEmailHTML(recipient: Recipient, courtName: string, formattedDate: 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { recipients, bookerName, bookedFor, courtName, date, time, duration, matchType } = body;
+    const { bookingId, recipients, bookerName, bookedFor, courtName, date, time, duration, matchType } = body;
 
     // Support both old format (single email) and new format (recipients array)
     const recipientList: Recipient[] = recipients
@@ -283,6 +283,16 @@ export async function POST(request: Request) {
       }
     } catch {
       // nodemailer not installed or SMTP not configured
+    }
+
+    // Stamp email_sent_at on the booking row if at least one email was sent
+    if (sentCount > 0 && bookingId && supabaseUrl && (supabaseServiceKey || supabaseAnonKey)) {
+      try {
+        const supabase = createClient(supabaseUrl, supabaseServiceKey || supabaseAnonKey);
+        await supabase.from('bookings').update({ email_sent_at: new Date().toISOString() }).eq('id', bookingId);
+      } catch {
+        // Non-critical — don't fail the response over a tracking update
+      }
     }
 
     return NextResponse.json({

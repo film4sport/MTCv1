@@ -175,18 +175,47 @@ function haptic() {}
 // GLOBAL ERROR HANDLERS
 // Catch unhandled errors/rejections so the app doesn't silently break.
 // ============================================
+var _errorCount = 0;
+var _errorResetTimer = null;
+
+function showCrashRecovery() {
+  // Only show if no overlay already present
+  if (document.getElementById('crashOverlay')) return;
+  var overlay = document.createElement('div');
+  overlay.id = 'crashOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(19,18,17,0.95);display:flex;align-items:center;justify-content:center;text-align:center;padding:32px;';
+  overlay.innerHTML =
+    '<div style="max-width:320px;">' +
+      '<div style="font-size:48px;margin-bottom:16px;">&#127934;</div>' +
+      '<h2 style="font-size:20px;font-weight:600;color:#e8e4d9;margin:0 0 8px;">Something went wrong</h2>' +
+      '<p style="font-size:14px;color:#9ca3a0;margin:0 0 24px;">The app hit an unexpected error. Tap below to reload.</p>' +
+      '<button onclick="location.reload()" style="background:#c8ff00;color:#131211;border:none;border-radius:12px;padding:14px 32px;font-size:15px;font-weight:600;cursor:pointer;">Reload App</button>' +
+    '</div>';
+  document.body.appendChild(overlay);
+}
+
 window.onerror = function(message, source, lineno, colno, error) {
   console.error('[MTC Global Error]', message, source, lineno, error);
-  // Show toast only for real errors (not script loading failures from offline)
-  if (navigator.onLine && typeof showToast === 'function') {
+  _errorCount++;
+  clearTimeout(_errorResetTimer);
+  _errorResetTimer = setTimeout(function() { _errorCount = 0; }, 10000);
+  // 3+ errors in 10s = something is fundamentally broken → show recovery
+  if (_errorCount >= 3) {
+    showCrashRecovery();
+  } else if (navigator.onLine && typeof showToast === 'function') {
     showToast('Something went wrong', 'error');
   }
 };
 
 window.addEventListener('unhandledrejection', function(event) {
   console.error('[MTC Unhandled Promise]', event.reason);
-  if (typeof showToast === 'function') {
-    showToast('An unexpected error occurred. Please refresh the page.', 'error');
+  _errorCount++;
+  clearTimeout(_errorResetTimer);
+  _errorResetTimer = setTimeout(function() { _errorCount = 0; }, 10000);
+  if (_errorCount >= 3) {
+    showCrashRecovery();
+  } else if (typeof showToast === 'function') {
+    showToast('An unexpected error occurred', 'error');
   }
 });
 
