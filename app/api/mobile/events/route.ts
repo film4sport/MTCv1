@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { authenticateMobileRequest, getAdminClient, sanitizeInput, isRateLimited } from '../auth-helper';
+import type { EventUpdate } from '../types';
 
 export async function GET(request: Request) {
   const authResult = await authenticateMobileRequest(request);
@@ -116,8 +117,7 @@ export async function PATCH(request: Request) {
     };
 
     // Build update object with only provided fields
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const updates: Record<string, any> = {};
+    const updates: EventUpdate = {};
     if (title !== undefined) updates.title = sanitizeInput(title);
     if (type !== undefined) updates.type = typeMap[type] || type;
     if (date !== undefined) updates.date = date;
