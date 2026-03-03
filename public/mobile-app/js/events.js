@@ -213,19 +213,6 @@
       spotsTaken: 16,
       description: '95+ combined age mixed doubles tournament. A+B Draw. Includes lunches at Mono Cliffs Inn and great prizes! Day 2 of 2.',
       attendees: []
-    },
-    'mark-taylor-classes': {
-      id: 'mark-taylor-classes',
-      title: 'Classes & Summer Camps',
-      date: '2026-05-11',
-      time: 'Various Times',
-      location: 'Courts 1-2',
-      badge: 'paid',
-      price: 'See Details',
-      spotsTotal: 40,
-      spotsTaken: 18,
-      description: 'Register for coaching classes and summer camps with Mark Taylor. Programs for all ages and skill levels. Spots fill up fast!',
-      attendees: []
     }
   };
 

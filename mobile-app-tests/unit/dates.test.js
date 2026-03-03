@@ -7,8 +7,7 @@ const clubEventDates = {
   'freedom-55': '2026-05-14',
   'interclub-league': '2026-05-14',
   'ladies-round-robin': '2026-05-15',
-  'friday-mixed': '2026-05-15',
-  'mark-taylor-classes': '2026-05-11'
+  'friday-mixed': '2026-05-15'
 };
 
 describe('Club event dates', () => {
