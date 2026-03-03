@@ -432,7 +432,7 @@ alter table partners replica identity full;
 -- Central audit log for ALL outbound communications
 create table if not exists email_logs (
   id serial primary key,
-  type text not null check (type in ('booking_confirmation', 'booking_cancellation', 'signup_confirmation', 'password_reset', 'push_notification')),
+  type text not null check (type in ('booking_confirmation', 'booking_cancellation', 'signup_confirmation', 'password_reset', 'push_notification', 'program_enrollment', 'program_withdrawal', 'event_rsvp')),
   recipient_email text,         -- email address (null for push notifications)
   recipient_user_id uuid references profiles(id) on delete set null,
   status text not null default 'sent' check (status in ('sent', 'failed', 'requested')),

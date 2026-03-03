@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { type, recipientEmail, recipientUserId, status, subject, metadata } = body;
 
-    const validTypes: EmailLogType[] = ['signup_confirmation', 'password_reset'];
+    const validTypes: EmailLogType[] = ['signup_confirmation', 'password_reset', 'program_enrollment', 'program_withdrawal', 'event_rsvp'];
     const validStatuses: EmailLogStatus[] = ['sent', 'failed', 'requested'];
 
     if (!type || !validTypes.includes(type)) {
