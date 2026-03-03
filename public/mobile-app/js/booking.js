@@ -692,7 +692,10 @@
     if (btn){btn.disabled=true;btn.textContent='BOOKING...';btn.style.transform='scale(0.97)';btn.style.opacity='0.7';}
 
     setTimeout(function(){
-      showToast('Court '+selectedSlot.court+' booked for '+selectedSlot.time+'!');
+      var bookedForName = (typeof getActiveDisplayName === 'function') ? getActiveDisplayName() : '';
+      var toastMsg = 'Court '+selectedSlot.court+' booked for '+selectedSlot.time+'!';
+      if (bookedForName && MTC.state.activeFamilyMember) toastMsg = bookedForName + ': ' + toastMsg;
+      showToast(toastMsg);
       closeBookingModal();
       document.querySelectorAll('.weekly-slot.selected').forEach(function(s){
         s.classList.remove('selected','available');s.classList.add('my-booking');

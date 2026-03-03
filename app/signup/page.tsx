@@ -242,8 +242,9 @@ export default function SignupPage() {
                 >
                   <div>
                     <span className="font-semibold text-base" style={{ color: '#2a2f1e' }}>{m.label}</span>
+                    {m.desc && <p className="text-xs mt-1" style={{ color: '#6b7266' }}>{m.desc}</p>}
                   </div>
-                  <span className="font-bold text-xl" style={{ color: '#4a5528' }}>${m.price}</span>
+                  <span className="font-bold text-xl flex-shrink-0 ml-4" style={{ color: '#4a5528' }}>${m.price}</span>
                 </button>
               ))}
             </div>

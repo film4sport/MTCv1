@@ -319,4 +319,72 @@
   } else {
     initProfileDisplay();
   }
+
+  // ============================================
+  // FAMILY PROFILE SWITCHER
+  // ============================================
+  // Initialize family state
+  MTC.state.familyMembers = MTC.state.familyMembers || [];
+  MTC.state.activeFamilyMember = MTC.state.activeFamilyMember || null;
+
+  function getActiveDisplayName() {
+    if (MTC.state.activeFamilyMember) return MTC.state.activeFamilyMember.name;
+    return MTC.state.currentUser ? MTC.state.currentUser.name : '';
+  }
+
+  window.switchFamilyProfile = function(memberId) {
+    if (!memberId || memberId === 'primary') {
+      MTC.state.activeFamilyMember = null;
+      MTC.storage.remove('mtc-active-family-member');
+    } else {
+      var member = (MTC.state.familyMembers || []).find(function(m) { return m.id === memberId; });
+      if (member) {
+        MTC.state.activeFamilyMember = member;
+        MTC.storage.set('mtc-active-family-member', member);
+      }
+    }
+    renderFamilySwitcher();
+    showToast('Switched to ' + getActiveDisplayName());
+  };
+
+  function renderFamilySwitcher() {
+    var container = document.getElementById('familySwitcher');
+    if (!container) return;
+    var members = MTC.state.familyMembers || [];
+    var user = MTC.state.currentUser;
+    if (!user || user.membershipType !== 'family' || members.length === 0) {
+      container.style.display = 'none';
+      return;
+    }
+    container.style.display = 'block';
+    var active = MTC.state.activeFamilyMember;
+    var html = '<div class="family-switcher-label">Playing as:</div><div class="family-switcher-pills">';
+    // Primary account
+    html += '<button class="family-pill' + (!active ? ' active' : '') + '" onclick="switchFamilyProfile(\'primary\')">';
+    html += sanitizeHTML(user.name) + '</button>';
+    // Family members
+    members.forEach(function(m) {
+      var isActive = active && active.id === m.id;
+      html += '<button class="family-pill' + (isActive ? ' active' : '') + '" onclick="switchFamilyProfile(\'' + m.id + '\')">';
+      html += '<span class="family-pill-type">' + (m.type === 'junior' ? 'Jr' : '') + '</span>';
+      html += sanitizeHTML(m.name) + '</button>';
+    });
+    html += '</div>';
+    container.innerHTML = html;
+
+    // Update profile name display
+    var nameEl = document.getElementById('profileName');
+    if (nameEl) nameEl.textContent = getActiveDisplayName().toUpperCase();
+  }
+
+  // Expose for other modules
+  window.getActiveDisplayName = getActiveDisplayName;
+  window.renderFamilySwitcher = renderFamilySwitcher;
+
+  // Render on init if family data exists
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', renderFamilySwitcher);
+  } else {
+    renderFamilySwitcher();
+  }
 })();

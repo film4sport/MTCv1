@@ -125,16 +125,32 @@
             currentUser.email = loginEmail;
             currentUser.name = loginEmail.split('@')[0];
           }
+          // Restore family state from localStorage
+          var storedFamily = MTC.storage.get('mtc-family-members', []);
+          if (storedFamily && storedFamily.length > 0) {
+            MTC.state.familyMembers = storedFamily;
+          }
+          var storedActiveMember = MTC.storage.get('mtc-active-family-member', null);
+          if (storedActiveMember) {
+            MTC.state.activeFamilyMember = storedActiveMember;
+          }
         } else if (matchedLogin) {
           currentUser = {
             name: matchedLogin.name,
             email: loginEmail.toLowerCase(),
             role: matchedLogin.role,
             id: matchedLogin.userId || null,
-            isMember: true
+            isMember: true,
+            membershipType: matchedLogin.membershipType || 'adult',
+            familyId: matchedLogin.familyId || null
           };
           MTC.state.currentUser = currentUser;
           window.currentUser = currentUser;
+          // Store family members if present
+          if (matchedLogin.familyMembers && matchedLogin.familyMembers.length > 0) {
+            MTC.storage.set('mtc-family-members', matchedLogin.familyMembers);
+            MTC.state.familyMembers = matchedLogin.familyMembers;
+          }
           currentRole = matchedLogin.role;
         }
 
@@ -216,7 +232,9 @@
      'mtc-bookings', 'mtc-conversations', 'mtc-notifications',
      'mtc-rsvps', 'mtc-profile', 'mtc-partner-joins', 'mtc-settings',
      'mtc-onboarding-done', 'mtc-api-events', 'mtc-api-members', 'mtc-api-partners',
-     'mtc-api-announcements', 'mtc-api-bookings'].forEach(function(key) { MTC.storage.remove(key); });
+     'mtc-api-announcements', 'mtc-api-bookings', 'mtc-family-members', 'mtc-active-family-member'].forEach(function(key) { MTC.storage.remove(key); });
+    MTC.state.familyMembers = [];
+    MTC.state.activeFamilyMember = null;
 
     document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
     document.getElementById('bottomNav').style.display = 'none';

@@ -78,9 +78,12 @@ export default function MembershipTab() {
               <h3 className="font-bold text-xl mb-4" style={{ color: '#2a2f1e' }}>Membership Fees</h3>
               <div className="space-y-3">
                 {membershipTypes.map((fee, i) => (
-                  <div key={i} className="flex items-center justify-between py-2" style={i < 3 ? { borderBottom: '1px solid #e0dcd3' } : {}}>
-                    <span className="text-sm" style={{ color: '#6b7266' }}>{fee.label}</span>
-                    <span className="font-semibold text-sm" style={{ color: '#4a5528' }}>${fee.price}{fee.key === 'guest' ? ' / visit' : ''}</span>
+                  <div key={i} className="flex items-center justify-between py-3" style={i < 3 ? { borderBottom: '1px solid #e0dcd3' } : {}}>
+                    <div>
+                      <span className="text-sm font-medium" style={{ color: '#2a2f1e' }}>{fee.label}</span>
+                      {fee.desc && <p className="text-xs mt-0.5" style={{ color: '#999' }}>{fee.desc}</p>}
+                    </div>
+                    <span className="font-semibold text-sm flex-shrink-0 ml-4" style={{ color: '#4a5528' }}>${fee.price}{fee.key === 'guest' ? ' / visit' : ''}</span>
                   </div>
                 ))}
               </div>
