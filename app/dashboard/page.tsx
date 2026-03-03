@@ -100,7 +100,14 @@ export default function DashboardHome() {
             style={{ background: 'linear-gradient(135deg, rgba(107, 122, 61, 0.08), rgba(212, 225, 87, 0.06))', borderColor: 'rgba(107, 122, 61, 0.2)' }}
           >
             <div className="flex items-center gap-3">
-              <span className="text-lg">🎾</span>
+              <span className="relative flex h-8 w-8 flex-shrink-0 items-center justify-center">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-30" style={{ backgroundColor: '#6b7a3d' }} />
+                <span className="relative inline-flex h-6 w-6 items-center justify-center rounded-full" style={{ backgroundColor: '#6b7a3d' }}>
+                  <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                  </svg>
+                </span>
+              </span>
               <p className="text-sm font-medium" style={{ color: '#2a2f1e' }}>
                 Complete your profile — set your skill level to get matched with the right partners!
               </p>
