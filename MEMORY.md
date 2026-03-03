@@ -536,6 +536,41 @@ Comprehensive audit found 16 UX gaps across all 3 platforms. All addressed in pr
 
 **Verification:** TypeScript clean ✓, Mobile build clean ✓
 
+### Booking Attendance Confirmation Tracking (2026-03-03)
+Full attendance confirmation flow: participants can confirm via email click, dashboard message button, or mobile (future).
+
+**New API route: `app/api/email-track/route.ts`**
+- GET: Email click tracking — updates `email_logs` status to 'opened', marks `booking_participants.confirmed_at`, creates notification for booker. Redirects to dashboard.
+- POST: Dashboard/mobile confirm — accepts `{ bookingId, participantId, via }`, marks confirmed_at + notifies booker.
+- Both handlers insert a "Attendance Confirmed" notification for the booker.
+
+**Schema changes (`supabase/schema.sql`):**
+- `booking_participants` — Added `confirmed_at timestamptz` and `confirmed_via text` ('email'|'dashboard'|'mobile')
+- `email_logs` — Added `opened_at timestamptz` column, expanded status constraint to include 'opened'
+
+**Confirmation email button (`app/api/booking-email/route.ts`):**
+- `buildEmailHTML` now accepts `trackingParams` — renders a "Confirm Attendance" (participants) or "View Booking" (booker) green CTA button
+- Button URL: `/api/email-track?booking={id}&email={email}&redirect=/dashboard/schedule`
+
+**Dashboard messages (`app/dashboard/messages/page.tsx`):**
+- Booking messages now show both "Add to Calendar" AND "Confirm Attendance" buttons
+- "Confirm Attendance" only shows for received messages (not your own)
+- Optimistic UI: button shows "Confirmed" immediately, rolls back on failure
+- POSTs to `/api/email-track` with `via: 'dashboard'`
+
+**Mobile PWA:** `[booking:...]` tag not yet parsed in mobile messaging — future TODO.
+
+**SQL to run in Supabase:**
+```sql
+ALTER TABLE booking_participants ADD COLUMN confirmed_at timestamptz;
+ALTER TABLE booking_participants ADD COLUMN confirmed_via text CHECK (confirmed_via IN ('email', 'dashboard', 'mobile'));
+ALTER TABLE email_logs ADD COLUMN opened_at timestamptz;
+ALTER TABLE email_logs DROP CONSTRAINT email_logs_status_check;
+ALTER TABLE email_logs ADD CONSTRAINT email_logs_status_check CHECK (status IN ('sent', 'failed', 'requested', 'opened'));
+```
+
+**Verification:** TypeScript clean ✓, Mobile build clean ✓
+
 ## TODO / REMINDERS
 - **Junior Summer Camp dates**: User is waiting on real dates from Mark Taylor. When received, update the `junior-summer-camp` event across: `supabase/seed.sql`, `app/dashboard/lib/data.ts`, `public/mobile-app/js/events.js`, and run UPDATE SQL on live Supabase. Also update date/time in `app/(landing)/layout.tsx` JSON-LD if camp is featured there.
 

@@ -17,9 +17,38 @@ export default function MessagesPage() {
 
 function MessagesContent() {
   const searchParams = useSearchParams();
-  const { currentUser, conversations, members, sendMessage, markConversationRead } = useApp();
+  const { currentUser, conversations, members, bookings, sendMessage, markConversationRead } = useApp();
   const { showToast } = useToast();
   const [selectedConvo, setSelectedConvo] = useState<string | null>(null);
+  const [confirmedBookings, setConfirmedBookings] = useState<Set<string>>(new Set());
+
+  const confirmAttendance = useCallback(async (courtName: string, date: string, time: string) => {
+    if (!currentUser) return;
+    // Find the booking by court + date + time
+    const booking = bookings.find(b =>
+      b.courtName === courtName && b.date === date && b.time === time && b.status === 'confirmed'
+    );
+    if (!booking) { showToast('Booking not found.', 'error'); return; }
+    const key = `${booking.id}-${currentUser.id}`;
+    if (confirmedBookings.has(key)) return;
+
+    // Optimistic UI
+    setConfirmedBookings(prev => new Set(prev).add(key));
+    showToast('Attendance confirmed!');
+
+    try {
+      const res = await fetch('/api/email-track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bookingId: booking.id, participantId: currentUser.id, via: 'dashboard' }),
+      });
+      if (!res.ok) throw new Error();
+    } catch {
+      // Rollback
+      setConfirmedBookings(prev => { const s = new Set(prev); s.delete(key); return s; });
+      showToast('Failed to confirm. Try again.', 'error');
+    }
+  }, [currentUser, bookings, confirmedBookings, showToast]);
 
   // Auto-open conversation from query param (e.g. from Partners page)
   useEffect(() => {
@@ -278,29 +307,40 @@ function MessagesContent() {
                           }}
                         >
                           <p className="text-sm whitespace-pre-line">{displayText}</p>
-                          {bookingMatch && (
-                            <button
-                              onClick={() => {
-                                downloadICS([{
-                                  title: `Tennis — ${bookingMatch[1]}`,
-                                  date: bookingMatch[2],
-                                  time: bookingMatch[3],
-                                  duration: 60,
-                                  location: `${bookingMatch[1]} — Mono Tennis Club`,
-                                }], 'mtc-booking.ics');
-                              }}
-                              className="mt-2 flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
-                              style={{
-                                background: isMine ? 'rgba(255,255,255,0.15)' : 'rgba(107, 122, 61, 0.1)',
-                                color: isMine ? '#fff' : '#6b7a3d',
-                              }}
-                            >
-                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                              </svg>
-                              Add to Calendar
-                            </button>
-                          )}
+                          {bookingMatch && (() => {
+                            const bCourtName = bookingMatch[1];
+                            const bDate = bookingMatch[2];
+                            const bTime = bookingMatch[3];
+                            const matchedBooking = bookings.find(b => b.courtName === bCourtName && b.date === bDate && b.time === bTime && b.status === 'confirmed');
+                            const isConfirmed = matchedBooking && currentUser ? confirmedBookings.has(`${matchedBooking.id}-${currentUser.id}`) : false;
+                            return (
+                              <div className="mt-2 flex flex-wrap gap-2">
+                                <button
+                                  onClick={() => downloadICS([{ title: `Tennis — ${bCourtName}`, date: bDate, time: bTime, duration: 60, location: `${bCourtName} — Mono Tennis Club` }], 'mtc-booking.ics')}
+                                  className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
+                                  style={{ background: isMine ? 'rgba(255,255,255,0.15)' : 'rgba(107, 122, 61, 0.1)', color: isMine ? '#fff' : '#6b7a3d' }}
+                                >
+                                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                  </svg>
+                                  Add to Calendar
+                                </button>
+                                {!isMine && (
+                                  <button
+                                    onClick={() => confirmAttendance(bCourtName, bDate, bTime)}
+                                    disabled={isConfirmed}
+                                    className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors disabled:opacity-60"
+                                    style={{ background: isConfirmed ? 'rgba(107,122,61,0.15)' : (isMine ? 'rgba(255,255,255,0.15)' : 'rgba(107, 122, 61, 0.1)'), color: isMine ? '#fff' : '#6b7a3d' }}
+                                  >
+                                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    {isConfirmed ? 'Confirmed' : 'Confirm Attendance'}
+                                  </button>
+                                )}
+                              </div>
+                            );
+                          })()}
                           <p className="text-[0.6rem] mt-1 opacity-60">
                             {new Date(msg.timestamp).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
                           </p>
