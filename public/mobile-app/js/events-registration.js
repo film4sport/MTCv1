@@ -107,6 +107,20 @@
   };
 
   // ============================================
+  // PRIVATE: Build avatar list HTML for RSVP displays
+  // ============================================
+  function buildAvatarList(list) {
+    var shown = list.slice(0, 6);
+    var html = shown.map(function(name) {
+      return '<div class="event-rsvp-avatar">' + getAvatar(name) + '<span>' + sanitizeHTML(name) + '</span></div>';
+    }).join('');
+    if (list.length > 6) {
+      html += '<div class="event-rsvp-avatar" style="background: var(--volt); color: #000;"><span>+' + (list.length - 6) + '</span></div>';
+    }
+    return html;
+  }
+
+  // ============================================
   // WINDOW: Inter-Club Match RSVP Modal (onclick from schedule.js generated HTML)
   // ============================================
   window.showInterclubRsvpModal = function(eventId) {
@@ -124,17 +138,6 @@
     };
 
     const userRsvpd = event.rsvpList.includes('You');
-
-    function buildAvatarList(list) {
-      const shown = list.slice(0, 6);
-      let html = shown.map(function(name) {
-        return '<div class="event-rsvp-avatar">' + getAvatar(name) + '<span>' + sanitizeHTML(name) + '</span></div>';
-      }).join('');
-      if (list.length > 6) {
-        html += '<div class="event-rsvp-avatar" style="background: var(--volt); color: #000;"><span>+' + (list.length - 6) + '</span></div>';
-      }
-      return html;
-    }
 
     const instructionsHtml = event.instructions ? event.instructions.map(function(i) { return '<li>' + sanitizeHTML(i) + '</li>'; }).join('') : '';
 
@@ -247,14 +250,7 @@
 
     // Update the player list live so user sees the change
     if (avatarContainer) {
-      var shown = event.rsvpList.slice(0, 6);
-      var html = shown.map(function(name) {
-        return '<div class="event-rsvp-avatar">' + getAvatar(name) + '<span>' + sanitizeHTML(name) + '</span></div>';
-      }).join('');
-      if (event.rsvpList.length > 6) {
-        html += '<div class="event-rsvp-avatar" style="background: var(--volt); color: #000;"><span>+' + (event.rsvpList.length - 6) + '</span></div>';
-      }
-      avatarContainer.innerHTML = html;
+      avatarContainer.innerHTML = buildAvatarList(event.rsvpList);
     }
     if (countEl) countEl.textContent = event.rsvpList.length + ' confirmed';
     if (spotEl) spotEl.textContent = event.rsvpList.length + ' confirmed';

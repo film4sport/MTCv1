@@ -689,6 +689,17 @@ Wired ALL remaining fake/stub admin functions in mobile PWA to real Supabase API
 
 **Production readiness: 9/10** (up from 7.5/10)
 
+### Production Hardening — Rate Limiting, Sanitization, Interclub RSVP (2026-03-03)
+**What changed:**
+- Added shared `sanitizeInput()` and `isRateLimited()` utilities to `auth-helper.ts`
+- Added rate limiting (30 req/min default) to all mobile write routes: events, announcements, conversations, members, settings
+- Added input sanitization (XSS strip) to all user-controlled string fields across events, announcements, conversations, members routes
+- Wired `rsvpInterclub()` to persist via POST `/mobile/events` (was in-memory only, lost on refresh)
+- Fixed `var` redeclaration in `generateReport()` (renamed to `reportRes`)
+- TypeScript: 0 errors, Unit tests: 207/207 pass
+
+**Production readiness: 9.5/10**
+
 ## TODO / REMINDERS
 - **Junior Summer Camp dates**: User is waiting on real dates from Mark Taylor. When received, update the `junior-summer-camp` event across: `supabase/seed.sql`, `app/dashboard/lib/data.ts`, `public/mobile-app/js/events.js`, and run UPDATE SQL on live Supabase. Also update date/time in `app/(landing)/layout.tsx` JSON-LD if camp is featured there.
 

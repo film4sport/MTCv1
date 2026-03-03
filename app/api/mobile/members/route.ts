@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { authenticateMobileRequest, getAdminClient, sanitizeInput, isRateLimited } from '../auth-helper';
+import type { ProfileUpdate } from '../types';
 
 export async function GET(request: Request) {
   const authResult = await authenticateMobileRequest(request);
@@ -104,8 +105,7 @@ export async function PATCH(request: Request) {
     const supabase = getAdminClient();
 
     // Build update object with only provided fields
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const updates: Record<string, any> = {};
+    const updates: ProfileUpdate = {};
     if (name?.trim()) updates.name = sanitizeInput(name, 100);
     if (email?.trim()) updates.email = email.trim().slice(0, 254);
     if (status?.trim()) updates.status = sanitizeInput(status, 20).toLowerCase();

@@ -10,7 +10,7 @@
 
   /**
    * Make an API request with timeout and error handling.
-   * @param {string} endpoint - API path (e.g., '/mobile-booking')
+   * @param {string} endpoint - API path (e.g., '/mobile/bookings')
    * @param {Object} options - fetch options
    * @param {number} [timeoutMs=10000] - timeout in ms
    * @returns {Promise<{ok: boolean, data: Object, status: number}>}
@@ -105,7 +105,7 @@
         return { bookingData: bookingData };
       },
       apiCall: function() {
-        return apiRequest('/mobile-booking', {
+        return apiRequest('/mobile/bookings', {
           method: 'POST',
           body: JSON.stringify(Object.assign({ userId: userId }, bookingData))
         });
@@ -143,7 +143,7 @@
         return { bookingId: bookingId };
       },
       apiCall: function() {
-        return apiRequest('/mobile-booking', {
+        return apiRequest('/mobile/bookings', {
           method: 'DELETE',
           body: JSON.stringify({ bookingId: bookingId, userId: userId })
         });
@@ -218,7 +218,7 @@
 
     queue.forEach(function(item) {
       if (item.type === 'booking') {
-        apiRequest('/mobile-booking', {
+        apiRequest('/mobile/bookings', {
           method: 'POST',
           body: JSON.stringify(item.data)
         }).then(function(result) {

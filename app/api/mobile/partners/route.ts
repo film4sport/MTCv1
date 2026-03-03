@@ -1,8 +1,5 @@
 import { NextResponse } from 'next/server';
-import { authenticateMobileRequest, getAdminClient } from '../auth-helper';
-
-// Rate limit: 5 partner requests per user per hour
-const partnerLimits = new Map<string, { count: number; resetAt: number }>();
+import { authenticateMobileRequest, getAdminClient, isRateLimited } from '../auth-helper';
 
 export async function GET(request: Request) {
   const authResult = await authenticateMobileRequest(request);
@@ -49,16 +46,8 @@ export async function POST(request: Request) {
 
   const userId = authResult.id;
 
-  // Rate limit
-  const now = Date.now();
-  const limit = partnerLimits.get(userId);
-  if (limit && now < limit.resetAt) {
-    if (limit.count >= 5) {
-      return NextResponse.json({ error: 'Too many requests. Try again later.' }, { status: 429 });
-    }
-    limit.count++;
-  } else {
-    partnerLimits.set(userId, { count: 1, resetAt: now + 3600000 });
+  if (isRateLimited(userId, 5)) {
+    return NextResponse.json({ error: 'Too many requests. Try again later.' }, { status: 429 });
   }
 
   try {

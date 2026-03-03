@@ -91,3 +91,50 @@ export function isRateLimited(userId: string, max = RATE_MAX, windowMs = RATE_WI
   entry.count++;
   return entry.count > max;
 }
+
+/**
+ * Route handler wrapper — extracts the repetitive auth + try/catch boilerplate.
+ * Usage:
+ *   export const GET = withAuth(async (user, request, supabase) => { ... });
+ *   export const POST = withAuth(async (user, request, supabase) => { ... }, { role: 'admin' });
+ */
+type RouteHandler = (
+  user: AuthenticatedUser,
+  request: Request,
+  supabase: ReturnType<typeof getAdminClient>
+) => Promise<NextResponse>;
+
+interface WithAuthOptions {
+  role?: 'admin' | 'coach' | 'admin|coach';
+  rateLimit?: number; // max requests per minute (0 = no limit)
+}
+
+export function withAuth(handler: RouteHandler, options?: WithAuthOptions) {
+  return async (request: Request): Promise<NextResponse> => {
+    const authResult = await authenticateMobileRequest(request);
+    if (authResult instanceof NextResponse) return authResult;
+
+    // Role check
+    if (options?.role) {
+      const allowedRoles = options.role.split('|');
+      if (!allowedRoles.includes(authResult.role)) {
+        return NextResponse.json(
+          { error: `${options.role.replace('|', ' or ')} only` },
+          { status: 403 }
+        );
+      }
+    }
+
+    // Rate limit check
+    if (options?.rateLimit && isRateLimited(authResult.id, options.rateLimit)) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
+
+    try {
+      const supabase = getAdminClient();
+      return await handler(authResult, request, supabase);
+    } catch {
+      return NextResponse.json({ error: 'Server error' }, { status: 500 });
+    }
+  };
+}
