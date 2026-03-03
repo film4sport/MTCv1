@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
+import { createClient } from '@supabase/supabase-js';
+import { logEmail } from '../../api/lib/email-logger';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
@@ -35,11 +37,56 @@ export async function GET(request: NextRequest) {
     },
   });
 
-  const { error } = await supabase.auth.exchangeCodeForSession(code);
+  const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
   if (error) {
     // Code was invalid or expired — redirect to login with error
     return NextResponse.redirect(`${siteUrl}/login?error=expired_link`);
+  }
+
+  // ── Post-confirmation: welcome message + notification ──
+  // Only for signup confirmations (not password recovery)
+  if (type !== 'recovery' && data?.session?.user) {
+    const user = data.session.user;
+    const userName = user.user_metadata?.name || user.email?.split('@')[0] || 'Member';
+
+    try {
+      // Use service role to bypass RLS for server-side operations
+      const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+      const adminSupabase = serviceKey
+        ? createClient(supabaseUrl, serviceKey)
+        : createClient(supabaseUrl, supabaseAnonKey);
+
+      // Send welcome message (gate code + greeting via admin conversation)
+      await adminSupabase.rpc('send_welcome_message', {
+        new_user_id: user.id,
+        new_user_name: userName,
+      });
+
+      // Create a welcome notification (shows in the bell icon)
+      await adminSupabase.from('notifications').insert({
+        id: `welcome-notif-${user.id}`,
+        user_id: user.id,
+        type: 'message',
+        title: 'Welcome to Mono Tennis Club!',
+        body: 'Your email has been confirmed. Check your messages for your court gate code.',
+        timestamp: new Date().toISOString(),
+        read: false,
+      });
+
+      // Log the confirmed email to email_logs
+      await logEmail({
+        type: 'signup_confirmation',
+        recipientEmail: user.email,
+        recipientUserId: user.id,
+        status: 'sent',
+        subject: 'Email Confirmed — Mono Tennis Club',
+        metadata: { source: 'auth_callback', userName },
+      });
+    } catch (err) {
+      // Non-critical — don't block the redirect if welcome message fails
+      console.error('[MTC] Post-confirmation setup error:', err);
+    }
   }
 
   return response;
