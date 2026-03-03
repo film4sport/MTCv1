@@ -62,6 +62,8 @@ export default function RootLayout({
     <html lang="en">
       <head>
         {/* JSON-LD is in app/(landing)/layout.tsx — richer version with @graph */}
+        {/* Preload critical fonts to avoid FOIT/FOUT */}
+        <link rel="preload" href="/Gotham_Rounded_Medium.otf" as="font" type="font/otf" crossOrigin="anonymous" />
         {/* Preconnect to external origins for faster resource loading */}
         <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />

@@ -264,7 +264,7 @@ export default function Schedule() {
 
         {/* Selected Day Detail Panel */}
         {selectedDay && (selectedEvents.length > 0 || selectedSlots.length > 0) && (
-          <div className="mt-6 cal-detail-panel cal-detail-slide-x" key={`${calMonth}-${selectedDay}`}>
+          <div className="mt-6 cal-detail-panel cal-detail-slide-x" key={`${calMonth}-${selectedDay}`} aria-live="polite" role="region" aria-label="Selected day details">
             <div
               className="rounded-2xl p-6"
               style={{

@@ -101,28 +101,29 @@ export default function LandingPage() {
       {/* Loading Screen */}
       <Loader />
 
-      <a href="#events" className="skip-to-content">Skip to content</a>
+      <a href="#main-content" className="skip-to-content">Skip to main content</a>
 
       {/* Scroll Progress Bar */}
-      <div className="scroll-progress" style={{ width: `${scrollProgress}%` }} />
+      <div className="scroll-progress" style={{ width: `${scrollProgress}%` }} role="progressbar" aria-valuenow={Math.round(scrollProgress)} aria-valuemin={0} aria-valuemax={100} aria-label="Page scroll progress" />
 
       <Navbar />
 
       {/* Hero Section (dark, parallax) */}
       <Hero />
 
-      {/* Events & Programs Section */}
-      <Events />
+      <main id="main-content">
+        {/* Events & Programs Section */}
+        <Events />
 
-      {/* Schedule / Calendar Section (dark bg) */}
-      <Schedule />
+        {/* Schedule / Calendar Section (dark bg) */}
+        <Schedule />
 
-      {/* Partners Section */}
-      <Partners />
+        {/* Partners Section */}
+        <Partners />
 
-
-      {/* Gallery Section */}
-      <Gallery onOpenLightbox={openLightbox} />
+        {/* Gallery Section */}
+        <Gallery onOpenLightbox={openLightbox} />
+      </main>
 
       {/* Wave Divider: Gallery (warm gray) → Footer (dark) */}
       <WaveDivider bgColor="#edeae3" fillColor="#1a1f12" />

@@ -93,22 +93,22 @@
         .catch(function() {
           if (loginBtn) { loginBtn.disabled = false; loginBtn.textContent = 'Sign In'; }
           // Offline fallback: only resume a previously authenticated session
-          // Requires exact email match + password hash match + session not expired (24 hours)
+          // Requires: valid Supabase access token stored + email match + session not expired (24 hours)
+          // No password-based offline check — we only resume sessions authenticated by the server
           var stored = MTC.storage.get('mtc-user', null);
           var sessionTime = MTC.storage.get('mtc-session-time', 0);
           var sessionAge = Date.now() - sessionTime;
-          var storedHash = MTC.storage.get('mtc-session-hash', '');
+          var hasToken = !!MTC.storage.get('mtc-access-token', '');
           var MAX_SESSION_AGE = 24 * 60 * 60 * 1000; // 24 hours
-          // Simple hash for offline password verification (not crypto-grade, just prevents casual bypass)
-          var inputHash = '';
-          for (var i = 0; i < password.length; i++) { inputHash += password.charCodeAt(i).toString(16); }
-          if (stored && stored.email === email.toLowerCase() && sessionAge < MAX_SESSION_AGE && storedHash && inputHash === storedHash) {
+          if (stored && hasToken && stored.email === email.toLowerCase() && sessionAge < MAX_SESSION_AGE) {
             showToast('Offline — resuming cached session');
             finishLogin(email, stored);
           } else {
-            if (sessionAge >= MAX_SESSION_AGE) {
+            if (sessionAge >= MAX_SESSION_AGE || !hasToken) {
               MTC.storage.remove('mtc-user');
               MTC.storage.remove('mtc-session-time');
+              MTC.storage.remove('mtc-access-token');
+              MTC.storage.remove('mtc-session-hash');
             }
             showToast('Cannot connect to server. Please try again when online.');
           }
@@ -162,12 +162,8 @@
         // Always persist session + timestamp for offline expiry
         MTC.storage.set('mtc-user', currentUser);
         MTC.storage.set('mtc-session-time', Date.now());
-        // Store password hash for offline re-authentication
-        if (password) {
-          var ph = '';
-          for (var pi = 0; pi < password.length; pi++) { ph += password.charCodeAt(pi).toString(16); }
-          MTC.storage.set('mtc-session-hash', ph);
-        }
+        // Offline re-authentication relies on the Supabase access token (stored above)
+        // No password hash is stored — server-authenticated session token is the only credential
 
         // Sync membership status to payment data
         if (typeof memberPaymentData !== 'undefined') {

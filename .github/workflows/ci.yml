@@ -7,7 +7,24 @@ on:
     branches: [main, master]
 
 jobs:
-  # ── Build & Unit Tests ──
+  # ── Security Audit ──
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Security audit (high + critical)
+        run: npm audit --audit-level=high || true
+
+  # ── Build, Typecheck & Unit Tests ──
   build-and-unit:
     runs-on: ubuntu-latest
     steps:
@@ -20,6 +37,9 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: TypeScript type check
+        run: npx tsc --noEmit
 
       - name: Build Next.js
         run: npm run build

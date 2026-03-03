@@ -10,23 +10,23 @@ interface GalleryProps {
 const CDN = 'https://cdn.jsdelivr.net/gh/film4sport/my-webapp-images@main/mtc-images';
 
 const slides = [
-  { src: `${CDN}/gallery-01-community.jpeg`, alt: 'MTC Community' },
-  { src: `${CDN}/gallery-02-doubles-match.jpeg`, alt: 'MTC Tennis' },
-  { src: `${CDN}/gallery-03-court-action.jpeg`, alt: 'MTC Tennis' },
-  { src: `${CDN}/gallery-04-players-net.jpeg`, alt: 'MTC Tennis' },
-  { src: `${CDN}/gallery-05-serve.png`, alt: 'MTC Tennis' },
-  { src: `${CDN}/gallery-06-group-photo.jpeg`, alt: 'MTC Tennis' },
-  { src: `${CDN}/gallery-07-rally.jpeg`, alt: 'MTC Tennis' },
-  { src: `${CDN}/gallery-08-court-overview.jpeg`, alt: 'MTC Tennis' },
-  { src: `${CDN}/gallery-09-warmup.jpeg`, alt: 'MTC Tennis' },
-  { src: `${CDN}/gallery-10-forehand.jpeg`, alt: 'MTC Tennis' },
-  { src: `${CDN}/gallery-11-celebration.jpeg`, alt: 'MTC Tennis' },
-  { src: `${CDN}/gallery-12-clubhouse.png`, alt: 'MTC Tennis' },
-  { src: `${CDN}/gallery-13-backhand.jpeg`, alt: 'MTC Tennis' },
-  { src: `${CDN}/gallery-14-sunset-court.jpeg`, alt: 'MTC Tennis' },
-  { src: `${CDN}/gallery-15-team-spirit.jpeg`, alt: 'MTC Tennis' },
-  { src: `${CDN}/info-opening-day.jpeg`, alt: 'MTC Opening Day' },
-  { src: `${CDN}/info-tennis-court.jpeg`, alt: 'MTC Tennis Court' },
+  { src: `${CDN}/gallery-01-community.jpeg`, alt: 'Mono Tennis Club community members gathered at the clubhouse' },
+  { src: `${CDN}/gallery-02-doubles-match.jpeg`, alt: 'Doubles match in progress on the MTC courts' },
+  { src: `${CDN}/gallery-03-court-action.jpeg`, alt: 'Action shot during a rally at Mono Tennis Club' },
+  { src: `${CDN}/gallery-04-players-net.jpeg`, alt: 'Players shaking hands at the net after a match' },
+  { src: `${CDN}/gallery-05-serve.png`, alt: 'Player serving during a club tournament' },
+  { src: `${CDN}/gallery-06-group-photo.jpeg`, alt: 'Group photo of MTC members at a club event' },
+  { src: `${CDN}/gallery-07-rally.jpeg`, alt: 'Baseline rally between two club members' },
+  { src: `${CDN}/gallery-08-court-overview.jpeg`, alt: 'Aerial view of the Mono Tennis Club courts' },
+  { src: `${CDN}/gallery-09-warmup.jpeg`, alt: 'Members warming up before a round robin' },
+  { src: `${CDN}/gallery-10-forehand.jpeg`, alt: 'Close-up of a forehand stroke during play' },
+  { src: `${CDN}/gallery-11-celebration.jpeg`, alt: 'Members celebrating after a tournament final' },
+  { src: `${CDN}/gallery-12-clubhouse.png`, alt: 'The Mono Tennis Club clubhouse and grounds' },
+  { src: `${CDN}/gallery-13-backhand.jpeg`, alt: 'Two-handed backhand return during a singles match' },
+  { src: `${CDN}/gallery-14-sunset-court.jpeg`, alt: 'Sunset view over the MTC tennis courts' },
+  { src: `${CDN}/gallery-15-team-spirit.jpeg`, alt: 'Team huddle showing club spirit at an interclub event' },
+  { src: `${CDN}/info-opening-day.jpeg`, alt: 'Opening day ceremony at Mono Tennis Club' },
+  { src: `${CDN}/info-tennis-court.jpeg`, alt: 'Well-maintained tennis court at Mono Tennis Club' },
 ];
 
 export default function Gallery({ onOpenLightbox }: GalleryProps) {
@@ -147,7 +147,7 @@ export default function Gallery({ onOpenLightbox }: GalleryProps) {
           {/* Track */}
           <div className="gallery-track" ref={trackRef}>
             {shuffledSlides.map((slide, i) => (
-              <div key={i} className="gallery-slide" onClick={() => onOpenLightbox(slide.src, slide.alt)}>
+              <div key={i} className="gallery-slide" role="button" tabIndex={0} aria-label={`View: ${slide.alt}`} onClick={() => onOpenLightbox(slide.src, slide.alt)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onOpenLightbox(slide.src, slide.alt); } }}>
                 <Image
                   src={slide.src}
                   alt={slide.alt}
