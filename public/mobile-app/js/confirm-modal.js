@@ -150,7 +150,7 @@
           }).then(function() {
             showToast('Member removed successfully');
           }).catch(function(err) {
-            console.warn('[MTC] removeMember API error:', err);
+            MTC.warn('[MTC] removeMember API error:', err);
             showToast('Failed to remove member — ' + (err.message || 'try again'), 'error');
           });
         }
@@ -180,7 +180,7 @@
           }).then(function() {
             showToast('Booking ' + id + ' cancelled — member notified');
           }).catch(function(err) {
-            console.warn('[MTC] adminCancelBooking API error:', err);
+            MTC.warn('[MTC] adminCancelBooking API error:', err);
             showToast('Booking cancelled locally — sync may be delayed', 'warning');
           });
         }

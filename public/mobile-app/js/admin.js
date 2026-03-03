@@ -117,7 +117,7 @@
         }).then(function() {
           showToast('Announcement deleted');
         }).catch(function(err) {
-          console.warn('[MTC] deleteAnnouncement API error:', err);
+          MTC.warn(' deleteAnnouncement API error:', err);
           showToast('Announcement deleted locally — sync may be delayed', 'warning');
         });
       }
@@ -185,7 +185,7 @@
         showToast('Member updated successfully');
       });
     }).catch(function(err) {
-      console.warn('[MTC] editMember API error:', err);
+      MTC.warn(' editMember API error:', err);
       closeAdminModal('editMemberModal', function() {
         showToast('Failed to save — try again', 'error');
       });
@@ -229,7 +229,7 @@
     }).then(function() {
       showToast('Booking ' + id + ' cancelled');
     }).catch(function(err) {
-      console.warn('[MTC] adminCancelBooking API error:', err);
+      MTC.warn(' adminCancelBooking API error:', err);
       showToast('Failed to cancel booking', 'error');
     });
   };
@@ -264,7 +264,7 @@
       URL.revokeObjectURL(url);
       showToast('Download started: mtc-bookings-export.csv');
     }).catch(function(err) {
-      console.warn('[MTC] exportBookings error:', err);
+      MTC.warn(' exportBookings error:', err);
       showToast('Failed to export bookings', 'error');
     });
   };
@@ -395,10 +395,10 @@
       }
       showToast('Event created successfully!');
     }).catch(function(err) {
-      console.warn('[MTC] createEvent API error:', err);
+      MTC.warn(' createEvent API error:', err);
       showToast('Event saved locally — sync may be delayed', 'warning');
     });
-    } catch(e) { console.warn('createEvent error:', e); }
+    } catch(e) { MTC.warn('createEvent error:', e); }
   };
 
   // ============================================
@@ -501,10 +501,10 @@
     }).then(function() {
       showToast('Announcement sent successfully!');
     }).catch(function(err) {
-      console.warn('[MTC] sendCoachAnnouncement API error:', err);
+      MTC.warn(' sendCoachAnnouncement API error:', err);
       showToast('Announcement saved locally — sync may be delayed', 'warning');
     });
-    } catch(e) { console.warn('sendCoachAnnouncement error:', e); }
+    } catch(e) { MTC.warn('sendCoachAnnouncement error:', e); }
   };
 
   // ============================================
@@ -582,10 +582,10 @@
     }).then(function() {
       showToast('Message sent successfully!');
     }).catch(function(err) {
-      console.warn('[MTC] sendAdminMessage API error:', err);
+      MTC.warn(' sendAdminMessage API error:', err);
       showToast('Message saved locally — sync may be delayed', 'warning');
     });
-    } catch(e) { console.warn('sendAdminMessage error:', e); }
+    } catch(e) { MTC.warn('sendAdminMessage error:', e); }
   };
 
   // ============================================
@@ -690,7 +690,7 @@
         setTimeout(function() { showToast('Welcome email sent!'); }, 800);
       }
     }).catch(function(err) {
-      console.warn('[MTC] addNewMember API error:', err);
+      MTC.warn(' addNewMember API error:', err);
       showToast('Failed to add member — ' + (err.message || 'try again'), 'error');
     });
   };
@@ -726,7 +726,7 @@
     }).then(function() {
       showToast('E-transfer settings saved!');
     }).catch(function(err) {
-      console.warn('[MTC] saveEtransferSettings API error:', err);
+      MTC.warn(' saveEtransferSettings API error:', err);
       showToast('Settings saved locally — sync may be delayed', 'warning');
     });
   };
@@ -900,7 +900,7 @@
         '</div>' +
       '</div>';
     document.getElementById('app').appendChild(modal);
-    } catch(e) { console.warn('showEventTaskManager error:', e); }
+    } catch(e) { MTC.warn('showEventTaskManager error:', e); }
   };
 
   window.closeTaskManagerModal = function() {
@@ -986,7 +986,7 @@
     }).then(function() {
       showToast(memberName + ' assigned! Notification sent.');
     }).catch(function(err) {
-      console.warn('[MTC] assignTask API error:', err);
+      MTC.warn(' assignTask API error:', err);
       showToast(memberName + ' assigned locally — sync may be delayed', 'warning');
     });
 
@@ -1071,7 +1071,7 @@
     }).then(function() {
       showToast('"' + taskName + '" added to event');
     }).catch(function(err) {
-      console.warn('[MTC] addTaskToEvent API error:', err);
+      MTC.warn(' addTaskToEvent API error:', err);
       showToast('Task added locally — sync may be delayed', 'warning');
     });
 

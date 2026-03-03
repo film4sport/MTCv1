@@ -148,7 +148,7 @@
           registration.update();
         })
         .catch(function(error) {
-          console.warn('ServiceWorker registration failed:', error);
+          MTC.warn('ServiceWorker registration failed:', error);
         });
 
       // Auto-reload when new service worker takes control

@@ -751,6 +751,23 @@ Added Supabase migration tooling and DIY backup system:
 
 **Also updated:** CLAUDE.md (migration/backup rules in #11), .env.example (DATABASE_URL + SUPABASE_SERVICE_ROLE_KEY), .gitignore (backups/), package.json (3 new scripts)
 
+### Cowork Production Hardening Session (2026-03-03)
+6-item sweep to reach 10/10 production readiness:
+
+1. **Global error handlers** — Added `unhandledrejection` + `error` listeners to `app/layout.tsx` (landing + dashboard) and `utils.js` (mobile PWA). Catches silent promise failures across all 3 platforms.
+
+2. **Console cleanup** — Replaced 51 `console.warn`/`console.log` calls across 15 mobile PWA files with `MTC.warn`/`MTC.log` (debug-gated, only outputs when `localStorage mtc-debug=true`). Mobile SW: commented out 8 `console.log` calls, kept 2 error-path `console.warn`. Only 2 intentional exceptions remain (utils.js cleanup handler, api-client.js rollback critical path).
+
+3. **Bare catch blocks** — Fixed 4 empty/silent catches in `store.tsx`: localStorage parse (line 91), localStorage quota (line 105), fetchWithRetry final failure (line 285), weather fetch (line 473). All now call `reportError()`.
+
+4. **Image error fallbacks** — `Hero.tsx`: onError hides image (overlay still provides visual). `Gallery.tsx`: onError fades image and adds error class to slide container.
+
+5. **API response validation** — Added `validateResponse()` to `api-client.js`: validates array/object shape before caching. `loadFromAPI` now checks response shape and falls back to cache if invalid. Guards against Supabase schema drift corrupting localStorage cache.
+
+6. **Timer cleanup audit** — All 12 timer instances in dashboard verified: every `setInterval` has `clearInterval` in useEffect cleanup, every persistent `setTimeout` has `clearTimeout`. One-shot animation delays in onClick handlers are not leaks. No fixes needed — all clean.
+
+**Verified:** TypeScript clean, 207/207 unit tests pass, mobile build successful.
+
 ## TODO / REMINDERS
 - **Junior Summer Camp dates**: User is waiting on real dates from Mark Taylor. When received, update the `junior-summer-camp` event across: `supabase/seed.sql`, `app/dashboard/lib/data.ts`, `public/mobile-app/js/events.js`, and run UPDATE SQL on live Supabase. Also update date/time in `app/(landing)/layout.tsx` JSON-LD if camp is featured there.
 

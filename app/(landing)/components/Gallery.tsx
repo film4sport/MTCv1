@@ -148,7 +148,19 @@ export default function Gallery({ onOpenLightbox }: GalleryProps) {
           <div className="gallery-track" ref={trackRef}>
             {shuffledSlides.map((slide, i) => (
               <div key={i} className="gallery-slide" onClick={() => onOpenLightbox(slide.src, slide.alt)}>
-                <Image src={slide.src} alt={slide.alt} loading="lazy" fill sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" className="object-cover" />
+                <Image
+                  src={slide.src}
+                  alt={slide.alt}
+                  loading="lazy"
+                  fill
+                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                  className="object-cover"
+                  onError={(e) => {
+                    const el = e.target as HTMLImageElement;
+                    el.style.opacity = '0';
+                    el.parentElement?.classList.add('gallery-slide-error');
+                  }}
+                />
               </div>
             ))}
           </div>

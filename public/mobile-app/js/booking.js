@@ -363,7 +363,7 @@
       if (c) h.innerHTML=sanitizeHTML(c.name)+(c.floodlight?' <span class="floodlight-icon" title="Floodlights">\ud83d\udca1</span>':'');
     });
     } catch(e) {
-      console.warn('renderWeeklyGrid error:', e);
+      MTC.warn('renderWeeklyGrid error:', e);
       MTC.fn.renderError(gridBody, 'Could not load the booking grid. Please try again.');
     }
   }

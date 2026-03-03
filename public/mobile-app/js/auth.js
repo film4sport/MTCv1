@@ -488,7 +488,7 @@
     navigator.serviceWorker.ready.then(function(registration) {
       var vapidPublicKey = window.MTC_VAPID_PUBLIC_KEY || '';
       if (!vapidPublicKey) {
-        console.warn('[Push] No VAPID public key configured');
+        MTC.warn('[Push] No VAPID public key configured');
         return;
       }
 
@@ -513,7 +513,7 @@
           })
         }).catch(function() { /* push registration is best-effort */ });
       }).catch(function(err) {
-        console.warn('[Push] Subscribe failed:', err.message);
+        MTC.warn('[Push] Subscribe failed:', err.message);
       });
     });
   }

@@ -59,6 +59,34 @@ const MTC = {
  */
 MTC.state = {};
 
+// ============================================
+// MTC.DEBUG — Production-safe logging
+// Only outputs when debug flag is enabled (localStorage mtc-debug = 'true')
+// ============================================
+MTC.DEBUG = (function() {
+  try { return localStorage.getItem('mtc-debug') === 'true'; } catch(e) { return false; }
+})();
+
+/** Log only in debug mode — use instead of console.log in production code */
+MTC.log = function() {
+  if (MTC.DEBUG) console.log.apply(console, ['[MTC]'].concat(Array.prototype.slice.call(arguments)));
+};
+
+/** Warn only in debug mode — use instead of console.warn in production code */
+MTC.warn = function() {
+  if (MTC.DEBUG) console.warn.apply(console, ['[MTC]'].concat(Array.prototype.slice.call(arguments)));
+};
+
+// ============================================
+// Global error handlers — catch unhandled promise rejections
+// ============================================
+window.addEventListener('unhandledrejection', function(e) {
+  if (MTC.DEBUG) console.error('[MTC] Unhandled promise rejection:', e.reason);
+});
+window.addEventListener('error', function(e) {
+  if (MTC.DEBUG) console.error('[MTC] Uncaught error:', e.message, e.filename, e.lineno);
+});
+
 /**
  * @namespace MTC.fn
  * @description Shared utility functions populated by owning modules.
@@ -127,7 +155,7 @@ MTC.storage = {
       if (raw === null) return fallback !== undefined ? fallback : null;
       return JSON.parse(raw);
     } catch(e) {
-      console.warn('MTC storage parse error for ' + key, e);
+      MTC.warn('MTC storage parse error for ' + key, e);
       // Clear corrupted data to prevent repeated failures
       try { localStorage.removeItem(key); } catch(e2) {}
       return fallback !== undefined ? fallback : null;

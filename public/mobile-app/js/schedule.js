@@ -74,7 +74,7 @@
       });
     }
 
-    } catch(e) { console.warn('getCalendarEvents error:', e); }
+    } catch(e) { MTC.warn('getCalendarEvents error:', e); }
     return events;
   }
 
@@ -461,7 +461,7 @@
       '</div>';
       container.insertAdjacentHTML('beforeend', itemHtml);
     });
-    } catch(e) { console.warn('renderScheduleBookings error:', e); MTC.fn.renderError(container, 'Could not load your schedule. Please try again.'); }
+    } catch(e) { MTC.warn('renderScheduleBookings error:', e); MTC.fn.renderError(container, 'Could not load your schedule. Please try again.'); }
   };
   window.renderScheduleBookings = MTC.fn.renderScheduleBookings;
 

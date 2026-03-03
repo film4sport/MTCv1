@@ -99,7 +99,7 @@
 
     // Update message badge count
     updateMessageBadge();
-    } catch(e) { console.warn('openConversation error:', e); }
+    } catch(e) { MTC.warn('openConversation error:', e); }
   };
 
   // Private helper
@@ -140,7 +140,7 @@
 
     container.innerHTML = html;
     container.scrollTop = container.scrollHeight;
-    } catch(e) { console.warn('renderMessages error:', e); }
+    } catch(e) { MTC.warn('renderMessages error:', e); }
   }
 
   // onclick handler (index.html)
@@ -177,7 +177,7 @@
         body: JSON.stringify({ toId: currentConversation, text: text })
       }).then(function(res) {
         if (!res.ok) {
-          console.warn('[MTC] Message send failed:', res.data);
+          MTC.warn('[MTC] Message send failed:', res.data);
           if (typeof showToast === 'function') showToast('Message may not have been saved');
         }
       }).catch(function() {
@@ -185,7 +185,7 @@
       });
     }
 
-    } catch(e) { console.warn('sendMessage error:', e); }
+    } catch(e) { MTC.warn('sendMessage error:', e); }
   };
 
   // simulateReply removed — real messages come via Supabase API

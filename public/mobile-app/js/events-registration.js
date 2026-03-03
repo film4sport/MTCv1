@@ -187,7 +187,7 @@
         '</div>' +
       '</div>';
     document.getElementById('app').appendChild(modal);
-    } catch(e) { console.warn('showInterclubRsvpModal error:', e); }
+    } catch(e) { MTC.warn('showInterclubRsvpModal error:', e); }
   };
 
   // ============================================
@@ -269,7 +269,7 @@
     }
 
     // Don't auto-close - let user see the updated list and close manually
-    } catch(e) { console.warn('rsvpInterclub error:', e); }
+    } catch(e) { MTC.warn('rsvpInterclub error:', e); }
   };
 
   // ============================================
@@ -716,7 +716,7 @@
         '</div>' +
       '</div>';
     }).join('');
-    } catch(e) { console.warn('handleSearch error:', e); }
+    } catch(e) { MTC.warn('handleSearch error:', e); }
   }
 
   // ============================================

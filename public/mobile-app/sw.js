@@ -1,5 +1,5 @@
 // MTC Court Service Worker v48 (monorepo edition — served from /mobile-app/)
-const CACHE_NAME = 'mtc-court-e92170da';
+const CACHE_NAME = 'mtc-court-a8806aea';
 const OFFLINE_URL = '/mobile-app/offline.html';
 
 // Assets to cache immediately on install (bundles built by scripts/build-mobile.js)
@@ -17,16 +17,16 @@ const PRECACHE_ASSETS = [
 
 // Install event - cache core assets
 self.addEventListener('install', (event) => {
-  console.log('[ServiceWorker] Installing mtc-court-e92170da...');
+  // [ServiceWorker] Installing mtc-court-a8806aea...
 
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        console.log('[ServiceWorker] Caching app assets');
+        // [ServiceWorker] Caching app assets
         return cache.addAll(PRECACHE_ASSETS);
       })
       .then(() => {
-        console.log('[ServiceWorker] Skip waiting');
+        // [ServiceWorker] Skip waiting
         return self.skipWaiting();
       })
   );
@@ -34,7 +34,7 @@ self.addEventListener('install', (event) => {
 
 // Activate event - clean up ALL old caches
 self.addEventListener('activate', (event) => {
-  console.log('[ServiceWorker] Activating mtc-court-e92170da...');
+  // [ServiceWorker] Activating mtc-court-a8806aea...
 
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -42,12 +42,12 @@ self.addEventListener('activate', (event) => {
         cacheNames
           .filter((cacheName) => cacheName !== CACHE_NAME)
           .map((cacheName) => {
-            console.log('[ServiceWorker] Removing old cache:', cacheName);
+            // [ServiceWorker] Removing old cache: [cacheName]
             return caches.delete(cacheName);
           })
       );
     }).then(() => {
-      console.log('[ServiceWorker] Claiming clients');
+      // [ServiceWorker] Claiming clients
       return self.clients.claim();
     })
   );
@@ -109,11 +109,11 @@ self.addEventListener('fetch', (event) => {
 // Background sync for bookings (when back online)
 self.addEventListener('sync', (event) => {
   if (event.tag === 'sync-bookings') {
-    console.log('[ServiceWorker] Syncing bookings...');
+    // [ServiceWorker] Syncing bookings...
     event.waitUntil(syncPendingBookings());
   }
   if (event.tag === 'sync-messages') {
-    console.log('[ServiceWorker] Syncing messages...');
+    // [ServiceWorker] Syncing messages...
     event.waitUntil(syncPendingMessages());
   }
 });

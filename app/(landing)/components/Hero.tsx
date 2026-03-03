@@ -42,6 +42,9 @@ export default function Hero() {
           fill
           priority
           sizes="100vw"
+          onError={(e) => {
+            (e.target as HTMLImageElement).style.opacity = '0';
+          }}
         />
       </div>
       <div className="absolute inset-0 hero-overlay"></div>

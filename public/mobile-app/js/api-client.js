@@ -255,6 +255,29 @@
   }
 
   // ============================================
+  // API RESPONSE VALIDATION — guards against schema drift
+  // ============================================
+  /**
+   * Validate that API response data matches expected shape.
+   * Returns the data if valid, null if invalid (logs warning in debug mode).
+   * @param {*} data - Response data to validate
+   * @param {string} type - Expected type: 'array' or 'object'
+   * @param {string} label - Endpoint label for debug logging
+   * @returns {*} The data if valid, null if invalid
+   */
+  function validateResponse(data, type, label) {
+    if (type === 'array' && !Array.isArray(data)) {
+      MTC.warn(label + ': expected array, got ' + typeof data);
+      return null;
+    }
+    if (type === 'object' && (typeof data !== 'object' || data === null || Array.isArray(data))) {
+      MTC.warn(label + ': expected object, got ' + typeof data);
+      return null;
+    }
+    return data;
+  }
+
+  // ============================================
   // LOAD FROM API — generic data loader with localStorage cache + fallback
   // ============================================
   /**
@@ -268,17 +291,21 @@
   function loadFromAPI(endpoint, storageKey, fallback) {
     var token = MTC.storage.get('mtc-access-token', '');
     if (!token) {
-      // No token — return cached or fallback
       return Promise.resolve(MTC.storage.get(storageKey, fallback));
     }
+
+    var expectedType = Array.isArray(fallback) ? 'array' : 'object';
 
     return apiRequest(endpoint, { method: 'GET' })
       .then(function(result) {
         if (result.ok && result.data) {
-          MTC.storage.set(storageKey, result.data);
-          return result.data;
+          var validated = validateResponse(result.data, expectedType, endpoint);
+          if (validated !== null) {
+            MTC.storage.set(storageKey, validated);
+            return validated;
+          }
         }
-        // API failed — try cached data
+        // API failed or invalid shape — try cached data
         return MTC.storage.get(storageKey, fallback);
       })
       .catch(function() {
@@ -296,6 +323,7 @@
   MTC.fn.queueForSync = queueForSync;
   MTC.fn.signup = signup;
   MTC.fn.loadFromAPI = loadFromAPI;
+  MTC.fn.validateResponse = validateResponse;
 
   window.apiRequest = apiRequest;
   window.optimisticAction = optimisticAction;

@@ -467,7 +467,7 @@
 
     // Re-render event booking cards (RSVPs) that live in upcomingBookings
     if (typeof renderEventBookings === 'function') renderEventBookings();
-    } catch(e) { console.warn('renderMyBookings error:', e); MTC.fn.renderError(document.getElementById('upcomingBookings'), 'Could not load bookings. Please try again.'); }
+    } catch(e) { MTC.warn('renderMyBookings error:', e); MTC.fn.renderError(document.getElementById('upcomingBookings'), 'Could not load bookings. Please try again.'); }
   }
 
   // ============================================
@@ -555,7 +555,7 @@
       renderMyBookings();
       if (typeof renderWeeklyGrid === 'function') renderWeeklyGrid();
     }, 400);
-    } catch(e) { console.warn('confirmCancelBooking error:', e); }
+    } catch(e) { MTC.warn('confirmCancelBooking error:', e); }
   }
 
   // ============================================
@@ -707,7 +707,7 @@
         btn.innerHTML = 'CONFIRM & BOOK <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>';
       }
     }, 400);
-    } catch(e) { console.warn('confirmBookingPayment error:', e); }
+    } catch(e) { MTC.warn('confirmBookingPayment error:', e); }
   }
 
   // ============================================
@@ -810,7 +810,7 @@
     html += '</div>';
 
     container.innerHTML = html;
-    } catch(e) { console.warn('renderAdminPayments error:', e); }
+    } catch(e) { MTC.warn('renderAdminPayments error:', e); }
   }
 
   function adminMarkPaid(memberId) {
@@ -866,7 +866,7 @@
     a.click();
     URL.revokeObjectURL(url);
     showToast('Payment report downloaded');
-    } catch(e) { console.warn('exportPaymentReport error:', e); }
+    } catch(e) { MTC.warn('exportPaymentReport error:', e); }
   }
 
   function adminSendReminder(memberId) {
