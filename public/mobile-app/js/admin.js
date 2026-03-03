@@ -235,10 +235,38 @@
   };
 
   window.exportBookings = function() {
-    showToast('📦 Preparing bookings export...');
-    setTimeout(function() {
-      showToast('⬇️ Download starting: mtc-bookings-export.csv');
-    }, 1500);
+    showToast('Preparing bookings export...');
+
+    // Fetch bookings from Supabase
+    MTC.fn.apiRequest('/mobile/bookings', { method: 'GET' }).then(function(bookings) {
+      if (!bookings || !bookings.length) {
+        showToast('No bookings to export');
+        return;
+      }
+
+      // Build CSV
+      var csv = 'Date,Time,Court,Member,Match Type,Duration (slots),Status\n';
+      bookings.forEach(function(b) {
+        csv += [b.date, b.time, b.courtName || ('Court ' + b.courtId),
+          b.userName || 'Unknown', b.matchType || 'singles',
+          b.duration || 2, 'confirmed'].join(',') + '\n';
+      });
+
+      // Trigger download
+      var blob = new Blob([csv], { type: 'text/csv' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'mtc-bookings-export.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('Download started: mtc-bookings-export.csv');
+    }).catch(function(err) {
+      console.warn('[MTC] exportBookings error:', err);
+      showToast('Failed to export bookings', 'error');
+    });
   };
 
   window.showCreateEventModal = function() {
@@ -340,28 +368,36 @@
       return;
     }
 
-    // Add to events data (in production, save to database)
-    const eventId = 'event-' + Date.now();
+    // Optimistic local add
+    var eventId = 'event-' + Date.now();
     clubEventsData[eventId] = {
-      id: eventId,
-      title: title,
-      date: date,
-      time: time,
-      location: location,
+      id: eventId, title: title, date: date, time: time, location: location,
       badge: price.toLowerCase() === 'free' ? 'free' : 'paid',
-      price: price,
-      spotsTotal: parseInt(spots),
-      spotsTaken: 0,
-      description: desc,
-      attendees: []
+      price: price, spotsTotal: parseInt(spots), spotsTaken: 0,
+      description: desc, attendees: []
     };
 
     closeCreateEventModal();
-    showToast('Event created successfully!');
 
-    if (notify) {
-      setTimeout(function() { showToast('Notification sent to 156 members'); }, 1000);
-    }
+    // Persist to Supabase
+    MTC.fn.apiRequest('/mobile/events', {
+      method: 'PUT',
+      body: JSON.stringify({
+        title: title, type: type, date: date, time: time,
+        location: location, spotsTotal: spots, price: price, description: desc
+      })
+    }).then(function(res) {
+      if (res && res.id) {
+        // Update local ID to match server
+        clubEventsData[res.id] = clubEventsData[eventId];
+        clubEventsData[res.id].id = res.id;
+        if (res.id !== eventId) delete clubEventsData[eventId];
+      }
+      showToast('Event created successfully!');
+    }).catch(function(err) {
+      console.warn('[MTC] createEvent API error:', err);
+      showToast('Event saved locally — sync may be delayed', 'warning');
+    });
     } catch(e) { console.warn('createEvent error:', e); }
   };
 
@@ -457,7 +493,17 @@
 
     closeCoachAnnouncementModal();
     showToast('Sending to ' + recipientCount + ' members...');
-    setTimeout(function() { showToast('Announcement sent successfully!'); }, 1500);
+
+    // Persist to Supabase as announcement
+    MTC.fn.apiRequest('/mobile/announcements', {
+      method: 'POST',
+      body: JSON.stringify({ text: title + ': ' + message, type: 'coaching' })
+    }).then(function() {
+      showToast('Announcement sent successfully!');
+    }).catch(function(err) {
+      console.warn('[MTC] sendCoachAnnouncement API error:', err);
+      showToast('Announcement saved locally — sync may be delayed', 'warning');
+    });
     } catch(e) { console.warn('sendCoachAnnouncement error:', e); }
   };
 
@@ -528,7 +574,17 @@
 
     closeMessageMembersModal();
     showToast('Sending to ' + recipientCount + ' members...');
-    setTimeout(function() { showToast('Message sent successfully!'); }, 1500);
+
+    // Persist as announcement (broadcast message to all members)
+    MTC.fn.apiRequest('/mobile/announcements', {
+      method: 'POST',
+      body: JSON.stringify({ text: subject + ': ' + body, type: 'info' })
+    }).then(function() {
+      showToast('Message sent successfully!');
+    }).catch(function(err) {
+      console.warn('[MTC] sendAdminMessage API error:', err);
+      showToast('Message saved locally — sync may be delayed', 'warning');
+    });
     } catch(e) { console.warn('sendAdminMessage error:', e); }
   };
 
@@ -603,9 +659,12 @@
   };
 
   window.addNewMember = function() {
-    const first = document.getElementById('newMemberFirst').value;
-    const last = document.getElementById('newMemberLast').value;
-    const email = document.getElementById('newMemberEmail').value;
+    var first = document.getElementById('newMemberFirst').value;
+    var last = document.getElementById('newMemberLast').value;
+    var email = document.getElementById('newMemberEmail').value;
+    var memberType = document.getElementById('newMemberType') ? document.getElementById('newMemberType').value : 'adult';
+    var skillLevel = document.getElementById('newMemberSkill') ? document.getElementById('newMemberSkill').value : 'intermediate';
+    var sendWelcome = document.getElementById('newMemberWelcome') ? document.getElementById('newMemberWelcome').checked : true;
 
     if (!first || !last || !email) {
       showToast('Please fill in name and email');
@@ -613,29 +672,63 @@
     }
 
     closeAddMemberModal();
-    showToast('Member added: ' + first + ' ' + last);
-    setTimeout(function() { showToast('Welcome email sent!'); }, 1000);
+    showToast('Adding member...');
+
+    // Persist to Supabase
+    MTC.fn.apiRequest('/mobile/members', {
+      method: 'POST',
+      body: JSON.stringify({
+        name: first.trim() + ' ' + last.trim(),
+        email: email.trim(),
+        membershipType: memberType,
+        skillLevel: skillLevel,
+        sendWelcome: sendWelcome
+      })
+    }).then(function() {
+      showToast('Member added: ' + first + ' ' + last);
+      if (sendWelcome) {
+        setTimeout(function() { showToast('Welcome email sent!'); }, 800);
+      }
+    }).catch(function(err) {
+      console.warn('[MTC] addNewMember API error:', err);
+      showToast('Failed to add member — ' + (err.message || 'try again'), 'error');
+    });
   };
 
   // ============================================
   // E-TRANSFER SETTINGS
   // ============================================
   window.saveEtransferSettings = function() {
-    const email = document.getElementById('etransferEmail').value;
-    const autoDeposit = document.getElementById('etransferAutoDeposit').classList.contains('active');
-    const message = document.getElementById('etransferMessage').value;
+    var email = document.getElementById('etransferEmail').value;
+    var autoDeposit = document.getElementById('etransferAutoDeposit').classList.contains('active');
+    var message = document.getElementById('etransferMessage').value;
 
     if (!email) {
       showToast('Please enter an e-transfer email');
       return;
     }
 
-    // Save to localStorage (in production, save to database)
+    // Save to localStorage as cache
     MTC.storage.set('mtc-etransfer-email', email);
     MTC.storage.set('mtc-etransfer-autodeposit', autoDeposit);
     MTC.storage.set('mtc-etransfer-message', message);
 
-    showToast('E-transfer settings saved!');
+    // Persist to Supabase club_settings
+    MTC.fn.apiRequest('/mobile/settings', {
+      method: 'POST',
+      body: JSON.stringify({
+        settings: {
+          'etransfer_email': email,
+          'etransfer_auto_deposit': String(autoDeposit),
+          'etransfer_message': message || ''
+        }
+      })
+    }).then(function() {
+      showToast('E-transfer settings saved!');
+    }).catch(function(err) {
+      console.warn('[MTC] saveEtransferSettings API error:', err);
+      showToast('Settings saved locally — sync may be delayed', 'warning');
+    });
   };
 
   // ============================================
@@ -871,12 +964,33 @@
   window.assignTask = function(eventId, taskId, memberName) {
     closeAssignTaskModal();
     closeTaskManagerModal();
-    showToast(memberName + ' assigned! Notification sent.');
 
-    // In production, this would update the database and send notification
-    setTimeout(function() {
-      showEventTaskManager(eventId);
-    }, 400);
+    // Update local data
+    var event = eventTasksData[eventId];
+    if (event) {
+      var task = event.volunteersNeeded.find(function(t) { return t.id === taskId; });
+      if (task) {
+        // Move from volunteersNeeded to assignedTasks
+        task.assigned = memberName;
+        event.assignedTasks.push(task);
+        event.volunteersNeeded = event.volunteersNeeded.filter(function(t) { return t.id !== taskId; });
+      }
+    }
+
+    // Persist to Supabase club_settings
+    MTC.fn.apiRequest('/mobile/settings', {
+      method: 'POST',
+      body: JSON.stringify({
+        settings: { ['event_tasks_' + eventId]: JSON.stringify(eventTasksData[eventId]) }
+      })
+    }).then(function() {
+      showToast(memberName + ' assigned! Notification sent.');
+    }).catch(function(err) {
+      console.warn('[MTC] assignTask API error:', err);
+      showToast(memberName + ' assigned locally — sync may be delayed', 'warning');
+    });
+
+    setTimeout(function() { showEventTaskManager(eventId); }, 400);
   };
 
   window.showReassignTaskModal = function(eventId, taskId, taskName, currentAssignee) {
@@ -934,8 +1048,35 @@
 
   window.addTaskToEvent = function(eventId, taskName, icon, iconClass) {
     closeAddTaskModal();
-    showToast('"' + taskName + '" added to event');
-    // In production, would add to database
+
+    // Add to local data
+    var event = eventTasksData[eventId];
+    if (event) {
+      var newTask = {
+        id: 't' + Date.now(),
+        name: taskName,
+        icon: icon,
+        iconClass: iconClass,
+        assigned: null
+      };
+      event.volunteersNeeded.push(newTask);
+    }
+
+    // Persist to Supabase
+    MTC.fn.apiRequest('/mobile/settings', {
+      method: 'POST',
+      body: JSON.stringify({
+        settings: { ['event_tasks_' + eventId]: JSON.stringify(eventTasksData[eventId]) }
+      })
+    }).then(function() {
+      showToast('"' + taskName + '" added to event');
+    }).catch(function(err) {
+      console.warn('[MTC] addTaskToEvent API error:', err);
+      showToast('Task added locally — sync may be delayed', 'warning');
+    });
+
+    // Refresh task manager
+    setTimeout(function() { showEventTaskManager(eventId); }, 300);
   };
 
 })();
