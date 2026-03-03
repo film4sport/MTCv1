@@ -1,5 +1,5 @@
 // MTC Court Service Worker v48 (monorepo edition — served from /mobile-app/)
-const CACHE_NAME = 'mtc-court-4be2891b';
+const CACHE_NAME = 'mtc-court-d3727c4a';
 const OFFLINE_URL = '/mobile-app/offline.html';
 
 // Assets to cache immediately on install (bundles built by scripts/build-mobile.js)
@@ -17,7 +17,7 @@ const PRECACHE_ASSETS = [
 
 // Install event - cache core assets
 self.addEventListener('install', (event) => {
-  console.log('[ServiceWorker] Installing mtc-court-4be2891b...');
+  console.log('[ServiceWorker] Installing mtc-court-d3727c4a...');
 
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -34,7 +34,7 @@ self.addEventListener('install', (event) => {
 
 // Activate event - clean up ALL old caches
 self.addEventListener('activate', (event) => {
-  console.log('[ServiceWorker] Activating mtc-court-4be2891b...');
+  console.log('[ServiceWorker] Activating mtc-court-d3727c4a...');
 
   event.waitUntil(
     caches.keys().then((cacheNames) => {
