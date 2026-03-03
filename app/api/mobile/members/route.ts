@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { authenticateMobileRequest, getAdminClient } from '../auth-helper';
+import { authenticateMobileRequest, getAdminClient, sanitizeInput, isRateLimited } from '../auth-helper';
 
 export async function GET(request: Request) {
   const authResult = await authenticateMobileRequest(request);
@@ -53,16 +53,22 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Name and email required' }, { status: 400 });
     }
 
+    if (isRateLimited(authResult.id, 10)) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
+
     const supabase = getAdminClient();
+    const cleanName = sanitizeInput(name, 100);
+    const cleanEmail = email.trim().slice(0, 254);
 
     // Create auth user with a temporary password (they'll reset via email)
     const tempPassword = `MTC-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
     const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-      email: email.trim(),
+      email: cleanEmail,
       password: tempPassword,
       email_confirm: true, // auto-confirm since admin is adding them
       user_metadata: {
-        name: name.trim(),
+        name: cleanName,
         skill_level: skillLevel || 'intermediate',
         membership_type: membershipType || 'adult',
       },
@@ -100,9 +106,9 @@ export async function PATCH(request: Request) {
     // Build update object with only provided fields
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updates: Record<string, any> = {};
-    if (name?.trim()) updates.name = name.trim();
-    if (email?.trim()) updates.email = email.trim();
-    if (status?.trim()) updates.status = status.trim().toLowerCase();
+    if (name?.trim()) updates.name = sanitizeInput(name, 100);
+    if (email?.trim()) updates.email = email.trim().slice(0, 254);
+    if (status?.trim()) updates.status = sanitizeInput(status, 20).toLowerCase();
 
     if (Object.keys(updates).length === 0) {
       return NextResponse.json({ error: 'No fields to update' }, { status: 400 });

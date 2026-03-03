@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { authenticateMobileRequest, getAdminClient } from '../auth-helper';
+import { authenticateMobileRequest, getAdminClient, isRateLimited } from '../auth-helper';
 
 /** Get club settings */
 export async function GET(request: Request) {
@@ -32,6 +32,10 @@ export async function POST(request: Request) {
     const { settings } = await request.json();
     if (!settings || typeof settings !== 'object') {
       return NextResponse.json({ error: 'Missing settings object' }, { status: 400 });
+    }
+
+    if (isRateLimited(authResult.id, 20)) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
     }
 
     const supabase = getAdminClient();

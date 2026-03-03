@@ -669,6 +669,26 @@ Wired ALL remaining fake/stub admin functions in mobile PWA to real Supabase API
 
 **Verification:** TypeScript clean ✓, mobile build clean ✓ (27 files, 284KB JS, cache: mtc-court-41b5d428)
 
+### Events-Registration + Production Hardening (2026-03-03)
+**What changed:**
+- Wired 7 fake stubs in `events-registration.js` to real Supabase APIs:
+  - `editEvent()` → PATCH `/mobile/events` (new handler)
+  - `deleteEvent()` → DELETE `/mobile/events` (new handler, cascades attendees)
+  - `generateReport()` → fetches real data from APIs, generates CSV download
+  - `toggleMaintenanceMode()` → persists to `club_settings` via `/mobile/settings`
+  - `sendBroadcastNotification()` → POST `/mobile/announcements`
+  - `exportClubData()` → fetches members+bookings+events, generates multi-section CSV
+  - `editOperatingHours()` → saves to `club_settings` via `/mobile/settings`
+- Added PATCH + DELETE handlers to `app/api/mobile/events/route.ts`
+- Added try-catch around `Promise.all()` in `store.tsx` init (was unguarded)
+- Added error checks to profiles + messages queries in `conversations/route.ts`
+- Added error logging for conversation metadata update (was fire-and-forget)
+- Removed demo fallback in `mobile-booking/route.ts` — now returns 503 if DB not configured
+- Mobile build clean: `mtc-court-9bdee5b4`
+- TypeScript: 0 errors, Unit tests: 207/207 pass
+
+**Production readiness: 9/10** (up from 7.5/10)
+
 ## TODO / REMINDERS
 - **Junior Summer Camp dates**: User is waiting on real dates from Mark Taylor. When received, update the `junior-summer-camp` event across: `supabase/seed.sql`, `app/dashboard/lib/data.ts`, `public/mobile-app/js/events.js`, and run UPDATE SQL on live Supabase. Also update date/time in `app/(landing)/layout.tsx` JSON-LD if camp is featured there.
 

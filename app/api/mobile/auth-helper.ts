@@ -65,3 +65,29 @@ export async function authenticateMobileRequest(
 export function getAdminClient() {
   return createClient(supabaseUrl, supabaseServiceKey || supabaseAnonKey);
 }
+
+/**
+ * Sanitize user input — strips HTML tags and dangerous characters, trims, limits length.
+ */
+export function sanitizeInput(str: string, maxLength = 500): string {
+  return str.replace(/<[^>]*>/g, '').replace(/[<>"'&]/g, '').trim().slice(0, maxLength);
+}
+
+/**
+ * In-memory rate limiter for mobile API routes.
+ * Tracks requests per user per window (default: 30 requests per minute).
+ */
+const rateLimitMap = new Map<string, { count: number; firstAttempt: number }>();
+const RATE_WINDOW_MS = 60_000; // 1 minute
+const RATE_MAX = 30;
+
+export function isRateLimited(userId: string, max = RATE_MAX, windowMs = RATE_WINDOW_MS): boolean {
+  const now = Date.now();
+  const entry = rateLimitMap.get(userId);
+  if (!entry || now - entry.firstAttempt > windowMs) {
+    rateLimitMap.set(userId, { count: 1, firstAttempt: now });
+    return false;
+  }
+  entry.count++;
+  return entry.count > max;
+}

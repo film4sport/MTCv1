@@ -122,20 +122,7 @@ export async function POST(request: NextRequest) {
     const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
     if (!supabaseUrl || !supabaseKey) {
-      // Fallback: return success without DB (demo mode)
-      return NextResponse.json({
-        success: true,
-        booking: {
-          id: 'demo-' + Date.now(),
-          courtId,
-          date,
-          time,
-          matchType,
-          duration,
-          isGuest,
-          guestName: cleanGuestName,
-        },
-      });
+      return NextResponse.json({ error: 'Database not configured' }, { status: 503 });
     }
 
     const supabase = createClient(supabaseUrl, supabaseKey);
@@ -213,7 +200,7 @@ export async function DELETE(request: NextRequest) {
     const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
     if (!supabaseUrl || !supabaseKey) {
-      return NextResponse.json({ success: true }); // demo mode
+      return NextResponse.json({ error: 'Database not configured' }, { status: 503 });
     }
 
     const supabase = createClient(supabaseUrl, supabaseKey);

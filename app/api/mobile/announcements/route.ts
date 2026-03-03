@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { authenticateMobileRequest, getAdminClient } from '../auth-helper';
+import { authenticateMobileRequest, getAdminClient, sanitizeInput, isRateLimited } from '../auth-helper';
 
 export async function GET(request: Request) {
   const authResult = await authenticateMobileRequest(request);
@@ -53,11 +53,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing text' }, { status: 400 });
     }
 
+    if (isRateLimited(authResult.id)) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
+
     const supabase = getAdminClient();
     const id = `ann-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const { error } = await supabase.from('announcements').insert({
       id,
-      text: text.trim(),
+      text: sanitizeInput(text, 1000),
       type: type || 'info',
       date: new Date().toISOString().split('T')[0],
     });
