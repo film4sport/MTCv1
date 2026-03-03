@@ -16,22 +16,15 @@
   let selectedWeekDay = null;
 
   // ============================================
-  // DEMO DATA - Real MTC Programs & Bookings
+  // BOOKING & EVENT DATA (populated from API after login)
   // ============================================
   const bookingsData = {};
   const eventsData = {};
 
-  // Registered member lists (publicly visible)
-  const eventRegistrations = {
-    'mens-rr': ['Mike C.', 'James P.', 'Chris R.', 'Tom K.', 'Alex T.', 'Dave M.', 'Rob S.', 'Brian L.'],
-    'ladies-rr': ['Sarah L.', 'Emily R.', 'Lisa M.', 'Jennifer K.', 'Karen W.', 'Nancy D.'],
-    'freedom55': ['Mike C.', 'Sarah L.', 'Tom K.', 'Karen W.', 'Dave M.', 'Rob S.'],
-    'thu-interclub-a': ['James P.', 'Chris R.', 'Alex T.', 'Brian L.'],
-    'thu-interclub-b': ['Mike C.', 'Tom K.', 'Dave M.', 'Rob S.'],
-    'fri-mixed-rr': ['Mike C.', 'Sarah L.', 'James P.', 'Emily R.', 'Tom K.', 'Lisa M.', 'Chris R.', 'Jennifer K.', 'You']
-  };
+  // Registered member lists (populated from API)
+  const eventRegistrations = {};
 
-  (function generateDemoData() {
+  (function generateScheduleData() {
     const today = new Date();
     const monday = new Date(today);
     monday.setDate(today.getDate() - ((today.getDay() + 6) % 7));
@@ -42,31 +35,8 @@
       return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
     }
 
-    // Individual member bookings
-    const demos = [
-      { day:0,time:'10:00',court:1,user:'Mike C.' },
-      { day:0,time:'14:00',court:2,user:'You' },
-      { day:0,time:'15:00',court:1,user:'Tom K.' },
-      { day:1,time:'12:00',court:2,user:'Emily R.' },
-      { day:1,time:'14:00',court:1,user:'You' },
-      { day:2,time:'12:00',court:2,user:'Mike C.' },
-      { day:2,time:'14:00',court:1,user:'You' },
-      { day:2,time:'15:00',court:2,user:'James P.' },
-      { day:3,time:'12:00',court:2,user:'Chris R.' },
-      { day:3,time:'14:00',court:1,user:'You' },
-      { day:4,time:'12:00',court:1,user:'James P.' },
-      { day:4,time:'14:00',court:2,user:'You' },
-      { day:5,time:'10:00',court:1,user:'You' },
-      { day:5,time:'11:00',court:2,user:'Chris R.' },
-      { day:5,time:'13:00',court:1,user:'Tom K.' },
-      { day:6,time:'10:00',court:1,user:'Lisa M.' },
-      { day:6,time:'11:00',court:2,user:'You' }
-    ];
-    demos.forEach(function(b) {
-      const d = ds(b.day);
-      if (!bookingsData[d]) bookingsData[d] = [];
-      bookingsData[d].push({ time:b.time, court:b.court, user:b.user });
-    });
+    // Individual bookings come from API via updateBookingsFromAPI()
+    // No demo bookings generated here
 
     // ============================================
     // REAL MTC PROGRAMS (weekly recurring)

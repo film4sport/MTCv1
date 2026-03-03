@@ -6,57 +6,15 @@
   'use strict';
 
   // Shared state (read by events-registration.js)
+  // Populated from API via updateMembersFromAPI() after login
   MTC.state.clubMembers = [
-    { id: 'mike', name: 'Mike Chen', skill: 'Advanced (4.5)', avatar: 'man-2' },
-    { id: 'sarah', name: 'Sarah Wilson', skill: 'Intermediate (4.0)', avatar: 'woman-1' },
-    { id: 'james', name: 'James Park', skill: 'Advanced (4.5)', avatar: 'man-3' },
-    { id: 'emma', name: 'Emma Davis', skill: 'Intermediate (3.5)', avatar: 'woman-4' },
-    { id: 'david', name: 'David Kim', skill: 'Beginner (3.0)', avatar: 'man-1' },
-    { id: 'lisa', name: 'Lisa Thompson', skill: 'Advanced (5.0)', avatar: 'woman-2' },
-    { id: 'robert', name: 'Robert Garcia', skill: 'Intermediate (4.0)', avatar: 'man-5' },
-    { id: 'jennifer', name: 'Jennifer Lee', skill: 'Intermediate (3.5)', avatar: 'woman-3' },
-    { id: 'michael', name: 'Michael Brown', skill: 'Beginner (2.5)', avatar: 'man-6' },
-    { id: 'amanda', name: 'Amanda White', skill: 'Advanced (4.5)', avatar: 'woman-5' },
-    { id: 'emily', name: 'Emily Rodriguez', skill: 'Intermediate (3.0)', avatar: 'woman-3' },
     { id: 'club', name: 'MTC Club', skill: 'Club Announcements', avatar: 'tennis-1' }
   ];
   // Backward-compat alias
   window.clubMembers = MTC.state.clubMembers;
 
-  // Default conversation history (used when no saved data exists)
-  const defaultConversations = {
-    'mike': [
-      { text: 'Hey! Want to play this weekend?', sent: false, time: '10:30 AM' },
-      { text: 'Sounds great! Saturday morning?', sent: true, time: '' },
-      { text: 'Perfect! Court 2 at 9am?', sent: false, time: '' },
-      { text: 'I\'ll book it now', sent: true, time: '' },
-      { text: 'Ready for our match tomorrow? \uD83C\uDFBE', sent: false, time: '2:15 PM' },
-      { text: 'sure', sent: true, time: '' },
-      { text: 'See you on the court! \uD83C\uDFBE', sent: false, time: '03:28 PM' }
-    ],
-    'sarah': [
-      { text: 'That was a great rally!', sent: false, time: 'Yesterday' },
-      { text: 'You really improved your backhand', sent: false, time: '' },
-      { text: 'Thanks! Been practicing a lot', sent: true, time: '' },
-      { text: 'Great game today! Let\'s play again soon.', sent: false, time: '1 hour ago' }
-    ],
-    'james': [
-      { text: 'Can you help me with my serve?', sent: false, time: '3 hours ago' },
-      { text: 'Sure! Try tossing the ball a bit higher', sent: true, time: '' },
-      { text: 'And follow through more', sent: true, time: '' },
-      { text: 'Thanks for the tips on my serve!', sent: false, time: '' }
-    ],
-    'emma': [
-      { text: 'Hi! Do you play doubles?', sent: false, time: 'Yesterday' },
-      { text: 'Yes I love doubles!', sent: true, time: '' },
-      { text: 'Are you free for doubles Saturday?', sent: false, time: '' }
-    ],
-    'club': [
-      { text: '\uD83D\uDCE2 Welcome to MTC Court! Your membership is now active.', sent: false, time: 'Last week' },
-      { text: '\uD83C\uDFBE Spring Tournament registration is now open!', sent: false, time: '2 days ago' },
-      { text: 'Your court booking is confirmed for Court 1, Feb 10 at 10:00 AM.', sent: false, time: 'Yesterday' }
-    ]
-  };
+  // Conversation history (populated from API via updateConversationsFromAPI() after login)
+  const defaultConversations = {};
 
   // Private state
   let conversations = JSON.parse(JSON.stringify(defaultConversations));
@@ -210,50 +168,10 @@
     input.value = '';
     renderMessages(currentConversation);
 
-    // Simulate reply after 2 seconds
-    setTimeout(function() {
-      simulateReply(currentConversation);
-    }, 2000);
     } catch(e) { console.warn('sendMessage error:', e); }
   };
 
-  function simulateReply(memberId) {
-    try {
-    const member = MTC.state.clubMembers.find(function(m) { return m.id === memberId; });
-    if (!member || memberId === 'club') return;
-
-    const replies = [
-      'Sounds good! \uD83D\uDC4D',
-      'Great idea!',
-      'I\'m free this weekend',
-      'Let me check my schedule',
-      'Perfect!',
-      'See you on the court! \uD83C\uDFBE',
-      'Can\'t wait!',
-      'I\'ll bring the balls',
-      'What time works for you?'
-    ];
-
-    const reply = replies[Math.floor(Math.random() * replies.length)];
-    const now = new Date();
-    const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-    conversations[memberId].push({
-      text: reply,
-      sent: false,
-      time: time
-    });
-
-    MTC.fn.saveConversations();
-
-    if (currentConversation === memberId) {
-      renderMessages(memberId);
-      showToast(member.name + ' replied');
-    } else {
-      showPushNotification('New Message', member.name + ': ' + reply, '\uD83D\uDCAC');
-    }
-    } catch(e) { console.warn('simulateReply error:', e); }
-  }
+  // simulateReply removed — real messages come via Supabase API
 
   // onclick handler (index.html)
   window.showNewMessageModal = function() {

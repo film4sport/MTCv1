@@ -1,19 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { timingSafeEqual } from 'crypto';
 
 /**
  * Mobile PWA Auth Proxy
  * Validates credentials against Supabase and returns user data.
  * The mobile PWA (at /mobile-app/) calls this instead of its old Express server.
  */
-
-// Demo credentials — same as the main app, for development/demo mode
-const DEMO_CREDENTIALS: Record<string, { password: string; role: string; name: string }> = {
-  'member@mtc.ca': { password: process.env.DEMO_MEMBER_PW || 'member123', role: 'member', name: 'Alex Thompson' },
-  'coach@mtc.ca':  { password: process.env.DEMO_COACH_PW  || 'coach123',  role: 'coach',  name: 'Mark Taylor' },
-  'admin@mtc.ca':  { password: process.env.DEMO_ADMIN_PW  || 'admin123',  role: 'admin',  name: 'Admin' },
-};
 
 // Simple in-memory rate limiter: max 5 attempts per email per 60 seconds
 const loginAttempts = new Map<string, { count: number; firstAttempt: number }>();
@@ -73,26 +65,12 @@ export async function POST(request: NextRequest) {
           }
         }
       } catch {
-        // Supabase failed — fall through to demo credentials
+        // Supabase connection failed
       }
     }
 
-    // Fallback to demo credentials (development only)
-    if (process.env.NODE_ENV !== 'development') {
-      return NextResponse.json({ error: 'unknown_account' }, { status: 401 });
-    }
-    const account = DEMO_CREDENTIALS[emailLower];
-    if (!account) {
-      return NextResponse.json({ error: 'unknown_account' }, { status: 401 });
-    }
-    // Timing-safe comparison to prevent timing attacks
-    const expected = Buffer.from(account.password);
-    const received = Buffer.from(password);
-    if (expected.length !== received.length || !timingSafeEqual(expected, received)) {
-      return NextResponse.json({ error: 'invalid_password' }, { status: 401 });
-    }
-
-    return NextResponse.json({ role: account.role, name: account.name, email: emailLower });
+    // No valid credentials found
+    return NextResponse.json({ error: 'unknown_account' }, { status: 401 });
   } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }

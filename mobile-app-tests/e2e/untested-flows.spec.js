@@ -1078,8 +1078,6 @@ test.describe('Export Payment Report', () => {
     });
 
     expect(csvContent).toContain('Name,Email,Tab');
-    expect(csvContent).toContain('Alex Thompson');
-    expect(csvContent).toContain('Sarah Wilson');
   });
 });
 

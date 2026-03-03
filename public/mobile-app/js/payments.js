@@ -12,10 +12,11 @@
   // ============================================
   // DATA STORE
   // ============================================
+  // Current user payment data — synced from currentUser on login
   const memberPaymentData = {
     currentUser: {
-      name: 'Alex Thompson',
-      email: 'alex.thompson@email.com',
+      name: '',
+      email: '',
       tab: 0,          // running total owed (positive = owes money)
       overpayment: 0,  // if they overpaid, carries forward
       flagged: false,
@@ -26,19 +27,10 @@
     nextBookingId: 1001
   };
 
-  // All members for admin view
-  const allMembersPayment = [
-    { id: 1, name: 'Alex Thompson', email: 'alex.thompson@email.com', tab: 10, overpayment: 0, totalBookings: 8, totalPaid: 20, guestBookings: 2, programFees: 0, flagged: false },
-    { id: 2, name: 'Sarah Wilson', email: 'sarah.wilson@email.com', tab: 20, overpayment: 0, totalBookings: 12, totalPaid: 30, guestBookings: 3, programFees: 20, flagged: false },
-    { id: 3, name: 'James Park', email: 'james.park@email.com', tab: 0, overpayment: 0, totalBookings: 6, totalPaid: 10, guestBookings: 1, programFees: 0, flagged: false },
-    { id: 4, name: 'Emily Rodriguez', email: 'emily.r@email.com', tab: 10, overpayment: 0, totalBookings: 9, totalPaid: 0, guestBookings: 1, programFees: 0, flagged: false },
-    { id: 5, name: 'David Kim', email: 'david.kim@email.com', tab: 0, overpayment: 0, totalBookings: 4, totalPaid: 20, guestBookings: 0, programFees: 0, flagged: false },
-    { id: 6, name: 'Lisa Thompson', email: 'lisa.t@email.com', tab: 30, overpayment: 0, totalBookings: 10, totalPaid: 10, guestBookings: 3, programFees: 10, flagged: true, flagReason: 'Tab reached $30 — booking restricted' },
-    { id: 7, name: 'Mike Chen', email: 'mike.chen@email.com', tab: 10, overpayment: 0, totalBookings: 7, totalPaid: 10, guestBookings: 1, programFees: 0, flagged: false },
-    { id: 8, name: 'Kelly K.', email: 'kelly.k@email.com', tab: 0, overpayment: 5, totalBookings: 15, totalPaid: 40, guestBookings: 2, programFees: 15, flagged: false }
-  ];
+  // All members for admin view (populated from API)
+  const allMembersPayment = [];
 
-  // Sample existing bookings for demo
+  // Existing bookings (populated from API)
   const sampleBookings = [];
 
   function initSampleBookings() {

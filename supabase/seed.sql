@@ -1,34 +1,18 @@
 -- ============================================================
 -- MTC Seed Data
 -- Run AFTER schema.sql and rls.sql
--- NOTE: Demo users must be created first via Supabase Auth
--- (Dashboard > Authentication > Users > Add user)
 --
--- Create these 3 users with email+password:
---   1. member@mtc.ca / member123
---   2. coach@mtc.ca  / coach123
---   3. admin@mtc.ca  / admin123
---
--- After creating them, the handle_new_user() trigger will
--- auto-create their profiles. This seed updates those profiles
--- and adds courts, events, announcements, and programs.
+-- Seeds courts, events, announcements, coaching programs,
+-- and club settings. User accounts are created manually
+-- via Supabase Auth Dashboard.
 -- ============================================================
 
 do $$
 declare
-  v_alex uuid;
-  v_mark uuid;
-  v_admin uuid;
+  v_coach uuid;
 begin
-  -- Look up the auth user IDs by email
-  select id into v_alex from auth.users where email = 'member@mtc.ca';
-  select id into v_mark from auth.users where email = 'coach@mtc.ca';
-  select id into v_admin from auth.users where email = 'admin@mtc.ca';
-
-  -- If the trigger already created profiles, update them
-  update profiles set name = 'Alex Thompson', role = 'member', ntrp = 3.5, skill_level = 'intermediate', member_since = '2025-03' where id = v_alex;
-  update profiles set name = 'Mark Taylor', role = 'coach', ntrp = 5.0, skill_level = 'competitive', member_since = '2023-01' where id = v_mark;
-  update profiles set name = 'Admin', role = 'admin', member_since = '2023-01' where id = v_admin;
+  -- Look up a coach user (if one exists) for coaching programs
+  select id into v_coach from profiles where role = 'coach' limit 1;
 
   -- ─── Courts ───────────────────────────────────────────
   insert into courts (id, name, floodlight, status)
@@ -89,14 +73,14 @@ begin
   on conflict (id) do nothing;
 
   -- ─── Coaching Programs ────────────────────────────────
-  -- Only seed if coach user exists
-  if v_mark is not null then
+  -- Only seed if a coach user exists
+  if v_coach is not null then
     insert into coaching_programs (id, title, type, coach_id, coach_name, description, court_id, court_name, fee, spots_total, status)
     values
-      ('prog-clinic-1', 'Beginner Group Clinic', 'clinic', v_mark, 'Mark Taylor',
+      ('prog-clinic-1', 'Beginner Group Clinic', 'clinic', v_coach, 'Mark Taylor',
        'A 4-week beginner clinic covering grips, strokes, footwork, and match play basics.',
        3, 'Court 3', 120, 8, 'active'),
-      ('prog-camp-1', 'Junior Summer Camp', 'camp', v_mark, 'Mark Taylor',
+      ('prog-camp-1', 'Junior Summer Camp', 'camp', v_coach, 'Mark Taylor',
        'Intensive camp for juniors aged 8-14. Daily drills, match play, fitness, and fun activities. Dates TBC.',
        1, 'Court 1', 250, 12, 'active')
     on conflict (id) do nothing;

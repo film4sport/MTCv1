@@ -311,15 +311,8 @@
   // ============================================
   // PRIVATE: Pool of partner requests available
   // ============================================
-  const homePartnerPool = [
-    { name: 'Mike Chen', time: 'Today at 5PM', level: 'advanced', levelClass: 'advanced' },
-    { name: 'Sarah Wilson', time: 'Tomorrow at 3PM', level: 'intermediate', levelClass: '' },
-    { name: 'James Park', time: 'Today at 4PM', level: 'intermediate', levelClass: '' },
-    { name: 'Emily Rodriguez', time: 'Tomorrow at 10AM', level: 'advanced', levelClass: 'advanced' },
-    { name: 'David Kim', time: 'This Weekend', level: 'intermediate', levelClass: '' },
-    { name: 'Lisa Thompson', time: 'Tomorrow at 9AM', level: 'beginner', levelClass: 'beginner' },
-    { name: "Ryan O'Connor", time: 'Today at 6PM', level: 'advanced', levelClass: 'advanced' }
-  ];
+  // Partner pool populated from API via updatePartnersFromAPI() after login
+  const homePartnerPool = [];
 
   // ============================================
   // PRIVATE: Repopulate home partner cards from pool after joining
