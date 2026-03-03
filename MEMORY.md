@@ -342,6 +342,9 @@ Two major features implemented across 10+ files:
 - RLS policies for families + family_members
 - Indexes
 
+## TODO / REMINDERS
+- **Junior Summer Camp dates**: User is waiting on real dates from Mark Taylor. When received, update the `junior-summer-camp` event across: `supabase/seed.sql`, `app/dashboard/lib/data.ts`, `public/mobile-app/js/events.js`, and run UPDATE SQL on live Supabase. Also update date/time in `app/(landing)/layout.tsx` JSON-LD if camp is featured there.
+
 ## Decisions Made
 - Double-booking prevention: DB-level partial unique index on `(court_id, date, time) WHERE status = 'confirmed'` — already implemented, no code change needed
 - Mobile PWA logout: clears all 11 app localStorage keys (added `mtc-session-hash`)

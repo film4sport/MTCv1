@@ -438,6 +438,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify({
           recipients,
           bookerName: currentUser.name,
+          bookedFor: booking.bookedFor || undefined,
           courtName: booking.courtName,
           date: booking.date,
           time: booking.time,

@@ -317,7 +317,7 @@ begin
     new.email,
     coalesce(new.raw_user_meta_data->>'role', 'member'),
     coalesce(new.raw_user_meta_data->>'skill_level', 'intermediate'),
-    (new.raw_user_meta_data->>'skill_level' is not null),
+    coalesce((new.raw_user_meta_data->>'skill_level_set')::boolean, (new.raw_user_meta_data->>'skill_level' is not null)),
     coalesce(new.raw_user_meta_data->>'membership_type', 'adult'),
     'tennis-male-1',
     to_char(now(), 'YYYY-MM')
