@@ -119,3 +119,29 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }
+
+/** Remove a member (admin only) — calls delete_member RPC */
+export async function DELETE(request: Request) {
+  const authResult = await authenticateMobileRequest(request);
+  if (authResult instanceof NextResponse) return authResult;
+  if (authResult.role !== 'admin') {
+    return NextResponse.json({ error: 'Admin only' }, { status: 403 });
+  }
+
+  try {
+    const { memberId } = await request.json();
+    if (!memberId) {
+      return NextResponse.json({ error: 'Missing memberId' }, { status: 400 });
+    }
+
+    const supabase = getAdminClient();
+
+    // Use the delete_member RPC which handles cascading deletes
+    const { error } = await supabase.rpc('delete_member', { target_user_id: memberId });
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+    return NextResponse.json({ success: true });
+  } catch {
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+  }
+}
