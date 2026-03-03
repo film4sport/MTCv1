@@ -1,0 +1,33 @@
+# Supabase CLI Configuration for MTC
+# Docs: https://supabase.com/docs/guides/cli/config
+#
+# Usage:
+#   npx supabase db push          — apply pending migrations to remote DB
+#   npx supabase db diff          — generate migration from schema changes
+#   npx supabase db reset          — reset local DB to schema.sql (local dev only)
+#
+# Setup (one-time):
+#   npx supabase login            — authenticate with Supabase
+#   npx supabase link --project-ref YOUR_PROJECT_REF
+
+[project]
+id = "mtc-website"
+
+[db]
+# Port for local development (supabase start)
+port = 54322
+shadow_port = 54320
+major_version = 15
+
+[db.pooler]
+enabled = false
+port = 54329
+pool_mode = "transaction"
+
+[api]
+enabled = true
+port = 54321
+
+[studio]
+enabled = true
+port = 54323

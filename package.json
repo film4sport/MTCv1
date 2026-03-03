@@ -11,7 +11,10 @@
     "test:unit": "vitest run",
     "test:all": "vitest run && npx playwright test",
     "test:coverage": "vitest run --coverage",
-    "deps:check": "npm outdated || true"
+    "deps:check": "npm outdated || true",
+    "db:backup": "bash scripts/backup-db.sh",
+    "db:push": "npx supabase db push",
+    "db:diff": "npx supabase db diff --schema public"
   },
   "dependencies": {
     "@supabase/ssr": "^0.8.0",

@@ -92,6 +92,12 @@ Use grep to find all occurrences before editing. Verify 0 stale values remain af
 
 ## #11: MAINTENANCE CONVENTIONS
 - **Supabase schema**: `supabase/schema.sql` is the single source of truth. All DB changes go there FIRST, then apply to Supabase. No ad-hoc ALTER TABLEs.
+- **DB migrations**: Use Supabase CLI for schema changes:
+  1. Edit `supabase/schema.sql` first (source of truth)
+  2. Run `npm run db:diff -- -f descriptive_name` to generate a migration file in `supabase/migrations/`
+  3. Run `npm run db:push` to apply to remote DB
+  4. Never run raw ALTER TABLE on production without a migration file
+- **DB backups**: Run `npm run db:backup` before any schema migration. Requires `DATABASE_URL` in `.env.local` (see `.env.example`). Backups go to `backups/` (gitignored). Auto-prunes to 30 files. Set up cron for automated weekly backups (see `scripts/backup-db.sh` header for cron examples).
 - **localStorage is a cache, not a source of truth**: Data flow is Supabase → localStorage → React state. New features must follow the same `store.tsx` pattern: optimistic update → Supabase write → rollback on failure.
 - **E2E tests for new features**: Every new user-facing feature needs at least one Playwright happy-path test in `tests/`.
 - **Mobile PWA `dist/` is build output**: Never edit `dist/app.bundle.*` directly — edit source files in `css/` and `js/`, then run `npm run build:mobile`. The build script auto-bumps the SW cache version from content hash.
@@ -161,6 +167,11 @@ Note: Sections 3→4→5→6 meet flush (no wave dividers between them)
 - `app/dashboard/components/MobileAppBanner.tsx` - Dismissible "Try MTC Court App" banner
 - `app/globals.css` - Global styles (@font-face after @tailwind directives)
 - `supabase/schema.sql` - Full DB schema (18+ tables, indexes, RPC functions, triggers)
+- `supabase/config.toml` - Supabase CLI config (migrations, local dev)
+- `supabase/migrations/` - DB migration files (baseline + incremental)
+- `scripts/backup-db.sh` - DIY database backup script (pg_dump + gzip + auto-prune)
+- `app/api/mobile/types.ts` - Shared TypeScript interfaces for mobile API routes
+- `app/api/mobile/auth-helper.ts` - Shared auth, rate limiting, sanitization, and withAuth wrapper
 - `public/sw.js` - Service worker (desktop)
 - `public/mobile-app/` - Mobile PWA (merged from mtc-app repo)
 - `public/manifest.json` - PWA manifest

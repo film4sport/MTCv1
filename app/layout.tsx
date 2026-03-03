@@ -72,6 +72,14 @@ export default function RootLayout({
         <script
           dangerouslySetInnerHTML={{
             __html: `
+              // Global error handlers — catch unhandled promise rejections and runtime errors
+              window.addEventListener('unhandledrejection', function(e) {
+                console.error('[MTC] Unhandled promise rejection:', e.reason);
+              });
+              window.addEventListener('error', function(e) {
+                console.error('[MTC] Uncaught error:', e.message, e.filename, e.lineno);
+              });
+
               if ('serviceWorker' in navigator && location.hostname === 'localhost') {
                 // Dev mode: unregister any existing SW to prevent stale cache issues
                 navigator.serviceWorker.getRegistrations().then(function(regs) {
