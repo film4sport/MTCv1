@@ -45,8 +45,8 @@ export default function ProfilePage() {
   const saveSkillLevel = async (level: SkillLevel) => {
     if (!currentUser) return;
     try {
-      await db.updateProfile(currentUser.id, { skill_level: level });
-      updateCurrentUser({ skillLevel: level });
+      await db.updateProfile(currentUser.id, { skill_level: level, skill_level_set: true });
+      updateCurrentUser({ skillLevel: level, skillLevelSet: true });
       showToast('Skill level updated');
     } catch (err) {
       console.error('[MTC Supabase]', err);

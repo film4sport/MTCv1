@@ -15,12 +15,13 @@ export async function fetchMembers(): Promise<User[]> {
     status: (p.status as User['status']) || 'active',
     ntrp: p.ntrp ?? undefined,
     skillLevel: (p.skill_level as SkillLevel) ?? undefined,
+    skillLevelSet: p.skill_level_set ?? false,
     memberSince: p.member_since ?? undefined,
     avatar: p.avatar ?? undefined,
   }));
 }
 
-export async function updateProfile(userId: string, updates: { ntrp?: number; name?: string; skill_level?: string; avatar?: string }): Promise<void> {
+export async function updateProfile(userId: string, updates: { ntrp?: number; name?: string; skill_level?: string; skill_level_set?: boolean; avatar?: string }): Promise<void> {
   await supabase.from('profiles').update(updates).eq('id', userId);
 }
 

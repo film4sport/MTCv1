@@ -93,6 +93,28 @@ export default function DashboardHome() {
           </div>
         ))}
 
+        {/* Skill Level Reminder */}
+        {currentUser && currentUser.skillLevelSet === false && (
+          <div
+            className="flex items-center justify-between rounded-xl px-5 py-3.5 border animate-slideUp"
+            style={{ background: 'linear-gradient(135deg, rgba(107, 122, 61, 0.08), rgba(212, 225, 87, 0.06))', borderColor: 'rgba(107, 122, 61, 0.2)' }}
+          >
+            <div className="flex items-center gap-3">
+              <span className="text-lg">🎾</span>
+              <p className="text-sm font-medium" style={{ color: '#2a2f1e' }}>
+                Complete your profile — set your skill level to get matched with the right partners!
+              </p>
+            </div>
+            <Link
+              href="/dashboard/profile"
+              className="text-xs font-semibold px-4 py-2 rounded-lg whitespace-nowrap transition-all hover:opacity-90"
+              style={{ backgroundColor: '#6b7a3d', color: '#fff' }}
+            >
+              Go to Profile →
+            </Link>
+          </div>
+        )}
+
         {/* Quick Actions */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 stagger-children">
           {[
