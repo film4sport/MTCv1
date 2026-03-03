@@ -1,0 +1,12 @@
+-- Baseline migration: MTC initial schema
+-- This file is auto-generated from supabase/schema.sql as the starting point
+-- for the migration system. Future changes should be added as new migration files.
+--
+-- To generate a new migration after making changes to schema.sql:
+--   npx supabase db diff --schema public -f descriptive_name
+--
+-- This baseline is idempotent (uses IF NOT EXISTS) so it's safe to run on an
+-- existing database.
+
+-- See supabase/schema.sql for the full annotated schema.
+-- This migration was created from schema.sql on 2026-03-03.

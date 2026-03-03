@@ -700,6 +700,57 @@ Wired ALL remaining fake/stub admin functions in mobile PWA to real Supabase API
 
 **Production readiness: 9.5/10**
 
+### Cowork Code Quality Session (2026-03-03)
+7-item improvement sweep for production hardening:
+
+**Item 1 — Shared route wrapper:**
+- `app/api/mobile/auth-helper.ts` — Added `withAuth()` wrapper that encapsulates auth check + role check + rate limiting + try/catch. New routes can use `export const GET = withAuth(handler, { role: 'admin', rateLimit: 10 })`.
+
+**Item 2 — Booking API consolidation:**
+- Merged create+cancel logic from `/api/mobile-booking` into `/api/mobile/bookings` (POST for create, unified DELETE for both admin and member cancel with 24h rule).
+- `/api/mobile-booking/route.ts` → deprecated stub returning 410 Gone.
+- `public/mobile-app/js/api-client.js` — All 3 references updated from `/mobile-booking` to `/mobile/bookings`.
+- Key improvement: bookings now use Bearer token auth (`authenticateMobileRequest`) instead of trusting `userId` from request body.
+
+**Item 3 — Proper TypeScript types:**
+- `app/api/mobile/types.ts` — New shared types file: `EventUpdate`, `ProfileUpdate`, `BookingCreatePayload`, `BookingRules`, `MessageResponse`, `ConversationResponse`.
+- Replaced `Record<string, any>` in `events/route.ts` (PATCH) and `members/route.ts` (PATCH).
+
+**Item 4 — Dead code cleanup:**
+- `partners/route.ts` — Replaced custom rate limiter (duplicate) with shared `isRateLimited()` from auth-helper.
+- `events-registration.js` — Hoisted `buildAvatarList()` to IIFE scope (was duplicated: once in `showInterclubRsvpModal` as a function, once inlined in `rsvpInterclub`).
+
+**Items 5-7 — Assessed, deferred:**
+- Item 5 (Vite/esbuild for mobile PWA): Too risky for a quick win. Current concat+minify pipeline works. Future sprint.
+- Item 6 (API versioning): Only one client exists. Add when v2 breaks backward compat.
+- Item 7 (Shared types): Partially done — `types.ts` is importable by dashboard code. Full extraction deferred.
+
+**Verified:** TypeScript clean, 207/207 unit tests pass, mobile build successful.
+
+### Cowork DB Tooling Session (2026-03-03)
+Added Supabase migration tooling and DIY backup system:
+
+**Migration tooling:**
+- `supabase/config.toml` — Supabase CLI config for local dev + migrations
+- `supabase/migrations/00000000000000_baseline.sql` — Baseline migration from current schema
+- `npm run db:diff` — Generate migration from schema changes
+- `npm run db:push` — Apply pending migrations to remote DB
+- Workflow: edit `schema.sql` → `db:diff` → review migration → `db:push`
+
+**DIY backup system (free tier):**
+- `scripts/backup-db.sh` — pg_dump + gzip with auto-prune (keeps last 30)
+- `npm run db:backup` — Manual backup, `npm run db:backup -- --data-only` for data only
+- Requires `DATABASE_URL` in `.env.local` (connection string from Supabase dashboard)
+- Cron example in script header for automated weekly/daily backups
+- `backups/` directory is gitignored
+
+**Shared types (Item 7):**
+- `app/api/mobile/types.ts` — Shared interfaces for mobile API routes (EventUpdate, ProfileUpdate, BookingCreatePayload, BookingRules)
+- Dashboard has its own `app/dashboard/lib/types.ts` with client-facing types in camelCase
+- Mobile API routes handle the mapping between DB snake_case and client camelCase
+
+**Also updated:** CLAUDE.md (migration/backup rules in #11), .env.example (DATABASE_URL + SUPABASE_SERVICE_ROLE_KEY), .gitignore (backups/), package.json (3 new scripts)
+
 ## TODO / REMINDERS
 - **Junior Summer Camp dates**: User is waiting on real dates from Mark Taylor. When received, update the `junior-summer-camp` event across: `supabase/seed.sql`, `app/dashboard/lib/data.ts`, `public/mobile-app/js/events.js`, and run UPDATE SQL on live Supabase. Also update date/time in `app/(landing)/layout.tsx` JSON-LD if camp is featured there.
 

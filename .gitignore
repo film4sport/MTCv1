@@ -39,6 +39,9 @@ test-results/
 playwright-report/
 coverage/
 
+# Database backups (contain sensitive data)
+backups/
+
 # Misc
 *.tsbuildinfo
 next-env.d.ts
