@@ -668,4 +668,27 @@
     MTC.fn.navigateTo(swipeScreens[nextIndex], direction);
   }, { passive: true });
 
+  /**
+   * Update partner pool from Supabase API data.
+   * Called by auth.js after login when API data is available.
+   */
+  window.updatePartnersFromAPI = function(apiPartners) {
+    if (!Array.isArray(apiPartners)) return;
+    // Replace the home partner pool with API data
+    homePartnerPool.length = 0;
+    apiPartners.forEach(function(p) {
+      var levelClass = '';
+      if (p.skillLevel === 'advanced' || p.skillLevel === 'competitive') levelClass = 'advanced';
+      else if (p.skillLevel === 'beginner') levelClass = 'beginner';
+      homePartnerPool.push({
+        name: p.name,
+        time: p.availability || p.date + ' at ' + p.time,
+        level: p.skillLevel || 'intermediate',
+        levelClass: levelClass
+      });
+    });
+    // Re-populate the home screen partner cards
+    repopulateHomePartners();
+  };
+
 })();

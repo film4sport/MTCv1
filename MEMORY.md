@@ -188,6 +188,46 @@ Completed all remaining NEEDS items + fixed all 11 pre-existing test failures.
 - Create `push_subscriptions` table in Supabase (run SQL from `supabase/schema.sql` lines 330-338)
 - Replace `SMTP_PASS=REPLACE_WITH_APP_PASSWORD` in `.env.local` with actual Google App Password
 
+### Backend Production Readiness (2026-03-03)
+Full backend production work: security fixes, seed data update, mobile API endpoints, and mobile PWA Supabase wiring.
+
+**Phase 1 — Security Fixes (4 files):**
+- `supabase/rls.sql` — Added RLS for `push_subscriptions` (read/create/delete own only). All 18 tables now covered.
+- `app/api/push-subscribe/route.ts` — Added Bearer token auth: validates caller via `supabase.auth.getUser(token)`, verifies userId matches authenticated user
+- `app/api/push-send/route.ts` — Added admin-only auth: validates Bearer token + checks `role = 'admin'` in profiles
+- `app/api/booking-email/route.ts` — Added recipient email validation: queries profiles table, rejects unknown emails
+
+**Phase 2 — Seed Data (1 file):**
+- `supabase/seed.sql` — Complete rewrite: synced with current codebase events (Euchre Tournament, French Open Social, Wimbledon Social added; tournament dates fixed to Jul 18-19; camp changed to TBC; mark-taylor-classes added; courts table fixed to match schema — removed non-existent columns)
+
+**Phase 3 — Mobile API Endpoints (8 files, 7 new):**
+- `app/api/mobile/auth-helper.ts` — NEW shared auth helper: `authenticateMobileRequest()` validates Bearer token + returns user profile; `getAdminClient()` for service-role queries
+- `app/api/mobile-auth/route.ts` — Now returns `userId` and `accessToken` (Supabase session token) for mobile PWA API calls
+- `app/api/mobile/events/route.ts` — NEW: GET events with attendee lists
+- `app/api/mobile/bookings/route.ts` — NEW: GET confirmed bookings with participants
+- `app/api/mobile/members/route.ts` — NEW: GET active members (email only visible to admins)
+- `app/api/mobile/partners/route.ts` — NEW: GET available partner requests
+- `app/api/mobile/announcements/route.ts` — NEW: GET announcements with dismissal status
+- `app/api/mobile/conversations/route.ts` — NEW: GET conversations + messages for authenticated user
+
+**Phase 4 — Mobile PWA Wiring (6 files):**
+- `public/mobile-app/js/api-client.js` — Auto-includes `Authorization: Bearer <token>` header; added `MTC.fn.loadFromAPI()` generic data loader with localStorage cache + offline fallback
+- `public/mobile-app/js/auth.js` — Stores `accessToken` and `userId` on login; clears on logout (including API cache keys); `loadAppDataFromAPI()` triggers after login to hydrate all screens from Supabase
+- `public/mobile-app/js/events.js` — Added `window.updateEventsFromAPI()` receiver to merge API events into `clubEventsData`
+- `public/mobile-app/js/messaging.js` — Added `window.updateMembersFromAPI()` and `window.updateConversationsFromAPI()` receivers
+- `public/mobile-app/js/navigation.js` — Added `window.updatePartnersFromAPI()` receiver to replace home partner pool
+- `public/mobile-app/js/booking.js` — Added `window.updateBookingsFromAPI()` and `window.updateAnnouncementsFromAPI()` receivers
+
+**TypeScript:** Clean ✓ (0 errors)
+**NEEDS `npm run build:mobile`** to rebuild the mobile bundle with new JS changes.
+
+**User needs to do in Supabase:**
+1. Run the new `push_subscriptions` RLS SQL (copy from rls.sql lines 191-197)
+2. Re-run updated `seed.sql` to get correct events
+3. Create 3 auth users if not done: member@mtc.ca, coach@mtc.ca, admin@mtc.ca
+4. Add `SUPABASE_SERVICE_ROLE_KEY` to `.env.local` (for mobile API endpoints to bypass RLS)
+5. Set `SMTP_PASS` when ready
+
 ## Decisions Made
 - Double-booking prevention: DB-level partial unique index on `(court_id, date, time) WHERE status = 'confirmed'` — already implemented, no code change needed
 - Mobile PWA logout: clears all 11 app localStorage keys (added `mtc-session-hash`)

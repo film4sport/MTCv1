@@ -633,4 +633,32 @@
   window.showRsvpListModal = showRsvpListModal;
   window.closeRsvpListModal = closeRsvpListModal;
   window.rsvpFromModal = rsvpFromModal;
+
+  /**
+   * Update events data from Supabase API response.
+   * Called by auth.js after successful login when API data is available.
+   * Merges API events into the existing clubEventsData object.
+   */
+  window.updateEventsFromAPI = function(apiEvents) {
+    if (!Array.isArray(apiEvents)) return;
+    apiEvents.forEach(function(ev) {
+      clubEventsData[ev.id] = {
+        id: ev.id,
+        title: ev.title,
+        date: ev.date,
+        time: ev.time,
+        location: ev.location,
+        badge: ev.badge,
+        price: ev.price,
+        spotsTotal: ev.spotsTotal,
+        spotsTaken: ev.spotsTaken,
+        description: ev.description,
+        type: ev.type,
+        attendees: ev.attendees || [],
+        rsvpCount: (ev.attendees || []).length
+      };
+    });
+    // Re-sync the UI
+    if (typeof syncEventCardDates === 'function') syncEventCardDates();
+  };
 })();

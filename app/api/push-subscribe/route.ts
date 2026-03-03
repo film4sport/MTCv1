@@ -2,7 +2,23 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+
+/**
+ * Verify the caller's identity via Bearer token.
+ * Returns the authenticated user's ID or null.
+ */
+async function authenticateRequest(request: Request): Promise<string | null> {
+  const authHeader = request.headers.get('authorization');
+  if (!authHeader?.startsWith('Bearer ')) return null;
+
+  const token = authHeader.slice(7);
+  const supabase = createClient(supabaseUrl, supabaseAnonKey);
+  const { data: { user }, error } = await supabase.auth.getUser(token);
+  if (error || !user) return null;
+  return user.id;
+}
 
 export async function POST(request: Request) {
   try {
@@ -13,11 +29,18 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    if (!supabaseUrl || !supabaseKey) {
+    if (!supabaseUrl || (!supabaseServiceKey && !supabaseAnonKey)) {
       return NextResponse.json({ error: 'Supabase not configured' }, { status: 500 });
     }
 
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    // Authenticate: verify caller owns this userId
+    const authenticatedUserId = await authenticateRequest(request);
+    if (!authenticatedUserId || authenticatedUserId !== userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Use service role to bypass RLS (server-side operation)
+    const supabase = createClient(supabaseUrl, supabaseServiceKey || supabaseAnonKey);
 
     const { error } = await supabase
       .from('push_subscriptions')
@@ -49,7 +72,13 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    // Authenticate: verify caller owns this userId
+    const authenticatedUserId = await authenticateRequest(request);
+    if (!authenticatedUserId || authenticatedUserId !== userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseServiceKey || supabaseAnonKey);
 
     await supabase
       .from('push_subscriptions')
