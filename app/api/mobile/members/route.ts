@@ -39,6 +39,48 @@ export async function GET(request: Request) {
   }
 }
 
+/** Add a new member (admin only) — creates Supabase auth user + profile */
+export async function POST(request: Request) {
+  const authResult = await authenticateMobileRequest(request);
+  if (authResult instanceof NextResponse) return authResult;
+  if (authResult.role !== 'admin') {
+    return NextResponse.json({ error: 'Admin only' }, { status: 403 });
+  }
+
+  try {
+    const { name, email, membershipType, skillLevel, sendWelcome } = await request.json();
+    if (!name?.trim() || !email?.trim()) {
+      return NextResponse.json({ error: 'Name and email required' }, { status: 400 });
+    }
+
+    const supabase = getAdminClient();
+
+    // Create auth user with a temporary password (they'll reset via email)
+    const tempPassword = `MTC-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+      email: email.trim(),
+      password: tempPassword,
+      email_confirm: true, // auto-confirm since admin is adding them
+      user_metadata: {
+        name: name.trim(),
+        skill_level: skillLevel || 'intermediate',
+        membership_type: membershipType || 'adult',
+      },
+    });
+
+    if (authError) return NextResponse.json({ error: authError.message }, { status: 500 });
+
+    // Send password reset so they can set their own password
+    if (sendWelcome && authData?.user) {
+      await supabase.auth.admin.generateLink({ type: 'recovery', email: email.trim() });
+    }
+
+    return NextResponse.json({ success: true, userId: authData?.user?.id });
+  } catch {
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+  }
+}
+
 /** Update a member profile (admin only) */
 export async function PATCH(request: Request) {
   const authResult = await authenticateMobileRequest(request);

@@ -54,6 +54,44 @@ export async function GET(request: Request) {
   }
 }
 
+/** Create a new event (admin/coach only) */
+export async function PUT(request: Request) {
+  const authResult = await authenticateMobileRequest(request);
+  if (authResult instanceof NextResponse) return authResult;
+  if (authResult.role !== 'admin' && authResult.role !== 'coach') {
+    return NextResponse.json({ error: 'Admin or coach only' }, { status: 403 });
+  }
+
+  try {
+    const { title, type, date, time, location, spotsTotal, price, description } = await request.json();
+    if (!title?.trim() || !date || !time) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    }
+
+    const supabase = getAdminClient();
+    const id = `event-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+    // Map mobile PWA types to schema-valid types
+    const typeMap: Record<string, string> = {
+      clinic: 'lesson', tournament: 'tournament', social: 'social',
+      roundrobin: 'roundrobin', camp: 'social', match: 'match', lesson: 'lesson',
+    };
+    const dbType = typeMap[type] || 'social';
+    const badge = (!price || price.toLowerCase() === 'free') ? 'free' : 'paid';
+
+    const { error } = await supabase.from('events').insert({
+      id, title: title.trim(), date, time, location: location || 'All Courts',
+      badge, price: price || 'Free', spots_total: parseInt(spotsTotal) || 16,
+      spots_taken: 0, description: description || '', type: dbType,
+    });
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ success: true, id });
+  } catch {
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+  }
+}
+
 /** Toggle RSVP for an event */
 export async function POST(request: Request) {
   const authResult = await authenticateMobileRequest(request);
