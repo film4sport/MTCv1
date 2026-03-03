@@ -65,6 +65,7 @@ const JS_FILES = [
   'notifications.js',
   'pull-refresh.js',
   'profile.js',
+  'admin.js',
   'confirm-modal.js',
   'enhancements.js',
   'app.js',
