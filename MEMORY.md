@@ -405,6 +405,52 @@ Deep audit found and fixed 7 issues across mobile PWA + API routes. All caused b
 **User needs to run in Supabase:**
 - `ALTER TABLE bookings ADD COLUMN IF NOT EXISTS email_sent_at timestamptz;`
 
+### Email Logs — Central Audit Table (2026-03-03)
+Added `email_logs` table to track ALL outbound communications across every flow.
+
+**Schema (`supabase/schema.sql`):**
+- `email_logs` table: type (booking_confirmation/booking_cancellation/signup_confirmation/password_reset/push_notification), recipient_email, recipient_user_id, status (sent/failed/requested), subject, metadata (jsonb), error, created_at
+- RLS: admins read all, users read own, anyone can insert
+- Indexes on recipient_email, type, created_at desc, recipient_user_id
+
+**Shared helper (`app/api/lib/email-logger.ts`):**
+- `logEmail()` — single entry, `logEmailBatch()` — multiple entries
+- Uses service role key, non-blocking (failures silently caught)
+
+**Routes wired:**
+- `booking-email/route.ts` — POST (confirmation) + DELETE (cancellation) both log per-recipient with status + error
+- `reset-password/route.ts` — Logs 'requested' on success, 'failed' on error
+- `mobile-signup/route.ts` — Logs 'requested' when Supabase sends confirmation email, 'failed' on signup error
+- `push-send/route.ts` — Logs per-subscription with sent/failed status
+- `log-email/route.ts` — NEW lightweight endpoint for client-side logging (only allows signup_confirmation + password_reset types)
+- `app/signup/page.tsx` — Calls `/api/log-email` after successful signup with emailConfirmRequired
+
+**User needs to run in Supabase:**
+```sql
+-- Create email_logs table
+CREATE TABLE IF NOT EXISTS email_logs (
+  id serial PRIMARY KEY,
+  type text NOT NULL CHECK (type IN ('booking_confirmation', 'booking_cancellation', 'signup_confirmation', 'password_reset', 'push_notification')),
+  recipient_email text,
+  recipient_user_id uuid REFERENCES profiles(id) ON DELETE SET NULL,
+  status text NOT NULL DEFAULT 'sent' CHECK (status IN ('sent', 'failed', 'requested')),
+  subject text,
+  metadata jsonb DEFAULT '{}',
+  error text,
+  created_at timestamptz DEFAULT now()
+);
+ALTER TABLE email_logs ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "email_logs_admin_read" ON email_logs FOR SELECT USING (is_admin());
+CREATE POLICY "email_logs_own_read" ON email_logs FOR SELECT USING (recipient_user_id = auth.uid());
+CREATE POLICY "email_logs_insert" ON email_logs FOR INSERT WITH CHECK (true);
+CREATE INDEX IF NOT EXISTS idx_email_logs_recipient ON email_logs(recipient_email);
+CREATE INDEX IF NOT EXISTS idx_email_logs_type ON email_logs(type);
+CREATE INDEX IF NOT EXISTS idx_email_logs_created ON email_logs(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_email_logs_user ON email_logs(recipient_user_id);
+```
+
+**TypeScript:** Clean ✓
+
 ## TODO / REMINDERS
 - **Junior Summer Camp dates**: User is waiting on real dates from Mark Taylor. When received, update the `junior-summer-camp` event across: `supabase/seed.sql`, `app/dashboard/lib/data.ts`, `public/mobile-app/js/events.js`, and run UPDATE SQL on live Supabase. Also update date/time in `app/(landing)/layout.tsx` JSON-LD if camp is featured there.
 

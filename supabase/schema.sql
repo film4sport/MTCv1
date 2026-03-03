@@ -428,6 +428,32 @@ alter table notifications replica identity full;
 alter table announcements replica identity full;
 alter table partners replica identity full;
 
+-- ─── Email / Notification Logs ────────────────────────────
+-- Central audit log for ALL outbound communications
+create table if not exists email_logs (
+  id serial primary key,
+  type text not null check (type in ('booking_confirmation', 'booking_cancellation', 'signup_confirmation', 'password_reset', 'push_notification')),
+  recipient_email text,         -- email address (null for push notifications)
+  recipient_user_id uuid references profiles(id) on delete set null,
+  status text not null default 'sent' check (status in ('sent', 'failed', 'requested')),
+  subject text,                 -- email subject line or push title
+  metadata jsonb default '{}',  -- extra context (booking_id, court, date, error message, etc.)
+  error text,                   -- error message if failed
+  created_at timestamptz default now()
+);
+
+-- RLS: admins can read all logs, users can read their own
+alter table email_logs enable row level security;
+create policy "email_logs_admin_read" on email_logs for select using (is_admin());
+create policy "email_logs_own_read" on email_logs for select using (recipient_user_id = auth.uid());
+-- Service role inserts (from API routes) bypass RLS, but allow authenticated inserts too
+create policy "email_logs_insert" on email_logs for insert with check (true);
+
+create index if not exists idx_email_logs_recipient on email_logs(recipient_email);
+create index if not exists idx_email_logs_type on email_logs(type);
+create index if not exists idx_email_logs_created on email_logs(created_at desc);
+create index if not exists idx_email_logs_user on email_logs(recipient_user_id);
+
 -- Push notification subscriptions (for mobile PWA)
 create table if not exists push_subscriptions (
   id serial primary key,

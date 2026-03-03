@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { logEmail } from '../lib/email-logger';
 
 /**
  * Server-side rate-limited password reset endpoint.
@@ -54,8 +55,23 @@ export async function POST(request: NextRequest) {
     });
 
     if (error) {
+      await logEmail({
+        type: 'password_reset',
+        recipientEmail: emailLower,
+        status: 'failed',
+        subject: 'Password Reset',
+        error: error.message,
+      });
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
+
+    await logEmail({
+      type: 'password_reset',
+      recipientEmail: emailLower,
+      status: 'requested',
+      subject: 'Password Reset',
+      metadata: { redirectTo: `${siteUrl}/auth/callback?type=recovery` },
+    });
 
     return NextResponse.json({ success: true });
   } catch {

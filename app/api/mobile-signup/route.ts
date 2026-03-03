@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { logEmail } from '../lib/email-logger';
 
 /**
  * Mobile PWA Signup API
@@ -89,6 +90,14 @@ export async function POST(request: NextRequest) {
     });
 
     if (error) {
+      await logEmail({
+        type: 'signup_confirmation',
+        recipientEmail: emailLower,
+        status: 'failed',
+        subject: 'Signup Confirmation',
+        error: error.message,
+        metadata: { source: 'mobile' },
+      });
       // Map common Supabase errors to user-friendly messages
       if (error.message.includes('already registered')) {
         return NextResponse.json({ error: 'An account with this email already exists' }, { status: 409 });
@@ -101,6 +110,18 @@ export async function POST(request: NextRequest) {
     }
 
     const needsConfirmation = !data.session;
+
+    // Log the signup confirmation email (Supabase sends it automatically)
+    if (needsConfirmation) {
+      await logEmail({
+        type: 'signup_confirmation',
+        recipientEmail: emailLower,
+        recipientUserId: data.user.id,
+        status: 'requested',
+        subject: 'Confirm Your Email — Mono Tennis Club',
+        metadata: { source: 'mobile', membershipType: type },
+      });
+    }
 
     return NextResponse.json({
       success: true,
