@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
         const supabase = createClient(supabaseUrl, supabaseKey);
         const { data, error } = await supabase.auth.signInWithPassword({ email: emailLower, password });
 
-        if (!error && data.user) {
+        if (!error && data.user && data.session) {
           const { data: profile } = await supabase
             .from('profiles')
             .select('name, role')
@@ -67,6 +67,8 @@ export async function POST(request: NextRequest) {
               role: profile.role || 'member',
               name: profile.name || emailLower.split('@')[0],
               email: emailLower,
+              userId: data.user.id,
+              accessToken: data.session.access_token,
             });
           }
         }

@@ -1,4 +1,9 @@
 import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
 // ICS generator (server-compatible copy from dashboard/lib/calendar.ts)
 const TIMEZONE = 'America/Toronto';
@@ -178,6 +183,30 @@ export async function POST(request: Request) {
       limit.count += recipientList.length;
     } else {
       emailLimits.set(rateLimitKey, { count: recipientList.length, resetAt: now + 60 * 60 * 1000 });
+    }
+
+    // Validate all recipient emails are real members
+    if (supabaseUrl && (supabaseServiceKey || supabaseAnonKey)) {
+      try {
+        const supabase = createClient(supabaseUrl, supabaseServiceKey || supabaseAnonKey);
+        const emails = recipientList.map(r => r.email.toLowerCase());
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('email')
+          .in('email', emails);
+
+        const validEmails = new Set((profiles || []).map(p => p.email.toLowerCase()));
+        const invalidEmails = emails.filter(e => !validEmails.has(e));
+
+        if (invalidEmails.length > 0) {
+          return NextResponse.json(
+            { error: `Unknown recipient(s): ${invalidEmails.join(', ')}` },
+            { status: 400 }
+          );
+        }
+      } catch {
+        // If validation fails, continue (don't block emails over a DB issue)
+      }
     }
 
     // Generate ICS with all attendee emails

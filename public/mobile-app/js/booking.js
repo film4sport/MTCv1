@@ -950,4 +950,64 @@
   window.formatTimeLabel = formatTimeLabel;
   window.formatTimeRange = formatTimeRange;
 
+  /**
+   * Update bookings data from Supabase API.
+   * Called by auth.js after login when API data is available.
+   * Merges real bookings into the booking grid.
+   */
+  window.updateBookingsFromAPI = function(apiBookings) {
+    if (!Array.isArray(apiBookings)) return;
+
+    // Clear demo data and replace with real bookings
+    Object.keys(bookingsData).forEach(function(k) { delete bookingsData[k]; });
+
+    apiBookings.forEach(function(b) {
+      var date = b.date;
+      if (!bookingsData[date]) bookingsData[date] = [];
+      // Convert 24h time or formatted time to HH:MM
+      var time = b.time;
+      if (time && time.indexOf('AM') !== -1 || time && time.indexOf('PM') !== -1) {
+        // Parse "9:00 AM" format to "09:00"
+        var parts = time.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+        if (parts) {
+          var h = parseInt(parts[1]);
+          if (parts[3].toUpperCase() === 'PM' && h !== 12) h += 12;
+          if (parts[3].toUpperCase() === 'AM' && h === 12) h = 0;
+          time = String(h).padStart(2, '0') + ':' + parts[2];
+        }
+      }
+      bookingsData[date].push({
+        time: time,
+        court: b.courtId,
+        user: b.userName || 'Booked'
+      });
+    });
+
+    // Re-render if booking system is initialized
+    if (typeof initBookingSystem === 'function') {
+      try { initBookingSystem(); } catch(e) { /* may not be on booking screen */ }
+    }
+  };
+
+  /**
+   * Update announcements from Supabase API.
+   * Called by auth.js after login when API data is available.
+   */
+  window.updateAnnouncementsFromAPI = function(apiAnnouncements) {
+    if (!Array.isArray(apiAnnouncements)) return;
+    // Update the home screen announcement banner if present
+    var banner = document.querySelector('#screen-home .announcement-banner');
+    if (!banner) return;
+
+    var active = apiAnnouncements.filter(function(a) { return !a.dismissed; });
+    if (active.length > 0) {
+      var latest = active[0];
+      var textEl = banner.querySelector('.announcement-text');
+      if (textEl) textEl.textContent = latest.text;
+      banner.style.display = '';
+    } else {
+      banner.style.display = 'none';
+    }
+  };
+
 })();

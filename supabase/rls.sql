@@ -186,3 +186,12 @@ create policy "Club settings: read by authenticated" on club_settings
   for select to authenticated using (true);
 create policy "Club settings: admin manage" on club_settings
   for all to authenticated using (is_admin());
+
+-- ─── Push Subscriptions ───────────────────────────────────
+alter table push_subscriptions enable row level security;
+create policy "Push subs: read own" on push_subscriptions
+  for select to authenticated using (user_id = auth.uid());
+create policy "Push subs: create own" on push_subscriptions
+  for insert to authenticated with check (user_id = auth.uid());
+create policy "Push subs: delete own" on push_subscriptions
+  for delete to authenticated using (user_id = auth.uid());

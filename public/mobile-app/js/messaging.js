@@ -337,4 +337,47 @@
   };
   // Backward-compat alias
   window.addMessageToConversation = MTC.fn.addMessageToConversation;
+
+  /**
+   * Update club members list from Supabase API.
+   * Called by auth.js after login when API data is available.
+   */
+  window.updateMembersFromAPI = function(apiMembers) {
+    if (!Array.isArray(apiMembers)) return;
+    var newMembers = apiMembers.map(function(m) {
+      var ntrpStr = m.ntrp ? ' (' + m.ntrp + ')' : '';
+      var skillLabel = (m.skillLevel || 'intermediate');
+      skillLabel = skillLabel.charAt(0).toUpperCase() + skillLabel.slice(1);
+      return {
+        id: m.id,
+        name: m.name,
+        skill: skillLabel + ntrpStr,
+        avatar: m.avatar || 'man-1'
+      };
+    });
+    // Replace the clubMembers array in-place (other modules hold references)
+    MTC.state.clubMembers.length = 0;
+    newMembers.forEach(function(m) { MTC.state.clubMembers.push(m); });
+    window.clubMembers = MTC.state.clubMembers;
+  };
+
+  /**
+   * Update conversations from Supabase API.
+   * Called by auth.js after login when API data is available.
+   */
+  window.updateConversationsFromAPI = function(apiConvos) {
+    if (!Array.isArray(apiConvos)) return;
+    var userId = MTC.state.currentUser ? MTC.state.currentUser.id : null;
+    apiConvos.forEach(function(conv) {
+      var key = conv.otherUserId || conv.id;
+      conversations[key] = (conv.messages || []).map(function(m) {
+        return {
+          text: m.text,
+          sent: m.fromId === userId,
+          time: m.timestamp ? new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''
+        };
+      });
+    });
+    MTC.fn.saveConversations();
+  };
 })();

@@ -136,6 +136,7 @@
             name: matchedLogin.name,
             email: loginEmail.toLowerCase(),
             role: matchedLogin.role,
+            id: matchedLogin.userId || null,
             isMember: true
           };
           MTC.state.currentUser = currentUser;
@@ -150,6 +151,11 @@
           };
           MTC.state.currentUser = currentUser;
           window.currentUser = currentUser;
+        }
+
+        // Store Supabase access token for API calls (returned by mobile-auth)
+        if (matchedLogin && matchedLogin.accessToken) {
+          MTC.storage.set('mtc-access-token', matchedLogin.accessToken);
         }
 
         // Always persist session + timestamp for offline expiry
@@ -208,6 +214,9 @@
     showToast('Welcome, ' + currentUser.name + '!');
     scheduleWelcomeNotifications();
 
+    // Load data from Supabase API (non-blocking, falls back to demo data)
+    loadAppDataFromAPI();
+
     // Register push notifications (best-effort, non-blocking)
     registerPushNotifications();
   }
@@ -218,9 +227,11 @@
     MTC.state.currentUser = null;
     window.currentUser = null;
     // Clear all app-related data on logout (prevents data leaks on shared devices)
-    ['mtc-user', 'mtc-session-time', 'mtc-session-hash', 'mtc-bookings', 'mtc-conversations', 'mtc-notifications',
+    ['mtc-user', 'mtc-session-time', 'mtc-session-hash', 'mtc-access-token',
+     'mtc-bookings', 'mtc-conversations', 'mtc-notifications',
      'mtc-rsvps', 'mtc-profile', 'mtc-partner-joins', 'mtc-settings',
-     'mtc-onboarding-done'].forEach(function(key) { MTC.storage.remove(key); });
+     'mtc-onboarding-done', 'mtc-api-events', 'mtc-api-members', 'mtc-api-partners',
+     'mtc-api-announcements', 'mtc-api-bookings'].forEach(function(key) { MTC.storage.remove(key); });
 
     document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
     document.getElementById('bottomNav').style.display = 'none';
@@ -394,6 +405,57 @@
       }, 2000);
     }
   };
+
+  // ============================================
+  // LOAD APP DATA FROM SUPABASE API
+  // ============================================
+  function loadAppDataFromAPI() {
+    if (!MTC.fn.loadFromAPI) return;
+    var token = MTC.storage.get('mtc-access-token', '');
+    if (!token) return; // No token = demo mode, keep hardcoded data
+
+    // Load events
+    MTC.fn.loadFromAPI('/mobile/events', 'mtc-api-events', null).then(function(events) {
+      if (events && events.length > 0 && typeof window.updateEventsFromAPI === 'function') {
+        window.updateEventsFromAPI(events);
+      }
+    });
+
+    // Load members
+    MTC.fn.loadFromAPI('/mobile/members', 'mtc-api-members', null).then(function(members) {
+      if (members && members.length > 0 && typeof window.updateMembersFromAPI === 'function') {
+        window.updateMembersFromAPI(members);
+      }
+    });
+
+    // Load partners
+    MTC.fn.loadFromAPI('/mobile/partners', 'mtc-api-partners', null).then(function(partners) {
+      if (partners && typeof window.updatePartnersFromAPI === 'function') {
+        window.updatePartnersFromAPI(partners);
+      }
+    });
+
+    // Load announcements
+    MTC.fn.loadFromAPI('/mobile/announcements', 'mtc-api-announcements', null).then(function(announcements) {
+      if (announcements && typeof window.updateAnnouncementsFromAPI === 'function') {
+        window.updateAnnouncementsFromAPI(announcements);
+      }
+    });
+
+    // Load bookings
+    MTC.fn.loadFromAPI('/mobile/bookings', 'mtc-api-bookings', null).then(function(bookings) {
+      if (bookings && typeof window.updateBookingsFromAPI === 'function') {
+        window.updateBookingsFromAPI(bookings);
+      }
+    });
+
+    // Load conversations
+    MTC.fn.loadFromAPI('/mobile/conversations', 'mtc-api-conversations', null).then(function(conversations) {
+      if (conversations && typeof window.updateConversationsFromAPI === 'function') {
+        window.updateConversationsFromAPI(conversations);
+      }
+    });
+  }
 
   // ============================================
   // ROLE (set via login credentials, no FAB)

@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || '';
 const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY || '';
@@ -12,6 +13,31 @@ const VAPID_EMAIL = process.env.VAPID_EMAIL || 'mailto:admin@monotennisclub.ca';
 let pushCount = 0;
 let pushResetAt = Date.now() + 60000;
 
+/**
+ * Verify the caller is an authenticated admin.
+ * Returns the admin's user ID or null.
+ */
+async function authenticateAdmin(request: Request): Promise<string | null> {
+  const authHeader = request.headers.get('authorization');
+  if (!authHeader?.startsWith('Bearer ')) return null;
+
+  const token = authHeader.slice(7);
+  const supabase = createClient(supabaseUrl, supabaseAnonKey);
+  const { data: { user }, error } = await supabase.auth.getUser(token);
+  if (error || !user) return null;
+
+  // Check admin role in profiles
+  const adminSupabase = createClient(supabaseUrl, supabaseServiceKey || supabaseAnonKey);
+  const { data: profile } = await adminSupabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+
+  if (!profile || profile.role !== 'admin') return null;
+  return user.id;
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -19,6 +45,12 @@ export async function POST(request: Request) {
 
     if (!userId || !title) {
       return NextResponse.json({ error: 'Missing userId or title' }, { status: 400 });
+    }
+
+    // Authenticate: only admins can send push notifications
+    const adminId = await authenticateAdmin(request);
+    if (!adminId) {
+      return NextResponse.json({ error: 'Unauthorized: admin only' }, { status: 403 });
     }
 
     // Rate limit
@@ -33,7 +65,7 @@ export async function POST(request: Request) {
     }
 
     // Get user's push subscriptions from Supabase
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    const supabase = createClient(supabaseUrl, supabaseServiceKey || supabaseAnonKey);
     const { data: subscriptions, error } = await supabase
       .from('push_subscriptions')
       .select('endpoint, p256dh, auth')

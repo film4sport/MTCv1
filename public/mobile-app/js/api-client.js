@@ -21,9 +21,16 @@
     var controller = new AbortController();
     var timer = setTimeout(function() { controller.abort(); }, timeoutMs);
 
+    // Auto-include auth token if available
+    var headers = { 'Content-Type': 'application/json' };
+    var token = MTC.storage.get('mtc-access-token', '');
+    if (token) {
+      headers['Authorization'] = 'Bearer ' + token;
+    }
+
     return fetch(API_BASE + endpoint, Object.assign({
       signal: controller.signal,
-      headers: { 'Content-Type': 'application/json' }
+      headers: headers
     }, options))
     .then(function(res) {
       clearTimeout(timer);
@@ -248,6 +255,38 @@
   }
 
   // ============================================
+  // LOAD FROM API — generic data loader with localStorage cache + fallback
+  // ============================================
+  /**
+   * Load data from a mobile API endpoint with localStorage caching.
+   * Falls back to cached data if the API call fails (offline support).
+   * @param {string} endpoint - API path (e.g., '/mobile/events')
+   * @param {string} storageKey - localStorage key to cache under
+   * @param {*} fallback - Default value if no cache and API fails
+   * @returns {Promise<*>} The loaded data
+   */
+  function loadFromAPI(endpoint, storageKey, fallback) {
+    var token = MTC.storage.get('mtc-access-token', '');
+    if (!token) {
+      // No token — return cached or fallback
+      return Promise.resolve(MTC.storage.get(storageKey, fallback));
+    }
+
+    return apiRequest(endpoint, { method: 'GET' })
+      .then(function(result) {
+        if (result.ok && result.data) {
+          MTC.storage.set(storageKey, result.data);
+          return result.data;
+        }
+        // API failed — try cached data
+        return MTC.storage.get(storageKey, fallback);
+      })
+      .catch(function() {
+        return MTC.storage.get(storageKey, fallback);
+      });
+  }
+
+  // ============================================
   // EXPORTS
   // ============================================
   MTC.fn.apiRequest = apiRequest;
@@ -256,6 +295,7 @@
   MTC.fn.cancelBooking = cancelBooking;
   MTC.fn.queueForSync = queueForSync;
   MTC.fn.signup = signup;
+  MTC.fn.loadFromAPI = loadFromAPI;
 
   window.apiRequest = apiRequest;
   window.optimisticAction = optimisticAction;
