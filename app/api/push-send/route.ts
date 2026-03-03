@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { logEmailBatch } from '../lib/email-logger';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
@@ -122,6 +123,18 @@ export async function POST(request: Request) {
           }
         }
       });
+
+      // Log push notifications
+      await logEmailBatch(
+        results.map((result, i) => ({
+          type: 'push_notification' as const,
+          recipientUserId: userId,
+          status: result.status === 'fulfilled' ? 'sent' as const : 'failed' as const,
+          subject: title,
+          metadata: { body: messageBody, endpoint: subscriptions[i].endpoint, tag },
+          error: result.status === 'rejected' ? String((result as PromiseRejectedResult).reason) : undefined,
+        }))
+      );
     } catch {
       return NextResponse.json({ error: 'web-push not installed. Run: npm install web-push' }, { status: 500 });
     }

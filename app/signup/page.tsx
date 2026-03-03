@@ -107,6 +107,19 @@ export default function SignupPage() {
       }
 
       if (emailConfirmRequired) {
+        // Log the Supabase-sent confirmation email
+        fetch('/api/log-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'signup_confirmation',
+            recipientEmail: trimmedEmail,
+            recipientUserId: user.id,
+            status: 'requested',
+            subject: 'Confirm Your Email — Mono Tennis Club',
+            metadata: { source: 'desktop', membershipType: signupData.membershipType },
+          }),
+        }).catch(() => { /* non-critical */ });
         setEmailConfirmPending(true);
         setSignupLoading(false);
         setSignupStep(totalSteps);

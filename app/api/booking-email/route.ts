@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { logEmailBatch } from '../lib/email-logger';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
@@ -280,6 +281,18 @@ export async function POST(request: Request) {
           if (r.status === 'fulfilled') sentCount++;
           else failedCount++;
         });
+
+        // Log each email to email_logs
+        await logEmailBatch(
+          recipientList.map((recipient, i) => ({
+            type: 'booking_confirmation' as const,
+            recipientEmail: recipient.email,
+            status: results[i].status === 'fulfilled' ? 'sent' as const : 'failed' as const,
+            subject: `Booking Confirmed — ${courtName}, ${formattedDate}`,
+            metadata: { bookingId, courtName, date, time, matchType, role: recipient.role },
+            error: results[i].status === 'rejected' ? String((results[i] as PromiseRejectedResult).reason) : undefined,
+          }))
+        );
       }
     } catch {
       // nodemailer not installed or SMTP not configured
@@ -465,6 +478,18 @@ export async function DELETE(request: Request) {
         );
 
         sentCount = results.filter(r => r.status === 'fulfilled').length;
+
+        // Log cancellation emails
+        await logEmailBatch(
+          recipientList.map((recipient, i) => ({
+            type: 'booking_cancellation' as const,
+            recipientEmail: recipient.email,
+            status: results[i].status === 'fulfilled' ? 'sent' as const : 'failed' as const,
+            subject: `Booking Cancelled — ${courtName}, ${formattedDate}`,
+            metadata: { courtName, date, time, cancelledBy },
+            error: results[i].status === 'rejected' ? String((results[i] as PromiseRejectedResult).reason) : undefined,
+          }))
+        );
       }
     } catch {
       // nodemailer not installed
