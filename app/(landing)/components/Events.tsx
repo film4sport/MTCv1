@@ -11,6 +11,24 @@ const categoryColors: Record<string, { accent: string; bg: string; text: string 
 
 const events = [
   {
+    category: 'coaching',
+    isoDate: '2026-03-08',
+    date: 'March 1 - 22, 2026',
+    title: 'Beginner Group Clinic',
+    description:
+      '4-week beginner clinic with Coach Mark Taylor. Covers grips, strokes, footwork, and match play basics. Saturdays 10:00 AM on Court 3.',
+    highlight: '$120 · 4 Weeks',
+  },
+  {
+    category: 'coaching',
+    isoDate: '2026-05-10',
+    date: 'Season 2026',
+    title: 'Private & Group Lessons',
+    description:
+      'Book private or group lessons with Coach Mark Taylor. All ages and skill levels. Contact the club to schedule your sessions.',
+    highlight: 'Contact to Book',
+  },
+  {
     category: 'social',
     isoDate: '2026-03-14',
     date: 'March 14, 2026',
@@ -30,12 +48,57 @@ const events = [
   },
   {
     category: 'social',
+    isoDate: '2026-05-12',
+    date: 'Every Tuesday · Starts May 12',
+    title: "Men's Round Robin",
+    description:
+      "Weekly men's round robin every Tuesday morning. All skill levels welcome. Courts 1-2.",
+    highlight: '9:00 - 11:00 AM',
+  },
+  {
+    category: 'social',
+    isoDate: '2026-05-14',
+    date: 'Every Thursday · Starts May 14',
+    title: 'Freedom 55 League',
+    description:
+      'Thursday morning league for the 55+ crowd. Fun and social tennis. Courts 1-2.',
+    highlight: '9:00 - 11:00 AM',
+  },
+  {
+    category: 'social',
+    isoDate: '2026-05-15',
+    date: 'Every Friday · Starts May 15',
+    title: "Ladies Round Robin",
+    description:
+      "Weekly ladies round robin every Friday morning. All skill levels welcome. Courts 1-2.",
+    highlight: '9:00 - 11:00 AM',
+  },
+  {
+    category: 'social',
+    isoDate: '2026-05-15',
+    date: 'Every Friday · Starts May 15',
+    title: 'Friday Night Mixed Round Robin',
+    description:
+      'Mixed doubles round robin every Friday evening. Rotating partners, fun format! All Courts.',
+    highlight: '6:00 - 9:00 PM',
+  },
+  {
+    category: 'social',
     isoDate: '2026-06-07',
     date: 'June 7, 2026',
     title: 'French Open Round Robin Social',
     description:
       'Celebrate the French Open with a themed round robin social! Mixed doubles, prizes, and refreshments. All skill levels welcome.',
     highlight: '1:00 - 4:00 PM',
+  },
+  {
+    category: 'camp',
+    isoDate: '2026-07-01',
+    date: 'Summer 2026 · Dates TBA',
+    title: 'Junior Summer Camp',
+    description:
+      'Intensive camp for juniors aged 8-14 with Mark Taylor. Daily drills, match play, fitness, and fun activities. All skill levels. Exact dates coming soon!',
+    highlight: 'Ages 8-14 · TBA',
   },
   {
     category: 'social',
