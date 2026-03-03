@@ -1,21 +1,11 @@
-// Default mock data for the dashboard
-// In production, this will be replaced with Supabase queries
+// Default data for the dashboard
+// In production, all data is fetched from Supabase.
+// These defaults provide empty states for initial render.
 
 import type { Court, Booking, ClubEvent, Partner, Conversation, Announcement, Notification, AdminAnalytics, User, CoachingProgram, VolunteerTask } from './types';
 
 // ─── Members ────────────────────────────────────────────
-export const DEFAULT_MEMBERS: User[] = [
-  { id: 'alex', name: 'Alex Thompson', email: 'member@mtc.ca', role: 'member', ntrp: 3.5, skillLevel: 'intermediate', memberSince: '2025-03', avatar: 'tennis-male-1' },
-  { id: 'mike', name: 'Mike Chen', email: 'mike.chen@mtc.ca', role: 'member', ntrp: 4.0, skillLevel: 'advanced', memberSince: '2024-12', avatar: 'tennis-male-2' },
-  { id: 'sarah', name: 'Sarah Wilson', email: 'sarah.w@mtc.ca', role: 'member', ntrp: 3.5, skillLevel: 'intermediate', memberSince: '2024-06', avatar: 'tennis-female-1' },
-  { id: 'james', name: 'James Park', email: 'james.p@mtc.ca', role: 'member', ntrp: 4.5, skillLevel: 'competitive', memberSince: '2024-09', avatar: 'tennis-male-1' },
-  { id: 'emily', name: 'Emily Rodriguez', email: 'emily.r@mtc.ca', role: 'member', ntrp: 3.0, skillLevel: 'beginner', memberSince: '2025-01', avatar: 'tennis-female-2' },
-  { id: 'david', name: 'David Kim', email: 'david.k@mtc.ca', role: 'member', ntrp: 4.0, skillLevel: 'advanced', memberSince: '2024-11', avatar: 'tennis-male-2' },
-  { id: 'lisa', name: 'Lisa Thompson', email: 'lisa.t@mtc.ca', role: 'member', ntrp: 3.0, skillLevel: 'beginner', memberSince: '2024-08', avatar: 'tennis-female-1' },
-  { id: 'ryan', name: "Ryan O'Connor", email: 'ryan.o@mtc.ca', role: 'member', ntrp: 3.5, skillLevel: 'intermediate', memberSince: '2025-02', avatar: 'tennis-male-1' },
-  { id: 'mark', name: 'Mark Taylor', email: 'coach@mtc.ca', role: 'coach', ntrp: 5.0, skillLevel: 'competitive', memberSince: '2023-01', avatar: 'tennis-male-2' },
-  { id: 'admin', name: 'Admin', email: 'admin@mtc.ca', role: 'admin', skillLevel: 'intermediate', memberSince: '2023-01', avatar: 'tennis-male-1' },
-];
+export const DEFAULT_MEMBERS: User[] = [];
 
 // ─── Courts ─────────────────────────────────────────────
 export const DEFAULT_COURTS: Court[] = [
@@ -71,21 +61,7 @@ export const DEFAULT_PROGRAMS: CoachingProgram[] = [
 ];
 
 // ─── Bookings ───────────────────────────────────────────
-export const DEFAULT_BOOKINGS: Booking[] = [
-  { id: 'b1', courtId: 2, courtName: 'Court 2', date: new Date().toISOString().split('T')[0], time: '4:00 PM', userId: 'alex', userName: 'Alex Thompson', status: 'confirmed', type: 'court' },
-  { id: 'b2', courtId: 1, courtName: 'Court 1', date: new Date(Date.now() + 86400000).toISOString().split('T')[0], time: '10:00 AM', userId: 'alex', userName: 'Alex Thompson', status: 'confirmed', type: 'court' },
-  // Program-blocked bookings (Beginner Clinic — Court 3)
-  { id: 'bp1', courtId: 3, courtName: 'Court 3', date: '2026-03-01', time: '10:00 AM', userId: 'mark', userName: 'Mark Taylor', status: 'confirmed', type: 'program', programId: 'prog-clinic-1' },
-  { id: 'bp2', courtId: 3, courtName: 'Court 3', date: '2026-03-08', time: '10:00 AM', userId: 'mark', userName: 'Mark Taylor', status: 'confirmed', type: 'program', programId: 'prog-clinic-1' },
-  { id: 'bp3', courtId: 3, courtName: 'Court 3', date: '2026-03-15', time: '10:00 AM', userId: 'mark', userName: 'Mark Taylor', status: 'confirmed', type: 'program', programId: 'prog-clinic-1' },
-  { id: 'bp4', courtId: 3, courtName: 'Court 3', date: '2026-03-22', time: '10:00 AM', userId: 'mark', userName: 'Mark Taylor', status: 'confirmed', type: 'program', programId: 'prog-clinic-1' },
-  // Program-blocked bookings (Junior Camp — Court 1)
-  { id: 'bp5', courtId: 1, courtName: 'Court 1', date: '2026-07-06', time: '9:30 AM', userId: 'mark', userName: 'Mark Taylor', status: 'confirmed', type: 'program', programId: 'prog-camp-1' },
-  { id: 'bp6', courtId: 1, courtName: 'Court 1', date: '2026-07-07', time: '9:30 AM', userId: 'mark', userName: 'Mark Taylor', status: 'confirmed', type: 'program', programId: 'prog-camp-1' },
-  { id: 'bp7', courtId: 1, courtName: 'Court 1', date: '2026-07-08', time: '9:30 AM', userId: 'mark', userName: 'Mark Taylor', status: 'confirmed', type: 'program', programId: 'prog-camp-1' },
-  { id: 'bp8', courtId: 1, courtName: 'Court 1', date: '2026-07-09', time: '9:30 AM', userId: 'mark', userName: 'Mark Taylor', status: 'confirmed', type: 'program', programId: 'prog-camp-1' },
-  { id: 'bp9', courtId: 1, courtName: 'Court 1', date: '2026-07-10', time: '9:30 AM', userId: 'mark', userName: 'Mark Taylor', status: 'confirmed', type: 'program', programId: 'prog-camp-1' },
-];
+export const DEFAULT_BOOKINGS: Booking[] = [];
 
 // ─── Club Events ────────────────────────────────────────
 // Generate recurring events for the full season (May 9 – Oct 31, 2026)
@@ -141,7 +117,7 @@ function generateRecurringEvents(): ClubEvent[] {
           badge: t.badge,
           price: t.price,
           description: t.description,
-          attendees: t.id === 'interclub' ? ['Kelly K.', 'Patrick M.', 'Michael H.', 'Phil P.', 'Peter G.', 'Jan H.', 'Sarah Wilson', 'Mike Chen', 'James Park'] : [],
+          attendees: [],
           type: t.type,
           ...(t.opponent ? { opponent: t.opponent } : {}),
           ...(t.format ? { format: t.format } : {}),
@@ -180,7 +156,7 @@ export const DEFAULT_EVENTS: ClubEvent[] = [
     badge: 'free',
     price: 'Free',
     description: 'Kick off the 2026 season! BBQ, music, and meet our coaching staff including Mark Taylor. All members, families, and guests welcome.',
-    attendees: ['Mike Chen', 'Sarah Wilson', 'James Park', 'Emily Rodriguez', 'Lisa Thompson'],
+    attendees: [],
     type: 'social',
     instructions: ['All members and families welcome!', 'BBQ and refreshments provided', 'Casual play on all courts', 'New members meet & greet at 3 PM'],
     assignedTasks: [
@@ -250,48 +226,10 @@ export const DEFAULT_EVENTS: ClubEvent[] = [
 ];
 
 // ─── Partner Requests ───────────────────────────────────
-export const DEFAULT_PARTNERS: Partner[] = [
-  { id: 'p1', userId: 'sarah', name: 'Sarah Wilson', ntrp: 3.5, skillLevel: 'intermediate', availability: 'Tomorrow, 10am', matchType: 'singles', date: 'Tomorrow', time: '10:00 AM', avatar: 'tennis-female-1', message: 'Looking for a practice partner before league night!', status: 'available' },
-  { id: 'p2', userId: 'mike', name: 'Mike Chen', ntrp: 4.0, skillLevel: 'advanced', availability: 'Saturday, 2pm', matchType: 'doubles', date: 'Saturday', time: '2:00 PM', avatar: 'tennis-male-2', status: 'available' },
-  { id: 'p3', userId: 'emily', name: 'Emily Rodriguez', ntrp: 3.0, availability: 'Sunday, 9am', matchType: 'any', date: 'Sunday', time: '9:00 AM', avatar: 'tennis-female-2', message: 'New to the club, happy to play with anyone!', status: 'available' },
-  { id: 'p4', userId: 'david', name: 'David Kim', ntrp: 4.0, skillLevel: 'advanced', availability: 'Monday, 6pm', matchType: 'singles', date: 'Monday', time: '6:00 PM', avatar: 'tennis-male-2', status: 'available' },
-  { id: 'p5', userId: 'ryan', name: "Ryan O'Connor", ntrp: 3.5, skillLevel: 'intermediate', availability: 'Wednesday, 4pm', matchType: 'mixed', date: 'Wednesday', time: '4:00 PM', avatar: 'tennis-male-1', status: 'available' },
-];
+export const DEFAULT_PARTNERS: Partner[] = [];
 
 // ─── Conversations ──────────────────────────────────────
-export const DEFAULT_CONVERSATIONS: Conversation[] = [
-  {
-    memberId: 'sarah',
-    memberName: 'Sarah Wilson',
-    lastMessage: 'Hey! Want to play doubles this weekend?',
-    lastTimestamp: '2026-02-10T10:30:00',
-    unread: 1,
-    messages: [
-      { id: 'm1', from: 'Sarah Wilson', fromId: 'sarah', to: 'Alex Thompson', toId: 'alex', text: 'Hey! Want to play doubles this weekend?', timestamp: '2026-02-10T10:30:00', read: false },
-    ],
-  },
-  {
-    memberId: 'admin',
-    memberName: 'Admin',
-    lastMessage: 'Welcome to Mono Tennis Club! Let us know if you have any questions.',
-    lastTimestamp: '2026-02-09T09:00:00',
-    unread: 0,
-    messages: [
-      { id: 'm2', from: 'Admin', fromId: 'admin', to: 'Alex Thompson', toId: 'alex', text: 'Welcome to Mono Tennis Club! Let us know if you have any questions.', timestamp: '2026-02-09T09:00:00', read: true },
-    ],
-  },
-  {
-    memberId: 'mike',
-    memberName: 'Mike Chen',
-    lastMessage: 'Good game today! Same time next week?',
-    lastTimestamp: '2026-02-08T16:45:00',
-    unread: 0,
-    messages: [
-      { id: 'm3', from: 'Mike Chen', fromId: 'mike', to: 'Alex Thompson', toId: 'alex', text: 'Good game today! Same time next week?', timestamp: '2026-02-08T16:45:00', read: true },
-      { id: 'm4', from: 'Alex Thompson', fromId: 'alex', to: 'Mike Chen', toId: 'mike', text: "Absolutely! I'll book Court 2.", timestamp: '2026-02-08T16:50:00', read: true },
-    ],
-  },
-];
+export const DEFAULT_CONVERSATIONS: Conversation[] = [];
 
 // ─── Announcements ──────────────────────────────────────
 export const DEFAULT_ANNOUNCEMENTS: Announcement[] = [
@@ -300,46 +238,21 @@ export const DEFAULT_ANNOUNCEMENTS: Announcement[] = [
 ];
 
 // ─── Notifications ──────────────────────────────────────
-export const DEFAULT_NOTIFICATIONS: Notification[] = [
-  { id: 'n1', type: 'booking', title: 'Booking Confirmed', body: 'Court 2 reserved for today at 4:00 PM.', timestamp: '2026-02-10T08:00:00', read: false },
-  { id: 'n2', type: 'event', title: 'Opening Day BBQ', body: 'Don\'t forget to RSVP for Opening Day BBQ on May 9th!', timestamp: '2026-02-09T12:00:00', read: false },
-  { id: 'n3', type: 'message', title: 'New Message', body: 'Sarah Wilson sent you a message.', timestamp: '2026-02-10T10:30:00', read: false },
-];
+export const DEFAULT_NOTIFICATIONS: Notification[] = [];
 
 // ─── Admin Analytics ────────────────────────────────────
 export const DEFAULT_ANALYTICS: AdminAnalytics = {
-  totalBookingsThisMonth: 156,
-  bookingsChange: 12,
-  revenueThisMonth: 780,
-  revenueChange: 8,
-  peakTimes: [
-    { day: 'Saturday', time: '10:00 AM', bookings: 24 },
-    { day: 'Sunday', time: '9:00 AM', bookings: 22 },
-    { day: 'Wednesday', time: '6:00 PM', bookings: 18 },
-  ],
-  courtUsage: { today: 12, thisWeek: 68, thisMonth: 156 },
-  revenueBreakdown: [
-    { category: 'Membership Fees', amount: 520, percentage: 67 },
-    { category: 'Guest Fees', amount: 150, percentage: 19 },
-    { category: 'Lesson Fees', amount: 110, percentage: 14 },
-  ],
+  totalBookingsThisMonth: 0,
+  bookingsChange: 0,
+  revenueThisMonth: 0,
+  revenueChange: 0,
+  peakTimes: [],
+  courtUsage: { today: 0, thisWeek: 0, thisMonth: 0 },
+  revenueBreakdown: [],
   memberActivity: {
-    mostActive: [
-      { name: 'Mike Chen', bookings: 18 },
-      { name: 'James Park', bookings: 15 },
-      { name: 'Sarah Wilson', bookings: 14 },
-      { name: "Ryan O'Connor", bookings: 12 },
-      { name: 'David Kim', bookings: 10 },
-    ],
-    newMembersThisMonth: 3,
-    avgBookingsPerMember: 5.2,
+    mostActive: [],
+    newMembersThisMonth: 0,
+    avgBookingsPerMember: 0,
   },
-  monthlyTrends: [
-    { month: 'Sep', bookings: 142, revenue: 680 },
-    { month: 'Oct', bookings: 98, revenue: 490 },
-    { month: 'Nov', bookings: 45, revenue: 220 },
-    { month: 'Dec', bookings: 28, revenue: 140 },
-    { month: 'Jan', bookings: 38, revenue: 190 },
-    { month: 'Feb', bookings: 156, revenue: 780 },
-  ],
+  monthlyTrends: [],
 };

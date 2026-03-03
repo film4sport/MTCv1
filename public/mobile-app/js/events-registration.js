@@ -27,7 +27,7 @@
         'Arrive by 12:30 PM for warm-up',
         'Post-match social at clubhouse'
       ],
-      rsvpList: ['Kelly K.', 'Patrick M.', 'Michael H.', 'Phil P.', 'Peter G.', 'Jan H.', 'Sarah Wilson', 'Mike Chen', 'James Park']
+      rsvpList: []
     },
     '95-mixed-doubles': {
       name: '95+ Mixed Doubles Tournament',
@@ -42,7 +42,7 @@
         { id: 't3', name: 'Scorekeeper', icon: '\uD83D\uDCCA', iconClass: 'score', assigned: 'Bobby O\'Reilly' },
         { id: 't4', name: 'Snacks & Lunch', icon: '\uD83C\uDF4A', iconClass: 'snacks', assigned: 'Jan H.' },
         { id: 't5', name: 'Court Setup', icon: '\uD83C\uDFBE', iconClass: 'setup', assigned: 'Phil P.' },
-        { id: 't6', name: 'First Aid', icon: '\uD83C\uDFE5', iconClass: 'firstaid', assigned: 'Sarah Wilson' }
+        { id: 't6', name: 'First Aid', icon: '\uD83C\uDFE5', iconClass: 'firstaid', assigned: null }
       ],
       instructions: [
         'Check-in opens at 8:30 AM',
@@ -50,7 +50,7 @@
         'Lunch provided for all participants',
         'Awards ceremony at 4:30 PM'
       ],
-      rsvpList: ['Mike Chen', 'Sarah Wilson', 'James Park', 'Emily Rodriguez', 'David Kim', 'Lisa Thompson']
+      rsvpList: []
     },
     'opening-day-bbq': {
       name: 'Opening Day BBQ & Round Robin',
@@ -72,7 +72,7 @@
         'Casual play on all courts',
         'New members meet & greet at 3 PM'
       ],
-      rsvpList: ['Mike Chen', 'Sarah Wilson', 'James Park', 'Emily Rodriguez', 'Lisa Thompson']
+      rsvpList: []
     },
     'french-open-rr': {
       name: 'French Open Round Robin Social',

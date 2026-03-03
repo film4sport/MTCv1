@@ -53,14 +53,6 @@
   function getAvatar(name) {
     const avatarMap = {
       'You': 'user',
-      'Mike Chen': 'mike',
-      'Sarah Wilson': 'sarah',
-      'James Park': 'james',
-      'Emily Rodriguez': 'emily',
-      'David Kim': 'david',
-      'Lisa Thompson': 'lisa',
-      'Ryan O\'Connor': 'ryan',
-      'Coach Martinez': 'coach',
       // MTC Board Members
       'Kelly K.': 'kelly',
       'Kelly Kamstra-Lloyd': 'kelly',
@@ -103,7 +95,7 @@
       spotsTotal: 60,
       spotsTaken: 38,
       description: 'Kick off the 2026 season! BBQ, music, and meet our coaching staff including Mark Taylor. All members, families, and guests welcome.',
-      attendees: ['Mike Chen', 'Sarah Wilson', 'James Park', 'Emily Rodriguez', 'Lisa Thompson']
+      attendees: []
     },
     'french-open-rr': {
       id: 'french-open-rr',
@@ -142,7 +134,7 @@
       spotsTotal: 16,
       spotsTaken: 10,
       description: 'Weekly men\'s round robin every Tuesday morning. All skill levels welcome. Drop in and play!',
-      attendees: ['Mike Chen', 'James Park', 'David Kim', 'Ryan O\'Connor']
+      attendees: []
     },
     'freedom-55': {
       id: 'freedom-55',
@@ -155,7 +147,7 @@
       spotsTotal: 16,
       spotsTaken: 12,
       description: 'Thursday morning league for the 55+ crowd. Fun and social tennis with a great group of players.',
-      attendees: ['Lisa Thompson', 'David Kim']
+      attendees: []
     },
     'interclub-league': {
       id: 'interclub-league',
@@ -168,7 +160,7 @@
       spotsTotal: 12,
       spotsTaken: 10,
       description: 'Thursday night competitive interclub league. A & B teams compete against clubs in the region. RSVP required for team selection.',
-      attendees: ['Mike Chen', 'James Park', 'Ryan O\'Connor']
+      attendees: []
     },
     'ladies-round-robin': {
       id: 'ladies-round-robin',
@@ -181,7 +173,7 @@
       spotsTotal: 16,
       spotsTaken: 8,
       description: 'Weekly ladies round robin every Friday morning. All skill levels welcome. A fun way to start the weekend!',
-      attendees: ['Sarah Wilson', 'Emily Rodriguez', 'Lisa Thompson']
+      attendees: []
     },
     'friday-mixed': {
       id: 'friday-mixed',
@@ -194,7 +186,7 @@
       spotsTotal: 24,
       spotsTaken: 16,
       description: 'Friday night mixed doubles round robin under the lights! Bring a partner or get matched. The most popular weekly event at MTC.',
-      attendees: ['Mike Chen', 'Sarah Wilson', 'James Park', 'Emily Rodriguez', 'David Kim']
+      attendees: []
     },
     'mixed-doubles-tournament-day1': {
       id: 'mixed-doubles-tournament-day1',

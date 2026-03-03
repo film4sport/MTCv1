@@ -13,7 +13,6 @@
  * @property {Object<string, {label: string, color: string, textColor: string}>} eventTypes - Event type display config
  * @property {string} headCoach - Head coach name
  * @property {{booking: number, guest: number, tabWarning: number, tabBlock: number, cancelWindowHours: number}} fees - Fee structure
- * @property {Object<string, {role: string, name: string}>} demoAccounts - Demo account public info (passwords server-side only)
  * @property {{lat: number, lon: number, name: string}} club - Club location coordinates and name
  * @property {string[]} guestAllowedScreens - Screens accessible without membership
  * @property {string[]} dayNamesShort - Abbreviated day names (Sun-Sat)
@@ -63,14 +62,6 @@ MTC.config = {
     tabWarning: 20,       // Nudge to pay at $20
     tabBlock: 30,         // Block bookings at $30
     cancelWindowHours: 24 // Free cancel window
-  },
-
-  // Demo accounts (passwords validated server-side via /api/auth/login)
-  // Only public info stored here — no passwords in client code
-  demoAccounts: {
-    'member@mtc.ca': { role: 'member', name: 'Alex Thompson' },
-    'coach@mtc.ca':  { role: 'coach',  name: 'Mark Taylor' },
-    'admin@mtc.ca':  { role: 'admin',  name: 'Admin' }
   },
 
   // Club location

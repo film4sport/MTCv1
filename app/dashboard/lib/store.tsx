@@ -3,12 +3,12 @@
 import { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef, type ReactNode } from 'react';
 import type { User, Court, Booking, ClubEvent, Partner, Conversation, Announcement, Notification, WeatherData, AdminAnalytics, CoachingProgram, NotificationPreferences } from './types';
 import { CLUB_LOCATION, DEFAULT_NOTIFICATION_PREFS } from './types';
-import { DEFAULT_MEMBERS, DEFAULT_COURTS, DEFAULT_BOOKINGS, DEFAULT_EVENTS, DEFAULT_PARTNERS, DEFAULT_CONVERSATIONS, DEFAULT_ANNOUNCEMENTS, DEFAULT_NOTIFICATIONS, DEFAULT_ANALYTICS, DEFAULT_PROGRAMS } from './data';
+import { DEFAULT_COURTS, DEFAULT_EVENTS, DEFAULT_ANNOUNCEMENTS, DEFAULT_ANALYTICS, DEFAULT_PROGRAMS } from './data';
 import { generateId } from './utils';
 import { signIn, signOut, getCurrentUser } from './auth';
 import { useToast } from './toast';
 import { reportError } from '../../lib/errorReporter';
-import { supabase, isSupabaseConfigured } from '../../lib/supabase';
+import { supabase } from '../../lib/supabase';
 import * as db from './db';
 
 interface AppState {
@@ -96,30 +96,27 @@ function saveJSON(key: string, value: unknown) {
   } catch { /* ignore quota errors */ }
 }
 
-/** When Supabase is configured, return empty array for empty results (real empty state).
- *  When NOT configured (demo/dev), return demo data as fallback.
- *  Defensive: if data is corrupted (not an array), fall back safely. */
-function demoFallback<T>(data: T[], demo: T[]): T[] {
-  if (!Array.isArray(data)) return isSupabaseConfigured ? [] : demo;
-  return data.length ? data : (isSupabaseConfigured ? [] : demo);
+/** Safely ensure data is always an array (defensive against corrupted data). */
+function safeArray<T>(data: T[]): T[] {
+  return Array.isArray(data) ? data : [];
 }
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [members, setMembers] = useState<User[]>(isSupabaseConfigured ? [] : DEFAULT_MEMBERS);
+  const [members, setMembers] = useState<User[]>([]);
   const [courts, setCourts] = useState<Court[]>(DEFAULT_COURTS);
-  const [bookings, setBookings] = useState<Booking[]>(isSupabaseConfigured ? [] : DEFAULT_BOOKINGS);
-  const [events, setEvents] = useState<ClubEvent[]>(isSupabaseConfigured ? [] : DEFAULT_EVENTS);
-  const [partners, setPartners] = useState<Partner[]>(isSupabaseConfigured ? [] : DEFAULT_PARTNERS);
-  const [conversations, setConversations] = useState<Conversation[]>(isSupabaseConfigured ? [] : DEFAULT_CONVERSATIONS);
-  const [announcements, setAnnouncements] = useState<Announcement[]>(isSupabaseConfigured ? [] : DEFAULT_ANNOUNCEMENTS);
-  const [notifications, setNotifications] = useState<Notification[]>(isSupabaseConfigured ? [] : DEFAULT_NOTIFICATIONS);
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [events, setEvents] = useState<ClubEvent[]>([]);
+  const [partners, setPartners] = useState<Partner[]>([]);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [weather, setWeather] = useState<WeatherData>({
     tempC: 0, tempF: 32, condition: 'sunny', wind: 0, humidity: 0, description: 'Loading...', lastUpdated: null,
   });
   const [analytics] = useState<AdminAnalytics>(DEFAULT_ANALYTICS);
-  const [programs, setPrograms] = useState<CoachingProgram[]>(isSupabaseConfigured ? [] : DEFAULT_PROGRAMS);
+  const [programs, setPrograms] = useState<CoachingProgram[]>([]);
   const [notificationPreferences, setNotificationPreferences] = useState<NotificationPreferences>(DEFAULT_NOTIFICATION_PREFS);
   const { showToast } = useToast();
 
@@ -149,14 +146,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
         ]);
 
         // Overwrite state with Supabase data (source of truth)
-        setMembers(demoFallback(members, DEFAULT_MEMBERS));
-        setBookings(Array.isArray(bookings) ? bookings : []);
-        setEvents(demoFallback(events, DEFAULT_EVENTS));
-        setPartners(demoFallback(partners, DEFAULT_PARTNERS));
-        setConversations(demoFallback(conversations, DEFAULT_CONVERSATIONS));
-        setAnnouncements(demoFallback(announcements, DEFAULT_ANNOUNCEMENTS));
-        setNotifications(demoFallback(notifications, DEFAULT_NOTIFICATIONS));
-        setPrograms(demoFallback(programs, DEFAULT_PROGRAMS));
+        setMembers(safeArray(members));
+        setBookings(safeArray(bookings));
+        setEvents(safeArray(events));
+        setPartners(safeArray(partners));
+        setConversations(safeArray(conversations));
+        setAnnouncements(safeArray(announcements));
+        setNotifications(safeArray(notifications));
+        setPrograms(safeArray(programs));
         if (notifPrefs) setNotificationPreferences(notifPrefs);
       } else if (savedUser) {
         // Supabase session expired — clear cached user
@@ -206,22 +203,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, () => {
         db.fetchConversations(userId).then(c => {
-          setConversations(demoFallback(c, DEFAULT_CONVERSATIONS));
+          setConversations(safeArray(c));
         }).catch(err => reportError(err, 'Realtime messages'));
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications' }, () => {
         db.fetchNotifications(userId).then(n => {
-          setNotifications(demoFallback(n, DEFAULT_NOTIFICATIONS));
+          setNotifications(safeArray(n));
         }).catch(err => reportError(err, 'Realtime notifications'));
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'announcements' }, () => {
         db.fetchAnnouncements(userId).then(a => {
-          setAnnouncements(demoFallback(a, DEFAULT_ANNOUNCEMENTS));
+          setAnnouncements(safeArray(a));
         }).catch(err => reportError(err, 'Realtime announcements'));
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'partners' }, () => {
         db.fetchPartners().then(p => {
-          setPartners(demoFallback(p, DEFAULT_PARTNERS));
+          setPartners(safeArray(p));
         }).catch(err => reportError(err, 'Realtime partners'));
       })
       .subscribe();
@@ -742,14 +739,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
         db.fetchNotifications(currentUser.id), db.fetchPrograms(),
         db.fetchNotificationPreferences(currentUser.id),
       ]);
-      setMembers(demoFallback(m, DEFAULT_MEMBERS));
-      setBookings(Array.isArray(b) ? b : []);
-      setEvents(demoFallback(ev, DEFAULT_EVENTS));
-      setPartners(demoFallback(p, DEFAULT_PARTNERS));
-      setConversations(demoFallback(c, DEFAULT_CONVERSATIONS));
-      setAnnouncements(demoFallback(a, DEFAULT_ANNOUNCEMENTS));
-      setNotifications(demoFallback(n, DEFAULT_NOTIFICATIONS));
-      setPrograms(demoFallback(pr, DEFAULT_PROGRAMS));
+      setMembers(safeArray(m));
+      setBookings(safeArray(b));
+      setEvents(safeArray(ev));
+      setPartners(safeArray(p));
+      setConversations(safeArray(c));
+      setAnnouncements(safeArray(a));
+      setNotifications(safeArray(n));
+      setPrograms(safeArray(pr));
       if (np) setNotificationPreferences(np);
     } catch (err) {
       reportError(err, 'Refresh');

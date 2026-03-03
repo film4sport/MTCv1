@@ -48,24 +48,22 @@
       clearFieldErrors(emailInput);
       clearFieldErrors(passwordInput);
 
-      const isDemoLogin = !email && !password;
+      // Validate required fields
+      const errors = [];
+      if (!email) { showFieldError(emailInput, 'Email is required'); errors.push('email'); }
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showFieldError(emailInput, 'Enter a valid email address'); errors.push('email format'); }
+      if (!password) { showFieldError(passwordInput, 'Password is required'); errors.push('password'); }
 
-      if (!isDemoLogin) {
-        const errors = [];
-        if (!email) { showFieldError(emailInput, 'Email is required'); errors.push('email'); }
-        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showFieldError(emailInput, 'Enter a valid email address'); errors.push('email format'); }
-        if (!password) { showFieldError(passwordInput, 'Password is required'); errors.push('password'); }
+      if (errors.length > 0) {
+        const loginCard = document.querySelector('.login-card:not(.signup-card)');
+        if (loginCard) { loginCard.style.animation='none'; loginCard.offsetHeight; loginCard.style.animation='shakeX 0.4s ease'; }
+        showToast('Please enter a valid ' + errors[0]);
+        return;
+      }
 
-        if (errors.length > 0) {
-          const loginCard = document.querySelector('.login-card:not(.signup-card)');
-          if (loginCard) { loginCard.style.animation='none'; loginCard.offsetHeight; loginCard.style.animation='shakeX 0.4s ease'; }
-          showToast('Please enter a valid ' + errors[0]);
-          return;
-        }
-
-        // Validate via server-side API (passwords never stored client-side)
-        var loginBtn = document.querySelector('.login-btn');
-        if (loginBtn) { loginBtn.disabled = true; loginBtn.textContent = 'Signing in...'; }
+      // Validate via server-side API (passwords never stored client-side)
+      var loginBtn = document.querySelector('.login-btn');
+      if (loginBtn) { loginBtn.disabled = true; loginBtn.textContent = 'Signing in...'; }
 
         fetch('/api/mobile-auth', {
           method: 'POST',
@@ -89,7 +87,7 @@
             if (lc) { lc.style.animation='none'; lc.offsetHeight; lc.style.animation='shakeX 0.4s ease'; }
             return;
           }
-          // Server returned valid demo account
+          // Server returned valid credentials
           finishLogin(email, result.data);
         })
         .catch(function() {
@@ -116,10 +114,6 @@
           }
         });
         return; // async — exit handleLogin, finishLogin continues
-      }
-
-      // Demo login (no email/password) — default member
-      finishLogin('member@mtc.ca', MTC.config.demoAccounts['member@mtc.ca']);
 
       function finishLogin(loginEmail, matchedLogin) {
         // Check for stored user
@@ -142,15 +136,6 @@
           MTC.state.currentUser = currentUser;
           window.currentUser = currentUser;
           currentRole = matchedLogin.role;
-        } else {
-          currentUser = {
-            name: loginEmail ? loginEmail.split('@')[0] : 'Alex Thompson',
-            email: loginEmail || 'member@mtc.ca',
-            role: 'member',
-            isMember: true
-          };
-          MTC.state.currentUser = currentUser;
-          window.currentUser = currentUser;
         }
 
         // Store Supabase access token for API calls (returned by mobile-auth)
@@ -214,7 +199,7 @@
     showToast('Welcome, ' + currentUser.name + '!');
     scheduleWelcomeNotifications();
 
-    // Load data from Supabase API (non-blocking, falls back to demo data)
+    // Load data from Supabase API (non-blocking, falls back to cached data)
     loadAppDataFromAPI();
 
     // Register push notifications (best-effort, non-blocking)
@@ -412,7 +397,7 @@
   function loadAppDataFromAPI() {
     if (!MTC.fn.loadFromAPI) return;
     var token = MTC.storage.get('mtc-access-token', '');
-    if (!token) return; // No token = demo mode, keep hardcoded data
+    if (!token) return; // No token = not authenticated, skip API calls
 
     // Load events
     MTC.fn.loadFromAPI('/mobile/events', 'mtc-api-events', null).then(function(events) {

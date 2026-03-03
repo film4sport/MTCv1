@@ -600,7 +600,7 @@
         'Arrive by 12:30 PM for warm-up',
         'Post-match social at clubhouse'
       ],
-      rsvpList: ['Kelly K.', 'Patrick M.', 'Michael H.', 'Phil P.', 'Peter G.', 'Jan H.', 'Sarah Wilson', 'Mike Chen', 'James Park']
+      rsvpList: []
     },
     '95-mixed-doubles': {
       name: '95+ Mixed Doubles Tournament',
@@ -615,7 +615,7 @@
         { id: 't3', name: 'Scorekeeper', icon: '&#128202;', iconClass: 'score', assigned: 'Bobby O\'Reilly' },
         { id: 't4', name: 'Snacks & Lunch', icon: '&#127818;', iconClass: 'snacks', assigned: 'Jan H.' },
         { id: 't5', name: 'Court Setup', icon: '&#127934;', iconClass: 'setup', assigned: 'Phil P.' },
-        { id: 't6', name: 'First Aid', icon: '&#127973;', iconClass: 'firstaid', assigned: 'Sarah Wilson' }
+        { id: 't6', name: 'First Aid', icon: '&#127973;', iconClass: 'firstaid', assigned: null }
       ],
       instructions: [
         'Check-in opens at 8:30 AM',
@@ -623,7 +623,7 @@
         'Lunch provided for all participants',
         'Awards ceremony at 4:30 PM'
       ],
-      rsvpList: ['Mike Chen', 'Sarah Wilson', 'James Park', 'Emily Rodriguez', 'David Kim', 'Lisa Thompson']
+      rsvpList: []
     },
     'opening-day-bbq': {
       name: 'Opening Day BBQ & Round Robin',
@@ -645,7 +645,7 @@
         'Casual play on all courts',
         'New members meet & greet at 3 PM'
       ],
-      rsvpList: ['Mike Chen', 'Sarah Wilson', 'James Park', 'Emily Rodriguez', 'Lisa Thompson']
+      rsvpList: []
     },
     'french-open-rr': {
       name: 'French Open Round Robin Social',
@@ -758,9 +758,10 @@
   };
 
   window.showAssignTaskModal = function(eventId, taskId, taskName) {
-    const members = [
-      'Kelly K.', 'Phil P.', 'Jan H.', 'Patrick M.', 'Michael H.', 'Peter G.',
-      'Mike Chen', 'Sarah Wilson', 'James Park', 'Emily Rodriguez', 'David Kim', 'Lisa Thompson'
+    // Use real members from API if available, otherwise use board members
+    const apiMembers = (MTC.state.clubMembers || []).filter(function(m) { return m.id !== 'club'; }).map(function(m) { return m.name; });
+    const members = apiMembers.length > 0 ? apiMembers : [
+      'Kelly K.', 'Phil P.', 'Jan H.', 'Patrick M.', 'Michael H.', 'Peter G.'
     ];
 
     const membersHtml = members.map(function(m) {

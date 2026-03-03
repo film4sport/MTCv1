@@ -34,13 +34,6 @@ describe('MTC.config', () => {
     expect(MTC.config.fees.cancelWindowHours).toBe(24);
   });
 
-  it('credentials has 3 entries', () => {
-    expect(Object.keys(MTC.config.credentials)).toHaveLength(3);
-    expect(MTC.config.credentials).toHaveProperty('member@mtc.ca');
-    expect(MTC.config.credentials).toHaveProperty('coach@mtc.ca');
-    expect(MTC.config.credentials).toHaveProperty('admin@mtc.ca');
-  });
-
   it('all config keys present', () => {
     expect(MTC.config).toHaveProperty('courts');
     expect(MTC.config).toHaveProperty('timeSlots');
@@ -48,7 +41,6 @@ describe('MTC.config', () => {
     expect(MTC.config).toHaveProperty('eventTypes');
     expect(MTC.config).toHaveProperty('headCoach');
     expect(MTC.config).toHaveProperty('fees');
-    expect(MTC.config).toHaveProperty('credentials');
     expect(MTC.config).toHaveProperty('club');
     expect(MTC.config).toHaveProperty('guestAllowedScreens');
   });

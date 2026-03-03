@@ -228,6 +228,37 @@ Full backend production work: security fixes, seed data update, mobile API endpo
 4. Add `SUPABASE_SERVICE_ROLE_KEY` to `.env.local` (for mobile API endpoints to bypass RLS)
 5. Set `SMTP_PASS` when ready
 
+### Demo Removal Session (2026-03-03)
+Stripped ALL demo/fake data from the entire codebase. Every platform now shows empty states when no real Supabase data exists — no more fake members, bookings, conversations, or names.
+
+**Dashboard (`app/dashboard/lib/`):**
+- `data.ts` — Emptied: `DEFAULT_MEMBERS`, `DEFAULT_BOOKINGS`, `DEFAULT_PARTNERS`, `DEFAULT_CONVERSATIONS`, `DEFAULT_NOTIFICATIONS` all set to `[]`. `DEFAULT_ANALYTICS` zeroed. `DEFAULT_EVENTS` attendees emptied. Kept real data: `DEFAULT_COURTS`, `DEFAULT_PROGRAMS`, `DEFAULT_ANNOUNCEMENTS`.
+- `store.tsx` — Removed `isSupabaseConfigured` import and `demoFallback()` function. Replaced with `safeArray()` (just validates Array.isArray). All state initializations now start as `[]` (no conditional demo data).
+
+**Mobile PWA (source files):**
+- `auth.js` — Removed dead demo login code, orphaned `}`, `else` fallback block with 'Alex Thompson' defaults. Fixed comments (demo → production language).
+- `messaging.js` — Emptied clubMembers (kept only MTC Club system entry), emptied defaultConversations, removed simulateReply entirely.
+- `navigation.js` — Emptied homePartnerPool.
+- `booking.js` — Emptied eventRegistrations, removed 17 demo bookings, renamed `generateDemoData` → `generateScheduleData`.
+- `profile.js` — Default profile: empty strings/arrays instead of 'Alex Thompson'.
+- `payments.js` — Empty currentUser, emptied allMembersPayment.
+- `account.js` — Emptied match history.
+- `events.js` — Removed demo names from avatarMap (kept real board members), emptied all attendees arrays.
+- `events-registration.js` — Emptied 3 rsvpLists, nulled volunteer assignment.
+- `admin.js` — Emptied 3 rsvpLists, nulled volunteer assignment, member list now dynamic from API with board member fallback.
+- `index.html` — All hardcoded demo names (James Park, Mike Chen, Sarah Wilson, Alex Thompson, Emily Rodriguez) → "—" placeholder.
+
+**Other:**
+- `supabase/seed.sql` — Removed v_alex/v_mark/v_admin variables and demo user profile updates. Coach lookup now generic (`role = 'coach' limit 1`).
+- `app/login/page.tsx` — Changed "David Kim"/"Lisa Thompson" → "Member" in decorative cards.
+
+**Verification:** TypeScript clean ✓, all IIFE closures intact, zero demo name references in source files.
+**NEEDS `npm run build:mobile`** to rebuild bundle.
+
+**User can now delete demo accounts from Supabase:**
+- Remove member@mtc.ca, coach@mtc.ca, admin@mtc.ca from Auth + profiles table
+- Item 3 from "User needs to do" list above is now OBSOLETE (don't create demo accounts)
+
 ## Decisions Made
 - Double-booking prevention: DB-level partial unique index on `(court_id, date, time) WHERE status = 'confirmed'` — already implemented, no code change needed
 - Mobile PWA logout: clears all 11 app localStorage keys (added `mtc-session-hash`)

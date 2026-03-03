@@ -94,16 +94,8 @@
   // ============================================
   // onclick handler (generated HTML)
   window.showAllMatches = function() {
-    const matches = [
-      { opponent: 'Mike Chen', result: 'W', score: '6-4, 7-5', date: 'Jan 28' },
-      { opponent: 'Sarah Wilson', result: 'L', score: '3-6, 4-6', date: 'Jan 21' },
-      { opponent: 'James Park', result: 'W', score: '6-3, 6-2', date: 'Jan 14' },
-      { opponent: 'Emily Rodriguez', result: 'W', score: '6-1, 6-4', date: 'Jan 7' },
-      { opponent: 'David Kim', result: 'W', score: '7-6, 6-3', date: 'Dec 20' },
-      { opponent: 'Lisa Thompson', result: 'L', score: '4-6, 2-6', date: 'Dec 15' },
-      { opponent: 'Mike Chen', result: 'L', score: '5-7, 6-7', date: 'Dec 8' },
-      { opponent: 'Sarah Wilson', result: 'W', score: '6-2, 6-4', date: 'Dec 1' }
-    ];
+    // Match history — populated from API when available
+    const matches = [];
     const wins = matches.filter(function(m) { return m.result === 'W'; }).length;
     const losses = matches.length - wins;
 

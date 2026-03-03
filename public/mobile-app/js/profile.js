@@ -6,14 +6,15 @@
   'use strict';
 
   // Shared state (read by events-registration.js)
+  // Default profile — synced from currentUser on login, persisted in localStorage
   MTC.state.profileData = {
-    name: 'Alex Thompson',
-    email: 'alex.t@email.com',
-    skill: 'Intermediate (4.0)',
-    skillClass: 'intermediate',
-    skillNTRP: '4.0',
-    availability: ['Weekday Evenings', 'Weekends'],
-    playstyle: ['Singles', 'Doubles']
+    name: '',
+    email: '',
+    skill: 'Not set',
+    skillClass: '',
+    skillNTRP: '',
+    availability: [],
+    playstyle: []
   };
   // Backward-compat alias
   window.profileData = MTC.state.profileData;
