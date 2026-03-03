@@ -71,7 +71,7 @@ interface Recipient {
 }
 
 // Shared email HTML template — cream theme matching site design
-function buildEmailHTML(recipient: Recipient, courtName: string, formattedDate: string, time: string, matchType: string | undefined, durationMinutes: number, bookerName: string, allParticipantNames: string[], bookedFor?: string): string {
+function buildEmailHTML(recipient: Recipient, courtName: string, formattedDate: string, time: string, matchType: string | undefined, durationMinutes: number, bookerName: string, allParticipantNames: string[], bookedFor?: string, trackingParams?: string): string {
   const isBooker = recipient.role === 'booker';
   const heading = isBooker ? 'Booking Confirmed' : 'You\'ve Been Added to a Booking';
   const greeting = `Hi ${recipient.name.split(' ')[0]},`;
@@ -148,6 +148,18 @@ function buildEmailHTML(recipient: Recipient, courtName: string, formattedDate: 
             </td></tr>
           </table>
         </td></tr>
+
+        <!-- Confirm & View button (click tracking) -->
+        ${trackingParams ? `<tr><td style="padding: 0 28px 12px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+            <tr><td align="center">
+              <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.monotennisclub.com'}/api/email-track?${trackingParams}"
+                 style="display: inline-block; padding: 12px 32px; background: #6b7a3d; color: #fff; text-decoration: none; border-radius: 10px; font-size: 14px; font-weight: 600;">
+                ${recipient.role === 'participant' ? 'Confirm Attendance' : 'View Booking'}
+              </a>
+            </td></tr>
+          </table>
+        </td></tr>` : ''}
 
         <!-- Footer -->
         <tr><td style="padding: 16px 28px 28px; text-align: center; border-top: 1px solid #f0ede6;">
@@ -263,11 +275,16 @@ export async function POST(request: Request) {
               ? `Booking Confirmed — ${courtName}, ${formattedDate}`
               : `Added to Booking — ${courtName}, ${formattedDate}`;
 
+            // Build tracking URL params for the "Confirm Attendance" / "View Booking" button
+            const trackParams = bookingId
+              ? `booking=${encodeURIComponent(bookingId)}&email=${encodeURIComponent(recipient.email)}&redirect=${encodeURIComponent('/dashboard/schedule')}`
+              : '';
+
             return transporter.sendMail({
               from: `"Mono Tennis Club" <${smtpUser}>`,
               to: recipient.email,
               subject,
-              html: buildEmailHTML(recipient, courtName, formattedDate, time, matchType, durationMinutes, actualBookerName, allNames, bookedFor),
+              html: buildEmailHTML(recipient, courtName, formattedDate, time, matchType, durationMinutes, actualBookerName, allNames, bookedFor, trackParams),
               icalEvent: {
                 filename: 'mtc-booking.ics',
                 method: 'REQUEST',

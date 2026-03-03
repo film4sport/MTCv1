@@ -10,7 +10,7 @@ export type EmailLogType =
   | 'program_withdrawal'
   | 'event_rsvp';
 
-export type EmailLogStatus = 'sent' | 'failed' | 'requested';
+export type EmailLogStatus = 'sent' | 'failed' | 'requested' | 'opened';
 
 interface LogEntry {
   type: EmailLogType;
