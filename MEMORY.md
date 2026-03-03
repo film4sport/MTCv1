@@ -187,7 +187,7 @@ Completed all remaining NEEDS items + fixed all 11 pre-existing test failures.
 **Still needs manual action:**
 - ~~Create `push_subscriptions` table in Supabase~~ ✅ DONE (2026-03-03)
 - ~~push_subscriptions RLS~~ ✅ DONE (2026-03-03)
-- Replace `SMTP_PASS=REPLACE_WITH_APP_PASSWORD` in `.env.local` with actual Google App Password
+- ~~Replace `SMTP_PASS` in `.env.local` with actual Google App Password~~ ✅ DONE (2026-03-03)
 
 ### Backend Production Readiness (2026-03-03)
 Full backend production work: security fixes, seed data update, mobile API endpoints, and mobile PWA Supabase wiring.
@@ -224,13 +224,13 @@ Full backend production work: security fixes, seed data update, mobile API endpo
 
 **User needs to do in Supabase:**
 1. ~~Run the new `push_subscriptions` RLS SQL~~ ✅ DONE (table + RLS created 2026-03-03)
-2. Re-run updated `seed.sql` to get correct events — STILL NEEDED
+2. ~~Re-run updated `seed.sql`~~ ✅ DONE (2026-03-03)
 3. ~~Create 3 auth users~~ OBSOLETE — demo accounts removed, user creates real accounts
 4. ~~Demo accounts deleted~~ ✅ DONE (member@mtc.ca, coach@mtc.ca, admin@mtc.ca removed 2026-03-03)
-5. Add `SUPABASE_SERVICE_ROLE_KEY` to `.env.local` — IN PROGRESS
-6. Set `SMTP_PASS` when ready
-7. Run security advisory SQL: `SET search_path` on functions + RLS for `club_settings`/`event_attendees`/`notifications` — STILL NEEDED
-8. Apply email templates from `supabase/email-templates/` into Auth → Email Templates — STILL NEEDED
+5. ~~Add `SUPABASE_SERVICE_ROLE_KEY` to `.env.local`~~ ✅ DONE (2026-03-03) — also added to Railway
+6. ~~Set `SMTP_PASS`~~ ✅ DONE (Google App Password set in .env.local + Railway)
+7. ~~Run security advisory SQL~~ ✅ DONE (2026-03-03) — SET search_path on all functions + RLS for club_settings/event_attendees/notifications
+8. ~~Apply email templates~~ ✅ DONE (2026-03-03) — confirm-signup + reset-password cream templates in Supabase Auth
 
 ### Demo Removal Session (2026-03-03)
 Stripped ALL demo/fake data from the entire codebase. Every platform now shows empty states when no real Supabase data exists — no more fake members, bookings, conversations, or names.
@@ -269,6 +269,31 @@ Stripped ALL demo/fake data from the entire codebase. Every platform now shows e
 - Remove member@mtc.ca, coach@mtc.ca, admin@mtc.ca from Auth + profiles table
 - Item 3 from "User needs to do" list above is now OBSOLETE (don't create demo accounts)
 - E2E tests still use `member@mtc.ca` to log in — update credentials in test files when real accounts are set up
+
+### Production Config Session (2026-03-03)
+All Supabase + Railway configuration completed. Platform is production-ready.
+
+**Supabase SQL (all run in SQL Editor):**
+- `seed.sql` — seeded courts, events, announcements, coaching programs, gate code
+- Security advisory fixes — `SET search_path = ''` on all 5 SECURITY DEFINER functions (`is_admin`, `is_coach`, `handle_new_user`, `delete_member`, `send_welcome_message`), fully-qualified table names
+- RLS added for `club_settings`, `event_attendees`, `notifications`
+- Note: `delete_member` required `DROP FUNCTION` first due to parameter rename (`target_user_id` → `member_id`)
+
+**Supabase Dashboard:**
+- Email templates applied: `confirm-signup.html` + `reset-password.html` (cream theme) in Auth → Email Templates
+
+**Env vars (.env.local + Railway):**
+- `SUPABASE_SERVICE_ROLE_KEY` added
+- `SMTP_PASS` set with Google App Password
+- All SMTP + VAPID vars confirmed in Railway
+
+**Landing page changes:**
+- `Events.tsx` — Restored filter pills (All Events, Tournaments, Camps, Coaching, Social) + date-aware 3-card limit (shows next 3 upcoming events, auto-rotates as dates pass)
+- `OnboardingTour.tsx` — Added Settings step (step 5 of 6), title changed to "Welcome to MTC Court!"
+- `Sidebar.tsx` — Added `data-tour="settings"` attribute
+- `landing.spec.js` — Event card count test updated to expect 3
+
+**All code pushed, Railway deployed. All Supabase manual tasks complete.**
 
 ## Decisions Made
 - Double-booking prevention: DB-level partial unique index on `(court_id, date, time) WHERE status = 'confirmed'` — already implemented, no code change needed
