@@ -498,6 +498,44 @@ Comprehensive audit found 16 UX gaps across all 3 platforms. All addressed in pr
 
 **Verification:** TypeScript clean ✓, Mobile build clean ✓, Bundle verified ✓
 
+### Real-Time Sync + Admin Analytics + Exports (2026-03-03)
+
+**Computed Admin Analytics (replaced static defaults):**
+- `app/dashboard/lib/store.tsx` — `analytics` is now a `useMemo` computed from real `bookings`, `members`, `programs` data:
+  - Total bookings this month + % change vs last month
+  - Court usage (today, this week, this month)
+  - Peak times (top 5 day+time combos from booking data)
+  - Revenue breakdown (membership fees by type: adult $120, family $240, junior $55 + program enrollment fees)
+  - Monthly revenue from new members who joined that month
+  - Member activity (most active bookers, new members count, avg bookings/member)
+  - Monthly trends (last 6 months of bookings + new member revenue)
+- Removed `DEFAULT_ANALYTICS` import — no longer needed
+
+**Supabase Realtime — expanded subscriptions:**
+- Already had: `bookings`, `messages`, `notifications`, `announcements`, `partners`
+- Added: `profiles` (members), `courts`, `coaching_programs`, `program_enrollments`, `events`, `event_attendees`
+- All use re-fetch pattern (not row-level mapping) for simplicity + consistency
+- Strategy: on any Realtime change, call existing `db.fetch*()` function to re-fetch full table
+
+**Courts now fetched from Supabase:**
+- `app/dashboard/lib/db.ts` — Added `fetchCourts()` function (was missing — courts were always DEFAULT_COURTS)
+- `store.tsx` initial load + `refreshData` now include courts fetch
+- Falls back to defaults if DB returns empty (for fresh installs)
+
+**Admin Exports overhauled:**
+- `app/dashboard/admin/page.tsx` — 3 export buttons: Members, Payments, Court Usage (replaced old Bookings/Members/Revenue)
+- **Date filter**: "From" date picker filters all exports (members by `memberSince`, bookings/court usage by `date`)
+- Export Members: Name, Email, Role, Membership Type, Annual Fee, Skill Level, Status, Member Since
+- Export Payments: Name, Email, Type, Fee + total row at bottom with member count + total fees
+- Export Court Usage: Per-court booking totals with type breakdown + total row
+- All exports now show success toast on download
+
+**Settings page improvements:**
+- Download toast (success/error) added
+- Logout double-redirect fixed (was both `router.replace` and `window.location.href`)
+
+**Verification:** TypeScript clean ✓, Mobile build clean ✓
+
 ## TODO / REMINDERS
 - **Junior Summer Camp dates**: User is waiting on real dates from Mark Taylor. When received, update the `junior-summer-camp` event across: `supabase/seed.sql`, `app/dashboard/lib/data.ts`, `public/mobile-app/js/events.js`, and run UPDATE SQL on live Supabase. Also update date/time in `app/(landing)/layout.tsx` JSON-LD if camp is featured there.
 

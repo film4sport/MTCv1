@@ -303,10 +303,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
         saveJSON('mtc-current-user', user);
 
         // Fetch all data from Supabase in parallel
-        const [members, bookings, events, partners, conversations, announcements, notifications, programs, notifPrefs] = await Promise.all([
+        const [members, bookings, events, courtsData, partners, conversations, announcements, notifications, programs, notifPrefs] = await Promise.all([
           db.fetchMembers(),
           db.fetchBookings(),
           db.fetchEvents(),
+          db.fetchCourts(),
           db.fetchPartners(),
           db.fetchConversations(user.id),
           db.fetchAnnouncements(user.id),
@@ -319,6 +320,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setMembers(safeArray(members));
         setBookings(safeArray(bookings));
         setEvents(safeArray(events));
+        if (courtsData.length > 0) setCourts(courtsData); // Keep defaults if DB has no courts yet
         setPartners(safeArray(partners));
         setConversations(safeArray(conversations));
         setAnnouncements(safeArray(announcements));
@@ -399,6 +401,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
         db.fetchPartners().then(p => {
           setPartners(safeArray(p));
         }).catch(err => reportError(err, 'Realtime partners'));
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => {
+        db.fetchMembers().then(m => setMembers(safeArray(m))).catch(err => reportError(err, 'Realtime members'));
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'courts' }, () => {
+        db.fetchCourts().then(c => setCourts(safeArray(c))).catch(err => reportError(err, 'Realtime courts'));
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'coaching_programs' }, () => {
+        db.fetchPrograms().then(p => setPrograms(safeArray(p))).catch(err => reportError(err, 'Realtime programs'));
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'program_enrollments' }, () => {
+        db.fetchPrograms().then(p => setPrograms(safeArray(p))).catch(err => reportError(err, 'Realtime enrollments'));
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'events' }, () => {
+        db.fetchEvents().then(e => setEvents(safeArray(e))).catch(err => reportError(err, 'Realtime events'));
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'event_attendees' }, () => {
+        db.fetchEvents().then(e => setEvents(safeArray(e))).catch(err => reportError(err, 'Realtime RSVPs'));
       })
       .subscribe();
 
@@ -985,8 +1005,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const refreshData = useCallback(async () => {
     if (!currentUser) return;
     try {
-      const [m, b, ev, p, c, a, n, pr, np] = await Promise.all([
-        db.fetchMembers(), db.fetchBookings(), db.fetchEvents(), db.fetchPartners(),
+      const [m, b, ev, ct, p, c, a, n, pr, np] = await Promise.all([
+        db.fetchMembers(), db.fetchBookings(), db.fetchEvents(), db.fetchCourts(), db.fetchPartners(),
         db.fetchConversations(currentUser.id), db.fetchAnnouncements(currentUser.id),
         db.fetchNotifications(currentUser.id), db.fetchPrograms(),
         db.fetchNotificationPreferences(currentUser.id),
@@ -994,6 +1014,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setMembers(safeArray(m));
       setBookings(safeArray(b));
       setEvents(safeArray(ev));
+      if (ct.length > 0) setCourts(ct);
       setPartners(safeArray(p));
       setConversations(safeArray(c));
       setAnnouncements(safeArray(a));

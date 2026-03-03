@@ -1,6 +1,6 @@
 import { supabase } from '../../lib/supabase';
 import { reportError } from '../../lib/errorReporter';
-import type { Booking, ClubEvent, Partner, Conversation, Message, Announcement, Notification, CoachingProgram, NotificationPreferences, User, SkillLevel, FamilyMember } from './types';
+import type { Booking, ClubEvent, Court, Partner, Conversation, Message, Announcement, Notification, CoachingProgram, NotificationPreferences, User, SkillLevel, FamilyMember } from './types';
 
 // ─── Profiles ───────────────────────────────────────────
 
@@ -310,6 +310,17 @@ export async function deleteAnnouncement(id: string): Promise<void> {
 }
 
 // ─── Courts ─────────────────────────────────────────────
+
+export async function fetchCourts(): Promise<Court[]> {
+  const { data } = await supabase.from('courts').select('*').order('id');
+  if (!data) return [];
+  return data.map(c => ({
+    id: c.id,
+    name: c.name,
+    floodlight: c.floodlight,
+    status: c.status as Court['status'],
+  }));
+}
 
 export async function updateCourtStatus(courtId: number, status: string): Promise<void> {
   await supabase.from('courts').update({ status }).eq('id', courtId);
