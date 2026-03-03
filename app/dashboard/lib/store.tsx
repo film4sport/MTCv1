@@ -537,10 +537,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // Actions
   const addBooking = useCallback((booking: Booking) => {
     setBookings(prev => [...prev, booking]);
-    // Persist to Supabase — rollback on failure
+    // Persist to Supabase — rollback booking + its notifications on failure
     db.createBooking(booking).catch((err) => {
       reportError(err, 'Supabase');
       setBookings(prev => prev.filter(b => b.id !== booking.id));
+      // Also remove any notifications created for this booking (by matching the booking ID in body text)
+      setNotifications(prev => prev.filter(n => !(n.type === 'booking' && n.body?.includes(booking.date) && n.body?.includes(booking.time))));
       showToast('Failed to save booking. Please try again.', 'error');
     });
     // Create notification for booker
