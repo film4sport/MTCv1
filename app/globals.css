@@ -619,3 +619,69 @@ html {
   0% { background-position: 100% 0; }
   100% { background-position: -100% 0; }
 }
+
+/* ── Dashboard Page Transition ── */
+.page-enter {
+  animation: pageEnter 0.2s ease-out both;
+}
+@keyframes pageEnter {
+  0% { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Booking Success Confetti ── */
+@keyframes dashConfettiFall {
+  0% { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
+  70% { opacity: 1; }
+  100% { transform: translateY(60vh) rotate(540deg) scale(0.5); opacity: 0; }
+}
+.dash-confetti-piece {
+  position: fixed;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 9999;
+  animation: dashConfettiFall 2.5s ease-out forwards;
+}
+
+/* ── Bell New Notification Shake ── */
+@keyframes bellNotify {
+  0%, 100% { transform: rotate(0deg); }
+  10% { transform: rotate(16deg); }
+  20% { transform: rotate(-14deg); }
+  30% { transform: rotate(12deg); }
+  40% { transform: rotate(-8deg); }
+  50% { transform: rotate(4deg); }
+  60% { transform: rotate(0deg); }
+}
+.bell-notify .bell-icon {
+  animation: bellNotify 0.8s ease-in-out;
+}
+
+/* ── Activity Feed Stagger ── */
+.feed-item {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: feedItemIn 0.35s ease-out forwards;
+}
+.feed-item:nth-child(1) { animation-delay: 0s; }
+.feed-item:nth-child(2) { animation-delay: 0.05s; }
+.feed-item:nth-child(3) { animation-delay: 0.1s; }
+.feed-item:nth-child(4) { animation-delay: 0.15s; }
+.feed-item:nth-child(5) { animation-delay: 0.2s; }
+.feed-item:nth-child(6) { animation-delay: 0.25s; }
+.feed-item:nth-child(7) { animation-delay: 0.3s; }
+.feed-item:nth-child(8) { animation-delay: 0.35s; }
+@keyframes feedItemIn {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Profile Switcher Crossfade ── */
+@keyframes profileSwitch {
+  0% { opacity: 0; transform: scale(0.9); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.profile-switch-enter {
+  animation: profileSwitch 0.25s ease-out;
+}

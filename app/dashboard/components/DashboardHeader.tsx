@@ -34,6 +34,18 @@ export default function DashboardHeader({ title }: DashboardHeaderProps) {
   });
   const unreadCount = filteredNotifications.filter(n => !n.read).length;
 
+  // Bell shake when new notification arrives
+  const [bellShake, setBellShake] = useState(false);
+  const prevUnread = useRef(unreadCount);
+  useEffect(() => {
+    if (unreadCount > prevUnread.current) {
+      setBellShake(true);
+      const t = setTimeout(() => setBellShake(false), 900);
+      return () => clearTimeout(t);
+    }
+    prevUnread.current = unreadCount;
+  }, [unreadCount]);
+
   // Close dropdowns on outside click
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
@@ -77,7 +89,7 @@ export default function DashboardHeader({ title }: DashboardHeaderProps) {
           <div ref={notifRef} className="relative">
             <button
               onClick={() => { setNotifOpen(!notifOpen); setMenuOpen(false); }}
-              className={`bell-btn relative w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 ${notifOpen ? 'bg-[#6b7a3d] shadow-md' : 'bg-[#6b7a3d]/10 hover:bg-[#6b7a3d]/20 active:scale-95'}`}
+              className={`bell-btn relative w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 ${bellShake ? 'bell-notify' : ''} ${notifOpen ? 'bg-[#6b7a3d] shadow-md' : 'bg-[#6b7a3d]/10 hover:bg-[#6b7a3d]/20 active:scale-95'}`}
               aria-label="Notifications"
             >
               <svg className="bell-icon w-[22px] h-[22px] transition-transform duration-200" style={{ color: notifOpen ? '#fff' : '#1a1f12' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
