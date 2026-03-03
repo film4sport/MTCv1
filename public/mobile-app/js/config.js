@@ -29,14 +29,19 @@ MTC.config = {
     { id: 4, name: 'Court 4', floodlight: false }
   ],
 
-  // Available booking time slots
-  timeSlots: ['9:30','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00'],
+  // Available booking time slots (must match dashboard TIME_SLOTS — 12h AM/PM format)
+  timeSlots: [
+    '10:00 AM','10:30 AM','11:00 AM','11:30 AM','12:00 PM','12:30 PM',
+    '1:00 PM','1:30 PM','2:00 PM','2:30 PM','3:00 PM','3:30 PM',
+    '4:00 PM','4:30 PM','5:00 PM','5:30 PM','6:00 PM','6:30 PM',
+    '7:00 PM','7:30 PM','8:00 PM','8:30 PM','9:00 PM','9:30 PM'
+  ],
 
   // Court operating hours (close time)
   courtHours: {
-    1: { close: '22:00' },  // Courts 1&2: 9:30am-10pm (lights out 11pm)
+    1: { close: '22:00' },  // Courts 1&2: 10am-10pm (lights out 11pm)
     2: { close: '22:00' },
-    3: { close: '20:00' },  // Courts 3&4: 9:30am-8pm (no lights)
+    3: { close: '20:00' },  // Courts 3&4: 10am-8pm (no lights)
     4: { close: '20:00' }
   },
 
