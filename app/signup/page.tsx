@@ -13,7 +13,7 @@ export default function SignupPage() {
 
   const [signupStep, setSignupStep] = useState(1);
   const [redirectCount, setRedirectCount] = useState(5);
-  const [signupData, setSignupData] = useState({ membershipType: '', name: '', email: '', password: '' });
+  const [signupData, setSignupData] = useState({ membershipType: '', name: '', email: '', password: '', skillLevel: '' });
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -35,7 +35,7 @@ export default function SignupPage() {
 
   // Auto-detect if waiver/ack content fits without scrolling (large screens)
   useEffect(() => {
-    if (signupStep === 3) {
+    if (signupStep === 4) {
       const checkFit = () => {
         if (waiverRef.current) {
           const { scrollHeight, clientHeight } = waiverRef.current;
@@ -52,7 +52,7 @@ export default function SignupPage() {
 
   // Auto-redirect to dashboard after signup completion (skip if email verification pending)
   useEffect(() => {
-    if (signupStep !== 5 || emailConfirmPending) return;
+    if (signupStep !== 6 || emailConfirmPending) return;
     const interval = setInterval(() => {
       setRedirectCount(prev => {
         if (prev <= 1) {
@@ -87,7 +87,7 @@ export default function SignupPage() {
     try {
       const trimmedEmail = signupData.email.trim().toLowerCase();
       const trimmedName = signupData.name.trim();
-      const { user, error, emailConfirmRequired } = await signUp(trimmedEmail, signupData.password, trimmedName, signupData.membershipType);
+      const { user, error, emailConfirmRequired } = await signUp(trimmedEmail, signupData.password, trimmedName, signupData.membershipType, signupData.skillLevel || undefined);
       if (error || !user) {
         const msg = error?.toLowerCase() || '';
         if (msg.includes('already registered') || msg.includes('already been registered')) {
@@ -106,7 +106,7 @@ export default function SignupPage() {
       if (emailConfirmRequired) {
         setEmailConfirmPending(true);
         setSignupLoading(false);
-        setSignupStep(5);
+        setSignupStep(6);
         return;
       }
 
@@ -123,7 +123,7 @@ export default function SignupPage() {
       localStorage.setItem('mtc-current-user', JSON.stringify(loggedInUser || user));
 
       setSignupLoading(false);
-      setSignupStep(5);
+      setSignupStep(6);
     } catch {
       setSignupError('Something went wrong. Please try again.');
       setSignupLoading(false);
@@ -177,10 +177,10 @@ export default function SignupPage() {
 
         {/* Progress Steps */}
         <div className="flex items-center justify-center gap-2 mb-10">
-          {[1, 2, 3, 4, 5].map((step) => (
+          {[1, 2, 3, 4, 5, 6].map((step) => (
             <div key={step} className="flex items-center gap-2">
               <div
-                className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors"
+                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors"
                 style={
                   signupStep >= step
                     ? { backgroundColor: '#6b7a3d', color: '#fff' }
@@ -195,8 +195,8 @@ export default function SignupPage() {
                   step
                 )}
               </div>
-              {step < 5 && (
-                <div className="w-8 h-0.5" style={{ backgroundColor: signupStep > step ? '#6b7a3d' : '#e0dcd3' }} />
+              {step < 6 && (
+                <div className="w-6 sm:w-8 h-0.5" style={{ backgroundColor: signupStep > step ? '#6b7a3d' : '#e0dcd3' }} />
               )}
             </div>
           ))}
@@ -368,8 +368,62 @@ export default function SignupPage() {
           </div>
         )}
 
-        {/* Step 3: Waiver */}
+        {/* Step 3: Skill Level */}
         {signupStep === 3 && (
+          <div>
+            <h3 className="headline-font text-2xl mb-2 text-center" style={{ color: '#2a2f1e' }}>Your Skill Level</h3>
+            <p className="text-sm text-center mb-8" style={{ color: '#6b7266' }}>This helps us match you with the right partners and programs.</p>
+            <div className="grid grid-cols-2 gap-4">
+              {[
+                { value: 'beginner', label: 'Beginner', color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.08)', desc: 'New to tennis or learning the basics' },
+                { value: 'intermediate', label: 'Intermediate', color: '#6b7a3d', bg: 'rgba(107, 122, 61, 0.08)', desc: 'Comfortable with rallying and basic strategy' },
+                { value: 'advanced', label: 'Advanced', color: '#d97706', bg: 'rgba(217, 119, 6, 0.08)', desc: 'Strong all-court game with consistent play' },
+                { value: 'competitive', label: 'Competitive', color: '#dc2626', bg: 'rgba(220, 38, 38, 0.08)', desc: 'Tournament-level player' },
+              ].map((level) => (
+                <button
+                  key={level.value}
+                  onClick={() => setSignupData({ ...signupData, skillLevel: level.value })}
+                  className="p-5 rounded-xl text-left transition-all hover:scale-[1.02]"
+                  style={{
+                    backgroundColor: signupData.skillLevel === level.value ? level.bg : '#faf8f3',
+                    border: `2px solid ${signupData.skillLevel === level.value ? level.color : '#e0dcd3'}`,
+                  }}
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: level.color }} />
+                    <span className="font-semibold text-sm" style={{ color: '#2a2f1e' }}>{level.label}</span>
+                  </div>
+                  <p className="text-xs leading-relaxed" style={{ color: '#6b7266' }}>{level.desc}</p>
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-center mt-4" style={{ color: '#999' }}>You can change this anytime in your Profile settings.</p>
+            <div className="flex items-center gap-4 mt-8">
+              <button
+                onClick={() => { setSignupStep(2); }}
+                className="px-6 py-3 rounded-full text-sm font-medium transition-all"
+                style={{ backgroundColor: '#faf8f3', color: '#6b7266', border: '1px solid #e0dcd3' }}
+              >
+                Back
+              </button>
+              <button
+                onClick={() => setSignupStep(4)}
+                disabled={!signupData.skillLevel}
+                className="flex-1 px-6 py-3 rounded-full text-sm font-semibold transition-all"
+                style={
+                  signupData.skillLevel
+                    ? { backgroundColor: '#6b7a3d', color: '#fff' }
+                    : { backgroundColor: '#e0dcd3', color: '#999', cursor: 'not-allowed' }
+                }
+              >
+                Continue
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Step 4: Waiver */}
+        {signupStep === 4 && (
           <div>
             <h3 className="headline-font text-2xl mb-2 text-center" style={{ color: '#2a2f1e' }}>Waiver & Acknowledgement</h3>
             <p className="text-sm text-center mb-8" style={{ color: '#6b7266' }}>Please read both documents carefully. Scroll to the bottom of each to proceed.</p>
@@ -414,14 +468,14 @@ export default function SignupPage() {
 
             <div className="flex items-center gap-4 mt-6">
               <button
-                onClick={() => { setSignupError(''); setSignupStep(2); }}
+                onClick={() => { setSignupError(''); setSignupStep(3); }}
                 className="px-6 py-3 rounded-full text-sm font-medium transition-all"
                 style={{ backgroundColor: '#faf8f3', color: '#6b7266', border: '1px solid #e0dcd3' }}
               >
                 Back
               </button>
               <button
-                onClick={() => { setWaiverAccepted(true); setSignupStep(4); }}
+                onClick={() => { setWaiverAccepted(true); setSignupStep(5); }}
                 disabled={!waiverScrolled || !ackScrolled}
                 className="flex-1 px-6 py-3 rounded-full text-sm font-semibold transition-all"
                 style={
@@ -436,8 +490,8 @@ export default function SignupPage() {
           </div>
         )}
 
-        {/* Step 4: E-Transfer Payment */}
-        {signupStep === 4 && (
+        {/* Step 5: E-Transfer Payment */}
+        {signupStep === 5 && (
           <div>
             <h3 className="headline-font text-2xl mb-2 text-center" style={{ color: '#2a2f1e' }}>Payment via E-Transfer</h3>
             <p className="text-sm text-center mb-8" style={{ color: '#6b7266' }}>Send an Interac e-transfer to complete your registration.</p>
@@ -460,7 +514,7 @@ export default function SignupPage() {
             )}
             <div className="flex items-center gap-4 mt-8">
               <button
-                onClick={() => { setSignupError(''); setSignupStep(3); }}
+                onClick={() => { setSignupError(''); setSignupStep(4); }}
                 className="px-6 py-3 rounded-full text-sm font-medium transition-all"
                 style={{ backgroundColor: '#faf8f3', color: '#6b7266', border: '1px solid #e0dcd3' }}
               >
@@ -478,8 +532,8 @@ export default function SignupPage() {
           </div>
         )}
 
-        {/* Step 5: Confirmation */}
-        {signupStep === 5 && (
+        {/* Step 6: Confirmation */}
+        {signupStep === 6 && (
           <div className="text-center">
             {emailConfirmPending ? (
               <>
@@ -500,9 +554,10 @@ export default function SignupPage() {
                       { label: 'Name', value: signupData.name },
                       { label: 'Email', value: signupData.email },
                       { label: 'Membership', value: getMembershipLabel() },
+                      { label: 'Skill Level', value: signupData.skillLevel ? signupData.skillLevel.charAt(0).toUpperCase() + signupData.skillLevel.slice(1) : 'Not set' },
                       { label: 'Waiver', value: 'Signed' },
                     ].map((row, i) => (
-                      <div key={i} className="flex items-center justify-between py-2" style={i < 3 ? { borderBottom: '1px solid #e0dcd3' } : {}}>
+                      <div key={i} className="flex items-center justify-between py-2" style={i < 4 ? { borderBottom: '1px solid #e0dcd3' } : {}}>
                         <span className="text-sm" style={{ color: '#999' }}>{row.label}</span>
                         <span className="text-sm font-medium" style={{ color: '#2a2f1e' }}>{row.value}</span>
                       </div>
@@ -535,9 +590,10 @@ export default function SignupPage() {
                       { label: 'Name', value: signupData.name },
                       { label: 'Email', value: signupData.email },
                       { label: 'Membership', value: getMembershipLabel() },
+                      { label: 'Skill Level', value: signupData.skillLevel ? signupData.skillLevel.charAt(0).toUpperCase() + signupData.skillLevel.slice(1) : 'Not set' },
                       { label: 'Waiver', value: 'Signed' },
                     ].map((row, i) => (
-                      <div key={i} className="flex items-center justify-between py-2" style={i < 3 ? { borderBottom: '1px solid #e0dcd3' } : {}}>
+                      <div key={i} className="flex items-center justify-between py-2" style={i < 4 ? { borderBottom: '1px solid #e0dcd3' } : {}}>
                         <span className="text-sm" style={{ color: '#999' }}>{row.label}</span>
                         <span className="text-sm font-medium" style={{ color: '#2a2f1e' }}>{row.value}</span>
                       </div>

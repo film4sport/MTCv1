@@ -10,6 +10,7 @@ export interface User {
   status?: 'active' | 'paused'; // undefined treated as 'active'
   ntrp?: number; // legacy — kept for backwards compat
   skillLevel?: SkillLevel;
+  skillLevelSet?: boolean;
   memberSince?: string;
   avatar?: string;
 }

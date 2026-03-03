@@ -17,6 +17,7 @@ create table if not exists profiles (
   status text not null default 'active' check (status in ('active', 'paused')),
   ntrp numeric(2,1) check (ntrp >= 1.0 and ntrp <= 7.0),
   skill_level text default 'intermediate' check (skill_level in ('beginner', 'intermediate', 'advanced', 'competitive')),
+  skill_level_set boolean default false,
   member_since text,
   avatar text,
   created_at timestamptz default now()
@@ -252,13 +253,14 @@ create index if not exists idx_profiles_role on profiles(role);
 create or replace function public.handle_new_user()
 returns trigger as $$
 begin
-  insert into public.profiles (id, name, email, role, skill_level, avatar, member_since)
+  insert into public.profiles (id, name, email, role, skill_level, skill_level_set, avatar, member_since)
   values (
     new.id,
     coalesce(new.raw_user_meta_data->>'name', split_part(new.email, '@', 1)),
     new.email,
     coalesce(new.raw_user_meta_data->>'role', 'member'),
-    'intermediate',
+    coalesce(new.raw_user_meta_data->>'skill_level', 'intermediate'),
+    (new.raw_user_meta_data->>'skill_level' is not null),
     'tennis-male-1',
     to_char(now(), 'YYYY-MM')
   );
