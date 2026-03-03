@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 const categoryColors: Record<string, { accent: string; bg: string; text: string }> = {
   tournament: { accent: '#6b7a3d', bg: 'rgba(107, 122, 61, 0.08)', text: '#4a5528' },
@@ -12,6 +12,7 @@ const categoryColors: Record<string, { accent: string; bg: string; text: string 
 const events = [
   {
     category: 'social',
+    isoDate: '2026-03-14',
     date: 'March 14, 2026',
     title: 'Euchre Tournament',
     description:
@@ -20,6 +21,7 @@ const events = [
   },
   {
     category: 'social',
+    isoDate: '2026-05-09',
     date: 'May 9, 2026',
     title: 'Opening Day BBQ & Round Robin',
     description:
@@ -28,6 +30,7 @@ const events = [
   },
   {
     category: 'social',
+    isoDate: '2026-06-07',
     date: 'June 7, 2026',
     title: 'French Open Round Robin Social',
     description:
@@ -36,6 +39,7 @@ const events = [
   },
   {
     category: 'social',
+    isoDate: '2026-07-12',
     date: 'July 12, 2026',
     title: 'Wimbledon Open Round Robin',
     description:
@@ -44,6 +48,7 @@ const events = [
   },
   {
     category: 'tournament',
+    isoDate: '2026-07-18',
     date: 'July 18-19, 2026',
     title: '95+ Mixed Doubles Tournament',
     description:
@@ -52,8 +57,25 @@ const events = [
   },
 ];
 
+const filters = [
+  { label: 'All Events', value: 'all' },
+  { label: 'Tournaments', value: 'tournament' },
+  { label: 'Camps', value: 'camp' },
+  { label: 'Coaching', value: 'coaching' },
+  { label: 'Social', value: 'social' },
+];
+
 export default function Events() {
+  const [filter, setFilter] = useState('all');
+  const [animKey, setAnimKey] = useState(0);
   const sectionRef = useRef<HTMLDivElement>(null);
+
+  const today = new Date().toISOString().slice(0, 10);
+  const filtered = filter === 'all' ? events : events.filter(e => e.category === filter);
+  const upcoming = filtered
+    .filter(e => e.isoDate >= today)
+    .sort((a, b) => a.isoDate.localeCompare(b.isoDate))
+    .slice(0, 3);
 
   // 3D Tilt effect — re-attaches whenever filter changes (animKey)
   const attachTilt = useCallback(() => {
@@ -91,7 +113,7 @@ export default function Events() {
   useEffect(() => {
     const cleanup = attachTilt();
     return cleanup;
-  }, [attachTilt]);
+  }, [animKey, attachTilt]);
 
   return (
     <section id="events" className="text-gray-900 py-20 lg:py-28" style={{ backgroundColor: '#f5f2eb' }} ref={sectionRef}>
@@ -105,14 +127,31 @@ export default function Events() {
           </h2>
         </div>
 
+        {/* Filter Tags */}
+        <div className="flex flex-wrap justify-center gap-3 mb-12 fade-in">
+          {filters.map((f) => (
+            <button
+              key={f.value}
+              aria-pressed={filter === f.value}
+              className={`filter-btn px-5 py-2 rounded-full text-sm font-medium transition-colors${
+                filter === f.value ? ' active text-white' : ' text-gray-600 border hover:border-gray-400'
+              }`}
+              style={filter === f.value ? { backgroundColor: '#6b7a3d' } : { backgroundColor: '#faf8f3', borderColor: '#e0dcd3' }}
+              onClick={() => { setFilter(f.value); setAnimKey(k => k + 1); }}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+
         {/* Events Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-          {events.map((event, index) => {
+          {upcoming.map((event, index) => {
             const colors = categoryColors[event.category] || categoryColors.social;
             return (
               <div
-                key={event.title}
-                className={`tilt-card event-card rounded-2xl overflow-hidden card-hover event-card-stagger flex${events.length === 3 && index === 2 ? ' md:col-span-2 lg:col-span-1' : ''}`}
+                key={`${event.title}-${animKey}`}
+                className={`tilt-card event-card rounded-2xl overflow-hidden card-hover event-card-stagger flex${upcoming.length === 3 && index === 2 ? ' md:col-span-2 lg:col-span-1' : ''}`}
                 style={{ backgroundColor: '#faf8f3', animationDelay: `${index * 100}ms`, border: '1px solid #e0dcd3' }}
                 data-category={event.category}
               >
