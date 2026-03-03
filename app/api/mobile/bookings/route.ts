@@ -53,3 +53,30 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }
+
+/** Admin cancel a booking */
+export async function DELETE(request: Request) {
+  const authResult = await authenticateMobileRequest(request);
+  if (authResult instanceof NextResponse) return authResult;
+  if (authResult.role !== 'admin') {
+    return NextResponse.json({ error: 'Admin only' }, { status: 403 });
+  }
+
+  try {
+    const { bookingId } = await request.json();
+    if (!bookingId) {
+      return NextResponse.json({ error: 'Missing bookingId' }, { status: 400 });
+    }
+
+    const supabase = getAdminClient();
+    const { error } = await supabase
+      .from('bookings')
+      .update({ status: 'cancelled' })
+      .eq('id', bookingId);
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ success: true });
+  } catch {
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+  }
+}

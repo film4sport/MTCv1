@@ -233,6 +233,9 @@
     const name = title ? title.textContent : 'Program';
     const cost = price ? price.childNodes[0].textContent.trim() : '';
 
+    // Get program ID from card data attribute or generate from title
+    const programId = card.dataset.programId || ('program-' + name.replace(/\s/g, '-').toLowerCase());
+
     if (btn.classList.contains('enrolled')) {
       btn.classList.remove('enrolled');
       btn.textContent = btn.dataset.originalText || 'Enroll Now';
@@ -241,6 +244,14 @@
       showToast('Enrollment cancelled for ' + name);
       if (typeof removeEventFromMyBookings === 'function') {
         removeEventFromMyBookings('program-' + name.replace(/\s/g, '-'));
+      }
+      // Persist withdrawal to Supabase
+      var token1 = MTC.storage.get('mtc-access-token', '');
+      if (token1 && typeof MTC.fn.apiRequest === 'function') {
+        MTC.fn.apiRequest('/mobile/programs', {
+          method: 'POST',
+          body: JSON.stringify({ programId: programId, action: 'withdraw' })
+        }).catch(function() { console.warn('[MTC] Withdrawal sync failed'); });
       }
     } else {
       let tabWarning = '';
@@ -262,6 +273,19 @@
 
       if (typeof addEventToMyBookings === 'function') {
         addEventToMyBookings('program-' + name.replace(/\s/g, '-'), 'program');
+      }
+      // Persist enrollment to Supabase
+      var token2 = MTC.storage.get('mtc-access-token', '');
+      if (token2 && typeof MTC.fn.apiRequest === 'function') {
+        MTC.fn.apiRequest('/mobile/programs', {
+          method: 'POST',
+          body: JSON.stringify({ programId: programId, action: 'enroll' })
+        }).then(function(res) {
+          if (!res.ok) {
+            console.warn('[MTC] Enrollment sync failed:', res.data);
+            showToast('Enrollment may not have been saved');
+          }
+        }).catch(function() { showToast('Enrollment may not have been saved'); });
       }
     }
   };

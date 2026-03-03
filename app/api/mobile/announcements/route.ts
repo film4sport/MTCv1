@@ -38,3 +38,57 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }
+
+/** Create an announcement (admin only) */
+export async function POST(request: Request) {
+  const authResult = await authenticateMobileRequest(request);
+  if (authResult instanceof NextResponse) return authResult;
+  if (authResult.role !== 'admin') {
+    return NextResponse.json({ error: 'Admin only' }, { status: 403 });
+  }
+
+  try {
+    const { text, type } = await request.json();
+    if (!text?.trim()) {
+      return NextResponse.json({ error: 'Missing text' }, { status: 400 });
+    }
+
+    const supabase = getAdminClient();
+    const id = `ann-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const { error } = await supabase.from('announcements').insert({
+      id,
+      text: text.trim(),
+      type: type || 'info',
+      date: new Date().toISOString().split('T')[0],
+    });
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+    return NextResponse.json({ success: true, id });
+  } catch {
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+  }
+}
+
+/** Delete an announcement (admin only) */
+export async function DELETE(request: Request) {
+  const authResult = await authenticateMobileRequest(request);
+  if (authResult instanceof NextResponse) return authResult;
+  if (authResult.role !== 'admin') {
+    return NextResponse.json({ error: 'Admin only' }, { status: 403 });
+  }
+
+  try {
+    const { id } = await request.json();
+    if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
+
+    const supabase = getAdminClient();
+    // Delete dismissals first (FK), then the announcement
+    await supabase.from('announcement_dismissals').delete().eq('announcement_id', id);
+    const { error } = await supabase.from('announcements').delete().eq('id', id);
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+    return NextResponse.json({ success: true });
+  } catch {
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+  }
+}

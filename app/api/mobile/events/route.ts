@@ -53,3 +53,41 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }
+
+/** Toggle RSVP for an event */
+export async function POST(request: Request) {
+  const authResult = await authenticateMobileRequest(request);
+  if (authResult instanceof NextResponse) return authResult;
+
+  try {
+    const { eventId } = await request.json();
+    if (!eventId) {
+      return NextResponse.json({ error: 'Missing eventId' }, { status: 400 });
+    }
+
+    const supabase = getAdminClient();
+    const userName = authResult.name;
+
+    // Check if already attending
+    const { data: existing } = await supabase
+      .from('event_attendees')
+      .select('id')
+      .eq('event_id', eventId)
+      .eq('user_name', userName)
+      .single();
+
+    if (existing) {
+      // Un-RSVP
+      const { error } = await supabase.from('event_attendees').delete().eq('id', existing.id);
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ success: true, action: 'removed' });
+    } else {
+      // RSVP
+      const { error } = await supabase.from('event_attendees').insert({ event_id: eventId, user_name: userName });
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ success: true, action: 'added' });
+    }
+  } catch {
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+  }
+}

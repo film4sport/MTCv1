@@ -88,3 +88,74 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }
+
+/** Send a message to another user */
+export async function POST(request: Request) {
+  const authResult = await authenticateMobileRequest(request);
+  if (authResult instanceof NextResponse) return authResult;
+
+  try {
+    const { toId, text } = await request.json();
+    if (!toId || !text?.trim()) {
+      return NextResponse.json({ error: 'Missing toId or text' }, { status: 400 });
+    }
+
+    const supabase = getAdminClient();
+    const fromId = authResult.id;
+    const fromName = authResult.name;
+    const timestamp = new Date().toISOString();
+
+    // Look up recipient name
+    const { data: toProfile } = await supabase.from('profiles').select('name').eq('id', toId).single();
+    const toName = toProfile?.name || 'Unknown';
+
+    // Find or create conversation
+    const { data: existing } = await supabase
+      .from('conversations')
+      .select('id')
+      .or(`and(member_a.eq.${fromId},member_b.eq.${toId}),and(member_a.eq.${toId},member_b.eq.${fromId})`)
+      .single();
+
+    let conversationId: number;
+    if (existing) {
+      conversationId = existing.id;
+    } else {
+      const { data: newConv, error: convErr } = await supabase
+        .from('conversations')
+        .insert({ member_a: fromId, member_b: toId, last_message: text.trim(), last_timestamp: timestamp })
+        .select('id')
+        .single();
+      if (convErr || !newConv) {
+        return NextResponse.json({ error: 'Failed to create conversation' }, { status: 500 });
+      }
+      conversationId = newConv.id;
+    }
+
+    // Insert message
+    const msgId = `m-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const { error: msgErr } = await supabase.from('messages').insert({
+      id: msgId,
+      conversation_id: conversationId,
+      from_id: fromId,
+      from_name: fromName,
+      to_id: toId,
+      to_name: toName,
+      text: text.trim(),
+      timestamp,
+      read: false,
+    });
+    if (msgErr) {
+      return NextResponse.json({ error: msgErr.message }, { status: 500 });
+    }
+
+    // Update conversation last message
+    await supabase.from('conversations').update({
+      last_message: text.trim(),
+      last_timestamp: timestamp,
+    }).eq('id', conversationId);
+
+    return NextResponse.json({ success: true, messageId: msgId, conversationId });
+  } catch {
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+  }
+}

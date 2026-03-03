@@ -158,6 +158,7 @@
     const now = new Date();
     const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
+    // Optimistic: add to local state immediately
     conversations[currentConversation].push({
       text: text,
       sent: true,
@@ -167,6 +168,22 @@
     MTC.fn.saveConversations();
     input.value = '';
     renderMessages(currentConversation);
+
+    // Persist to Supabase via API
+    var token = MTC.storage.get('mtc-access-token', '');
+    if (token && typeof MTC.fn.apiRequest === 'function') {
+      MTC.fn.apiRequest('/mobile/conversations', {
+        method: 'POST',
+        body: JSON.stringify({ toId: currentConversation, text: text })
+      }).then(function(res) {
+        if (!res.ok) {
+          console.warn('[MTC] Message send failed:', res.data);
+          if (typeof showToast === 'function') showToast('Message may not have been saved');
+        }
+      }).catch(function() {
+        if (typeof showToast === 'function') showToast('Message may not have been saved');
+      });
+    }
 
     } catch(e) { console.warn('sendMessage error:', e); }
   };

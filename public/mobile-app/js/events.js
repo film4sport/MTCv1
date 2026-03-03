@@ -450,7 +450,7 @@
     const isRegistered = userRsvps.includes(eventId);
 
     if (isRegistered) {
-      // Unregister
+      // Unregister — optimistic
       const rsvpIdx = userRsvps.indexOf(eventId);
       if (rsvpIdx !== -1) userRsvps.splice(rsvpIdx, 1);
       saveUserRsvps();
@@ -469,8 +469,23 @@
       saveUserRsvps();
       event.spotsTaken++;
       event.attendees.unshift('You');
-      showToast('Successfully registered! \uD83C\uDF89');
+      showToast('Successfully registered!');
       addEventToMyBookings(eventId, 'event');
+    }
+
+    // Persist RSVP to Supabase via API
+    var token = MTC.storage.get('mtc-access-token', '');
+    if (token && typeof MTC.fn.apiRequest === 'function') {
+      MTC.fn.apiRequest('/mobile/events', {
+        method: 'POST',
+        body: JSON.stringify({ eventId: eventId })
+      }).then(function(res) {
+        if (!res.ok) {
+          console.warn('[MTC] RSVP sync failed:', res.data);
+        }
+      }).catch(function(err) {
+        console.warn('[MTC] RSVP sync error:', err);
+      });
     }
 
     // Close modal after brief delay for visual feedback
