@@ -18,10 +18,39 @@ create table if not exists profiles (
   ntrp numeric(2,1) check (ntrp >= 1.0 and ntrp <= 7.0),
   skill_level text default 'intermediate' check (skill_level in ('beginner', 'intermediate', 'advanced', 'competitive')),
   skill_level_set boolean default false,
+  membership_type text default 'adult' check (membership_type in ('adult', 'family', 'junior')),
+  family_id uuid references families(id),
   member_since text,
   avatar text,
   created_at timestamptz default now()
 );
+
+-- ─── Families ─────────────────────────────────────────────
+-- Groups family membership members under one account
+create table if not exists families (
+  id uuid default gen_random_uuid() primary key,
+  primary_user_id uuid not null,  -- references profiles(id), added as FK after profiles exists
+  name text not null,             -- e.g. "The Smith Family"
+  created_at timestamptz default now()
+);
+
+-- ─── Family Members ───────────────────────────────────────
+-- Sub-profiles under a family (Netflix-style switching)
+create table if not exists family_members (
+  id uuid default gen_random_uuid() primary key,
+  family_id uuid not null references families(id) on delete cascade,
+  name text not null,
+  type text not null default 'adult' check (type in ('adult', 'junior')),
+  skill_level text default 'intermediate' check (skill_level in ('beginner', 'intermediate', 'advanced', 'competitive')),
+  skill_level_set boolean default false,
+  avatar text default 'tennis-male-1',
+  birth_year int,
+  created_at timestamptz default now()
+);
+
+-- FK from families.primary_user_id → profiles (deferred to avoid circular dependency)
+-- Applied after profiles table exists:
+-- alter table families add constraint families_primary_user_fk foreign key (primary_user_id) references profiles(id) on delete cascade;
 
 -- ─── Courts ─────────────────────────────────────────────
 create table if not exists courts (
@@ -40,6 +69,7 @@ create table if not exists bookings (
   time text not null,
   user_id uuid not null references profiles(id),
   user_name text not null,
+  booked_for text,              -- family member name if booked by a family profile
   guest_name text,
   status text not null default 'confirmed' check (status in ('confirmed', 'cancelled')),
   type text not null default 'court' check (type in ('court', 'partner', 'program', 'lesson')),
@@ -248,12 +278,39 @@ create index if not exists idx_messages_to_read on messages(to_id, read);
 create index if not exists idx_booking_participants_user on booking_participants(participant_id);
 create index if not exists idx_bookings_status on bookings(status);
 create index if not exists idx_profiles_role on profiles(role);
+create index if not exists idx_profiles_family on profiles(family_id);
+create index if not exists idx_family_members_family on family_members(family_id);
+
+-- Deferred FK for families.primary_user_id
+do $$ begin
+  if not exists (select 1 from pg_constraint where conname = 'families_primary_user_fk') then
+    alter table families add constraint families_primary_user_fk foreign key (primary_user_id) references profiles(id) on delete cascade;
+  end if;
+end $$;
+
+-- RLS for families
+alter table families enable row level security;
+create policy "families_select_own" on families for select using (primary_user_id = auth.uid());
+create policy "families_insert_own" on families for insert with check (primary_user_id = auth.uid());
+create policy "families_update_own" on families for update using (primary_user_id = auth.uid());
+create policy "families_delete_own" on families for delete using (primary_user_id = auth.uid());
+
+-- RLS for family_members
+alter table family_members enable row level security;
+create policy "family_members_select_own" on family_members for select
+  using (family_id in (select id from families where primary_user_id = auth.uid()));
+create policy "family_members_insert_own" on family_members for insert
+  with check (family_id in (select id from families where primary_user_id = auth.uid()));
+create policy "family_members_update_own" on family_members for update
+  using (family_id in (select id from families where primary_user_id = auth.uid()));
+create policy "family_members_delete_own" on family_members for delete
+  using (family_id in (select id from families where primary_user_id = auth.uid()));
 
 -- ─── Auto-create profile on signup ──────────────────────
 create or replace function public.handle_new_user()
 returns trigger as $$
 begin
-  insert into public.profiles (id, name, email, role, skill_level, skill_level_set, avatar, member_since)
+  insert into public.profiles (id, name, email, role, skill_level, skill_level_set, membership_type, avatar, member_since)
   values (
     new.id,
     coalesce(new.raw_user_meta_data->>'name', split_part(new.email, '@', 1)),
@@ -261,6 +318,7 @@ begin
     coalesce(new.raw_user_meta_data->>'role', 'member'),
     coalesce(new.raw_user_meta_data->>'skill_level', 'intermediate'),
     (new.raw_user_meta_data->>'skill_level' is not null),
+    coalesce(new.raw_user_meta_data->>'membership_type', 'adult'),
     'tennis-male-1',
     to_char(now(), 'YYYY-MM')
   );

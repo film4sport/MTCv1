@@ -11,9 +11,27 @@ export interface User {
   ntrp?: number; // legacy — kept for backwards compat
   skillLevel?: SkillLevel;
   skillLevelSet?: boolean;
+  membershipType?: 'adult' | 'family' | 'junior';
+  familyId?: string;
   memberSince?: string;
   avatar?: string;
 }
+
+export interface FamilyMember {
+  id: string;
+  familyId: string;
+  name: string;
+  type: 'adult' | 'junior';
+  skillLevel?: SkillLevel;
+  skillLevelSet?: boolean;
+  avatar?: string;
+  birthYear?: number;
+}
+
+// Active profile: either the primary account holder or a family sub-profile
+export type ActiveProfile =
+  | { type: 'primary' }
+  | { type: 'family_member'; member: FamilyMember };
 
 export interface Court {
   id: number;
@@ -30,6 +48,7 @@ export interface Booking {
   time: string;
   userId: string;
   userName: string;
+  bookedFor?: string;   // family member name if booked via family profile
   guestName?: string;
   participants?: { id: string; name: string }[];
   status: 'confirmed' | 'cancelled';
