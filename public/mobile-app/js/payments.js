@@ -243,7 +243,7 @@
 
     const user = memberPaymentData.currentUser;
     const now = new Date();
-    const bookingDateTime = new Date(booking.date + 'T' + booking.time + ':00');
+    const bookingDateTime = buildBookingDate(booking.date, booking.time);
     const hoursUntil = (bookingDateTime - now) / (1000 * 60 * 60);
 
     booking.status = 'cancelled';
@@ -292,19 +292,48 @@
     return days[d.getDay()] + ', ' + months[d.getMonth()] + ' ' + d.getDate();
   }
 
+  /** Parse 12h AM/PM time string into {hour24, minute} */
+  function parseTime12h(timeStr) {
+    var m = timeStr.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+    if (m) {
+      var h = parseInt(m[1]), min = parseInt(m[2]), pm = m[3].toUpperCase() === 'PM';
+      if (pm && h !== 12) h += 12;
+      if (!pm && h === 12) h = 0;
+      return { hour: h, minute: min };
+    }
+    // Fallback: 24h
+    var p = timeStr.split(':');
+    return { hour: parseInt(p[0]), minute: parseInt(p[1] || 0) };
+  }
+
+  /** Build a proper Date from date string + 12h AM/PM time */
+  function buildBookingDate(dateStr, timeStr) {
+    var t = parseTime12h(timeStr);
+    var d = new Date(dateStr + 'T00:00:00');
+    d.setHours(t.hour, t.minute, 0, 0);
+    return d;
+  }
+
   function formatTime(timeStr) {
-    const hour = parseInt(timeStr.split(':')[0]);
-    if (hour === 0) return '12:00 AM';
-    if (hour === 12) return '12:00 PM';
-    return hour > 12 ? (hour - 12) + ':00 PM' : hour + ':00 AM';
+    // Already in 12h format? Return as-is
+    if (/AM|PM/i.test(timeStr)) return timeStr;
+    // 24h fallback
+    var hour = parseInt(timeStr.split(':')[0]);
+    var min = parseInt(timeStr.split(':')[1] || 0);
+    if (hour === 0) return '12:' + String(min).padStart(2,'0') + ' AM';
+    if (hour === 12) return '12:' + String(min).padStart(2,'0') + ' PM';
+    if (hour > 12) return (hour - 12) + ':' + String(min).padStart(2,'0') + ' PM';
+    return hour + ':' + String(min).padStart(2,'0') + ' AM';
   }
 
   function formatPaymentTimeRange(timeStr) {
-    const hour = parseInt(timeStr.split(':')[0]);
-    const endHour = hour + 1;
-    const startFormatted = formatTime(timeStr);
-    const endFormatted = formatTime(endHour + ':00');
-    return startFormatted + ' - ' + endFormatted;
+    var t = parseTime12h(timeStr);
+    var endMin = t.hour * 60 + t.minute + 60;
+    var endH = Math.floor(endMin / 60);
+    var endM = endMin % 60;
+    var endPm = endH >= 12 ? 'PM' : 'AM';
+    var endH12 = endH > 12 ? endH - 12 : (endH === 0 ? 12 : endH);
+    return formatTime(timeStr) + ' - ' + endH12 + ':' + String(endM).padStart(2,'0') + ' ' + endPm;
   }
 
   // ============================================
@@ -450,7 +479,7 @@
     if (!booking) return;
 
     const now = new Date();
-    const bookingDateTime = new Date(booking.date + 'T' + booking.time + ':00');
+    const bookingDateTime = buildBookingDate(booking.date, booking.time);
     const hoursUntil = (bookingDateTime - now) / (1000 * 60 * 60);
     const isFreeCancel = hoursUntil >= CANCEL_WINDOW_HOURS;
 

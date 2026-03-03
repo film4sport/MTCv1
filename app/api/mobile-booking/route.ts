@@ -38,7 +38,7 @@ function sanitize(str: string): string {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { courtId, date, time, matchType, duration, isGuest, guestName, participants, userId } = body;
+    const { courtId, date, time, matchType, duration, isGuest, guestName, participants, userId, bookedFor, userName } = body;
 
     // ── Required fields ───────────────────────────────
     if (!courtId || !date || !time || !matchType || !duration || !userId) {
@@ -162,16 +162,22 @@ export async function POST(request: NextRequest) {
     }
 
     // Create the booking
+    // Resolve court name from ID
+    const courtNames: Record<number, string> = { 1: 'Court 1', 2: 'Court 2', 3: 'Court 3', 4: 'Court 4' };
+
     const { data: newBooking, error: insertError } = await supabase
       .from('bookings')
       .insert({
         court_id: courtId,
+        court_name: courtNames[courtId] || `Court ${courtId}`,
         date,
         time,
         user_id: userId,
+        user_name: userName ? sanitize(userName) : 'Member',
+        booked_for: bookedFor ? sanitize(bookedFor) : null,
         match_type: matchType,
         duration,
-        is_guest: isGuest || false,
+        type: 'court',
         guest_name: cleanGuestName,
         status: 'confirmed',
       })
@@ -228,7 +234,19 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Check 24-hour cancellation window
-    const bookingDateTime = new Date(`${booking.date}T${booking.time}`);
+    // Parse 12h AM/PM time (e.g. '10:00 AM') into 24h for Date constructor
+    const timeMatch = (booking.time as string).match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+    let bookingDateTime: Date;
+    if (timeMatch) {
+      let h = parseInt(timeMatch[1]);
+      const min = parseInt(timeMatch[2]);
+      const isPM = timeMatch[3].toUpperCase() === 'PM';
+      if (isPM && h !== 12) h += 12;
+      if (!isPM && h === 12) h = 0;
+      bookingDateTime = new Date(`${booking.date}T${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}:00`);
+    } else {
+      bookingDateTime = new Date(`${booking.date}T${booking.time}`);
+    }
     const hoursUntil = (bookingDateTime.getTime() - Date.now()) / (1000 * 60 * 60);
     if (hoursUntil < 24) {
       return NextResponse.json({ error: 'Cannot cancel within 24 hours of booking time' }, { status: 400 });
