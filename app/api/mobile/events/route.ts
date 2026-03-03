@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { authenticateMobileRequest, getAdminClient } from '../auth-helper';
+import { authenticateMobileRequest, getAdminClient, sanitizeInput, isRateLimited } from '../auth-helper';
 
 export async function GET(request: Request) {
   const authResult = await authenticateMobileRequest(request);
@@ -68,6 +68,10 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
+    if (isRateLimited(authResult.id)) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
+
     const supabase = getAdminClient();
     const id = `event-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
@@ -80,13 +84,84 @@ export async function PUT(request: Request) {
     const badge = (!price || price.toLowerCase() === 'free') ? 'free' : 'paid';
 
     const { error } = await supabase.from('events').insert({
-      id, title: title.trim(), date, time, location: location || 'All Courts',
-      badge, price: price || 'Free', spots_total: parseInt(spotsTotal) || 16,
-      spots_taken: 0, description: description || '', type: dbType,
+      id, title: sanitizeInput(title), date, time, location: sanitizeInput(location || 'All Courts'),
+      badge, price: sanitizeInput(price || 'Free', 50), spots_total: parseInt(spotsTotal) || 16,
+      spots_taken: 0, description: sanitizeInput(description || '', 2000), type: dbType,
     });
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ success: true, id });
+  } catch {
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+  }
+}
+
+/** Edit an existing event (admin only) */
+export async function PATCH(request: Request) {
+  const authResult = await authenticateMobileRequest(request);
+  if (authResult instanceof NextResponse) return authResult;
+  if (authResult.role !== 'admin' && authResult.role !== 'coach') {
+    return NextResponse.json({ error: 'Admin or coach only' }, { status: 403 });
+  }
+
+  try {
+    const { id, title, type, date, time, location, spotsTotal, price, description } = await request.json();
+    if (!id) return NextResponse.json({ error: 'Missing event id' }, { status: 400 });
+
+    const supabase = getAdminClient();
+
+    const typeMap: Record<string, string> = {
+      clinic: 'lesson', tournament: 'tournament', social: 'social',
+      roundrobin: 'roundrobin', camp: 'social', match: 'match', lesson: 'lesson',
+    };
+
+    // Build update object with only provided fields
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const updates: Record<string, any> = {};
+    if (title !== undefined) updates.title = sanitizeInput(title);
+    if (type !== undefined) updates.type = typeMap[type] || type;
+    if (date !== undefined) updates.date = date;
+    if (time !== undefined) updates.time = time;
+    if (location !== undefined) updates.location = sanitizeInput(location);
+    if (spotsTotal !== undefined) updates.spots_total = parseInt(spotsTotal) || 16;
+    if (price !== undefined) {
+      updates.price = sanitizeInput(price || 'Free', 50);
+      updates.badge = (!price || price.toLowerCase() === 'free') ? 'free' : 'paid';
+    }
+    if (description !== undefined) updates.description = sanitizeInput(description, 2000);
+
+    if (Object.keys(updates).length === 0) {
+      return NextResponse.json({ error: 'No fields to update' }, { status: 400 });
+    }
+
+    const { error } = await supabase.from('events').update(updates).eq('id', id);
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ success: true });
+  } catch {
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+  }
+}
+
+/** Delete an event (admin only) */
+export async function DELETE(request: Request) {
+  const authResult = await authenticateMobileRequest(request);
+  if (authResult instanceof NextResponse) return authResult;
+  if (authResult.role !== 'admin') {
+    return NextResponse.json({ error: 'Admin only' }, { status: 403 });
+  }
+
+  try {
+    const { id } = await request.json();
+    if (!id) return NextResponse.json({ error: 'Missing event id' }, { status: 400 });
+
+    const supabase = getAdminClient();
+
+    // Delete attendees first (FK constraint)
+    await supabase.from('event_attendees').delete().eq('event_id', id);
+
+    const { error } = await supabase.from('events').delete().eq('id', id);
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
@@ -101,6 +176,10 @@ export async function POST(request: Request) {
     const { eventId } = await request.json();
     if (!eventId) {
       return NextResponse.json({ error: 'Missing eventId' }, { status: 400 });
+    }
+
+    if (isRateLimited(authResult.id)) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
     }
 
     const supabase = getAdminClient();

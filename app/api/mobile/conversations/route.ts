@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { authenticateMobileRequest, getAdminClient } from '../auth-helper';
+import { authenticateMobileRequest, getAdminClient, sanitizeInput, isRateLimited } from '../auth-helper';
 
 export async function GET(request: Request) {
   const authResult = await authenticateMobileRequest(request);
@@ -31,10 +31,14 @@ export async function GET(request: Request) {
       userIds.add(c.member_b);
     });
 
-    const { data: profiles } = await supabase
+    const { data: profiles, error: profilesError } = await supabase
       .from('profiles')
       .select('id, name, avatar')
       .in('id', Array.from(userIds));
+
+    if (profilesError) {
+      return NextResponse.json({ error: 'Failed to fetch profiles' }, { status: 500 });
+    }
 
     const profileMap: Record<string, { name: string; avatar: string | null }> = {};
     (profiles || []).forEach(p => {
@@ -43,11 +47,15 @@ export async function GET(request: Request) {
 
     // Fetch messages for all conversations
     const convIds = conversations.map(c => c.id);
-    const { data: messages } = await supabase
+    const { data: messages, error: messagesError } = await supabase
       .from('messages')
       .select('*')
       .in('conversation_id', convIds)
       .order('timestamp', { ascending: true });
+
+    if (messagesError) {
+      return NextResponse.json({ error: 'Failed to fetch messages' }, { status: 500 });
+    }
 
     // Group messages by conversation
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -100,6 +108,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing toId or text' }, { status: 400 });
     }
 
+    if (isRateLimited(authResult.id)) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
+
     const supabase = getAdminClient();
     const fromId = authResult.id;
     const fromName = authResult.name;
@@ -122,7 +134,7 @@ export async function POST(request: Request) {
     } else {
       const { data: newConv, error: convErr } = await supabase
         .from('conversations')
-        .insert({ member_a: fromId, member_b: toId, last_message: text.trim(), last_timestamp: timestamp })
+        .insert({ member_a: fromId, member_b: toId, last_message: sanitizeInput(text, 200), last_timestamp: timestamp })
         .select('id')
         .single();
       if (convErr || !newConv) {
@@ -133,6 +145,7 @@ export async function POST(request: Request) {
 
     // Insert message
     const msgId = `m-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const sanitizedText = sanitizeInput(text, 2000);
     const { error: msgErr } = await supabase.from('messages').insert({
       id: msgId,
       conversation_id: conversationId,
@@ -140,7 +153,7 @@ export async function POST(request: Request) {
       from_name: fromName,
       to_id: toId,
       to_name: toName,
-      text: text.trim(),
+      text: sanitizedText,
       timestamp,
       read: false,
     });
@@ -149,10 +162,15 @@ export async function POST(request: Request) {
     }
 
     // Update conversation last message
-    await supabase.from('conversations').update({
-      last_message: text.trim(),
+    const { error: updateErr } = await supabase.from('conversations').update({
+      last_message: sanitizedText.slice(0, 200),
       last_timestamp: timestamp,
     }).eq('id', conversationId);
+
+    if (updateErr) {
+      // Message was sent but metadata update failed — log but don't fail
+      console.error('[conversations] metadata update failed:', updateErr.message);
+    }
 
     return NextResponse.json({ success: true, messageId: msgId, conversationId });
   } catch {

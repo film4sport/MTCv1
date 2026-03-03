@@ -201,17 +201,18 @@
   // ============================================
   // WINDOW: RSVP Interclub (onclick from generated HTML, hooked by confirm-modal.js)
   // ============================================
-  window.rsvpInterclub = function(eventId, response) {
+  window.rsvpInterclub = async function(eventId, response) {
     try {
-    const event = eventTasksData[eventId];
+    var event = eventTasksData[eventId];
     if (!event) return;
 
-    const goingBtn = document.getElementById('rsvpGoingBtn');
-    const notGoingBtn = document.getElementById('rsvpNotGoingBtn');
-    const avatarContainer = document.getElementById('interclubRsvpAvatars');
-    const countEl = document.getElementById('interclubRsvpCount');
-    const spotEl = document.getElementById('interclubSpotCount');
+    var goingBtn = document.getElementById('rsvpGoingBtn');
+    var notGoingBtn = document.getElementById('rsvpNotGoingBtn');
+    var avatarContainer = document.getElementById('interclubRsvpAvatars');
+    var countEl = document.getElementById('interclubRsvpCount');
+    var spotEl = document.getElementById('interclubSpotCount');
 
+    // Optimistic UI update
     if (response === 'going') {
       if (!event.rsvpList.includes('You')) {
         event.rsvpList.unshift('You');
@@ -230,7 +231,7 @@
         });
       }
     } else {
-      const idx = event.rsvpList.indexOf('You');
+      var idx = event.rsvpList.indexOf('You');
       if (idx > -1) event.rsvpList.splice(idx, 1);
 
       notGoingBtn.classList.add('active');
@@ -246,8 +247,8 @@
 
     // Update the player list live so user sees the change
     if (avatarContainer) {
-      const shown = event.rsvpList.slice(0, 6);
-      let html = shown.map(function(name) {
+      var shown = event.rsvpList.slice(0, 6);
+      var html = shown.map(function(name) {
         return '<div class="event-rsvp-avatar">' + getAvatar(name) + '<span>' + sanitizeHTML(name) + '</span></div>';
       }).join('');
       if (event.rsvpList.length > 6) {
@@ -258,6 +259,19 @@
     if (countEl) countEl.textContent = event.rsvpList.length + ' confirmed';
     if (spotEl) spotEl.textContent = event.rsvpList.length + ' confirmed';
 
+    // Persist RSVP to Supabase (toggle — server handles add/remove)
+    try {
+      var res = await MTC.fn.apiRequest('/mobile/events', {
+        method: 'POST',
+        body: JSON.stringify({ eventId: eventId })
+      });
+      if (!res.ok) {
+        console.error('Interclub RSVP persist failed:', (await res.json()).error);
+      }
+    } catch(apiErr) {
+      console.error('Interclub RSVP API error:', apiErr);
+    }
+
     // Don't auto-close - let user see the updated list and close manually
     } catch(e) { console.warn('rsvpInterclub error:', e); }
   };
@@ -266,7 +280,17 @@
   // WINDOW: Edit Event (onclick from admin.js generated HTML)
   // ============================================
   window.editEvent = function(id) {
-    const modal = document.createElement('div');
+    // Find the event in local state
+    var ev = null;
+    if (typeof MTC !== 'undefined' && MTC.state && MTC.state.events) {
+      ev = MTC.state.events.find(function(e) { return e.id === id; });
+    }
+    var evTitle = ev ? ev.title : 'Event';
+    var evTime = ev ? ev.time : '6:30 PM';
+    var evSpots = ev ? (ev.spotsTotal || 16) : 16;
+    var evPrice = ev ? (ev.price || 'Free') : 'Free';
+
+    var modal = document.createElement('div');
     modal.className = 'modal-overlay active';
     modal.id = 'editEventModal';
     modal.setAttribute('role', 'dialog');
@@ -278,28 +302,59 @@
         '<div class="modal-title" style="text-align: center;">EDIT EVENT</div>' +
         '<div style="margin: 16px 0;">' +
           '<label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Event Name</label>' +
-          '<input type="text" value="Friday House League" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); font-size: 14px; box-sizing: border-box;">' +
+          '<input type="text" id="editEvTitle" value="' + sanitizeHTML(evTitle) + '" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); font-size: 14px; box-sizing: border-box;">' +
         '</div>' +
         '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">' +
           '<div>' +
-            '<label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Day</label>' +
-            '<select style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); font-size: 14px;">' +
-              '<option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option selected>Friday</option><option>Saturday</option><option>Sunday</option>' +
-            '</select>' +
+            '<label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Time</label>' +
+            '<input type="text" id="editEvTime" value="' + sanitizeHTML(evTime) + '" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); font-size: 14px; box-sizing: border-box;">' +
           '</div>' +
           '<div>' +
-            '<label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Time</label>' +
-            '<input type="time" value="18:30" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); font-size: 14px; box-sizing: border-box;">' +
+            '<label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Max Spots</label>' +
+            '<input type="number" id="editEvSpots" value="' + evSpots + '" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); font-size: 14px; box-sizing: border-box;">' +
           '</div>' +
         '</div>' +
         '<div style="margin-bottom: 16px;">' +
-          '<label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Max Spots</label>' +
-          '<input type="number" value="16" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); font-size: 14px; box-sizing: border-box;">' +
+          '<label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Price</label>' +
+          '<input type="text" id="editEvPrice" value="' + sanitizeHTML(evPrice) + '" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); font-size: 14px; box-sizing: border-box;">' +
         '</div>' +
-        '<button class="modal-btn ripple" onclick="document.getElementById(\'editEventModal\').remove(); showToast(\'Event updated successfully\')">SAVE CHANGES</button>' +
+        '<button class="modal-btn ripple" id="editEvSaveBtn">SAVE CHANGES</button>' +
         '<button class="modal-btn ripple" style="background: transparent; color: var(--text-muted); margin-top: 8px;" onclick="document.getElementById(\'editEventModal\').remove()">CANCEL</button>' +
       '</div>';
     document.getElementById('app').appendChild(modal);
+
+    // Wire save button to API
+    document.getElementById('editEvSaveBtn').onclick = async function() {
+      var btn = this;
+      btn.disabled = true;
+      btn.textContent = 'SAVING...';
+      try {
+        var res = await MTC.fn.apiRequest('/mobile/events', {
+          method: 'PATCH',
+          body: JSON.stringify({
+            id: id,
+            title: document.getElementById('editEvTitle').value,
+            time: document.getElementById('editEvTime').value,
+            spotsTotal: document.getElementById('editEvSpots').value,
+            price: document.getElementById('editEvPrice').value
+          })
+        });
+        if (!res.ok) throw new Error((await res.json()).error || 'Failed to update');
+        // Update local state
+        if (ev) {
+          ev.title = document.getElementById('editEvTitle').value;
+          ev.time = document.getElementById('editEvTime').value;
+          ev.spotsTotal = parseInt(document.getElementById('editEvSpots').value) || 16;
+          ev.price = document.getElementById('editEvPrice').value;
+        }
+        document.getElementById('editEventModal').remove();
+        showToast('Event updated successfully');
+      } catch(err) {
+        btn.disabled = false;
+        btn.textContent = 'SAVE CHANGES';
+        showToast('Failed to update event: ' + err.message);
+      }
+    };
   };
 
   // ============================================
@@ -314,8 +369,22 @@
       confirmText: 'DELETE EVENT',
       cancelText: 'KEEP',
       confirmClass: 'danger',
-      onConfirm: function() {
-        showToast('Event deleted');
+      onConfirm: async function() {
+        try {
+          var res = await MTC.fn.apiRequest('/mobile/events', {
+            method: 'DELETE',
+            body: JSON.stringify({ id: id })
+          });
+          if (!res.ok) throw new Error((await res.json()).error || 'Failed');
+          // Remove from local state
+          if (MTC.state && MTC.state.events) {
+            MTC.state.events = MTC.state.events.filter(function(e) { return e.id !== id; });
+          }
+          showToast('Event deleted');
+          if (typeof navigateTo === 'function') navigateTo('events');
+        } catch(err) {
+          showToast('Failed to delete event: ' + err.message);
+        }
       }
     });
   };
@@ -324,7 +393,7 @@
   // WINDOW: Edit Operating Hours (onclick from admin.js generated HTML)
   // ============================================
   window.editOperatingHours = function() {
-    const modal = document.createElement('div');
+    var modal = document.createElement('div');
     modal.className = 'modal-overlay active';
     modal.id = 'editHoursModal';
     modal.setAttribute('role', 'dialog');
@@ -332,33 +401,107 @@
     modal.setAttribute('aria-label', 'Edit operating hours');
     modal.onclick = function(e) { if (e.target === this) this.remove(); };
 
-    const days = MTC.config.dayNamesFull.slice(1).concat(MTC.config.dayNamesFull[0]);
-    const hours = days.map(function(day) {
-      const isWeekend = (day === 'Saturday' || day === 'Sunday');
+    var days = MTC.config.dayNamesFull.slice(1).concat(MTC.config.dayNamesFull[0]);
+    var defaultHours = { weekday: { open: '6:00 AM', close: '10:00 PM' }, weekend: { open: '7:00 AM', close: '8:00 PM' } };
+
+    var hours = days.map(function(day, i) {
+      var isWeekend = (day === 'Saturday' || day === 'Sunday');
+      var def = isWeekend ? defaultHours.weekend : defaultHours.weekday;
       return '<div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border-color);">' +
         '<span style="font-size: 14px; font-weight: 600; color: var(--text-primary);">' + day + '</span>' +
-        '<span style="font-size: 13px; color: var(--text-secondary);">' + (isWeekend ? '7:00 AM - 8:00 PM' : '6:00 AM - 10:00 PM') + '</span>' +
+        '<div style="display: flex; gap: 6px; align-items: center;">' +
+          '<input type="text" class="hours-input" data-day="' + day + '" data-field="open" value="' + def.open + '" style="width: 90px; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); font-size: 13px; text-align: center;">' +
+          '<span style="color: var(--text-muted);">–</span>' +
+          '<input type="text" class="hours-input" data-day="' + day + '" data-field="close" value="' + def.close + '" style="width: 90px; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); font-size: 13px; text-align: center;">' +
+        '</div>' +
       '</div>';
     }).join('');
 
     modal.innerHTML =
-      '<div class="modal" onclick="event.stopPropagation()" style="max-width: 380px; text-align: left;">' +
+      '<div class="modal" onclick="event.stopPropagation()" style="max-width: 420px; text-align: left;">' +
         '<div class="modal-title" style="text-align: center;">OPERATING HOURS</div>' +
         '<div style="margin: 16px 0;">' + hours + '</div>' +
-        '<button class="modal-btn ripple" onclick="document.getElementById(\'editHoursModal\').remove(); showToast(\'Hours saved\')">SAVE</button>' +
+        '<button class="modal-btn ripple" id="saveHoursBtn">SAVE</button>' +
         '<button class="modal-btn ripple" style="background: transparent; color: var(--text-muted); margin-top: 8px;" onclick="document.getElementById(\'editHoursModal\').remove()">CLOSE</button>' +
       '</div>';
     document.getElementById('app').appendChild(modal);
+
+    document.getElementById('saveHoursBtn').onclick = async function() {
+      var btn = this;
+      btn.disabled = true;
+      btn.textContent = 'SAVING...';
+      try {
+        var hoursObj = {};
+        modal.querySelectorAll('.hours-input').forEach(function(inp) {
+          var day = inp.getAttribute('data-day');
+          var field = inp.getAttribute('data-field');
+          if (!hoursObj[day]) hoursObj[day] = {};
+          hoursObj[day][field] = inp.value;
+        });
+        var res = await MTC.fn.apiRequest('/mobile/settings', {
+          method: 'POST',
+          body: JSON.stringify({ settings: { operating_hours: JSON.stringify(hoursObj) } })
+        });
+        if (!res.ok) throw new Error((await res.json()).error || 'Failed');
+        document.getElementById('editHoursModal').remove();
+        showToast('Hours saved');
+      } catch(err) {
+        btn.disabled = false;
+        btn.textContent = 'SAVE';
+        showToast('Failed to save hours: ' + err.message);
+      }
+    };
   };
 
   // ============================================
   // WINDOW: Generate Report (onclick from admin.js generated HTML)
   // ============================================
-  window.generateReport = function(type) {
+  window.generateReport = async function(type) {
     showToast('\uD83D\uDCCA Generating ' + type + ' report...');
-    setTimeout(function() {
-      showToast('\u2705 ' + type.charAt(0).toUpperCase() + type.slice(1) + ' report ready!');
-    }, 1500);
+    try {
+      // Fetch real data from APIs based on report type
+      var data, reportRes;
+      if (type === 'bookings' || type === 'court') {
+        reportRes = await MTC.fn.apiRequest('/mobile/bookings');
+        data = reportRes.ok ? await reportRes.json() : [];
+      } else if (type === 'members' || type === 'membership') {
+        reportRes = await MTC.fn.apiRequest('/mobile/members');
+        data = reportRes.ok ? await reportRes.json() : [];
+      } else if (type === 'events') {
+        reportRes = await MTC.fn.apiRequest('/mobile/events');
+        data = reportRes.ok ? await reportRes.json() : [];
+      } else {
+        data = [];
+      }
+
+      if (!Array.isArray(data) || data.length === 0) {
+        showToast('No data found for ' + type + ' report');
+        return;
+      }
+
+      // Generate CSV from real data
+      var headers = Object.keys(data[0]);
+      var csv = headers.join(',') + '\n';
+      data.forEach(function(row) {
+        csv += headers.map(function(h) {
+          var val = row[h] != null ? String(row[h]) : '';
+          return '"' + val.replace(/"/g, '""') + '"';
+        }).join(',') + '\n';
+      });
+
+      var blob = new Blob([csv], { type: 'text/csv' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'mtc-' + type + '-report-' + new Date().toISOString().slice(0, 10) + '.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('\u2705 ' + type.charAt(0).toUpperCase() + type.slice(1) + ' report downloaded!');
+    } catch(err) {
+      showToast('Failed to generate report: ' + err.message);
+    }
   };
 
   // ============================================
@@ -366,17 +509,48 @@
   // ============================================
   let maintenanceMode = false;
 
+  // Load maintenance mode state from server on init
+  (async function() {
+    try {
+      var res = await MTC.fn.apiRequest('/mobile/settings');
+      if (res.ok) {
+        var settings = await res.json();
+        if (settings.maintenance_mode === 'true') {
+          maintenanceMode = true;
+          document.body.classList.add('maintenance-mode');
+        }
+      }
+    } catch(e) { /* silent — non-critical init */ }
+  })();
+
   // ============================================
   // WINDOW: Toggle Maintenance Mode (onclick from admin.js generated HTML)
   // ============================================
-  window.toggleMaintenanceMode = function() {
+  window.toggleMaintenanceMode = async function() {
     maintenanceMode = !maintenanceMode;
+    // Optimistic UI update
     if (maintenanceMode) {
-      showToast('\uD83D\uDD27 Maintenance mode ENABLED - Bookings paused');
       document.body.classList.add('maintenance-mode');
+      showToast('\uD83D\uDD27 Maintenance mode ENABLED - Bookings paused');
     } else {
-      showToast('\u2705 Maintenance mode DISABLED - Bookings resumed');
       document.body.classList.remove('maintenance-mode');
+      showToast('\u2705 Maintenance mode DISABLED - Bookings resumed');
+    }
+    try {
+      var res = await MTC.fn.apiRequest('/mobile/settings', {
+        method: 'POST',
+        body: JSON.stringify({ settings: { maintenance_mode: String(maintenanceMode) } })
+      });
+      if (!res.ok) throw new Error('Failed');
+    } catch(err) {
+      // Rollback
+      maintenanceMode = !maintenanceMode;
+      if (maintenanceMode) {
+        document.body.classList.add('maintenance-mode');
+      } else {
+        document.body.classList.remove('maintenance-mode');
+      }
+      showToast('Failed to toggle maintenance mode');
     }
   };
 
@@ -384,7 +558,7 @@
   // WINDOW: Send Broadcast Notification (onclick from admin.js generated HTML)
   // ============================================
   window.sendBroadcastNotification = function() {
-    const modal = document.createElement('div');
+    var modal = document.createElement('div');
     modal.className = 'modal-overlay active';
     modal.id = 'broadcastModal';
     modal.setAttribute('role', 'dialog');
@@ -394,26 +568,96 @@
     modal.innerHTML =
       '<div class="modal" onclick="event.stopPropagation()" style="max-width: 400px; text-align: left;">' +
         '<div class="modal-title" style="text-align: center;">BROADCAST NOTIFICATION</div>' +
-        '<div class="modal-desc" style="text-align: center;">Send a push notification to all 156 members</div>' +
+        '<div class="modal-desc" style="text-align: center;">Send a notification to all members</div>' +
         '<div style="margin: 16px 0;">' +
           '<label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Message</label>' +
           '<textarea id="broadcastMessage" placeholder="Type your message..." style="width: 100%; min-height: 80px; padding: 12px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); font-size: 14px; resize: vertical; font-family: Inter, sans-serif; box-sizing: border-box;"></textarea>' +
         '</div>' +
-        '<button class="modal-btn ripple" onclick="const msg = document.getElementById(\'broadcastMessage\').value; if (!msg.trim()) { showToast(\'Please enter a message\'); return; } document.getElementById(\'broadcastModal\').remove(); showToast(\'\uD83D\uDCE4 Sending to 156 members...\'); setTimeout(function() { showToast(\'\u2705 Notification sent!\'); }, 1500);">SEND TO ALL MEMBERS</button>' +
+        '<button class="modal-btn ripple" id="sendBroadcastBtn">SEND TO ALL MEMBERS</button>' +
         '<button class="modal-btn ripple" style="background: transparent; color: var(--text-muted); margin-top: 8px;" onclick="document.getElementById(\'broadcastModal\').remove()">CANCEL</button>' +
       '</div>';
     document.getElementById('app').appendChild(modal);
+
+    document.getElementById('sendBroadcastBtn').onclick = async function() {
+      var msg = document.getElementById('broadcastMessage').value;
+      if (!msg.trim()) { showToast('Please enter a message'); return; }
+      var btn = this;
+      btn.disabled = true;
+      btn.textContent = 'SENDING...';
+      try {
+        var res = await MTC.fn.apiRequest('/mobile/announcements', {
+          method: 'POST',
+          body: JSON.stringify({
+            title: 'Broadcast',
+            message: msg.trim(),
+            type: 'general',
+            priority: 'normal'
+          })
+        });
+        if (!res.ok) throw new Error((await res.json()).error || 'Failed');
+        document.getElementById('broadcastModal').remove();
+        showToast('\u2705 Broadcast sent!');
+      } catch(err) {
+        btn.disabled = false;
+        btn.textContent = 'SEND TO ALL MEMBERS';
+        showToast('Failed to send broadcast: ' + err.message);
+      }
+    };
   };
 
   // ============================================
   // WINDOW: Export Club Data (onclick from admin.js generated HTML)
   // ============================================
-  window.exportClubData = function() {
+  window.exportClubData = async function() {
     showToast('\uD83D\uDCE6 Preparing club data export...');
-    setTimeout(function() {
-      showToast('\u2B07\uFE0F Download starting: mtc-data-export.csv');
-      // In real app, would trigger actual download
-    }, 2000);
+    try {
+      // Fetch members, bookings, events in parallel
+      var results = await Promise.all([
+        MTC.fn.apiRequest('/mobile/members').then(function(r) { return r.ok ? r.json() : []; }),
+        MTC.fn.apiRequest('/mobile/bookings').then(function(r) { return r.ok ? r.json() : []; }),
+        MTC.fn.apiRequest('/mobile/events').then(function(r) { return r.ok ? r.json() : []; })
+      ]);
+      var members = results[0], bookings = results[1], events = results[2];
+
+      // Build multi-section CSV
+      var csv = '=== MEMBERS ===\n';
+      if (Array.isArray(members) && members.length > 0) {
+        var mHeaders = Object.keys(members[0]);
+        csv += mHeaders.join(',') + '\n';
+        members.forEach(function(row) {
+          csv += mHeaders.map(function(h) { return '"' + String(row[h] != null ? row[h] : '').replace(/"/g, '""') + '"'; }).join(',') + '\n';
+        });
+      }
+      csv += '\n=== BOOKINGS ===\n';
+      if (Array.isArray(bookings) && bookings.length > 0) {
+        var bHeaders = Object.keys(bookings[0]);
+        csv += bHeaders.join(',') + '\n';
+        bookings.forEach(function(row) {
+          csv += bHeaders.map(function(h) { return '"' + String(row[h] != null ? row[h] : '').replace(/"/g, '""') + '"'; }).join(',') + '\n';
+        });
+      }
+      csv += '\n=== EVENTS ===\n';
+      if (Array.isArray(events) && events.length > 0) {
+        var eHeaders = Object.keys(events[0]);
+        csv += eHeaders.join(',') + '\n';
+        events.forEach(function(row) {
+          csv += eHeaders.map(function(h) { return '"' + String(row[h] != null ? row[h] : '').replace(/"/g, '""') + '"'; }).join(',') + '\n';
+        });
+      }
+
+      var blob = new Blob([csv], { type: 'text/csv' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'mtc-data-export-' + new Date().toISOString().slice(0, 10) + '.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('\u2B07\uFE0F Club data export downloaded!');
+    } catch(err) {
+      showToast('Failed to export data: ' + err.message);
+    }
   };
 
   // showAddMemberModal - defined in admin.js (single source of truth)

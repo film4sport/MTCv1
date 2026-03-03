@@ -303,30 +303,35 @@ export function AppProvider({ children }: { children: ReactNode }) {
         saveJSON('mtc-current-user', user);
 
         // Fetch all data from Supabase in parallel
-        const [members, bookings, events, courtsData, partners, conversations, announcements, notifications, programs, notifPrefs] = await Promise.all([
-          db.fetchMembers(),
-          db.fetchBookings(),
-          db.fetchEvents(),
-          db.fetchCourts(),
-          db.fetchPartners(),
-          db.fetchConversations(user.id),
-          db.fetchAnnouncements(user.id),
-          db.fetchNotifications(user.id),
-          db.fetchPrograms(),
-          db.fetchNotificationPreferences(user.id),
-        ]);
+        try {
+          const [members, bookings, events, courtsData, partners, conversations, announcements, notifications, programs, notifPrefs] = await Promise.all([
+            db.fetchMembers(),
+            db.fetchBookings(),
+            db.fetchEvents(),
+            db.fetchCourts(),
+            db.fetchPartners(),
+            db.fetchConversations(user.id),
+            db.fetchAnnouncements(user.id),
+            db.fetchNotifications(user.id),
+            db.fetchPrograms(),
+            db.fetchNotificationPreferences(user.id),
+          ]);
 
-        // Overwrite state with Supabase data (source of truth)
-        setMembers(safeArray(members));
-        setBookings(safeArray(bookings));
-        setEvents(safeArray(events));
-        if (courtsData.length > 0) setCourts(courtsData); // Keep defaults if DB has no courts yet
-        setPartners(safeArray(partners));
-        setConversations(safeArray(conversations));
-        setAnnouncements(safeArray(announcements));
-        setNotifications(safeArray(notifications));
-        setPrograms(safeArray(programs));
-        if (notifPrefs) setNotificationPreferences(notifPrefs);
+          // Overwrite state with Supabase data (source of truth)
+          setMembers(safeArray(members));
+          setBookings(safeArray(bookings));
+          setEvents(safeArray(events));
+          if (courtsData.length > 0) setCourts(courtsData); // Keep defaults if DB has no courts yet
+          setPartners(safeArray(partners));
+          setConversations(safeArray(conversations));
+          setAnnouncements(safeArray(announcements));
+          setNotifications(safeArray(notifications));
+          setPrograms(safeArray(programs));
+          if (notifPrefs) setNotificationPreferences(notifPrefs);
+        } catch (err) {
+          reportError(err instanceof Error ? err : new Error(String(err)), 'Supabase init');
+          // State falls back to localStorage cache — user can still interact
+        }
 
         // Fetch family members if user has a family membership
         if (user.familyId) {
