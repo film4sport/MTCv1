@@ -356,6 +356,28 @@ Two major features implemented across 10+ files:
 
 **Verification:** TypeScript clean ✓, mobile build done (mtc-court-04f8b3c1)
 
+### Animation & UX Polish Session (2026-03-03)
+15 animation/UX improvements across all 3 platforms:
+
+**Landing Page (4 changes):**
+- `landing.css` — Hero CTA breathing pulse (`.hero-cta-pulse` keyframe on box-shadow), event card hover border-color shift to green, calendar detail panel horizontal slide-in (`.cal-detail-slide-x`), stagger delay utility classes (`.fade-in-delay-1` through `-5`)
+- `Hero.tsx` — Added `hero-cta-pulse` class to "Become a Member" button
+- `Schedule.tsx` — Added `cal-detail-slide-x` class to day detail panel
+
+**Dashboard (5 changes):**
+- `globals.css` — Page enter animation (`.page-enter`), full-screen booking confetti (`.dash-confetti-piece`), bell notification shake (`.bell-notify`), activity feed stagger (`.feed-item` with nth-child delays), profile switcher crossfade (`.profile-switch-enter`)
+- `SuccessModal.tsx` — Full-screen confetti burst (30 pieces) fires on booking success, auto-cleans after 4s
+- `DashboardHeader.tsx` — Bell shakes when `unreadCount` increases (tracks previous count via ref)
+
+**Mobile PWA (6 changes):**
+- `enhancements.css` — Pull-to-refresh indicator styles (`.ptr-indicator`, spinner, arrow rotation), enhanced button tap feedback (`.action-btn:active` scale 0.97), toast spring bounce animation (`.toast.show` with cubic-bezier overshoot)
+- `navigation.js` — Pull-to-refresh touch handler for home + schedule screens (60px threshold, calls `loadAppDataFromAPI()`, shows spinner, toast on complete)
+- `index.html` — Added `#ptrIndicator` element inside `#app`
+
+**Pre-existing (already had):** Screen slide transitions (from-left/from-right), skeleton loaders (full system), staggered entrance animations, toast slide-in, button active states
+
+**Verification:** TypeScript clean ✓, mobile build done (mtc-court-adc9e80c, 235KB JS, 193KB CSS)
+
 ## TODO / REMINDERS
 - **Junior Summer Camp dates**: User is waiting on real dates from Mark Taylor. When received, update the `junior-summer-camp` event across: `supabase/seed.sql`, `app/dashboard/lib/data.ts`, `public/mobile-app/js/events.js`, and run UPDATE SQL on live Supabase. Also update date/time in `app/(landing)/layout.tsx` JSON-LD if camp is featured there.
 
