@@ -378,6 +378,33 @@ Two major features implemented across 10+ files:
 
 **Verification:** TypeScript clean ✓, mobile build done (mtc-court-adc9e80c, 235KB JS, 193KB CSS)
 
+### Cross-Platform Time Format Audit Session (2026-03-03)
+Deep audit found and fixed 7 issues across mobile PWA + API routes. All caused by 24h↔12h time format mismatch after config.js was converted to 12h AM/PM.
+
+**Events & UX (Landing Page):**
+- `Events.tsx` — Added real coaching schedule from coach's wife (Junior Programs Mon/Tue/Thu/Fri, Adult Programs Mon/Tue/Fri), real round robins from data.ts (Men's RR, Freedom 55, Ladies RR, Friday Mixed), Summer Camps TBA. Added empty state for filter tabs, skeleton loading.
+- `landing.css` — Hero CTA pulse replaced with static glow (user found it annoying)
+- `utils.js` — Added crash recovery overlay (mobile error boundary, 3 errors in 10s triggers reload overlay)
+
+**CRITICAL datetime parsing fixes:**
+- `payments.js` — Added `parseTime12h()` + `buildBookingDate()` helpers. Fixed `formatTime()` and `formatPaymentTimeRange()` for 12h input. Replaced 2 broken `new Date(date+'T'+time+':00')` calls with `buildBookingDate()`.
+- `booking.js` — Changed all program times + special event times from 24h to 12h AM/PM format.
+- `mobile-booking/route.ts` — Fixed DELETE handler: proper 12h→24h conversion for cancellation window datetime.
+
+**Data accuracy fixes:**
+- `events-registration.js` — Interclub corrected: Saturday 1-5 PM → Every Thursday 7-9:30 PM. French Open/Wimbledon day labels: Saturday → Sunday (verified with `new Date().getDay()`).
+- `mobile-booking/route.ts` — POST handler: added `court_name`, `user_name`, `booked_for`, `type` to Supabase insert; added `bookedFor`/`userName` to destructured body.
+
+**Email tracking:**
+- `supabase/schema.sql` — Added `email_sent_at timestamptz` to bookings table
+- `app/api/booking-email/route.ts` — Stamps `email_sent_at` after successful sends
+- `app/dashboard/lib/store.tsx` — Passes `bookingId` to booking-email fetch
+
+**Verification:** TypeScript clean ✓, mobile build done (mtc-court-36109d61, 237KB JS, 193KB CSS)
+
+**User needs to run in Supabase:**
+- `ALTER TABLE bookings ADD COLUMN IF NOT EXISTS email_sent_at timestamptz;`
+
 ## TODO / REMINDERS
 - **Junior Summer Camp dates**: User is waiting on real dates from Mark Taylor. When received, update the `junior-summer-camp` event across: `supabase/seed.sql`, `app/dashboard/lib/data.ts`, `public/mobile-app/js/events.js`, and run UPDATE SQL on live Supabase. Also update date/time in `app/(landing)/layout.tsx` JSON-LD if camp is featured there.
 

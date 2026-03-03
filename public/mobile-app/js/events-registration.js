@@ -11,8 +11,8 @@
   const eventTasksData = {
     'interclub-league': {
       name: 'Interclub Competitive League',
-      date: 'Sat, Jun 7, 2026',
-      time: '1:00 - 5:00 PM',
+      date: 'Every Thursday · Starts May 14',
+      time: '7:00 PM - 9:30 PM',
       type: 'interclub',
       volunteersNeeded: [
         { id: 't1', name: 'Snacks & Refreshments', icon: '\uD83C\uDF4A', iconClass: 'snacks', assigned: null },
@@ -24,7 +24,7 @@
         { id: 't5', name: 'Team Captain A', icon: '\uD83D\uDC51', iconClass: 'drinks', assigned: 'Patti P.' }
       ],
       instructions: [
-        'Arrive by 12:30 PM for warm-up',
+        'Arrive by 6:30 PM for warm-up',
         'Post-match social at clubhouse'
       ],
       rsvpList: []
@@ -76,7 +76,7 @@
     },
     'french-open-rr': {
       name: 'French Open Round Robin Social',
-      date: 'Saturday, June 7, 2026',
+      date: 'Sunday, June 7, 2026',
       time: '1:00 PM - 4:00 PM',
       type: 'social',
       volunteersNeeded: [],
@@ -91,7 +91,7 @@
     },
     'wimbledon-rr': {
       name: 'Wimbledon Open Round Robin',
-      date: 'Saturday, July 12, 2026',
+      date: 'Sunday, July 12, 2026',
       time: '1:00 PM - 4:00 PM',
       type: 'social',
       volunteersNeeded: [],
