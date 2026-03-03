@@ -14,7 +14,7 @@ interface DashboardHeaderProps {
 
 export default function DashboardHeader({ title }: DashboardHeaderProps) {
   const router = useRouter();
-  const { currentUser, logout, notifications, clearNotifications, markNotificationRead, notificationPreferences, refreshData } = useApp();
+  const { currentUser, logout, notifications, clearNotifications, markNotificationRead, notificationPreferences, refreshData, familyMembers, activeProfile, switchProfile, activeDisplayName } = useApp();
   const { showToast } = useToast();
   const [menuOpen, setMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
@@ -160,9 +160,57 @@ export default function DashboardHeader({ title }: DashboardHeaderProps) {
               <div className="dropdown-enter absolute right-0 top-[52px] w-[calc(100vw-24px)] sm:w-72 rounded-2xl shadow-2xl border overflow-hidden z-50" style={{ backgroundColor: '#faf8f3', borderColor: '#e0dcd3' }}>
                 {/* User info */}
                 <div className="p-4 border-b" style={{ borderColor: '#e0dcd3' }}>
-                  <p className="font-semibold text-sm" style={{ color: '#1a1f12' }}>{currentUser?.name}</p>
+                  <p className="font-semibold text-sm" style={{ color: '#1a1f12' }}>{activeDisplayName}</p>
                   <p className="text-xs" style={{ color: '#6b7a3d' }}>{currentUser?.email}</p>
+                  {activeProfile.type === 'family_member' && (
+                    <p className="text-[0.65rem] mt-1 px-2 py-0.5 rounded-full inline-block" style={{ backgroundColor: 'rgba(107, 122, 61, 0.1)', color: '#6b7a3d' }}>
+                      Family profile
+                    </p>
+                  )}
                 </div>
+
+                {/* Family Profile Switcher */}
+                {familyMembers.length > 0 && (
+                  <div className="p-3 border-b" style={{ borderColor: '#e0dcd3' }}>
+                    <p className="text-[0.65rem] font-semibold uppercase tracking-wider mb-2" style={{ color: '#999' }}>Switch Profile</p>
+                    <div className="space-y-1">
+                      {/* Primary account */}
+                      <button
+                        onClick={() => { switchProfile({ type: 'primary' }); setMenuOpen(false); }}
+                        className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm transition-colors hover:bg-black/5"
+                        style={{ backgroundColor: activeProfile.type === 'primary' ? 'rgba(107, 122, 61, 0.08)' : 'transparent' }}
+                      >
+                        <div className="w-6 h-6 rounded-full flex items-center justify-center text-[0.55rem] font-bold" style={{ backgroundColor: '#6b7a3d', color: '#fff' }}>
+                          {currentUser?.name?.charAt(0).toUpperCase()}
+                        </div>
+                        <span className="flex-1 text-left text-sm" style={{ color: '#2a2f1e' }}>{currentUser?.name}</span>
+                        {activeProfile.type === 'primary' && (
+                          <svg className="w-4 h-4" style={{ color: '#6b7a3d' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
+                        )}
+                      </button>
+                      {/* Family members */}
+                      {familyMembers.map(fm => (
+                        <button
+                          key={fm.id}
+                          onClick={() => { switchProfile({ type: 'family_member', member: fm }); setMenuOpen(false); }}
+                          className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm transition-colors hover:bg-black/5"
+                          style={{ backgroundColor: activeProfile.type === 'family_member' && activeProfile.member.id === fm.id ? 'rgba(107, 122, 61, 0.08)' : 'transparent' }}
+                        >
+                          <div className="w-6 h-6 rounded-full flex items-center justify-center text-[0.55rem] font-bold" style={{ backgroundColor: fm.type === 'junior' ? '#3BAFDA' : '#6b7a3d', color: '#fff' }}>
+                            {fm.name.charAt(0).toUpperCase()}
+                          </div>
+                          <span className="flex-1 text-left text-sm" style={{ color: '#2a2f1e' }}>{fm.name}</span>
+                          <span className="text-[0.6rem] px-1.5 py-0.5 rounded-full" style={{ backgroundColor: fm.type === 'junior' ? 'rgba(59, 175, 218, 0.1)' : 'rgba(107, 122, 61, 0.1)', color: fm.type === 'junior' ? '#3BAFDA' : '#6b7a3d' }}>
+                            {fm.type === 'junior' ? 'Jr' : 'Adult'}
+                          </span>
+                          {activeProfile.type === 'family_member' && activeProfile.member.id === fm.id && (
+                            <svg className="w-4 h-4" style={{ color: '#6b7a3d' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* Weather */}
                 <div className="p-3 border-b" style={{ borderColor: '#e0dcd3' }}>

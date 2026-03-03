@@ -21,7 +21,7 @@ const SuccessModal = dynamic(() => import('./components/SuccessModal'), { ssr: f
 
 export default function BookCourtPage() {
   const searchParams = useSearchParams();
-  const { currentUser, members, bookings, courts, events, addBooking, cancelBooking } = useApp();
+  const { currentUser, members, bookings, courts, events, addBooking, cancelBooking, activeProfile, activeDisplayName } = useApp();
   const { showToast } = useToast();
   const [bookingSuccess, setBookingSuccess] = useState<{ courtName: string; date: string; time: string; participants?: { id: string; name: string }[]; duration?: number; matchType?: 'singles' | 'doubles' } | null>(null);
   const [view, setView] = useState<ViewMode>('week');
@@ -130,6 +130,7 @@ export default function BookCourtPage() {
       type: 'court' as const,
       matchType,
       duration,
+      bookedFor: activeProfile.type === 'family_member' ? activeDisplayName : undefined,
     });
     setBookingLoading(false);
     setShowModal(false);

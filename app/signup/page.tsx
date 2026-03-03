@@ -123,6 +123,28 @@ export default function SignupPage() {
       }
 
       sendWelcomeMessage(user.id, user.name).catch(err => console.error('[MTC] welcome message:', err));
+
+      // Create family group and add family members if this is a family membership
+      if (isFamily && familyMemberInputs.length > 0) {
+        try {
+          const familyName = `The ${trimmedName.split(' ').pop() || trimmedName} Family`;
+          const familyId = await createFamily(user.id, familyName);
+          if (familyId) {
+            const validMembers = familyMemberInputs.filter(fm => fm.name.trim());
+            await Promise.all(validMembers.map(fm =>
+              addFamilyMember(familyId, {
+                name: fm.name.trim(),
+                type: fm.type,
+                birthYear: fm.birthYear ? parseInt(fm.birthYear) : undefined,
+              })
+            ));
+          }
+        } catch (err) {
+          console.error('[MTC] family creation:', err);
+          // Don't block signup — family members can be added later
+        }
+      }
+
       localStorage.setItem('mtc-current-user', JSON.stringify(loggedInUser || user));
 
       setSignupLoading(false);
@@ -586,14 +608,14 @@ export default function SignupPage() {
 
             <div className="flex items-center gap-4 mt-6">
               <button
-                onClick={() => { setSignupError(''); setSignupStep(3); }}
+                onClick={() => { setSignupError(''); setSignupStep(4); }}
                 className="px-6 py-3 rounded-full text-sm font-medium transition-all"
                 style={{ backgroundColor: '#faf8f3', color: '#6b7266', border: '1px solid #e0dcd3' }}
               >
                 Back
               </button>
               <button
-                onClick={() => { setWaiverAccepted(true); setSignupStep(5); }}
+                onClick={() => { setWaiverAccepted(true); setSignupStep(6); }}
                 disabled={!waiverScrolled || !ackScrolled}
                 className="flex-1 px-6 py-3 rounded-full text-sm font-semibold transition-all"
                 style={
@@ -608,8 +630,8 @@ export default function SignupPage() {
           </div>
         )}
 
-        {/* Step 5: E-Transfer Payment */}
-        {signupStep === 5 && (
+        {/* Step 6: E-Transfer Payment */}
+        {signupStep === 6 && (
           <div>
             <h3 className="headline-font text-2xl mb-2 text-center" style={{ color: '#2a2f1e' }}>Payment via E-Transfer</h3>
             <p className="text-sm text-center mb-8" style={{ color: '#6b7266' }}>Send an Interac e-transfer to complete your registration.</p>
@@ -632,7 +654,7 @@ export default function SignupPage() {
             )}
             <div className="flex items-center gap-4 mt-8">
               <button
-                onClick={() => { setSignupError(''); setSignupStep(4); }}
+                onClick={() => { setSignupError(''); setSignupStep(5); }}
                 className="px-6 py-3 rounded-full text-sm font-medium transition-all"
                 style={{ backgroundColor: '#faf8f3', color: '#6b7266', border: '1px solid #e0dcd3' }}
               >
@@ -650,8 +672,8 @@ export default function SignupPage() {
           </div>
         )}
 
-        {/* Step 6: Confirmation */}
-        {signupStep === 6 && (
+        {/* Final Step: Confirmation */}
+        {signupStep === totalSteps && (
           <div className="text-center">
             {emailConfirmPending ? (
               <>
@@ -673,9 +695,10 @@ export default function SignupPage() {
                       { label: 'Email', value: signupData.email },
                       { label: 'Membership', value: getMembershipLabel() },
                       { label: 'Skill Level', value: signupData.skillLevel ? signupData.skillLevel.charAt(0).toUpperCase() + signupData.skillLevel.slice(1) : 'Not set' },
+                      ...(familyMemberInputs.filter(f => f.name.trim()).length > 0 ? [{ label: 'Family Members', value: familyMemberInputs.filter(f => f.name.trim()).map(f => f.name.trim()).join(', ') }] : []),
                       { label: 'Waiver', value: 'Signed' },
-                    ].map((row, i) => (
-                      <div key={i} className="flex items-center justify-between py-2" style={i < 4 ? { borderBottom: '1px solid #e0dcd3' } : {}}>
+                    ].map((row, i, arr) => (
+                      <div key={i} className="flex items-center justify-between py-2" style={i < arr.length - 1 ? { borderBottom: '1px solid #e0dcd3' } : {}}>
                         <span className="text-sm" style={{ color: '#999' }}>{row.label}</span>
                         <span className="text-sm font-medium" style={{ color: '#2a2f1e' }}>{row.value}</span>
                       </div>
@@ -709,9 +732,10 @@ export default function SignupPage() {
                       { label: 'Email', value: signupData.email },
                       { label: 'Membership', value: getMembershipLabel() },
                       { label: 'Skill Level', value: signupData.skillLevel ? signupData.skillLevel.charAt(0).toUpperCase() + signupData.skillLevel.slice(1) : 'Not set' },
+                      ...(familyMemberInputs.filter(f => f.name.trim()).length > 0 ? [{ label: 'Family Members', value: familyMemberInputs.filter(f => f.name.trim()).map(f => f.name.trim()).join(', ') }] : []),
                       { label: 'Waiver', value: 'Signed' },
-                    ].map((row, i) => (
-                      <div key={i} className="flex items-center justify-between py-2" style={i < 4 ? { borderBottom: '1px solid #e0dcd3' } : {}}>
+                    ].map((row, i, arr) => (
+                      <div key={i} className="flex items-center justify-between py-2" style={i < arr.length - 1 ? { borderBottom: '1px solid #e0dcd3' } : {}}>
                         <span className="text-sm" style={{ color: '#999' }}>{row.label}</span>
                         <span className="text-sm font-medium" style={{ color: '#2a2f1e' }}>{row.value}</span>
                       </div>
