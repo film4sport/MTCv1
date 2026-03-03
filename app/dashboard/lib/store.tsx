@@ -3,7 +3,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef, type ReactNode } from 'react';
 import type { User, Court, Booking, ClubEvent, Partner, Conversation, Announcement, Notification, WeatherData, AdminAnalytics, CoachingProgram, NotificationPreferences, FamilyMember, ActiveProfile } from './types';
 import { CLUB_LOCATION, DEFAULT_NOTIFICATION_PREFS } from './types';
-import { DEFAULT_COURTS, DEFAULT_EVENTS, DEFAULT_ANNOUNCEMENTS, DEFAULT_ANALYTICS, DEFAULT_PROGRAMS } from './data';
+import { DEFAULT_COURTS, DEFAULT_EVENTS, DEFAULT_ANNOUNCEMENTS, DEFAULT_PROGRAMS } from './data';
 import { generateId } from './utils';
 import { signIn, signOut, getCurrentUser } from './auth';
 import { useToast } from './toast';
@@ -124,12 +124,171 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [weather, setWeather] = useState<WeatherData>({
     tempC: 0, tempF: 32, condition: 'sunny', wind: 0, humidity: 0, description: 'Loading...', lastUpdated: null,
   });
-  const [analytics] = useState<AdminAnalytics>(DEFAULT_ANALYTICS);
   const [programs, setPrograms] = useState<CoachingProgram[]>([]);
   const [notificationPreferences, setNotificationPreferences] = useState<NotificationPreferences>(DEFAULT_NOTIFICATION_PREFS);
   const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
   const [activeProfile, setActiveProfile] = useState<ActiveProfile>({ type: 'primary' });
   const { showToast } = useToast();
+
+  // ── Computed analytics (derived from real data) ──────────
+  const analytics = useMemo<AdminAnalytics>(() => {
+    const now = new Date();
+    const thisMonth = now.getMonth();
+    const thisYear = now.getFullYear();
+    const lastMonth = thisMonth === 0 ? 11 : thisMonth - 1;
+    const lastMonthYear = thisMonth === 0 ? thisYear - 1 : thisYear;
+    const today = now.toISOString().slice(0, 10);
+    const dayOfWeek = now.getDay(); // 0=Sun
+    const weekStart = new Date(now);
+    weekStart.setDate(now.getDate() - dayOfWeek);
+    const weekStartStr = weekStart.toISOString().slice(0, 10);
+
+    // Membership fee lookup
+    const FEES: Record<string, number> = { adult: 120, family: 240, junior: 55 };
+
+    // --- Bookings this month vs last month ---
+    const confirmedBookings = bookings.filter(b => b.status === 'confirmed');
+    const bookingsThisMonth = confirmedBookings.filter(b => {
+      const d = new Date(b.date);
+      return d.getMonth() === thisMonth && d.getFullYear() === thisYear;
+    });
+    const bookingsLastMonth = confirmedBookings.filter(b => {
+      const d = new Date(b.date);
+      return d.getMonth() === lastMonth && d.getFullYear() === lastMonthYear;
+    });
+    const bookingsChange = bookingsLastMonth.length > 0
+      ? Math.round(((bookingsThisMonth.length - bookingsLastMonth.length) / bookingsLastMonth.length) * 100)
+      : bookingsThisMonth.length > 0 ? 100 : 0;
+
+    // --- Court usage ---
+    const bookingsToday = confirmedBookings.filter(b => b.date === today).length;
+    const bookingsThisWeek = confirmedBookings.filter(b => b.date >= weekStartStr && b.date <= today).length;
+
+    // --- Peak times (top 5 day+time combos) ---
+    const dayTimeMap = new Map<string, number>();
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    for (const b of confirmedBookings) {
+      const d = new Date(b.date);
+      const key = `${dayNames[d.getDay()]}|${b.time}`;
+      dayTimeMap.set(key, (dayTimeMap.get(key) || 0) + 1);
+    }
+    const peakTimes = Array.from(dayTimeMap.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([key, count]) => {
+        const [day, time] = key.split('|');
+        return { day, time, bookings: count };
+      });
+
+    // --- Revenue breakdown (membership fees + program fees) ---
+    const membershipRevenue = members.reduce((sum, m) => {
+      const fee = FEES[(m.membershipType as string) || 'adult'] || FEES.adult;
+      return sum + fee;
+    }, 0);
+    const programRevenue = programs.reduce((sum, p) => sum + (p.fee * (p.enrolledMembers?.length || 0)), 0);
+    const totalRevenue = membershipRevenue + programRevenue;
+    const revenueBreakdown = [
+      { category: 'Memberships', amount: membershipRevenue, percentage: totalRevenue > 0 ? Math.round((membershipRevenue / totalRevenue) * 100) : 0 },
+      ...(programRevenue > 0 ? [{ category: 'Programs', amount: programRevenue, percentage: Math.round((programRevenue / totalRevenue) * 100) }] : []),
+    ];
+
+    // --- Revenue this month (from members who joined this month + program enrollments) ---
+    const newMembersThisMonth = members.filter(m => {
+      if (!m.memberSince) return false;
+      const d = new Date(m.memberSince);
+      return d.getMonth() === thisMonth && d.getFullYear() === thisYear;
+    });
+    const revenueThisMonth = newMembersThisMonth.reduce((sum, m) => sum + (FEES[(m.membershipType as string) || 'adult'] || FEES.adult), 0) + programRevenue;
+    const revenueLastMonth = 0; // Would need historical data to compute properly
+    const revenueChange = revenueLastMonth > 0
+      ? Math.round(((revenueThisMonth - revenueLastMonth) / revenueLastMonth) * 100)
+      : revenueThisMonth > 0 ? 100 : 0;
+
+    // --- Member activity ---
+    const bookingsPerMember = new Map<string, { name: string; count: number }>();
+    for (const b of confirmedBookings) {
+      const prev = bookingsPerMember.get(b.userId);
+      bookingsPerMember.set(b.userId, { name: b.userName, count: (prev?.count || 0) + 1 });
+    }
+    const mostActive = Array.from(bookingsPerMember.values())
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5)
+      .map(m => ({ name: m.name, bookings: m.count }));
+
+    // --- Monthly trends (last 6 months) ---
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const monthlyTrends: AdminAnalytics['monthlyTrends'] = [];
+    for (let i = 5; i >= 0; i--) {
+      const m = new Date(thisYear, thisMonth - i, 1);
+      const mo = m.getMonth();
+      const yr = m.getFullYear();
+      const count = confirmedBookings.filter(b => {
+        const d = new Date(b.date);
+        return d.getMonth() === mo && d.getFullYear() === yr;
+      }).length;
+      const newMembers = members.filter(mem => {
+        if (!mem.memberSince) return false;
+        const d = new Date(mem.memberSince);
+        return d.getMonth() === mo && d.getFullYear() === yr;
+      });
+      const rev = newMembers.reduce((s, mem) => s + (FEES[(mem.membershipType as string) || 'adult'] || FEES.adult), 0);
+      monthlyTrends.push({ month: monthNames[mo], bookings: count, revenue: rev });
+    }
+
+    return {
+      totalBookingsThisMonth: bookingsThisMonth.length,
+      bookingsChange,
+      revenueThisMonth,
+      revenueChange,
+      peakTimes,
+      courtUsage: { today: bookingsToday, thisWeek: bookingsThisWeek, thisMonth: bookingsThisMonth.length },
+      revenueBreakdown,
+      memberActivity: {
+        mostActive,
+        newMembersThisMonth: newMembersThisMonth.length,
+        avgBookingsPerMember: members.length > 0 ? Math.round((confirmedBookings.length / members.length) * 10) / 10 : 0,
+      },
+      monthlyTrends,
+    };
+  }, [bookings, members, programs]);
+
+  // ── Notification preference gating ──────────────────────
+  // Maps notification type → preference key. Returns true if the user allows this type.
+  const shouldNotify = useCallback((type: Notification['type']): boolean => {
+    const prefMap: Record<string, keyof NotificationPreferences> = {
+      booking: 'bookings', event: 'events', partner: 'partners',
+      message: 'messages', program: 'programs', announcement: 'bookings', // announcements always shown
+    };
+    const key = prefMap[type];
+    return key ? notificationPreferences[key] !== false : true;
+  }, [notificationPreferences]);
+
+  // ── Email send with retry ────────────────────────────────
+  // Retries up to 2 times on failure, shows warning toast if all attempts fail.
+  const fetchWithRetry = useCallback(async (
+    url: string,
+    options: RequestInit,
+    label: string,
+    maxRetries = 2,
+  ) => {
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        const res = await fetch(url, options);
+        if (res.ok) return; // success
+        if (attempt < maxRetries) {
+          await new Promise(r => setTimeout(r, 1000 * (attempt + 1))); // backoff
+          continue;
+        }
+      } catch {
+        if (attempt < maxRetries) {
+          await new Promise(r => setTimeout(r, 1000 * (attempt + 1)));
+          continue;
+        }
+      }
+    }
+    // All retries exhausted — show warning
+    showToast(`${label} email couldn't be sent. The booking itself was saved.`, 'error');
+  }, [showToast]);
 
   // Load user from Supabase session on mount (localStorage as instant fallback)
   useEffect(() => {
@@ -364,8 +523,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
         timestamp: new Date().toISOString(),
         read: false,
       };
-      setNotifications(prev => [notif, ...prev]);
-      db.createNotification(booking.userId, notif).catch((err) => reportError(err, 'Supabase'));
+      if (shouldNotify('booking')) {
+        setNotifications(prev => [notif, ...prev]);
+        db.createNotification(booking.userId, notif).catch((err) => reportError(err, 'Supabase'));
+      }
     }
     if (booking.type === 'court') {
       const notif: Notification = {
@@ -376,9 +537,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
         timestamp: new Date().toISOString(),
         read: false,
       };
-      setNotifications(prev => [notif, ...prev]);
-      // Persist booker notification to Supabase
-      db.createNotification(booking.userId, notif).catch((err) => reportError(err, 'Supabase'));
+      if (shouldNotify('booking')) {
+        setNotifications(prev => [notif, ...prev]);
+        db.createNotification(booking.userId, notif).catch((err) => reportError(err, 'Supabase'));
+      }
 
       // Notify each participant with a notification + message
       if (booking.participants && booking.participants.length > 0) {
@@ -432,7 +594,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           }
         });
       }
-      fetch('/api/booking-email', {
+      fetchWithRetry('/api/booking-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -446,7 +608,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           duration: booking.duration,
           matchType: booking.matchType,
         }),
-      }).catch(() => { /* email is best-effort */ });
+      }, 'Confirmation');
     }
   }, [currentUser, members]);
 
@@ -501,7 +663,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
             }
           });
           if (cancelRecipients.length > 0) {
-            fetch('/api/booking-email', {
+            fetchWithRetry('/api/booking-email', {
               method: 'DELETE',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
@@ -511,7 +673,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
                 date: booking.date,
                 time: booking.time,
               }),
-            }).catch(() => { /* cancellation email is best-effort */ });
+            }, 'Cancellation');
           }
         });
       }
@@ -584,9 +746,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       timestamp: new Date().toISOString(),
       read: false,
     };
-    setNotifications(prev => [notif, ...prev]);
-    // Persist enrollment notification to Supabase
-    db.createNotification(memberId, notif).catch((err) => reportError(err, 'Supabase'));
+    if (shouldNotify('program')) {
+      setNotifications(prev => [notif, ...prev]);
+      db.createNotification(memberId, notif).catch((err) => reportError(err, 'Supabase'));
+    }
     // Send message from coach (persist to Supabase)
     const coachMsgText = `Welcome to ${program.title}! Your enrollment is confirmed. ${program.sessions.length} sessions starting ${new Date(program.sessions[0]?.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}. See you on the court!`;
     const coachMsg = {
@@ -610,19 +773,47 @@ export function AppProvider({ children }: { children: ReactNode }) {
       id: coachMsg.id, fromId: program.coachId, fromName: program.coachName,
       toId: memberId, toName: memberName, text: coachMsgText,
     }).catch((err) => reportError(err, 'Supabase'));
-  }, [programs]);
+    // Log enrollment to email_logs for audit trail
+    fetch('/api/log-email', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'program_enrollment', recipientEmail: currentUser?.email,
+        recipientUserId: memberId, status: 'sent',
+        subject: `Enrolled in ${program.title}`,
+        metadata: { programId, programTitle: program.title, coachName: program.coachName, fee: program.fee },
+      }),
+    }).catch(() => { /* non-critical */ });
+  }, [programs, currentUser]);
 
   const withdrawFromProgram = useCallback((programId: string, memberId: string) => {
     const program = programs.find(p => p.id === programId);
     if (!program) return;
+    const memberName = currentUser?.name || 'Member';
     setPrograms(prev => prev.map(p => p.id === programId ? { ...p, enrolledMembers: p.enrolledMembers.filter(m => m !== memberId) } : p));
+    showToast(`Withdrawn from ${program.title}`);
     // Persist to Supabase
     db.withdrawFromProgram(programId, memberId).catch((err) => {
       reportError(err, 'Supabase');
       setPrograms(prev => prev.map(p => p.id === programId ? { ...p, enrolledMembers: [...p.enrolledMembers, memberId] } : p));
       showToast('Failed to withdraw. Please try again.', 'error');
     });
-  }, [programs]);
+    // Notify coach about withdrawal
+    const withdrawMsg = `${memberName} has withdrawn from ${program.title}.`;
+    db.sendMessageByUsers({
+      id: generateId('msg'), fromId: memberId, fromName: memberName,
+      toId: program.coachId, toName: program.coachName, text: withdrawMsg,
+    }).catch((err) => reportError(err, 'Supabase'));
+    // Log withdrawal
+    fetch('/api/log-email', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'program_withdrawal', recipientEmail: currentUser?.email,
+        recipientUserId: memberId, status: 'sent',
+        subject: `Withdrawn from ${program.title}`,
+        metadata: { programId, programTitle: program.title },
+      }),
+    }).catch(() => { /* non-critical */ });
+  }, [programs, currentUser]);
 
   const addPartner = useCallback((partner: Partner) => {
     setPartners(prev => [partner, ...prev]);
@@ -641,8 +832,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
         timestamp: new Date().toISOString(),
         read: false,
       };
-      setNotifications(prev => [notif, ...prev]);
-      db.createNotification(currentUser.id, notif).catch(err => reportError(err, 'Supabase'));
+      if (shouldNotify('partner')) {
+        setNotifications(prev => [notif, ...prev]);
+        db.createNotification(currentUser.id, notif).catch(err => reportError(err, 'Supabase'));
+      }
     }
   }, [currentUser]);
 
@@ -673,8 +866,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
             timestamp: new Date().toISOString(),
             read: false,
           };
-          setNotifications(p => [notif, ...p]);
-          db.createNotification(currentUser.id, notif).catch(err => reportError(err, 'Supabase'));
+          if (shouldNotify('event')) {
+            setNotifications(p => [notif, ...p]);
+            db.createNotification(currentUser.id, notif).catch(err => reportError(err, 'Supabase'));
+          }
+          // Log RSVP to audit trail
+          fetch('/api/log-email', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              type: 'event_rsvp', recipientEmail: currentUser.email,
+              recipientUserId: currentUser.id, status: 'sent',
+              subject: `RSVP Confirmed — ${e.title}`,
+              metadata: { eventId: e.id, eventTitle: e.title, date: e.date, time: e.time },
+            }),
+          }).catch(() => { /* non-critical */ });
         }
         return {
           ...e,

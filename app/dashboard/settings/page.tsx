@@ -4,11 +4,13 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useApp } from '../lib/store';
+import { useToast } from '../lib/toast';
 import DashboardHeader from '../components/DashboardHeader';
 
 export default function SettingsPage() {
   const { currentUser, bookings, conversations, logout, notificationPreferences, setNotificationPreferences } = useApp();
   const router = useRouter();
+  const { showToast } = useToast();
   const [downloading, setDownloading] = useState(false);
 
   const togglePref = (key: keyof typeof notificationPreferences) => {
@@ -16,8 +18,7 @@ export default function SettingsPage() {
   };
 
   const handleLogout = () => {
-    logout();
-    router.replace('/login');
+    logout(); // signOut() + clears state + redirects to /login via window.location.href
   };
 
   const downloadMyData = async () => {
@@ -43,8 +44,9 @@ export default function SettingsPage() {
       a.download = `mtc-my-data-${new Date().toISOString().slice(0, 10)}.json`;
       a.click();
       URL.revokeObjectURL(url);
+      showToast('Your data has been downloaded.');
     } catch {
-      // silent fail
+      showToast('Download failed. Please try again.', 'error');
     } finally {
       setDownloading(false);
     }

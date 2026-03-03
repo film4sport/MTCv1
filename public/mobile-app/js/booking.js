@@ -727,20 +727,62 @@
     const btn=document.querySelector('.booking-confirm-btn');
     if (btn){btn.disabled=true;btn.textContent='BOOKING...';btn.style.transform='scale(0.97)';btn.style.opacity='0.7';}
 
-    setTimeout(function(){
-      var bookedForName = (typeof getActiveDisplayName === 'function') ? getActiveDisplayName() : '';
+    var bookedForName = (typeof getActiveDisplayName === 'function') ? getActiveDisplayName() : '';
+    var userName = MTC.storage.get('mtc-user-name', '');
+    var courtId = parseInt(selectedSlot.court.replace(/\D/g, ''), 10) || 1;
+
+    var bookingData = {
+      courtId: courtId,
+      courtName: 'Court ' + selectedSlot.court,
+      date: selectedSlot.date,
+      time: selectedSlot.time,
+      userName: userName,
+      bookedFor: (MTC.state.activeFamilyMember && bookedForName) ? bookedForName : undefined,
+      type: 'court'
+    };
+
+    function resetBtn() {
+      if (btn){btn.disabled=false;btn.style.transform='';btn.style.opacity='';btn.innerHTML='CONFIRM & BOOK <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>';}
+    }
+
+    // Use the real API client if available, fall back to optimistic-only for offline
+    if (MTC.fn.createBooking && MTC.storage.get('mtc-access-token')) {
+      MTC.fn.createBooking(bookingData,
+        function onSuccess() {
+          var toastMsg = 'Court '+selectedSlot.court+' booked for '+selectedSlot.time+'!';
+          if (bookedForName && MTC.state.activeFamilyMember) toastMsg = bookedForName + ': ' + toastMsg;
+          showToast(toastMsg);
+          closeBookingModal();
+          document.querySelectorAll('.weekly-slot.selected').forEach(function(s){
+            s.classList.remove('selected','available');s.classList.add('my-booking');
+            s.innerHTML='<span class="slot-label mine-label">\ud83c\udfbe MY COURT</span>';
+          });
+          selectedSlot=null;
+          resetBtn();
+          showModal(); triggerBookingNotification();
+        },
+        function onError(err) {
+          resetBtn();
+          showToast(err || 'Booking failed — please try again', 'error');
+        }
+      );
+    } else {
+      // Offline / no token: queue for background sync
+      if (MTC.fn.queueForSync) {
+        MTC.fn.queueForSync('booking', bookingData);
+      }
       var toastMsg = 'Court '+selectedSlot.court+' booked for '+selectedSlot.time+'!';
       if (bookedForName && MTC.state.activeFamilyMember) toastMsg = bookedForName + ': ' + toastMsg;
-      showToast(toastMsg);
+      showToast(toastMsg + ' (will sync when online)');
       closeBookingModal();
       document.querySelectorAll('.weekly-slot.selected').forEach(function(s){
         s.classList.remove('selected','available');s.classList.add('my-booking');
         s.innerHTML='<span class="slot-label mine-label">\ud83c\udfbe MY COURT</span>';
       });
       selectedSlot=null;
-      if (btn){btn.disabled=false;btn.style.transform='';btn.style.opacity='';btn.innerHTML='CONFIRM & BOOK <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>';}
+      resetBtn();
       showModal(); triggerBookingNotification();
-    },400);
+    }
   }
 
 

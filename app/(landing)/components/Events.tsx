@@ -11,24 +11,6 @@ const categoryColors: Record<string, { accent: string; bg: string; text: string 
 
 const events = [
   {
-    category: 'coaching',
-    isoDate: '2026-05-09',
-    date: 'Mon / Tue / Thu / Fri',
-    title: 'Junior Programs',
-    description:
-      'Munchkin (Thu 4:30-5), Red Ball (Thu 5-6), Orange (Tue 4-5), Green (Tue 5-6), Teen (Mon 5-6, Tue 6-7, Fri 4:30-5:30). All levels welcome!',
-    highlight: 'Ages 4-17',
-  },
-  {
-    category: 'coaching',
-    isoDate: '2026-05-09',
-    date: 'Mon / Tue / Fri',
-    title: 'Adult Programs',
-    description:
-      'Live Ball (Mon 9:30-11 AM & 6-7:30 PM, Fri 5:30-7), Team Practice (Mon 11-1), Adult lesson (Tue 8:30-9:30), House League (Fri 7-9).',
-    highlight: 'All Levels',
-  },
-  {
     category: 'social',
     isoDate: '2026-03-14',
     date: 'March 14, 2026',

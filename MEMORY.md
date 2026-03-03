@@ -465,6 +465,39 @@ Previously, when Supabase required email confirmation, the signup page returned 
 
 **TypeScript:** Clean ✓
 
+### UX Gaps Audit + Fix Session (2026-03-03)
+Comprehensive audit found 16 UX gaps across all 3 platforms. All addressed in priority order.
+
+**CRITICAL — Fake data removed:**
+- `app/(landing)/components/Events.tsx` — Removed fake "Junior Programs" and "Adult Programs" coaching cards. Coach's wife schedule was for camps/programs info, NOT event cards.
+
+**CRITICAL — Mobile booking wired to API:**
+- `public/mobile-app/js/booking.js` — `confirmBooking()` was a fake `setTimeout(400)` with no API call. Now uses `MTC.fn.createBooking` (POSTs to `/api/mobile-booking`). Includes offline fallback with `MTC.fn.queueForSync`.
+
+**CRITICAL — Mobile partners wired to Supabase:**
+- `public/mobile-app/js/partners.js` — `submitPartnerRequest` and `removePartnerRequest` were localStorage-only. Now POST/DELETE to `/api/mobile/partners` with optimistic UI + rollback on failure.
+- `app/api/mobile/partners/route.ts` — Added POST (rate-limited 5/hr/user) and DELETE handlers.
+
+**HIGH — Notification preferences enforced:**
+- `app/dashboard/lib/store.tsx` — Added `shouldNotify()` helper. Wrapped 5 of 7 `createNotification` calls with preference checks. Skipped 2 that notify OTHER users (their prefs aren't available client-side).
+
+**HIGH — Email logging for enrollment/RSVP/withdrawal:**
+- `supabase/schema.sql` — Added 3 new types: `program_enrollment`, `program_withdrawal`, `event_rsvp`
+- `app/dashboard/lib/store.tsx` — Added logging calls in `enrollInProgram`, `withdrawFromProgram`, `toggleRsvp`
+- `withdrawFromProgram` also now shows success toast + sends coach notification message
+
+**HIGH — Booking email retry + user feedback:**
+- `app/dashboard/lib/store.tsx` — Added `fetchWithRetry()` helper (2 retries with backoff). Both booking confirmation and cancellation email fetches now use it. Shows warning toast if all retries fail.
+
+**LOW — Download data toast:**
+- `app/dashboard/settings/page.tsx` — Added success/error toasts for data download. Fixed double-redirect in logout handler.
+
+**MEDIUM items reviewed — already handled:**
+- Password reset has "Password Updated!" success screen + 60s cooldown countdown
+- Message send uses standard optimistic UI with rollback — no premature "sent" toast exists
+
+**Verification:** TypeScript clean ✓, Mobile build clean ✓, Bundle verified ✓
+
 ## TODO / REMINDERS
 - **Junior Summer Camp dates**: User is waiting on real dates from Mark Taylor. When received, update the `junior-summer-camp` event across: `supabase/seed.sql`, `app/dashboard/lib/data.ts`, `public/mobile-app/js/events.js`, and run UPDATE SQL on live Supabase. Also update date/time in `app/(landing)/layout.tsx` JSON-LD if camp is featured there.
 

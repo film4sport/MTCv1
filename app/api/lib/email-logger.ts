@@ -5,7 +5,10 @@ export type EmailLogType =
   | 'booking_cancellation'
   | 'signup_confirmation'
   | 'password_reset'
-  | 'push_notification';
+  | 'push_notification'
+  | 'program_enrollment'
+  | 'program_withdrawal'
+  | 'event_rsvp';
 
 export type EmailLogStatus = 'sent' | 'failed' | 'requested';
 

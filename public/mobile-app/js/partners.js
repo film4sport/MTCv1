@@ -109,22 +109,51 @@
     const avatarKey = MTC.storage.get('mtc-avatar', 'default');
     const avatarHtml = (typeof avatarSVGs !== 'undefined' && avatarSVGs[avatarKey]) ? avatarSVGs[avatarKey] : avatarSVGs['default'];
 
-    const requestId = 'pr-' + Date.now();
-    const savedRequests = MTC.storage.get('mtc-partner-requests', []);
-    savedRequests.unshift({ id: requestId, type: type, typeLabel: typeLabel, level: level, when: when, userName: userName });
+    var localId = 'pr-' + Date.now();
+    var reqData = { id: localId, type: type, typeLabel: typeLabel, level: level, when: when, userName: userName };
+
+    // Optimistic UI: show card immediately + save locally
+    var savedRequests = MTC.storage.get('mtc-partner-requests', []);
+    savedRequests.unshift(reqData);
     MTC.storage.set('mtc-partner-requests', savedRequests);
+    insertPartnerRequestCard(reqData, avatarHtml);
+    showToast('Posting partner request...');
 
-    insertPartnerRequestCard({ id: requestId, type: type, typeLabel: typeLabel, level: level, when: when, userName: userName }, avatarHtml);
-
-    showToast('Partner request posted! \uD83C\uDFBE');
-
-    setTimeout(function() {
-      showPushNotification(
-        '\u2705 Request Posted',
-        'Members will see your partner request. You\'ll be notified when someone responds!',
-        '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#5a8a00" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>'
-      );
-    }, 1500);
+    // Sync to Supabase via API
+    if (MTC.fn.apiRequest && MTC.storage.get('mtc-access-token')) {
+      MTC.fn.apiRequest('/mobile/partners', {
+        method: 'POST',
+        body: JSON.stringify({
+          matchType: type,
+          skillLevel: level === 'Any Level' ? undefined : level.toLowerCase(),
+          availability: when,
+          message: null
+        })
+      }).then(function(result) {
+        if (result.ok && result.data && result.data.id) {
+          // Update local storage with server-assigned ID
+          reqData.serverId = result.data.id;
+          var updated = MTC.storage.get('mtc-partner-requests', []);
+          for (var i = 0; i < updated.length; i++) {
+            if (updated[i].id === localId) { updated[i].serverId = result.data.id; break; }
+          }
+          MTC.storage.set('mtc-partner-requests', updated);
+          // Update card's data attribute
+          var card = document.querySelector('[data-request-id="' + localId + '"]');
+          if (card) card.setAttribute('data-server-id', result.data.id);
+          showToast('Partner request posted!');
+        } else {
+          showToast(result.data && result.data.error ? result.data.error : 'Failed to post request', 'error');
+          // Remove optimistic card
+          window.removePartnerRequest(localId);
+        }
+      }).catch(function() {
+        showToast('Request saved locally — will sync when online');
+      });
+    } else {
+      // Offline: keep in localStorage, will be visible only to this user
+      showToast('Partner request saved (offline)');
+    }
   };
 
   // Private helper
@@ -162,10 +191,27 @@
   // onclick handler (generated HTML)
   window.removePartnerRequest = function(requestId) {
     const card = document.querySelector('[data-request-id="' + requestId + '"]');
+    // Get server ID before removing
+    var serverId = card ? card.getAttribute('data-server-id') : null;
+    // Also check localStorage for serverId
+    if (!serverId) {
+      var reqs = MTC.storage.get('mtc-partner-requests', []);
+      for (var i = 0; i < reqs.length; i++) {
+        if (reqs[i].id === requestId && reqs[i].serverId) { serverId = reqs[i].serverId; break; }
+      }
+    }
     if (card) card.remove();
     const requests = MTC.storage.get('mtc-partner-requests', []).filter(function(r) { return r.id !== requestId; });
     MTC.storage.set('mtc-partner-requests', requests);
     showToast('Request removed');
+
+    // Delete from Supabase
+    if (serverId && MTC.fn.apiRequest && MTC.storage.get('mtc-access-token')) {
+      MTC.fn.apiRequest('/mobile/partners', {
+        method: 'DELETE',
+        body: JSON.stringify({ partnerId: serverId })
+      }).catch(function() { /* best effort */ });
+    }
   };
 
   // Restore saved partner requests on page load
