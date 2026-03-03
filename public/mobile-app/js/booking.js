@@ -42,32 +42,32 @@
     // REAL MTC PROGRAMS (weekly recurring)
     // ============================================
     const programs = [
-      // TUESDAY - Men's Round Robin 9-11am
-      { day:1, start:'9:30', end:'11:00', courts:[1,2], type:'roundrobin',
+      // TUESDAY - Men's Round Robin 9-11am (starts before bookable slots)
+      { day:1, start:'9:00 AM', end:'11:00 AM', courts:[1,2], type:'roundrobin',
         title:"Men's Round Robin", fee:0, guestFee:10,
         coach: null, regKey:'mens-rr',
         desc:'Weekly men\'s round robin. All skill levels welcome.' },
 
       // THURSDAY AM - Freedom 55 League 9-11am
-      { day:3, start:'9:30', end:'11:00', courts:[1,2], type:'openplay',
+      { day:3, start:'9:00 AM', end:'11:00 AM', courts:[1,2], type:'openplay',
         title:'Freedom 55 League', fee:0, guestFee:10,
         coach: null, regKey:'freedom55',
         desc:'Weekday morning league for the 55+ crowd. Fun and social!' },
 
       // THURSDAY PM - Interclub Competitive A & B 7-9:30pm
-      { day:3, start:'19:00', end:'21:00', courts:[1,2], type:'doubles',
+      { day:3, start:'7:00 PM', end:'9:30 PM', courts:[1,2], type:'doubles',
         title:'Interclub Competitive League', fee:0, guestFee:0,
         coach: null, regKey:'thu-interclub-a', rsvp:true,
         desc:'Thursday night competitive interclub. Team A & B. RSVP required.' },
 
       // FRIDAY AM - Ladies Round Robin 9-11am
-      { day:4, start:'9:30', end:'11:00', courts:[1,2], type:'roundrobin',
+      { day:4, start:'9:00 AM', end:'11:00 AM', courts:[1,2], type:'roundrobin',
         title:"Ladies Round Robin", fee:0, guestFee:10,
         coach: null, regKey:'ladies-rr',
         desc:'Weekly ladies round robin. All skill levels welcome.' },
 
       // FRIDAY PM - Mixed Round Robin 6-9pm
-      { day:4, start:'18:00', end:'21:00', courts:[1,2,3,4], type:'roundrobin',
+      { day:4, start:'6:00 PM', end:'9:00 PM', courts:[1,2,3,4], type:'roundrobin',
         title:'Friday Night Mixed Round Robin', fee:0, guestFee:10,
         coach: null, regKey:'fri-mixed-rr',
         desc:'Weekly mixed doubles round robin. Bring a partner or get matched!' },
@@ -137,14 +137,46 @@
     return dates;
   }
 
-  function timeToIndex(time) { return MTC.config.timeSlots.indexOf(time); }
+  function timeToMinutes(t) {
+    // 12h: '10:00 AM', '1:30 PM'
+    var m12 = t.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+    if (m12) {
+      var h = parseInt(m12[1]), min = parseInt(m12[2]), pm = m12[3].toUpperCase()==='PM';
+      if (pm && h !== 12) h += 12;
+      if (!pm && h === 12) h = 0;
+      return h * 60 + min;
+    }
+    // 24h fallback: '19:00'
+    var p = t.split(':');
+    return parseInt(p[0]) * 60 + parseInt(p[1] || 0);
+  }
+  function timeToIndex(time) {
+    var idx = MTC.config.timeSlots.indexOf(time);
+    if (idx >= 0) return idx;
+    // Time not in slots — find nearest slot by minutes
+    var mins = timeToMinutes(time);
+    for (var i = 0; i < MTC.config.timeSlots.length; i++) {
+      if (timeToMinutes(MTC.config.timeSlots[i]) >= mins) return i;
+    }
+    return MTC.config.timeSlots.length;
+  }
 
   function formatTimeLabel(time) {
-    const parts = time.split(':');
-    const h = parseInt(parts[0]);
-    const m = parseInt(parts[1] || 0);
-    const suffix = h >= 12 ? 'pm' : 'am';
-    const displayH = h > 12 ? h - 12 : (h === 0 ? 12 : h);
+    // Handle 12h AM/PM format (e.g. '10:00 AM', '1:30 PM')
+    var ampmMatch = time.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+    if (ampmMatch) {
+      var h12 = parseInt(ampmMatch[1]);
+      var min = parseInt(ampmMatch[2]);
+      var period = ampmMatch[3].toLowerCase();
+      if (min > 0) return h12 + ':' + String(min).padStart(2,'0') + period;
+      return h12 + period;
+    }
+    // Fallback: 24h format (e.g. '19:00')
+    var parts = time.split(':');
+    var h = parseInt(parts[0]);
+    var m = parseInt(parts[1] || 0);
+    var suffix = h >= 12 ? 'pm' : 'am';
+    var displayH = h > 12 ? h - 12 : (h === 0 ? 12 : h);
     if (m > 0) return displayH + ':' + String(m).padStart(2,'0') + suffix;
     return displayH + suffix;
   }
@@ -169,8 +201,12 @@
 
   function isEventStart(dateStr,time,court) {
     const d = eventsData[dateStr]||[];
+    const ti = timeToIndex(time);
     for (let i=0;i<d.length;i++) {
-      if (d[i].courts.indexOf(court)!==-1 && d[i].startTime===time) return d[i];
+      if (d[i].courts.indexOf(court)===-1) continue;
+      // Match exact start OR first visible slot if event starts before grid
+      const si = timeToIndex(d[i].startTime);
+      if (d[i].startTime===time || (si <= 0 && ti === 0)) return d[i];
     }
     return null;
   }
