@@ -75,7 +75,7 @@ export default function Hero() {
           <div className="hero-buttons flex items-center gap-4 mb-10">
             <a
               href="/signup"
-              className="glass-btn px-8 py-3 rounded-full text-sm font-medium"
+              className="glass-btn hero-cta-pulse px-8 py-3 rounded-full text-sm font-medium"
             >
               Become a Member
             </a>

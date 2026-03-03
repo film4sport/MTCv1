@@ -884,3 +884,89 @@ body.offline .offline-banner {
   }
 }
 
+/* ============================================
+   PULL TO REFRESH
+============================================ */
+.ptr-indicator {
+  position: absolute;
+  top: -50px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: top 0.25s ease, opacity 0.25s ease;
+  z-index: 100;
+}
+
+.ptr-indicator.visible {
+  top: 12px;
+  opacity: 1;
+}
+
+.ptr-indicator.refreshing {
+  top: 12px;
+  opacity: 1;
+}
+
+.ptr-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2.5px solid var(--bg-secondary);
+  border-top-color: var(--volt);
+  border-radius: 50%;
+  animation: ptrSpin 0.8s linear infinite;
+}
+
+.ptr-arrow {
+  width: 18px;
+  height: 18px;
+  color: var(--text-muted);
+  transition: transform 0.2s ease;
+}
+
+.ptr-indicator.ready .ptr-arrow {
+  transform: rotate(180deg);
+  color: var(--volt);
+}
+
+@keyframes ptrSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* ============================================
+   ENHANCED BUTTON TAP FEEDBACK
+============================================ */
+.action-btn,
+.primary-btn,
+.booking-confirm-btn,
+.rsvp-btn {
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.action-btn:active,
+.primary-btn:active,
+.booking-confirm-btn:active,
+.rsvp-btn:active {
+  transform: scale(0.97);
+}
+
+/* ============================================
+   TOAST SPRING BOUNCE ENHANCEMENT
+============================================ */
+.toast.show {
+  animation: toastSpring 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes toastSpring {
+  0% { opacity: 0; transform: translateX(-50%) translateY(-80px) scale(0.92); }
+  60% { opacity: 1; transform: translateX(-50%) translateY(4px) scale(1.02); }
+  100% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+}
+

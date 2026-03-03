@@ -684,4 +684,65 @@
     repopulateHomePartners();
   };
 
+  // ============================================
+  // PULL TO REFRESH — home + events screens
+  // ============================================
+  (function initPullToRefresh() {
+    var ptrScreens = ['home', 'schedule'];
+    var ptrStartY = 0;
+    var ptrActive = false;
+    var ptrThreshold = 60;
+
+    document.addEventListener('touchstart', function(e) {
+      if (ptrScreens.indexOf(_currentScreen) === -1) return;
+      var screen = document.getElementById('screen-' + _currentScreen);
+      if (!screen || screen.scrollTop > 5) return;
+      ptrStartY = e.touches[0].clientY;
+      ptrActive = true;
+    }, { passive: true });
+
+    document.addEventListener('touchmove', function(e) {
+      if (!ptrActive) return;
+      var dy = e.touches[0].clientY - ptrStartY;
+      if (dy < 0) { ptrActive = false; return; }
+      var indicator = document.getElementById('ptrIndicator');
+      if (!indicator) return;
+      if (dy > 10) {
+        indicator.classList.add('visible');
+        if (dy >= ptrThreshold) {
+          indicator.classList.add('ready');
+        } else {
+          indicator.classList.remove('ready');
+        }
+      }
+    }, { passive: true });
+
+    document.addEventListener('touchend', function() {
+      if (!ptrActive) return;
+      ptrActive = false;
+      var indicator = document.getElementById('ptrIndicator');
+      if (!indicator) return;
+      if (indicator.classList.contains('ready')) {
+        indicator.classList.remove('ready', 'visible');
+        indicator.classList.add('refreshing', 'visible');
+        indicator.innerHTML = '<div class="ptr-spinner"></div>';
+        // Trigger data refresh
+        if (typeof MTC !== 'undefined' && MTC.state && MTC.state.accessToken && typeof loadAppDataFromAPI === 'function') {
+          loadAppDataFromAPI().then(function() {
+            indicator.classList.remove('refreshing', 'visible');
+            indicator.innerHTML = '<svg class="ptr-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
+            if (typeof showToast === 'function') showToast('Refreshed');
+          });
+        } else {
+          setTimeout(function() {
+            indicator.classList.remove('refreshing', 'visible');
+            indicator.innerHTML = '<svg class="ptr-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
+          }, 800);
+        }
+      } else {
+        indicator.classList.remove('visible', 'ready');
+      }
+    }, { passive: true });
+  })();
+
 })();

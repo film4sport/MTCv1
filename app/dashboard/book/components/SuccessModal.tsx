@@ -24,6 +24,28 @@ export default function SuccessModal({ courtName, date, time, duration, matchTyp
     return () => window.removeEventListener('keydown', handler);
   }, [onClose]);
 
+  // Full-screen confetti burst
+  useEffect(() => {
+    const colors = ['#6b7a3d', '#d4e157', '#16a34a', '#fbbf24', '#c8d943', '#e8e4d9'];
+    const pieces: HTMLDivElement[] = [];
+    for (let i = 0; i < 30; i++) {
+      const el = document.createElement('div');
+      el.className = 'dash-confetti-piece';
+      el.style.left = `${Math.random() * 100}vw`;
+      el.style.top = `${-10 - Math.random() * 20}px`;
+      el.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+      el.style.animationDelay = `${Math.random() * 0.4}s`;
+      el.style.animationDuration = `${2 + Math.random() * 1.5}s`;
+      el.style.width = `${6 + Math.random() * 6}px`;
+      el.style.height = `${6 + Math.random() * 6}px`;
+      el.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+      document.body.appendChild(el);
+      pieces.push(el);
+    }
+    const timer = setTimeout(() => pieces.forEach(p => p.remove()), 4000);
+    return () => { clearTimeout(timer); pieces.forEach(p => p.remove()); };
+  }, []);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.4)' }} onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="success-modal-title">
       <div ref={trapRef} className="rounded-2xl p-6 w-full max-w-sm text-center animate-scaleIn" style={{ background: '#fff' }} onClick={e => e.stopPropagation()}>
