@@ -295,6 +295,39 @@ All Supabase + Railway configuration completed. Platform is production-ready.
 
 **All code pushed, Railway deployed. All Supabase manual tasks complete.**
 
+### Skill Level + Family Membership Feature (2026-03-03)
+Two major features implemented across 10+ files:
+
+**Skill Level at Signup:**
+- `supabase/schema.sql` — Added `skill_level_set boolean default false` to profiles; updated `handle_new_user()` trigger to read `skill_level` from auth metadata
+- `app/dashboard/lib/types.ts` — Added `skillLevelSet?: boolean` to User
+- `app/dashboard/lib/auth.ts` — `signUp()` accepts `skillLevel` param, passes in metadata; both profile mappers now include `skillLevelSet`
+- `app/dashboard/lib/db.ts` — Maps `skill_level_set` in profile fetches
+- `app/signup/page.tsx` — New Step 3 (Skill Level) with beginner/intermediate/advanced/competitive cards; steps renumbered 3→4→5→6
+- `app/dashboard/profile/page.tsx` — `saveSkillLevel()` now sets `skill_level_set: true`
+- `app/dashboard/page.tsx` — Reminder banner for users with `skillLevelSet !== true`
+
+**Family Membership (Netflix-style profiles):**
+- `supabase/schema.sql` — Added `families` table, `family_members` table (2 adults + 4 juniors max), `membership_type`/`family_id` on profiles, `booked_for` on bookings, RLS policies, indexes
+- `app/dashboard/lib/types.ts` — Added `FamilyMember` interface, `ActiveProfile` type union, `membershipType`/`familyId` on User, `bookedFor` on Booking
+- `app/dashboard/lib/db.ts` — Added `createFamily()`, `fetchFamilyMembers()`, `addFamilyMember()`, `updateFamilyMember()`, `removeFamilyMember()` + `booked_for` in booking create/fetch
+- `app/dashboard/lib/auth.ts` — `membershipType`/`familyId` mapped in both signIn + getCurrentUser
+- `app/dashboard/lib/store.tsx` — Added `familyMembers`, `activeProfile`, `switchProfile`, computed `activeDisplayName`/`activeAvatar`/`activeSkillLevel`; persists active profile to localStorage; fetches family data on login
+- `app/signup/page.tsx` — Dynamic 6/7 step wizard (family gets Step 3: Family Members); creates family group + members after signup
+- `app/dashboard/components/DashboardHeader.tsx` — Profile switcher in menu dropdown (primary + family members with checkmark on active)
+- `app/dashboard/profile/page.tsx` — Family Members management card (add/remove/edit skill level per member, enforces 2 adult + 4 junior limits)
+- `app/dashboard/book/page.tsx` — `bookedFor` set from `activeDisplayName` when family member profile is active
+
+**TypeScript:** Clean ✓
+
+**User needs to run SQL in Supabase:**
+- CREATE TABLE families + family_members
+- ALTER TABLE profiles ADD membership_type + family_id
+- ALTER TABLE bookings ADD booked_for
+- CREATE OR REPLACE FUNCTION handle_new_user() (updated trigger)
+- RLS policies for families + family_members
+- Indexes
+
 ## Decisions Made
 - Double-booking prevention: DB-level partial unique index on `(court_id, date, time) WHERE status = 'confirmed'` — already implemented, no code change needed
 - Mobile PWA logout: clears all 11 app localStorage keys (added `mtc-session-hash`)

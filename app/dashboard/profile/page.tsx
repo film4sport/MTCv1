@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useApp } from '../lib/store';
 import { useToast } from '../lib/toast';
 import DashboardHeader from '../components/DashboardHeader';
 import { AvatarDisplay, AVATAR_OPTIONS, AVATAR_SVGS } from '../lib/avatars';
-import type { SkillLevel } from '../lib/types';
+import type { SkillLevel, FamilyMember } from '../lib/types';
 import * as db from '../lib/db';
 
 const SKILL_LEVELS: { value: SkillLevel; label: string; color: string; bg: string }[] = [
@@ -16,7 +16,7 @@ const SKILL_LEVELS: { value: SkillLevel; label: string; color: string; bg: strin
 ];
 
 export default function ProfilePage() {
-  const { currentUser, updateCurrentUser, notificationPreferences, setNotificationPreferences } = useApp();
+  const { currentUser, updateCurrentUser, notificationPreferences, setNotificationPreferences, familyMembers, setFamilyMembers } = useApp();
   const { showToast } = useToast();
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [editingName, setEditingName] = useState(false);
@@ -24,6 +24,68 @@ export default function ProfilePage() {
   const [nameSaving, setNameSaving] = useState(false);
   const avatarModalRef = useRef<HTMLDivElement>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);
+  // Family member management
+  const [addingMember, setAddingMember] = useState(false);
+  const [newMemberName, setNewMemberName] = useState('');
+  const [newMemberType, setNewMemberType] = useState<'adult' | 'junior'>('adult');
+  const [newMemberBirthYear, setNewMemberBirthYear] = useState('');
+  const [savingMember, setSavingMember] = useState(false);
+  const [editingMemberSkill, setEditingMemberSkill] = useState<string | null>(null);
+
+  const isFamily = currentUser?.membershipType === 'family';
+  const adultCount = familyMembers.filter(m => m.type === 'adult').length;
+  const juniorCount = familyMembers.filter(m => m.type === 'junior').length;
+  const canAddAdult = adultCount < 2;
+  const canAddJunior = juniorCount < 4;
+
+  const handleAddMember = useCallback(async () => {
+    const trimmed = newMemberName.trim();
+    if (!trimmed || !currentUser?.familyId) return;
+    setSavingMember(true);
+    try {
+      const member = await db.addFamilyMember(currentUser.familyId, {
+        name: trimmed,
+        type: newMemberType,
+        birthYear: newMemberType === 'junior' && newMemberBirthYear ? parseInt(newMemberBirthYear) : undefined,
+      });
+      if (member) {
+        setFamilyMembers([...familyMembers, member]);
+        showToast(`${trimmed} added to family`);
+      }
+      setNewMemberName('');
+      setNewMemberBirthYear('');
+      setAddingMember(false);
+    } catch (err) {
+      console.error('[MTC Supabase]', err);
+      showToast('Failed to add family member', 'error');
+    } finally {
+      setSavingMember(false);
+    }
+  }, [newMemberName, newMemberType, newMemberBirthYear, currentUser?.familyId, familyMembers, setFamilyMembers, showToast]);
+
+  const handleRemoveMember = useCallback(async (member: FamilyMember) => {
+    if (!confirm(`Remove ${member.name} from your family?`)) return;
+    try {
+      await db.removeFamilyMember(member.id);
+      setFamilyMembers(familyMembers.filter(m => m.id !== member.id));
+      showToast(`${member.name} removed`);
+    } catch (err) {
+      console.error('[MTC Supabase]', err);
+      showToast('Failed to remove family member', 'error');
+    }
+  }, [familyMembers, setFamilyMembers, showToast]);
+
+  const handleMemberSkillChange = useCallback(async (member: FamilyMember, level: SkillLevel) => {
+    try {
+      await db.updateFamilyMember(member.id, { skill_level: level, skill_level_set: true });
+      setFamilyMembers(familyMembers.map(m => m.id === member.id ? { ...m, skillLevel: level, skillLevelSet: true } : m));
+      setEditingMemberSkill(null);
+      showToast(`${member.name}'s skill level updated`);
+    } catch (err) {
+      console.error('[MTC Supabase]', err);
+      showToast('Failed to update skill level', 'error');
+    }
+  }, [familyMembers, setFamilyMembers, showToast]);
 
   // Esc key closes avatar picker
   useEffect(() => {
@@ -203,6 +265,169 @@ export default function ProfilePage() {
             ))}
           </div>
         </div>
+
+        {/* Family Members */}
+        {isFamily && (
+          <div className="glass-card rounded-2xl border p-6 section-card" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold" style={{ color: '#2a2f1e' }}>Family Members</h3>
+              {!addingMember && (canAddAdult || canAddJunior) && (
+                <button onClick={() => setAddingMember(true)} className="text-xs px-3 py-1.5 rounded-lg font-medium transition-colors" style={{ backgroundColor: '#6b7a3d', color: '#fff' }}>
+                  + Add Member
+                </button>
+              )}
+            </div>
+
+            {familyMembers.length === 0 && !addingMember && (
+              <p className="text-sm" style={{ color: '#6b7266' }}>No family members added yet. Add up to 2 adults and 4 juniors.</p>
+            )}
+
+            <div className="space-y-3">
+              {familyMembers.map(member => (
+                <div key={member.id} className="p-3 rounded-xl border" style={{ borderColor: '#f0ede6', background: '#faf8f3' }}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <AvatarDisplay avatar={member.avatar} name={member.name} size={36} />
+                      <div>
+                        <p className="text-sm font-medium" style={{ color: '#2a2f1e' }}>{member.name}</p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{
+                            background: member.type === 'junior' ? 'rgba(59, 175, 218, 0.1)' : 'rgba(107, 122, 61, 0.1)',
+                            color: member.type === 'junior' ? '#3BAFDA' : '#6b7a3d',
+                          }}>
+                            {member.type === 'junior' ? 'Junior' : 'Adult'}
+                          </span>
+                          {member.birthYear && (
+                            <span className="text-[10px]" style={{ color: '#6b7266' }}>Born {member.birthYear}</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <button onClick={() => handleRemoveMember(member)} className="text-xs hover:underline" style={{ color: '#dc2626' }}>
+                      Remove
+                    </button>
+                  </div>
+
+                  {/* Skill level for this member */}
+                  <div className="mt-2 pt-2 border-t" style={{ borderColor: '#f0ede6' }}>
+                    {editingMemberSkill === member.id ? (
+                      <div className="flex flex-wrap gap-1.5">
+                        {SKILL_LEVELS.map(level => (
+                          <button
+                            key={level.value}
+                            onClick={() => handleMemberSkillChange(member, level.value)}
+                            className="px-3 py-1 rounded-lg text-xs font-medium transition-all"
+                            style={{
+                              background: member.skillLevel === level.value ? level.color : level.bg,
+                              color: member.skillLevel === level.value ? '#fff' : level.color,
+                            }}
+                          >
+                            {level.label}
+                          </button>
+                        ))}
+                        <button onClick={() => setEditingMemberSkill(null)} className="px-2 py-1 text-xs" style={{ color: '#6b7266' }}>Cancel</button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs" style={{ color: '#6b7266' }}>Skill:</span>
+                        <span className="text-xs font-medium" style={{ color: SKILL_LEVELS.find(l => l.value === (member.skillLevel || 'intermediate'))?.color }}>
+                          {SKILL_LEVELS.find(l => l.value === (member.skillLevel || 'intermediate'))?.label}
+                        </span>
+                        <button onClick={() => setEditingMemberSkill(member.id)} className="text-[10px] hover:underline" style={{ color: '#6b7a3d' }}>Change</button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+
+              {/* Add member form */}
+              {addingMember && (
+                <div className="p-4 rounded-xl border-2 border-dashed" style={{ borderColor: '#6b7a3d', background: 'rgba(107, 122, 61, 0.03)' }}>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-xs font-medium block mb-1" style={{ color: '#6b7266' }}>Name</label>
+                      <input
+                        type="text"
+                        value={newMemberName}
+                        onChange={e => setNewMemberName(e.target.value)}
+                        placeholder="Family member name"
+                        maxLength={80}
+                        className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+                        style={{ backgroundColor: '#fff', border: '1px solid #e0dcd3', color: '#2a2f1e' }}
+                        autoFocus
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium block mb-1" style={{ color: '#6b7266' }}>Type</label>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setNewMemberType('adult')}
+                          disabled={!canAddAdult}
+                          className="flex-1 py-2 rounded-lg text-sm font-medium transition-all disabled:opacity-40"
+                          style={{
+                            background: newMemberType === 'adult' ? '#6b7a3d' : '#f5f2eb',
+                            color: newMemberType === 'adult' ? '#fff' : '#2a2f1e',
+                          }}
+                        >
+                          Adult {!canAddAdult && '(max 2)'}
+                        </button>
+                        <button
+                          onClick={() => setNewMemberType('junior')}
+                          disabled={!canAddJunior}
+                          className="flex-1 py-2 rounded-lg text-sm font-medium transition-all disabled:opacity-40"
+                          style={{
+                            background: newMemberType === 'junior' ? '#3BAFDA' : '#f5f2eb',
+                            color: newMemberType === 'junior' ? '#fff' : '#2a2f1e',
+                          }}
+                        >
+                          Junior {!canAddJunior && '(max 4)'}
+                        </button>
+                      </div>
+                    </div>
+                    {newMemberType === 'junior' && (
+                      <div>
+                        <label className="text-xs font-medium block mb-1" style={{ color: '#6b7266' }}>Birth Year (optional)</label>
+                        <input
+                          type="number"
+                          value={newMemberBirthYear}
+                          onChange={e => setNewMemberBirthYear(e.target.value)}
+                          placeholder="e.g. 2015"
+                          min={2000}
+                          max={new Date().getFullYear()}
+                          className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+                          style={{ backgroundColor: '#fff', border: '1px solid #e0dcd3', color: '#2a2f1e' }}
+                        />
+                      </div>
+                    )}
+                    <div className="flex gap-2 pt-1">
+                      <button
+                        onClick={handleAddMember}
+                        disabled={!newMemberName.trim() || savingMember}
+                        className="flex-1 py-2 rounded-lg text-sm font-medium transition-all disabled:opacity-40"
+                        style={{ backgroundColor: '#6b7a3d', color: '#fff' }}
+                      >
+                        {savingMember ? 'Adding...' : 'Add Member'}
+                      </button>
+                      <button
+                        onClick={() => { setAddingMember(false); setNewMemberName(''); setNewMemberBirthYear(''); }}
+                        className="px-4 py-2 rounded-lg text-sm font-medium"
+                        style={{ backgroundColor: '#f5f2eb', color: '#6b7266' }}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {familyMembers.length > 0 && (
+              <p className="text-xs mt-3" style={{ color: '#6b7266' }}>
+                {adultCount}/2 adults · {juniorCount}/4 juniors — Switch profiles from the menu in the header
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Avatar Picker Modal */}

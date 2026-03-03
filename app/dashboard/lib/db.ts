@@ -53,6 +53,7 @@ export async function fetchBookings(): Promise<Booking[]> {
     programId: b.program_id ?? undefined,
     matchType: (b.match_type as Booking['matchType']) ?? undefined,
     duration: b.duration ?? undefined,
+    bookedFor: b.booked_for ?? undefined,
   }));
 }
 
@@ -71,6 +72,7 @@ export async function createBooking(booking: Booking): Promise<void> {
     program_id: booking.programId || null,
     match_type: booking.matchType || null,
     duration: booking.duration || null,
+    booked_for: booking.bookedFor || null,
   });
 
   // Insert participants
