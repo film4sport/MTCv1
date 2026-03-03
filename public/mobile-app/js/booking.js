@@ -42,7 +42,7 @@
     // REAL MTC PROGRAMS (weekly recurring)
     // ============================================
     const programs = [
-      // TUESDAY - Men's Round Robin 9-11am (starts before bookable slots)
+      // TUESDAY - Men's Round Robin 9-11am (starts before 9:30 bookable slot)
       { day:1, start:'9:00 AM', end:'11:00 AM', courts:[1,2], type:'roundrobin',
         title:"Men's Round Robin", fee:0, guestFee:10,
         coach: null, regKey:'mens-rr',
