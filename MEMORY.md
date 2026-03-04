@@ -873,3 +873,9 @@ Closed remaining test coverage and CI gaps to bring all platforms to true 10/10:
 - Auth callback validates code exchange result and redirects with error on failure
 - Password reset URL configured via `NEXT_PUBLIC_SITE_URL` env var (defaults to production domain)
 - **Local verification**: Use `npm run check` (tsc + mobile build) instead of `npm run build` in Cowork/Claude Code sessions. Full Next.js build times out in the VM. CI handles the full build on push.
+
+### Environment Limitations (IMPORTANT)
+- **Cowork VM has NO Playwright browsers installed.** Never attempt to run E2E tests in Cowork — they will stall or error. E2E tests only run in CI (GitHub Actions) or on the dev machine.
+- **If a command fails once, diagnose and explain — don't retry.** Repeated blind retries waste the user's time.
+- **Unit tests (Vitest) DO work in Cowork** — `npm run test:unit` is safe to run locally.
+- **`npm run check`** (tsc + mobile build) works in Cowork — use this for quick local validation.
