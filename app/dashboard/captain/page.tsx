@@ -217,8 +217,8 @@ export default function CaptainPage() {
         {/* ─── ROSTER TAB ─── */}
         {activeTab === 'roster' && (
           <div>
-            {/* Add Member (captain only) */}
-            {isCaptain && (
+            {/* Add Member (captain or admin) */}
+            {(isCaptain || isAdmin) && (
               <div style={{ marginBottom: 20 }}>
                 {!addingMember ? (
                   <button onClick={() => setAddingMember(true)} style={{
@@ -289,7 +289,7 @@ export default function CaptainPage() {
                         </div>
                       </div>
                     </div>
-                    {isCaptain && m.id !== currentUser.id && !m.interclubCaptain && (
+                    {(isCaptain || isAdmin) && m.id !== currentUser.id && !m.interclubCaptain && (
                       <button onClick={() => removeFromTeam(m.id)} style={{
                         padding: '6px 12px', borderRadius: 8, border: '1px solid rgba(239, 68, 68, 0.3)',
                         background: 'transparent', color: '#ef4444', cursor: 'pointer', fontSize: 12, fontWeight: 600,
@@ -306,7 +306,7 @@ export default function CaptainPage() {
         {activeTab === 'announcements' && (
           <div>
             {/* Post Form (captain only) */}
-            {isCaptain && (
+            {(isCaptain || isAdmin) && (
               <div style={{ background: 'rgba(255,255,255,0.04)', borderRadius: 12, padding: 16, marginBottom: 20, border: '1px solid rgba(255,255,255,0.06)' }}>
                 <div style={{ fontSize: 13, fontWeight: 600, color: 'rgba(232, 228, 217, 0.5)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 }}>Post Team Update</div>
                 <textarea
@@ -359,7 +359,7 @@ export default function CaptainPage() {
         {activeTab === 'lineups' && (
           <div>
             {/* Create Match (captain only) */}
-            {isCaptain && (
+            {(isCaptain || isAdmin) && (
               <div style={{ marginBottom: 20 }}>
                 {!showNewLineup ? (
                   <button onClick={() => setShowNewLineup(true)} style={{
@@ -497,7 +497,7 @@ export default function CaptainPage() {
                           )}
 
                           {/* Delete Match (captain only) */}
-                          {isCaptain && (
+                          {(isCaptain || isAdmin) && (
                             <button onClick={() => deleteMatch(lineup.id)} style={{
                               marginTop: 12, padding: '8px 16px', borderRadius: 8, border: '1px solid rgba(239, 68, 68, 0.3)',
                               background: 'transparent', color: '#ef4444', cursor: 'pointer', fontSize: 12, fontWeight: 600, width: '100%',
