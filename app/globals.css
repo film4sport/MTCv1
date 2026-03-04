@@ -279,10 +279,7 @@ html {
   animation: spin 1s linear infinite;
 }
 
-/* Fade in animation (dashboard-only — landing/info use scroll-triggered .fade-in from landing.css) */
-.animate-fade-in {
-  animation: fadeIn 0.3s ease-in;
-}
+/* Note: .animate-fade-in defined below with fadeIn keyframe (dashboard-only) */
 
 /* Slide up animation */
 .slide-up {
@@ -352,17 +349,7 @@ html {
   box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
 }
 
-/* Scale in animation for modals */
-@keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
+/* Note: @keyframes scaleIn defined below (dashboard bounce variant) */
 
 .animate-scale-in {
   animation: scaleIn 0.3s ease-out;
@@ -445,7 +432,7 @@ html {
 .stagger-children > *:nth-child(5) { animation-delay: 200ms; }
 .stagger-children > *:nth-child(6) { animation-delay: 250ms; }
 
-/* Card hover lift effect */
+/* Card hover lift effect (dashboard). Landing page overrides with 3D version in landing.css */
 .card-hover {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }

@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import { ErrorBoundary } from '../dashboard/components/ErrorBoundary';
+import { getJsonLdEvents } from '../lib/events';
 
 const SITE_URL = 'https://www.monotennisclub.com';
 const CDN = 'https://cdn.jsdelivr.net/gh/film4sport/my-webapp-images@main/mtc-images';
@@ -159,7 +160,7 @@ const jsonLd = {
       hasMap: 'https://www.google.com/maps?q=754483+Mono+Centre+Rd,+Mono,+ON',
       priceRange: '$',
       foundingDate: '1980',
-      nonprofitStatus: 'Nonprofit501c3',
+      nonprofitStatus: 'Nonprofit',
       sameAs: [],
     },
     {
@@ -181,75 +182,8 @@ const jsonLd = {
         'Mono Tennis Club is a not-for-profit community tennis club in Mono, Ontario — serving Orangeville, Caledon, Bolton, Shelburne, Brampton, Dufferin County, and the GTA since 1980.',
       inLanguage: 'en-CA',
     },
-    {
-      '@type': 'SportsEvent',
-      name: '95+ Mixed Doubles Tournament',
-      description: '$180/Team — 2 Matches Guaranteed. A+B Draw, Over 95 Mixed Doubles. Includes lunches at Mono Cliffs Inn and great prizes!',
-      startDate: '2026-07-18',
-      endDate: '2026-07-19',
-      location: { '@id': `${SITE_URL}/#organization` },
-      sport: 'Tennis',
-      eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
-      eventStatus: 'https://schema.org/EventScheduled',
-      organizer: { '@id': `${SITE_URL}/#organization` },
-      offers: {
-        '@type': 'Offer',
-        price: '180',
-        priceCurrency: 'CAD',
-        availability: 'https://schema.org/InStock',
-        url: `${SITE_URL}/#events`,
-      },
-    },
-    {
-      '@type': 'Event',
-      name: 'Euchre Tournament',
-      description: 'Pre-season Euchre tournament at Mono Tennis Club. Open to members and guests. Prizes for top teams.',
-      startDate: '2026-03-14',
-      location: { '@id': `${SITE_URL}/#organization` },
-      eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
-      eventStatus: 'https://schema.org/EventScheduled',
-      organizer: { '@id': `${SITE_URL}/#organization` },
-      isAccessibleForFree: true,
-    },
-    {
-      '@type': 'SportsEvent',
-      name: 'Opening Day BBQ & Round Robin',
-      description: 'Kick off the 2026 tennis season with a BBQ and round robin at Mono Tennis Club. Meet fellow members, enjoy food, and hit the courts.',
-      startDate: '2026-05-09T12:30:00-04:00',
-      endDate: '2026-05-09T15:00:00-04:00',
-      location: { '@id': `${SITE_URL}/#organization` },
-      sport: 'Tennis',
-      eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
-      eventStatus: 'https://schema.org/EventScheduled',
-      organizer: { '@id': `${SITE_URL}/#organization` },
-      isAccessibleForFree: true,
-    },
-    {
-      '@type': 'SportsEvent',
-      name: 'French Open Round Robin Social',
-      description: 'Celebrate the French Open with a themed round robin social at Mono Tennis Club. Mixed doubles, prizes, and refreshments.',
-      startDate: '2026-06-07T13:00:00-04:00',
-      endDate: '2026-06-07T16:00:00-04:00',
-      location: { '@id': `${SITE_URL}/#organization` },
-      sport: 'Tennis',
-      eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
-      eventStatus: 'https://schema.org/EventScheduled',
-      organizer: { '@id': `${SITE_URL}/#organization` },
-      isAccessibleForFree: true,
-    },
-    {
-      '@type': 'SportsEvent',
-      name: 'Wimbledon Open Round Robin',
-      description: 'Wimbledon-themed round robin at Mono Tennis Club. Mixed doubles play, strawberries & cream, and great prizes.',
-      startDate: '2026-07-12T13:00:00-04:00',
-      endDate: '2026-07-12T16:00:00-04:00',
-      location: { '@id': `${SITE_URL}/#organization` },
-      sport: 'Tennis',
-      eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
-      eventStatus: 'https://schema.org/EventScheduled',
-      organizer: { '@id': `${SITE_URL}/#organization` },
-      isAccessibleForFree: true,
-    },
+    // Events generated from shared data source (app/lib/events.ts)
+    ...getJsonLdEvents(),
   ],
 };
 

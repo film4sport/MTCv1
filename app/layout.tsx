@@ -59,7 +59,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
+    <html lang="en-CA">
       <head>
         {/* JSON-LD is in app/(landing)/layout.tsx — richer version with @graph */}
         {/* Preload critical fonts to avoid FOIT/FOUT */}

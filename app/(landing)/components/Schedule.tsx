@@ -1,28 +1,21 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { calendarSpecialEvents, calendarRecurringEvents } from '../../lib/events';
 
 const MONTH_NAMES = [
   'January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December',
 ];
 
-const specialEvents = [
-  { date: '2026-03-14', title: 'Euchre Tournament', time: 'Evening', type: 'social' },
-  { date: '2026-05-09', title: 'Opening Day BBQ & Round Robin', time: '12:30 - 3:00 PM', type: 'special' },
-  { date: '2026-06-07', title: 'French Open Round Robin Social', time: '1:00 - 4:00 PM', type: 'social' },
-  { date: '2026-07-12', title: 'Wimbledon Open Round Robin', time: '1:00 - 4:00 PM', type: 'social' },
-  { date: '2026-07-18', title: '95+ Mixed Doubles Tournament (Day 1)', time: 'All Day', type: 'tournament' },
-  { date: '2026-07-19', title: '95+ Mixed Doubles Tournament (Day 2)', time: 'All Day', type: 'tournament' },
-];
-
-const recurringEvents = [
-  { day: 2, title: "Men's Round Robin", time: '9:00 - 11:00 AM', type: 'social' },
-  { day: 4, title: 'Freedom 55 League', time: 'Morning', type: 'social' },
-  { day: 4, title: 'Interclub Competitive League (A & B)', time: '7:00 - 9:30 PM', type: 'match' },
-  { day: 5, title: "Ladies Round Robin", time: '9:00 - 11:00 AM', type: 'social' },
-  { day: 5, title: 'Friday Night Mixed Round Robin', time: '6:00 - 9:00 PM', type: 'social' },
-];
+// Use shared event data
+const specialEvents = calendarSpecialEvents;
+const recurringEvents = calendarRecurringEvents.map((e) => ({
+  day: e.day,
+  title: e.title,
+  time: e.time,
+  type: e.calendarType,
+}));
 
 interface CalEvent {
   title: string;
@@ -246,7 +239,7 @@ export default function Schedule() {
                     <>
                       <div>
                         {uniqueTypes.slice(0, 4).map((type) => (
-                          <span key={type} className={`cal-dot ${type}`} />
+                          <span key={type} className={`cal-dot ${type}`} aria-label={type} title={type} />
                         ))}
                       </div>
                       {events.map((ev, idx) => (
