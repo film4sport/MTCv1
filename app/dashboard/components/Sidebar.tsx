@@ -28,7 +28,7 @@ function Sidebar() {
   const { sidebarCollapsed, setSidebarCollapsed, mobileSidebarOpen, setMobileSidebarOpen } = useUI();
   const isAdmin = currentUser?.role === 'admin';
   const isCoach = currentUser?.role === 'coach';
-  const isOnTeam = currentUser?.interclubTeam === 'a' || currentUser?.interclubTeam === 'b';
+  const isOnTeam = currentUser?.interclubTeam === 'a' || currentUser?.interclubTeam === 'b' || isAdmin;
 
   const unreadMessages = useMemo(() => conversations.reduce((sum, c) => sum + c.unread, 0), [conversations]);
 
