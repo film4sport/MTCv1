@@ -87,6 +87,23 @@
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS preferences jsonb DEFAULT '{}';
 ```
 
+### Cowork Session (2026-03-04) — Final Write-Back Wiring + CI Fix
+
+**Event RSVPs now fully round-trip with Supabase:**
+- `events.js` — `updateEventsFromAPI()` now rebuilds `userRsvps` and `eventBookings` from API attendee data on login. Replaces real user name with "You" in attendees arrays for client-side display consistency.
+- Write side was already wired: `toggleEventRsvp()` calls POST `/mobile/events` to toggle RSVP in Supabase.
+- `mtc-event-bookings` and `mtc-user-rsvps` localStorage are now caches of API truth (rebuilt on login).
+
+**Items verified as ALREADY wired (audit false positives):**
+- `mtc-partner-requests` — POST/DELETE to `/mobile/partners` already existed
+- `mtc-etransfer-*` — POST to `/mobile/settings` already existed
+- `mtc-notif-prefs` — PATCH to `/mobile/settings` (write) + load from API (read) already existed
+
+**CI fix:**
+- `tests/mobile-pwa-flows.spec.js` — Schedule screen test was flaky in CI (race condition). Added `waitForFunction` to explicitly wait for `MTC.fn.navigateTo` before calling it. Applied same fix to booking screen tests.
+
+**Build verified:** `npm run check` passes clean.
+
 ---
 
 ### Cowork Session (2026-03-04) — Audit Remaining Items + Booking UX
