@@ -11,6 +11,7 @@ export interface AuthenticatedUser {
   role: string;
   name: string;
   interclubTeam: string;
+  interclubCaptain: boolean;
 }
 
 /**
@@ -43,7 +44,7 @@ export async function authenticateMobileRequest(
   const adminClient = createClient(supabaseUrl, supabaseServiceKey || supabaseAnonKey);
   const { data: profile } = await adminClient
     .from('profiles')
-    .select('name, role, email, interclub_team')
+    .select('name, role, email, interclub_team, interclub_captain')
     .eq('id', user.id)
     .single();
 
@@ -57,6 +58,7 @@ export async function authenticateMobileRequest(
     role: profile.role,
     name: profile.name,
     interclubTeam: profile.interclub_team || 'none',
+    interclubCaptain: profile.interclub_captain === true,
   };
 }
 

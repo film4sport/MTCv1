@@ -493,3 +493,72 @@ create policy "error_logs_insert" on error_logs for insert with check (true);
 
 create index if not exists idx_error_logs_created on error_logs(created_at desc);
 create index if not exists idx_error_logs_context on error_logs(context);
+
+-- ─── Match Lineups (Interclub) ────────────────────────────
+-- Captain creates a match day, members mark availability
+create table if not exists match_lineups (
+  id text primary key default 'lineup-' || gen_random_uuid()::text,
+  team text not null check (team in ('a', 'b')),
+  match_date date not null,
+  match_time text,
+  opponent text,
+  location text,
+  notes text,
+  created_by uuid not null references profiles(id),
+  created_at timestamptz default now()
+);
+
+create table if not exists lineup_entries (
+  id bigint generated always as identity primary key,
+  lineup_id text not null references match_lineups(id) on delete cascade,
+  member_id uuid not null references profiles(id),
+  status text default 'pending' check (status in ('available', 'unavailable', 'maybe', 'pending')),
+  position text,
+  notes text,
+  updated_at timestamptz default now(),
+  unique(lineup_id, member_id)
+);
+
+-- RLS: captains manage their team's lineups, members read + update own entry
+alter table match_lineups enable row level security;
+alter table lineup_entries enable row level security;
+
+-- Admins: full access
+create policy "lineups_admin_all" on match_lineups for all using (is_admin());
+create policy "entries_admin_all" on lineup_entries for all using (is_admin());
+
+-- Captains: full CRUD on their team's lineups
+create policy "lineups_captain_select" on match_lineups for select using (
+  exists(select 1 from profiles where id = auth.uid() and interclub_team = match_lineups.team)
+);
+create policy "lineups_captain_insert" on match_lineups for insert with check (
+  exists(select 1 from profiles where id = auth.uid() and interclub_captain = true and interclub_team = match_lineups.team)
+);
+create policy "lineups_captain_update" on match_lineups for update using (
+  exists(select 1 from profiles where id = auth.uid() and interclub_captain = true and interclub_team = match_lineups.team)
+);
+create policy "lineups_captain_delete" on match_lineups for delete using (
+  exists(select 1 from profiles where id = auth.uid() and interclub_captain = true and interclub_team = match_lineups.team)
+);
+
+-- Team members: read entries for their team's lineups, update own entry only
+create policy "entries_team_select" on lineup_entries for select using (
+  exists(select 1 from match_lineups ml join profiles p on p.id = auth.uid()
+    where ml.id = lineup_entries.lineup_id and p.interclub_team = ml.team)
+);
+create policy "entries_captain_insert" on lineup_entries for insert with check (
+  exists(select 1 from match_lineups ml join profiles p on p.id = auth.uid()
+    where ml.id = lineup_entries.lineup_id and p.interclub_captain = true and p.interclub_team = ml.team)
+);
+create policy "entries_member_update" on lineup_entries for update using (
+  member_id = auth.uid()
+  or exists(select 1 from profiles where id = auth.uid() and interclub_captain = true)
+);
+create policy "entries_captain_delete" on lineup_entries for delete using (
+  exists(select 1 from match_lineups ml join profiles p on p.id = auth.uid()
+    where ml.id = lineup_entries.lineup_id and p.interclub_captain = true and p.interclub_team = ml.team)
+);
+
+create index if not exists idx_lineups_team_date on match_lineups(team, match_date);
+create index if not exists idx_entries_lineup on lineup_entries(lineup_id);
+create index if not exists idx_entries_member on lineup_entries(member_id);

@@ -28,6 +28,7 @@ function Sidebar() {
   const { sidebarCollapsed, setSidebarCollapsed, mobileSidebarOpen, setMobileSidebarOpen } = useUI();
   const isAdmin = currentUser?.role === 'admin';
   const isCoach = currentUser?.role === 'coach';
+  const isOnTeam = currentUser?.interclubTeam === 'a' || currentUser?.interclubTeam === 'b';
 
   const unreadMessages = useMemo(() => conversations.reduce((sum, c) => sum + c.unread, 0), [conversations]);
 
@@ -156,6 +157,29 @@ function Sidebar() {
                     <path strokeLinecap="round" strokeLinejoin="round" d={coachItem.icon} />
                   </svg>
                   {!sidebarCollapsed && <span className="text-sm">{coachItem.label}</span>}
+                </Link>
+              </li>
+            )}
+
+            {/* My Team — interclub members */}
+            {isOnTeam && (
+              <li className="pt-2 mt-2" style={{ borderTop: '1px solid rgba(232, 228, 217, 0.1)' }}>
+                <Link
+                  href="/dashboard/captain"
+                  onClick={closeMobileSidebar}
+                  aria-current={pathname.startsWith('/dashboard/captain') ? 'page' : undefined}
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${
+                    pathname.startsWith('/dashboard/captain')
+                      ? 'font-semibold'
+                      : 'hover:bg-white/5'
+                  }`}
+                  style={pathname.startsWith('/dashboard/captain') ? { backgroundColor: 'rgba(212, 225, 87, 0.15)', color: '#d4e157' } : { color: 'rgba(232, 228, 217, 0.7)' }}
+                  title={sidebarCollapsed ? 'My Team' : undefined}
+                >
+                  <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={pathname.startsWith('/dashboard/captain') ? 2.5 : 2} aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                  </svg>
+                  {!sidebarCollapsed && <span className="text-sm">My Team</span>}
                 </Link>
               </li>
             )}

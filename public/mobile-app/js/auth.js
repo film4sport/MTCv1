@@ -143,7 +143,8 @@
             isMember: true,
             membershipType: matchedLogin.membershipType || 'adult',
             familyId: matchedLogin.familyId || null,
-            interclubTeam: matchedLogin.interclubTeam || 'none'
+            interclubTeam: matchedLogin.interclubTeam || 'none',
+            interclubCaptain: matchedLogin.interclubCaptain === true
           };
           MTC.state.currentUser = currentUser;
           window.currentUser = currentUser;
@@ -195,6 +196,16 @@
         adminMenuItem.classList.remove('admin-hidden');
       } else {
         adminMenuItem.classList.add('admin-hidden');
+      }
+    }
+
+    // Show/hide captain/team menu item based on interclub team
+    const captainMenuItem = document.getElementById('menuCaptainItem');
+    if (captainMenuItem) {
+      if (currentUser && currentUser.interclubTeam && currentUser.interclubTeam !== 'none') {
+        captainMenuItem.classList.remove('admin-hidden');
+      } else {
+        captainMenuItem.classList.add('admin-hidden');
       }
     }
 
@@ -619,10 +630,12 @@
   MTC.state.currentRole = 'member';
   window.currentRole = 'member'; // Backward-compat alias
 
-  // Hide admin menu item on initial load (member by default)
+  // Hide admin + captain menu items on initial load (member by default)
   document.addEventListener('DOMContentLoaded', function() {
     const adminMenuItem = document.getElementById('menuAdminItem');
     if (adminMenuItem) adminMenuItem.classList.add('admin-hidden');
+    const captainMenuItem = document.getElementById('menuCaptainItem');
+    if (captainMenuItem) captainMenuItem.classList.add('admin-hidden');
 
     // Clear validation error styling when user focuses an input
     document.addEventListener('focusin', function(e) {

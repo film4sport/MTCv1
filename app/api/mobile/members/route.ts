@@ -100,8 +100,12 @@ export async function PATCH(request: Request) {
     const isAdmin = authResult.role === 'admin';
     const isSelf = memberId === authResult.id;
 
-    // Non-admins can only update their own profile
-    if (!isAdmin && !isSelf) {
+    // Captains can update interclub_team for roster management
+    const isCaptain = authResult.interclubCaptain === true;
+    const isCaptainRosterAction = !isSelf && isCaptain && body.interclub_team !== undefined;
+
+    // Non-admins can only update their own profile, unless captain managing roster
+    if (!isAdmin && !isSelf && !isCaptainRosterAction) {
       return NextResponse.json({ error: 'Can only update your own profile' }, { status: 403 });
     }
 
@@ -126,11 +130,24 @@ export async function PATCH(request: Request) {
       updates.preferences = { ...currentPrefs, ...body.preferences };
     }
 
+    // Captain roster management: can add/remove from own team only
+    if (isCaptainRosterAction) {
+      const captainTeam = authResult.interclubTeam;
+      const targetTeam = body.interclub_team;
+      // Captain can set to their team or remove (set to 'none')
+      if (targetTeam !== captainTeam && targetTeam !== 'none') {
+        return NextResponse.json({ error: 'Can only add to your own team or remove' }, { status: 403 });
+      }
+      updates.interclub_team = targetTeam;
+    }
+
     // Fields only admins can update
     if (isAdmin) {
       if (body.name?.trim()) updates.name = sanitizeInput(body.name, 100);
       if (body.email?.trim()) updates.email = body.email.trim().slice(0, 254);
       if (body.status?.trim()) updates.status = sanitizeInput(body.status, 20).toLowerCase();
+      if (body.interclub_team !== undefined) updates.interclub_team = body.interclub_team;
+      if (body.interclub_captain !== undefined) updates.interclub_captain = !!body.interclub_captain;
     }
 
     if (Object.keys(updates).length === 0) {
