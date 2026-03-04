@@ -11,6 +11,7 @@
     "test:unit": "vitest run",
     "test:all": "vitest run && npx playwright test",
     "test:coverage": "vitest run --coverage",
+    "check": "npx tsc --noEmit && node scripts/build-mobile.js",
     "deps:check": "npm outdated || true",
     "db:backup": "bash scripts/backup-db.sh",
     "db:push": "npx supabase db push",
