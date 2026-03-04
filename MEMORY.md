@@ -7,6 +7,28 @@
 ## Current Status
 - **SMTP/Supabase email signups**: DONE. Google SMTP configured in Supabase dashboard. Email confirmation and password reset emails are live.
 
+### Cowork Session (2026-03-04) — Audit Remaining Items + Booking UX
+
+**Mobile PWA — Offline queue persistence:**
+- `api-client.js` — `createBooking()` and `cancelBooking()` now check `navigator.onLine` before attempting API calls. If offline, requests are queued via `queueForSync()` (already stored in localStorage as `mtc-pending-queue`). When back online, `processPendingQueue()` retries all queued items with 24-hour stale expiry and 409-conflict detection.
+- `processPendingQueue()` now handles both `booking` and `cancel` types (previously only `booking`).
+
+**Mobile PWA — Offline mode indicator:**
+- `enhancements.js` — New `setupOfflineIndicator()` creates a fixed banner at top of screen showing offline status with pending queue count badge. Shows "Back online — syncing..." flash when connectivity returns.
+- `enhancements.css` — Styled `.offline-banner` with slide-down animation, `.offline-queue-badge` for pending count.
+
+**Desktop Dashboard — "All Courts" availability view (DEFAULT on desktop):**
+- `app/dashboard/book/page.tsx` — New `all-courts` view mode (default on ≥640px) showing all 4 courts as columns for a single day. Day navigation with prev/next buttons and "Today" quick-jump. Court accent colors for "You" indicators. Toggle order: All Courts → Week → Month. Mobile still defaults to Week view.
+- `app/dashboard/book/components/booking-utils.ts` — `ViewMode` type extended with `'all-courts'`.
+- Court tabs auto-hide when "All Courts" view is active (replaced by "All Courts — [date]" header).
+
+**Files modified (5):**
+1. `public/mobile-app/js/api-client.js` — offline queue wiring
+2. `public/mobile-app/js/enhancements.js` — offline indicator
+3. `public/mobile-app/css/enhancements.css` — offline banner CSS
+4. `app/dashboard/book/page.tsx` — All Courts view (default on desktop)
+5. `app/dashboard/book/components/booking-utils.ts` — ViewMode type
+
 ### Cowork Bug-Fix Session (2026-03-01)
 12 bugs fixed across 11 files. All verified visually in Chrome with no console errors.
 

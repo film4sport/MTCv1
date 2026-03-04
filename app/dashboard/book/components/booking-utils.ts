@@ -1,7 +1,7 @@
 import { TIME_SLOTS, COURT_HOURS, FEES, BOOKING_RULES } from '../../lib/types';
 import type { Booking, Court } from '../../lib/types';
 
-export type ViewMode = 'week' | 'calendar';
+export type ViewMode = 'week' | 'calendar' | 'all-courts';
 
 // Subtle court accent colors
 export const COURT_COLORS: Record<number, { bg: string; accent: string; dot: string }> = {
