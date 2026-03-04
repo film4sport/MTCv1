@@ -9,17 +9,13 @@ const { test, expect } = require('@playwright/test');
 
 const MOBILE_URL = '/mobile-app/index.html';
 
-/** Dismiss onboarding overlay if present */
+/** Dismiss onboarding overlay unconditionally (don't check visibility — animation timing varies on CI) */
 async function dismissOnboarding(page) {
-  const overlay = page.locator('#onboardingOverlay.active');
-  if (await overlay.isVisible().catch(() => false)) {
-    // Click through all onboarding slides via JS to avoid click interception
-    await page.evaluate(() => {
-      const overlay = document.getElementById('onboardingOverlay');
-      if (overlay) overlay.classList.remove('active');
-    });
-    await page.waitForTimeout(300);
-  }
+  await page.evaluate(() => {
+    const el = document.getElementById('onboardingOverlay');
+    if (el) { el.classList.remove('active'); el.style.display = 'none'; }
+  });
+  await page.waitForTimeout(300);
 }
 
 test.describe('Mobile PWA — Login Screen', () => {
