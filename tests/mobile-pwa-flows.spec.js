@@ -181,11 +181,8 @@ test.describe('Mobile PWA — Booking Screen', () => {
   test('booking screen shows weekly grid after navigation', async ({ page }) => {
     await mockAuthenticatedState(page);
 
-    await page.evaluate(() => {
-      if (typeof MTC !== 'undefined' && MTC.fn && MTC.fn.navigateTo) {
-        MTC.fn.navigateTo('book');
-      }
-    });
+    await page.waitForFunction(() => typeof MTC !== 'undefined' && MTC.fn && MTC.fn.navigateTo, null, { timeout: 5000 });
+    await page.evaluate(() => { MTC.fn.navigateTo('book'); });
     await page.waitForTimeout(500);
 
     // Weekly grid or calendar view should be present
@@ -196,11 +193,8 @@ test.describe('Mobile PWA — Booking Screen', () => {
   test('booking screen has court legend', async ({ page }) => {
     await mockAuthenticatedState(page);
 
-    await page.evaluate(() => {
-      if (typeof MTC !== 'undefined' && MTC.fn && MTC.fn.navigateTo) {
-        MTC.fn.navigateTo('book');
-      }
-    });
+    await page.waitForFunction(() => typeof MTC !== 'undefined' && MTC.fn && MTC.fn.navigateTo, null, { timeout: 5000 });
+    await page.evaluate(() => { MTC.fn.navigateTo('book'); });
     await page.waitForTimeout(500);
 
     const legend = page.locator('.booking-legend').or(page.locator('.legend'));
@@ -214,14 +208,11 @@ test.describe('Mobile PWA — Schedule Screen', () => {
   test('schedule screen loads with tabs', async ({ page }) => {
     await mockAuthenticatedState(page);
 
-    await page.evaluate(() => {
-      if (typeof MTC !== 'undefined' && MTC.fn && MTC.fn.navigateTo) {
-        MTC.fn.navigateTo('schedule');
-      }
-    });
-    await page.waitForTimeout(500);
+    // Wait for MTC navigation to be ready before calling it
+    await page.waitForFunction(() => typeof MTC !== 'undefined' && MTC.fn && MTC.fn.navigateTo, null, { timeout: 5000 });
+    await page.evaluate(() => { MTC.fn.navigateTo('schedule'); });
 
     const scheduleScreen = page.locator('#screen-schedule.active');
-    await expect(scheduleScreen).toBeAttached();
+    await expect(scheduleScreen).toBeAttached({ timeout: 5000 });
   });
 });
