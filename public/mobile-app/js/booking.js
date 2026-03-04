@@ -721,7 +721,13 @@
     if (typeof confirmBookingPayment==='function'){confirmBookingPayment();return;}
     if (!selectedSlot||!selectedSlot.date||!selectedSlot.time||!selectedSlot.court){showToast('Please select a time slot first');closeBookingModal();return;}
 
+    // Validate date format (YYYY-MM-DD)
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(selectedSlot.date)){showToast('Invalid date format');return;}
+    // Validate time format (12h AM/PM)
+    if (!/^\d{1,2}:\d{2}\s?(AM|PM)$/i.test(selectedSlot.time)){showToast('Invalid time format');return;}
+
     const slotDate=new Date(selectedSlot.date); const now=new Date();now.setHours(0,0,0,0);
+    if (isNaN(slotDate.getTime())){showToast('Invalid date');return;}
     if (slotDate<now){showToast('Cannot book a past date');return;}
 
     const btn=document.querySelector('.booking-confirm-btn');
