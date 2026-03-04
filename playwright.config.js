@@ -10,6 +10,7 @@ const AUTH_TESTS = [
 const DESKTOP_ONLY_TESTS = [
   'responsive.spec.js',  // already loops through 3 viewports internally
   'mobile.spec.js',      // already sets its own viewport (390x812)
+  'mobile-pwa.spec.js',  // mobile PWA tests (390x844 viewport)
 ];
 
 // All other tests run on all 3 viewports for responsive coverage

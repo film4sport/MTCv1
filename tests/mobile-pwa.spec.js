@@ -1,0 +1,190 @@
+// @ts-check
+const { test, expect } = require('@playwright/test');
+
+/**
+ * Mobile PWA E2E Tests — /mobile-app/index.html
+ * Tests the vanilla JS SPA served at /mobile-app/
+ * Covers: login UI, validation, screen structure, navigation, booking UI
+ */
+
+const MOBILE_URL = '/mobile-app/index.html';
+
+test.describe('Mobile PWA — Login Screen', () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  test.beforeEach(async ({ page }) => {
+    await page.goto(MOBILE_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForTimeout(1000);
+  });
+
+  test('login screen renders with all elements', async ({ page }) => {
+    await expect(page.locator('#login-screen')).toBeVisible();
+    await expect(page.locator('#loginEmail')).toBeVisible();
+    await expect(page.locator('#loginPassword')).toBeVisible();
+    await expect(page.locator('.login-btn')).toBeVisible();
+    await expect(page.locator('#rememberMe')).toBeAttached();
+  });
+
+  test('login form validates empty fields', async ({ page }) => {
+    await page.locator('.login-btn').click();
+    await page.waitForTimeout(500);
+    // Should show field errors for empty email and password
+    const errors = page.locator('.field-error');
+    await expect(errors.first()).toBeAttached();
+  });
+
+  test('login form validates invalid email format', async ({ page }) => {
+    await page.fill('#loginEmail', 'not-an-email');
+    await page.fill('#loginPassword', 'somepassword');
+    await page.locator('.login-btn').click();
+    await page.waitForTimeout(500);
+    const emailError = page.locator('#loginEmail ~ .field-error, #loginEmail + .field-error').or(
+      page.locator('.field-error').filter({ hasText: /email/i })
+    );
+    await expect(emailError.first()).toBeAttached();
+  });
+
+  test('signup card toggle works', async ({ page }) => {
+    const signupCard = page.locator('#signupCard');
+    await expect(signupCard).toBeHidden();
+    // Click "Create Account" link to show signup card
+    const createAccountLink = page.getByText('Create Account').or(page.getByText('Sign Up'));
+    await createAccountLink.first().click();
+    await page.waitForTimeout(500);
+    await expect(signupCard).toBeVisible();
+    await expect(page.locator('#signupName')).toBeVisible();
+    await expect(page.locator('#signupEmail')).toBeVisible();
+    await expect(page.locator('#signupPassword')).toBeVisible();
+  });
+
+  test('signup form validates empty fields', async ({ page }) => {
+    // Show signup card
+    const createAccountLink = page.getByText('Create Account').or(page.getByText('Sign Up'));
+    await createAccountLink.first().click();
+    await page.waitForTimeout(500);
+    // Submit empty
+    await page.locator('#signupCard .login-btn').click();
+    await page.waitForTimeout(500);
+    const errors = page.locator('#signupCard .field-error');
+    await expect(errors.first()).toBeAttached();
+  });
+
+  test('forgot password link exists', async ({ page }) => {
+    const forgotLink = page.getByText('Forgot').or(page.getByText('Reset'));
+    await expect(forgotLink.first()).toBeAttached();
+  });
+
+  test('no horizontal overflow on login screen', async ({ page }) => {
+    const bodyWidth = await page.evaluate(() => document.body.scrollWidth);
+    const viewportWidth = await page.evaluate(() => window.innerWidth);
+    expect(bodyWidth).toBeLessThanOrEqual(viewportWidth + 1);
+  });
+});
+
+test.describe('Mobile PWA — Page Structure', () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  test('all expected screens exist in DOM', async ({ page }) => {
+    await page.goto(MOBILE_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForTimeout(1000);
+
+    const expectedScreens = [
+      'screen-home', 'screen-notifications', 'screen-book',
+      'screen-partners', 'screen-schedule', 'screen-profile',
+      'screen-events', 'screen-messages', 'screen-settings',
+    ];
+
+    for (const screenId of expectedScreens) {
+      await expect(page.locator(`#${screenId}`)).toBeAttached();
+    }
+  });
+
+  test('screens have ARIA labels', async ({ page }) => {
+    await page.goto(MOBILE_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForTimeout(1000);
+
+    const screens = page.locator('.screen[aria-label]');
+    const count = await screens.count();
+    expect(count).toBeGreaterThanOrEqual(8);
+  });
+
+  test('bottom navigation bar exists', async ({ page }) => {
+    await page.goto(MOBILE_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForTimeout(1000);
+
+    const bottomNav = page.locator('.bottom-nav').or(page.locator('#bottomNav')).or(page.locator('nav[role="navigation"]'));
+    await expect(bottomNav.first()).toBeAttached();
+  });
+
+  test('PWA manifest is linked', async ({ page }) => {
+    await page.goto(MOBILE_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    const manifest = page.locator('link[rel="manifest"]');
+    await expect(manifest).toBeAttached();
+  });
+
+  test('viewport meta tag is set correctly', async ({ page }) => {
+    await page.goto(MOBILE_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    const viewport = await page.locator('meta[name="viewport"]').getAttribute('content');
+    expect(viewport).toContain('width=device-width');
+    expect(viewport).toContain('viewport-fit=cover');
+  });
+});
+
+test.describe('Mobile PWA — Booking UI', () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  test('booking screen has required elements', async ({ page }) => {
+    await page.goto(MOBILE_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForTimeout(1000);
+
+    const bookScreen = page.locator('#screen-book');
+    await expect(bookScreen).toBeAttached();
+
+    // Booking screen should have a header
+    const header = bookScreen.locator('.screen-header').or(bookScreen.locator('h1, h2'));
+    await expect(header.first()).toBeAttached();
+  });
+
+  test('partner screen has required elements', async ({ page }) => {
+    await page.goto(MOBILE_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForTimeout(1000);
+
+    const partnerScreen = page.locator('#screen-partners');
+    await expect(partnerScreen).toBeAttached();
+  });
+});
+
+test.describe('Mobile PWA — API Endpoint', () => {
+  test('mobile auth endpoint rejects empty credentials', async ({ request }) => {
+    const response = await request.post('/api/mobile-auth', {
+      data: {},
+    });
+    expect(response.status()).toBe(400);
+    const body = await response.json();
+    expect(body.error).toBeTruthy();
+  });
+
+  test('mobile auth endpoint rejects invalid credentials', async ({ request }) => {
+    const response = await request.post('/api/mobile-auth', {
+      data: { email: 'nonexistent@test.com', password: 'wrongpassword' },
+    });
+    // Should be 401 (unauthorized) not 500 (server error)
+    expect([401, 429]).toContain(response.status());
+  });
+
+  test('error reporting endpoint accepts valid error', async ({ request }) => {
+    const response = await request.post('/api/errors', {
+      data: { message: 'Test error from E2E', context: 'playwright-test' },
+    });
+    expect(response.status()).toBe(200);
+    const body = await response.json();
+    expect(body.ok).toBe(true);
+  });
+
+  test('error reporting endpoint rejects missing message', async ({ request }) => {
+    const response = await request.post('/api/errors', {
+      data: { context: 'no-message' },
+    });
+    expect(response.status()).toBe(400);
+  });
+});
