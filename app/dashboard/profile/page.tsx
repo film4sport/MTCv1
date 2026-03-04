@@ -7,6 +7,7 @@ import DashboardHeader from '../components/DashboardHeader';
 import { AvatarDisplay, AVATAR_OPTIONS, AVATAR_SVGS } from '../lib/avatars';
 import type { SkillLevel, FamilyMember } from '../lib/types';
 import * as db from '../lib/db';
+import { reportError } from '../../lib/errorReporter';
 
 const SKILL_LEVELS: { value: SkillLevel; label: string; color: string; bg: string }[] = [
   { value: 'beginner', label: 'Beginner', color: '#16a34a', bg: 'rgba(34, 197, 94, 0.1)' },
@@ -56,7 +57,7 @@ export default function ProfilePage() {
       setNewMemberBirthYear('');
       setAddingMember(false);
     } catch (err) {
-      console.error('[MTC Supabase]', err);
+      reportError(err instanceof Error ? err : new Error(String(err)), 'Supabase');
       showToast('Failed to add family member', 'error');
     } finally {
       setSavingMember(false);
@@ -70,7 +71,7 @@ export default function ProfilePage() {
       setFamilyMembers(familyMembers.filter(m => m.id !== member.id));
       showToast(`${member.name} removed`);
     } catch (err) {
-      console.error('[MTC Supabase]', err);
+      reportError(err instanceof Error ? err : new Error(String(err)), 'Supabase');
       showToast('Failed to remove family member', 'error');
     }
   }, [familyMembers, setFamilyMembers, showToast]);
@@ -82,7 +83,7 @@ export default function ProfilePage() {
       setEditingMemberSkill(null);
       showToast(`${member.name}'s skill level updated`);
     } catch (err) {
-      console.error('[MTC Supabase]', err);
+      reportError(err instanceof Error ? err : new Error(String(err)), 'Supabase');
       showToast('Failed to update skill level', 'error');
     }
   }, [familyMembers, setFamilyMembers, showToast]);
@@ -111,7 +112,7 @@ export default function ProfilePage() {
       updateCurrentUser({ skillLevel: level, skillLevelSet: true });
       showToast('Skill level updated');
     } catch (err) {
-      console.error('[MTC Supabase]', err);
+      reportError(err instanceof Error ? err : new Error(String(err)), 'Supabase');
       showToast('Failed to update skill level. Please try again.', 'error');
     }
   };
@@ -124,7 +125,7 @@ export default function ProfilePage() {
       setShowAvatarPicker(false);
       showToast('Avatar updated!');
     } catch (err) {
-      console.error('[MTC Supabase]', err);
+      reportError(err instanceof Error ? err : new Error(String(err)), 'Supabase');
       showToast('Failed to update avatar. Please try again.', 'error');
     }
   };
@@ -138,7 +139,7 @@ export default function ProfilePage() {
       updateCurrentUser({ name: trimmed });
       showToast('Name updated');
     } catch (err) {
-      console.error('[MTC Supabase]', err);
+      reportError(err instanceof Error ? err : new Error(String(err)), 'Supabase');
       showToast('Failed to update name. Please try again.', 'error');
       setNameValue(currentUser.name);
     } finally {
