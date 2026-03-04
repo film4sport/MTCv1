@@ -80,7 +80,8 @@ After making code changes, verify they won't break GitHub Actions CI:
 - **Don't run full E2E locally** (too slow) — instead, review the test specs for anything your changes could break
 - Check that existing test assertions still match (text content, selectors, element counts)
 - If a CSS/layout change could affect the mobile overflow test (`mobile.spec.js:24`), verify `body.scrollWidth <= viewport + 1` won't fail
-- CI runs: `npm run build` → `npm run test:unit` → `npx playwright test` (see `.github/workflows/ci.yml`)
+- CI runs: `npm audit` → `tsc --noEmit` → `npm run build` → `npm run test:unit` → `npx playwright test` (see `.github/workflows/ci.yml`)
+- **Local quick-check**: Use `npm run check` (runs `tsc --noEmit` + mobile build only — fast, no Next.js SSG). Use this instead of `npm run build` in Cowork/Claude Code sessions to avoid timeouts.
 
 ## #14: CROSS-PLATFORM DATA CONSISTENCY
 **Event dates, times, titles, and details MUST be updated across ALL THREE platforms in one pass:**

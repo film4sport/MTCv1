@@ -768,6 +768,42 @@ Added Supabase migration tooling and DIY backup system:
 
 **Verified:** TypeScript clean, 207/207 unit tests pass, mobile build successful.
 
+### Cowork 10/10 Sweep Session (2026-03-04)
+Cross-referenced both code review reports (38 + 39 findings) against current code. 24 already fixed, ~15 remaining. Fixed all remaining issues:
+
+**Security (3 fixes):**
+- `public/mobile-app/js/auth.js` — Removed weak charCode offline password hash (#3). Offline fallback now requires a valid Supabase access token stored from a previous successful server login. No password is stored or compared client-side.
+- `app/dashboard/lib/store.tsx` — Booking notification rollback (#12): if `db.createBooking()` fails, now also removes optimistically-created notifications (matched by date+time in body text).
+- `public/mobile-app/js/booking.js` — Input validation (#25): date format (YYYY-MM-DD regex), time format (12h AM/PM regex), and `isNaN` guard on parsed date before booking submission.
+
+**CI/CD (1 file):**
+- `.github/workflows/ci.yml` — Added `security` job (npm audit --audit-level=high), added `npx tsc --noEmit` TypeScript type check before build in `build-and-unit` job.
+
+**Performance (1 fix):**
+- `app/layout.tsx` — Added `<link rel="preload">` for Gotham Rounded Medium font (critical headline font) to eliminate FOIT/FOUT.
+
+**Accessibility (8 fixes):**
+- `app/(landing)/page.tsx` — Added `<main id="main-content">` landmark wrapping Events→Gallery. Skip link now targets `#main-content`. Scroll progress bar gets `role="progressbar"` with `aria-valuenow/min/max`.
+- `app/(landing)/components/Events.tsx` — Events grid gets `aria-live="polite"` for filter tab changes.
+- `app/(landing)/components/Schedule.tsx` — Day detail panel gets `aria-live="polite"`, `role="region"`, `aria-label`.
+- `app/(landing)/components/Gallery.tsx` — All 17 gallery images now have unique descriptive alt text (was generic "MTC Tennis"). Slides now keyboard-accessible with `role="button"`, `tabIndex={0}`, Enter/Space handlers.
+- `app/signup/page.tsx` — All 4 form inputs get unique `id` attributes, labels get `htmlFor` linking.
+- `app/login/page.tsx` — All 4 form inputs (login email, password, reset new/confirm) get `id` + `htmlFor`.
+
+**Error reporting consistency (3 files):**
+- `app/dashboard/profile/page.tsx` — All 6 `console.error` → `reportError()` (added import).
+- `app/dashboard/admin/page.tsx` — All 5 `console.error` → `reportError()` (added import).
+- `app/dashboard/lib/db.ts` — 1 `console.error` → `reportError()`.
+
+**Verified:** TypeScript clean ✓, mobile build done (mtc-court-7e198e89, 290KB JS, 193KB CSS). All files integrity-checked (wc -l).
+
+**Report cross-reference summary:**
+- 24/38 Code Review findings: FIXED (in prior sessions)
+- 11/39 Bug Hunting findings: FIXED (in prior sessions)
+- Remaining open items now fixed in this session: #3, #12, #25, #28, #32, #35
+- Items that were already fixed but agent initially flagged as open: #11 (UNIQUE constraint exists), B29 (cache version sync already done), B30 (phantom bookings already use API client)
+- Truly low-priority/won't-fix: #9 (CSRF — mitigated by Bearer token auth + CORS), #16 (admin role — validated server-side on every API call, frontend is just UX), #36 (idempotency — DB unique index prevents duplicates)
+
 ## TODO / REMINDERS
 - **Junior Summer Camp dates**: User is waiting on real dates from Mark Taylor. When received, update the `junior-summer-camp` event across: `supabase/seed.sql`, `app/dashboard/lib/data.ts`, `public/mobile-app/js/events.js`, and run UPDATE SQL on live Supabase. Also update date/time in `app/(landing)/layout.tsx` JSON-LD if camp is featured there.
 
@@ -778,3 +814,4 @@ Added Supabase migration tooling and DIY backup system:
 - Demo credentials only available in development mode
 - Auth callback validates code exchange result and redirects with error on failure
 - Password reset URL configured via `NEXT_PUBLIC_SITE_URL` env var (defaults to production domain)
+- **Local verification**: Use `npm run check` (tsc + mobile build) instead of `npm run build` in Cowork/Claude Code sessions. Full Next.js build times out in the VM. CI handles the full build on push.
