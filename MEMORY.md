@@ -834,6 +834,34 @@ Mobile build: mtc-court-429a3001. All tests pass ✓.
 
 **Production Readiness: 10/10** — All platforms (landing, dashboard, mobile PWA) are fully hardened. Zero remaining findings from either code review report. All error paths handled, console gated behind debug flags, accessibility complete, CSP headers in place, E2E + unit test coverage across all platforms.
 
+### Test Coverage + CI Expansion (2026-03-04)
+Closed remaining test coverage and CI gaps to bring all platforms to true 10/10:
+
+**Landing page E2E — Gallery + Lightbox (NEW: `tests/landing-gallery.spec.js`):**
+- 10 tests: slide rendering, keyboard navigation (Enter/Space open lightbox), Escape key close, backdrop click close, close button focus on open, ARIA dialog attributes, next/prev nav, dot nav, unique descriptive alt text verification
+- Runs on all 3 viewports (desktop/tablet/mobile)
+
+**Dashboard unit tests — db.ts data transforms (NEW: `unit-tests/db-mutations.test.js`):**
+- 22 tests: Supabase→app type mapping (fetchMembers, fetchBookings snake_case→camelCase), mutation operations (cancel, toggle RSVP, notifications CRUD, gate code, family), error handling patterns (reportError integration, throw on error), security patterns (no raw SQL, typed params, explicit delete IDs)
+
+**Mobile PWA E2E — Authenticated flows (NEW: `tests/mobile-pwa-flows.spec.js`):**
+- 8 tests: Mocks /api/mobile-auth + localStorage session to bypass login. Tests navigateTo() for all screens (book, partners, profile, settings), booking screen weekly grid/legend, schedule screen tabs
+- Uses Playwright route interception for auth + API mocking
+
+**Mobile PWA E2E — Offline resilience (NEW: `tests/mobile-pwa-offline.spec.js`):**
+- 7 tests: Login error on unreachable API, DOM structure intact without network, no unhandled errors on 500 response, rate limit 429 handling, service worker registration, MTC global object initialization, localStorage utilities
+- Uses Playwright route abort/fulfill for network simulation
+
+**Infrastructure — PR check workflow (NEW: `.github/workflows/pr-check.yml`):**
+- `pr-validate` job: TypeScript check → mobile build → unit tests → Next.js build → upload artifact (3-day retention) → PR comment with status table
+- `pr-e2e` job: Full Playwright E2E suite on PR builds
+- Auto-updates existing bot comment on re-push (no duplicate comments)
+
+**Config updates:**
+- `playwright.config.js` — Added `landing-gallery.spec.js` to RESPONSIVE_TESTS, added `mobile-pwa-flows.spec.js` + `mobile-pwa-offline.spec.js` to DESKTOP_ONLY_TESTS
+
+**Test totals:** 229 unit tests (14 files) + 47 E2E tests (across 15 spec files, 3 viewports for responsive = ~80 runs). All passing ✓.
+
 ## TODO / REMINDERS
 - **Junior Summer Camp dates**: User is waiting on real dates from Mark Taylor. When received, update the `junior-summer-camp` event across: `supabase/seed.sql`, `app/dashboard/lib/data.ts`, `public/mobile-app/js/events.js`, and run UPDATE SQL on live Supabase. Also update date/time in `app/(landing)/layout.tsx` JSON-LD if camp is featured there.
 
