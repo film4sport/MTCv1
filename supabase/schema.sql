@@ -136,6 +136,8 @@ create table if not exists partners (
   avatar text,
   message text,
   status text not null default 'available' check (status in ('available', 'matched')),
+  matched_by uuid references profiles(id),
+  matched_at timestamptz,
   created_at timestamptz default now()
 );
 

@@ -74,7 +74,7 @@
   // Join partner (from navigation.js home cards)
   registerAction('joinPartner', function(el, data) {
     if (typeof window.joinPartner === 'function') {
-      window.joinPartner(data.name, data.time, el);
+      window.joinPartner(data.name, data.time, el, data.id);
     }
   });
 

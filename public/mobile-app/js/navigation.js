@@ -234,13 +234,27 @@
   // ============================================
   // WINDOW: Join Partner (onclick from index.html)
   // ============================================
-  window.joinPartner = function(name, time, btnEl) {
+  window.joinPartner = function(name, time, btnEl, partnerId) {
     showCelebrationModal('YOU\'RE IN!', 'Matched with ' + name + '. See you ' + time + '!');
     showPushNotification(
       'Partner Matched!',
       'You\'re playing with ' + name + ' \u2014 ' + time,
       '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>'
     );
+
+    // Persist to Supabase — mark partner request as matched
+    if (partnerId && typeof MTC !== 'undefined' && MTC.fn && MTC.fn.apiRequest) {
+      MTC.fn.apiRequest('/mobile/partners', {
+        method: 'PATCH',
+        body: JSON.stringify({ partnerId: partnerId })
+      }).then(function(result) {
+        if (result && result.ok === false && result.status === 409) {
+          showToast('This partner was already matched by someone else');
+        }
+      }).catch(function(err) {
+        MTC.warn('joinPartner API error:', err);
+      });
+    }
 
     // Parse a date from the time string (e.g., "Tomorrow at 2pm", "Saturday Morning")
     let partnerDate = '';
@@ -366,7 +380,7 @@
             '<span class="skill-badge ' + sanitizeHTML(p.levelClass) + '">' + sanitizeHTML(p.level.charAt(0).toUpperCase() + p.level.slice(1)) + '</span>' +
           '</div>' +
         '</div>' +
-        '<button class="partner-join-btn" aria-label="Join session" data-action="joinPartner" data-name="' + sanitizeHTML(p.name).replace(/"/g, '&quot;') + '" data-time="' + sanitizeHTML(p.time).replace(/"/g, '&quot;') + '">Join</button>';
+        '<button class="partner-join-btn" aria-label="Join session" data-action="joinPartner" data-id="' + sanitizeHTML(p.id || '').replace(/"/g, '&quot;') + '" data-name="' + sanitizeHTML(p.name).replace(/"/g, '&quot;') + '" data-time="' + sanitizeHTML(p.time).replace(/"/g, '&quot;') + '">Join</button>';
       // Animate in
       card.style.opacity = '0';
       card.style.transform = 'translateX(-20px)';
@@ -674,6 +688,7 @@
       if (p.skillLevel === 'advanced' || p.skillLevel === 'competitive') levelClass = 'advanced';
       else if (p.skillLevel === 'beginner') levelClass = 'beginner';
       homePartnerPool.push({
+        id: p.id,
         name: p.name,
         time: p.availability || p.date + ' at ' + p.time,
         level: p.skillLevel || 'intermediate',

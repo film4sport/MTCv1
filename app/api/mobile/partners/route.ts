@@ -94,6 +94,71 @@ export async function POST(request: Request) {
   }
 }
 
+/** Join/match a partner request — sets status to 'matched' */
+export async function PATCH(request: Request) {
+  const authResult = await authenticateMobileRequest(request);
+  if (authResult instanceof NextResponse) return authResult;
+
+  const userId = authResult.id;
+
+  try {
+    const { partnerId } = await request.json();
+    if (!partnerId) {
+      return NextResponse.json({ error: 'Missing partnerId' }, { status: 400 });
+    }
+
+    const supabase = getAdminClient();
+
+    // Can't join your own request
+    const { data: partner } = await supabase
+      .from('partners')
+      .select('user_id, status')
+      .eq('id', partnerId)
+      .single();
+
+    if (!partner) {
+      return NextResponse.json({ error: 'Partner request not found' }, { status: 404 });
+    }
+    if (partner.user_id === userId) {
+      return NextResponse.json({ error: 'Cannot join your own request' }, { status: 400 });
+    }
+    if (partner.status === 'matched') {
+      return NextResponse.json({ error: 'Already matched' }, { status: 409 });
+    }
+
+    const { error } = await supabase
+      .from('partners')
+      .update({
+        status: 'matched',
+        matched_by: userId,
+        matched_at: new Date().toISOString(),
+      })
+      .eq('id', partnerId);
+
+    if (error) {
+      return NextResponse.json({ error: 'Failed to join partner request' }, { status: 500 });
+    }
+
+    // Notify the original poster that someone joined (non-critical)
+    const notifId = `notif-partner-${partnerId}-${userId.slice(0, 8)}`;
+    try {
+      await supabase.from('notifications').insert({
+        id: notifId,
+        user_id: partner.user_id,
+        type: 'partner',
+        title: '🎾 Partner Matched!',
+        body: `${authResult.name} wants to play with you!`,
+        timestamp: new Date().toISOString(),
+        read: false,
+      });
+    } catch { /* non-critical */ }
+
+    return NextResponse.json({ success: true });
+  } catch {
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+  }
+}
+
 export async function DELETE(request: Request) {
   const authResult = await authenticateMobileRequest(request);
   if (authResult instanceof NextResponse) return authResult;

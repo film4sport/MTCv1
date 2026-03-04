@@ -456,7 +456,54 @@
         window.updateConversationsFromAPI(conversations);
       }
     });
+
+    // Load court status (maintenance/available)
+    MTC.fn.loadFromAPI('/mobile/courts', 'mtc-api-courts', null).then(function(courts) {
+      if (courts && typeof window.updateCourtsFromAPI === 'function') {
+        window.updateCourtsFromAPI(courts);
+      }
+    });
+
+    // Load notifications from Supabase
+    MTC.fn.loadFromAPI('/mobile/notifications', 'mtc-api-notifications', null).then(function(notifications) {
+      if (notifications && typeof window.updateNotificationsFromAPI === 'function') {
+        window.updateNotificationsFromAPI(notifications);
+      }
+    });
+
+    // Load family members
+    MTC.fn.loadFromAPI('/mobile/families', 'mtc-api-families', null).then(function(familyData) {
+      if (familyData && typeof window.updateFamiliesFromAPI === 'function') {
+        window.updateFamiliesFromAPI(familyData);
+      }
+    });
+
+    // Load notification preferences from Supabase
+    MTC.fn.apiRequest('/mobile/settings', {
+      method: 'PATCH',
+      body: JSON.stringify({ action: 'getNotifPrefs' })
+    }).then(function(prefs) {
+      if (prefs && typeof window.updateNotifPrefsFromAPI === 'function') {
+        window.updateNotifPrefsFromAPI(prefs);
+      }
+    }).catch(function() { /* non-critical */ });
   }
+
+  /**
+   * Update family data from Supabase API.
+   * Called after login to sync family members across platforms.
+   */
+  window.updateFamiliesFromAPI = function(data) {
+    if (!data) return;
+    if (data.family) {
+      MTC.state.familyId = data.family.id;
+      if (currentUser) currentUser.familyId = data.family.id;
+    }
+    if (data.members && Array.isArray(data.members)) {
+      MTC.state.familyMembers = data.members;
+      MTC.storage.set('mtc-family-members', data.members);
+    }
+  };
 
   // ============================================
   // ROLE (set via login credentials, no FAB)
