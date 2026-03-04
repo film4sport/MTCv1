@@ -467,3 +467,23 @@ create table if not exists push_subscriptions (
   created_at timestamptz default now(),
   unique(user_id, endpoint)
 );
+
+-- Client-side error logs (from /api/errors endpoint)
+create table if not exists error_logs (
+  id bigint generated always as identity primary key,
+  message text not null,
+  context text,
+  stack text,
+  url text,
+  user_agent text,
+  ip text,
+  created_at timestamptz default now()
+);
+
+-- Only admins can read error logs; API route inserts via service role (bypasses RLS)
+alter table error_logs enable row level security;
+create policy "error_logs_admin_read" on error_logs for select using (is_admin());
+create policy "error_logs_insert" on error_logs for insert with check (true);
+
+create index if not exists idx_error_logs_created on error_logs(created_at desc);
+create index if not exists idx_error_logs_context on error_logs(context);
