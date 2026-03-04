@@ -301,7 +301,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (savedUser) setCurrentUser(savedUser);
 
     // Then verify against Supabase session and fetch live data
-    getCurrentUser().then(async (user) => {
+    getCurrentUser().catch((err) => { reportError(err instanceof Error ? err : new Error(String(err)), 'getCurrentUser'); return null; }).then(async (user) => {
       if (user) {
         setCurrentUser(user);
         saveJSON('mtc-current-user', user);

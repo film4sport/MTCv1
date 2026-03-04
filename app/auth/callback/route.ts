@@ -15,8 +15,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${siteUrl}/login`);
   }
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!supabaseUrl || !supabaseAnonKey) {
+    return NextResponse.redirect(`${siteUrl}/login?error=config`);
+  }
 
   const redirectUrl = type === 'recovery'
     ? `${siteUrl}/login?reset=true`

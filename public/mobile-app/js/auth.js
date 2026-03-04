@@ -175,7 +175,7 @@
         completeLogin();
       }
     } catch (error) {
-      console.error('Login error:', error);
+      MTC.warn('Login error:', error);
       showToast('Login failed. Please try again.');
     }
   };
