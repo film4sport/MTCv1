@@ -1,7 +1,7 @@
 'use client';
 
 import type { User } from '../../lib/types';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 
 interface AdminMembersTabProps {
   currentUser: User | null;
@@ -9,6 +9,7 @@ interface AdminMembersTabProps {
   memberSearch: string;
   onMemberSearchChange: (value: string) => void;
   onActionClick: (id: string, name: string, action: 'pause' | 'unpause' | 'cancel') => void;
+  onSetCaptain?: (userId: string, captain: boolean) => void;
 }
 
 export default function AdminMembersTab({
@@ -17,13 +18,19 @@ export default function AdminMembersTab({
   memberSearch,
   onMemberSearchChange,
   onActionClick,
+  onSetCaptain,
 }: AdminMembersTabProps) {
+  const [teamFilter, setTeamFilter] = useState<'all' | 'a' | 'b'>('all');
+
   const filteredMembers = useMemo(
-    () => members.filter(m =>
-      m.name.toLowerCase().includes(memberSearch.toLowerCase()) ||
-      m.email.toLowerCase().includes(memberSearch.toLowerCase())
-    ),
-    [members, memberSearch]
+    () => members.filter(m => {
+      const matchesSearch = m.name.toLowerCase().includes(memberSearch.toLowerCase()) ||
+        m.email.toLowerCase().includes(memberSearch.toLowerCase());
+      if (!matchesSearch) return false;
+      if (teamFilter === 'all') return true;
+      return m.interclubTeam === teamFilter;
+    }),
+    [members, memberSearch, teamFilter]
   );
 
   return (
@@ -37,6 +44,21 @@ export default function AdminMembersTab({
         className="w-full max-w-sm px-4 py-2.5 rounded-xl text-sm border focus:outline-none focus:ring-2 focus:ring-[#6b7a3d]/20 mb-4"
         style={{ borderColor: '#e0dcd3', color: '#2a2f1e' }}
       />
+      <div className="flex gap-2 mb-4">
+        {([['all', 'All Members'], ['a', 'Team A'], ['b', 'Team B']] as const).map(([val, label]) => (
+          <button
+            key={val}
+            onClick={() => setTeamFilter(val)}
+            className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+            style={{
+              background: teamFilter === val ? '#6b7a3d' : 'rgba(107, 122, 61, 0.08)',
+              color: teamFilter === val ? '#fff' : '#6b7266',
+            }}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
       <div className="glass-card rounded-2xl border overflow-hidden" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
         <table className="w-full">
           <thead>
@@ -46,6 +68,7 @@ export default function AdminMembersTab({
               <th className="text-left px-4 py-3 text-xs font-medium" style={{ color: '#6b7266' }}>Role</th>
               <th className="text-left px-4 py-3 text-xs font-medium" style={{ color: '#6b7266' }}>Membership</th>
               <th className="text-left px-4 py-3 text-xs font-medium" style={{ color: '#6b7266' }}>Skill</th>
+              <th className="text-left px-4 py-3 text-xs font-medium" style={{ color: '#6b7266' }}>Team</th>
               <th className="text-left px-4 py-3 text-xs font-medium" style={{ color: '#6b7266' }}>Status</th>
               <th className="text-left px-4 py-3 text-xs font-medium" style={{ color: '#6b7266' }}>Since</th>
               <th className="text-right px-4 py-3 text-xs font-medium" style={{ color: '#6b7266' }}>Actions</th>
@@ -88,6 +111,23 @@ export default function AdminMembersTab({
                   </span>
                 </td>
                 <td className="px-4 py-3">
+                  {m.interclubTeam && m.interclubTeam !== 'none' ? (
+                    <div className="flex items-center gap-1">
+                      <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{
+                        background: m.interclubTeam === 'a' ? 'rgba(107, 122, 61, 0.1)' : 'rgba(59, 175, 218, 0.1)',
+                        color: m.interclubTeam === 'a' ? '#6b7a3d' : '#3BAFDA',
+                      }}>
+                        {m.interclubTeam.toUpperCase()}
+                      </span>
+                      {m.interclubCaptain && (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: 'rgba(245, 158, 11, 0.1)', color: '#d97706' }}>C</span>
+                      )}
+                    </div>
+                  ) : (
+                    <span className="text-xs" style={{ color: '#6b7266' }}>—</span>
+                  )}
+                </td>
+                <td className="px-4 py-3">
                   <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{
                     background: (m.status || 'active') === 'active' ? 'rgba(34, 197, 94, 0.1)' : 'rgba(245, 158, 11, 0.1)',
                     color: (m.status || 'active') === 'active' ? '#16a34a' : '#d97706',
@@ -99,6 +139,16 @@ export default function AdminMembersTab({
                 <td className="px-4 py-3 text-right">
                   {m.id !== currentUser?.id && m.role !== 'admin' && (
                     <div className="flex items-center justify-end gap-1.5">
+                      {m.interclubTeam && m.interclubTeam !== 'none' && onSetCaptain && (
+                        <button
+                          onClick={() => onSetCaptain(m.id, !m.interclubCaptain)}
+                          className="text-xs px-2.5 py-1 rounded-lg transition-colors hover:bg-amber-50"
+                          style={{ color: m.interclubCaptain ? '#d97706' : '#6b7266' }}
+                          title={m.interclubCaptain ? 'Remove captain' : 'Set as captain'}
+                        >
+                          {m.interclubCaptain ? '★ Captain' : '☆ Captain'}
+                        </button>
+                      )}
                       {(m.status || 'active') === 'active' ? (
                         <button
                           onClick={() => onActionClick(m.id, m.name, 'pause')}

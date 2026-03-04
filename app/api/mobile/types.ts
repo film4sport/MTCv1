@@ -31,6 +31,8 @@ export interface ProfileUpdate {
   skill_level?: string;
   skill_level_set?: boolean;
   preferences?: Record<string, unknown>;
+  interclub_team?: string;
+  interclub_captain?: boolean;
 }
 
 export interface EventUpdate {

@@ -142,7 +142,8 @@
             id: matchedLogin.userId || null,
             isMember: true,
             membershipType: matchedLogin.membershipType || 'adult',
-            familyId: matchedLogin.familyId || null
+            familyId: matchedLogin.familyId || null,
+            interclubTeam: matchedLogin.interclubTeam || 'none'
           };
           MTC.state.currentUser = currentUser;
           window.currentUser = currentUser;
@@ -477,6 +478,9 @@
         window.updateFamiliesFromAPI(familyData);
       }
     });
+
+    // Load club settings (gate code, etc.)
+    MTC.fn.loadFromAPI('/mobile/settings', 'mtc-club-settings', null);
 
     // Load notification preferences from Supabase
     MTC.fn.apiRequest('/mobile/settings', {

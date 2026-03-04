@@ -430,14 +430,29 @@
     const modalEl = document.getElementById('announcementModal');
     if (modalEl) modalEl.remove();
 
-    // Persist to Supabase via API — this also creates notifications for all members
+    // Map selected recipients to API audience field
+    var audience = 'all';
+    var hasAll = selected.indexOf('all') !== -1;
+    var hasA = selected.indexOf('team-a') !== -1;
+    var hasB = selected.indexOf('team-b') !== -1;
+    if (hasAll) {
+      audience = 'all';
+    } else if (hasA && hasB) {
+      audience = 'interclub_all';
+    } else if (hasA) {
+      audience = 'interclub_a';
+    } else if (hasB) {
+      audience = 'interclub_b';
+    }
+
+    // Persist to Supabase via API — also creates notifications for targeted members
     if (typeof MTC !== 'undefined' && MTC.fn && MTC.fn.apiRequest) {
       MTC.fn.apiRequest('/mobile/announcements', {
         method: 'POST',
-        body: JSON.stringify({ text: title + ': ' + message, type: 'info', title: title })
+        body: JSON.stringify({ text: title + ': ' + message, type: 'info', title: title, audience: audience })
       }).then(function(result) {
         if (result && result.ok !== false) {
-          showToast('Announcement sent to ' + recipientLabel + ' — all members notified');
+          showToast('Announcement sent to ' + recipientLabel);
         } else {
           showToast('Announcement saved locally — server sync may be delayed', 'warning');
         }

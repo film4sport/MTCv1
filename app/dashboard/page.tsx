@@ -19,9 +19,17 @@ export default function DashboardHome() {
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
     .slice(0, 3);
 
-  const activeAnnouncements = announcements.filter(
-    a => !a.dismissedBy.includes(currentUser?.id || '')
-  );
+  const activeAnnouncements = announcements.filter(a => {
+    if (a.dismissedBy.includes(currentUser?.id || '')) return false;
+    // Filter by audience — only show announcements targeted to this user's team
+    const audience = a.audience || 'all';
+    if (audience === 'all') return true;
+    const team = currentUser?.interclubTeam || 'none';
+    if (audience === 'interclub_a') return team === 'a';
+    if (audience === 'interclub_b') return team === 'b';
+    if (audience === 'interclub_all') return team === 'a' || team === 'b';
+    return true;
+  });
 
   const formatDate = (dateStr: string) => {
     const d = new Date(dateStr + 'T00:00:00');

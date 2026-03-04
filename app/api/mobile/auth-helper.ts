@@ -10,6 +10,7 @@ export interface AuthenticatedUser {
   email: string;
   role: string;
   name: string;
+  interclubTeam: string;
 }
 
 /**
@@ -42,7 +43,7 @@ export async function authenticateMobileRequest(
   const adminClient = createClient(supabaseUrl, supabaseServiceKey || supabaseAnonKey);
   const { data: profile } = await adminClient
     .from('profiles')
-    .select('name, role, email')
+    .select('name, role, email, interclub_team')
     .eq('id', user.id)
     .single();
 
@@ -55,6 +56,7 @@ export async function authenticateMobileRequest(
     email: profile.email,
     role: profile.role,
     name: profile.name,
+    interclubTeam: profile.interclub_team || 'none',
   };
 }
 

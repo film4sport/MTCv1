@@ -49,7 +49,7 @@
     if (token && typeof MTC.fn.apiRequest === 'function') {
       MTC.fn.apiRequest('/mobile/announcements', {
         method: 'POST',
-        body: JSON.stringify({ text: title + ': ' + message, type: 'info' })
+        body: JSON.stringify({ text: title + ': ' + message, type: 'info', title: title, audience: 'all' })
       }).then(function(res) {
         if (res.ok) {
           showToast('Announcement posted!');
