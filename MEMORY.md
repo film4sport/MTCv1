@@ -7,6 +7,48 @@
 ## Current Status
 - **SMTP/Supabase email signups**: DONE. Google SMTP configured in Supabase dashboard. Email confirmation and password reset emails are live.
 
+### Cowork Session (2026-03-04) — Cross-Platform Supabase Wiring (8 gaps)
+
+**All state now persists to Supabase — no more local-only features.**
+
+**New API endpoints created:**
+- `app/api/mobile/courts/route.ts` — GET all courts with status, PATCH admin toggle maintenance
+- `app/api/mobile/notifications/route.ts` — GET user notifications (limit 100), PATCH mark read / mark all read
+- `app/api/mobile/families/route.ts` — Full CRUD: GET family+members, POST create family/add member, PATCH update member, DELETE remove member
+
+**Existing API endpoints extended:**
+- `app/api/mobile/partners/route.ts` — Added PATCH: join/match a partner request (validates not self, not already matched, creates notification for poster). Schema: added `matched_by` + `matched_at` columns to partners table.
+- `app/api/mobile/members/route.ts` — PATCH expanded: members can now self-update (avatar, ntrp, skillLevel, skillLevelSet), admins can additionally update name/email/status.
+- `app/api/mobile/settings/route.ts` — Added PATCH: `getNotifPrefs` and `setNotifPrefs` actions for notification_preferences table.
+- `app/api/mobile/announcements/route.ts` — POST now bulk-creates notifications for ALL members after inserting announcement.
+- `app/api/mobile/types.ts` — ProfileUpdate extended with avatar, ntrp, skill_level, skill_level_set fields.
+
+**Dashboard wiring:**
+- `app/dashboard/admin/page.tsx` — `addAnnouncement` now async, creates per-member notification via Supabase after insert.
+- `app/dashboard/lib/data.ts` — Stale announcement dates updated (Feb → March 2026).
+
+**Mobile PWA consumer wiring:**
+- `auth.js` — Added loadFromAPI calls post-login for courts, notifications, families, and notification preferences. Added `updateFamiliesFromAPI` consumer.
+- `booking.js` — Added `updateCourtsFromAPI` consumer, `isCourtClosed()` checks `status === 'maintenance'`.
+- `navigation.js` — `joinPartner` calls PATCH API with partnerId, partner cards include `data-id` attribute, `updatePartnersFromAPI` preserves `id` field.
+- `event-delegation.js` — Passes `data.id` to joinPartner.
+- `notifications.js` — Added `updateNotificationsFromAPI` (injects unread into UI, marks read via API), `updateNotifPrefsFromAPI`, wired `saveSettingsToggles` to sync prefs to Supabase.
+
+**Bug fixes (from production audit):**
+- `book/page.tsx` — SSR hydration fix (useState with window.innerWidth → useEffect).
+- `booking-utils.ts` — canBookDate() missing lower bound check for past dates.
+- `api-client.js` — Queue race condition (processing guard), infinite retry loop (max 3 retries), unbounded queue (max 20 items), only retry 5xx not 4xx.
+- `enhancements.js` — Offline indicator duplicate listeners (singleton check).
+
+**Schema changes (need migration):**
+- `supabase/schema.sql` — `partners` table: added `matched_by uuid references profiles(id)`, `matched_at timestamptz`.
+
+**Decision:** Landing page events left as static TypeScript — different purpose (marketing/SEO) from dashboard events (operational/RSVP). Per CLAUDE.md #14, these are updated at deployment time.
+
+**Build verified:** `npm run check` passes clean (tsc + mobile build). All file integrity verified via wc -l.
+
+---
+
 ### Cowork Session (2026-03-04) — Audit Remaining Items + Booking UX
 
 **Mobile PWA — Offline queue persistence:**
