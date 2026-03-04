@@ -50,21 +50,21 @@ export async function GET(request: NextRequest) {
     const user = data.session.user;
     const userName = user.user_metadata?.name || user.email?.split('@')[0] || 'Member';
 
-    try {
-      // Use service role to bypass RLS for server-side operations
-      const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-      const adminSupabase = serviceKey
-        ? createClient(supabaseUrl, serviceKey)
-        : createClient(supabaseUrl, supabaseAnonKey);
+    // Use service role to bypass RLS for server-side operations
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const adminSupabase = serviceKey
+      ? createClient(supabaseUrl, serviceKey)
+      : createClient(supabaseUrl, supabaseAnonKey);
 
+    // Run all post-confirmation tasks in parallel — one failure shouldn't block others
+    const results = await Promise.allSettled([
       // Send welcome message (gate code + greeting via admin conversation)
-      await adminSupabase.rpc('send_welcome_message', {
+      adminSupabase.rpc('send_welcome_message', {
         new_user_id: user.id,
         new_user_name: userName,
-      });
-
+      }),
       // Create a welcome notification (shows in the bell icon)
-      await adminSupabase.from('notifications').insert({
+      adminSupabase.from('notifications').insert({
         id: `welcome-notif-${user.id}`,
         user_id: user.id,
         type: 'message',
@@ -72,21 +72,25 @@ export async function GET(request: NextRequest) {
         body: 'Your email has been confirmed. Check your messages for your court gate code.',
         timestamp: new Date().toISOString(),
         read: false,
-      });
-
+      }),
       // Log the confirmed email to email_logs
-      await logEmail({
+      logEmail({
         type: 'signup_confirmation',
         recipientEmail: user.email,
         recipientUserId: user.id,
         status: 'sent',
         subject: 'Email Confirmed — Mono Tennis Club',
         metadata: { source: 'auth_callback', userName },
-      });
-    } catch (err) {
-      // Non-critical — don't block the redirect if welcome message fails
-      console.error('[MTC] Post-confirmation setup error:', err);
-    }
+      }),
+    ]);
+
+    // Log any failures (non-critical — don't block redirect)
+    results.forEach((r, i) => {
+      if (r.status === 'rejected') {
+        const labels = ['welcome_message', 'notification', 'email_log'];
+        console.error(`[MTC] Post-confirmation ${labels[i]} failed:`, r.reason);
+      }
+    });
   }
 
   return response;
