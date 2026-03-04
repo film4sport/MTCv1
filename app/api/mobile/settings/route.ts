@@ -20,6 +20,60 @@ export async function GET(request: Request) {
   }
 }
 
+/** Get or update notification preferences for the current user */
+export async function PATCH(request: Request) {
+  const authResult = await authenticateMobileRequest(request);
+  if (authResult instanceof NextResponse) return authResult;
+
+  try {
+    const supabase = getAdminClient();
+    const body = await request.json();
+
+    if (body.action === 'getNotifPrefs') {
+      // Fetch notification preferences
+      const { data } = await supabase
+        .from('notification_preferences')
+        .select('*')
+        .eq('user_id', authResult.id)
+        .single();
+
+      if (!data) {
+        return NextResponse.json({ bookings: true, events: true, partners: true, messages: true, programs: true });
+      }
+      return NextResponse.json({
+        bookings: data.bookings,
+        events: data.events,
+        partners: data.partners,
+        messages: data.messages,
+        programs: data.programs,
+      });
+    }
+
+    if (body.action === 'setNotifPrefs') {
+      const prefs = body.prefs;
+      if (!prefs || typeof prefs !== 'object') {
+        return NextResponse.json({ error: 'Missing prefs object' }, { status: 400 });
+      }
+
+      const { error } = await supabase.from('notification_preferences').upsert({
+        user_id: authResult.id,
+        bookings: prefs.bookings !== undefined ? !!prefs.bookings : true,
+        events: prefs.events !== undefined ? !!prefs.events : true,
+        partners: prefs.partners !== undefined ? !!prefs.partners : true,
+        messages: prefs.messages !== undefined ? !!prefs.messages : true,
+        programs: prefs.programs !== undefined ? !!prefs.programs : true,
+      }, { onConflict: 'user_id' });
+
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ success: true });
+    }
+
+    return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
+  } catch {
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+  }
+}
+
 /** Update club settings (admin only) */
 export async function POST(request: Request) {
   const authResult = await authenticateMobileRequest(request);

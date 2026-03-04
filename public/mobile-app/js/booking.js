@@ -213,9 +213,12 @@
 
   function getEventSpan(ev) { return timeToIndex(ev.endTime)-timeToIndex(ev.startTime); }
 
-  // Check if a court is closed at a given time
+  // Check if a court is closed at a given time (hours) or in maintenance
   function isCourtClosed(court, time) {
-    const closeTime = MTC.config.courtHours[court] ? MTC.config.courtHours[court].close : '22:00';
+    // Check maintenance status from API
+    var courtConfig = MTC.config.courts.find(function(c) { return c.id === court; });
+    if (courtConfig && courtConfig.status === 'maintenance') return true;
+    var closeTime = MTC.config.courtHours[court] ? MTC.config.courtHours[court].close : '22:00';
     return timeToMinutes(time) >= timeToMinutes(closeTime);
   }
 
@@ -1044,6 +1047,25 @@
     if (typeof initBookingSystem === 'function') {
       try { initBookingSystem(); } catch(e) { /* may not be on booking screen */ }
     }
+  };
+
+  /**
+   * Update court status from Supabase API.
+   * Called by auth.js after login when API data is available.
+   * Merges maintenance status into MTC.config.courts so booking grid reflects closures.
+   */
+  window.updateCourtsFromAPI = function(apiCourts) {
+    if (!Array.isArray(apiCourts)) return;
+    apiCourts.forEach(function(apiCourt) {
+      var configCourt = MTC.config.courts.find(function(c) { return c.id === apiCourt.id; });
+      if (configCourt) {
+        configCourt.status = apiCourt.status || 'available';
+      }
+    });
+    // Store for offline access
+    MTC.storage.set('mtc-api-courts', apiCourts);
+    // Re-render booking grid if currently on that screen
+    try { initBookingSystem(); } catch(e) { /* may not be on booking screen */ }
   };
 
   /**

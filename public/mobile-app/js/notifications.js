@@ -526,6 +526,21 @@
       });
       settings.pushNotificationsEnabled = pushNotificationsEnabled;
       MTC.storage.set('mtc-settings', settings);
+
+      // Sync notification preferences to Supabase
+      if (typeof MTC !== 'undefined' && MTC.fn && MTC.fn.apiRequest) {
+        var prefs = {
+          bookings: settings['profile-toggle-0'] !== false,
+          events: settings['profile-toggle-1'] !== false,
+          partners: settings['profile-toggle-2'] !== false,
+          messages: settings['profile-toggle-3'] !== false,
+          programs: settings['profile-toggle-4'] !== false,
+        };
+        MTC.fn.apiRequest('/mobile/settings', {
+          method: 'PATCH',
+          body: JSON.stringify({ action: 'setNotifPrefs', prefs: prefs })
+        }).catch(function() { /* non-critical */ });
+      }
     } catch(e) {}
   }
 
@@ -564,6 +579,85 @@
       }
     } catch(e) {}
   }
+
+  // ============================================
+  // API CONSUMERS
+  // ============================================
+
+  /**
+   * Update notifications from Supabase API.
+   * Called by auth.js after login when API data is available.
+   */
+  window.updateNotificationsFromAPI = function(apiNotifications) {
+    if (!Array.isArray(apiNotifications)) return;
+    MTC.storage.set('mtc-api-notifications', apiNotifications);
+
+    // Count unread
+    var unread = apiNotifications.filter(function(n) { return !n.read; }).length;
+    updateUnreadCount(unread);
+
+    // Inject recent unread notifications into the notifications screen
+    var container = document.querySelector('#screen-notifications .notifications-list');
+    if (!container) return;
+
+    apiNotifications.slice(0, 20).forEach(function(n) {
+      // Skip if already rendered (by ID)
+      if (container.querySelector('[data-notif-id="' + n.id + '"]')) return;
+      if (n.read) return; // Only inject unread
+
+      var el = document.createElement('div');
+      el.className = 'notification-item ' + (n.type || 'announcement') + '-type unread stagger-item';
+      el.setAttribute('data-notif-id', n.id);
+      el.onclick = function() {
+        markNotificationRead(el);
+        // Mark read on server
+        if (typeof MTC !== 'undefined' && MTC.fn && MTC.fn.apiRequest) {
+          MTC.fn.apiRequest('/mobile/notifications', {
+            method: 'PATCH',
+            body: JSON.stringify({ id: n.id })
+          }).catch(function() { /* non-critical */ });
+        }
+      };
+      el.innerHTML =
+        '<div class="notification-icon-wrap" style="background: var(--volt); color: #000;">' +
+          '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>' +
+        '</div>' +
+        '<div class="notification-content">' +
+          '<div class="notification-title">' + sanitizeHTML(n.title) + '</div>' +
+          '<div class="notification-message">' + sanitizeHTML(n.body) + '</div>' +
+          '<div class="notification-time">' + formatRelativeTime(n.timestamp) + '</div>' +
+        '</div>';
+
+      // Insert at top of list
+      if (container.firstChild) {
+        container.insertBefore(el, container.firstChild);
+      } else {
+        container.appendChild(el);
+      }
+    });
+  };
+
+  function formatRelativeTime(timestamp) {
+    if (!timestamp) return '';
+    var diff = Date.now() - new Date(timestamp).getTime();
+    var mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'Just now';
+    if (mins < 60) return mins + 'm ago';
+    var hrs = Math.floor(mins / 60);
+    if (hrs < 24) return hrs + 'h ago';
+    var days = Math.floor(hrs / 24);
+    return days + 'd ago';
+  }
+
+  /**
+   * Update notification preferences from Supabase API.
+   * Called by auth.js after login.
+   */
+  window.updateNotifPrefsFromAPI = function(prefs) {
+    if (!prefs || typeof prefs !== 'object') return;
+    // Store locally for the settings screen to pick up
+    MTC.storage.set('mtc-notif-prefs', prefs);
+  };
 
   // ============================================
   // EXPORTS

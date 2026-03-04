@@ -88,27 +88,37 @@ export async function POST(request: Request) {
   }
 }
 
-/** Update a member profile (admin only) */
+/** Update a member profile — members can update own profile, admins can update anyone */
 export async function PATCH(request: Request) {
   const authResult = await authenticateMobileRequest(request);
   if (authResult instanceof NextResponse) return authResult;
-  if (authResult.role !== 'admin') {
-    return NextResponse.json({ error: 'Admin only' }, { status: 403 });
-  }
 
   try {
-    const { memberId, name, email, status } = await request.json();
-    if (!memberId) {
-      return NextResponse.json({ error: 'Missing memberId' }, { status: 400 });
+    const body = await request.json();
+    const memberId = body.memberId || authResult.id; // default to self
+    const isAdmin = authResult.role === 'admin';
+    const isSelf = memberId === authResult.id;
+
+    // Non-admins can only update their own profile
+    if (!isAdmin && !isSelf) {
+      return NextResponse.json({ error: 'Can only update your own profile' }, { status: 403 });
     }
 
     const supabase = getAdminClient();
-
-    // Build update object with only provided fields
     const updates: ProfileUpdate = {};
-    if (name?.trim()) updates.name = sanitizeInput(name, 100);
-    if (email?.trim()) updates.email = email.trim().slice(0, 254);
-    if (status?.trim()) updates.status = sanitizeInput(status, 20).toLowerCase();
+
+    // Fields members can update on themselves
+    if (body.avatar !== undefined) updates.avatar = sanitizeInput(body.avatar, 50);
+    if (body.ntrp !== undefined) updates.ntrp = Number(body.ntrp) || 3.0;
+    if (body.skillLevel !== undefined) updates.skill_level = sanitizeInput(body.skillLevel, 20);
+    if (body.skillLevelSet !== undefined) updates.skill_level_set = !!body.skillLevelSet;
+
+    // Fields only admins can update
+    if (isAdmin) {
+      if (body.name?.trim()) updates.name = sanitizeInput(body.name, 100);
+      if (body.email?.trim()) updates.email = body.email.trim().slice(0, 254);
+      if (body.status?.trim()) updates.status = sanitizeInput(body.status, 20).toLowerCase();
+    }
 
     if (Object.keys(updates).length === 0) {
       return NextResponse.json({ error: 'No fields to update' }, { status: 400 });

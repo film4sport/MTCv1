@@ -26,6 +26,10 @@ export interface ProfileUpdate {
   name?: string;
   email?: string;
   status?: string;
+  avatar?: string;
+  ntrp?: number;
+  skill_level?: string;
+  skill_level_set?: boolean;
 }
 
 export interface EventUpdate {
