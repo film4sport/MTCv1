@@ -25,13 +25,25 @@ export async function GET(request: Request) {
 
     const dismissedIds = new Set((dismissals || []).map(d => d.announcement_id));
 
-    const result = (announcements || []).map(a => ({
-      id: a.id,
-      text: a.text,
-      type: a.type,
-      date: a.date,
-      dismissed: dismissedIds.has(a.id),
-    }));
+    // Filter by audience based on user's interclub team
+    const userTeam = authResult.interclubTeam || 'none';
+    const result = (announcements || [])
+      .filter(a => {
+        const audience = a.audience || 'all';
+        if (audience === 'all') return true;
+        if (audience === 'interclub_a') return userTeam === 'a';
+        if (audience === 'interclub_b') return userTeam === 'b';
+        if (audience === 'interclub_all') return userTeam === 'a' || userTeam === 'b';
+        return true;
+      })
+      .map(a => ({
+        id: a.id,
+        text: a.text,
+        type: a.type,
+        audience: a.audience || 'all',
+        date: a.date,
+        dismissed: dismissedIds.has(a.id),
+      }));
 
     return NextResponse.json(result);
   } catch {
@@ -48,7 +60,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { text, type, title } = await request.json();
+    const { text, type, title, audience } = await request.json();
     if (!text?.trim()) {
       return NextResponse.json({ error: 'Missing text' }, { status: 400 });
     }
@@ -61,22 +73,34 @@ export async function POST(request: Request) {
     const id = `ann-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const sanitizedText = sanitizeInput(text, 1000);
     const announcementType = type || 'info';
+    const validAudiences = ['all', 'interclub_a', 'interclub_b', 'interclub_all'];
+    const announcementAudience = validAudiences.includes(audience) ? audience : 'all';
 
     const { error } = await supabase.from('announcements').insert({
       id,
       text: sanitizedText,
       type: announcementType,
+      audience: announcementAudience,
       date: new Date().toISOString().split('T')[0],
     });
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-    // Create a notification for every member so they see it in their bell icon
-    const { data: allMembers } = await supabase.from('profiles').select('id');
+    // Create notifications — filter recipients by audience
+    const { data: allMembers } = await supabase.from('profiles').select('id, interclub_team');
     if (allMembers && allMembers.length > 0) {
+      const targetMembers = allMembers.filter((m) => {
+        if (announcementAudience === 'all') return true;
+        const team = m.interclub_team || 'none';
+        if (announcementAudience === 'interclub_a') return team === 'a';
+        if (announcementAudience === 'interclub_b') return team === 'b';
+        if (announcementAudience === 'interclub_all') return team === 'a' || team === 'b';
+        return true;
+      });
+
       const now = new Date().toISOString();
       const typeEmoji = announcementType === 'urgent' ? '🔴' : announcementType === 'warning' ? '⚠️' : '📢';
       const notifTitle = title ? sanitizeInput(title, 200) : `${typeEmoji} Club Announcement`;
-      const notifications = allMembers.map(member => ({
+      const notifications = targetMembers.map(member => ({
         id: `notif-ann-${id}-${member.id.slice(0, 8)}`,
         user_id: member.id,
         type: 'announcement',

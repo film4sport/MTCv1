@@ -80,6 +80,11 @@
       setTimeout(function() { renderWeeklyGrid(); }, 100);
     }
 
+    // Initialize profile extras (interclub team, gate code)
+    if (screen === 'profile') {
+      setTimeout(function() { if (typeof initProfileExtras === 'function') initProfileExtras(); }, 100);
+    }
+
     // Render schedule bookings dynamically
     if (screen === 'schedule') {
       setTimeout(function() {

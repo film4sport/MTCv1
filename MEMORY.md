@@ -995,6 +995,43 @@ Closed remaining test coverage and CI gaps to bring all platforms to true 10/10:
 - Password reset URL configured via `NEXT_PUBLIC_SITE_URL` env var (defaults to production domain)
 - **Local verification**: Use `npm run check` (tsc + mobile build) instead of `npm run build` in Cowork/Claude Code sessions. Full Next.js build times out in the VM. CI handles the full build on push.
 
+### Cowork Session (2026-03-04) — Interclub Team Announcements + Gate Code Display
+
+**New feature: Targeted announcements by interclub team + gate code display for members.**
+
+**Schema changes (need migration):**
+```sql
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS interclub_team text default 'none' check (interclub_team in ('none', 'a', 'b'));
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS interclub_captain boolean default false;
+ALTER TABLE announcements ADD COLUMN IF NOT EXISTS audience text default 'all' check (audience in ('all', 'interclub_a', 'interclub_b', 'interclub_all'));
+```
+
+**Dashboard changes:**
+- `lib/types.ts` — Added `interclubTeam`, `interclubCaptain` to User; `AnnouncementAudience` type; `audience` to Announcement
+- `lib/db.ts` — Maps `interclub_team`/`interclub_captain`/`audience` in fetchMembers, fetchAnnouncements, createAnnouncement, updateProfile
+- `profile/page.tsx` — Interclub team selector (3 buttons) + gate code display section
+- `admin/components/AdminAnnouncementsTab.tsx` — Audience dropdown (All/Team A/Team B/All Interclub) + audience badges
+- `admin/components/AdminMembersTab.tsx` — Team filter buttons, team badges, captain toggle (★/☆)
+- `admin/page.tsx` — Passes audience through to announcements, filters notification targets by team, captain toggle handler
+- `page.tsx` (home) — Filters announcements by user's interclubTeam
+
+**API changes:**
+- `api/mobile-auth/route.ts` — Returns `interclubTeam` from profile on login
+- `api/mobile/auth-helper.ts` — `AuthenticatedUser` includes `interclubTeam`, selected in profile query
+- `api/mobile/announcements/route.ts` — GET filters by user's team, POST accepts `audience` and filters notification recipients
+- `api/mobile/settings/route.ts` — PATCH accepts `setInterclubTeam` action
+- `api/mobile/types.ts` — Added `interclub_team`, `interclub_captain` to ProfileUpdate
+
+**Mobile PWA changes:**
+- `index.html` — Interclub team selector buttons + gate code display section in profile screen
+- `js/profile.js` — `selectInterclubTeam()` + `initProfileExtras()` (team state restore + gate code display)
+- `js/navigation.js` — Calls `initProfileExtras()` on profile screen
+- `js/auth.js` — Stores `interclubTeam` in currentUser, loads club settings (gate code) on login
+- `js/notifications.js` — `sendAnnouncement()` maps recipient buttons to API `audience` field
+- `js/admin.js` — `postAnnouncement()` passes `audience: 'all'` default
+
+**Build verified:** `npm run check` passes clean (tsc + mobile build). All file integrity verified.
+
 ### Environment Limitations (IMPORTANT)
 - **Cowork VM has NO Playwright browsers installed.** Never attempt to run E2E tests in Cowork — they will stall or error. E2E tests only run in CI (GitHub Actions) or on the dev machine.
 - **If a command fails once, diagnose and explain — don't retry.** Repeated blind retries waste the user's time.

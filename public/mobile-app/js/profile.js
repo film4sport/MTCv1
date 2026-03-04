@@ -413,4 +413,75 @@
   } else {
     renderFamilySwitcher();
   }
+
+  // ============================================
+  // INTERCLUB TEAM SELECTION
+  // ============================================
+  window.selectInterclubTeam = function(team, btnEl) {
+    // Update button visuals
+    var allBtns = document.querySelectorAll('#interclubTeamBtns .interclub-team-btn');
+    allBtns.forEach(function(b) {
+      b.classList.remove('active');
+      b.style.background = 'var(--bg-secondary)';
+      b.style.color = b.getAttribute('data-team') === 'none' ? 'var(--text-muted)' : 'var(--text-primary)';
+      b.style.borderColor = 'var(--border-color)';
+    });
+    if (btnEl) {
+      btnEl.classList.add('active');
+      btnEl.style.background = 'var(--volt)';
+      btnEl.style.color = '#000';
+      btnEl.style.borderColor = 'var(--volt)';
+    }
+
+    // Save to localStorage
+    var user = MTC.storage.get('mtc-user', null) || MTC.storage.get('mtc-current-user', null);
+    if (user) {
+      user.interclubTeam = team;
+      MTC.storage.set('mtc-user', user);
+      MTC.storage.set('mtc-current-user', user);
+    }
+
+    // Sync to Supabase
+    if (MTC.fn && MTC.fn.apiRequest) {
+      MTC.fn.apiRequest('/mobile/settings', {
+        method: 'PATCH',
+        body: JSON.stringify({ action: 'setInterclubTeam', team: team })
+      }).then(function() {
+        showToast(team === 'none' ? 'Removed from interclub team' : 'Set to Interclub ' + team.toUpperCase() + ' Team');
+      }).catch(function() {
+        showToast('Failed to update team', 'error');
+      });
+    }
+  };
+
+  // Initialize interclub team + gate code on profile screen load
+  window.initProfileExtras = function() {
+    // Set interclub team button state
+    var user = MTC.storage.get('mtc-user', null) || MTC.storage.get('mtc-current-user', null);
+    var team = (user && user.interclubTeam) ? user.interclubTeam : 'none';
+    var allBtns = document.querySelectorAll('#interclubTeamBtns .interclub-team-btn');
+    allBtns.forEach(function(b) {
+      var btnTeam = b.getAttribute('data-team');
+      if (btnTeam === team) {
+        b.classList.add('active');
+        b.style.background = 'var(--volt)';
+        b.style.color = '#000';
+        b.style.borderColor = 'var(--volt)';
+      } else {
+        b.classList.remove('active');
+        b.style.background = 'var(--bg-secondary)';
+        b.style.color = btnTeam === 'none' ? 'var(--text-muted)' : 'var(--text-primary)';
+        b.style.borderColor = 'var(--border-color)';
+      }
+    });
+
+    // Show gate code from club settings
+    var settings = MTC.storage.get('mtc-club-settings', null);
+    var gateSection = document.getElementById('gateCodeSection');
+    var gateValue = document.getElementById('gateCodeValue');
+    if (settings && settings.gate_code && gateSection && gateValue) {
+      gateValue.textContent = settings.gate_code;
+      gateSection.style.display = 'block';
+    }
+  };
 })();

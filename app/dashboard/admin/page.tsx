@@ -21,6 +21,7 @@ export default function AdminPage() {
   const [memberSearch, setMemberSearch] = useState('');
   const [newAnnouncement, setNewAnnouncement] = useState('');
   const [newAnnouncementType, setNewAnnouncementType] = useState<'info' | 'warning' | 'urgent'>('info');
+  const [newAnnouncementAudience, setNewAnnouncementAudience] = useState<'all' | 'interclub_a' | 'interclub_b' | 'interclub_all'>('all');
 
   // Gate code state
   const [gateCode, setGateCode] = useState('');
@@ -125,19 +126,28 @@ export default function AdminPage() {
       id: generateId('a'),
       text: newAnnouncement.trim(),
       type: newAnnouncementType,
+      audience: newAnnouncementAudience,
       date: new Date().toISOString().split('T')[0],
       dismissedBy: [] as string[],
     };
     setAnnouncements([ann, ...announcements]);
     setNewAnnouncement('');
+    setNewAnnouncementAudience('all');
 
     try {
       await db.createAnnouncement(ann);
-      // Create a notification for every member
+      // Create a notification for targeted members
       const typeEmoji = ann.type === 'urgent' ? '🔴' : ann.type === 'warning' ? '⚠️' : '📢';
       const now = new Date().toISOString();
+      const targetMembers = members.filter(member => {
+        if (ann.audience === 'all') return true;
+        if (ann.audience === 'interclub_a') return member.interclubTeam === 'a';
+        if (ann.audience === 'interclub_b') return member.interclubTeam === 'b';
+        if (ann.audience === 'interclub_all') return member.interclubTeam === 'a' || member.interclubTeam === 'b';
+        return true;
+      });
       await Promise.allSettled(
-        members.map(member =>
+        targetMembers.map(member =>
           db.createNotification(member.id, {
             id: generateId('n'),
             type: 'announcement',
@@ -147,7 +157,8 @@ export default function AdminPage() {
           })
         )
       );
-      showToast('Announcement posted to all members');
+      const audienceLabel = ann.audience === 'all' ? 'all members' : ann.audience === 'interclub_a' ? 'Team A' : ann.audience === 'interclub_b' ? 'Team B' : 'all interclub members';
+      showToast(`Announcement posted to ${audienceLabel}`);
     } catch (err) {
       reportError(err instanceof Error ? err : new Error(String(err)), 'Supabase');
       showToast('Announcement saved locally — sync may be delayed', 'error');
@@ -217,6 +228,16 @@ export default function AdminPage() {
             memberSearch={memberSearch}
             onMemberSearchChange={setMemberSearch}
             onActionClick={(id, name, action) => setActionTarget({ id, name, action })}
+            onSetCaptain={async (userId, captain) => {
+              try {
+                await db.updateProfile(userId, { interclub_captain: captain });
+                setMembers(members.map(m => m.id === userId ? { ...m, interclubCaptain: captain } : m));
+                showToast(captain ? 'Set as team captain' : 'Removed captain status');
+              } catch (err) {
+                reportError(err instanceof Error ? err : new Error(String(err)), 'Supabase');
+                showToast('Failed to update captain status', 'error');
+              }
+            }}
           />
         )}
 
@@ -234,8 +255,10 @@ export default function AdminPage() {
             announcements={announcements}
             newAnnouncement={newAnnouncement}
             newAnnouncementType={newAnnouncementType}
+            newAnnouncementAudience={newAnnouncementAudience}
             onAnnouncementChange={setNewAnnouncement}
             onAnnouncementTypeChange={setNewAnnouncementType}
+            onAnnouncementAudienceChange={setNewAnnouncementAudience}
             onAddAnnouncement={addAnnouncement}
             onDeleteAnnouncement={deleteAnnouncement}
           />

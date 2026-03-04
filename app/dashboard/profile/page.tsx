@@ -5,9 +5,15 @@ import { useApp } from '../lib/store';
 import { useToast } from '../lib/toast';
 import DashboardHeader from '../components/DashboardHeader';
 import { AvatarDisplay, AVATAR_OPTIONS, AVATAR_SVGS } from '../lib/avatars';
-import type { SkillLevel, FamilyMember } from '../lib/types';
+import type { SkillLevel, FamilyMember, User } from '../lib/types';
 import * as db from '../lib/db';
 import { reportError } from '../../lib/errorReporter';
+
+const INTERCLUB_TEAMS: { value: User['interclubTeam']; label: string; color: string; bg: string }[] = [
+  { value: 'none', label: 'Not on a team', color: '#6b7266', bg: 'rgba(107, 114, 102, 0.08)' },
+  { value: 'a', label: 'A Team', color: '#6b7a3d', bg: 'rgba(107, 122, 61, 0.1)' },
+  { value: 'b', label: 'B Team', color: '#3BAFDA', bg: 'rgba(59, 175, 218, 0.1)' },
+];
 
 const SKILL_LEVELS: { value: SkillLevel; label: string; color: string; bg: string }[] = [
   { value: 'beginner', label: 'Beginner', color: '#16a34a', bg: 'rgba(34, 197, 94, 0.1)' },
@@ -32,6 +38,7 @@ export default function ProfilePage() {
   const [newMemberBirthYear, setNewMemberBirthYear] = useState('');
   const [savingMember, setSavingMember] = useState(false);
   const [editingMemberSkill, setEditingMemberSkill] = useState<string | null>(null);
+  const [gateCode, setGateCode] = useState<string | null>(null);
 
   const isFamily = currentUser?.membershipType === 'family';
   const adultCount = familyMembers.filter(m => m.type === 'adult').length;
@@ -88,6 +95,11 @@ export default function ProfilePage() {
     }
   }, [familyMembers, setFamilyMembers, showToast]);
 
+  // Load gate code on mount
+  useEffect(() => {
+    db.getGateCode().then(code => { if (code) setGateCode(code); });
+  }, []);
+
   // Esc key closes avatar picker
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape' && showAvatarPicker) setShowAvatarPicker(false); };
@@ -114,6 +126,18 @@ export default function ProfilePage() {
     } catch (err) {
       reportError(err instanceof Error ? err : new Error(String(err)), 'Supabase');
       showToast('Failed to update skill level. Please try again.', 'error');
+    }
+  };
+
+  const saveInterclubTeam = async (team: User['interclubTeam']) => {
+    if (!currentUser || team === undefined) return;
+    try {
+      await db.updateProfile(currentUser.id, { interclub_team: team });
+      updateCurrentUser({ interclubTeam: team });
+      showToast(team === 'none' ? 'Removed from interclub team' : `Set to Interclub ${team.toUpperCase()} Team`);
+    } catch (err) {
+      reportError(err instanceof Error ? err : new Error(String(err)), 'Supabase');
+      showToast('Failed to update team. Please try again.', 'error');
     }
   };
 
@@ -244,6 +268,44 @@ export default function ProfilePage() {
             </div>
           </div>
         </div>
+
+        {/* Interclub Team */}
+        <div className="glass-card rounded-2xl border p-6 section-card" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
+          <h3 className="font-semibold mb-2" style={{ color: '#2a2f1e' }}>Interclub Team</h3>
+          <p className="text-xs mb-3" style={{ color: '#6b7266' }}>Select your team for interclub competitive league play</p>
+          <div className="flex flex-wrap gap-2">
+            {INTERCLUB_TEAMS.map(team => (
+              <button
+                key={team.value}
+                onClick={() => saveInterclubTeam(team.value)}
+                className="px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 btn-press"
+                style={{
+                  background: (currentUser.interclubTeam || 'none') === team.value ? team.color : team.bg,
+                  color: (currentUser.interclubTeam || 'none') === team.value ? '#fff' : team.color,
+                  border: `1.5px solid ${(currentUser.interclubTeam || 'none') === team.value ? team.color : 'transparent'}`,
+                }}
+              >
+                {team.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Gate Code */}
+        {gateCode && (
+          <div className="glass-card rounded-2xl border p-6 section-card" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
+            <h3 className="font-semibold mb-2" style={{ color: '#2a2f1e' }}>Court Gate Code</h3>
+            <div className="flex items-center gap-3 p-3 rounded-xl" style={{ background: 'rgba(107, 122, 61, 0.06)', border: '1px solid rgba(107, 122, 61, 0.15)' }}>
+              <svg className="w-5 h-5 flex-shrink-0" style={{ color: '#6b7a3d' }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+              </svg>
+              <div>
+                <p className="text-lg font-bold tracking-widest" style={{ color: '#2a2f1e', fontFamily: 'monospace' }}>{gateCode}</p>
+                <p className="text-xs" style={{ color: '#6b7266' }}>Please keep confidential — do not share with non-members</p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Notifications */}
         <div className="glass-card rounded-2xl border p-6 section-card" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>

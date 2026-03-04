@@ -1,6 +1,6 @@
 import { supabase } from '../../lib/supabase';
 import { reportError } from '../../lib/errorReporter';
-import type { Booking, ClubEvent, Court, Partner, Conversation, Message, Announcement, Notification, CoachingProgram, NotificationPreferences, User, SkillLevel, FamilyMember } from './types';
+import type { Booking, ClubEvent, Court, Partner, Conversation, Message, Announcement, AnnouncementAudience, Notification, CoachingProgram, NotificationPreferences, User, SkillLevel, FamilyMember } from './types';
 
 // ─── Profiles ───────────────────────────────────────────
 
@@ -20,10 +20,12 @@ export async function fetchMembers(): Promise<User[]> {
     familyId: p.family_id ?? undefined,
     memberSince: p.member_since ?? undefined,
     avatar: p.avatar ?? undefined,
+    interclubTeam: (p.interclub_team as User['interclubTeam']) ?? 'none',
+    interclubCaptain: p.interclub_captain ?? false,
   }));
 }
 
-export async function updateProfile(userId: string, updates: { ntrp?: number; name?: string; skill_level?: string; skill_level_set?: boolean; membership_type?: string; family_id?: string; avatar?: string; preferences?: Record<string, unknown> }): Promise<void> {
+export async function updateProfile(userId: string, updates: { ntrp?: number; name?: string; skill_level?: string; skill_level_set?: boolean; membership_type?: string; family_id?: string; avatar?: string; preferences?: Record<string, unknown>; interclub_team?: string; interclub_captain?: boolean }): Promise<void> {
   const { error } = await supabase.from('profiles').update(updates).eq('id', userId);
   if (error) throw error;
 }
@@ -298,6 +300,7 @@ export async function fetchAnnouncements(userId: string): Promise<Announcement[]
     id: a.id,
     text: a.text,
     type: a.type as Announcement['type'],
+    audience: (a.audience as AnnouncementAudience) || 'all',
     date: a.date,
     dismissedBy: dismissedIds.has(a.id) ? [userId] : [],
   }));
@@ -316,6 +319,7 @@ export async function createAnnouncement(announcement: Announcement): Promise<vo
     id: announcement.id,
     text: announcement.text,
     type: announcement.type,
+    audience: announcement.audience || 'all',
     date: announcement.date,
   });
   if (error) throw error;

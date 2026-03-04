@@ -1,13 +1,29 @@
 'use client';
 
-import type { Announcement } from '../../lib/types';
+import type { Announcement, AnnouncementAudience } from '../../lib/types';
+
+const AUDIENCE_OPTIONS: { value: AnnouncementAudience; label: string }[] = [
+  { value: 'all', label: 'All Members' },
+  { value: 'interclub_a', label: 'Interclub A Team' },
+  { value: 'interclub_b', label: 'Interclub B Team' },
+  { value: 'interclub_all', label: 'All Interclub' },
+];
+
+const AUDIENCE_LABELS: Record<string, string> = {
+  all: 'All',
+  interclub_a: 'Team A',
+  interclub_b: 'Team B',
+  interclub_all: 'Interclub',
+};
 
 interface AdminAnnouncementsTabProps {
   announcements: Announcement[];
   newAnnouncement: string;
   newAnnouncementType: 'info' | 'warning' | 'urgent';
+  newAnnouncementAudience: AnnouncementAudience;
   onAnnouncementChange: (value: string) => void;
   onAnnouncementTypeChange: (value: 'info' | 'warning' | 'urgent') => void;
+  onAnnouncementAudienceChange: (value: AnnouncementAudience) => void;
   onAddAnnouncement: () => void;
   onDeleteAnnouncement: (id: string) => void;
 }
@@ -16,8 +32,10 @@ export default function AdminAnnouncementsTab({
   announcements,
   newAnnouncement,
   newAnnouncementType,
+  newAnnouncementAudience,
   onAnnouncementChange,
   onAnnouncementTypeChange,
+  onAnnouncementAudienceChange,
   onAddAnnouncement,
   onDeleteAnnouncement,
 }: AdminAnnouncementsTabProps) {
@@ -46,6 +64,16 @@ export default function AdminAnnouncementsTab({
             <option value="warning">Warning</option>
             <option value="urgent">Urgent</option>
           </select>
+          <select
+            value={newAnnouncementAudience}
+            onChange={(e) => onAnnouncementAudienceChange(e.target.value as AnnouncementAudience)}
+            className="px-3 py-2 rounded-xl text-sm border focus:outline-none"
+            style={{ borderColor: '#e0dcd3', color: '#2a2f1e' }}
+          >
+            {AUDIENCE_OPTIONS.map(opt => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
           <button
             onClick={onAddAnnouncement}
             disabled={!newAnnouncement.trim()}
@@ -64,7 +92,14 @@ export default function AdminAnnouncementsTab({
             <span className="text-lg">{a.type === 'urgent' ? '🔴' : a.type === 'warning' ? '⚠️' : 'ℹ️'}</span>
             <div>
               <p className="text-sm" style={{ color: '#2a2f1e' }}>{a.text}</p>
-              <p className="text-xs" style={{ color: '#6b7266' }}>{a.date}</p>
+              <div className="flex items-center gap-2 mt-0.5">
+                <p className="text-xs" style={{ color: '#6b7266' }}>{a.date}</p>
+                {a.audience && a.audience !== 'all' && (
+                  <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: 'rgba(59, 175, 218, 0.1)', color: '#3BAFDA' }}>
+                    {AUDIENCE_LABELS[a.audience] || a.audience}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
           <button

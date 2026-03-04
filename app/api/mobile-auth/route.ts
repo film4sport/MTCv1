@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
         if (!error && data.user && data.session) {
           const { data: profile } = await supabase
             .from('profiles')
-            .select('name, role, membership_type, family_id')
+            .select('name, role, membership_type, family_id, interclub_team')
             .eq('id', data.user.id)
             .single();
 
@@ -83,6 +83,7 @@ export async function POST(request: NextRequest) {
               accessToken: data.session.access_token,
               membershipType: profile.membership_type || 'adult',
               familyId: profile.family_id || null,
+              interclubTeam: profile.interclub_team || 'none',
               familyMembers,
             });
           }

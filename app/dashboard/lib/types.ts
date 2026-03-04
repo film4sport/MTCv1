@@ -16,6 +16,8 @@ export interface User {
   memberSince?: string;
   avatar?: string;
   preferences?: Record<string, unknown>;
+  interclubTeam?: 'none' | 'a' | 'b';
+  interclubCaptain?: boolean;
 }
 
 export interface FamilyMember {
@@ -122,10 +124,13 @@ export interface Conversation {
   messages: Message[];
 }
 
+export type AnnouncementAudience = 'all' | 'interclub_a' | 'interclub_b' | 'interclub_all';
+
 export interface Announcement {
   id: string;
   text: string;
   type: 'info' | 'warning' | 'urgent';
+  audience?: AnnouncementAudience;
   date: string;
   dismissedBy: string[];
 }

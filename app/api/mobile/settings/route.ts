@@ -68,6 +68,17 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ success: true });
     }
 
+    if (body.action === 'setInterclubTeam') {
+      const team = body.team;
+      const validTeams = ['none', 'a', 'b'];
+      if (!validTeams.includes(team)) {
+        return NextResponse.json({ error: 'Invalid team value' }, { status: 400 });
+      }
+      const { error } = await supabase.from('profiles').update({ interclub_team: team }).eq('id', authResult.id);
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ success: true });
+    }
+
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
   } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });

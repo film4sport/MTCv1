@@ -23,6 +23,8 @@ create table if not exists profiles (
   member_since text,
   avatar text,
   preferences jsonb default '{}',
+  interclub_team text default 'none' check (interclub_team in ('none', 'a', 'b')),
+  interclub_captain boolean default false,
   created_at timestamptz default now()
 );
 
@@ -170,6 +172,7 @@ create table if not exists announcements (
   id text primary key,
   text text not null,
   type text not null default 'info' check (type in ('info', 'warning', 'urgent')),
+  audience text default 'all' check (audience in ('all', 'interclub_a', 'interclub_b', 'interclub_all')),
   date date not null,
   created_at timestamptz default now()
 );
