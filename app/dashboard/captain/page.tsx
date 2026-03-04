@@ -28,8 +28,12 @@ export default function CaptainPage() {
   const [loading, setLoading] = useState(true);
 
   // Captain state
+  const isAdmin = currentUser?.role === 'admin';
   const isCaptain = currentUser?.interclubCaptain === true;
-  const team = currentUser?.interclubTeam as 'a' | 'b' | undefined;
+  const userTeam = currentUser?.interclubTeam as 'a' | 'b' | 'none' | undefined;
+  const [adminTeamView, setAdminTeamView] = useState<'a' | 'b'>('a');
+  // Admins can view any team; members see their own
+  const team = (isAdmin && (!userTeam || userTeam === 'none')) ? adminTeamView : (userTeam as 'a' | 'b' | undefined);
   const isOnTeam = team === 'a' || team === 'b';
 
   // Roster
@@ -168,6 +172,21 @@ export default function CaptainPage() {
     <div style={{ minHeight: '100vh', background: '#1a1f12' }}>
       <DashboardHeader title="My Team" />
       <div style={{ maxWidth: 900, margin: '0 auto', padding: '24px 16px' }}>
+        {/* Admin team selector */}
+        {isAdmin && (!userTeam || userTeam === 'none') && (
+          <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+            {(['a', 'b'] as const).map(t => (
+              <button key={t} onClick={() => setAdminTeamView(t)} style={{
+                padding: '8px 20px', borderRadius: 10, border: 'none', cursor: 'pointer',
+                background: team === t ? '#d4e157' : 'rgba(255,255,255,0.08)',
+                color: team === t ? '#1a1f12' : 'rgba(232,228,217,0.6)',
+                fontWeight: 600, fontSize: 13, transition: 'all 0.2s',
+              }}>
+                Team {t.toUpperCase()}
+              </button>
+            ))}
+          </div>
+        )}
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
           <div style={{ width: 48, height: 48, borderRadius: 12, background: 'rgba(212, 225, 87, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
