@@ -59,8 +59,8 @@ export default function AdminMembersTab({
           </button>
         ))}
       </div>
-      <div className="glass-card rounded-2xl border overflow-hidden" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
-        <table className="w-full">
+      <div className="glass-card rounded-2xl border overflow-x-auto" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
+        <table className="w-full" style={{ minWidth: '900px' }}>
           <thead>
             <tr style={{ background: '#faf8f3' }}>
               <th className="text-left px-4 py-3 text-xs font-medium" style={{ color: '#6b7266' }}>Name</th>
