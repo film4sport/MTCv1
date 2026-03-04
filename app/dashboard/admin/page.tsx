@@ -6,6 +6,7 @@ import { useToast } from '../lib/toast';
 import DashboardHeader from '../components/DashboardHeader';
 import { generateId, useFocusTrap } from '../lib/utils';
 import * as db from '../lib/db';
+import { reportError } from '../../lib/errorReporter';
 
 type AdminTab = 'dashboard' | 'members' | 'courts' | 'announcements';
 
@@ -64,7 +65,7 @@ export default function AdminPage() {
       setNewGateCode('');
       showToast(`Gate code updated. ${activeMembers.length} member${activeMembers.length !== 1 ? 's' : ''} notified.`);
     } catch (err) {
-      console.error('[MTC Supabase] gate code update:', err);
+      reportError(err instanceof Error ? err : new Error(String(err)), 'Supabase gate code update');
       showToast('Failed to update gate code', 'error');
     }
     setGateCodeLoading(false);
@@ -89,7 +90,7 @@ export default function AdminPage() {
         showToast(`${actionTarget.name}'s account deleted.`);
       }
     } catch (err) {
-      console.error('[MTC Supabase] member action:', err);
+      reportError(err instanceof Error ? err : new Error(String(err)), 'Supabase member action');
       showToast('Action failed', 'error');
     }
     setActionLoading(false);
@@ -189,7 +190,7 @@ export default function AdminPage() {
     const court = courts.find(c => c.id === courtId);
     const newStatus = court?.status === 'maintenance' ? 'available' : 'maintenance';
     setCourts(courts.map(c => c.id === courtId ? { ...c, status: newStatus } as typeof c : c));
-    db.updateCourtStatus(courtId, newStatus).catch((err) => console.error('[MTC Supabase]', err));
+    db.updateCourtStatus(courtId, newStatus).catch((err) => reportError(err instanceof Error ? err : new Error(String(err)), 'Supabase'));
   };
 
   const addAnnouncement = () => {
@@ -203,12 +204,12 @@ export default function AdminPage() {
     };
     setAnnouncements([ann, ...announcements]);
     setNewAnnouncement('');
-    db.createAnnouncement(ann).catch((err) => console.error('[MTC Supabase]', err));
+    db.createAnnouncement(ann).catch((err) => reportError(err instanceof Error ? err : new Error(String(err)), 'Supabase'));
   };
 
   const deleteAnnouncement = (id: string) => {
     setAnnouncements(announcements.filter(a => a.id !== id));
-    db.deleteAnnouncement(id).catch((err) => console.error('[MTC Supabase]', err));
+    db.deleteAnnouncement(id).catch((err) => reportError(err instanceof Error ? err : new Error(String(err)), 'Supabase'));
   };
 
   const tabs: { key: AdminTab; label: string }[] = [
