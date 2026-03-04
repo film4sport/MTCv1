@@ -24,10 +24,16 @@ export default function BookCourtPage() {
   const { currentUser, members, bookings, courts, events, addBooking, cancelBooking, activeProfile, activeDisplayName } = useApp();
   const { showToast } = useToast();
   const [bookingSuccess, setBookingSuccess] = useState<{ courtName: string; date: string; time: string; participants?: { id: string; name: string }[]; duration?: number; matchType?: 'singles' | 'doubles' } | null>(null);
-  const [view, setView] = useState<ViewMode>(() => {
-    if (typeof window !== 'undefined' && window.innerWidth >= 640) return 'all-courts';
-    return 'week';
-  });
+  const [view, setView] = useState<ViewMode>('week');
+
+  // Set default view to 'all-courts' on desktop after hydration to avoid SSR mismatch
+  const hasSetInitialView = useRef(false);
+  useEffect(() => {
+    if (!hasSetInitialView.current && window.innerWidth >= 640) {
+      setView('all-courts');
+      hasSetInitialView.current = true;
+    }
+  }, []);
   const [weekStart, setWeekStart] = useState(() => {
     const d = new Date();
     d.setHours(0, 0, 0, 0);

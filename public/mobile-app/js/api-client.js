@@ -222,14 +222,23 @@
   // BACKGROUND SYNC — queue failed requests for retry when online
   // ============================================
   var pendingQueue = MTC.storage.get('mtc-pending-queue', []);
+  var MAX_RETRIES = 3;
+  var MAX_QUEUE_SIZE = 20;
+  var isProcessingQueue = false;
 
   /**
    * Queue a failed request for background sync retry.
-   * @param {string} type - 'booking' or 'message'
+   * @param {string} type - 'booking' or 'cancel'
    * @param {Object} data - Request payload
+   * @param {number} [retries] - Current retry count
    */
-  function queueForSync(type, data) {
-    pendingQueue.push({ type: type, data: data, timestamp: Date.now() });
+  function queueForSync(type, data, retries) {
+    // Enforce max queue size to prevent localStorage bloat
+    if (pendingQueue.length >= MAX_QUEUE_SIZE) {
+      MTC.warn('Sync queue full (' + MAX_QUEUE_SIZE + ') — dropping oldest item');
+      pendingQueue.shift();
+    }
+    pendingQueue.push({ type: type, data: data, timestamp: Date.now(), retries: retries || 0 });
     MTC.storage.set('mtc-pending-queue', pendingQueue);
 
     // Request background sync if available
@@ -244,24 +253,37 @@
 
   /**
    * Process pending sync queue (called when back online or by SW message).
+   * Guarded against concurrent execution.
    */
   function processPendingQueue() {
-    if (pendingQueue.length === 0) return;
+    if (pendingQueue.length === 0 || isProcessingQueue) return;
+    isProcessingQueue = true;
 
     var queue = pendingQueue.slice(); // copy
     pendingQueue = [];
     MTC.storage.set('mtc-pending-queue', []);
 
-    var syncCount = { ok: 0, fail: 0 };
+    var syncCount = { ok: 0, fail: 0, dropped: 0 };
     var remaining = queue.length;
+
+    function finishItem() {
+      remaining--;
+      if (remaining === 0) {
+        isProcessingQueue = false;
+        if (syncCount.ok > 0) {
+          if (typeof showToast === 'function') showToast(syncCount.ok + ' queued action(s) synced!');
+        }
+        if (syncCount.dropped > 0) {
+          if (typeof showToast === 'function') showToast(syncCount.dropped + ' stale action(s) expired', 'warning');
+        }
+      }
+    }
 
     queue.forEach(function(item) {
       // Skip items older than 24 hours (stale bookings are unlikely valid)
       if (Date.now() - item.timestamp > 24 * 60 * 60 * 1000) {
-        remaining--;
-        if (remaining === 0 && syncCount.ok > 0) {
-          if (typeof showToast === 'function') showToast(syncCount.ok + ' queued action(s) synced! ✓');
-        }
+        syncCount.dropped++;
+        finishItem();
         return;
       }
 
@@ -276,15 +298,18 @@
           syncCount.ok++;
         } else {
           syncCount.fail++;
-          // Re-queue if still failing (but not if it's a conflict/duplicate)
-          if (result.status !== 409) {
-            queueForSync(item.type, item.data);
+          var retryCount = (item.retries || 0) + 1;
+          // Re-queue only for server errors (5xx/network), not client errors (4xx)
+          if (result.status >= 500 || result.status === 0) {
+            if (retryCount < MAX_RETRIES) {
+              queueForSync(item.type, item.data, retryCount);
+            } else {
+              if (typeof showToast === 'function') showToast('A queued ' + item.type + ' failed after ' + MAX_RETRIES + ' retries', 'error');
+            }
           }
+          // 4xx errors (including 409 conflict) are not retried — they won't succeed
         }
-        remaining--;
-        if (remaining === 0 && syncCount.ok > 0) {
-          if (typeof showToast === 'function') showToast(syncCount.ok + ' queued action(s) synced! ✓');
-        }
+        finishItem();
       });
     });
   }

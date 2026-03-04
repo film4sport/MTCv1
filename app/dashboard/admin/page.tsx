@@ -119,7 +119,7 @@ export default function AdminPage() {
     db.updateCourtStatus(courtId, newStatus).catch((err) => reportError(err instanceof Error ? err : new Error(String(err)), 'Supabase'));
   };
 
-  const addAnnouncement = () => {
+  const addAnnouncement = async () => {
     if (!newAnnouncement.trim()) return;
     const ann = {
       id: generateId('a'),
@@ -130,7 +130,28 @@ export default function AdminPage() {
     };
     setAnnouncements([ann, ...announcements]);
     setNewAnnouncement('');
-    db.createAnnouncement(ann).catch((err) => reportError(err instanceof Error ? err : new Error(String(err)), 'Supabase'));
+
+    try {
+      await db.createAnnouncement(ann);
+      // Create a notification for every member
+      const typeEmoji = ann.type === 'urgent' ? '🔴' : ann.type === 'warning' ? '⚠️' : '📢';
+      const now = new Date().toISOString();
+      await Promise.allSettled(
+        members.map(member =>
+          db.createNotification(member.id, {
+            id: generateId('n'),
+            type: 'announcement',
+            title: `${typeEmoji} Club Announcement`,
+            body: ann.text,
+            timestamp: now,
+          })
+        )
+      );
+      showToast('Announcement posted to all members');
+    } catch (err) {
+      reportError(err instanceof Error ? err : new Error(String(err)), 'Supabase');
+      showToast('Announcement saved locally — sync may be delayed', 'error');
+    }
   };
 
   const deleteAnnouncement = (id: string) => {

@@ -39,7 +39,7 @@ export async function GET(request: Request) {
   }
 }
 
-/** Create an announcement (admin only) */
+/** Create an announcement (admin only) and notify all members */
 export async function POST(request: Request) {
   const authResult = await authenticateMobileRequest(request);
   if (authResult instanceof NextResponse) return authResult;
@@ -48,7 +48,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { text, type } = await request.json();
+    const { text, type, title } = await request.json();
     if (!text?.trim()) {
       return NextResponse.json({ error: 'Missing text' }, { status: 400 });
     }
@@ -59,13 +59,39 @@ export async function POST(request: Request) {
 
     const supabase = getAdminClient();
     const id = `ann-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const sanitizedText = sanitizeInput(text, 1000);
+    const announcementType = type || 'info';
+
     const { error } = await supabase.from('announcements').insert({
       id,
-      text: sanitizeInput(text, 1000),
-      type: type || 'info',
+      text: sanitizedText,
+      type: announcementType,
       date: new Date().toISOString().split('T')[0],
     });
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+    // Create a notification for every member so they see it in their bell icon
+    const { data: allMembers } = await supabase.from('profiles').select('id');
+    if (allMembers && allMembers.length > 0) {
+      const now = new Date().toISOString();
+      const typeEmoji = announcementType === 'urgent' ? '🔴' : announcementType === 'warning' ? '⚠️' : '📢';
+      const notifTitle = title ? sanitizeInput(title, 200) : `${typeEmoji} Club Announcement`;
+      const notifications = allMembers.map(member => ({
+        id: `notif-ann-${id}-${member.id.slice(0, 8)}`,
+        user_id: member.id,
+        type: 'announcement',
+        title: notifTitle,
+        body: sanitizedText,
+        timestamp: now,
+        read: false,
+      }));
+      // Batch insert (Supabase handles up to 1000 rows per insert)
+      const { error: notifErr } = await supabase.from('notifications').insert(notifications);
+      if (notifErr) {
+        // Log but don't fail the announcement creation
+        console.error('Failed to create announcement notifications:', notifErr.message);
+      }
+    }
 
     return NextResponse.json({ success: true, id });
   } catch {
