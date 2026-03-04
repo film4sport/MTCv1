@@ -123,11 +123,8 @@ test.describe('Mobile PWA — Authenticated Navigation', () => {
   test('can navigate to partners screen', async ({ page }) => {
     await mockAuthenticatedState(page);
 
-    await page.evaluate(() => {
-      if (typeof MTC !== 'undefined' && MTC.fn && MTC.fn.navigateTo) {
-        MTC.fn.navigateTo('partners');
-      }
-    });
+    await page.waitForFunction(() => typeof MTC !== 'undefined' && MTC.fn && MTC.fn.navigateTo, null, { timeout: 5000 });
+    await page.evaluate(() => { MTC.fn.navigateTo('partners'); });
     await page.waitForTimeout(500);
 
     const active = await page.evaluate(() => {
