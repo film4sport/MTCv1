@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useApp } from '../lib/store';
+import * as db from '../lib/db';
 
 interface TourStep {
   title: string;
@@ -58,9 +59,15 @@ export default function OnboardingTour() {
   useEffect(() => {
     if (!currentUser?.id) return;
     try {
-      // Per-user key so tour shows for each new account (not blocked by other accounts on same device)
+      // Check localStorage first (fast), then Supabase preferences as fallback
       const key = `mtc-onboarding-done-${currentUser.id}`;
       if (localStorage.getItem(key) === 'true') return;
+      // Also check Supabase preferences (synced across devices)
+      const prefs = currentUser.preferences;
+      if (prefs?.onboardingCompleted) {
+        localStorage.setItem(key, 'true'); // cache locally
+        return;
+      }
     } catch { /* ignore */ }
     // Small delay so dashboard renders first
     const timer = setTimeout(() => setVisible(true), 1200);
@@ -101,7 +108,11 @@ export default function OnboardingTour() {
   const finish = () => {
     setVisible(false);
     try {
-      if (currentUser?.id) localStorage.setItem(`mtc-onboarding-done-${currentUser.id}`, 'true');
+      if (currentUser?.id) {
+        localStorage.setItem(`mtc-onboarding-done-${currentUser.id}`, 'true');
+        // Sync to Supabase so it persists across devices
+        db.updateProfile(currentUser.id, { preferences: { ...(currentUser.preferences || {}), onboardingCompleted: true } }).catch(() => {});
+      }
     } catch { /* ignore */ }
   };
 

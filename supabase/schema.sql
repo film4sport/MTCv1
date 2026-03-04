@@ -22,6 +22,7 @@ create table if not exists profiles (
   family_id uuid references families(id),
   member_since text,
   avatar text,
+  preferences jsonb default '{}',
   created_at timestamptz default now()
 );
 

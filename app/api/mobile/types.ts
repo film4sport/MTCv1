@@ -30,6 +30,7 @@ export interface ProfileUpdate {
   ntrp?: number;
   skill_level?: string;
   skill_level_set?: boolean;
+  preferences?: Record<string, unknown>;
 }
 
 export interface EventUpdate {

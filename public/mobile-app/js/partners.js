@@ -361,6 +361,13 @@
 
   function savePrivacySettings(settings) {
     MTC.storage.set('mtc-privacy', settings);
+    // Sync to Supabase preferences
+    if (MTC.fn && MTC.fn.apiRequest) {
+      MTC.fn.apiRequest('/mobile/members', {
+        method: 'PATCH',
+        body: JSON.stringify({ preferences: { privacy: settings } })
+      }).catch(function() { MTC.warn('Privacy settings sync failed'); });
+    }
   }
 
   // onclick handler (generated HTML)

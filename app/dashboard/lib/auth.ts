@@ -31,6 +31,7 @@ export async function signIn(email: string, password: string): Promise<User | nu
     familyId: profile.family_id ?? undefined,
     memberSince: profile.member_since ?? undefined,
     avatar: profile.avatar ?? undefined,
+    preferences: profile.preferences ?? {},
   };
 }
 
@@ -137,5 +138,6 @@ export async function getCurrentUser(): Promise<User | null> {
     familyId: profile.family_id ?? undefined,
     memberSince: profile.member_since ?? undefined,
     avatar: profile.avatar ?? undefined,
+    preferences: profile.preferences ?? {},
   };
 }

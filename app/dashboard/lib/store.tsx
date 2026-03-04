@@ -529,7 +529,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const switchProfile = useCallback((profile: ActiveProfile) => {
     setActiveProfile(profile);
     saveJSON('mtc-active-profile', profile);
-  }, []);
+    // Sync to Supabase preferences
+    if (currentUser?.id) {
+      const prefActiveProfile = profile.type === 'primary' ? { type: 'primary' } : { type: 'family_member', memberId: (profile as { type: 'family_member'; member: { id: string } }).member.id };
+      const prefs = { ...(currentUser.preferences || {}), activeProfile: prefActiveProfile };
+      db.updateProfile(currentUser.id, { preferences: prefs }).catch(() => {});
+    }
+  }, [currentUser?.id, currentUser?.preferences]);
 
   // Computed: active display name, avatar, skill level based on activeProfile
   const activeDisplayName = useMemo(() => {

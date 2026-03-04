@@ -27,9 +27,25 @@
     }
   })();
 
-  // Private helper
+  // Private helper — save locally + sync to Supabase
   function saveProfileToStorage() {
     MTC.storage.set('mtc-profile', MTC.state.profileData);
+    // Sync to Supabase via PATCH /mobile/members
+    if (MTC.fn && MTC.fn.apiRequest) {
+      var data = MTC.state.profileData;
+      var body = { preferences: { availability: data.availability, playstyle: data.playstyle } };
+      // Map skill display value to DB fields
+      var skillOpt = profileFieldConfigs.skill.options.find(function(o) { return o.value === data.skill; });
+      if (skillOpt) {
+        body.ntrp = skillOpt.ntrp;
+        body.skillLevel = skillOpt.cls;
+        body.skillLevelSet = true;
+      }
+      MTC.fn.apiRequest('/mobile/members', {
+        method: 'PATCH',
+        body: JSON.stringify(body)
+      }).catch(function() { MTC.warn('Profile sync failed'); });
+    }
   }
 
   // Private helper
@@ -342,6 +358,16 @@
         MTC.state.activeFamilyMember = member;
         MTC.storage.set('mtc-active-family-member', member);
       }
+    }
+    // Sync active profile to Supabase
+    if (MTC.fn && MTC.fn.apiRequest) {
+      var activeProfile = memberId && memberId !== 'primary'
+        ? { type: 'family_member', memberId: memberId }
+        : { type: 'primary' };
+      MTC.fn.apiRequest('/mobile/members', {
+        method: 'PATCH',
+        body: JSON.stringify({ preferences: { activeProfile: activeProfile } })
+      }).catch(function() { MTC.warn('Active profile sync failed'); });
     }
     renderFamilySwitcher();
     showToast('Switched to ' + getActiveDisplayName());

@@ -13,7 +13,7 @@ export async function GET(request: Request) {
     // Always select all fields — filter email in response based on role
     const { data: members, error } = await supabase
       .from('profiles')
-      .select('id, name, email, role, ntrp, skill_level, avatar, member_since, status')
+      .select('id, name, email, role, ntrp, skill_level, avatar, member_since, status, preferences')
       .eq('status', 'active')
       .order('name', { ascending: true });
 
@@ -32,6 +32,7 @@ export async function GET(request: Request) {
       avatar: m.avatar,
       memberSince: m.member_since,
       status: m.status,
+      preferences: m.preferences || {},
     }));
 
     return NextResponse.json(result);
@@ -112,6 +113,18 @@ export async function PATCH(request: Request) {
     if (body.ntrp !== undefined) updates.ntrp = Number(body.ntrp) || 3.0;
     if (body.skillLevel !== undefined) updates.skill_level = sanitizeInput(body.skillLevel, 20);
     if (body.skillLevelSet !== undefined) updates.skill_level_set = !!body.skillLevelSet;
+
+    // Preferences JSONB merge (court prefs, privacy, onboarding, active profile, etc.)
+    if (body.preferences !== undefined && typeof body.preferences === 'object') {
+      // Fetch current preferences, merge with new ones
+      const { data: currentProfile } = await supabase
+        .from('profiles')
+        .select('preferences')
+        .eq('id', memberId)
+        .single();
+      const currentPrefs = (currentProfile?.preferences as Record<string, unknown>) || {};
+      updates.preferences = { ...currentPrefs, ...body.preferences };
+    }
 
     // Fields only admins can update
     if (isAdmin) {
