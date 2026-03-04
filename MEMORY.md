@@ -1032,6 +1032,67 @@ ALTER TABLE announcements ADD COLUMN IF NOT EXISTS audience text default 'all' c
 
 **Build verified:** `npm run check` passes clean (tsc + mobile build). All file integrity verified.
 
+### Cowork Session (2026-03-04) — Captain Team Management (Full Feature)
+
+**Captains can now: view roster, add/remove team members, post team updates, create match lineups, and manage availability.**
+
+**Schema changes (need migration):**
+```sql
+CREATE TABLE IF NOT EXISTS match_lineups (
+  id text PRIMARY KEY DEFAULT 'lineup-' || gen_random_uuid()::text,
+  team text NOT NULL CHECK (team IN ('a', 'b')),
+  match_date date NOT NULL,
+  match_time text,
+  opponent text,
+  location text,
+  notes text,
+  created_by uuid NOT NULL REFERENCES profiles(id),
+  created_at timestamptz DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS lineup_entries (
+  id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  lineup_id text NOT NULL REFERENCES match_lineups(id) ON DELETE CASCADE,
+  member_id uuid NOT NULL REFERENCES profiles(id),
+  status text DEFAULT 'pending' CHECK (status IN ('available', 'unavailable', 'maybe', 'pending')),
+  position text,
+  notes text,
+  updated_at timestamptz DEFAULT now(),
+  UNIQUE(lineup_id, member_id)
+);
+
+-- RLS policies for both tables (see schema.sql for full details)
+-- Indexes on (team, match_date), (lineup_id), (member_id)
+```
+
+**Dashboard changes:**
+- `lib/types.ts` — Added `LineupStatus`, `LineupEntry`, `MatchLineup` interfaces
+- `lib/db.ts` — Added `fetchLineups()`, `createLineup()`, `updateLineupEntry()`, `deleteLineup()` functions
+- `captain/page.tsx` — NEW: Full captain hub with 3 tabs (Roster, Updates, Matches)
+- `components/Sidebar.tsx` — Added "My Team" nav link (visible when user is on a team)
+
+**API changes:**
+- `api/mobile/lineups/route.ts` — NEW: Full CRUD (GET/POST/PATCH/DELETE) for match lineups
+- `api/mobile/auth-helper.ts` — Added `interclubCaptain` to AuthenticatedUser interface
+- `api/mobile/announcements/route.ts` — POST now accepts captain (not just admin), audience locked to captain's team
+- `api/mobile/members/route.ts` — PATCH extended for captain roster management (add/remove from own team)
+- `api/mobile-auth/route.ts` — Now returns `interclubCaptain` from profile
+
+**Mobile PWA changes:**
+- `index.html` — Captain menu item + full captain screen HTML (roster/updates/matches tabs)
+- `js/captain.js` — NEW: Captain screen logic (tab switching, roster CRUD, team updates, match lineups, availability)
+- `css/captain.css` — NEW: Captain screen styles
+- `js/auth.js` — Stores `interclubCaptain` in currentUser, shows/hides captain menu item
+- `js/navigation.js` — Calls `initCaptainScreen()` on captain screen navigation
+- `scripts/build-mobile.js` — Added captain.js and captain.css to bundle
+
+**Permission model:**
+- Captains: full CRUD on own team's lineups, post team-scoped announcements, add/remove members to/from own team
+- Members: view own team's roster/updates/lineups, set own availability only
+- Admins: same as captain (all teams)
+
+**Build verified:** `npm run check` passes clean. All 229 unit tests pass. File integrity verified.
+
 ### Environment Limitations (IMPORTANT)
 - **Cowork VM has NO Playwright browsers installed.** Never attempt to run E2E tests in Cowork — they will stall or error. E2E tests only run in CI (GitHub Actions) or on the dev machine.
 - **If a command fails once, diagnose and explain — don't retry.** Repeated blind retries waste the user's time.
