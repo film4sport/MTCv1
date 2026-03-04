@@ -147,6 +147,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  // ── Analytics date key (recalculates when the date changes) ──────────
+  const [analyticsDateKey, setAnalyticsDateKey] = useState(() => new Date().toISOString().slice(0, 10));
+  useEffect(() => {
+    const checkDate = () => {
+      const today = new Date().toISOString().slice(0, 10);
+      if (today !== analyticsDateKey) setAnalyticsDateKey(today);
+    };
+    const id = setInterval(checkDate, 60_000); // check every minute
+    return () => clearInterval(id);
+  }, [analyticsDateKey]);
+
   // ── Computed analytics (derived from real data) ──────────
   const analytics = useMemo<AdminAnalytics>(() => {
     const now = new Date();
@@ -267,7 +278,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       },
       monthlyTrends,
     };
-  }, [bookings, members, programs]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bookings, members, programs, analyticsDateKey]);
 
   // ── Notification preference gating ──────────────────────
   // Maps notification type → preference key. Returns true if the user allows this type.
