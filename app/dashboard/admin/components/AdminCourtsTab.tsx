@@ -1,6 +1,6 @@
 'use client';
 
-import { Court } from '../../lib/store';
+import type { Court } from '../../lib/types';
 
 interface AdminCourtsTabProps {
   courts: Court[];

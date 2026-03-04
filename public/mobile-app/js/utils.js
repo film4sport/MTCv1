@@ -20,9 +20,10 @@ const MTC = {
 
   // Run cleanup for a screen that's being navigated away from
   cleanupScreen: function(screenId) {
-    const fns = MTC._screenCleanup[screenId];
+    var fns = MTC._screenCleanup[screenId];
     if (fns) {
       fns.forEach(function(fn) { try { fn(); } catch(e) { console.warn('Cleanup error:', e); } });
+      delete MTC._screenCleanup[screenId]; // Prevent double-cleanup
     }
   },
 
@@ -39,6 +40,35 @@ const MTC = {
       try { l.el.removeEventListener(l.event, l.handler, l.options); } catch(e) {}
     });
     MTC._listeners = [];
+  },
+
+  // Tracked timers — auto-cleared on screen exit
+  _timers: [],
+
+  /** Start a tracked setTimeout that auto-clears on screen exit */
+  startTimer: function(screenId, fn, delay) {
+    var id = setTimeout(fn, delay);
+    if (screenId) {
+      MTC.onScreenExit(screenId, function() { clearTimeout(id); });
+    }
+    MTC._timers.push(id);
+    return id;
+  },
+
+  /** Start a tracked setInterval that auto-clears on screen exit */
+  startInterval: function(screenId, fn, delay) {
+    var id = setInterval(fn, delay);
+    if (screenId) {
+      MTC.onScreenExit(screenId, function() { clearInterval(id); });
+    }
+    MTC._timers.push(id);
+    return id;
+  },
+
+  /** Clear all tracked timers (used during logout / hard reset) */
+  clearAllTimers: function() {
+    MTC._timers.forEach(function(id) { clearTimeout(id); clearInterval(id); });
+    MTC._timers = [];
   }
 };
 
