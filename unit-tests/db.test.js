@@ -47,14 +47,14 @@ beforeEach(() => {
 
 describe('db — fetchMembers', () => {
   it('returns mapped users when data exists', async () => {
-    const row = { id: 'u1', name: 'Alice', email: 'a@b.com', role: 'member', status: 'active', ntrp: 3.5, skill_level: 'intermediate', skill_level_set: false, membership_type: null, family_id: null, member_since: '2024-01', avatar: null };
+    const row = { id: 'u1', name: 'Alice', email: 'a@b.com', role: 'member', status: 'active', ntrp: 3.5, skill_level: 'intermediate', skill_level_set: false, membership_type: null, family_id: null, member_since: '2024-01', avatar: null, interclub_team: 'none', interclub_captain: false };
     mockFrom.mockReturnValueOnce(createQueryBuilder([row]));
 
     const result = await db.fetchMembers();
     expect(result).toHaveLength(1);
     expect(result[0]).toEqual({
       id: 'u1', name: 'Alice', email: 'a@b.com', role: 'member', status: 'active',
-      ntrp: 3.5, skillLevel: 'intermediate', skillLevelSet: false, membershipType: undefined, familyId: undefined, memberSince: '2024-01', avatar: undefined,
+      ntrp: 3.5, skillLevel: 'intermediate', skillLevelSet: false, membershipType: undefined, familyId: undefined, memberSince: '2024-01', avatar: undefined, interclubTeam: 'none', interclubCaptain: false,
     });
     expect(mockFrom).toHaveBeenCalledWith('profiles');
   });
