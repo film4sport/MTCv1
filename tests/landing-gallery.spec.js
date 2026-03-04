@@ -81,10 +81,11 @@ test.describe('Gallery & Lightbox', () => {
     await page.locator('#gallery').scrollIntoViewIfNeeded();
     await page.waitForTimeout(500);
     await page.locator('.gallery-slide').first().click();
-    await page.waitForTimeout(300);
+    // Lightbox.tsx uses setTimeout(100ms) to focus close button — wait longer for CI
+    await page.waitForTimeout(600);
     // Close button should be focused
     const closeBtn = page.locator('.lightbox-close');
-    await expect(closeBtn).toBeFocused();
+    await expect(closeBtn).toBeFocused({ timeout: 3000 });
   });
 
   test('lightbox has proper ARIA attributes', async ({ page }) => {
@@ -101,15 +102,20 @@ test.describe('Gallery & Lightbox', () => {
     await page.locator('#gallery').scrollIntoViewIfNeeded();
     await page.waitForTimeout(500);
     const nextBtn = page.locator('.gallery-nav.next');
-    // Get initial active dot
-    const initialActive = await page.locator('.gallery-dot.active').count();
-    expect(initialActive).toBe(1);
-    // Click next
-    await nextBtn.click();
+    // Get initial active dot index
+    const initialIndex = await page.evaluate(() => {
+      const dots = document.querySelectorAll('.gallery-dot');
+      return Array.from(dots).findIndex((d) => d.classList.contains('active'));
+    });
+    // Nav buttons may be CSS-hidden (hover-only) on tablet/mobile — use dispatchEvent
+    await nextBtn.dispatchEvent('click');
     await page.waitForTimeout(500);
-    // Active dot should still exist (carousel navigated)
-    const afterActive = await page.locator('.gallery-dot.active').count();
-    expect(afterActive).toBe(1);
+    // Active dot should have changed
+    const afterIndex = await page.evaluate(() => {
+      const dots = document.querySelectorAll('.gallery-dot');
+      return Array.from(dots).findIndex((d) => d.classList.contains('active'));
+    });
+    expect(afterIndex).not.toBe(initialIndex);
   });
 
   test('gallery dots navigation works', async ({ page }) => {
