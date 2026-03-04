@@ -170,7 +170,7 @@
     renderMessages(currentConversation);
 
     // Persist to Supabase via API
-    var token = MTC.storage.get('mtc-access-token', '');
+    var token = MTC.getToken();
     if (token && typeof MTC.fn.apiRequest === 'function') {
       MTC.fn.apiRequest('/mobile/conversations', {
         method: 'POST',

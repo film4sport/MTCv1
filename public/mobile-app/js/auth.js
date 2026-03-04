@@ -98,7 +98,7 @@
           var stored = MTC.storage.get('mtc-user', null);
           var sessionTime = MTC.storage.get('mtc-session-time', 0);
           var sessionAge = Date.now() - sessionTime;
-          var hasToken = !!MTC.storage.get('mtc-access-token', '');
+          var hasToken = !!MTC.getToken();
           var MAX_SESSION_AGE = 24 * 60 * 60 * 1000; // 24 hours
           if (stored && hasToken && stored.email === email.toLowerCase() && sessionAge < MAX_SESSION_AGE) {
             showToast('Offline — resuming cached session');
@@ -107,7 +107,7 @@
             if (sessionAge >= MAX_SESSION_AGE || !hasToken) {
               MTC.storage.remove('mtc-user');
               MTC.storage.remove('mtc-session-time');
-              MTC.storage.remove('mtc-access-token');
+              MTC.clearToken();
               MTC.storage.remove('mtc-session-hash');
             }
             showToast('Cannot connect to server. Please try again when online.');
@@ -156,7 +156,7 @@
 
         // Store Supabase access token for API calls (returned by mobile-auth)
         if (matchedLogin && matchedLogin.accessToken) {
-          MTC.storage.set('mtc-access-token', matchedLogin.accessToken);
+          MTC.setToken(matchedLogin.accessToken);
         }
 
         // Always persist session + timestamp for offline expiry
@@ -224,7 +224,9 @@
     MTC.state.currentUser = null;
     window.currentUser = null;
     // Clear all app-related data on logout (prevents data leaks on shared devices)
-    ['mtc-user', 'mtc-session-time', 'mtc-session-hash', 'mtc-access-token',
+    MTC.clearToken(); // Clear memory-cached token first
+    MTC.clearAllTimers(); // Clear any tracked timers
+    ['mtc-user', 'mtc-session-time', 'mtc-session-hash',
      'mtc-bookings', 'mtc-conversations', 'mtc-notifications',
      'mtc-rsvps', 'mtc-profile', 'mtc-partner-joins', 'mtc-settings',
      'mtc-onboarding-done', 'mtc-api-events', 'mtc-api-members', 'mtc-api-partners',
@@ -410,7 +412,7 @@
   // ============================================
   function loadAppDataFromAPI() {
     if (!MTC.fn.loadFromAPI) return;
-    var token = MTC.storage.get('mtc-access-token', '');
+    var token = MTC.getToken();
     if (!token) return; // No token = not authenticated, skip API calls
 
     // Load events

@@ -45,7 +45,7 @@
     }
 
     // Persist to Supabase
-    var token = MTC.storage.get('mtc-access-token', '');
+    var token = MTC.getToken();
     if (token && typeof MTC.fn.apiRequest === 'function') {
       MTC.fn.apiRequest('/mobile/announcements', {
         method: 'POST',

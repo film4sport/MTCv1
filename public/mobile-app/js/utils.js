@@ -69,6 +69,28 @@ const MTC = {
   clearAllTimers: function() {
     MTC._timers.forEach(function(id) { clearTimeout(id); clearInterval(id); });
     MTC._timers = [];
+  },
+
+  // ── Auth token accessor (memory-cached, falls back to localStorage) ──
+  _cachedToken: null,
+
+  /** Get the current access token (memory-first for speed + security) */
+  getToken: function() {
+    if (MTC._cachedToken) return MTC._cachedToken;
+    MTC._cachedToken = MTC.storage ? MTC.storage.get('mtc-access-token', '') : '';
+    return MTC._cachedToken;
+  },
+
+  /** Set the access token (both memory + localStorage for persistence) */
+  setToken: function(token) {
+    MTC._cachedToken = token || '';
+    if (MTC.storage) MTC.storage.set('mtc-access-token', MTC._cachedToken);
+  },
+
+  /** Clear the access token from both memory + localStorage */
+  clearToken: function() {
+    MTC._cachedToken = null;
+    if (MTC.storage) MTC.storage.remove('mtc-access-token');
   }
 };
 
