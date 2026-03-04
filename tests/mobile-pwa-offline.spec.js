@@ -132,7 +132,8 @@ test.describe('Mobile PWA — Offline Resilience', () => {
 
   test('localStorage utilities work when storage is available', async ({ page }) => {
     await page.goto(MOBILE_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
-    await page.waitForTimeout(1000);
+    // Wait for MTC.storage to be defined (it's assigned after the MTC object literal)
+    await page.waitForFunction(() => typeof MTC !== 'undefined' && !!MTC.storage, { timeout: 10000 });
 
     const storageWorks = await page.evaluate(() => {
       if (typeof MTC === 'undefined' || !MTC.storage) return false;
