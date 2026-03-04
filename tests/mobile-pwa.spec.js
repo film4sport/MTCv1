@@ -108,7 +108,7 @@ test.describe('Mobile PWA — Page Structure', () => {
 
     const expectedScreens = [
       'screen-home', 'screen-notifications', 'screen-book',
-      'screen-partners', 'screen-schedule', 'screen-profile',
+      'screen-partners', 'screen-schedule',
       'screen-events', 'screen-messages', 'screen-settings',
     ];
 

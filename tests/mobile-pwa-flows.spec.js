@@ -134,7 +134,7 @@ test.describe('Mobile PWA — Authenticated Navigation', () => {
     expect(active).toBe(true);
   });
 
-  test('can navigate to profile screen', async ({ page }) => {
+  test('navigating to profile redirects to settings screen', async ({ page }) => {
     await mockAuthenticatedState(page);
 
     await page.evaluate(() => {
@@ -145,7 +145,7 @@ test.describe('Mobile PWA — Authenticated Navigation', () => {
     await page.waitForTimeout(500);
 
     const active = await page.evaluate(() => {
-      const screen = document.getElementById('screen-profile');
+      const screen = document.getElementById('screen-settings');
       return screen ? screen.classList.contains('active') : false;
     });
     expect(active).toBe(true);
