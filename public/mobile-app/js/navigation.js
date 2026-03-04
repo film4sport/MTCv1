@@ -28,6 +28,7 @@
     }
     if (screen === 'matches') screen = 'home';
     if (screen === 'coach') screen = 'lessons';
+    if (screen === 'profile') screen = 'settings';
 
     // Show target screen
     const targetScreen = document.getElementById('screen-' + screen);
@@ -80,8 +81,8 @@
       setTimeout(function() { renderWeeklyGrid(); }, 100);
     }
 
-    // Initialize profile extras (interclub team, gate code)
-    if (screen === 'profile') {
+    // Initialize profile extras (interclub team, gate code) — now on settings screen
+    if (screen === 'settings') {
       setTimeout(function() { if (typeof initProfileExtras === 'function') initProfileExtras(); }, 100);
     }
 

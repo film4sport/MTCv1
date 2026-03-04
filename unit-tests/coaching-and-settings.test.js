@@ -55,17 +55,17 @@ describe('Settings — Mobile App links to /mobile-app/', () => {
 
 // ─── Settings: no stale payment toggle ──────────────────
 describe('Settings — notification toggle integrity', () => {
-  it('should have exactly 5 notification toggle entries', () => {
+  it('should have exactly 4 notification toggle entries (programs removed)', () => {
     // Count the key: '...' as const patterns in the toggles array
     const toggleKeys = settingsFile.match(/key:\s*'[a-z]+'\s*as\s*const/g);
     expect(toggleKeys).toBeTruthy();
-    expect(toggleKeys).toHaveLength(5);
+    expect(toggleKeys).toHaveLength(4);
   });
 
-  it('toggle keys should be bookings, events, partners, messages, programs', () => {
+  it('toggle keys should be bookings, events, partners, messages', () => {
     const toggleKeys = settingsFile.match(/key:\s*'([a-z]+)'\s*as\s*const/g)
       .map(m => m.match(/key:\s*'([a-z]+)'/)[1]);
-    expect(toggleKeys).toEqual(['bookings', 'events', 'partners', 'messages', 'programs']);
+    expect(toggleKeys).toEqual(['bookings', 'events', 'partners', 'messages']);
   });
 
   it('should not have a payments toggle', () => {

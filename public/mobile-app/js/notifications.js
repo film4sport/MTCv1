@@ -529,14 +529,11 @@
   function saveSettingsToggles() {
     try {
       const settings = {};
-      // Profile notification toggles
-      const profileToggles = document.querySelectorAll('#screen-profile .toggle');
-      profileToggles.forEach(function(t, i) {
-        settings['profile-toggle-' + i] = t.classList.contains('active');
-      });
-      // Settings screen toggles (push notif, dark mode, location, email)
-      const settingsToggles = document.querySelectorAll('#screen-settings .toggle');
-      settingsToggles.forEach(function(t, i) {
+      // All toggles now in merged settings screen
+      // Order: 0=Booking Reminders, 1=Partner Requests, 2=Club Announcements,
+      //        3=Push Notifications, 4=Dark Mode, 5=Location Services
+      const allToggles = document.querySelectorAll('#screen-settings .toggle');
+      allToggles.forEach(function(t, i) {
         settings['settings-toggle-' + i] = t.classList.contains('active');
       });
       settings.pushNotificationsEnabled = pushNotificationsEnabled;
@@ -545,11 +542,10 @@
       // Sync notification preferences to Supabase
       if (typeof MTC !== 'undefined' && MTC.fn && MTC.fn.apiRequest) {
         var prefs = {
-          bookings: settings['profile-toggle-0'] !== false,
-          events: settings['profile-toggle-1'] !== false,
-          partners: settings['profile-toggle-2'] !== false,
-          messages: settings['profile-toggle-3'] !== false,
-          programs: settings['profile-toggle-4'] !== false,
+          bookings: settings['settings-toggle-0'] !== false,
+          partners: settings['settings-toggle-1'] !== false,
+          events: settings['settings-toggle-2'] !== false,
+          messages: true,
         };
         MTC.fn.apiRequest('/mobile/settings', {
           method: 'PATCH',
@@ -564,24 +560,13 @@
       const settings = MTC.storage.get('mtc-settings', null);
       if (!settings) return;
 
-      // Profile notification toggles
-      const profileToggles = document.querySelectorAll('#screen-profile .toggle');
-      profileToggles.forEach(function(t, i) {
-        const key = 'profile-toggle-' + i;
-        if (key in settings) {
-          if (settings[key]) t.classList.add('active');
-          else t.classList.remove('active');
-          t.setAttribute('aria-checked', settings[key] ? 'true' : 'false');
-        }
-      });
-
-      // Settings screen toggles
-      const settingsToggles = document.querySelectorAll('#screen-settings .toggle');
-      settingsToggles.forEach(function(t, i) {
+      // All toggles now in merged settings screen
+      const allToggles = document.querySelectorAll('#screen-settings .toggle');
+      allToggles.forEach(function(t, i) {
         const key = 'settings-toggle-' + i;
         if (key in settings) {
-          // Skip dark mode toggle (index 1) - handled by theme.js
-          if (i === 1) return;
+          // Skip dark mode toggle (index 4) - handled by theme.js
+          if (i === 4) return;
           if (settings[key]) t.classList.add('active');
           else t.classList.remove('active');
           t.setAttribute('aria-checked', settings[key] ? 'true' : 'false');
