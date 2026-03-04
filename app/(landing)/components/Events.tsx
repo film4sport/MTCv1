@@ -199,13 +199,6 @@ export default function Events() {
             Book a Court
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
           </a>
-          <a
-            href="/info?tab=coaching"
-            className="inline-flex items-center gap-2 px-8 py-3 rounded-full text-sm font-semibold border transition-transform hover:scale-105"
-            style={{ color: '#6b7a3d', borderColor: '#6b7a3d' }}
-          >
-            View Coaching Programs
-          </a>
         </div>
 
       </div>
