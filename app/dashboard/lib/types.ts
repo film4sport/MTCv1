@@ -198,6 +198,34 @@ export interface CoachingProgram {
   status: 'active' | 'cancelled' | 'completed';
 }
 
+export type LineupStatus = 'available' | 'unavailable' | 'maybe' | 'pending';
+
+export interface LineupEntry {
+  id: number;
+  lineupId: string;
+  memberId: string;
+  memberName?: string;
+  memberSkillLevel?: SkillLevel;
+  memberAvatar?: string;
+  status: LineupStatus;
+  position?: string;
+  notes?: string;
+  updatedAt?: string;
+}
+
+export interface MatchLineup {
+  id: string;
+  team: 'a' | 'b';
+  matchDate: string;
+  matchTime?: string;
+  opponent?: string;
+  location?: string;
+  notes?: string;
+  createdBy: string;
+  createdAt?: string;
+  entries: LineupEntry[];
+}
+
 // Config constants
 export const COURTS_CONFIG = [
   { id: 1, name: 'Court 1', floodlight: true },

@@ -85,6 +85,11 @@
       setTimeout(function() { if (typeof initProfileExtras === 'function') initProfileExtras(); }, 100);
     }
 
+    // Initialize captain/team screen
+    if (screen === 'captain') {
+      setTimeout(function() { if (typeof initCaptainScreen === 'function') initCaptainScreen(); }, 100);
+    }
+
     // Render schedule bookings dynamically
     if (screen === 'schedule') {
       setTimeout(function() {

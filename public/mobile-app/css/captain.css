@@ -1,0 +1,368 @@
+/* captain.css - MTC Court */
+/* ============================================
+   CAPTAIN / MY TEAM SCREEN
+============================================ */
+
+.captain-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border);
+}
+
+.captain-tab {
+  flex: 1;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 20px;
+  background: var(--bg-secondary);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.captain-tab.active {
+  background: var(--accent);
+  color: var(--bg-primary);
+}
+
+.captain-content {
+  padding: 16px;
+}
+
+.captain-team-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 0 0 12px;
+}
+
+/* Roster */
+.captain-roster-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px !important;
+}
+
+.captain-roster-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.captain-roster-avatar img,
+.captain-roster-avatar svg {
+  width: 100%;
+  height: 100%;
+}
+
+.captain-roster-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.captain-roster-badges {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.captain-badge {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--accent);
+  background: rgba(196, 255, 0, 0.15);
+  padding: 2px 8px;
+  border-radius: 10px;
+  letter-spacing: 0.5px;
+}
+
+.captain-remove-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.captain-remove-btn:hover {
+  color: #ff5a5f;
+  background: rgba(255, 90, 95, 0.1);
+}
+
+/* Add member */
+.captain-add-section {
+  margin-top: 16px;
+}
+
+.captain-add-form {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  background: var(--bg-secondary);
+  border-radius: 12px;
+}
+
+.captain-select {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+.captain-select-sm {
+  flex: 0 0 auto;
+  width: auto;
+}
+
+.captain-action-btn {
+  padding: 10px 20px;
+  background: var(--accent);
+  color: var(--bg-primary);
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  white-space: nowrap;
+}
+
+.captain-action-btn:hover {
+  opacity: 0.9;
+}
+
+/* Team updates */
+.captain-textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 60px;
+  box-sizing: border-box;
+}
+
+.captain-update-controls {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  justify-content: flex-end;
+}
+
+.captain-section-header {
+  margin-top: 20px;
+}
+
+.captain-update-item {
+  border-left: 3px solid var(--border) !important;
+  padding: 12px !important;
+}
+
+.captain-update-info { border-left-color: var(--accent) !important; }
+.captain-update-warning { border-left-color: #f59e0b !important; }
+.captain-update-urgent { border-left-color: #ff5a5f !important; }
+
+.captain-update-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.captain-update-text {
+  font-size: 13px;
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+
+.captain-update-date {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* Match form */
+.captain-match-form {
+  padding: 12px !important;
+}
+
+.captain-form-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.captain-form-row label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  width: 70px;
+  flex-shrink: 0;
+}
+
+.captain-input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+.captain-create-btn {
+  width: 100%;
+  margin-top: 8px;
+}
+
+/* Match cards */
+.captain-match-card {
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.captain-match-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.captain-match-info {
+  flex: 1;
+}
+
+.captain-match-date {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.captain-match-opponent {
+  font-size: 13px;
+  color: var(--accent);
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.captain-match-location {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.captain-match-summary {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 12px 0;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.captain-avail-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 2px;
+}
+
+.captain-avail-yes { background: #4ade80; }
+.captain-avail-maybe { background: #f59e0b; }
+.captain-avail-no { background: #ff5a5f; }
+.captain-avail-pending { background: #6b7280; }
+
+/* Player entries */
+.captain-match-entries {
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+}
+
+.captain-entry {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.captain-entry:last-child {
+  border-bottom: none;
+}
+
+.captain-entry-name {
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.captain-status-available .captain-entry-name { color: #4ade80; }
+.captain-status-unavailable .captain-entry-name { color: #ff5a5f; }
+.captain-status-maybe .captain-entry-name { color: #f59e0b; }
+
+.captain-entry-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.captain-avail-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--bg-primary);
+  color: var(--text-muted);
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.captain-avail-btn.active {
+  background: #4ade80;
+  color: #000;
+  border-color: #4ade80;
+}
+
+.captain-avail-btn-maybe.active {
+  background: #f59e0b;
+  border-color: #f59e0b;
+}
+
+.captain-avail-btn-no.active {
+  background: #ff5a5f;
+  border-color: #ff5a5f;
+}
+
+.captain-entry-status {
+  font-size: 14px;
+  color: var(--text-muted);
+  width: 32px;
+  text-align: center;
+}
+
+.captain-matches-list {
+  padding: 0;
+}

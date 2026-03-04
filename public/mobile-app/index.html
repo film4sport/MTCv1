@@ -20,7 +20,7 @@
     if ('serviceWorker' in navigator) {
       caches.keys().then(function(names) {
         names.forEach(function(name) {
-          if (name.indexOf('mtc-court-acdbf6d2') === -1) {
+          if (name.indexOf('mtc-court-f272b93c') === -1) {
             caches.delete(name);
             console.log('[CacheBust] Deleted old cache:', name);
           }
@@ -505,6 +505,12 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
             </div>
             <span class="menu-item-text">Lessons</span>
+          </div>
+          <div class="menu-item admin-hidden" id="menuCaptainItem" role="button" tabindex="0" onclick="navigateTo('captain'); closeMenu();">
+            <div class="menu-item-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            </div>
+            <span class="menu-item-text">My Team</span>
           </div>
           <div class="menu-item admin-hidden" id="menuAdminItem" role="button" tabindex="0" onclick="navigateTo('admin'); closeMenu();">
             <div class="menu-item-icon">
@@ -2004,6 +2010,95 @@
 <!-- ============================================
          ADMIN PANEL SCREEN
     ============================================ -->
+    <!-- ============================================
+         CAPTAIN / MY TEAM SCREEN
+    ============================================ -->
+    <div class="screen" id="screen-captain" aria-label="My Team">
+      <div class="screen-header">
+        <button class="back-btn" onclick="navigateTo('home')" aria-label="Go back to home">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+        <h2 class="screen-title">MY TEAM</h2>
+        <div style="width:36px"></div>
+      </div>
+
+      <!-- Team pill tabs -->
+      <div class="captain-tabs" role="tablist">
+        <button class="captain-tab active" id="captainRosterTab" role="tab" aria-selected="true" onclick="switchCaptainTab('roster')">Roster</button>
+        <button class="captain-tab" id="captainUpdatesTab" role="tab" aria-selected="false" onclick="switchCaptainTab('updates')">Updates</button>
+        <button class="captain-tab" id="captainMatchesTab" role="tab" aria-selected="false" onclick="switchCaptainTab('matches')">Matches</button>
+      </div>
+
+      <!-- Roster Tab -->
+      <div class="captain-content" id="captainRoster">
+        <div id="captainTeamLabel" class="captain-team-label"></div>
+        <div id="captainRosterList" class="settings-group">
+          <div class="admin-empty-state">Loading roster...</div>
+        </div>
+        <div id="captainAddMemberSection" class="captain-add-section" style="display:none;">
+          <div class="section-header"><h3 class="section-title">ADD MEMBER</h3></div>
+          <div class="captain-add-form">
+            <select id="captainAddMemberSelect" class="captain-select">
+              <option value="">Select a member...</option>
+            </select>
+            <button class="captain-action-btn" onclick="captainAddMember()">Add</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Updates Tab -->
+      <div class="captain-content" id="captainUpdates" style="display:none;">
+        <div id="captainPostSection" style="display:none;">
+          <div class="section-header"><h3 class="section-title">POST TEAM UPDATE</h3></div>
+          <div class="settings-group">
+            <textarea id="captainUpdateText" class="captain-textarea" placeholder="Write a message to your team..." rows="3"></textarea>
+            <div class="captain-update-controls">
+              <select id="captainUpdateType" class="captain-select captain-select-sm">
+                <option value="info">Info</option>
+                <option value="warning">Warning</option>
+                <option value="urgent">Urgent</option>
+              </select>
+              <button class="captain-action-btn" onclick="captainPostUpdate()">Post</button>
+            </div>
+          </div>
+        </div>
+        <div class="section-header captain-section-header"><h3 class="section-title">TEAM UPDATES</h3></div>
+        <div id="captainUpdatesList" class="settings-group">
+          <div class="admin-empty-state">No team updates yet</div>
+        </div>
+      </div>
+
+      <!-- Matches Tab -->
+      <div class="captain-content" id="captainMatches" style="display:none;">
+        <div id="captainCreateMatchSection" style="display:none;">
+          <div class="section-header"><h3 class="section-title">CREATE MATCH</h3></div>
+          <div class="settings-group captain-match-form">
+            <div class="captain-form-row">
+              <label>Date</label>
+              <input type="date" id="captainMatchDate" class="captain-input" />
+            </div>
+            <div class="captain-form-row">
+              <label>Time</label>
+              <input type="text" id="captainMatchTime" class="captain-input" placeholder="e.g. 10:00 AM" />
+            </div>
+            <div class="captain-form-row">
+              <label>Opponent</label>
+              <input type="text" id="captainMatchOpponent" class="captain-input" placeholder="e.g. Orangeville TC" />
+            </div>
+            <div class="captain-form-row">
+              <label>Location</label>
+              <input type="text" id="captainMatchLocation" class="captain-input" placeholder="Home / Away" />
+            </div>
+            <button class="captain-action-btn captain-create-btn" onclick="captainCreateMatch()">Create Match</button>
+          </div>
+        </div>
+        <div class="section-header captain-section-header"><h3 class="section-title">UPCOMING MATCHES</h3></div>
+        <div id="captainMatchesList" class="captain-matches-list">
+          <div class="admin-empty-state">No upcoming matches</div>
+        </div>
+      </div>
+    </div>
+
     <div class="screen" id="screen-admin" aria-label="Admin Panel">
       <div class="screen-header">
         <button class="back-btn" onclick="navigateTo('home')" aria-label="Go back to home">

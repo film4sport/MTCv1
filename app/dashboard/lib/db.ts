@@ -1,6 +1,6 @@
 import { supabase } from '../../lib/supabase';
 import { reportError } from '../../lib/errorReporter';
-import type { Booking, ClubEvent, Court, Partner, Conversation, Message, Announcement, AnnouncementAudience, Notification, CoachingProgram, NotificationPreferences, User, SkillLevel, FamilyMember } from './types';
+import type { Booking, ClubEvent, Court, Partner, Conversation, Message, Announcement, AnnouncementAudience, Notification, CoachingProgram, NotificationPreferences, User, SkillLevel, FamilyMember, MatchLineup, LineupEntry, LineupStatus } from './types';
 
 // ─── Profiles ───────────────────────────────────────────
 
@@ -592,6 +592,102 @@ export async function updateFamilyMember(memberId: string, updates: { name?: str
 export async function removeFamilyMember(memberId: string): Promise<void> {
   const { error } = await supabase.from('family_members').delete().eq('id', memberId);
   if (error) reportError(error, 'removeFamilyMember');
+}
+
+// ─── Match Lineups (Interclub) ───────────────────────────
+
+export async function fetchLineups(team: 'a' | 'b'): Promise<MatchLineup[]> {
+  const { data, error } = await supabase
+    .from('match_lineups')
+    .select('*')
+    .eq('team', team)
+    .gte('match_date', new Date().toISOString().split('T')[0])
+    .order('match_date');
+  if (error) { reportError(error, 'fetchLineups'); return []; }
+  if (!data || data.length === 0) return [];
+
+  // Fetch entries for all lineups
+  const lineupIds = data.map(l => l.id);
+  const { data: entries } = await supabase
+    .from('lineup_entries')
+    .select('*')
+    .in('lineup_id', lineupIds);
+
+  // Fetch member names for entries
+  const memberIds = Array.from(new Set((entries || []).map(e => e.member_id)));
+  const memberMap: Record<string, { name: string; skill_level?: string; avatar?: string }> = {};
+  if (memberIds.length > 0) {
+    const { data: members } = await supabase.from('profiles').select('id, name, skill_level, avatar').in('id', memberIds);
+    if (members) members.forEach(m => { memberMap[m.id] = { name: m.name, skill_level: m.skill_level, avatar: m.avatar }; });
+  }
+
+  return data.map(l => ({
+    id: l.id,
+    team: l.team as 'a' | 'b',
+    matchDate: l.match_date,
+    matchTime: l.match_time || undefined,
+    opponent: l.opponent || undefined,
+    location: l.location || undefined,
+    notes: l.notes || undefined,
+    createdBy: l.created_by,
+    createdAt: l.created_at,
+    entries: (entries || [])
+      .filter(e => e.lineup_id === l.id)
+      .map(e => ({
+        id: e.id,
+        lineupId: e.lineup_id,
+        memberId: e.member_id,
+        memberName: memberMap[e.member_id]?.name,
+        memberSkillLevel: memberMap[e.member_id]?.skill_level as SkillLevel | undefined,
+        memberAvatar: memberMap[e.member_id]?.avatar || undefined,
+        status: e.status as LineupStatus,
+        position: e.position || undefined,
+        notes: e.notes || undefined,
+        updatedAt: e.updated_at,
+      })),
+  }));
+}
+
+export async function createLineup(lineup: { team: 'a' | 'b'; matchDate: string; matchTime?: string; opponent?: string; location?: string; notes?: string; createdBy: string }): Promise<string | null> {
+  const { data, error } = await supabase
+    .from('match_lineups')
+    .insert({
+      team: lineup.team,
+      match_date: lineup.matchDate,
+      match_time: lineup.matchTime || null,
+      opponent: lineup.opponent || null,
+      location: lineup.location || null,
+      notes: lineup.notes || null,
+      created_by: lineup.createdBy,
+    })
+    .select('id')
+    .single();
+  if (error) throw error;
+  const lineupId = data.id;
+
+  // Auto-create entries for all team members
+  const { data: teamMembers } = await supabase.from('profiles').select('id').eq('interclub_team', lineup.team);
+  if (teamMembers && teamMembers.length > 0) {
+    const entries = teamMembers.map(m => ({ lineup_id: lineupId, member_id: m.id, status: 'pending' }));
+    const { error: entryError } = await supabase.from('lineup_entries').insert(entries);
+    if (entryError) reportError(entryError, 'createLineup:entries');
+  }
+
+  return lineupId;
+}
+
+export async function updateLineupEntry(lineupId: string, memberId: string, updates: { status?: LineupStatus; position?: string; notes?: string }): Promise<void> {
+  const dbUpdates: Record<string, unknown> = { updated_at: new Date().toISOString() };
+  if (updates.status !== undefined) dbUpdates.status = updates.status;
+  if (updates.position !== undefined) dbUpdates.position = updates.position;
+  if (updates.notes !== undefined) dbUpdates.notes = updates.notes;
+  const { error } = await supabase.from('lineup_entries').update(dbUpdates).eq('lineup_id', lineupId).eq('member_id', memberId);
+  if (error) throw error;
+}
+
+export async function deleteLineup(lineupId: string): Promise<void> {
+  const { error } = await supabase.from('match_lineups').delete().eq('id', lineupId);
+  if (error) throw error;
 }
 
 // ─── Welcome Message (Signup) ───────────────────────────

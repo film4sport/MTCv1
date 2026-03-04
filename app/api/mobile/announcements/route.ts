@@ -55,8 +55,11 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   const authResult = await authenticateMobileRequest(request);
   if (authResult instanceof NextResponse) return authResult;
-  if (authResult.role !== 'admin') {
-    return NextResponse.json({ error: 'Admin only' }, { status: 403 });
+  // Admins can post to any audience; captains can only post to their own team
+  const isAdmin = authResult.role === 'admin';
+  const isCaptain = authResult.interclubCaptain === true;
+  if (!isAdmin && !isCaptain) {
+    return NextResponse.json({ error: 'Admin or captain only' }, { status: 403 });
   }
 
   try {
@@ -74,7 +77,14 @@ export async function POST(request: Request) {
     const sanitizedText = sanitizeInput(text, 1000);
     const announcementType = type || 'info';
     const validAudiences = ['all', 'interclub_a', 'interclub_b', 'interclub_all'];
-    const announcementAudience = validAudiences.includes(audience) ? audience : 'all';
+    let announcementAudience = validAudiences.includes(audience) ? audience : 'all';
+
+    // Captains (non-admins) can only post to their own team
+    if (!isAdmin && isCaptain) {
+      const captainTeam = authResult.interclubTeam;
+      const allowedAudience = captainTeam === 'a' ? 'interclub_a' : 'interclub_b';
+      announcementAudience = allowedAudience;
+    }
 
     const { error } = await supabase.from('announcements').insert({
       id,

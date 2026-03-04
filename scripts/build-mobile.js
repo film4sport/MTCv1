@@ -38,6 +38,7 @@ const CSS_FILES = [
   'enhancements.css',
   'neumorphic.css',
   'chat.css',
+  'captain.css',
 ];
 
 // JS files in load order (must match original index.html dependency chain)
@@ -66,6 +67,7 @@ const JS_FILES = [
   'pull-refresh.js',
   'profile.js',
   'admin.js',
+  'captain.js',
   'confirm-modal.js',
   'enhancements.js',
   'app.js',
