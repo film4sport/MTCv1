@@ -8,14 +8,17 @@ const AUTH_TESTS = [
 
 // Tests that manage their own viewports — run desktop only (no auth needed)
 const DESKTOP_ONLY_TESTS = [
-  'responsive.spec.js',  // already loops through 3 viewports internally
-  'mobile.spec.js',      // already sets its own viewport (390x812)
-  'mobile-pwa.spec.js',  // mobile PWA tests (390x844 viewport)
+  'responsive.spec.js',      // already loops through 3 viewports internally
+  'mobile.spec.js',          // already sets its own viewport (390x812)
+  'mobile-pwa.spec.js',      // mobile PWA tests (390x844 viewport)
+  'mobile-pwa-flows.spec.js',   // authenticated flow tests (mocked auth, 390x844)
+  'mobile-pwa-offline.spec.js', // offline resilience tests (mocked network, 390x844)
 ];
 
 // All other tests run on all 3 viewports for responsive coverage
 const RESPONSIVE_TESTS = [
   'landing.spec.js',
+  'landing-gallery.spec.js',
   'signup.spec.js',
   'verify-fixes.spec.js',
   'footer-gap.spec.js',
