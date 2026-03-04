@@ -57,7 +57,6 @@ const dotColors: Record<string, string> = {
   tournament: '#dc2626',
   camp: '#2563eb',
   special: '#d4e157',
-  booking: '#8b95a5',
 };
 
 const bgColors: Record<string, string> = {
@@ -66,7 +65,6 @@ const bgColors: Record<string, string> = {
   tournament: 'rgba(220,38,38,0.15)',
   camp: 'rgba(37,99,235,0.15)',
   special: 'rgba(212,225,87,0.15)',
-  booking: 'rgba(139,149,165,0.15)',
 };
 
 export default function Schedule() {
@@ -150,7 +148,7 @@ export default function Schedule() {
             <div key={type} className="flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: color }} />
               <span className="text-xs capitalize" style={{ color: 'rgba(232,228,217,0.5)' }}>
-                {type === 'booking' ? 'court bookings' : type}
+                {type}
               </span>
             </div>
           ))}
