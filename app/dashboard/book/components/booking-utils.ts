@@ -114,6 +114,7 @@ export function canBookDate(date: string): boolean {
   const now = new Date();
   now.setHours(0, 0, 0, 0);
   const bookDate = new Date(date + 'T00:00:00');
+  if (bookDate < now) return false;
   const maxAdvance = new Date(now);
   maxAdvance.setDate(maxAdvance.getDate() + BOOKING_RULES.maxAdvanceDays);
   return bookDate <= maxAdvance;

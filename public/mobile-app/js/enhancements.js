@@ -473,6 +473,9 @@
   // OFFLINE MODE INDICATOR
   // ============================================
   function setupOfflineIndicator() {
+    // Singleton — prevent duplicate banners and listeners on re-init
+    if (document.getElementById('offlineBanner')) return;
+
     var banner = document.createElement('div');
     banner.id = 'offlineBanner';
     banner.className = 'offline-banner';

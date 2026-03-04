@@ -430,7 +430,23 @@
     const modalEl = document.getElementById('announcementModal');
     if (modalEl) modalEl.remove();
 
-    // Add to notifications screen
+    // Persist to Supabase via API — this also creates notifications for all members
+    if (typeof MTC !== 'undefined' && MTC.fn && MTC.fn.apiRequest) {
+      MTC.fn.apiRequest('/mobile/announcements', {
+        method: 'POST',
+        body: JSON.stringify({ text: title + ': ' + message, type: 'info', title: title })
+      }).then(function(result) {
+        if (result && result.ok !== false) {
+          showToast('Announcement sent to ' + recipientLabel + ' — all members notified');
+        } else {
+          showToast('Announcement saved locally — server sync may be delayed', 'warning');
+        }
+      }).catch(function() {
+        showToast('Announcement saved locally — server sync may be delayed', 'warning');
+      });
+    }
+
+    // Add to notifications screen (optimistic local UI)
     addAnnouncementNotification(title, message, recipientLabel);
 
     // Add announcement to MTC Club conversation in Messages
@@ -443,8 +459,6 @@
       label: 'VIEW',
       navigate: 'notifications'
     });
-
-    showToast('Announcement sent to ' + recipientLabel + ' \u2713');
   }
 
   function addAnnouncementNotification(title, message, recipients) {
