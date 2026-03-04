@@ -183,23 +183,27 @@ export async function deletePartner(partnerId: string): Promise<void> {
 }
 
 export async function markMessagesRead(conversationId: number, userId: string): Promise<void> {
+  // Only mark messages received before this call (prevents marking newly-arriving messages as read)
+  const cutoff = new Date().toISOString();
   const { error } = await supabase
     .from('messages')
     .update({ read: true })
     .eq('conversation_id', conversationId)
     .eq('to_id', userId)
-    .eq('read', false);
+    .eq('read', false)
+    .lte('created_at', cutoff);
   if (error) throw error;
 }
 
 // ─── Conversations & Messages ───────────────────────────
 
-export async function fetchConversations(userId: string): Promise<Conversation[]> {
+export async function fetchConversations(userId: string, limit = 20): Promise<Conversation[]> {
   const { data } = await supabase
     .from('conversations')
     .select('*, messages(*)')
     .or(`member_a.eq.${userId},member_b.eq.${userId}`)
-    .order('last_timestamp', { ascending: false });
+    .order('last_timestamp', { ascending: false })
+    .range(0, limit - 1);
 
   if (!data) return [];
 

@@ -133,6 +133,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [activeProfile, setActiveProfile] = useState<ActiveProfile>({ type: 'primary' });
   const { showToast } = useToast();
 
+  // ── Debounce refs (prevent rapid duplicate calls) ──────────
+  const pendingRsvps = useRef<Set<string>>(new Set());
+
+  /** Deduplicate notifications: skip if same title+type exists within last 30 seconds */
+  const addNotification = useCallback((notif: Notification) => {
+    setNotifications(prev => {
+      const thirtySecsAgo = new Date(Date.now() - 30_000).toISOString();
+      const isDupe = prev.some(n =>
+        n.title === notif.title && n.type === notif.type && n.timestamp > thirtySecsAgo
+      );
+      return isDupe ? prev : [notif, ...prev];
+    });
+  }, []);
+
   // ── Computed analytics (derived from real data) ──────────
   const analytics = useMemo<AdminAnalytics>(() => {
     const now = new Date();
@@ -436,15 +450,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoaded, currentUser?.id]);
 
-  // Fetch weather
+  // Fetch weather (with retry on failure)
   useEffect(() => {
+    let retryCount = 0;
+    const MAX_RETRIES = 3;
     const fetchWeather = async () => {
       try {
         const res = await fetch(
           `https://api.open-meteo.com/v1/forecast?latitude=${CLUB_LOCATION.lat}&longitude=${CLUB_LOCATION.lon}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&timezone=America/Toronto`
         );
+        if (!res.ok) throw new Error(`Weather API ${res.status}`);
         const data = await res.json();
         if (data.current) {
+          retryCount = 0; // Reset on success
           const tempC = Math.round(data.current.temperature_2m);
           const tempF = Math.round(tempC * 9 / 5 + 32);
           const windKmh = Math.round(data.current.wind_speed_10m);
@@ -471,12 +489,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
           setWeather({ tempC, tempF, condition, wind: windKmh, humidity: data.current.relative_humidity_2m, description, lastUpdated: new Date().toLocaleTimeString() });
         }
       } catch (err) {
+        retryCount++;
+        if (retryCount <= MAX_RETRIES) {
+          setTimeout(fetchWeather, retryCount * 5000); // Backoff: 5s, 10s, 15s
+          return;
+        }
         reportError(err, 'Weather fetch');
-        setWeather(prev => ({ ...prev, description: 'Weather unavailable' }));
+        setWeather(prev => ({ ...prev, description: 'Weather unavailable — refresh to retry' }));
       }
     };
     fetchWeather();
-    const interval = setInterval(fetchWeather, 30 * 60 * 1000);
+    const interval = setInterval(fetchWeather, 2 * 60 * 60 * 1000); // Every 2 hours (was 30min)
     return () => clearInterval(interval);
   }, []);
 
@@ -556,7 +579,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         read: false,
       };
       if (shouldNotify('booking')) {
-        setNotifications(prev => [notif, ...prev]);
+        addNotification(notif);
         db.createNotification(booking.userId, notif).catch((err) => reportError(err, 'Supabase'));
       }
     }
@@ -570,7 +593,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         read: false,
       };
       if (shouldNotify('booking')) {
-        setNotifications(prev => [notif, ...prev]);
+        addNotification(notif);
         db.createNotification(booking.userId, notif).catch((err) => reportError(err, 'Supabase'));
       }
 
@@ -779,7 +802,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       read: false,
     };
     if (shouldNotify('program')) {
-      setNotifications(prev => [notif, ...prev]);
+      addNotification(notif);
       db.createNotification(memberId, notif).catch((err) => reportError(err, 'Supabase'));
     }
     // Send message from coach (persist to Supabase)
@@ -865,7 +888,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         read: false,
       };
       if (shouldNotify('partner')) {
-        setNotifications(prev => [notif, ...prev]);
+        addNotification(notif);
         db.createNotification(currentUser.id, notif).catch(err => reportError(err, 'Supabase'));
       }
     }
@@ -882,6 +905,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [partners]);
 
   const toggleRsvp = useCallback((eventId: string, userName: string) => {
+    // Debounce: prevent rapid double-clicks on the same event
+    if (pendingRsvps.current.has(eventId)) return;
+    pendingRsvps.current.add(eventId);
+
     // Snapshot for rollback
     setEvents(prev => {
       const snapshot = prev;
@@ -899,7 +926,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
             read: false,
           };
           if (shouldNotify('event')) {
-            setNotifications(p => [notif, ...p]);
+            addNotification(notif);
             db.createNotification(currentUser.id, notif).catch(err => reportError(err, 'Supabase'));
           }
           // Log RSVP to audit trail
@@ -920,11 +947,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
         };
       });
       // Persist to Supabase — rollback on failure
-      db.toggleEventRsvp(eventId, userName).catch((err) => {
-        reportError(err, 'Supabase');
-        setEvents(snapshot);
-        showToast('Failed to update RSVP. Please try again.', 'error');
-      });
+      db.toggleEventRsvp(eventId, userName)
+        .catch((err) => {
+          reportError(err, 'Supabase');
+          setEvents(snapshot);
+          showToast('Failed to update RSVP. Please try again.', 'error');
+        })
+        .finally(() => {
+          pendingRsvps.current.delete(eventId);
+        });
       return updated;
     });
   }, [currentUser]);

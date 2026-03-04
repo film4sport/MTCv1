@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { allCardEvents, eventFilters, type MTCEvent } from '../../lib/events';
 
 const categoryColors: Record<string, { accent: string; bg: string; text: string }> = {
   tournament: { accent: '#6b7a3d', bg: 'rgba(107, 122, 61, 0.08)', text: '#4a5528' },
@@ -9,106 +10,9 @@ const categoryColors: Record<string, { accent: string; bg: string; text: string 
   social: { accent: '#1a1f12', bg: 'rgba(26, 31, 18, 0.05)', text: '#1a1f12' },
 };
 
-const events = [
-  {
-    category: 'social',
-    isoDate: '2026-03-14',
-    date: 'March 14, 2026',
-    title: 'Euchre Tournament',
-    description:
-      'Pre-season Euchre tournament! Open to members and guests. Prizes for top teams. Come kick off the new season.',
-    highlight: 'Evening',
-  },
-  {
-    category: 'social',
-    isoDate: '2026-05-09',
-    date: 'May 9, 2026',
-    title: 'Opening Day BBQ & Round Robin',
-    description:
-      'Kick off the 2026 season! BBQ, music, and meet our coaching staff including Mark Taylor. All members, families, and guests welcome.',
-    highlight: '12:30 - 3:00 PM',
-  },
-  {
-    category: 'social',
-    isoDate: '2026-05-12',
-    date: 'Every Tuesday · Starts May 12',
-    title: "Men's Round Robin",
-    description:
-      "Weekly men's round robin every Tuesday morning. All skill levels welcome. Courts 1-2.",
-    highlight: '9:00 - 11:00 AM',
-  },
-  {
-    category: 'social',
-    isoDate: '2026-05-14',
-    date: 'Every Thursday · Starts May 14',
-    title: 'Freedom 55 League',
-    description:
-      'Thursday morning league for the 55+ crowd. Fun and social tennis. Courts 1-2.',
-    highlight: '9:00 - 11:00 AM',
-  },
-  {
-    category: 'social',
-    isoDate: '2026-05-15',
-    date: 'Every Friday · Starts May 15',
-    title: "Ladies Round Robin",
-    description:
-      "Weekly ladies round robin every Friday morning. All skill levels welcome. Courts 1-2.",
-    highlight: '9:00 - 11:00 AM',
-  },
-  {
-    category: 'social',
-    isoDate: '2026-05-15',
-    date: 'Every Friday · Starts May 15',
-    title: 'Friday Night Mixed Round Robin',
-    description:
-      'Mixed doubles round robin every Friday evening. Rotating partners, fun format! All Courts.',
-    highlight: '6:00 - 9:00 PM',
-  },
-  {
-    category: 'social',
-    isoDate: '2026-06-07',
-    date: 'June 7, 2026',
-    title: 'French Open Round Robin Social',
-    description:
-      'Celebrate the French Open with a themed round robin social! Mixed doubles, prizes, and refreshments. All skill levels welcome.',
-    highlight: '1:00 - 4:00 PM',
-  },
-  {
-    category: 'camp',
-    isoDate: '2026-07-01',
-    date: 'Summer 2026 · Dates TBA',
-    title: 'Summer Camps',
-    description:
-      'Junior camps coming this summer! Dates are being confirmed once pros are available. Stay tuned for registration details.',
-    highlight: 'Dates Coming Soon',
-  },
-  {
-    category: 'social',
-    isoDate: '2026-07-12',
-    date: 'July 12, 2026',
-    title: 'Wimbledon Open Round Robin',
-    description:
-      'Whites encouraged! Join our Wimbledon-themed round robin with mixed doubles play, strawberries & cream, and great prizes.',
-    highlight: '1:00 - 4:00 PM',
-  },
-  {
-    category: 'tournament',
-    isoDate: '2026-07-18',
-    date: 'July 18-19, 2026',
-    title: '95+ Mixed Doubles Tournament',
-    description:
-      '$180/Team — 2 Matches Guaranteed. A+B Draw, Over 95 Mixed Doubles. Includes lunches at Mono Cliffs Inn and great prizes!',
-    highlight: '$180/Team',
-  },
-];
-
-const filters = [
-  { label: 'All Events', value: 'all' },
-  { label: 'Tournaments', value: 'tournament' },
-  { label: 'Camps', value: 'camp' },
-  { label: 'Coaching', value: 'coaching' },
-  { label: 'Social', value: 'social' },
-];
+// Use shared event data
+const events = allCardEvents;
+const filters = eventFilters;
 
 function EventCardSkeleton() {
   return (
@@ -140,11 +44,17 @@ export default function Events() {
   useEffect(() => { setMounted(true); }, []);
 
   const today = new Date().toISOString().slice(0, 10);
-  const filtered = filter === 'all' ? events : events.filter(e => e.category === filter);
-  const upcoming = filtered
-    .filter(e => e.isoDate >= today)
-    .sort((a, b) => a.isoDate.localeCompare(b.isoDate))
-    .slice(0, 3);
+  const filtered = useMemo(
+    () => filter === 'all' ? events : events.filter(e => e.category === filter),
+    [filter]
+  );
+  const upcoming = useMemo(
+    () => filtered
+      .filter(e => e.isoDate >= today)
+      .sort((a, b) => a.isoDate.localeCompare(b.isoDate))
+      .slice(0, 3),
+    [filtered, today]
+  );
 
   // 3D Tilt effect — re-attaches whenever filter changes (animKey)
   const attachTilt = useCallback(() => {
@@ -277,6 +187,25 @@ export default function Events() {
               </div>
             );
           })}
+        </div>
+
+        {/* CTAs */}
+        <div className="flex flex-wrap justify-center gap-4 mt-12 fade-in">
+          <a
+            href="/login"
+            className="inline-flex items-center gap-2 px-8 py-3 rounded-full text-sm font-semibold text-white transition-transform hover:scale-105"
+            style={{ backgroundColor: '#6b7a3d' }}
+          >
+            Book a Court
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+          </a>
+          <a
+            href="/info?tab=coaching"
+            className="inline-flex items-center gap-2 px-8 py-3 rounded-full text-sm font-semibold border transition-transform hover:scale-105"
+            style={{ color: '#6b7a3d', borderColor: '#6b7a3d' }}
+          >
+            View Coaching Programs
+          </a>
         </div>
 
       </div>

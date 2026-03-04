@@ -30,14 +30,26 @@ const slides = [
 ];
 
 export default function Gallery({ onOpenLightbox }: GalleryProps) {
-  // Shuffle slides on each page load so the gallery starts differently every time
+  // Shuffle slides — cache order in sessionStorage so carousel is consistent within a visit
   const shuffledSlides = useMemo(() => {
-    const arr = [...slides];
-    for (let i = arr.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [arr[i], arr[j]] = [arr[j], arr[i]];
+    if (typeof window !== 'undefined') {
+      const cached = sessionStorage.getItem('mtc-gallery-order');
+      if (cached) {
+        try {
+          const indices = JSON.parse(cached) as number[];
+          if (indices.length === slides.length) return indices.map((i) => slides[i]);
+        } catch { /* ignore corrupt cache */ }
+      }
     }
-    return arr;
+    const indices = slides.map((_, i) => i);
+    for (let i = indices.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [indices[i], indices[j]] = [indices[j], indices[i]];
+    }
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('mtc-gallery-order', JSON.stringify(indices));
+    }
+    return indices.map((i) => slides[i]);
   }, []);
 
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -129,6 +141,11 @@ export default function Gallery({ onOpenLightbox }: GalleryProps) {
           role="region"
           aria-label="Photo gallery carousel"
           aria-roledescription="carousel"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === 'ArrowLeft') { e.preventDefault(); goToSlide(currentSlide - 1); }
+            else if (e.key === 'ArrowRight') { e.preventDefault(); goToSlide(currentSlide + 1); }
+          }}
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
         >
