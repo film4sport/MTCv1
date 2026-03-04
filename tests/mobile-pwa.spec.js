@@ -11,10 +11,20 @@ const MOBILE_URL = '/mobile-app/index.html';
 
 /** Dismiss onboarding overlay unconditionally (don't check visibility — animation timing varies on CI) */
 async function dismissOnboarding(page) {
-  await page.evaluate(() => {
-    const el = document.getElementById('onboardingOverlay');
-    if (el) { el.classList.remove('active'); el.style.display = 'none'; }
-  });
+  // Wait for page to fully settle (avoids "execution context destroyed" from mid-load navigations)
+  await page.waitForLoadState('load').catch(() => {});
+  // Retry once if context is destroyed during page initialization
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      await page.evaluate(() => {
+        const el = document.getElementById('onboardingOverlay');
+        if (el) { el.classList.remove('active'); el.style.display = 'none'; }
+      });
+      break;
+    } catch {
+      await page.waitForTimeout(500);
+    }
+  }
   await page.waitForTimeout(300);
 }
 

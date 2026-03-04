@@ -108,12 +108,9 @@ test.describe('Mobile PWA — Authenticated Navigation', () => {
   test('navigateTo function works via JS evaluation', async ({ page }) => {
     await mockAuthenticatedState(page);
 
-    // Use the navigation function directly
-    await page.evaluate(() => {
-      if (typeof MTC !== 'undefined' && MTC.fn && MTC.fn.navigateTo) {
-        MTC.fn.navigateTo('book');
-      }
-    });
+    // Wait for MTC navigation to be ready before calling it
+    await page.waitForFunction(() => typeof MTC !== 'undefined' && MTC.fn && MTC.fn.navigateTo, null, { timeout: 5000 });
+    await page.evaluate(() => { MTC.fn.navigateTo('book'); });
     await page.waitForTimeout(500);
 
     const bookActive = await page.evaluate(() => {
