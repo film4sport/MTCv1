@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo, memo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useApp } from '../lib/store';
@@ -21,21 +22,21 @@ const navItems = [
 const adminItem = { href: '/dashboard/admin', label: 'Admin Panel', icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z' };
 const coachItem = { href: '/dashboard/coaching', label: 'Book Lessons', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01' };
 
-export default function Sidebar() {
+function Sidebar() {
   const pathname = usePathname();
   const { currentUser, conversations } = useApp();
   const { sidebarCollapsed, setSidebarCollapsed, mobileSidebarOpen, setMobileSidebarOpen } = useUI();
   const isAdmin = currentUser?.role === 'admin';
   const isCoach = currentUser?.role === 'coach';
 
-  const unreadMessages = conversations.reduce((sum, c) => sum + c.unread, 0);
+  const unreadMessages = useMemo(() => conversations.reduce((sum, c) => sum + c.unread, 0), [conversations]);
 
-  // Role-based nav filtering
-  const filteredNavItems = navItems.filter(item => {
+  // Role-based nav filtering (memoized — only changes when role changes)
+  const filteredNavItems = useMemo(() => navItems.filter(item => {
     if (isCoach && (item.label === 'Partners' || item.label === 'Lessons')) return false;
     if (isAdmin && item.label === 'Lessons') return false;
     return true;
-  });
+  }), [isAdmin, isCoach]);
 
   const closeMobileSidebar = () => setMobileSidebarOpen(false);
 
@@ -200,3 +201,5 @@ export default function Sidebar() {
     </>
   );
 }
+
+export default memo(Sidebar);
