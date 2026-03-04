@@ -11,6 +11,18 @@ const { test, expect } = require('@playwright/test');
 
 const MOBILE_URL = '/mobile-app/index.html';
 
+/** Dismiss onboarding overlay if present */
+async function dismissOnboarding(page) {
+  const overlay = page.locator('#onboardingOverlay.active');
+  if (await overlay.isVisible().catch(() => false)) {
+    await page.evaluate(() => {
+      const overlay = document.getElementById('onboardingOverlay');
+      if (overlay) overlay.classList.remove('active');
+    });
+    await page.waitForTimeout(300);
+  }
+}
+
 test.describe('Mobile PWA — Offline Resilience', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
@@ -22,16 +34,14 @@ test.describe('Mobile PWA — Offline Resilience', () => {
 
     await page.goto(MOBILE_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
     await page.waitForTimeout(1000);
+    await dismissOnboarding(page);
 
     // Fill in login form
     await page.fill('#loginEmail', 'test@mtc.ca');
     await page.fill('#loginPassword', 'password123');
-    await page.locator('.login-btn').click();
+    await page.locator('.login-btn').first().click();
     await page.waitForTimeout(2000);
 
-    // Should show an error toast or message, NOT a blank screen
-    const toast = page.locator('.toast').or(page.locator('[class*="toast"]')).or(page.locator('.field-error'));
-    const hasError = await toast.first().isVisible().catch(() => false);
     // Login screen should still be visible (not crashed)
     await expect(page.locator('#login-screen')).toBeAttached();
   });
@@ -63,10 +73,11 @@ test.describe('Mobile PWA — Offline Resilience', () => {
 
     await page.goto(MOBILE_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
     await page.waitForTimeout(1000);
+    await dismissOnboarding(page);
 
     await page.fill('#loginEmail', 'test@mtc.ca');
     await page.fill('#loginPassword', 'password123');
-    await page.locator('.login-btn').click();
+    await page.locator('.login-btn').first().click();
     await page.waitForTimeout(2000);
 
     // Should have no unhandled JS errors (global error handler catches them)
@@ -84,10 +95,11 @@ test.describe('Mobile PWA — Offline Resilience', () => {
 
     await page.goto(MOBILE_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
     await page.waitForTimeout(1000);
+    await dismissOnboarding(page);
 
     await page.fill('#loginEmail', 'test@mtc.ca');
     await page.fill('#loginPassword', 'password123');
-    await page.locator('.login-btn').click();
+    await page.locator('.login-btn').first().click();
     await page.waitForTimeout(2000);
 
     // Login screen should still be showing (not navigated away)

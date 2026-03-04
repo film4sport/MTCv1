@@ -23,7 +23,7 @@ const MOCK_USER = {
 
 /**
  * Helper: Mock the auth endpoint and localStorage to simulate a logged-in session.
- * The mobile PWA checks localStorage for existing session before showing login screen.
+ * Uses addInitScript to set localStorage BEFORE page loads (avoids context-destroyed errors).
  */
 async function mockAuthenticatedState(page) {
   // Intercept /api/mobile-auth to return mock user
@@ -60,12 +60,8 @@ async function mockAuthenticatedState(page) {
     }
   });
 
-  // Go to mobile app
-  await page.goto(MOBILE_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
-  await page.waitForTimeout(500);
-
-  // Set localStorage session data to bypass login screen
-  await page.evaluate((user) => {
+  // Set localStorage via addInitScript BEFORE page loads (prevents context-destroyed errors)
+  await page.addInitScript((user) => {
     localStorage.setItem('mtc-current-user', JSON.stringify(user));
     localStorage.setItem('mtc-access-token', user.accessToken);
     localStorage.setItem('mtc-session', JSON.stringify({
@@ -75,8 +71,9 @@ async function mockAuthenticatedState(page) {
     }));
   }, MOCK_USER);
 
-  // Reload to pick up localStorage session
-  await page.reload({ waitUntil: 'domcontentloaded' });
+  // Now navigate — localStorage is already set when the page JS runs
+  await page.goto(MOBILE_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await page.waitForLoadState('load');
   await page.waitForTimeout(1500);
 }
 
