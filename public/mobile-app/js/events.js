@@ -648,6 +648,11 @@
    */
   window.updateEventsFromAPI = function(apiEvents) {
     if (!Array.isArray(apiEvents)) return;
+
+    // Get current user's name for RSVP matching
+    var currentUser = MTC.storage.get('mtc-user', null) || MTC.storage.get('mtc-current-user', null);
+    var userName = currentUser ? (currentUser.name || '') : '';
+
     apiEvents.forEach(function(ev) {
       clubEventsData[ev.id] = {
         id: ev.id,
@@ -665,6 +670,46 @@
         rsvpCount: (ev.attendees || []).length
       };
     });
+
+    // Rebuild userRsvps from API attendees (restore RSVP state on login/device switch)
+    if (userName) {
+      // Clear and rebuild from API truth
+      userRsvps.length = 0;
+      Object.keys(clubEventsData).forEach(function(eventId) {
+        var ev = clubEventsData[eventId];
+        if (ev.attendees) {
+          // Replace real name with "You" for client-side display consistency
+          var idx = ev.attendees.indexOf(userName);
+          if (idx !== -1) {
+            ev.attendees[idx] = 'You';
+            userRsvps.push(eventId);
+          }
+        }
+      });
+      saveUserRsvps();
+
+      // Rebuild event bookings list for My Bookings screen
+      if (typeof MTC.state !== 'undefined') {
+        MTC.state.eventBookings = [];
+        userRsvps.forEach(function(eventId) {
+          var ev = clubEventsData[eventId];
+          if (ev) {
+            MTC.state.eventBookings.push({
+              eventId: eventId,
+              type: ev.type || 'event',
+              title: ev.title,
+              date: ev.date,
+              time: ev.time,
+              location: ev.location || 'MTC Courts'
+            });
+          }
+        });
+        window.eventBookings = MTC.state.eventBookings;
+        MTC.storage.set('mtc-event-bookings', MTC.state.eventBookings);
+        if (typeof MTC.fn.renderEventBookings === 'function') MTC.fn.renderEventBookings();
+      }
+    }
+
     // Re-sync the UI
     if (typeof syncEventCardDates === 'function') syncEventCardDates();
   };
