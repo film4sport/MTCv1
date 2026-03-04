@@ -7,6 +7,10 @@ import DashboardHeader from '../components/DashboardHeader';
 import { generateId, useFocusTrap } from '../lib/utils';
 import * as db from '../lib/db';
 import { reportError } from '../../lib/errorReporter';
+import AdminDashboardTab from './components/AdminDashboardTab';
+import AdminMembersTab from './components/AdminMembersTab';
+import AdminCourtsTab from './components/AdminCourtsTab';
+import AdminAnnouncementsTab from './components/AdminAnnouncementsTab';
 
 type AdminTab = 'dashboard' | 'members' | 'courts' | 'announcements';
 
