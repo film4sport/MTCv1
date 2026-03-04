@@ -23,7 +23,7 @@
 
     // Auto-include auth token if available
     var headers = { 'Content-Type': 'application/json' };
-    var token = MTC.storage.get('mtc-access-token', '');
+    var token = MTC.getToken();
     if (token) {
       headers['Authorization'] = 'Bearer ' + token;
     }
@@ -289,7 +289,7 @@
    * @returns {Promise<*>} The loaded data
    */
   function loadFromAPI(endpoint, storageKey, fallback) {
-    var token = MTC.storage.get('mtc-access-token', '');
+    var token = MTC.getToken();
     if (!token) {
       return Promise.resolve(MTC.storage.get(storageKey, fallback));
     }

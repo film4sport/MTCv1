@@ -752,7 +752,7 @@
     }
 
     // Use the real API client if available, fall back to optimistic-only for offline
-    if (MTC.fn.createBooking && MTC.storage.get('mtc-access-token')) {
+    if (MTC.fn.createBooking && MTC.getToken()) {
       MTC.fn.createBooking(bookingData,
         function onSuccess() {
           var toastMsg = 'Court '+selectedSlot.court+' booked for '+selectedSlot.time+'!';

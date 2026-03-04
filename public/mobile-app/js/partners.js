@@ -120,7 +120,7 @@
     showToast('Posting partner request...');
 
     // Sync to Supabase via API
-    if (MTC.fn.apiRequest && MTC.storage.get('mtc-access-token')) {
+    if (MTC.fn.apiRequest && MTC.getToken()) {
       MTC.fn.apiRequest('/mobile/partners', {
         method: 'POST',
         body: JSON.stringify({
@@ -206,7 +206,7 @@
     showToast('Request removed');
 
     // Delete from Supabase
-    if (serverId && MTC.fn.apiRequest && MTC.storage.get('mtc-access-token')) {
+    if (serverId && MTC.fn.apiRequest && MTC.getToken()) {
       MTC.fn.apiRequest('/mobile/partners', {
         method: 'DELETE',
         body: JSON.stringify({ partnerId: serverId })
@@ -246,7 +246,7 @@
         removeEventFromMyBookings('program-' + name.replace(/\s/g, '-'));
       }
       // Persist withdrawal to Supabase
-      var token1 = MTC.storage.get('mtc-access-token', '');
+      var token1 = MTC.getToken();
       if (token1 && typeof MTC.fn.apiRequest === 'function') {
         MTC.fn.apiRequest('/mobile/programs', {
           method: 'POST',
@@ -275,7 +275,7 @@
         addEventToMyBookings('program-' + name.replace(/\s/g, '-'), 'program');
       }
       // Persist enrollment to Supabase
-      var token2 = MTC.storage.get('mtc-access-token', '');
+      var token2 = MTC.getToken();
       if (token2 && typeof MTC.fn.apiRequest === 'function') {
         MTC.fn.apiRequest('/mobile/programs', {
           method: 'POST',
