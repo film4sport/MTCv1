@@ -262,10 +262,10 @@
         body: JSON.stringify({ eventId: eventId })
       });
       if (!res.ok) {
-        console.error('Interclub RSVP persist failed:', (await res.json()).error);
+        MTC.warn('Interclub RSVP persist failed:', (await res.json()).error);
       }
     } catch(apiErr) {
-      console.error('Interclub RSVP API error:', apiErr);
+      MTC.warn('Interclub RSVP API error:', apiErr);
     }
 
     // Don't auto-close - let user see the updated list and close manually

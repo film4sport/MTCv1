@@ -46,7 +46,7 @@ export default function Loader() {
           priority
         />
         <div className={`tennis-ball-wrapper${ballHit ? ' ball-hit' : ''}`}>
-          <Image className="tennis-ball" src="/tennis-ball-loader.png" alt="" width={40} height={40} onLoad={handleImgLoad} priority />
+          <Image className="tennis-ball" src="/tennis-ball-loader.png" alt="" width={40} height={40} onLoad={handleImgLoad} priority aria-hidden="true" />
         </div>
       </div>
     </div>
