@@ -35,7 +35,7 @@ export async function fetchBookings(): Promise<Booking[]> {
     .from('bookings')
     .select('*, booking_participants(*)')
     .order('date', { ascending: true });
-  if (error) { console.error('[MTC] fetchBookings error:', error.message); throw error; }
+  if (error) { reportError(new Error(error.message), 'fetchBookings'); throw error; }
   if (!data) return [];
   return data.map(b => ({
     id: b.id,
