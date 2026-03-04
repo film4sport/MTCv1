@@ -804,6 +804,23 @@ Cross-referenced both code review reports (38 + 39 findings) against current cod
 - Items that were already fixed but agent initially flagged as open: #11 (UNIQUE constraint exists), B29 (cache version sync already done), B30 (phantom bookings already use API client)
 - Truly low-priority/won't-fix: #9 (CSRF — mitigated by Bearer token auth + CORS), #16 (admin role — validated server-side on every API call, frontend is just UX), #36 (idempotency — DB unique index prevents duplicates)
 
+### Cowork 10/10 Sweep Continuation (2026-03-04)
+Completed remaining items from the sweep:
+
+**Error reporting pipeline (3 files):**
+- `app/api/errors/route.ts` (NEW) — POST endpoint for client-side error logging. Rate limited (20/min/IP), input sanitized (message: 1000 chars, stack: 2000 chars). Persists to Supabase `error_logs` table with console fallback.
+- `app/lib/errorReporter.ts` (rewritten) — Now batches errors with 2s debounce and POSTs to `/api/errors`. Still logs to console for dev visibility.
+- `supabase/schema.sql` — Added `error_logs` table (message, context, stack, url, user_agent, ip, created_at). RLS: admin read, open insert (service role bypasses). Indexes on created_at and context.
+
+**Gate code notifications (#21):**
+- `app/auth/callback/route.ts` — Changed sequential awaits to `Promise.allSettled` for welcome message + notification + email log. One failure no longer blocks the others.
+
+**Mobile PWA E2E tests (NEW):**
+- `tests/mobile-pwa.spec.js` — 14 tests covering: login screen rendering, form validation (empty fields, invalid email), signup toggle, page structure (all screens in DOM, ARIA labels, bottom nav, manifest, viewport), booking/partner screen structure, API endpoint validation (auth rejects empty/invalid creds, error reporting accepts/rejects correctly).
+- `playwright.config.js` — Added `mobile-pwa.spec.js` to DESKTOP_ONLY_TESTS array.
+
+**Verified:** TypeScript clean ✓, 207/207 unit tests pass ✓, mobile build successful ✓.
+
 ## TODO / REMINDERS
 - **Junior Summer Camp dates**: User is waiting on real dates from Mark Taylor. When received, update the `junior-summer-camp` event across: `supabase/seed.sql`, `app/dashboard/lib/data.ts`, `public/mobile-app/js/events.js`, and run UPDATE SQL on live Supabase. Also update date/time in `app/(landing)/layout.tsx` JSON-LD if camp is featured there.
 
