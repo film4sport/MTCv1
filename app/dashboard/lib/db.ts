@@ -23,7 +23,7 @@ export async function fetchMembers(): Promise<User[]> {
   }));
 }
 
-export async function updateProfile(userId: string, updates: { ntrp?: number; name?: string; skill_level?: string; skill_level_set?: boolean; membership_type?: string; family_id?: string; avatar?: string }): Promise<void> {
+export async function updateProfile(userId: string, updates: { ntrp?: number; name?: string; skill_level?: string; skill_level_set?: boolean; membership_type?: string; family_id?: string; avatar?: string; preferences?: Record<string, unknown> }): Promise<void> {
   const { error } = await supabase.from('profiles').update(updates).eq('id', userId);
   if (error) throw error;
 }

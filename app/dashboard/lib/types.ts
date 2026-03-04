@@ -15,6 +15,7 @@ export interface User {
   familyId?: string;
   memberSince?: string;
   avatar?: string;
+  preferences?: Record<string, unknown>;
 }
 
 export interface FamilyMember {

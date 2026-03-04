@@ -99,6 +99,38 @@ export async function POST(request: Request) {
   }
 }
 
+/** Dismiss or undismiss an announcement for the current user */
+export async function PATCH(request: Request) {
+  const authResult = await authenticateMobileRequest(request);
+  if (authResult instanceof NextResponse) return authResult;
+
+  try {
+    const { announcementId, dismiss } = await request.json();
+    if (!announcementId) return NextResponse.json({ error: 'Missing announcementId' }, { status: 400 });
+
+    const supabase = getAdminClient();
+    const userId = authResult.id;
+
+    if (dismiss === false) {
+      // Undismiss
+      await supabase.from('announcement_dismissals').delete()
+        .eq('announcement_id', announcementId)
+        .eq('user_id', userId);
+    } else {
+      // Dismiss (upsert to avoid duplicates)
+      const { error } = await supabase.from('announcement_dismissals').upsert(
+        { announcement_id: announcementId, user_id: userId },
+        { onConflict: 'announcement_id,user_id' }
+      );
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true });
+  } catch {
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+  }
+}
+
 /** Delete an announcement (admin only) */
 export async function DELETE(request: Request) {
   const authResult = await authenticateMobileRequest(request);

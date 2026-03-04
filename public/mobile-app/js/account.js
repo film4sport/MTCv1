@@ -85,6 +85,13 @@
       lighting: document.getElementById('prefLighting').classList.contains('active')
     };
     MTC.storage.set('mtc-court-prefs', prefs);
+    // Sync to Supabase preferences
+    if (MTC.fn && MTC.fn.apiRequest) {
+      MTC.fn.apiRequest('/mobile/members', {
+        method: 'PATCH',
+        body: JSON.stringify({ preferences: { courtPrefs: prefs } })
+      }).catch(function() { MTC.warn('Court prefs sync failed'); });
+    }
     document.getElementById('courtPrefsModal').remove();
     showToast('Court preferences saved');
   };

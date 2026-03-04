@@ -47,6 +47,46 @@
 
 **Build verified:** `npm run check` passes clean (tsc + mobile build). All file integrity verified via wc -l.
 
+### Cowork Session (2026-03-04) — Eliminate ALL Remaining Local-Only State
+
+**Audit found 11 local-only features. ALL fixed.**
+
+**Schema change:**
+- `profiles` table: added `preferences jsonb default '{}'` column — stores all misc user preferences (onboarding, banner dismissal, court prefs, privacy settings, active family profile, availability, playstyle)
+- Migration: `supabase/migrations/20260304_user_preferences.sql`
+
+**New API functionality:**
+- `GET /api/mobile/programs` — Lists all coaching programs with enrollment counts and user enrollment status
+- `PATCH /api/mobile/announcements` — Dismiss/undismiss announcements per user (upserts into announcement_dismissals)
+- `PATCH /api/mobile/conversations` — Mark all messages in a conversation as read for the current user
+- `PATCH /api/mobile/members` now supports `preferences` JSONB merge (fetches current, merges new keys)
+- `GET /api/mobile/members` now returns `preferences` field
+
+**Dashboard types extended:**
+- `User` interface: added `preferences?: Record<string, unknown>`
+- `db.updateProfile()`: added `preferences` parameter
+- `auth.ts`: both profile mappers now include `preferences`
+
+**Mobile PWA wiring:**
+- `profile.js` — `saveProfileToStorage()` now calls PATCH `/mobile/members` with ntrp, skillLevel, and preferences (availability, playstyle)
+- `avatar.js` — `selectAvatar()` now calls PATCH `/mobile/members` with avatar field
+- `partners.js` — `savePrivacySettings()` now syncs 4 privacy toggles to Supabase via preferences.privacy
+- `account.js` — `saveCourtPreferences()` now syncs court prefs to Supabase via preferences.courtPrefs
+- `profile.js` — `switchFamilyProfile()` now syncs active profile selection to Supabase via preferences.activeProfile
+- `auth.js` — `loadAppDataFromAPI()` now loads: programs (new), user preferences from own profile (restores privacy, court prefs, availability, playstyle, active family member, avatar from Supabase on login)
+
+**Dashboard wiring:**
+- `OnboardingTour.tsx` — Checks Supabase `preferences.onboardingCompleted` + syncs completion to Supabase
+- `MobileAppBanner.tsx` — Checks Supabase `preferences.mobileAppBannerDismissed` + syncs dismissal to Supabase
+- `store.tsx` — `switchProfile()` syncs active profile to Supabase preferences
+
+**Build verified:** `npm run check` passes clean. All files integrity-checked.
+
+**SQL to run in Supabase:**
+```sql
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS preferences jsonb DEFAULT '{}';
+```
+
 ---
 
 ### Cowork Session (2026-03-04) — Audit Remaining Items + Booking UX

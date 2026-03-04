@@ -1,14 +1,26 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useApp } from '../lib/store';
+import * as db from '../lib/db';
 
 export default function MobileAppBanner() {
+  const { currentUser } = useApp();
   const [dismissed, setDismissed] = useState(true); // default hidden until we check
 
   useEffect(() => {
     const wasDismissed = localStorage.getItem('mtc-mobile-app-dismissed') === 'true';
-    setDismissed(wasDismissed);
-  }, []);
+    if (wasDismissed) { setDismissed(true); return; }
+    // Also check Supabase preferences (synced across devices)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const prefs = (currentUser as any)?.preferences;
+    if (prefs?.mobileAppBannerDismissed) {
+      localStorage.setItem('mtc-mobile-app-dismissed', 'true');
+      setDismissed(true);
+      return;
+    }
+    setDismissed(false);
+  }, [currentUser]);
 
   if (dismissed) return null;
 
@@ -31,6 +43,12 @@ export default function MobileAppBanner() {
         onClick={() => {
           localStorage.setItem('mtc-mobile-app-dismissed', 'true');
           setDismissed(true);
+          // Sync to Supabase so it persists across devices
+          if (currentUser?.id) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const prefs = ((currentUser as any)?.preferences || {});
+            db.updateProfile(currentUser.id, { preferences: { ...prefs, mobileAppBannerDismissed: true } }).catch(() => {});
+          }
         }}
         className="shrink-0 p-0.5 rounded-full hover:bg-black/5 transition-colors"
         aria-label="Dismiss"

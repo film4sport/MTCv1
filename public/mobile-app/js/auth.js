@@ -487,6 +487,52 @@
         window.updateNotifPrefsFromAPI(prefs);
       }
     }).catch(function() { /* non-critical */ });
+
+    // Load coaching programs
+    MTC.fn.loadFromAPI('/mobile/programs', 'mtc-api-programs', null).then(function(programs) {
+      if (programs && typeof window.updateProgramsFromAPI === 'function') {
+        window.updateProgramsFromAPI(programs);
+      }
+    });
+
+    // Load user preferences (privacy, court prefs, active profile, etc.) from own profile
+    MTC.fn.loadFromAPI('/mobile/members', 'mtc-api-members', null).then(function(members) {
+      if (!members || !Array.isArray(members)) return;
+      // Find own profile
+      var userId = MTC.storage.get('mtc-user-id');
+      var me = members.find(function(m) { return m.id === userId; });
+      if (me && me.preferences) {
+        // Restore privacy settings
+        if (me.preferences.privacy) {
+          MTC.storage.set('mtc-privacy', me.preferences.privacy);
+        }
+        // Restore court preferences
+        if (me.preferences.courtPrefs) {
+          MTC.storage.set('mtc-court-prefs', me.preferences.courtPrefs);
+        }
+        // Restore availability + playstyle into profile
+        if (me.preferences.availability || me.preferences.playstyle) {
+          var profile = MTC.storage.get('mtc-profile', {});
+          if (me.preferences.availability) profile.availability = me.preferences.availability;
+          if (me.preferences.playstyle) profile.playstyle = me.preferences.playstyle;
+          MTC.storage.set('mtc-profile', profile);
+          Object.assign(MTC.state.profileData || {}, profile);
+        }
+        // Restore active family profile
+        if (me.preferences.activeProfile && me.preferences.activeProfile.type === 'family_member') {
+          var memberId = me.preferences.activeProfile.memberId;
+          if (memberId && typeof window.switchFamilyProfile === 'function') {
+            // Delay to let family data load first
+            setTimeout(function() { window.switchFamilyProfile(memberId); }, 500);
+          }
+        }
+        // Restore avatar from profile
+        if (me.avatar) {
+          MTC.storage.set('mtc-avatar', me.avatar);
+          if (typeof window.loadSavedAvatar === 'function') window.loadSavedAvatar();
+        }
+      }
+    });
   }
 
   /**

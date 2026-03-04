@@ -177,3 +177,32 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }
+
+/** Mark messages as read in a conversation, or mark all notifications read */
+export async function PATCH(request: Request) {
+  const authResult = await authenticateMobileRequest(request);
+  if (authResult instanceof NextResponse) return authResult;
+
+  try {
+    const { conversationId } = await request.json();
+    if (!conversationId) {
+      return NextResponse.json({ error: 'Missing conversationId' }, { status: 400 });
+    }
+
+    const supabase = getAdminClient();
+    const userId = authResult.id;
+
+    // Mark all messages sent TO this user in this conversation as read
+    const { error } = await supabase
+      .from('messages')
+      .update({ read: true })
+      .eq('conversation_id', conversationId)
+      .eq('to_id', userId)
+      .eq('read', false);
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ success: true });
+  } catch {
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+  }
+}

@@ -166,6 +166,14 @@
     }
     MTC.storage.set('mtc-avatar', avatarId);
 
+    // Sync to Supabase
+    if (MTC.fn && MTC.fn.apiRequest) {
+      MTC.fn.apiRequest('/mobile/members', {
+        method: 'PATCH',
+        body: JSON.stringify({ avatar: avatarId })
+      }).catch(function() { MTC.warn('Avatar sync failed'); });
+    }
+
     // Update selection state
     document.querySelectorAll('.avatar-option').forEach(function(opt) {
       opt.classList.remove('selected');
