@@ -1,11 +1,11 @@
 'use client';
 
-import { Member } from '../../lib/store';
+import type { User } from '../../lib/types';
 import { useMemo } from 'react';
 
 interface AdminMembersTabProps {
-  currentUser: Member | null;
-  members: Member[];
+  currentUser: User | null;
+  members: User[];
   memberSearch: string;
   onMemberSearchChange: (value: string) => void;
   onActionClick: (id: string, name: string, action: 'pause' | 'unpause' | 'cancel') => void;
@@ -57,7 +57,7 @@ export default function AdminMembersTab({
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2">
                     <div className="w-7 h-7 rounded-full flex items-center justify-center text-[0.6rem] font-bold" style={{ background: 'rgba(107, 122, 61, 0.1)', color: '#6b7a3d' }}>
-                      {m.name.split(' ').map(n => n[0]).join('')}
+                      {m.name.split(' ').map((n: string) => n[0]).join('')}
                     </div>
                     <span className="text-sm font-medium" style={{ color: '#2a2f1e' }}>{m.name}</span>
                   </div>

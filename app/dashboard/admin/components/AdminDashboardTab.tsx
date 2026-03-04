@@ -1,18 +1,14 @@
 'use client';
 
-import { Member, Court, Booking, Analytics } from '../../lib/store';
+import type { User, Court, Booking, AdminAnalytics } from '../../lib/types';
 import { useToast } from '../../lib/toast';
-import { generateId } from '../../lib/utils';
-import * as db from '../../lib/db';
-import { reportError } from '../../../lib/errorReporter';
-import { useState } from 'react';
 
 interface AdminDashboardTabProps {
-  currentUser: Member | null;
-  members: Member[];
+  currentUser: User | null;
+  members: User[];
   bookings: Booking[];
   courts: Court[];
-  analytics: Analytics;
+  analytics: AdminAnalytics;
   gateCode: string;
   newGateCode: string;
   gateCodeLoading: boolean;
@@ -214,7 +210,7 @@ export default function AdminDashboardTab({
       <div className="glass-card rounded-2xl border p-5" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
         <h4 className="font-medium text-sm mb-4" style={{ color: '#2a2f1e' }}>Peak Times</h4>
         <div className="space-y-3">
-          {analytics.peakTimes.map((pt, i) => (
+          {analytics.peakTimes.map((pt: any, i: number) => (
             <div key={i} className="flex items-center gap-4">
               <span className="text-sm w-24" style={{ color: '#2a2f1e' }}>{pt.day}</span>
               <span className="text-xs w-20" style={{ color: '#6b7266' }}>{pt.time}</span>
@@ -248,7 +244,7 @@ export default function AdminDashboardTab({
       <div className="glass-card rounded-2xl border p-5" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
         <h4 className="font-medium text-sm mb-4" style={{ color: '#2a2f1e' }}>Revenue Breakdown</h4>
         <div className="h-6 rounded-full overflow-hidden flex mb-4" style={{ background: '#f5f2eb' }}>
-          {analytics.revenueBreakdown.map((item, i) => {
+          {analytics.revenueBreakdown.map((item: any, i: number) => {
             const colors = ['#6b7a3d', '#d4e157', '#a3b356'];
             return (
               <div
@@ -261,7 +257,7 @@ export default function AdminDashboardTab({
           })}
         </div>
         <div className="space-y-2">
-          {analytics.revenueBreakdown.map((item, i) => {
+          {analytics.revenueBreakdown.map((item: any, i: number) => {
             const colors = ['#6b7a3d', '#d4e157', '#a3b356'];
             return (
               <div key={item.category} className="flex items-center justify-between text-sm">
@@ -294,7 +290,7 @@ export default function AdminDashboardTab({
         </div>
         <p className="text-xs font-medium mb-3" style={{ color: '#6b7266' }}>Most Active Members</p>
         <div className="space-y-2">
-          {analytics.memberActivity.mostActive.map((m, i) => {
+          {analytics.memberActivity.mostActive.map((m: any, i: number) => {
             const maxBookings = analytics.memberActivity.mostActive[0].bookings;
             return (
               <div key={m.name} className="flex items-center gap-3">
@@ -314,8 +310,8 @@ export default function AdminDashboardTab({
       <div className="glass-card rounded-2xl border p-5" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
         <h4 className="font-medium text-sm mb-4" style={{ color: '#2a2f1e' }}>Monthly Trends</h4>
         <div className="flex items-end justify-between gap-2" style={{ height: '160px' }}>
-          {analytics.monthlyTrends.map(month => {
-            const maxBookings = Math.max(...analytics.monthlyTrends.map(m => m.bookings));
+          {analytics.monthlyTrends.map((month: any) => {
+            const maxBookings = Math.max(...analytics.monthlyTrends.map((m: any) => m.bookings));
             const heightPct = (month.bookings / maxBookings) * 100;
             return (
               <div key={month.month} className="flex-1 flex flex-col items-center gap-1">

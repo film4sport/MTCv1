@@ -1,6 +1,6 @@
 'use client';
 
-import { Announcement } from '../../lib/store';
+import type { Announcement } from '../../lib/types';
 
 interface AdminAnnouncementsTabProps {
   announcements: Announcement[];
