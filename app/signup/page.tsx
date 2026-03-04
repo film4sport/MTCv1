@@ -274,8 +274,9 @@ export default function SignupPage() {
             <p className="text-sm text-center mb-8" style={{ color: '#6b7266' }}>Tell us a bit about yourself.</p>
             <div className="space-y-5">
               <div>
-                <label className="block text-sm font-medium mb-2" style={{ color: '#6b7266' }}>Full Name</label>
+                <label htmlFor="signup-name" className="block text-sm font-medium mb-2" style={{ color: '#6b7266' }}>Full Name</label>
                 <input
+                  id="signup-name"
                   type="text"
                   value={signupData.name}
                   onChange={(e) => setSignupData({ ...signupData, name: e.target.value })}
@@ -287,8 +288,9 @@ export default function SignupPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2" style={{ color: '#6b7266' }}>Email</label>
+                <label htmlFor="signup-email" className="block text-sm font-medium mb-2" style={{ color: '#6b7266' }}>Email</label>
                 <input
+                  id="signup-email"
                   type="email"
                   value={signupData.email}
                   onChange={(e) => setSignupData({ ...signupData, email: e.target.value })}
@@ -300,9 +302,10 @@ export default function SignupPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2" style={{ color: '#6b7266' }}>Password</label>
+                <label htmlFor="signup-password" className="block text-sm font-medium mb-2" style={{ color: '#6b7266' }}>Password</label>
                 <div className="relative">
                   <input
+                    id="signup-password"
                     type={showPassword ? 'text' : 'password'}
                     value={signupData.password}
                     onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
@@ -328,9 +331,10 @@ export default function SignupPage() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2" style={{ color: '#6b7266' }}>Confirm Password</label>
+                <label htmlFor="signup-confirm-password" className="block text-sm font-medium mb-2" style={{ color: '#6b7266' }}>Confirm Password</label>
                 <div className="relative">
                   <input
+                    id="signup-confirm-password"
                     type={showConfirmPassword ? 'text' : 'password'}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}

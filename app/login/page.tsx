@@ -540,9 +540,10 @@ function LoginContent() {
               ) : (
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm mb-2" style={{ color: '#2a2f1e' }}>New Password</label>
+                    <label htmlFor="reset-new-password" className="block text-sm mb-2" style={{ color: '#2a2f1e' }}>New Password</label>
                     <div className="relative">
                       <input
+                        id="reset-new-password"
                         type={showNewPassword ? 'text' : 'password'}
                         value={newPassword}
                         onChange={(e) => { setNewPassword(e.target.value); setResetUpdateError(''); }}
@@ -564,9 +565,10 @@ function LoginContent() {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm mb-2" style={{ color: '#2a2f1e' }}>Confirm New Password</label>
+                    <label htmlFor="reset-confirm-password" className="block text-sm mb-2" style={{ color: '#2a2f1e' }}>Confirm New Password</label>
                     <div className="relative">
                       <input
+                        id="reset-confirm-password"
                         type={showConfirmNewPassword ? 'text' : 'password'}
                         value={confirmNewPassword}
                         onChange={(e) => { setConfirmNewPassword(e.target.value); setResetUpdateError(''); }}
@@ -645,8 +647,9 @@ function LoginContent() {
           {/* Login Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm mb-2" style={{ color: '#2a2f1e' }}>Email</label>
+              <label htmlFor="login-email" className="block text-sm mb-2" style={{ color: '#2a2f1e' }}>Email</label>
               <input
+                id="login-email"
                 type="email"
                 value={email}
                 onChange={(e) => { setEmail(e.target.value); setEmailError(false); }}
@@ -667,9 +670,10 @@ function LoginContent() {
             </div>
 
             <div>
-              <label className="block text-sm mb-2" style={{ color: '#2a2f1e' }}>Password</label>
+              <label htmlFor="login-password" className="block text-sm mb-2" style={{ color: '#2a2f1e' }}>Password</label>
               <div className="relative">
                 <input
+                  id="login-password"
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => { setPassword(e.target.value); setPasswordError(false); }}
