@@ -24,7 +24,10 @@ export default function BookCourtPage() {
   const { currentUser, members, bookings, courts, events, addBooking, cancelBooking, activeProfile, activeDisplayName } = useApp();
   const { showToast } = useToast();
   const [bookingSuccess, setBookingSuccess] = useState<{ courtName: string; date: string; time: string; participants?: { id: string; name: string }[]; duration?: number; matchType?: 'singles' | 'doubles' } | null>(null);
-  const [view, setView] = useState<ViewMode>('week');
+  const [view, setView] = useState<ViewMode>(() => {
+    if (typeof window !== 'undefined' && window.innerWidth >= 640) return 'all-courts';
+    return 'week';
+  });
   const [weekStart, setWeekStart] = useState(() => {
     const d = new Date();
     d.setHours(0, 0, 0, 0);
@@ -43,6 +46,7 @@ export default function BookCourtPage() {
   const [contentKey, setContentKey] = useState(0);
   const tooltipTimeout = useRef<NodeJS.Timeout | null>(null);
   const [mobileDayIdx, setMobileDayIdx] = useState(() => new Date().getDay());
+  const [allCourtsDate, setAllCourtsDate] = useState<string>(() => new Date().toISOString().split('T')[0]);
 
   const weekDays = useMemo(() => {
     return Array.from({ length: 7 }, (_, i) => {
@@ -177,37 +181,45 @@ export default function BookCourtPage() {
 
         {/* Top Bar: Court Tabs + View Toggle */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
-          <div className="flex gap-1.5 overflow-x-auto pb-1 -mb-1">
-            {COURTS_CONFIG.map(c => {
-              const colors = COURT_COLORS[c.id];
-              const active = selectedCourt === c.id;
-              const closed = isCourtInMaintenance(courts, c.id);
-              return (
-                <button
-                  key={c.id}
-                  onClick={() => setSelectedCourt(c.id)}
-                  className="relative px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 shrink-0"
-                  style={{
-                    background: active ? '#2a2f1e' : closed ? '#f5f2eb' : '#fff',
-                    color: active ? '#fff' : closed ? '#b5b0a5' : '#6b7266',
-                    border: active ? '1px solid #2a2f1e' : '1px solid #e0dcd3',
-                    boxShadow: active ? '0 2px 8px rgba(42,47,30,0.15)' : 'none',
-                    opacity: closed && !active ? 0.7 : 1,
-                  }}
-                >
-                  <span className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full" style={{ background: closed ? '#dc2626' : active ? '#d4e157' : colors.dot, opacity: active ? 1 : 0.5 }} />
-                    {c.name}
-                  </span>
-                  <span className="block text-[0.6rem] font-normal mt-0.5" style={{ opacity: 0.7 }}>
-                    {closed ? 'Closed' : c.floodlight ? 'til 10 PM' : 'til 8 PM'}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+          {view !== 'all-courts' ? (
+            <div className="flex gap-1.5 overflow-x-auto pb-1 -mb-1">
+              {COURTS_CONFIG.map(c => {
+                const colors = COURT_COLORS[c.id];
+                const active = selectedCourt === c.id;
+                const closed = isCourtInMaintenance(courts, c.id);
+                return (
+                  <button
+                    key={c.id}
+                    onClick={() => setSelectedCourt(c.id)}
+                    className="relative px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 shrink-0"
+                    style={{
+                      background: active ? '#2a2f1e' : closed ? '#f5f2eb' : '#fff',
+                      color: active ? '#fff' : closed ? '#b5b0a5' : '#6b7266',
+                      border: active ? '1px solid #2a2f1e' : '1px solid #e0dcd3',
+                      boxShadow: active ? '0 2px 8px rgba(42,47,30,0.15)' : 'none',
+                      opacity: closed && !active ? 0.7 : 1,
+                    }}
+                  >
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full" style={{ background: closed ? '#dc2626' : active ? '#d4e157' : colors.dot, opacity: active ? 1 : 0.5 }} />
+                      {c.name}
+                    </span>
+                    <span className="block text-[0.6rem] font-normal mt-0.5" style={{ opacity: 0.7 }}>
+                      {closed ? 'Closed' : c.floodlight ? 'til 10 PM' : 'til 8 PM'}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 text-sm font-medium" style={{ color: '#2a2f1e' }}>
+              <svg className="w-4 h-4" fill="none" stroke="#6b7a3d" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
+              All Courts — {(allCourtsDate ? new Date(allCourtsDate + 'T00:00:00') : new Date()).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+            </div>
+          )}
 
           <div className="flex items-center gap-1 p-1 rounded-xl shrink-0" style={{ background: 'rgba(255, 255, 255, 0.5)', border: '1px solid rgba(255, 255, 255, 0.4)' }}>
+            <button onClick={() => setView('all-courts')} className="hidden sm:block px-4 py-2 rounded-lg text-xs font-medium transition-all duration-200" style={{ background: view === 'all-courts' ? '#6b7a3d' : 'transparent', color: view === 'all-courts' ? '#fff' : '#6b7266' }}>All Courts</button>
             <button onClick={() => setView('week')} className="px-4 py-2 rounded-lg text-xs font-medium transition-all duration-200" style={{ background: view === 'week' ? '#6b7a3d' : 'transparent', color: view === 'week' ? '#fff' : '#6b7266' }}>Week</button>
             <button onClick={() => setView('calendar')} className="px-4 py-2 rounded-lg text-xs font-medium transition-all duration-200" style={{ background: view === 'calendar' ? '#6b7a3d' : 'transparent', color: view === 'calendar' ? '#fff' : '#6b7266' }}>Month</button>
           </div>
@@ -367,6 +379,116 @@ export default function BookCourtPage() {
                   </div>
                 </div>
 
+                <div className="mt-4"><BookingLegend /></div>
+              </>
+            ) : view === 'all-courts' ? (
+              /* All Courts Day View */
+              <>
+                {/* Date Navigation */}
+                <div className="flex items-center justify-between mb-4">
+                  <button onClick={() => { const d = new Date(allCourtsDate + 'T00:00:00'); d.setDate(d.getDate() - 1); setAllCourtsDate(d.toISOString().split('T')[0]); setContentKey(k => k + 1); }} className="w-10 h-10 rounded-xl flex items-center justify-center border hover:bg-white transition-colors active:scale-95" style={{ borderColor: '#e0dcd3' }}>
+                    <svg className="w-4 h-4" fill="none" stroke="#2a2f1e" viewBox="0 0 24 24" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                  </button>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => setAllCourtsDate(new Date().toISOString().split('T')[0])} className="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors" style={{ background: allCourtsDate === new Date().toISOString().split('T')[0] ? '#6b7a3d' : '#f5f2eb', color: allCourtsDate === new Date().toISOString().split('T')[0] ? '#fff' : '#6b7266' }}>Today</button>
+                    <span className="font-semibold text-sm" style={{ color: '#2a2f1e' }}>
+                      {new Date(allCourtsDate + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+                    </span>
+                  </div>
+                  <button onClick={() => { const d = new Date(allCourtsDate + 'T00:00:00'); d.setDate(d.getDate() + 1); setAllCourtsDate(d.toISOString().split('T')[0]); setContentKey(k => k + 1); }} className="w-10 h-10 rounded-xl flex items-center justify-center border hover:bg-white transition-colors active:scale-95" style={{ borderColor: '#e0dcd3' }}>
+                    <svg className="w-4 h-4" fill="none" stroke="#2a2f1e" viewBox="0 0 24 24" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/></svg>
+                  </button>
+                </div>
+
+                {/* All Courts Grid */}
+                <div className="glass-card rounded-2xl border overflow-hidden" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse min-w-[500px]">
+                      <thead>
+                        <tr>
+                          <th className="sticky left-0 z-10 p-3 text-[0.7rem] font-medium text-left border-b" style={{ borderColor: '#f0ede6', background: '#faf8f3', color: '#9ca3a0', width: 72 }}>Time</th>
+                          {COURTS_CONFIG.map(c => {
+                            const colors = COURT_COLORS[c.id];
+                            const closed = isCourtInMaintenance(courts, c.id);
+                            return (
+                              <th key={c.id} className="p-2.5 text-center border-b" style={{ borderColor: '#f0ede6', background: '#faf8f3' }}>
+                                <div className="flex items-center justify-center gap-1.5">
+                                  <span className="w-2.5 h-2.5 rounded-full" style={{ background: closed ? '#dc2626' : colors.dot }} />
+                                  <span className="text-sm font-semibold" style={{ color: '#2a2f1e' }}>{c.name}</span>
+                                </div>
+                                <div className="text-[0.6rem] font-normal mt-0.5" style={{ color: '#9ca3a0' }}>
+                                  {closed ? 'Closed' : c.floodlight ? 'til 10 PM' : 'til 8 PM'}
+                                </div>
+                              </th>
+                            );
+                          })}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {TIME_SLOTS.map(time => (
+                          <tr key={time}>
+                            <td className="sticky left-0 z-10 px-3 py-0 text-[0.7rem] font-medium border-b" style={{ borderColor: '#f7f5f0', background: '#faf8f3', color: '#9ca3a0' }}>{time}</td>
+                            {COURTS_CONFIG.map(c => {
+                              const courtClosed = isCourtInMaintenance(courts, c.id);
+                              const slotClosed = isCourtClosed(c.id, time);
+                              const booked = isSlotBooked(bookings, c.id, allCourtsDate, time);
+                              const mine = isSlotMine(bookings, c.id, allCourtsDate, time, currentUser?.id);
+                              const past = isSlotPast(allCourtsDate, time);
+                              const beyondWindow = !canBookDate(allCourtsDate);
+                              const isProgram = booked?.type === 'program';
+                              const isLesson = booked?.type === 'lesson';
+                              const available = !booked && !past && !courtClosed && !slotClosed && !beyondWindow;
+                              const colors = COURT_COLORS[c.id];
+                              const slotKey = `ac-${c.id}-${allCourtsDate}-${time}`;
+                              const showTooltipHere = hoveredSlot === slotKey && booked && !mine;
+
+                              return (
+                                <td key={c.id} className="border-b p-[3px] relative" style={{ borderColor: '#f7f5f0', background: courtClosed || slotClosed ? '#f5f2eb' : 'transparent' }}>
+                                  <button
+                                    onClick={() => handleSlotClick(c.id, c.name, allCourtsDate, time)}
+                                    onMouseEnter={() => (booked && !mine) ? handleSlotHover(slotKey) : undefined}
+                                    onMouseLeave={() => handleSlotHover(null)}
+                                    disabled={(!mine && !!booked) || past || courtClosed || slotClosed}
+                                    className={`slot-cell w-full rounded-lg text-xs font-medium py-2.5 px-2 transition-all duration-150 relative overflow-hidden ${mine ? 'slot-booked-pulse' : ''} ${available ? 'hover:border-[#d97706] hover:border-solid hover:bg-[#d97706]/[0.04]' : ''}`}
+                                    style={{
+                                      background: mine ? colors.accent : courtClosed || slotClosed ? '#f0ede6' : isLesson ? 'rgba(59, 130, 246, 0.08)' : isProgram ? 'rgba(245, 158, 11, 0.08)' : booked ? '#f5f3ee' : 'transparent',
+                                      color: mine ? '#fff' : courtClosed || slotClosed ? '#c5c0b5' : isLesson ? '#3b82f6' : isProgram ? '#d97706' : booked ? '#b5b0a5' : past || beyondWindow ? '#d5d0c8' : colors.accent,
+                                      cursor: available ? 'pointer' : mine ? 'pointer' : 'default',
+                                      border: mine ? `1.5px solid ${colors.accent}` : available ? '1.5px dashed #d4d0c7' : '1.5px solid transparent',
+                                    }}
+                                  >
+                                    {mine ? (
+                                      <span className="flex items-center justify-center gap-1">
+                                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
+                                        You
+                                      </span>
+                                    ) : courtClosed || slotClosed ? (
+                                      <span style={{ opacity: 0.4 }}>—</span>
+                                    ) : isLesson ? 'Lesson' : isProgram ? 'Program' : booked ? (
+                                      <span className="flex items-center justify-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-current opacity-40" />Taken</span>
+                                    ) : past || beyondWindow ? (
+                                      <span style={{ opacity: 0.3 }}>—</span>
+                                    ) : (
+                                      <span className="slot-book-label opacity-0 transition-opacity duration-150" style={{ color: '#d97706' }}>Book</span>
+                                    )}
+                                  </button>
+
+                                  {showTooltipHere && booked && (
+                                    <div className="absolute z-30 bottom-full left-1/2 -translate-x-1/2 mb-1 px-2.5 py-1.5 rounded-lg text-[0.65rem] font-medium whitespace-nowrap shadow-lg pointer-events-none animate-fadeIn" style={{ background: '#2a2f1e', color: '#e8e4d9' }}>
+                                      {isLesson ? 'Lesson' : isProgram ? 'Program session' : booked.userName}
+                                      <span className="block text-[0.55rem] font-normal" style={{ color: '#9ca3a0' }}>{getTimeRange(time, booked?.duration)}</span>
+                                      <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent" style={{ borderTopColor: '#2a2f1e' }} />
+                                    </div>
+                                  )}
+                                </td>
+                              );
+                            })}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
                 <div className="mt-4"><BookingLegend /></div>
               </>
             ) : (

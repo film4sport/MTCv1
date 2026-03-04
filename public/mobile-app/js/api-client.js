@@ -95,10 +95,18 @@
    */
   function createBooking(bookingData, onSuccess, onError) {
     var userId = MTC.storage.get('mtc-user-email', 'demo-user');
+    var payload = Object.assign({ userId: userId }, bookingData);
+
+    // If offline, queue immediately instead of attempting the request
+    if (!navigator.onLine) {
+      queueForSync('booking', payload);
+      if (typeof showToast === 'function') showToast('You\'re offline — booking queued and will sync when connected');
+      if (onSuccess) onSuccess({ queued: true });
+      return;
+    }
 
     optimisticAction({
       apply: function() {
-        // Optimistic: show booking immediately
         if (typeof showToast === 'function') {
           showToast('Booking court...');
         }
@@ -107,21 +115,31 @@
       apiCall: function() {
         return apiRequest('/mobile/bookings', {
           method: 'POST',
-          body: JSON.stringify(Object.assign({ userId: userId }, bookingData))
+          body: JSON.stringify(payload)
         });
       },
       rollback: function() {
-        // Remove the optimistic booking from UI
-        if (typeof showToast === 'function') {
-          showToast('Booking failed — please try again', 'error');
+        // Network error mid-request — queue for later sync
+        if (!navigator.onLine) {
+          queueForSync('booking', payload);
+          if (typeof showToast === 'function') showToast('Connection lost — booking queued for sync');
+        } else {
+          if (typeof showToast === 'function') showToast('Booking failed — please try again', 'error');
         }
       },
       onSuccess: function(data) {
         if (onSuccess) onSuccess(data);
       },
       onError: function(err) {
-        if (onError) onError(err);
-        else if (typeof showToast === 'function') showToast(err, 'error');
+        // If the error is a network error, queue for sync
+        if (!navigator.onLine || (err && err.indexOf && err.indexOf('Network') >= 0)) {
+          queueForSync('booking', payload);
+          if (typeof showToast === 'function') showToast('Connection issue — booking queued for sync');
+        } else if (onError) {
+          onError(err);
+        } else if (typeof showToast === 'function') {
+          showToast(err, 'error');
+        }
       }
     });
   }
@@ -134,6 +152,15 @@
    */
   function cancelBooking(bookingId, onSuccess, onError) {
     var userId = MTC.storage.get('mtc-user-email', 'demo-user');
+    var payload = { bookingId: bookingId, userId: userId };
+
+    // If offline, queue the cancellation
+    if (!navigator.onLine) {
+      queueForSync('cancel', payload);
+      if (typeof showToast === 'function') showToast('You\'re offline — cancellation queued for sync');
+      if (onSuccess) onSuccess({ queued: true });
+      return;
+    }
 
     optimisticAction({
       apply: function() {
@@ -145,20 +172,29 @@
       apiCall: function() {
         return apiRequest('/mobile/bookings', {
           method: 'DELETE',
-          body: JSON.stringify({ bookingId: bookingId, userId: userId })
+          body: JSON.stringify(payload)
         });
       },
       rollback: function() {
-        if (typeof showToast === 'function') {
-          showToast('Cancel failed — please try again', 'error');
+        if (!navigator.onLine) {
+          queueForSync('cancel', payload);
+          if (typeof showToast === 'function') showToast('Connection lost — cancellation queued for sync');
+        } else {
+          if (typeof showToast === 'function') showToast('Cancel failed — please try again', 'error');
         }
       },
       onSuccess: function(data) {
         if (onSuccess) onSuccess(data);
       },
       onError: function(err) {
-        if (onError) onError(err);
-        else if (typeof showToast === 'function') showToast(err, 'error');
+        if (!navigator.onLine || (err && err.indexOf && err.indexOf('Network') >= 0)) {
+          queueForSync('cancel', payload);
+          if (typeof showToast === 'function') showToast('Connection issue — cancellation queued for sync');
+        } else if (onError) {
+          onError(err);
+        } else if (typeof showToast === 'function') {
+          showToast(err, 'error');
+        }
       }
     });
   }
@@ -216,20 +252,40 @@
     pendingQueue = [];
     MTC.storage.set('mtc-pending-queue', []);
 
+    var syncCount = { ok: 0, fail: 0 };
+    var remaining = queue.length;
+
     queue.forEach(function(item) {
-      if (item.type === 'booking') {
-        apiRequest('/mobile/bookings', {
-          method: 'POST',
-          body: JSON.stringify(item.data)
-        }).then(function(result) {
-          if (result.ok) {
-            if (typeof showToast === 'function') showToast('Pending booking synced! ✓');
-          } else {
-            // Re-queue if still failing
+      // Skip items older than 24 hours (stale bookings are unlikely valid)
+      if (Date.now() - item.timestamp > 24 * 60 * 60 * 1000) {
+        remaining--;
+        if (remaining === 0 && syncCount.ok > 0) {
+          if (typeof showToast === 'function') showToast(syncCount.ok + ' queued action(s) synced! ✓');
+        }
+        return;
+      }
+
+      var endpoint = '/mobile/bookings';
+      var method = item.type === 'cancel' ? 'DELETE' : 'POST';
+
+      apiRequest(endpoint, {
+        method: method,
+        body: JSON.stringify(item.data)
+      }).then(function(result) {
+        if (result.ok) {
+          syncCount.ok++;
+        } else {
+          syncCount.fail++;
+          // Re-queue if still failing (but not if it's a conflict/duplicate)
+          if (result.status !== 409) {
             queueForSync(item.type, item.data);
           }
-        });
-      }
+        }
+        remaining--;
+        if (remaining === 0 && syncCount.ok > 0) {
+          if (typeof showToast === 'function') showToast(syncCount.ok + ' queued action(s) synced! ✓');
+        }
+      });
     });
   }
 

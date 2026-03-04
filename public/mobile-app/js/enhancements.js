@@ -470,6 +470,64 @@
   }
 
   // ============================================
+  // OFFLINE MODE INDICATOR
+  // ============================================
+  function setupOfflineIndicator() {
+    var banner = document.createElement('div');
+    banner.id = 'offlineBanner';
+    banner.className = 'offline-banner';
+    banner.setAttribute('role', 'status');
+    banner.setAttribute('aria-live', 'polite');
+    banner.innerHTML =
+      '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+        '<line x1="1" y1="1" x2="23" y2="23"/>' +
+        '<path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/>' +
+        '<path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/>' +
+        '<path d="M10.71 5.05A16 16 0 0 1 22.56 9"/>' +
+        '<path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/>' +
+        '<path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>' +
+        '<line x1="12" y1="20" x2="12.01" y2="20"/>' +
+      '</svg>' +
+      '<span>You\'re offline — changes will sync when reconnected</span>';
+    document.body.appendChild(banner);
+
+    // Pending queue count badge
+    var badge = document.createElement('span');
+    badge.id = 'offlineQueueBadge';
+    badge.className = 'offline-queue-badge';
+    badge.style.display = 'none';
+    banner.appendChild(badge);
+
+    function updateBanner() {
+      var isOffline = !navigator.onLine;
+      banner.classList.toggle('visible', isOffline);
+
+      // Show pending queue count
+      var pending = MTC.storage.get('mtc-pending-queue', []);
+      if (pending.length > 0 && isOffline) {
+        badge.textContent = pending.length + ' pending';
+        badge.style.display = 'inline-block';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
+    window.addEventListener('online', function() {
+      updateBanner();
+      // Brief "back online" flash
+      banner.querySelector('span').textContent = 'Back online — syncing...';
+      banner.classList.add('visible', 'online-flash');
+      setTimeout(function() {
+        banner.classList.remove('visible', 'online-flash');
+        banner.querySelector('span').textContent = 'You\'re offline — changes will sync when reconnected';
+      }, 2500);
+    });
+
+    window.addEventListener('offline', updateBanner);
+    updateBanner();
+  }
+
+  // ============================================
   // INIT ALL ENHANCEMENTS
   // ============================================
   function initEnhancements() {
@@ -479,6 +537,7 @@
     setupLongPress();
     setupPersistence();
     setupPartnerFilters();
+    setupOfflineIndicator();
   }
 
   if (document.readyState === 'loading') {
