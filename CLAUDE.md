@@ -44,6 +44,15 @@ All external links to clubspark.ca have been removed. ClubSpark was only used as
 ## #9: ALWAYS UPDATE CLAUDE.md
 When new project rules or conventions are established, add them to this file AND MEMORY.md.
 
+## #16: CHECK PREREQUISITES BEFORE RUNNING — NEVER RETRY BLIND
+**Before running ANY tool/command, verify prerequisites exist first. If a command fails, STOP and tell the user WHY — don't retry.**
+- Before running Playwright E2E: check browsers are installed (`ls ~/.cache/ms-playwright/`) and dev server is running
+- Before running any test suite: verify the runner and its dependencies are available
+- **Cowork VM does NOT have Playwright browsers installed.** E2E tests can only run in CI (GitHub Actions) or locally on the dev machine. Never attempt to run them in Cowork.
+- If a command fails with permissions or missing dependencies: explain the blocker immediately, don't retry the same thing
+- **Rule of 1**: If it fails once, diagnose. Don't try a second time with a slight variation hoping it works.
+- This rule exists because repeated failed attempts wasted significant user time.
+
 ## #15: SHARED MEMORY FILE
 **`MEMORY.md` in the project root is the single source of truth for session context, status, and decisions.**
 - Both Cowork and Claude Code read and write to `MTCv1/MEMORY.md`
