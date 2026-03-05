@@ -197,7 +197,7 @@ export default function BookCourtPage() {
                   <button
                     key={c.id}
                     onClick={() => setSelectedCourt(c.id)}
-                    className="relative px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 shrink-0"
+                    className="relative px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 shrink-0 flex-1 min-w-0 text-center"
                     style={{
                       background: active ? '#2a2f1e' : closed ? '#f5f2eb' : '#fff',
                       color: active ? '#fff' : closed ? '#b5b0a5' : '#6b7266',
@@ -206,21 +206,18 @@ export default function BookCourtPage() {
                       opacity: closed && !active ? 0.7 : 1,
                     }}
                   >
-                    <span className="flex items-center gap-1.5">
+                    <span className="flex items-center justify-center gap-1.5">
                       {closed ? (
                         <span className="w-2 h-2 rounded-full" style={{ background: '#dc2626' }} />
                       ) : (
-                        <span className="relative flex items-center justify-center" style={{ width: 10, height: 10 }}>
-                          <span className="court-available-ring absolute inset-0 rounded-full" style={{ border: `1.5px solid ${active ? 'rgba(212,225,87,0.5)' : 'rgba(196,160,96,0.5)'}` }} />
-                          <span className="w-1.5 h-1.5 rounded-full" style={{ background: active ? '#d4e157' : '#c4a060' }} />
-                        </span>
+                        <span className="w-2 h-2 rounded-full" style={{ background: active ? '#d4e157' : '#6b7a3d' }} />
                       )}
                       {c.name}
                       {c.floodlight && !closed && (
-                        <span className="text-xs leading-none" style={{ opacity: 0.7 }}>💡</span>
+                        <svg className="inline-block w-4 h-4 -mt-px" viewBox="0 0 24 24" fill="none" stroke="#e8b624" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z" fill="rgba(232,182,36,0.2)"/></svg>
                       )}
                     </span>
-                    <span className="block text-[0.6rem] font-normal mt-0.5" style={{ opacity: 0.7 }}>
+                    <span className="block text-[0.6rem] font-normal mt-0.5" style={{ color: active ? 'rgba(255,255,255,0.7)' : '#6b7266' }}>
                       {closed ? 'Closed' : c.floodlight ? 'Lit til 10 PM' : 'til 8 PM'}
                     </span>
                   </button>
@@ -430,16 +427,13 @@ export default function BookCourtPage() {
                               <th key={c.id} className="p-2.5 text-center border-b" style={{ borderColor: '#f0ede6', background: '#faf8f3' }}>
                                 <div className="flex items-center justify-center gap-1.5">
                                   {closed ? (
-                                    <span className="w-2.5 h-2.5 rounded-full" style={{ background: '#dc2626' }} />
+                                    <span className="w-2 h-2 rounded-full" style={{ background: '#dc2626' }} />
                                   ) : (
-                                    <span className="relative flex items-center justify-center" style={{ width: 12, height: 12 }}>
-                                      <span className="court-available-ring absolute inset-0 rounded-full" style={{ border: '1.5px solid rgba(196,160,96,0.5)' }} />
-                                      <span className="w-2 h-2 rounded-full" style={{ background: '#c4a060' }} />
-                                    </span>
+                                    <span className="w-2 h-2 rounded-full" style={{ background: '#6b7a3d' }} />
                                   )}
                                   <span className="text-sm font-semibold" style={{ color: '#2a2f1e' }}>{c.name}</span>
                                   {c.floodlight && !closed && (
-                                    <span className="text-xs leading-none" style={{ opacity: 0.7 }}>💡</span>
+                                    <svg className="inline-block w-4 h-4 -mt-px" viewBox="0 0 24 24" fill="none" stroke="#e8b624" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z" fill="rgba(232,182,36,0.2)"/></svg>
                                   )}
                                 </div>
                                 <div className="text-[0.6rem] font-normal mt-0.5" style={{ color: '#9ca3a0' }}>

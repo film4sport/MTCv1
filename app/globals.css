@@ -421,9 +421,14 @@ html {
   animation: fadeIn 0.3s ease-out both;
 }
 
-/* Staggered children animation */
+/* Staggered children animation — uses staggerFadeIn (no transform lock) so hover transforms work */
 .stagger-children > * {
-  animation: slideUp 0.35s ease-out both;
+  opacity: 0;
+  animation: staggerFadeIn 0.35s ease-out forwards;
+}
+@keyframes staggerFadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; }
 }
 .stagger-children > *:nth-child(1) { animation-delay: 0ms; }
 .stagger-children > *:nth-child(2) { animation-delay: 50ms; }
@@ -562,21 +567,6 @@ html {
   background: transparent;
 }
 
-/* ============================================
-   Dashboard quick-action cards — hover lift
-   ============================================ */
-.quick-action-card {
-  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease;
-}
-.quick-action-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12), 0 4px 10px rgba(0, 0, 0, 0.06);
-}
-.quick-action-card:active {
-  transform: translateY(-2px);
-  transition-duration: 0.1s;
-}
-
 /* Overscroll bounce on mobile */
 .overscroll-bounce {
   -webkit-overflow-scrolling: touch;
@@ -600,13 +590,6 @@ html {
 @keyframes badgePulse {
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.15); }
-}
-@keyframes courtRingPulse {
-  0%, 100% { transform: scale(1); opacity: 0.5; }
-  50% { transform: scale(1.4); opacity: 0; }
-}
-.court-available-ring {
-  animation: courtRingPulse 2.5s ease-in-out infinite;
 }
 @keyframes dropdownIn {
   from { opacity: 0; transform: translateY(-8px) scale(0.96); }
@@ -691,6 +674,34 @@ html {
 @keyframes titleShimmer {
   0% { background-position: 100% 0; }
   100% { background-position: -100% 0; }
+}
+
+/* ── Calendar Dot Bounce ── */
+.calendar-dot-bounce {
+  animation: calDotBounce 2s ease-in-out infinite;
+}
+@keyframes calDotBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+/* ── Event Filter Pills ── */
+.event-filter-pill {
+  color: #8a8578;
+  background: transparent;
+  border: 1.5px solid rgba(200, 195, 185, 0.5);
+  font-weight: 500;
+}
+.event-filter-pill:hover:not(.event-filter-pill-active) {
+  color: var(--pill-color);
+  border-color: var(--pill-color);
+  background: color-mix(in srgb, var(--pill-color) 8%, transparent);
+}
+.event-filter-pill-active {
+  color: var(--pill-color);
+  border-color: var(--pill-color);
+  background: color-mix(in srgb, var(--pill-color) 10%, transparent);
+  font-weight: 600;
 }
 
 /* ── Dashboard Page Transition ── */

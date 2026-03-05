@@ -63,7 +63,7 @@ begin
     if dow = 2 then
       insert into events (id, title, date, time, location, badge, price, spots_total, spots_taken, description, type)
       values ('mens-rr-' || ds, 'Men''s Round Robin', d, '9:00 AM - 11:00 AM', 'Courts 1-2', 'members', 'Members', 16, 0,
-              'Weekly men''s round robin every Tuesday morning. All skill levels welcome.', 'roundrobin')
+              'Weekly men''s round robin every Tuesday morning. All skill levels welcome.', 'social')
       on conflict (id) do nothing;
     end if;
 
@@ -71,7 +71,7 @@ begin
     if dow = 4 then
       insert into events (id, title, date, time, location, badge, price, spots_total, spots_taken, description, type)
       values ('freedom-55-' || ds, 'Freedom 55 League', d, '9:00 AM - 11:00 AM', 'Courts 1-2', 'members', 'Members', 16, 0,
-              'Thursday morning league for the 55+ crowd. Fun and social tennis.', 'roundrobin')
+              'Thursday morning league for the 55+ crowd. Fun and social tennis.', 'social')
       on conflict (id) do nothing;
     end if;
 
@@ -87,7 +87,7 @@ begin
     if dow = 5 then
       insert into events (id, title, date, time, location, badge, price, spots_total, spots_taken, description, type)
       values ('ladies-rr-' || ds, 'Ladies Round Robin', d, '9:00 AM - 11:00 AM', 'Courts 1-2', 'members', 'Members', 16, 0,
-              'Weekly ladies round robin every Friday morning. All skill levels welcome.', 'roundrobin')
+              'Weekly ladies round robin every Friday morning. All skill levels welcome.', 'social')
       on conflict (id) do nothing;
     end if;
 
@@ -95,7 +95,7 @@ begin
     if dow = 5 then
       insert into events (id, title, date, time, location, badge, price, spots_total, spots_taken, description, type)
       values ('friday-mixed-' || ds, 'Friday Night Mixed Round Robin', d, '6:00 PM - 9:00 PM', 'All Courts', 'members', 'Members', 24, 0,
-              'Mixed doubles round robin every Friday evening. Rotating partners, fun format!', 'roundrobin')
+              'Mixed doubles round robin every Friday evening. Rotating partners, fun format!', 'social')
       on conflict (id) do nothing;
     end if;
 

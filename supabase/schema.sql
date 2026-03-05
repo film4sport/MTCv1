@@ -105,7 +105,7 @@ create table if not exists events (
   spots_total integer,
   spots_taken integer default 0,
   description text not null,
-  type text not null check (type in ('social', 'match', 'roundrobin', 'lesson', 'tournament')),
+  type text not null check (type in ('social', 'match', 'lesson', 'tournament', 'camp')),
   created_at timestamptz default now()
 );
 

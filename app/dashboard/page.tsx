@@ -154,7 +154,7 @@ export default function DashboardHome() {
               key={action.label}
               href={action.href}
               data-tour={action.label === 'Book Court' ? 'book-court' : action.label === 'Find Partner' ? 'find-partner' : undefined}
-              className="glass-card rounded-2xl p-5 flex flex-col gap-3 quick-action-card"
+              className="glass-card rounded-2xl p-5 flex flex-col gap-3 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-xl active:translate-y-0 active:duration-100"
               style={{
                 background: action.bg,
                 color: action.color,

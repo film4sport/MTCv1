@@ -7,7 +7,7 @@ import DashboardHeader from '../components/DashboardHeader';
 import { downloadICS } from '../lib/calendar';
 import { useFocusTrap } from '../lib/utils';
 
-type EventFilter = 'all' | 'social' | 'match' | 'roundrobin' | 'lesson' | 'tournament';
+type EventFilter = 'all' | 'social' | 'match' | 'lesson' | 'tournament';
 type ViewMode = 'calendar' | 'list';
 type PageView = 'events' | 'programs';
 
@@ -30,8 +30,10 @@ export default function EventsPage() {
   useFocusTrap(programModalRef, !!selectedProgram);
   useFocusTrap(eventModalRef, !!selectedEvent);
 
+  // Normalize type — 'roundrobin' from legacy Supabase data maps to 'social'
+  const normalizeType = (t: string) => t === 'roundrobin' ? 'social' : t;
   const filtered = events
-    .filter(e => filter === 'all' || e.type === filter)
+    .filter(e => filter === 'all' || normalizeType(e.type) === filter)
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   // Events for calendar view filtered by selected day
@@ -46,14 +48,13 @@ export default function EventsPage() {
   };
 
   const typeLabels: Record<string, string> = {
-    social: 'Social', match: 'Match', roundrobin: 'Round Robin', lesson: 'Lesson', tournament: 'Tournament',
+    social: 'Social', match: 'Match', lesson: 'Lesson', tournament: 'Tournament', camp: 'Camp', roundrobin: 'Social',
   };
 
   // Event type colors — matches landing page calendar legend
   const typeColors: Record<string, string> = {
     social: '#6b7a3d',
     match: '#d97706',
-    roundrobin: '#0891b2',
     tournament: '#dc2626',
     lesson: '#2563eb',
     camp: '#2563eb',
@@ -92,7 +93,7 @@ export default function EventsPage() {
     .forEach(e => {
       const day = new Date(e.date + 'T00:00:00').getDate();
       if (!eventTypesThisMonth.has(day)) eventTypesThisMonth.set(day, new Set());
-      eventTypesThisMonth.get(day)!.add(e.type);
+      eventTypesThisMonth.get(day)!.add(normalizeType(e.type));
     });
 
   const prevMonth = () => setCalendarDate(new Date(year, month - 1, 1));
@@ -177,16 +178,14 @@ export default function EventsPage() {
 
         {/* Filter pills */}
         <div className="flex flex-wrap gap-2 mb-6">
-          {(['all', 'social', 'roundrobin', 'match', 'tournament', 'lesson'] as EventFilter[]).map(f => (
+          {(['all', 'social', 'match', 'tournament', 'lesson'] as EventFilter[]).map(f => (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className="px-3 py-1.5 rounded-full text-xs font-medium transition-colors"
+              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors event-filter-pill ${filter === f ? 'event-filter-pill-active' : ''}`}
               style={{
-                background: filter === f ? (typeColors[f] || '#6b7a3d') : 'rgba(255, 255, 255, 0.5)',
-                color: filter === f ? '#fff' : (typeColors[f] || '#2a2f1e'),
-                border: filter === f ? `1.5px solid ${typeColors[f] || '#6b7a3d'}` : `1.5px solid ${f === 'all' ? 'rgba(200, 195, 185, 0.6)' : (typeColors[f] || 'rgba(200, 195, 185, 0.6)')}`,
-              }}
+                '--pill-color': typeColors[f] || '#6b7a3d',
+              } as React.CSSProperties}
             >
               {f === 'all' ? 'All Events' : typeLabels[f] || f}
             </button>
@@ -248,11 +247,14 @@ export default function EventsPage() {
                     <span className="text-sm font-medium">{day}</span>
                     {dayTypes && dayTypes.size > 0 && (
                       <span className="absolute bottom-1 flex gap-0.5">
-                        {Array.from(dayTypes).slice(0, 3).map(type => (
+                        {Array.from(dayTypes).slice(0, 3).map((type, i) => (
                           <span
                             key={type}
-                            className="w-1.5 h-1.5 rounded-full"
-                            style={{ background: isSelected ? '#fff' : (typeColors[type] || '#6b7a3d') }}
+                            className="w-1.5 h-1.5 rounded-full calendar-dot-bounce"
+                            style={{
+                              background: isSelected ? '#fff' : (typeColors[type] || '#6b7a3d'),
+                              animationDelay: `${i * 0.15}s`,
+                            }}
                           />
                         ))}
                       </span>
