@@ -62,6 +62,10 @@
       modal.classList.remove('active');
       const msg = document.getElementById('partnerPostMessage');
       if (msg) msg.value = '';
+      // Reset time selection
+      document.querySelectorAll('.partner-time-btn').forEach(function(b) { b.classList.remove('active'); });
+      var timeInp = document.getElementById('partnerTimeInput');
+      if (timeInp) timeInp.value = '';
     }
   };
 
@@ -89,16 +93,72 @@
     btn.classList.add('active');
   };
 
+  // Helper: convert 24h "HH:MM" to "H:MM AM/PM"
+  function to12h(val24) {
+    if (!val24) return '';
+    var parts = val24.split(':');
+    var h = parseInt(parts[0], 10);
+    var m = parts[1] || '00';
+    var period = h >= 12 ? 'PM' : 'AM';
+    if (h === 0) h = 12;
+    else if (h > 12) h -= 12;
+    return h + ':' + m + ' ' + period;
+  }
+
+  // onclick handler (index.html) — time grid button
+  window.selectPartnerTime = function(btn) {
+    // Toggle: clicking active btn deselects it
+    if (btn.classList.contains('active')) {
+      btn.classList.remove('active');
+      var inp = document.getElementById('partnerTimeInput');
+      if (inp) inp.value = '';
+      return;
+    }
+    document.querySelectorAll('.partner-time-btn').forEach(function(b) {
+      b.classList.remove('active');
+    });
+    btn.classList.add('active');
+    // Sync to input field
+    var timeLabel = btn.getAttribute('data-time'); // e.g. "8:00 AM"
+    var inp = document.getElementById('partnerTimeInput');
+    if (inp && timeLabel) {
+      var match = timeLabel.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/);
+      if (match) {
+        var h = parseInt(match[1], 10);
+        if (match[3] === 'PM' && h !== 12) h += 12;
+        if (match[3] === 'AM' && h === 12) h = 0;
+        inp.value = String(h).padStart(2, '0') + ':' + match[2];
+      }
+    }
+  };
+
+  // onchange handler — native time input (scroll wheel / keyboard)
+  window.onPartnerTimeInput = function(inp) {
+    // Deselect grid buttons
+    document.querySelectorAll('.partner-time-btn').forEach(function(b) {
+      b.classList.remove('active');
+    });
+    // Try to match a grid button
+    if (inp.value) {
+      var label = to12h(inp.value);
+      document.querySelectorAll('.partner-time-btn').forEach(function(b) {
+        if (b.getAttribute('data-time') === label) b.classList.add('active');
+      });
+    }
+  };
+
   // onclick handler (index.html)
   window.submitPartnerRequest = function() {
     const typeBtn = document.querySelector('#postPartnerModal [data-type].active');
     const levelBtn = document.querySelector('#postPartnerModal [data-level].active');
     const whenBtn = document.querySelector('#postPartnerModal [data-when].active');
+    const timeInput = document.getElementById('partnerTimeInput');
 
     const type = typeBtn ? typeBtn.getAttribute('data-type') : 'singles';
     const typeLabel = typeBtn ? typeBtn.textContent : 'Singles';
     const level = levelBtn ? levelBtn.textContent : 'Any Level';
     const when = whenBtn ? whenBtn.textContent : 'Anytime';
+    const preferredTime = timeInput && timeInput.value ? to12h(timeInput.value) : '';
 
     closePostPartnerModal();
 
@@ -110,7 +170,8 @@
     const avatarHtml = (typeof avatarSVGs !== 'undefined' && avatarSVGs[avatarKey]) ? avatarSVGs[avatarKey] : avatarSVGs['default'];
 
     var localId = 'pr-' + Date.now();
-    var reqData = { id: localId, type: type, typeLabel: typeLabel, level: level, when: when, userName: userName };
+    var timeDisplay = preferredTime ? when + ' at ' + preferredTime : when;
+    var reqData = { id: localId, type: type, typeLabel: typeLabel, level: level, when: timeDisplay, userName: userName };
 
     // Optimistic UI: show card immediately + save locally
     var savedRequests = MTC.storage.get('mtc-partner-requests', []);
