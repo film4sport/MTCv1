@@ -167,3 +167,8 @@ export function isToday(d: Date): boolean {
   const now = new Date();
   return d.getDate() === now.getDate() && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
 }
+
+/** Format a Date as YYYY-MM-DD in LOCAL time (avoids UTC offset bugs from toISOString). */
+export function toLocalDateStr(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}

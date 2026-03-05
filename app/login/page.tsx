@@ -53,15 +53,7 @@ function LoginContent() {
     } catch { /* ignore */ }
   }, []);
 
-  // Load Bebas Neue for phone mockup
-  useEffect(() => {
-    if (!document.querySelector('link[href*="Bebas+Neue"]')) {
-      const link = document.createElement('link');
-      link.rel = 'stylesheet';
-      link.href = 'https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap';
-      document.head.appendChild(link);
-    }
-  }, []);
+  // Bebas Neue font is preloaded in login/layout.tsx — no client-side injection needed
 
   // Warm up Supabase on page load so login doesn't wait for cold start.
   // Hits both the server-side keep-alive (warms DB + Auth via API route)
