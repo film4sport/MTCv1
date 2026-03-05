@@ -32,9 +32,14 @@
   /** Restores conversations from localStorage */
   MTC.fn.loadSavedConversations = function() {
     const parsed = MTC.storage.get('mtc-conversations', {});
+    let hadCorrupted = false;
     for (const key in parsed) {
+      // Skip corrupted entries with numeric keys (array index artifacts)
+      if (/^\d+$/.test(key)) { hadCorrupted = true; continue; }
       conversations[key] = parsed[key];
     }
+    // Clean up corrupted localStorage
+    if (hadCorrupted) MTC.fn.saveConversations();
   };
   // Backward-compat alias
   window.loadSavedConversations = MTC.fn.loadSavedConversations;
