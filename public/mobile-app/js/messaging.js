@@ -280,13 +280,12 @@
   window.updateMembersFromAPI = function(apiMembers) {
     if (!Array.isArray(apiMembers)) return;
     var newMembers = apiMembers.map(function(m) {
-      var ntrpStr = m.ntrp ? ' (' + m.ntrp + ')' : '';
       var skillLabel = (m.skillLevel || 'intermediate');
       skillLabel = skillLabel.charAt(0).toUpperCase() + skillLabel.slice(1);
       return {
         id: m.id,
         name: m.name,
-        skill: skillLabel + ntrpStr,
+        skill: skillLabel,
         avatar: m.avatar || 'man-1'
       };
     });

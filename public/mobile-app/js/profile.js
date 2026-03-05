@@ -12,7 +12,7 @@
     email: '',
     skill: 'Not set',
     skillClass: '',
-    skillNTRP: '',
+    // skillNTRP removed — using skillClass only (matches desktop)
     availability: [],
     playstyle: []
   };
@@ -37,7 +37,6 @@
       // Map skill display value to DB fields
       var skillOpt = profileFieldConfigs.skill.options.find(function(o) { return o.value === data.skill; });
       if (skillOpt) {
-        body.ntrp = skillOpt.ntrp;
         body.skillLevel = skillOpt.cls;
         body.skillLevelSet = true;
       }
@@ -88,14 +87,10 @@
       title: 'PLAYER RATING',
       type: 'select',
       options: [
-        { value: 'Beginner (2.0)', label: 'Beginner (2.0)', cls: 'beginner', ntrp: '2.0', level: 'BEGINNER' },
-        { value: 'Beginner+ (2.5)', label: 'Beginner+ (2.5)', cls: 'beginner', ntrp: '2.5', level: 'BEGINNER' },
-        { value: 'Intermediate (3.0)', label: 'Intermediate (3.0)', cls: 'intermediate', ntrp: '3.0', level: 'INTERMEDIATE' },
-        { value: 'Intermediate (3.5)', label: 'Intermediate (3.5)', cls: 'intermediate', ntrp: '3.5', level: 'INTERMEDIATE' },
-        { value: 'Intermediate (4.0)', label: 'Intermediate (4.0)', cls: 'intermediate', ntrp: '4.0', level: 'INTERMEDIATE' },
-        { value: 'Advanced (4.5)', label: 'Advanced (4.5)', cls: 'advanced', ntrp: '4.5', level: 'ADVANCED' },
-        { value: 'Advanced (5.0)', label: 'Advanced (5.0)', cls: 'advanced', ntrp: '5.0', level: 'ADVANCED' },
-        { value: 'Expert (5.5+)', label: 'Expert (5.5+)', cls: 'advanced', ntrp: '5.5+', level: 'EXPERT' }
+        { value: 'Beginner', label: 'Beginner', cls: 'beginner', level: 'BEGINNER' },
+        { value: 'Intermediate', label: 'Intermediate', cls: 'intermediate', level: 'INTERMEDIATE' },
+        { value: 'Advanced', label: 'Advanced', cls: 'advanced', level: 'ADVANCED' },
+        { value: 'Competitive', label: 'Competitive', cls: 'advanced', level: 'COMPETITIVE' }
       ],
       getValue: function() { return MTC.state.profileData.skill; },
       save: function(val) {
@@ -103,7 +98,6 @@
         const opt = profileFieldConfigs.skill.options.find(function(o) { return o.value === val; });
         if (opt) {
           MTC.state.profileData.skillClass = opt.cls;
-          MTC.state.profileData.skillNTRP = opt.ntrp;
         }
         updateProfileDisplay('skill');
         saveProfileToStorage();
@@ -294,9 +288,7 @@
       case 'skill':
         const skillOpt = profileFieldConfigs.skill.options.find(function(o) { return o.value === MTC.state.profileData.skill; });
         if (skillOpt) {
-          const ntrpEl = document.getElementById('playerRatingNTRP');
           const levelEl = document.getElementById('playerRatingLevel');
-          if (ntrpEl) ntrpEl.textContent = skillOpt.ntrp;
           if (levelEl) {
             levelEl.textContent = skillOpt.level;
             levelEl.className = 'player-rating-level ' + skillOpt.cls;

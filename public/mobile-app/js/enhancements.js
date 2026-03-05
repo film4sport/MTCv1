@@ -438,12 +438,11 @@
       } else if (filter === 'Available Now') {
         show = availability && availability.textContent.toLowerCase().includes('available now');
       } else if (filter === 'Beginner') {
-        show = level && parseFloat(level.textContent.replace('NTRP ', '')) < 3.5;
+        show = level && level.textContent.toLowerCase().includes('beginner');
       } else if (filter === 'Intermediate') {
-        const ntrp = level ? parseFloat(level.textContent.replace('NTRP ', '')) : 0;
-        show = ntrp >= 3.5 && ntrp < 4.5;
+        show = level && level.textContent.toLowerCase().includes('intermediate');
       } else if (filter === 'Advanced') {
-        show = level && parseFloat(level.textContent.replace('NTRP ', '')) >= 4.5;
+        show = level && (level.textContent.toLowerCase().includes('advanced') || level.textContent.toLowerCase().includes('competitive'));
       }
 
       card.style.display = show ? '' : 'none';
