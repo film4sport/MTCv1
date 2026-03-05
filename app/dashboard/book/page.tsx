@@ -536,10 +536,10 @@ export default function BookCourtPage() {
                       <button key={dateStr} onClick={() => !isPast && setCalSelectedDate(selected ? null : dateStr)} disabled={isPast} className="aspect-square rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all duration-150 relative" style={{ background: selected ? '#2a2f1e' : today ? 'rgba(107, 122, 61, 0.08)' : 'transparent', color: selected ? '#fff' : isPast ? '#d1d5db' : '#2a2f1e', cursor: isPast ? 'default' : 'pointer', fontWeight: today ? 700 : 500 }}>
                         <span className="text-sm">{day.getDate()}</span>
                         {(hasBooking || hasMine || hasEvent) && (
-                          <div className="flex gap-0.5">
-                            {hasMine && <span className="w-1.5 h-1.5 rounded-full" style={{ background: selected ? '#d4e157' : '#6b7a3d' }} />}
-                            {hasEvent && <span className="w-1.5 h-1.5 rounded-full" style={{ background: selected ? 'rgba(212,225,87,0.7)' : '#d4e157' }} />}
-                            {hasBooking && !hasMine && <span className="w-1.5 h-1.5 rounded-full" style={{ background: selected ? 'rgba(255,255,255,0.4)' : '#d4d0c7' }} />}
+                          <div className="flex gap-1">
+                            {hasMine && <span className="w-2 h-2 rounded-full calendar-dot-bounce" style={{ background: selected ? '#d4e157' : '#6b7a3d' }} />}
+                            {hasEvent && <span className="w-2 h-2 rounded-full calendar-dot-bounce" style={{ background: selected ? 'rgba(212,225,87,0.7)' : '#d4e157', animationDelay: '0.3s' }} />}
+                            {hasBooking && !hasMine && <span className="w-2 h-2 rounded-full calendar-dot-bounce" style={{ background: selected ? 'rgba(255,255,255,0.4)' : '#d4d0c7', animationDelay: '0.6s' }} />}
                           </div>
                         )}
                       </button>

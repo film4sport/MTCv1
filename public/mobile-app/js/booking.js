@@ -130,10 +130,11 @@
 
   function getWeekDates(offset) {
     const today = new Date();
-    const monday = new Date(today);
-    monday.setDate(today.getDate() - ((today.getDay()+6)%7) + (offset*7));
+    today.setHours(0,0,0,0);
+    const start = new Date(today);
+    start.setDate(today.getDate() + (offset*7)); // Rolling 7-day view from today
     const dates = [];
-    for (let i=0;i<7;i++) { const d=new Date(monday); d.setDate(monday.getDate()+i); dates.push(d); }
+    for (let i=0;i<7;i++) { const d=new Date(start); d.setDate(start.getDate()+i); dates.push(d); }
     return dates;
   }
 
@@ -260,14 +261,12 @@
     try {
 
     const dates=getWeekDates(currentWeekOffset);
-    const dayN=MTC.config.dayNamesShort.slice(1).concat(MTC.config.dayNamesShort[0]);
+    const dayNFull=MTC.config.dayNamesShort; // Sun=0, Mon=1, ..., Sat=6
     const moN=MTC.config.monthNamesShort;
     const todayStr=formatDateStr(new Date());
 
     if (weekLabel) {
-      if (currentWeekOffset===0) weekLabel.textContent='THIS WEEK';
-      else if (currentWeekOffset===1) weekLabel.textContent='NEXT WEEK';
-      else if (currentWeekOffset===-1) weekLabel.textContent='LAST WEEK';
+      if (currentWeekOffset===0) weekLabel.textContent='NEXT 7 DAYS';
       else weekLabel.textContent='';
     }
     if (weekDatesEl) weekDatesEl.textContent=moN[dates[0].getMonth()]+' '+dates[0].getDate()+' \u2013 '+moN[dates[6].getMonth()]+' '+dates[6].getDate();
@@ -305,7 +304,7 @@
         }
         dots+='</span>';
       }
-      th+='<button class="'+tc+'" onclick="selectWeekDay('+t+')"><span class="week-day-tab-name">'+sanitizeHTML(dayN[t])+'</span><span class="week-day-tab-date">'+dates[t].getDate()+'</span>'+dots+'</button>';
+      th+='<button class="'+tc+'" onclick="selectWeekDay('+t+')"><span class="week-day-tab-name">'+sanitizeHTML(dayNFull[dates[t].getDay()])+'</span><span class="week-day-tab-date">'+dates[t].getDate()+'</span>'+dots+'</button>';
     }
     tabsC.innerHTML=th;
 
