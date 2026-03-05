@@ -119,7 +119,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [members, setMembers] = useState<User[]>([]);
   const [courts, setCourts] = useState<Court[]>(DEFAULT_COURTS);
   const [bookings, setBookings] = useState<Booking[]>([]);
-  const [events, setEvents] = useState<ClubEvent[]>([]);
+  const [events, setEvents] = useState<ClubEvent[]>(DEFAULT_EVENTS);
   const [partners, setPartners] = useState<Partner[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
@@ -350,7 +350,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           // Overwrite state with Supabase data (source of truth)
           setMembers(safeArray(members));
           setBookings(safeArray(bookings));
-          setEvents(safeArray(events));
+          if (safeArray(events).length > 0) setEvents(safeArray(events)); // Keep DEFAULT_EVENTS if DB has none yet
           if (courtsData.length > 0) setCourts(courtsData); // Keep defaults if DB has no courts yet
           setPartners(safeArray(partners));
           setConversations(safeArray(conversations));
@@ -450,10 +450,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
         db.fetchPrograms().then(p => setPrograms(safeArray(p))).catch(err => reportError(err, 'Realtime enrollments'));
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'events' }, () => {
-        db.fetchEvents().then(e => setEvents(safeArray(e))).catch(err => reportError(err, 'Realtime events'));
+        db.fetchEvents().then(e => { const arr = safeArray(e); if (arr.length > 0) setEvents(arr); }).catch(err => reportError(err, 'Realtime events'));
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'event_attendees' }, () => {
-        db.fetchEvents().then(e => setEvents(safeArray(e))).catch(err => reportError(err, 'Realtime RSVPs'));
+        db.fetchEvents().then(e => { const arr = safeArray(e); if (arr.length > 0) setEvents(arr); }).catch(err => reportError(err, 'Realtime RSVPs'));
       })
       .subscribe();
 

@@ -42,6 +42,24 @@ function InfoPageContent() {
 
   useEffect(() => { setActiveTab(tab); }, [tab]);
 
+  // Scroll to hash anchor after tab content renders (e.g. /info?tab=about#news)
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (!hash) return;
+    let attempts = 0;
+    const tryScroll = () => {
+      const el = document.querySelector(hash);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+      } else if (attempts < 10) {
+        attempts++;
+        setTimeout(tryScroll, 100);
+      }
+    };
+    const timer = setTimeout(tryScroll, 100);
+    return () => clearTimeout(timer);
+  }, [activeTab]);
+
   // IntersectionObserver for fade-in animations
   useEffect(() => {
     const observer = new IntersectionObserver(
