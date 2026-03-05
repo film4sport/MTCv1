@@ -24,7 +24,11 @@ function flushErrors() {
 }
 
 export function reportError(error: unknown, context?: string) {
-  const msg = error instanceof Error ? error.message : String(error);
+  const msg = error instanceof Error
+    ? error.message
+    : (typeof error === 'object' && error !== null && 'message' in error)
+      ? String((error as { message: unknown }).message)
+      : String(error);
   const stack = error instanceof Error ? error.stack : undefined;
   console.error(`[MTC] ${context || 'Error'}:`, msg);
 

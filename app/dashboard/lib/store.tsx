@@ -113,6 +113,18 @@ function safeArray<T>(data: T[]): T[] {
   return Array.isArray(data) ? data : [];
 }
 
+/** Merge Supabase events with DEFAULT_EVENTS.
+ *  Supabase rows win by ID; any defaults not in Supabase are preserved.
+ *  This prevents losing hardcoded events (tournaments, specials) when
+ *  Supabase only returns a partial set (e.g. just recurring events). */
+function mergeEventsWithDefaults(supabaseEvents: ClubEvent[]): ClubEvent[] {
+  const arr = safeArray(supabaseEvents);
+  if (arr.length === 0) return DEFAULT_EVENTS;
+  const supabaseIds = new Set(arr.map(e => e.id));
+  const defaultsNotInSupabase = DEFAULT_EVENTS.filter(e => !supabaseIds.has(e.id));
+  return [...arr, ...defaultsNotInSupabase];
+}
+
 export function AppProvider({ children }: { children: ReactNode }) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -350,7 +362,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           // Overwrite state with Supabase data (source of truth)
           setMembers(safeArray(members));
           setBookings(safeArray(bookings));
-          if (safeArray(events).length > 0) setEvents(safeArray(events)); // Keep DEFAULT_EVENTS if DB has none yet
+          setEvents(mergeEventsWithDefaults(events));
           if (courtsData.length > 0) setCourts(courtsData); // Keep defaults if DB has no courts yet
           setPartners(safeArray(partners));
           setConversations(safeArray(conversations));
@@ -450,10 +462,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
         db.fetchPrograms().then(p => { const arr = safeArray(p); if (arr.length > 0) setPrograms(arr); }).catch(err => reportError(err, 'Realtime enrollments'));
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'events' }, () => {
-        db.fetchEvents().then(e => { const arr = safeArray(e); if (arr.length > 0) setEvents(arr); }).catch(err => reportError(err, 'Realtime events'));
+        db.fetchEvents().then(e => setEvents(mergeEventsWithDefaults(e))).catch(err => reportError(err, 'Realtime events'));
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'event_attendees' }, () => {
-        db.fetchEvents().then(e => { const arr = safeArray(e); if (arr.length > 0) setEvents(arr); }).catch(err => reportError(err, 'Realtime RSVPs'));
+        db.fetchEvents().then(e => setEvents(mergeEventsWithDefaults(e))).catch(err => reportError(err, 'Realtime RSVPs'));
       })
       .subscribe();
 
@@ -1029,14 +1041,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }));
     // Persist read status to Supabase — find conversation and mark messages read
     if (currentUser) {
-      supabase
-        .from('conversations')
-        .select('id')
-        .or(`and(member_a.eq.${currentUser.id},member_b.eq.${memberId}),and(member_a.eq.${memberId},member_b.eq.${currentUser.id})`)
-        .single()
-        .then(({ data: conv }) => {
-          if (conv) db.markMessagesRead(conv.id, currentUser.id).catch((err) => reportError(err, 'Supabase'));
-        });
+      Promise.resolve(
+        supabase
+          .from('conversations')
+          .select('id')
+          .or(`and(member_a.eq.${currentUser.id},member_b.eq.${memberId}),and(member_a.eq.${memberId},member_b.eq.${currentUser.id})`)
+          .single()
+      ).then(({ data: conv, error: err }) => {
+        if (err || !conv) return; // No conversation yet — skip silently
+        db.markMessagesRead(conv.id, currentUser.id).catch((e) => reportError(e, 'Supabase'));
+      }).catch(() => { /* conversations table may not exist yet — ignore */ });
     }
   }, [currentUser]);
 
@@ -1074,7 +1088,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       ]);
       setMembers(safeArray(m));
       setBookings(safeArray(b));
-      if (safeArray(ev).length > 0) setEvents(safeArray(ev));
+      setEvents(mergeEventsWithDefaults(ev));
       if (ct.length > 0) setCourts(ct);
       setPartners(safeArray(p));
       setConversations(safeArray(c));
