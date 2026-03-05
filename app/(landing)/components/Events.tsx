@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { allCardEvents, eventFilters, type MTCEvent } from '../../lib/events';
 
 const categoryColors: Record<string, { accent: string; bg: string; text: string }> = {
-  tournament: { accent: '#a3b835', bg: 'rgba(212, 225, 87, 0.12)', text: '#3b4229' },
+  tournament: { accent: '#3a3a3a', bg: 'rgba(58, 58, 58, 0.08)', text: '#2a2a2a' },
   camp: { accent: '#dc2626', bg: 'rgba(220, 38, 38, 0.08)', text: '#991b1b' },
   coaching: { accent: '#6b7a3d', bg: 'rgba(107, 122, 61, 0.08)', text: '#4a5528' },
   social: { accent: '#d97706', bg: 'rgba(217, 119, 6, 0.08)', text: '#92400e' },

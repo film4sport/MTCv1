@@ -463,9 +463,9 @@ html {
 
 /* RSVP button — green default, orange glow on hover */
 .rsvp-btn:hover:not(:disabled) {
-  border-color: #d97706 !important;
-  background: rgba(245, 158, 11, 0.10) !important;
-  color: #d97706 !important;
+  border-color: var(--event-color, #d97706) !important;
+  background: color-mix(in srgb, var(--event-color, #d97706) 10%, transparent) !important;
+  color: var(--event-color, #d97706) !important;
 }
 
 /* Gradient background for dashboard pages — gives glass cards something to blur */

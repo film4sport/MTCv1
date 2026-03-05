@@ -59,7 +59,7 @@ export default function EventsPage() {
   const typeColors: Record<string, string> = {
     social: '#d97706',
     match: '#9333ea',
-    tournament: '#eab308',
+    tournament: '#3a3a3a',
     camp: '#dc2626',
     programs: '#60a5fa',
     lesson: '#60a5fa',
@@ -344,10 +344,11 @@ export default function EventsPage() {
                       disabled={isPast}
                       className={`rsvp-btn px-4 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${isPast ? 'opacity-50' : ''}`}
                       style={{
-                        background: attending ? '#d97706' : 'rgba(107, 122, 61, 0.1)',
+                        '--event-color': typeColors[normalizeType(ev.type)] || '#6b7a3d',
+                        background: attending ? (typeColors[normalizeType(ev.type)] || '#d97706') : 'rgba(107, 122, 61, 0.1)',
                         color: attending ? '#fff' : '#6b7a3d',
-                        border: attending ? '1.5px solid #d97706' : '1.5px solid transparent',
-                      }}
+                        border: attending ? `1.5px solid ${typeColors[normalizeType(ev.type)] || '#d97706'}` : '1.5px solid transparent',
+                      } as React.CSSProperties}
                     >
                       {attending ? '✓ Going' : 'RSVP'}
                     </button>
