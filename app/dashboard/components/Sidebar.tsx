@@ -113,12 +113,11 @@ function Sidebar() {
                     onClick={closeMobileSidebar}
                     aria-current={isActive ? 'page' : undefined}
                     data-tour={item.label === 'Messages' ? 'messages' : item.label === 'Settings' ? 'settings' : undefined}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative ${
+                    className={`sidebar-nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative ${
                       isActive
-                        ? 'font-semibold'
-                        : 'hover:bg-white/5'
+                        ? 'sidebar-nav-active font-semibold'
+                        : ''
                     }`}
-                    style={isActive ? { backgroundColor: 'rgba(212, 225, 87, 0.15)', color: '#d4e157' } : { color: 'rgba(232, 228, 217, 0.7)' }}
                     title={sidebarCollapsed ? item.label : undefined}
                   >
                     <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={isActive ? 2.5 : 2} aria-hidden="true">
@@ -143,12 +142,11 @@ function Sidebar() {
                   href={coachItem.href}
                   onClick={closeMobileSidebar}
                   aria-current={pathname.startsWith(coachItem.href) ? 'page' : undefined}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${
+                  className={`sidebar-nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${
                     pathname.startsWith(coachItem.href)
-                      ? 'font-semibold'
-                      : 'hover:bg-white/5'
+                      ? 'sidebar-nav-active font-semibold'
+                      : ''
                   }`}
-                  style={pathname.startsWith(coachItem.href) ? { backgroundColor: 'rgba(212, 225, 87, 0.15)', color: '#d4e157' } : { color: 'rgba(232, 228, 217, 0.7)' }}
                   title={sidebarCollapsed ? coachItem.label : undefined}
                 >
                   <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={pathname.startsWith(coachItem.href) ? 2.5 : 2} aria-hidden="true">
@@ -166,12 +164,11 @@ function Sidebar() {
                   href="/dashboard/captain"
                   onClick={closeMobileSidebar}
                   aria-current={pathname.startsWith('/dashboard/captain') ? 'page' : undefined}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${
+                  className={`sidebar-nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${
                     pathname.startsWith('/dashboard/captain')
-                      ? 'font-semibold'
-                      : 'hover:bg-white/5'
+                      ? 'sidebar-nav-active font-semibold'
+                      : ''
                   }`}
-                  style={pathname.startsWith('/dashboard/captain') ? { backgroundColor: 'rgba(212, 225, 87, 0.15)', color: '#d4e157' } : { color: 'rgba(232, 228, 217, 0.7)' }}
                   title={sidebarCollapsed ? 'My Team' : undefined}
                 >
                   <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={pathname.startsWith('/dashboard/captain') ? 2.5 : 2} aria-hidden="true">
@@ -189,12 +186,11 @@ function Sidebar() {
                   href={adminItem.href}
                   onClick={closeMobileSidebar}
                   aria-current={pathname.startsWith(adminItem.href) ? 'page' : undefined}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${
+                  className={`sidebar-nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${
                     pathname.startsWith(adminItem.href)
-                      ? 'font-semibold'
-                      : 'hover:bg-white/5'
+                      ? 'sidebar-nav-active font-semibold'
+                      : ''
                   }`}
-                  style={pathname.startsWith(adminItem.href) ? { backgroundColor: 'rgba(212, 225, 87, 0.15)', color: '#d4e157' } : { color: 'rgba(232, 228, 217, 0.7)' }}
                   title={sidebarCollapsed ? adminItem.label : undefined}
                 >
                   <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={pathname.startsWith(adminItem.href) ? 2.5 : 2} aria-hidden="true">
