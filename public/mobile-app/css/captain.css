@@ -8,7 +8,7 @@
   gap: 8px;
   padding: 12px 16px;
   background: var(--bg-primary);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .captain-tab {
@@ -25,7 +25,7 @@
 }
 
 .captain-tab.active {
-  background: var(--accent);
+  background: var(--volt);
   color: var(--bg-primary);
 }
 
@@ -36,7 +36,7 @@
 .captain-team-label {
   font-size: 14px;
   font-weight: 700;
-  color: var(--accent);
+  color: var(--volt);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   padding: 0 0 12px;
@@ -80,7 +80,7 @@
 .captain-badge {
   font-size: 10px;
   font-weight: 700;
-  color: var(--accent);
+  color: var(--volt);
   background: rgba(196, 255, 0, 0.15);
   padding: 2px 8px;
   border-radius: 10px;
@@ -118,7 +118,7 @@
 .captain-select {
   flex: 1;
   padding: 10px 12px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   background: var(--bg-primary);
   color: var(--text-primary);
@@ -132,7 +132,7 @@
 
 .captain-action-btn {
   padding: 10px 20px;
-  background: var(--accent);
+  background: var(--volt);
   color: var(--bg-primary);
   border: none;
   border-radius: 8px;
@@ -151,7 +151,7 @@
 .captain-textarea {
   width: 100%;
   padding: 12px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   background: var(--bg-primary);
   color: var(--text-primary);
@@ -174,11 +174,11 @@
 }
 
 .captain-update-item {
-  border-left: 3px solid var(--border) !important;
+  border-left: 3px solid var(--border-color) !important;
   padding: 12px !important;
 }
 
-.captain-update-info { border-left-color: var(--accent) !important; }
+.captain-update-info { border-left-color: var(--volt) !important; }
 .captain-update-warning { border-left-color: #f59e0b !important; }
 .captain-update-urgent { border-left-color: #ff5a5f !important; }
 
@@ -222,7 +222,7 @@
 .captain-input {
   flex: 1;
   padding: 10px 12px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   background: var(--bg-primary);
   color: var(--text-primary);
@@ -260,7 +260,7 @@
 
 .captain-match-opponent {
   font-size: 13px;
-  color: var(--accent);
+  color: var(--volt);
   font-weight: 600;
   margin-top: 2px;
 }
@@ -295,7 +295,7 @@
 
 /* Player entries */
 .captain-match-entries {
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--border-color);
   padding-top: 8px;
 }
 
@@ -329,7 +329,7 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-color);
   background: var(--bg-primary);
   color: var(--text-muted);
   font-size: 14px;

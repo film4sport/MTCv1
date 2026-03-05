@@ -229,6 +229,42 @@
     }
   };
 
+  // Compute next occurrence for recurring weekly events (matches desktop recurring templates)
+  // dayOfWeek: 0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat
+  (function setRecurringDates() {
+    var SEASON_START = '2026-05-09'; // Opening Day
+    var SEASON_END   = '2026-09-30';
+    var recurring = {
+      'mens-round-robin':  2, // Tuesday
+      'freedom-55':        4, // Thursday
+      'interclub-league':  4, // Thursday
+      'ladies-round-robin': 5, // Friday
+      'friday-mixed':      5  // Friday
+    };
+    var today = new Date();
+    today.setHours(0,0,0,0);
+    var seasonStart = new Date(SEASON_START + 'T12:00:00');
+    var seasonEnd   = new Date(SEASON_END + 'T12:00:00');
+
+    Object.keys(recurring).forEach(function(id) {
+      var ev = clubEventsData[id];
+      if (!ev) return;
+      var dow = recurring[id];
+      // Start searching from today or season start, whichever is later
+      var from = today > seasonStart ? new Date(today) : new Date(seasonStart);
+      // Move forward to the next matching day of week
+      var diff = (dow - from.getDay() + 7) % 7;
+      if (diff === 0 && from <= today) diff = 7; // if today is the day but it's past, go to next week
+      from.setDate(from.getDate() + diff);
+      if (from <= seasonEnd) {
+        var y = from.getFullYear();
+        var m = String(from.getMonth() + 1).padStart(2, '0');
+        var d = String(from.getDate()).padStart(2, '0');
+        ev.date = y + '-' + m + '-' + d;
+      }
+    });
+  })();
+
   // Sync attendees with persisted userRsvps (add 'You' if RSVP'd)
   (function syncRsvpAttendees() {
     userRsvps.forEach(function(eventId) {

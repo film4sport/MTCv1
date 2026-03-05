@@ -20,7 +20,7 @@
     if ('serviceWorker' in navigator) {
       caches.keys().then(function(names) {
         names.forEach(function(name) {
-          if (name.indexOf('mtc-court-c3cd4fa4') === -1) {
+          if (name.indexOf('mtc-court-964ac1f9') === -1) {
             caches.delete(name);
             console.log('[CacheBust] Deleted old cache:', name);
           }
@@ -1110,6 +1110,26 @@
               <button class="partner-type-btn" data-when="today" onclick="selectPartnerWhen(this)">Today</button>
               <button class="partner-type-btn" data-when="tomorrow" onclick="selectPartnerWhen(this)">Tomorrow</button>
               <button class="partner-type-btn" data-when="weekend" onclick="selectPartnerWhen(this)">This Weekend</button>
+            </div>
+
+            <label class="modal-form-label">Preferred Time</label>
+            <div class="partner-time-input-row">
+              <input type="time" id="partnerTimeInput" class="partner-time-input" onchange="onPartnerTimeInput(this)" placeholder="Or type a time">
+              <span class="partner-time-or">or pick:</span>
+            </div>
+            <div class="partner-time-grid" id="partnerTimeGrid">
+              <button class="partner-time-btn" data-time="8:00 AM" onclick="selectPartnerTime(this)">8 AM</button>
+              <button class="partner-time-btn" data-time="9:00 AM" onclick="selectPartnerTime(this)">9 AM</button>
+              <button class="partner-time-btn" data-time="10:00 AM" onclick="selectPartnerTime(this)">10 AM</button>
+              <button class="partner-time-btn" data-time="11:00 AM" onclick="selectPartnerTime(this)">11 AM</button>
+              <button class="partner-time-btn" data-time="12:00 PM" onclick="selectPartnerTime(this)">12 PM</button>
+              <button class="partner-time-btn" data-time="1:00 PM" onclick="selectPartnerTime(this)">1 PM</button>
+              <button class="partner-time-btn" data-time="2:00 PM" onclick="selectPartnerTime(this)">2 PM</button>
+              <button class="partner-time-btn" data-time="3:00 PM" onclick="selectPartnerTime(this)">3 PM</button>
+              <button class="partner-time-btn" data-time="4:00 PM" onclick="selectPartnerTime(this)">4 PM</button>
+              <button class="partner-time-btn" data-time="5:00 PM" onclick="selectPartnerTime(this)">5 PM</button>
+              <button class="partner-time-btn" data-time="6:00 PM" onclick="selectPartnerTime(this)">6 PM</button>
+              <button class="partner-time-btn" data-time="7:00 PM" onclick="selectPartnerTime(this)">7 PM</button>
             </div>
 
             <label class="modal-form-label">Message (optional)</label>
