@@ -1093,6 +1093,35 @@ CREATE TABLE IF NOT EXISTS lineup_entries (
 
 **Build verified:** `npm run check` passes clean. All 229 unit tests pass. File integrity verified.
 
+### Cowork Session (2026-03-05) — UI Polish + Demo Data Cleanup
+
+**Mobile PWA — Fake data removal:**
+- Removed 5 hardcoded fake conversation items from `index.html` (mike, sarah, james, emma, club)
+- Replaced with dynamic `renderConversationsList()` in `messaging.js` (renders from API data)
+- Removed 3 hardcoded fake notifications from `index.html`
+- Made notification badge + summary hidden by default (shown dynamically when data arrives)
+- Announcements stay as notifications/banners only — removed `addMessageToConversation` call from `notifications.js`
+
+**Mobile PWA — Menu drawer footer redesign:**
+- Replaced plain weather/address/copyright with polished weather card (`admin.css` + `index.html`)
+
+**Dashboard — Sidebar hover animation (`globals.css` + `Sidebar.tsx`):**
+- Added `.sidebar-nav-link` / `.sidebar-nav-active` CSS classes with glow slide-in + icon lift + text nudge
+- **Removed all inline `style` attributes** from sidebar nav links — inline styles overrode CSS hover rules
+- Colors now controlled purely by CSS classes
+
+**Dashboard — Quick action card hover lift (`page.tsx`):**
+- Added Tailwind hover classes: `hover:-translate-y-1.5 hover:shadow-xl active:translate-y-0`
+- Custom `.quick-action-card` CSS removed (didn't work for user — Tailwind classes more reliable)
+
+**Dashboard — Court light icon (`book/page.tsx`):**
+- Replaced tiny 💡 emoji with proper SVG lightbulb icon (w-4 h-4, amber stroke `#e8b624`)
+- Updated both All Courts view and Week view instances
+
+**Profile + Settings merge** (from approved plan): Already complete on both dashboard and mobile.
+
+**Build verified:** `npm run check` passes clean (tsc + mobile build).
+
 ### Environment Limitations (IMPORTANT)
 - **Cowork VM has NO Playwright browsers installed.** Never attempt to run E2E tests in Cowork — they will stall or error. E2E tests only run in CI (GitHub Actions) or on the dev machine.
 - **If a command fails once, diagnose and explain — don't retry.** Repeated blind retries waste the user's time.

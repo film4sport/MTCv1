@@ -79,7 +79,7 @@ export async function PUT(request: Request) {
     // Map mobile PWA types to schema-valid types
     const typeMap: Record<string, string> = {
       clinic: 'lesson', tournament: 'tournament', social: 'social',
-      roundrobin: 'roundrobin', camp: 'social', match: 'match', lesson: 'lesson',
+      roundrobin: 'social', camp: 'camp', match: 'match', lesson: 'lesson',
     };
     const dbType = typeMap[type] || 'social';
     const badge = (!price || price.toLowerCase() === 'free') ? 'free' : 'paid';
@@ -113,7 +113,7 @@ export async function PATCH(request: Request) {
 
     const typeMap: Record<string, string> = {
       clinic: 'lesson', tournament: 'tournament', social: 'social',
-      roundrobin: 'roundrobin', camp: 'social', match: 'match', lesson: 'lesson',
+      roundrobin: 'social', camp: 'camp', match: 'match', lesson: 'lesson',
     };
 
     // Build update object with only provided fields

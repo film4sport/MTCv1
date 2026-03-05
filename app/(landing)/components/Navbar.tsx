@@ -115,8 +115,7 @@ export default function Navbar() {
         role="dialog"
         aria-modal={mobileMenuOpen}
         aria-label="Navigation menu"
-        // @ts-expect-error — inert is a valid HTML attribute but React types lag behind
-        inert={!mobileMenuOpen ? '' : undefined}
+        inert={!mobileMenuOpen ? true : undefined}
       >
         <div className="mobile-menu-content">
           <button className="mobile-menu-close" onClick={closeMobileMenu} aria-label="Close menu">

@@ -43,7 +43,7 @@
     // ============================================
     const programs = [
       // TUESDAY - Men's Round Robin 9-11am (starts before 9:30 bookable slot)
-      { day:1, start:'9:00 AM', end:'11:00 AM', courts:[1,2], type:'roundrobin',
+      { day:1, start:'9:00 AM', end:'11:00 AM', courts:[1,2], type:'social',
         title:"Men's Round Robin", fee:0, guestFee:10,
         coach: null, regKey:'mens-rr',
         desc:'Weekly men\'s round robin. All skill levels welcome.' },
@@ -61,13 +61,13 @@
         desc:'Thursday night competitive interclub. Team A & B. RSVP required.' },
 
       // FRIDAY AM - Ladies Round Robin 9-11am
-      { day:4, start:'9:00 AM', end:'11:00 AM', courts:[1,2], type:'roundrobin',
+      { day:4, start:'9:00 AM', end:'11:00 AM', courts:[1,2], type:'social',
         title:"Ladies Round Robin", fee:0, guestFee:10,
         coach: null, regKey:'ladies-rr',
         desc:'Weekly ladies round robin. All skill levels welcome.' },
 
       // FRIDAY PM - Mixed Round Robin 6-9pm
-      { day:4, start:'6:00 PM', end:'9:00 PM', courts:[1,2,3,4], type:'roundrobin',
+      { day:4, start:'6:00 PM', end:'9:00 PM', courts:[1,2,3,4], type:'social',
         title:'Friday Night Mixed Round Robin', fee:0, guestFee:10,
         coach: null, regKey:'fri-mixed-rr',
         desc:'Weekly mixed doubles round robin. Bring a partner or get matched!' },
@@ -96,11 +96,11 @@
         title:'Opening Day BBQ & Round Robin', fee:0, guestFee:0,
         coach: null, regKey:null,
         desc:'Kick off the season! BBQ, music, and meet our coaching staff. All members, families, and guests welcome.' },
-      { date:'2026-06-07', start:'1:00 PM', end:'4:00 PM', courts:[1,2,3,4], type:'roundrobin',
+      { date:'2026-06-07', start:'1:00 PM', end:'4:00 PM', courts:[1,2,3,4], type:'social',
         title:'French Open Round Robin Social', fee:0, guestFee:0,
         coach: null, regKey:null,
         desc:'Celebrate the French Open with a themed round robin social! Mixed doubles, prizes, and refreshments.' },
-      { date:'2026-07-12', start:'1:00 PM', end:'4:00 PM', courts:[1,2,3,4], type:'roundrobin',
+      { date:'2026-07-12', start:'1:00 PM', end:'4:00 PM', courts:[1,2,3,4], type:'social',
         title:'Wimbledon Open Round Robin', fee:0, guestFee:0,
         coach: null, regKey:null,
         desc:'Wimbledon-themed round robin! Whites encouraged. Mixed doubles play, strawberries & cream, and great prizes.' }
@@ -400,7 +400,7 @@
     const mos=MTC.config.monthNamesShort;
     const dateLbl=days[d.getDay()]+', '+mos[d.getMonth()]+' '+d.getDate();
     // Determine if this is a social event (no courts/fees to show)
-    const isSocialEvent = ['roundrobin', 'openplay', 'doubles', 'social'].indexOf(ev.type) !== -1;
+    const isSocialEvent = ['social', 'openplay', 'doubles'].indexOf(ev.type) !== -1;
 
     // Court names - only show for non-social events
     const courtNames=ev.courts.map(function(c){return 'Court '+c;}).join(', ');
