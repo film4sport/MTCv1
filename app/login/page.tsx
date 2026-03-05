@@ -63,9 +63,16 @@ function LoginContent() {
     }
   }, []);
 
-  // Warm up Supabase on page load so login doesn't wait for cold start
+  // Warm up Supabase on page load so login doesn't wait for cold start.
+  // Hits both the server-side keep-alive (warms DB + Auth via API route)
+  // and Supabase Auth directly from the client (warms GoTrue connection).
   useEffect(() => {
     fetch('/api/keep-alive').catch(() => {});
+    // Direct client-side auth warm-up — getSession is lightweight and
+    // establishes the connection to Supabase Auth so signInWithPassword is fast
+    import('../lib/supabase').then(({ supabase }) => {
+      supabase.auth.getSession().catch(() => {});
+    }).catch(() => {});
   }, []);
 
   // No auto-redirect — always show login page so users can see it
