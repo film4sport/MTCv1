@@ -75,8 +75,16 @@
       // (Weekend Open Play and Sunday Mixed Doubles removed - not real MTC programs)
     ];
 
+    // Season starts on Opening Day — don't show recurring programs before then
+    const seasonStart = new Date('2026-05-09');
+    seasonStart.setHours(0,0,0,0);
+
     programs.forEach(function(e) {
       const d = ds(e.day);
+      // Skip recurring programs before the season opens
+      const programDate = new Date(d + 'T00:00:00');
+      if (programDate < seasonStart) return;
+
       if (!eventsData[d]) eventsData[d] = [];
       eventsData[d].push({
         startTime:e.start, endTime:e.end,
