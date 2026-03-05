@@ -998,11 +998,11 @@ html, body {
   margin: 1px;
   animation: dotGlow 3s ease-in-out infinite;
 }
-.cal-dot.social { background: #6b7a3d; box-shadow: 0 0 4px rgba(107, 122, 61, 0.6); }
-.cal-dot.match { background: #d97706; box-shadow: 0 0 4px rgba(217, 119, 6, 0.6); }
-.cal-dot.tournament { background: #dc2626; box-shadow: 0 0 4px rgba(220, 38, 38, 0.6); }
-.cal-dot.camp { background: #2563eb; box-shadow: 0 0 4px rgba(37, 99, 235, 0.6); }
-.cal-dot.special { background: #d4e157; box-shadow: 0 0 4px rgba(212, 225, 87, 0.6); }
+.cal-dot.social { background: #d97706; box-shadow: 0 0 4px rgba(217, 119, 6, 0.6); }
+.cal-dot.match { background: #9333ea; box-shadow: 0 0 4px rgba(147, 51, 234, 0.6); }
+.cal-dot.tournament { background: #d4e157; box-shadow: 0 0 4px rgba(212, 225, 87, 0.6); }
+.cal-dot.camp { background: #dc2626; box-shadow: 0 0 4px rgba(220, 38, 38, 0.6); }
+.cal-dot.special, .cal-dot.programs { background: #60a5fa; box-shadow: 0 0 4px rgba(96, 165, 250, 0.6); }
 .cal-dot.booking { background: #8b95a5; box-shadow: 0 0 4px rgba(139, 149, 165, 0.6); }
 @keyframes dotGlow {
   0%, 100% { opacity: 1; }
@@ -1026,11 +1026,11 @@ html, body {
   transition: all 0.2s ease;
 }
 .cal-day:hover .cal-event-label { transform: translateX(2px); }
-.cal-event-label.social { background: rgba(107,122,61,0.3); color: #c8d943; }
-.cal-event-label.match { background: rgba(217,119,6,0.3); color: #fbbf24; }
-.cal-event-label.tournament { background: rgba(220,38,38,0.3); color: #fca5a5; }
-.cal-event-label.camp { background: rgba(37,99,235,0.3); color: #93c5fd; }
-.cal-event-label.special { background: rgba(212,225,87,0.35); color: #d4e157; }
+.cal-event-label.social { background: rgba(217,119,6,0.3); color: #fbbf24; }
+.cal-event-label.match { background: rgba(147,51,234,0.3); color: #d8b4fe; }
+.cal-event-label.tournament { background: rgba(212,225,87,0.35); color: #d4e157; }
+.cal-event-label.camp { background: rgba(220,38,38,0.3); color: #fca5a5; }
+.cal-event-label.special, .cal-event-label.programs { background: rgba(96,165,250,0.3); color: #93c5fd; }
 .cal-event-label.booking { background: rgba(139,149,165,0.25); color: #b0b8c5; }
 
 /* Selected day detail panel — slide in */

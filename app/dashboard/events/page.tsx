@@ -7,7 +7,7 @@ import DashboardHeader from '../components/DashboardHeader';
 import { downloadICS } from '../lib/calendar';
 import { useFocusTrap } from '../lib/utils';
 
-type EventFilter = 'all' | 'social' | 'match' | 'lesson' | 'tournament';
+type EventFilter = 'all' | 'social' | 'match' | 'tournament' | 'camp' | 'programs';
 type ViewMode = 'calendar' | 'list';
 type PageView = 'events' | 'programs';
 
@@ -30,8 +30,12 @@ export default function EventsPage() {
   useFocusTrap(programModalRef, !!selectedProgram);
   useFocusTrap(eventModalRef, !!selectedEvent);
 
-  // Normalize type — 'roundrobin' from legacy Supabase data maps to 'social'
-  const normalizeType = (t: string) => t === 'roundrobin' ? 'social' : t;
+  // Normalize type — 'roundrobin' → 'social', 'lesson'/'special' → 'programs' for filtering
+  const normalizeType = (t: string) => {
+    if (t === 'roundrobin') return 'social';
+    if (t === 'lesson' || t === 'special') return 'programs';
+    return t;
+  };
   const filtered = events
     .filter(e => filter === 'all' || normalizeType(e.type) === filter)
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
@@ -48,17 +52,18 @@ export default function EventsPage() {
   };
 
   const typeLabels: Record<string, string> = {
-    social: 'Social', match: 'Match', lesson: 'Lesson', tournament: 'Tournament', camp: 'Camp', roundrobin: 'Social',
+    social: 'Social', match: 'Match', lesson: 'Programs', tournament: 'Tournament', camp: 'Camp', roundrobin: 'Social', special: 'Programs', programs: 'Programs',
   };
 
   // Event type colors — matches landing page calendar legend
   const typeColors: Record<string, string> = {
-    social: '#6b7a3d',
-    match: '#d97706',
-    tournament: '#dc2626',
-    lesson: '#2563eb',
-    camp: '#2563eb',
-    special: '#d4e157',
+    social: '#d97706',
+    match: '#9333ea',
+    tournament: '#a3b835',
+    camp: '#dc2626',
+    programs: '#60a5fa',
+    lesson: '#60a5fa',
+    special: '#60a5fa',
   };
 
   const detail = selectedEvent ? events.find(e => e.id === selectedEvent) : null;
@@ -178,7 +183,7 @@ export default function EventsPage() {
 
         {/* Filter pills */}
         <div className="flex flex-wrap gap-2 mb-6">
-          {(['all', 'social', 'match', 'tournament', 'lesson'] as EventFilter[]).map(f => (
+          {(['all', 'social', 'match', 'tournament', 'camp', 'programs'] as EventFilter[]).map(f => (
             <button
               key={f}
               onClick={() => setFilter(f)}
