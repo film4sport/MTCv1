@@ -249,6 +249,85 @@
     -4px -4px 8px rgba(60, 58, 54, 0.35);
 }
 
+/* Booking Info Panel (#9) */
+.booking-info-panel {
+  margin: 0 16px 12px;
+}
+.booking-info-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 12px;
+  background: var(--color-light-border);
+  color: var(--text-muted);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  box-shadow:
+    3px 3px 6px rgba(0, 0, 0, 0.08),
+    -3px -3px 6px rgba(255, 255, 255, 0.8);
+}
+[data-theme="dark"] .booking-info-toggle {
+  background: var(--color-dark-bg);
+  box-shadow:
+    3px 3px 6px rgba(0, 0, 0, 0.3),
+    -3px -3px 6px rgba(50, 50, 50, 0.2);
+}
+.booking-info-toggle[aria-expanded="true"] {
+  border-radius: 12px 12px 0 0;
+}
+.booking-info-chevron {
+  margin-left: auto;
+  transition: transform 0.25s ease;
+}
+.booking-info-toggle[aria-expanded="true"] .booking-info-chevron {
+  transform: rotate(180deg);
+}
+.booking-info-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, padding 0.3s ease;
+  background: var(--color-light-border);
+  border-radius: 0 0 12px 12px;
+  padding: 0 14px;
+  box-shadow:
+    3px 3px 6px rgba(0, 0, 0, 0.08),
+    -3px -3px 6px rgba(255, 255, 255, 0.8);
+}
+[data-theme="dark"] .booking-info-content {
+  background: var(--color-dark-bg);
+  box-shadow:
+    3px 3px 6px rgba(0, 0, 0, 0.3),
+    -3px -3px 6px rgba(50, 50, 50, 0.2);
+}
+.booking-info-content.open {
+  max-height: 300px;
+  padding: 8px 14px 14px;
+}
+.booking-info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  padding: 3px 0;
+}
+.booking-info-item strong {
+  color: var(--text-primary);
+}
+.info-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+
 /* Week Day Tabs */
 .week-day-tabs {
   display: flex;
@@ -495,6 +574,65 @@
 .weekly-slot.past {
   cursor: default;
   pointer-events: none;
+}
+
+/* ============================================
+   NOW LINE - Current time indicator (#1)
+============================================ */
+.weekly-grid-row.now-row {
+  position: relative;
+}
+.weekly-grid-row.now-row::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--coral, #ff5a5f);
+  z-index: 5;
+  box-shadow: 0 0 6px rgba(255, 90, 95, 0.4);
+}
+.weekly-grid-row.now-row .weekly-time-cell {
+  color: var(--coral, #ff5a5f);
+  font-weight: 700;
+}
+
+/* PRIME TIME - subtle glow on peak hours (#5) */
+.weekly-grid-row.prime-time {
+  background: rgba(255, 200, 0, 0.04);
+}
+.weekly-grid-row.prime-time .weekly-time-cell {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+[data-theme="dark"] .weekly-grid-row.prime-time {
+  background: rgba(255, 200, 0, 0.06);
+}
+
+/* Court hours label under header (#4) */
+.court-hours-label {
+  display: block;
+  font-family: inherit;
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 0.3px;
+  opacity: 0.65;
+  margin-top: 1px;
+  text-transform: none;
+}
+
+/* Tap/active state for booking slots (#6) */
+.weekly-slot.available:active .slot-book-btn {
+  transform: scale(0.92);
+  background: var(--volt);
+  color: var(--color-black);
+  transition: transform 0.1s ease;
+}
+.weekly-slot.my-booking:active .weekly-slot-inner,
+.weekly-slot.booked:active .weekly-slot-inner {
+  transform: scale(0.95);
+  transition: transform 0.1s ease;
 }
 
 /* ============================================
