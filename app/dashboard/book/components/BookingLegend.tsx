@@ -25,10 +25,6 @@ export default function BookingLegend() {
         <span className="w-5 h-3 rounded" style={{ background: 'rgba(212, 225, 87, 0.15)', border: '1px solid rgba(212, 225, 87, 0.4)' }} />
         Club Event
       </div>
-      <div className="flex items-center gap-1">
-        <span className="text-xs leading-none">💡</span>
-        Floodlit
-      </div>
     </div>
   );
 }
