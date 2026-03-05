@@ -217,9 +217,7 @@ export default function BookCourtPage() {
                       )}
                       {c.name}
                       {c.floodlight && !closed && (
-                        <svg className="w-3.5 h-3.5" style={{ color: active ? '#d4e157' : '#c4a060', opacity: 0.7 }} fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v3m0-18a5.5 5.5 0 013.5 9.75V15a.5.5 0 01-.5.5h-6a.5.5 0 01-.5-.5v-3.25A5.5 5.5 0 0112 3zm-2.5 15h5" />
-                        </svg>
+                        <span className="text-xs leading-none" style={{ opacity: 0.7 }}>💡</span>
                       )}
                     </span>
                     <span className="block text-[0.6rem] font-normal mt-0.5" style={{ opacity: 0.7 }}>
@@ -441,9 +439,7 @@ export default function BookCourtPage() {
                                   )}
                                   <span className="text-sm font-semibold" style={{ color: '#2a2f1e' }}>{c.name}</span>
                                   {c.floodlight && !closed && (
-                                    <svg className="w-3.5 h-3.5" style={{ color: '#c4a060', opacity: 0.65 }} fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v3m0-18a5.5 5.5 0 013.5 9.75V15a.5.5 0 01-.5.5h-6a.5.5 0 01-.5-.5v-3.25A5.5 5.5 0 0112 3zm-2.5 15h5" />
-                                    </svg>
+                                    <span className="text-xs leading-none" style={{ opacity: 0.7 }}>💡</span>
                                   )}
                                 </div>
                                 <div className="text-[0.6rem] font-normal mt-0.5" style={{ color: '#9ca3a0' }}>

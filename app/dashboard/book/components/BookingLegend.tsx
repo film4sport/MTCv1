@@ -26,9 +26,7 @@ export default function BookingLegend() {
         Club Event
       </div>
       <div className="flex items-center gap-1">
-        <svg className="w-3.5 h-3.5" style={{ color: '#c4a060' }} fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v3m0-18a5.5 5.5 0 013.5 9.75V15a.5.5 0 01-.5.5h-6a.5.5 0 01-.5-.5v-3.25A5.5 5.5 0 0112 3zm-2.5 15h5" />
-        </svg>
+        <span className="text-xs leading-none">💡</span>
         Floodlit
       </div>
     </div>
