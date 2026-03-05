@@ -51,6 +51,7 @@ MTC.config = {
   eventTypes: {
     singles:    { label: 'Singles',        color: '#4CAF50', textColor: '#fff' },
     doubles:    { label: 'Doubles',        color: '#c8ff00', textColor: '#000' },
+    social:     { label: 'Social',         color: '#ff5a5f', textColor: '#fff' },
     roundrobin: { label: 'Round Robin',    color: '#ff5a5f', textColor: '#fff' },
     drills:     { label: 'Drills/Clinic',  color: '#00d4ff', textColor: '#000' },
     lesson:     { label: 'Lesson',         color: '#9C27B0', textColor: '#fff' },
