@@ -191,7 +191,7 @@ function LoginContent() {
               MTC Court App
             </h2>
             <p className="text-base mb-12 max-w-md mx-auto" style={{ color: '#6b7266' }}>
-              Live court status, book courts, find partners, and connect with members — all in one place.
+              Book courts and lessons, find partners, and message members — all in one place.
             </p>
 
             {/* Phone Mockup */}
