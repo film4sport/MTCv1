@@ -522,6 +522,13 @@ html {
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.15); }
 }
+@keyframes courtRingPulse {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.4); opacity: 0; }
+}
+.court-available-ring {
+  animation: courtRingPulse 2.5s ease-in-out infinite;
+}
 @keyframes dropdownIn {
   from { opacity: 0; transform: translateY(-8px) scale(0.96); }
   to { opacity: 1; transform: translateY(0) scale(1); }
