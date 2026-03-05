@@ -37,9 +37,7 @@ export default function BookCourtPage() {
   const [weekStart, setWeekStart] = useState(() => {
     const d = new Date();
     d.setHours(0, 0, 0, 0);
-    const day = d.getDay();
-    d.setDate(d.getDate() - day);
-    return d;
+    return d; // Rolling 7-day view: starts from today
   });
   const [selectedCourt, setSelectedCourt] = useState<number>(1);
   const [showModal, setShowModal] = useState(false);
@@ -51,7 +49,7 @@ export default function BookCourtPage() {
   const [cancelTarget, setCancelTarget] = useState<{ id: string; courtName: string; date: string; time: string } | null>(null);
   const [contentKey, setContentKey] = useState(0);
   const tooltipTimeout = useRef<NodeJS.Timeout | null>(null);
-  const [mobileDayIdx, setMobileDayIdx] = useState(() => new Date().getDay());
+  const [mobileDayIdx, setMobileDayIdx] = useState(0); // Today is always first in rolling view
   const [allCourtsDate, setAllCourtsDate] = useState<string>(() => toLocalDateStr(new Date()));
 
   const weekDays = useMemo(() => {
@@ -76,12 +74,9 @@ export default function BookCourtPage() {
       prefilledRef.current = true;
       const target = new Date(dateParam + 'T00:00:00');
       if (!isNaN(target.getTime())) {
-        // Navigate week view to include that date
-        const day = target.getDay();
-        const weekStartDate = new Date(target);
-        weekStartDate.setDate(weekStartDate.getDate() - day);
-        setWeekStart(weekStartDate);
-        setMobileDayIdx(day);
+        // Navigate rolling view to start from that date
+        setWeekStart(target);
+        setMobileDayIdx(0);
         // Also set calendar view
         setCalMonth(new Date(target.getFullYear(), target.getMonth()));
         setCalSelectedDate(dateParam);
@@ -271,7 +266,7 @@ export default function BookCourtPage() {
                             return (
                               <th key={day.toISOString()} className="p-2.5 text-center border-b" style={{ borderColor: '#f0ede6', background: today ? 'rgba(107, 122, 61, 0.06)' : '#faf8f3' }}>
                                 <div className="text-[0.6rem] font-medium uppercase tracking-wider" style={{ color: '#9ca3a0' }}>{f.day}</div>
-                                <div className={`text-base font-bold mt-0.5 ${today ? 'text-white' : ''}`} style={today ? { background: '#6b7a3d', borderRadius: '8px', padding: '2px 8px', display: 'inline-block' } : { color: '#2a2f1e' }}>{f.date}</div>
+                                <div className="text-base font-bold mt-0.5 inline-flex items-center justify-center w-8 h-8 rounded-lg" style={{ background: today ? '#6b7a3d' : 'transparent', color: today ? '#fff' : '#2a2f1e' }}>{f.date}</div>
                               </th>
                             );
                           })}
