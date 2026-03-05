@@ -300,7 +300,7 @@
         const shown={};
         for (let e=0;e<dayEv.length&&Object.keys(shown).length<4;e++) {
           const et=dayEv[e].type;
-          if (!shown[et]) { shown[et]=true; dots+='<span class="day-dot" style="background:'+MTC.config.eventTypes[et].color+'"></span>'; }
+          if (!shown[et]) { shown[et]=true; var eti=MTC.config.eventTypes[et]||MTC.config.eventTypes.reserved; dots+='<span class="day-dot" style="background:'+eti.color+'"></span>'; }
         }
         dots+='</span>';
       }
