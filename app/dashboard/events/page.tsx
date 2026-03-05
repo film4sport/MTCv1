@@ -59,7 +59,7 @@ export default function EventsPage() {
   const typeColors: Record<string, string> = {
     social: '#d97706',
     match: '#9333ea',
-    tournament: '#a3b835',
+    tournament: '#eab308',
     camp: '#dc2626',
     programs: '#60a5fa',
     lesson: '#60a5fa',
@@ -330,7 +330,7 @@ export default function EventsPage() {
                   <p className="text-xs mb-3" style={{ color: '#6b7266' }}>{ev.location}</p>
 
                   <div className="flex items-center justify-between">
-                    <span className="text-[0.65rem] px-2 py-0.5 rounded-full font-medium" style={{ background: `${typeColors[ev.type] || '#6b7a3d'}15`, color: typeColors[ev.type] || '#6b7266', border: `1px solid ${typeColors[ev.type] || '#6b7a3d'}30` }}>
+                    <span className="text-[0.65rem] px-2 py-0.5 rounded-full font-medium" style={{ background: `${typeColors[normalizeType(ev.type)] || '#6b7a3d'}15`, color: typeColors[normalizeType(ev.type)] || '#6b7266', border: `1px solid ${typeColors[normalizeType(ev.type)] || '#6b7a3d'}30` }}>
                       {typeLabels[ev.type] || ev.type}
                     </span>
                     <button

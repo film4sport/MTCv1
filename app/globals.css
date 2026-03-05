@@ -693,9 +693,9 @@ html {
   font-weight: 500;
 }
 .event-filter-pill:hover:not(.event-filter-pill-active) {
-  color: var(--pill-color);
-  border-color: var(--pill-color);
-  background: color-mix(in srgb, var(--pill-color) 8%, transparent);
+  color: #3a3a3a;
+  border-color: #3a3a3a;
+  background: rgba(58, 58, 58, 0.06);
 }
 .event-filter-pill-active {
   color: var(--pill-color);
