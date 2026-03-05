@@ -498,6 +498,70 @@ html {
   transition: top 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.15s ease;
 }
 
+/* ============================================
+   Sidebar nav link hover animations
+   Combined: glow slide-in + icon scale + underline reveal
+   ============================================ */
+.sidebar-nav-link {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* Glow background — slides in from left */
+.sidebar-nav-link::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgba(212, 225, 87, 0.12) 0%, rgba(212, 225, 87, 0.04) 60%, transparent 100%);
+  transform: translateX(-105%);
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Default state colors (replaces inline styles) */
+.sidebar-nav-link {
+  color: rgba(232, 228, 217, 0.7);
+}
+.sidebar-nav-link.sidebar-nav-active {
+  color: #d4e157;
+  background-color: rgba(212, 225, 87, 0.15);
+}
+
+/* Icon scale + glow */
+.sidebar-nav-link > svg {
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.2s ease, filter 0.3s ease;
+}
+
+/* Text color transition */
+.sidebar-nav-link > span {
+  transition: color 0.2s ease, transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* --- Hover state (non-active only) --- */
+.sidebar-nav-link:not(.sidebar-nav-active):hover::before {
+  transform: translateX(0);
+}
+.sidebar-nav-link:not(.sidebar-nav-active):hover {
+  color: #e8e4d9;
+}
+.sidebar-nav-link:not(.sidebar-nav-active):hover > svg {
+  transform: translateY(-3px) scale(1.1);
+  color: #d4e157;
+  filter: drop-shadow(0 0 6px rgba(212, 225, 87, 0.45));
+}
+.sidebar-nav-link:not(.sidebar-nav-active):hover > span {
+  transform: translateX(2px);
+}
+
+/* Active items: no extra hover animation */
+.sidebar-nav-active::before {
+  transform: translateX(0);
+  background: transparent;
+}
+
 /* Overscroll bounce on mobile */
 .overscroll-bounce {
   -webkit-overflow-scrolling: touch;
