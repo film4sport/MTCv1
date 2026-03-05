@@ -367,7 +367,7 @@ export default function BookCourtPage() {
                   <div className="glass-card rounded-2xl border overflow-hidden" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
                     <div className="p-3 border-b" style={{ borderColor: '#f0ede6', background: '#faf8f3' }}>
                       <p className="text-xs font-semibold" style={{ color: '#2a2f1e' }}>{mobileDay.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
-                      <p className="text-[0.65rem] mt-0.5" style={{ color: '#9ca3a0' }}>{courtConfig.name} &bull; {courtConfig.floodlight ? 'Lights til 10 PM' : 'Closes 8 PM'}</p>
+                      <p className="text-[0.65rem] mt-0.5" style={{ color: '#9ca3a0' }}>{courtConfig.name} &bull; {courtConfig.floodlight ? 'Lit til 10 PM' : 'til 8 PM'}</p>
                     </div>
                     <div className="divide-y" style={{ borderColor: '#f7f5f0' }}>
                       {(() => { const mobileCourtClosed = isCourtInMaintenance(courts, selectedCourt); const mobileBeyondWindow = !canBookDate(mobileDateStr); return slotsForCourt.map(time => {

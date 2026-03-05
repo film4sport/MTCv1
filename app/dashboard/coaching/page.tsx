@@ -161,7 +161,7 @@ export default function CoachingPanelPage() {
                     >
                       {c.name}
                       <span className="block text-[0.65rem] mt-0.5 opacity-70">
-                        {c.floodlight ? 'Lights til 10pm' : 'Closes 8pm'}
+                        {c.floodlight ? 'Lit til 10 PM' : 'til 8 PM'}
                       </span>
                     </button>
                   ))}
