@@ -86,6 +86,11 @@
       setTimeout(function() { if (typeof initProfileExtras === 'function') initProfileExtras(); }, 100);
     }
 
+    // Render conversations list dynamically when navigating to messages
+    if (screen === 'messages') {
+      setTimeout(function() { if (typeof renderConversationsList === 'function') renderConversationsList(); }, 100);
+    }
+
     // Initialize captain/team screen
     if (screen === 'captain') {
       setTimeout(function() { if (typeof initCaptainScreen === 'function') initCaptainScreen(); }, 100);

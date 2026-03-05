@@ -62,10 +62,12 @@
       modal.classList.remove('active');
       const msg = document.getElementById('partnerPostMessage');
       if (msg) msg.value = '';
-      // Reset time selection
+      // Reset time selection + hide time section (Anytime is default)
       document.querySelectorAll('.partner-time-btn').forEach(function(b) { b.classList.remove('active'); });
       var timeInp = document.getElementById('partnerTimeInput');
       if (timeInp) timeInp.value = '';
+      var timeSection = document.getElementById('partnerTimeSection');
+      if (timeSection) timeSection.style.display = 'none';
     }
   };
 
@@ -85,12 +87,24 @@
     btn.classList.add('active');
   };
 
-  // onclick handler (index.html)
+  // onclick handler (index.html) — "When" pills show/hide time section
   window.selectPartnerWhen = function(btn) {
     btn.parentElement.querySelectorAll('.partner-type-btn').forEach(function(b) {
       b.classList.remove('active');
     });
     btn.classList.add('active');
+    // Show/hide time section based on selection
+    var timeSection = document.getElementById('partnerTimeSection');
+    var isAnytime = btn.getAttribute('data-when') === 'anytime';
+    if (timeSection) {
+      timeSection.style.display = isAnytime ? 'none' : 'block';
+    }
+    // Clear time selection when switching to Anytime
+    if (isAnytime) {
+      document.querySelectorAll('.partner-time-btn').forEach(function(b) { b.classList.remove('active'); });
+      var inp = document.getElementById('partnerTimeInput');
+      if (inp) inp.value = '';
+    }
   };
 
   // Helper: convert 24h "HH:MM" to "H:MM AM/PM"
@@ -105,7 +119,17 @@
     return h + ':' + m + ' ' + period;
   }
 
-  // onclick handler (index.html) — time grid button
+  // Helper: convert "H:MM AM/PM" to 24h "HH:MM"
+  function to24h(label) {
+    var match = label.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/);
+    if (!match) return '';
+    var h = parseInt(match[1], 10);
+    if (match[3] === 'PM' && h !== 12) h += 12;
+    if (match[3] === 'AM' && h === 12) h = 0;
+    return String(h).padStart(2, '0') + ':' + match[2];
+  }
+
+  // onclick handler (index.html) — quick-pick time grid button
   window.selectPartnerTime = function(btn) {
     // Toggle: clicking active btn deselects it
     if (btn.classList.contains('active')) {
@@ -118,27 +142,18 @@
       b.classList.remove('active');
     });
     btn.classList.add('active');
-    // Sync to input field
-    var timeLabel = btn.getAttribute('data-time'); // e.g. "8:00 AM"
+    // Sync to native input
+    var timeLabel = btn.getAttribute('data-time');
     var inp = document.getElementById('partnerTimeInput');
-    if (inp && timeLabel) {
-      var match = timeLabel.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/);
-      if (match) {
-        var h = parseInt(match[1], 10);
-        if (match[3] === 'PM' && h !== 12) h += 12;
-        if (match[3] === 'AM' && h === 12) h = 0;
-        inp.value = String(h).padStart(2, '0') + ':' + match[2];
-      }
-    }
+    if (inp && timeLabel) inp.value = to24h(timeLabel);
   };
 
   // onchange handler — native time input (scroll wheel / keyboard)
   window.onPartnerTimeInput = function(inp) {
-    // Deselect grid buttons
+    // Deselect all grid buttons, then highlight matching one
     document.querySelectorAll('.partner-time-btn').forEach(function(b) {
       b.classList.remove('active');
     });
-    // Try to match a grid button
     if (inp.value) {
       var label = to12h(inp.value);
       document.querySelectorAll('.partner-time-btn').forEach(function(b) {
@@ -153,12 +168,13 @@
     const levelBtn = document.querySelector('#postPartnerModal [data-level].active');
     const whenBtn = document.querySelector('#postPartnerModal [data-when].active');
     const timeInput = document.getElementById('partnerTimeInput');
+    const isAnytime = whenBtn && whenBtn.getAttribute('data-when') === 'anytime';
 
     const type = typeBtn ? typeBtn.getAttribute('data-type') : 'singles';
     const typeLabel = typeBtn ? typeBtn.textContent : 'Singles';
     const level = levelBtn ? levelBtn.textContent : 'Any Level';
     const when = whenBtn ? whenBtn.textContent : 'Anytime';
-    const preferredTime = timeInput && timeInput.value ? to12h(timeInput.value) : '';
+    const preferredTime = (!isAnytime && timeInput && timeInput.value) ? to12h(timeInput.value) : '';
 
     closePostPartnerModal();
 

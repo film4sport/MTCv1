@@ -43,6 +43,73 @@
   window.debouncedFilterConversations = MTC.debounce(filterConversations, 250);
   window.debouncedSearchMembers = MTC.debounce(searchMembers, 250);
 
+  // ============================================
+  // DYNAMIC CONVERSATION LIST RENDERER
+  // ============================================
+  /** Renders the conversation list from actual data (no hardcoded items) */
+  window.renderConversationsList = function() {
+    var container = document.getElementById('conversationsList');
+    var emptyState = document.getElementById('noConversations');
+    if (!container) return;
+
+    var keys = Object.keys(conversations);
+    if (keys.length === 0) {
+      container.innerHTML = '';
+      if (emptyState) emptyState.style.display = 'block';
+      return;
+    }
+    if (emptyState) emptyState.style.display = 'none';
+
+    // Sort: most recent message first
+    keys.sort(function(a, b) {
+      var msgsA = conversations[a] || [];
+      var msgsB = conversations[b] || [];
+      // Put conversations with messages first, empty ones last
+      if (msgsA.length === 0 && msgsB.length > 0) return 1;
+      if (msgsB.length === 0 && msgsA.length > 0) return -1;
+      return 0; // preserve insertion order otherwise
+    });
+
+    var avatars = MTC.state.avatarSVGs || {};
+    var clubIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="5"></circle><path d="M12 13v8"></path><path d="M9 18h6"></path></svg>';
+
+    var html = '';
+    keys.forEach(function(memberId) {
+      var msgs = conversations[memberId] || [];
+      var member = MTC.state.clubMembers.find(function(m) { return m.id === memberId; });
+      var name = member ? member.name : memberId;
+      var lastMsg = msgs.length > 0 ? msgs[msgs.length - 1] : null;
+      var preview = lastMsg ? lastMsg.text : 'No messages yet';
+      var time = lastMsg ? (lastMsg.time || '') : '';
+      var isClub = (memberId === 'club');
+      var avatarHtml;
+
+      if (isClub) {
+        avatarHtml = '<div class="message-avatar-wrap club-avatar">' + clubIcon + '</div>';
+      } else {
+        var avatarKey = member ? member.avatar : 'default';
+        var svg = avatars[avatarKey] || avatars['default'] || '';
+        avatarHtml = '<div class="message-avatar-wrap">' + svg + '</div>';
+      }
+
+      // Truncate preview
+      if (preview.length > 60) preview = preview.substring(0, 57) + '...';
+
+      html += '<div class="message-item stagger-item" onclick="openConversation(\'' + sanitizeHTML(memberId) + '\')">' +
+        avatarHtml +
+        '<div class="message-content">' +
+          '<div class="message-header">' +
+            '<div class="message-name">' + sanitizeHTML(name) + '</div>' +
+            '<div class="message-time">' + sanitizeHTML(time) + '</div>' +
+          '</div>' +
+          '<div class="message-preview">' + sanitizeHTML(preview) + '</div>' +
+        '</div>' +
+      '</div>';
+    });
+
+    container.innerHTML = html;
+  };
+
   function filterConversations(query) {
     const items = document.querySelectorAll('#conversationsList .message-item');
     const noResults = document.getElementById('noConversations');
@@ -313,5 +380,7 @@
       });
     });
     MTC.fn.saveConversations();
+    // Re-render conversation list if messages screen is visible
+    if (typeof renderConversationsList === 'function') renderConversationsList();
   };
 })();
