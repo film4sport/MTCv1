@@ -11,6 +11,7 @@ export default function SchedulePage() {
   const { currentUser, bookings, events, cancelBooking, programs } = useApp();
   const { showToast } = useToast();
   const [view, setView] = useState<'list' | 'calendar'>('list');
+  const [timeFilter, setTimeFilter] = useState<'upcoming' | 'past'>('upcoming');
   const [calMonth, setCalMonth] = useState(() => new Date());
   const [cancelTarget, setCancelTarget] = useState<{ id: string; title: string; date: string; time: string } | null>(null);
 
@@ -70,16 +71,31 @@ export default function SchedulePage() {
     return d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
   };
 
-  // Group items by date
+  // Filter by upcoming vs past, then group by date
+  const todayStr = useMemo(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  }, []);
+
+  const filteredItems = useMemo(() => {
+    if (timeFilter === 'upcoming') {
+      return allItems.filter(item => item.date >= todayStr);
+    }
+    return allItems.filter(item => item.date < todayStr).reverse(); // past: newest first
+  }, [allItems, timeFilter, todayStr]);
+
+  const pastCount = useMemo(() => allItems.filter(item => item.date < todayStr).length, [allItems, todayStr]);
+  const upcomingCount = useMemo(() => allItems.filter(item => item.date >= todayStr).length, [allItems, todayStr]);
+
   const grouped = useMemo(() => {
-    const map = new Map<string, typeof allItems>();
-    allItems.forEach(item => {
+    const map = new Map<string, typeof filteredItems>();
+    filteredItems.forEach(item => {
       const existing = map.get(item.date) || [];
       existing.push(item);
       map.set(item.date, existing);
     });
     return Array.from(map.entries());
-  }, [allItems]);
+  }, [filteredItems]);
 
   // Calendar
   const calDays = useMemo(() => {
@@ -109,22 +125,50 @@ export default function SchedulePage() {
 
       <div className="p-6 lg:p-8 max-w-4xl mx-auto animate-slideUp">
 
-        {/* View toggle */}
-        <div className="flex items-center gap-2 mb-6">
-          <button
-            onClick={() => setView('list')}
-            className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-            style={{ background: view === 'list' ? '#6b7a3d' : 'rgba(255, 255, 255, 0.5)', color: view === 'list' ? '#fff' : '#2a2f1e', border: view === 'list' ? 'none' : '1px solid rgba(255, 255, 255, 0.4)' }}
-          >
-            List
-          </button>
-          <button
-            onClick={() => setView('calendar')}
-            className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-            style={{ background: view === 'calendar' ? '#6b7a3d' : 'rgba(255, 255, 255, 0.5)', color: view === 'calendar' ? '#fff' : '#2a2f1e', border: view === 'calendar' ? 'none' : '1px solid rgba(255, 255, 255, 0.4)' }}
-          >
-            Calendar
-          </button>
+        {/* View toggle + Upcoming/Past filter */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setView('list')}
+              className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+              style={{ background: view === 'list' ? '#6b7a3d' : 'rgba(255, 255, 255, 0.5)', color: view === 'list' ? '#fff' : '#2a2f1e', border: view === 'list' ? 'none' : '1px solid rgba(255, 255, 255, 0.4)' }}
+            >
+              List
+            </button>
+            <button
+              onClick={() => setView('calendar')}
+              className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+              style={{ background: view === 'calendar' ? '#6b7a3d' : 'rgba(255, 255, 255, 0.5)', color: view === 'calendar' ? '#fff' : '#2a2f1e', border: view === 'calendar' ? 'none' : '1px solid rgba(255, 255, 255, 0.4)' }}
+            >
+              Calendar
+            </button>
+          </div>
+          {view === 'list' && (
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => setTimeFilter('upcoming')}
+                className="px-3 py-1.5 rounded-full text-xs font-medium transition-colors"
+                style={{
+                  background: timeFilter === 'upcoming' ? '#6b7a3d' : 'rgba(255, 255, 255, 0.5)',
+                  color: timeFilter === 'upcoming' ? '#fff' : '#6b7266',
+                  border: `1px solid ${timeFilter === 'upcoming' ? '#6b7a3d' : 'rgba(200, 195, 185, 0.6)'}`,
+                }}
+              >
+                Upcoming{upcomingCount > 0 ? ` (${upcomingCount})` : ''}
+              </button>
+              <button
+                onClick={() => setTimeFilter('past')}
+                className="px-3 py-1.5 rounded-full text-xs font-medium transition-colors"
+                style={{
+                  background: timeFilter === 'past' ? '#6b7a3d' : 'rgba(255, 255, 255, 0.5)',
+                  color: timeFilter === 'past' ? '#fff' : '#6b7266',
+                  border: `1px solid ${timeFilter === 'past' ? '#6b7a3d' : 'rgba(200, 195, 185, 0.6)'}`,
+                }}
+              >
+                Past{pastCount > 0 ? ` (${pastCount})` : ''}
+              </button>
+            </div>
+          )}
         </div>
 
         {view === 'list' ? (
@@ -136,8 +180,8 @@ export default function SchedulePage() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
                   </svg>
                 </div>
-                <p className="font-medium text-sm mb-1" style={{ color: '#2a2f1e' }}>Your schedule is clear!</p>
-                <p className="text-xs mb-4" style={{ color: '#6b7266' }}>Book a court or RSVP to an event to get started</p>
+                <p className="font-medium text-sm mb-1" style={{ color: '#2a2f1e' }}>{timeFilter === 'past' ? 'No past events' : 'Your schedule is clear!'}</p>
+                <p className="text-xs mb-4" style={{ color: '#6b7266' }}>{timeFilter === 'past' ? 'Your past bookings and events will appear here' : 'Book a court or RSVP to an event to get started'}</p>
                 <div className="flex items-center justify-center gap-3">
                   <Link href="/dashboard/book" className="px-4 py-2 rounded-xl text-sm font-medium text-white btn-press" style={{ background: '#6b7a3d' }}>Book a Court</Link>
                   <Link href="/dashboard/events" className="px-4 py-2 rounded-xl text-sm font-medium btn-press" style={{ background: 'rgba(107, 122, 61, 0.1)', color: '#6b7a3d' }}>Browse Events</Link>

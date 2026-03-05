@@ -209,13 +209,34 @@ export default function PartnersPage() {
               </div>
               <div>
                 <label className="block text-sm mb-1.5" style={{ color: '#2a2f1e' }}>Time</label>
-                <input
-                  type="time"
-                  value={postTime}
-                  onChange={(e) => setPostTime(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg text-sm border focus:outline-none focus:ring-2 focus:ring-[#6b7a3d]/20"
-                  style={{ borderColor: '#e0dcd3', color: '#2a2f1e' }}
-                />
+                <div className="grid grid-cols-4 gap-1.5">
+                  {['8:00 AM', '9:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM', '6:00 PM', '7:00 PM'].map(t => {
+                    // Convert display time to 24h format for postTime state
+                    const match = t.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/);
+                    let val24 = '';
+                    if (match) {
+                      let h = parseInt(match[1]);
+                      if (match[3] === 'PM' && h !== 12) h += 12;
+                      if (match[3] === 'AM' && h === 12) h = 0;
+                      val24 = `${String(h).padStart(2, '0')}:${match[2]}`;
+                    }
+                    return (
+                      <button
+                        key={t}
+                        type="button"
+                        onClick={() => setPostTime(val24)}
+                        className="px-2 py-2 rounded-lg text-xs font-medium transition-all duration-200"
+                        style={{
+                          background: postTime === val24 ? '#6b7a3d' : 'rgba(245, 242, 235, 0.8)',
+                          color: postTime === val24 ? '#fff' : '#6b7266',
+                          border: `1px solid ${postTime === val24 ? '#6b7a3d' : '#e0dcd3'}`,
+                        }}
+                      >
+                        {t}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
               <div>
                 <label className="block text-sm mb-1.5" style={{ color: '#2a2f1e' }}>Match Type</label>
