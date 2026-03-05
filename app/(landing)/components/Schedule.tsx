@@ -54,7 +54,7 @@ function getEventsForDate(year: number, month: number, day: number): CalEvent[] 
 const dotColors: Record<string, string> = {
   social: '#d97706',
   match: '#9333ea',
-  tournament: '#d4e157',
+  tournament: '#3a3a3a',
   camp: '#dc2626',
   programs: '#60a5fa',
   special: '#60a5fa', // alias — data uses 'special', legend shows 'programs'
@@ -63,7 +63,7 @@ const dotColors: Record<string, string> = {
 const bgColors: Record<string, string> = {
   social: 'rgba(217,119,6,0.15)',
   match: 'rgba(147,51,234,0.15)',
-  tournament: 'rgba(212,225,87,0.15)',
+  tournament: 'rgba(58,58,58,0.15)',
   camp: 'rgba(220,38,38,0.15)',
   programs: 'rgba(96,165,250,0.15)',
   special: 'rgba(96,165,250,0.15)', // alias
