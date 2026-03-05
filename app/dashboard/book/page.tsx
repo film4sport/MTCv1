@@ -11,7 +11,7 @@ import { generateId } from '../lib/utils';
 import {
   ViewMode, COURT_COLORS, getTimeRange, formatDuration,
   isSlotBooked, isSlotMine, isSlotPast, isCourtClosed, isCourtInMaintenance, canCancel, canBookDate,
-  formatDateShort, isToday,
+  formatDateShort, isToday, toLocalDateStr,
 } from './components/booking-utils';
 import BookingLegend from './components/BookingLegend';
 import BookingSidebar from './components/BookingSidebar';
@@ -52,7 +52,7 @@ export default function BookCourtPage() {
   const [contentKey, setContentKey] = useState(0);
   const tooltipTimeout = useRef<NodeJS.Timeout | null>(null);
   const [mobileDayIdx, setMobileDayIdx] = useState(() => new Date().getDay());
-  const [allCourtsDate, setAllCourtsDate] = useState<string>(() => new Date().toISOString().split('T')[0]);
+  const [allCourtsDate, setAllCourtsDate] = useState<string>(() => toLocalDateStr(new Date()));
 
   const weekDays = useMemo(() => {
     return Array.from({ length: 7 }, (_, i) => {
@@ -168,8 +168,8 @@ export default function BookCourtPage() {
     return days;
   }, [calMonth]);
 
-  const hasBookingOnDate = (d: Date) => { const s = d.toISOString().split('T')[0]; return bookings.some(b => b.date === s && b.status === 'confirmed'); };
-  const myBookingOnDate = (d: Date) => { const s = d.toISOString().split('T')[0]; return bookings.some(b => b.date === s && b.status === 'confirmed' && b.userId === currentUser?.id); };
+  const hasBookingOnDate = (d: Date) => { const s = toLocalDateStr(d); return bookings.some(b => b.date === s && b.status === 'confirmed'); };
+  const myBookingOnDate = (d: Date) => { const s = toLocalDateStr(d); return bookings.some(b => b.date === s && b.status === 'confirmed' && b.userId === currentUser?.id); };
 
   const handleSlotHover = (slotKey: string | null) => {
     if (tooltipTimeout.current) clearTimeout(tooltipTimeout.current);
@@ -177,7 +177,7 @@ export default function BookCourtPage() {
   };
 
   const mobileDay = weekDays[mobileDayIdx] || weekDays[0];
-  const mobileDateStr = mobileDay.toISOString().split('T')[0];
+  const mobileDateStr = toLocalDateStr(mobileDay);
 
   return (
     <div className="min-h-screen dashboard-gradient-bg">
@@ -261,7 +261,7 @@ export default function BookCourtPage() {
                 {/* Desktop: Full Week Grid */}
                 <div className="glass-card hidden sm:block rounded-2xl border overflow-hidden" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
                   <div className="overflow-x-auto">
-                    <table className="w-full border-collapse min-w-[600px]">
+                    <table className="w-full border-collapse table-fixed min-w-[600px]">
                       <thead>
                         <tr>
                           <th className="sticky left-0 z-10 p-3 text-[0.7rem] font-medium text-left border-b" style={{ borderColor: '#f0ede6', background: '#faf8f3', color: '#9ca3a0', width: 72 }} />
@@ -282,7 +282,7 @@ export default function BookCourtPage() {
                           <tr key={time}>
                             <td className="sticky left-0 z-10 px-3 py-0 text-[0.7rem] font-medium border-b" style={{ borderColor: '#f7f5f0', background: '#faf8f3', color: '#9ca3a0' }}>{time}</td>
                             {weekDays.map(day => {
-                              const dateStr = day.toISOString().split('T')[0];
+                              const dateStr = toLocalDateStr(day);
                               const booked = isSlotBooked(bookings, selectedCourt, dateStr, time);
                               const mine = isSlotMine(bookings, selectedCourt, dateStr, time, currentUser?.id);
                               const past = isSlotPast(dateStr, time);
@@ -296,13 +296,13 @@ export default function BookCourtPage() {
                               const showTooltipHere = hoveredSlot === slotKey && booked && !mine;
 
                               return (
-                                <td key={`${dateStr}-${time}`} className="border-b p-[3px] relative" style={{ borderColor: '#f7f5f0', background: courtClosed ? '#f5f2eb' : today ? 'rgba(107, 122, 61, 0.02)' : 'transparent' }}>
+                                <td key={`${dateStr}-${time}`} className="border-b p-[3px] relative" style={{ borderColor: '#f7f5f0', background: courtClosed ? '#f5f2eb' : today ? 'rgba(107, 122, 61, 0.02)' : 'transparent', height: 44 }}>
                                   <button
                                     onClick={() => handleSlotClick(selectedCourt, courtConfig.name, dateStr, time)}
                                     onMouseEnter={() => (booked && !mine) ? handleSlotHover(slotKey) : undefined}
                                     onMouseLeave={() => handleSlotHover(null)}
                                     disabled={(!mine && !!booked) || past || closed}
-                                    className={`slot-cell w-full rounded-lg text-xs font-medium py-2.5 px-2 transition-all duration-150 relative overflow-hidden ${mine ? 'slot-booked-pulse' : ''} ${available ? 'hover:border-[#d97706] hover:border-solid hover:bg-[#d97706]/[0.04]' : ''}`}
+                                    className={`slot-cell w-full h-full rounded-lg text-xs font-medium px-2 transition-all duration-150 relative overflow-hidden ${mine ? 'slot-booked-pulse' : ''} ${available ? 'hover:border-[#d97706] hover:border-solid hover:bg-[#d97706]/[0.04]' : ''}`}
                                     style={{
                                       background: mine ? '#6b7a3d' : courtClosed ? '#f0ede6' : isLesson ? 'rgba(59, 130, 246, 0.08)' : isProgram ? 'rgba(245, 158, 11, 0.08)' : booked ? '#f5f3ee' : 'transparent',
                                       color: mine ? '#fff' : courtClosed ? '#c5c0b5' : isLesson ? '#3b82f6' : isProgram ? '#d97706' : booked ? '#b5b0a5' : past || closed || beyondWindow ? '#d5d0c8' : '#6b7a3d',
@@ -399,16 +399,16 @@ export default function BookCourtPage() {
               <>
                 {/* Date Navigation */}
                 <div className="flex items-center justify-between mb-4">
-                  <button onClick={() => { const d = new Date(allCourtsDate + 'T00:00:00'); d.setDate(d.getDate() - 1); setAllCourtsDate(d.toISOString().split('T')[0]); setContentKey(k => k + 1); }} className="w-10 h-10 rounded-xl flex items-center justify-center border hover:bg-white transition-colors active:scale-95" style={{ borderColor: '#e0dcd3' }}>
+                  <button onClick={() => { const d = new Date(allCourtsDate + 'T00:00:00'); d.setDate(d.getDate() - 1); setAllCourtsDate(toLocalDateStr(d)); setContentKey(k => k + 1); }} className="w-10 h-10 rounded-xl flex items-center justify-center border hover:bg-white transition-colors active:scale-95" style={{ borderColor: '#e0dcd3' }}>
                     <svg className="w-4 h-4" fill="none" stroke="#2a2f1e" viewBox="0 0 24 24" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/></svg>
                   </button>
                   <div className="flex items-center gap-2">
-                    <button onClick={() => setAllCourtsDate(new Date().toISOString().split('T')[0])} className="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors" style={{ background: allCourtsDate === new Date().toISOString().split('T')[0] ? '#6b7a3d' : '#f5f2eb', color: allCourtsDate === new Date().toISOString().split('T')[0] ? '#fff' : '#6b7266' }}>Today</button>
+                    <button onClick={() => setAllCourtsDate(toLocalDateStr(new Date()))} className="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors" style={{ background: allCourtsDate === toLocalDateStr(new Date()) ? '#6b7a3d' : '#f5f2eb', color: allCourtsDate === toLocalDateStr(new Date()) ? '#fff' : '#6b7266' }}>Today</button>
                     <span className="font-semibold text-sm" style={{ color: '#2a2f1e' }}>
                       {new Date(allCourtsDate + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
                     </span>
                   </div>
-                  <button onClick={() => { const d = new Date(allCourtsDate + 'T00:00:00'); d.setDate(d.getDate() + 1); setAllCourtsDate(d.toISOString().split('T')[0]); setContentKey(k => k + 1); }} className="w-10 h-10 rounded-xl flex items-center justify-center border hover:bg-white transition-colors active:scale-95" style={{ borderColor: '#e0dcd3' }}>
+                  <button onClick={() => { const d = new Date(allCourtsDate + 'T00:00:00'); d.setDate(d.getDate() + 1); setAllCourtsDate(toLocalDateStr(d)); setContentKey(k => k + 1); }} className="w-10 h-10 rounded-xl flex items-center justify-center border hover:bg-white transition-colors active:scale-95" style={{ borderColor: '#e0dcd3' }}>
                     <svg className="w-4 h-4" fill="none" stroke="#2a2f1e" viewBox="0 0 24 24" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/></svg>
                   </button>
                 </div>
@@ -416,7 +416,7 @@ export default function BookCourtPage() {
                 {/* All Courts Grid */}
                 <div className="glass-card rounded-2xl border overflow-hidden" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
                   <div className="overflow-x-auto">
-                    <table className="w-full border-collapse min-w-[500px]">
+                    <table className="w-full border-collapse table-fixed min-w-[500px]">
                       <thead>
                         <tr>
                           <th className="sticky left-0 z-10 p-3 text-[0.7rem] font-medium text-left border-b" style={{ borderColor: '#f0ede6', background: '#faf8f3', color: '#9ca3a0', width: 72 }}>Time</th>
@@ -463,13 +463,13 @@ export default function BookCourtPage() {
                               const showTooltipHere = hoveredSlot === slotKey && booked && !mine;
 
                               return (
-                                <td key={c.id} className="border-b p-[3px] relative" style={{ borderColor: '#f7f5f0', background: courtClosed || slotClosed ? '#f5f2eb' : 'transparent' }}>
+                                <td key={c.id} className="border-b p-[3px] relative" style={{ borderColor: '#f7f5f0', background: courtClosed || slotClosed ? '#f5f2eb' : 'transparent', height: 44 }}>
                                   <button
                                     onClick={() => handleSlotClick(c.id, c.name, allCourtsDate, time)}
                                     onMouseEnter={() => (booked && !mine) ? handleSlotHover(slotKey) : undefined}
                                     onMouseLeave={() => handleSlotHover(null)}
                                     disabled={(!mine && !!booked) || past || courtClosed || slotClosed}
-                                    className={`slot-cell w-full rounded-lg text-xs font-medium py-2.5 px-2 transition-all duration-150 relative overflow-hidden ${mine ? 'slot-booked-pulse' : ''} ${available ? 'hover:border-[#d97706] hover:border-solid hover:bg-[#d97706]/[0.04]' : ''}`}
+                                    className={`slot-cell w-full h-full rounded-lg text-xs font-medium px-2 transition-all duration-150 relative overflow-hidden ${mine ? 'slot-booked-pulse' : ''} ${available ? 'hover:border-[#d97706] hover:border-solid hover:bg-[#d97706]/[0.04]' : ''}`}
                                     style={{
                                       background: mine ? colors.accent : courtClosed || slotClosed ? '#f0ede6' : isLesson ? 'rgba(59, 130, 246, 0.08)' : isProgram ? 'rgba(245, 158, 11, 0.08)' : booked ? '#f5f3ee' : 'transparent',
                                       color: mine ? '#fff' : courtClosed || slotClosed ? '#c5c0b5' : isLesson ? '#3b82f6' : isProgram ? '#d97706' : booked ? '#b5b0a5' : past || beyondWindow ? '#d5d0c8' : colors.accent,
@@ -530,7 +530,7 @@ export default function BookCourtPage() {
                   ))}
                   {calDays.map((day, i) => {
                     if (!day) return <div key={`empty-${i}`} />;
-                    const dateStr = day.toISOString().split('T')[0];
+                    const dateStr = toLocalDateStr(day);
                     const today = isToday(day);
                     const hasBooking = hasBookingOnDate(day);
                     const hasMine = myBookingOnDate(day);
