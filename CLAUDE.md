@@ -44,6 +44,20 @@ All external links to clubspark.ca have been removed. ClubSpark was only used as
 ## #9: ALWAYS UPDATE CLAUDE.md
 When new project rules or conventions are established, add them to this file AND MEMORY.md.
 
+## #18: NO TENNIS EMOJI — EVER
+**NEVER use the tennis ball emoji (🎾) or any tennis-related emoji anywhere in the codebase.**
+- Not in JSX, not in HTML, not in event indicators, not in banners, not anywhere.
+- For event/booking slot indicators: use SVG icons, styled text labels, or colored dots — never emoji.
+- This rule exists because it was violated repeatedly. The emoji looks cheap and unprofessional.
+
+## #17: ALWAYS VERIFY CHANGES BEFORE REPORTING DONE
+**Never tell the user "it's done" or ship code without verifying it actually works.**
+- After making changes: rebuild (`npm run build:mobile` for PWA), then visually verify in the browser (BDG/Playwright/Cowork)
+- After CSS/layout changes: take a screenshot and confirm the change looks correct
+- After JS logic changes: test the actual behavior in the browser, don't just assume it works
+- If you can't verify (e.g. no dev server running): explicitly tell the user "I haven't been able to verify this yet"
+- This rule exists because unverified changes were shipped to the user, wasting their time on bugs Claude should have caught.
+
 ## #16: CHECK PREREQUISITES BEFORE RUNNING — NEVER RETRY BLIND
 **Before running ANY tool/command, verify prerequisites exist first. If a command fails, STOP and tell the user WHY — don't retry.**
 - Before running Playwright E2E: check browsers are installed (`ls ~/.cache/ms-playwright/`) and dev server is running

@@ -9,7 +9,7 @@ import DashboardHeader from '../components/DashboardHeader';
 import { TIME_SLOTS, COURTS_CONFIG, FEES, BOOKING_RULES } from '../lib/types';
 import { generateId } from '../lib/utils';
 import {
-  ViewMode, COURT_COLORS, getTimeRange, formatDuration,
+  ViewMode, COURT_COLORS, getTimeRange, formatDuration, parseTimeMinutes,
   isSlotBooked, isSlotMine, isSlotPast, isCourtClosed, isCourtInMaintenance, canCancel, canBookDate,
   formatDateShort, isToday, toLocalDateStr,
 } from './components/booking-utils';
@@ -25,15 +25,6 @@ export default function BookCourtPage() {
   const { showToast } = useToast();
   const [bookingSuccess, setBookingSuccess] = useState<{ courtName: string; date: string; time: string; participants?: { id: string; name: string }[]; duration?: number; matchType?: 'singles' | 'doubles' } | null>(null);
   const [view, setView] = useState<ViewMode>('week');
-
-  // Set default view to 'all-courts' on desktop after hydration to avoid SSR mismatch
-  const hasSetInitialView = useRef(false);
-  useEffect(() => {
-    if (!hasSetInitialView.current && window.innerWidth >= 640) {
-      setView('all-courts');
-      hasSetInitialView.current = true;
-    }
-  }, []);
   const [weekStart, setWeekStart] = useState(() => {
     const d = new Date();
     d.setHours(0, 0, 0, 0);
@@ -50,7 +41,6 @@ export default function BookCourtPage() {
   const [contentKey, setContentKey] = useState(0);
   const tooltipTimeout = useRef<NodeJS.Timeout | null>(null);
   const [mobileDayIdx, setMobileDayIdx] = useState(0); // Today is always first in rolling view
-  const [allCourtsDate, setAllCourtsDate] = useState<string>(() => toLocalDateStr(new Date()));
 
   const weekDays = useMemo(() => {
     return Array.from({ length: 7 }, (_, i) => {
@@ -166,6 +156,50 @@ export default function BookCourtPage() {
   const hasBookingOnDate = (d: Date) => { const s = toLocalDateStr(d); return bookings.some(b => b.date === s && b.status === 'confirmed'); };
   const myBookingOnDate = (d: Date) => { const s = toLocalDateStr(d); return bookings.some(b => b.date === s && b.status === 'confirmed' && b.userId === currentUser?.id); };
 
+  // Parse event time like "1:00 PM - 4:00 PM" into start/end slot indices; returns null for unparseable times ("Evening", "All Day", "Dates TBA")
+  const parseEventTimeRange = (timeStr: string): { startIdx: number; endIdx: number } | null => {
+    const match = timeStr.match(/^(\d{1,2}:\d{2}\s*[AP]M)\s*-\s*(\d{1,2}:\d{2}\s*[AP]M)$/i);
+    if (!match) return null;
+    const startTime = match[1].replace(/\s+/g, ' ').trim();
+    const endTime = match[2].replace(/\s+/g, ' ').trim();
+    // Find closest TIME_SLOTS index for start and end
+    const startIdx = TIME_SLOTS.findIndex(t => parseTimeMinutes(t) >= parseTimeMinutes(startTime));
+    const endMinutes = parseTimeMinutes(endTime);
+    let endIdx = TIME_SLOTS.findIndex(t => parseTimeMinutes(t) >= endMinutes);
+    if (endIdx < 0) endIdx = TIME_SLOTS.length; // event goes beyond last slot
+    if (startIdx < 0) return null;
+    return { startIdx, endIdx };
+  };
+
+  // Determine which court IDs an event occupies based on location
+  const getEventCourts = (location: string): number[] => {
+    const loc = location.toLowerCase();
+    if (loc.includes('all courts')) return [1, 2, 3, 4];
+    if (loc.includes('courts 1-2') || loc.includes('court 1-2')) return [1, 2];
+    if (loc.includes('courts 3-4') || loc.includes('court 3-4')) return [3, 4];
+    if (loc.includes('court 1')) return [1];
+    if (loc.includes('court 2')) return [2];
+    if (loc.includes('court 3')) return [3];
+    if (loc.includes('court 4')) return [4];
+    // Clubhouse or unknown — no courts blocked
+    return [];
+  };
+
+  // Check if a court+time slot is blocked by an event on a given date
+  const getEventForSlot = (courtId: number, dateStr: string, time: string) => {
+    const tIdx = TIME_SLOTS.indexOf(time as typeof TIME_SLOTS[number]);
+    return events.find(e => {
+      if (e.date !== dateStr) return false;
+      const courts = getEventCourts(e.location);
+      if (!courts.includes(courtId)) return false;
+      const range = parseEventTimeRange(e.time);
+      if (!range) return null; // can't determine — don't block
+      return tIdx >= range.startIdx && tIdx < range.endIdx;
+    }) || null;
+  };
+
+  const eventsForDate = (dateStr: string) => events.filter(e => e.date === dateStr);
+
   const handleSlotHover = (slotKey: string | null) => {
     if (tooltipTimeout.current) clearTimeout(tooltipTimeout.current);
     if (slotKey) { tooltipTimeout.current = setTimeout(() => setHoveredSlot(slotKey), 300); } else { setHoveredSlot(null); }
@@ -180,54 +214,14 @@ export default function BookCourtPage() {
 
       <div className="p-4 sm:p-6 lg:p-8 max-w-[1400px] mx-auto animate-slideUp">
 
-        {/* Top Bar: Court Tabs + View Toggle */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
-          {view !== 'all-courts' ? (
-            <div className="flex gap-1.5 overflow-x-auto pb-1 -mb-1">
-              {COURTS_CONFIG.map(c => {
-                const colors = COURT_COLORS[c.id];
-                const active = selectedCourt === c.id;
-                const closed = isCourtInMaintenance(courts, c.id);
-                return (
-                  <button
-                    key={c.id}
-                    onClick={() => setSelectedCourt(c.id)}
-                    className="relative px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 shrink-0 flex-1 min-w-0 text-center"
-                    style={{
-                      background: active ? '#2a2f1e' : closed ? '#f5f2eb' : '#fff',
-                      color: active ? '#fff' : closed ? '#b5b0a5' : '#6b7266',
-                      border: active ? '1px solid #2a2f1e' : '1px solid #e0dcd3',
-                      boxShadow: active ? '0 2px 8px rgba(42,47,30,0.15)' : 'none',
-                      opacity: closed && !active ? 0.7 : 1,
-                    }}
-                  >
-                    <span className="flex items-center justify-center gap-1.5">
-                      {closed ? (
-                        <span className="w-2 h-2 rounded-full" style={{ background: '#dc2626' }} />
-                      ) : (
-                        <span className="w-2 h-2 rounded-full" style={{ background: active ? '#d4e157' : '#6b7a3d' }} />
-                      )}
-                      {c.name}
-                      {c.floodlight && !closed && (
-                        <svg className="inline-block w-4 h-4 -mt-px" viewBox="0 0 24 24" fill="none" stroke="#e8b624" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z" fill="rgba(232,182,36,0.2)"/></svg>
-                      )}
-                    </span>
-                    <span className="block text-[0.6rem] font-normal mt-0.5" style={{ color: active ? 'rgba(255,255,255,0.7)' : '#6b7266' }}>
-                      {closed ? 'Closed' : c.floodlight ? 'Lit til 10 PM' : 'til 8 PM'}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="flex items-center gap-2 text-sm font-medium" style={{ color: '#2a2f1e' }}>
-              <svg className="w-4 h-4" fill="none" stroke="#6b7a3d" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
-              All Courts — {(allCourtsDate ? new Date(allCourtsDate + 'T00:00:00') : new Date()).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
-            </div>
-          )}
+        {/* Top Bar: View Toggle */}
+        <div className="flex items-center justify-between gap-4 mb-5">
+          <div className="flex items-center gap-2 text-sm font-medium" style={{ color: '#2a2f1e' }}>
+            <svg className="w-4 h-4" fill="none" stroke="#6b7a3d" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
+            All Courts
+          </div>
 
           <div className="flex items-center gap-1 p-1 rounded-xl shrink-0" style={{ background: 'rgba(255, 255, 255, 0.5)', border: '1px solid rgba(255, 255, 255, 0.4)' }}>
-            <button onClick={() => setView('all-courts')} className="hidden sm:block px-4 py-2 rounded-lg text-xs font-medium transition-all duration-200" style={{ background: view === 'all-courts' ? '#6b7a3d' : 'transparent', color: view === 'all-courts' ? '#fff' : '#6b7266' }}>All Courts</button>
             <button onClick={() => setView('week')} className="px-4 py-2 rounded-lg text-xs font-medium transition-all duration-200" style={{ background: view === 'week' ? '#6b7a3d' : 'transparent', color: view === 'week' ? '#fff' : '#6b7266' }}>Week</button>
             <button onClick={() => setView('calendar')} className="px-4 py-2 rounded-lg text-xs font-medium transition-all duration-200" style={{ background: view === 'calendar' ? '#6b7a3d' : 'transparent', color: view === 'calendar' ? '#fff' : '#6b7266' }}>Month</button>
           </div>
@@ -253,257 +247,147 @@ export default function BookCourtPage() {
                   </button>
                 </div>
 
-                {/* Desktop: Full Week Grid */}
-                <div className="glass-card hidden sm:block rounded-2xl border overflow-hidden" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
-                  <div className="overflow-x-auto">
-                    <table className="w-full border-collapse table-fixed min-w-[600px]">
-                      <thead>
-                        <tr>
-                          <th className="sticky left-0 z-10 p-3 text-[0.7rem] font-medium text-left border-b" style={{ borderColor: '#f0ede6', background: '#faf8f3', color: '#9ca3a0', width: 72 }} />
-                          {weekDays.map(day => {
-                            const f = formatDateShort(day);
-                            const today = isToday(day);
-                            return (
-                              <th key={day.toISOString()} className="p-2.5 text-center border-b" style={{ borderColor: '#f0ede6', background: today ? 'rgba(107, 122, 61, 0.06)' : '#faf8f3' }}>
-                                <div className="text-[0.6rem] font-medium uppercase tracking-wider" style={{ color: '#9ca3a0' }}>{f.day}</div>
-                                <div className="text-base font-bold mt-0.5 inline-flex items-center justify-center w-8 h-8 rounded-lg" style={{ background: today ? '#6b7a3d' : 'transparent', color: today ? '#fff' : '#2a2f1e' }}>{f.date}</div>
-                              </th>
-                            );
-                          })}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {(() => { const courtClosed = isCourtInMaintenance(courts, selectedCourt); return slotsForCourt.map(time => (
-                          <tr key={time}>
-                            <td className="sticky left-0 z-10 px-3 py-0 text-[0.7rem] font-medium border-b" style={{ borderColor: '#f7f5f0', background: '#faf8f3', color: '#9ca3a0' }}>{time}</td>
-                            {weekDays.map(day => {
-                              const dateStr = toLocalDateStr(day);
-                              const booked = isSlotBooked(bookings, selectedCourt, dateStr, time);
-                              const mine = isSlotMine(bookings, selectedCourt, dateStr, time, currentUser?.id);
-                              const past = isSlotPast(dateStr, time);
-                              const closed = isCourtClosed(selectedCourt, time) || courtClosed;
-                              const beyondWindow = !canBookDate(dateStr);
-                              const isProgram = booked?.type === 'program';
-                              const isLesson = booked?.type === 'lesson';
-                              const today = isToday(day);
-                              const available = !booked && !past && !closed && !beyondWindow;
-                              const slotKey = `${selectedCourt}-${dateStr}-${time}`;
-                              const showTooltipHere = hoveredSlot === slotKey && booked && !mine;
-
-                              return (
-                                <td key={`${dateStr}-${time}`} className="border-b p-[3px] relative" style={{ borderColor: '#f7f5f0', background: courtClosed ? '#f5f2eb' : today ? 'rgba(107, 122, 61, 0.02)' : 'transparent', height: 44 }}>
-                                  <button
-                                    onClick={() => handleSlotClick(selectedCourt, courtConfig.name, dateStr, time)}
-                                    onMouseEnter={() => (booked && !mine) ? handleSlotHover(slotKey) : undefined}
-                                    onMouseLeave={() => handleSlotHover(null)}
-                                    disabled={(!mine && !!booked) || past || closed}
-                                    className={`slot-cell w-full h-full rounded-lg text-xs font-medium px-2 transition-all duration-150 relative overflow-hidden ${mine ? 'slot-booked-pulse' : ''} ${available ? 'hover:border-[#d97706] hover:border-solid hover:bg-[#d97706]/[0.04]' : ''}`}
-                                    style={{
-                                      background: mine ? '#6b7a3d' : courtClosed ? '#f0ede6' : isLesson ? 'rgba(59, 130, 246, 0.08)' : isProgram ? 'rgba(245, 158, 11, 0.08)' : booked ? '#f5f3ee' : 'transparent',
-                                      color: mine ? '#fff' : courtClosed ? '#c5c0b5' : isLesson ? '#3b82f6' : isProgram ? '#d97706' : booked ? '#b5b0a5' : past || closed || beyondWindow ? '#d5d0c8' : '#6b7a3d',
-                                      cursor: available ? 'pointer' : mine ? 'pointer' : 'default',
-                                      border: mine ? '1.5px solid #6b7a3d' : available ? '1.5px dashed #d4d0c7' : courtClosed ? '1.5px solid #e0dcd3' : '1.5px solid transparent',
-                                    }}
-                                  >
-                                    {mine ? (
-                                      <span className="flex items-center justify-center gap-1">
-                                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
-                                        Booked
-                                      </span>
-                                    ) : courtClosed ? (
-                                      <span style={{ opacity: 0.4 }}>Closed</span>
-                                    ) : isLesson ? 'Lesson' : isProgram ? 'Program' : booked ? (
-                                      <span className="flex items-center justify-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-current opacity-40" />Taken</span>
-                                    ) : past || closed || beyondWindow ? (
-                                      <span style={{ opacity: 0.3 }}>—</span>
-                                    ) : (
-                                      <span className="slot-book-label opacity-0 transition-opacity duration-150" style={{ color: '#d97706' }}>Book</span>
-                                    )}
-                                  </button>
-
-                                  {showTooltipHere && booked && (
-                                    <div className="absolute z-30 bottom-full left-1/2 -translate-x-1/2 mb-1 px-2.5 py-1.5 rounded-lg text-[0.65rem] font-medium whitespace-nowrap shadow-lg pointer-events-none animate-fadeIn" style={{ background: '#2a2f1e', color: '#e8e4d9' }}>
-                                      {isLesson ? 'Lesson' : isProgram ? 'Program session' : booked.userName}
-                                      <span className="block text-[0.55rem] font-normal" style={{ color: '#9ca3a0' }}>{getTimeRange(time, booked?.duration)}</span>
-                                      <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent" style={{ borderTopColor: '#2a2f1e' }} />
-                                    </div>
-                                  )}
-                                </td>
-                              );
-                            })}
-                          </tr>
-                        )); })()}
-                      </tbody>
-                    </table>
-                  </div>
+                {/* Day Tabs — select which day to show all 4 courts for */}
+                <div className="flex gap-1 mb-4 overflow-x-auto pb-1">
+                  {weekDays.map((day, idx) => {
+                    const f = formatDateShort(day);
+                    const today = isToday(day);
+                    const active = mobileDayIdx === idx;
+                    const dayEvents = eventsForDate(toLocalDateStr(day));
+                    return (
+                      <button key={day.toISOString()} onClick={() => { setMobileDayIdx(idx); setContentKey(k => k + 1); }} className="flex flex-col items-center px-3 py-2 rounded-xl transition-all duration-200 shrink-0 flex-1 min-w-0" style={{ background: active ? '#2a2f1e' : today ? 'rgba(107, 122, 61, 0.08)' : '#fff', color: active ? '#fff' : today ? '#6b7a3d' : '#6b7266', border: active ? '1px solid #2a2f1e' : '1px solid #e0dcd3' }}>
+                        <span className="text-[0.6rem] font-medium uppercase">{f.day}</span>
+                        <span className="text-sm font-bold">{f.date}</span>
+                        {dayEvents.length > 0 && <span className="w-1.5 h-1.5 rounded-full mt-0.5" style={{ background: '#d97706' }} />}
+                      </button>
+                    );
+                  })}
                 </div>
 
-                {/* Mobile: Day-by-day vertical list */}
-                <div className="sm:hidden">
-                  <div className="flex gap-1 mb-4 overflow-x-auto pb-1 -mb-1">
-                    {weekDays.map((day, idx) => {
-                      const f = formatDateShort(day);
-                      const today = isToday(day);
-                      const active = mobileDayIdx === idx;
-                      return (
-                        <button key={day.toISOString()} onClick={() => setMobileDayIdx(idx)} className="flex flex-col items-center px-3 py-2 rounded-xl transition-all duration-200 shrink-0" style={{ background: active ? '#2a2f1e' : today ? 'rgba(107, 122, 61, 0.08)' : '#fff', color: active ? '#fff' : today ? '#6b7a3d' : '#6b7266', border: active ? '1px solid #2a2f1e' : '1px solid #e0dcd3', minWidth: 48 }}>
-                          <span className="text-[0.6rem] font-medium uppercase">{f.day}</span>
-                          <span className="text-sm font-bold">{f.date}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  <div className="glass-card rounded-2xl border overflow-hidden" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
-                    <div className="p-3 border-b" style={{ borderColor: '#f0ede6', background: '#faf8f3' }}>
-                      <p className="text-xs font-semibold" style={{ color: '#2a2f1e' }}>{mobileDay.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
-                      <p className="text-[0.65rem] mt-0.5" style={{ color: '#9ca3a0' }}>{courtConfig.name} &bull; {courtConfig.floodlight ? 'Lit til 10 PM' : 'til 8 PM'}</p>
+                {/* Event banner for selected day */}
+                {(() => {
+                  const selectedDate = toLocalDateStr(weekDays[mobileDayIdx] || weekDays[0]);
+                  const dayEvts = eventsForDate(selectedDate);
+                  if (dayEvts.length === 0) return null;
+                  return (
+                    <div className="mb-4 space-y-2">
+                      {dayEvts.map(evt => (
+                        <div key={evt.id} className="flex items-center gap-3 px-4 py-3 rounded-xl border" style={{ background: 'rgba(217, 119, 6, 0.08)', borderColor: 'rgba(217, 119, 6, 0.25)' }}>
+                          <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 20 20" fill="none" stroke="#d97706" strokeWidth="1.5"><rect x="3" y="4" width="14" height="13" rx="2" /><path d="M3 8h14" /><path d="M7 4V2M13 4V2" strokeLinecap="round" /></svg>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold" style={{ color: '#2a2f1e' }}>{evt.title}</p>
+                            <p className="text-[0.65rem]" style={{ color: '#6b7266' }}>{evt.time} · {evt.location}</p>
+                          </div>
+                          {evt.spotsTotal && <span className="text-[0.6rem] px-2 py-1 rounded-lg" style={{ background: '#f5f2eb', color: '#6b7266' }}>{evt.spotsTaken || 0}/{evt.spotsTotal}</span>}
+                        </div>
+                      ))}
                     </div>
-                    <div className="divide-y" style={{ borderColor: '#f7f5f0' }}>
-                      {(() => { const mobileCourtClosed = isCourtInMaintenance(courts, selectedCourt); const mobileBeyondWindow = !canBookDate(mobileDateStr); return slotsForCourt.map(time => {
-                        const booked = isSlotBooked(bookings, selectedCourt, mobileDateStr, time);
-                        const mine = isSlotMine(bookings, selectedCourt, mobileDateStr, time, currentUser?.id);
-                        const past = isSlotPast(mobileDateStr, time);
-                        const available = !booked && !past && !mobileCourtClosed && !mobileBeyondWindow;
-                        const isLesson = booked?.type === 'lesson';
-                        const isProgram = booked?.type === 'program';
+                  );
+                })()}
 
-                        return (
-                          <button key={time} onClick={() => (available || mine) ? handleSlotClick(selectedCourt, courtConfig.name, mobileDateStr, time) : undefined} disabled={!available && !mine} className="w-full flex items-center justify-between px-4 py-3.5 transition-colors" style={{ background: mine ? 'rgba(107, 122, 61, 0.06)' : mobileCourtClosed ? '#f5f2eb' : 'transparent', cursor: (available || mine) ? 'pointer' : 'default' }}>
-                            <div className="flex items-center gap-3">
-                              <div className="w-1.5 h-8 rounded-full" style={{ background: mine ? '#6b7a3d' : mobileCourtClosed ? '#e0dcd3' : isLesson ? '#3b82f6' : isProgram ? '#d97706' : available ? '#d4d0c7' : '#f0ede6' }} />
-                              <div className="text-left">
-                                <span className="text-sm font-medium" style={{ color: (past && !mine) || mobileCourtClosed ? '#d1d5db' : '#2a2f1e' }}>{time}</span>
-                                <span className="block text-[0.65rem]" style={{ color: '#9ca3a0' }}>{getTimeRange(time).split(' – ')[1] ? `til ${getTimeRange(time).split(' – ')[1]}` : ''}</span>
-                              </div>
-                            </div>
-                            <span className="text-xs font-medium" style={{ color: mine ? '#6b7a3d' : mobileCourtClosed ? '#c5c0b5' : isLesson ? '#3b82f6' : isProgram ? '#d97706' : available ? '#9ca3a0' : '#d1d5db' }}>
-                              {mine ? 'Your Booking ✓' : mobileCourtClosed ? 'Closed' : isLesson ? 'Lesson' : isProgram ? 'Program' : booked ? booked.userName : past ? 'Past' : mobileBeyondWindow ? 'Too far ahead' : 'Available'}
-                            </span>
-                          </button>
-                        );
-                      }); })()}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-4"><BookingLegend /></div>
-              </>
-            ) : view === 'all-courts' ? (
-              /* All Courts Day View */
-              <>
-                {/* Date Navigation */}
-                <div className="flex items-center justify-between mb-4">
-                  <button onClick={() => { const d = new Date(allCourtsDate + 'T00:00:00'); d.setDate(d.getDate() - 1); setAllCourtsDate(toLocalDateStr(d)); setContentKey(k => k + 1); }} className="w-10 h-10 rounded-xl flex items-center justify-center border hover:bg-white transition-colors active:scale-95" style={{ borderColor: '#e0dcd3' }}>
-                    <svg className="w-4 h-4" fill="none" stroke="#2a2f1e" viewBox="0 0 24 24" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/></svg>
-                  </button>
-                  <div className="flex items-center gap-2">
-                    <button onClick={() => setAllCourtsDate(toLocalDateStr(new Date()))} className="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors" style={{ background: allCourtsDate === toLocalDateStr(new Date()) ? '#6b7a3d' : '#f5f2eb', color: allCourtsDate === toLocalDateStr(new Date()) ? '#fff' : '#6b7266' }}>Today</button>
-                    <span className="font-semibold text-sm" style={{ color: '#2a2f1e' }}>
-                      {new Date(allCourtsDate + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
-                    </span>
-                  </div>
-                  <button onClick={() => { const d = new Date(allCourtsDate + 'T00:00:00'); d.setDate(d.getDate() + 1); setAllCourtsDate(toLocalDateStr(d)); setContentKey(k => k + 1); }} className="w-10 h-10 rounded-xl flex items-center justify-center border hover:bg-white transition-colors active:scale-95" style={{ borderColor: '#e0dcd3' }}>
-                    <svg className="w-4 h-4" fill="none" stroke="#2a2f1e" viewBox="0 0 24 24" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/></svg>
-                  </button>
-                </div>
-
-                {/* All Courts Grid */}
-                <div className="glass-card rounded-2xl border overflow-hidden" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
-                  <div className="overflow-x-auto">
-                    <table className="w-full border-collapse table-fixed min-w-[500px]">
-                      <thead>
-                        <tr>
-                          <th className="sticky left-0 z-10 p-3 text-[0.7rem] font-medium text-left border-b" style={{ borderColor: '#f0ede6', background: '#faf8f3', color: '#9ca3a0', width: 72 }}>Time</th>
-                          {COURTS_CONFIG.map(c => {
-                            const colors = COURT_COLORS[c.id];
-                            const closed = isCourtInMaintenance(courts, c.id);
-                            return (
-                              <th key={c.id} className="p-2.5 text-center border-b" style={{ borderColor: '#f0ede6', background: '#faf8f3' }}>
-                                <div className="flex items-center justify-center gap-1.5">
-                                  {closed ? (
-                                    <span className="w-2 h-2 rounded-full" style={{ background: '#dc2626' }} />
-                                  ) : (
-                                    <span className="w-2 h-2 rounded-full" style={{ background: '#6b7a3d' }} />
-                                  )}
-                                  <span className="text-sm font-semibold" style={{ color: '#2a2f1e' }}>{c.name}</span>
-                                  {c.floodlight && !closed && (
-                                    <svg className="inline-block w-4 h-4 -mt-px" viewBox="0 0 24 24" fill="none" stroke="#e8b624" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z" fill="rgba(232,182,36,0.2)"/></svg>
-                                  )}
-                                </div>
-                                <div className="text-[0.6rem] font-normal mt-0.5" style={{ color: '#9ca3a0' }}>
-                                  {closed ? 'Closed' : c.floodlight ? 'Lit til 10 PM' : 'til 8 PM'}
-                                </div>
-                              </th>
-                            );
-                          })}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {TIME_SLOTS.map(time => (
-                          <tr key={time}>
-                            <td className="sticky left-0 z-10 px-3 py-0 text-[0.7rem] font-medium border-b" style={{ borderColor: '#f7f5f0', background: '#faf8f3', color: '#9ca3a0' }}>{time}</td>
-                            {COURTS_CONFIG.map(c => {
-                              const courtClosed = isCourtInMaintenance(courts, c.id);
-                              const slotClosed = isCourtClosed(c.id, time);
-                              const booked = isSlotBooked(bookings, c.id, allCourtsDate, time);
-                              const mine = isSlotMine(bookings, c.id, allCourtsDate, time, currentUser?.id);
-                              const past = isSlotPast(allCourtsDate, time);
-                              const beyondWindow = !canBookDate(allCourtsDate);
-                              const isProgram = booked?.type === 'program';
-                              const isLesson = booked?.type === 'lesson';
-                              const available = !booked && !past && !courtClosed && !slotClosed && !beyondWindow;
-                              const colors = COURT_COLORS[c.id];
-                              const slotKey = `ac-${c.id}-${allCourtsDate}-${time}`;
-                              const showTooltipHere = hoveredSlot === slotKey && booked && !mine;
-
-                              return (
-                                <td key={c.id} className="border-b p-[3px] relative" style={{ borderColor: '#f7f5f0', background: courtClosed || slotClosed ? '#f5f2eb' : 'transparent', height: 44 }}>
-                                  <button
-                                    onClick={() => handleSlotClick(c.id, c.name, allCourtsDate, time)}
-                                    onMouseEnter={() => (booked && !mine) ? handleSlotHover(slotKey) : undefined}
-                                    onMouseLeave={() => handleSlotHover(null)}
-                                    disabled={(!mine && !!booked) || past || courtClosed || slotClosed}
-                                    className={`slot-cell w-full h-full rounded-lg text-xs font-medium px-2 transition-all duration-150 relative overflow-hidden ${mine ? 'slot-booked-pulse' : ''} ${available ? 'hover:border-[#d97706] hover:border-solid hover:bg-[#d97706]/[0.04]' : ''}`}
-                                    style={{
-                                      background: mine ? colors.accent : courtClosed || slotClosed ? '#f0ede6' : isLesson ? 'rgba(59, 130, 246, 0.08)' : isProgram ? 'rgba(245, 158, 11, 0.08)' : booked ? '#f5f3ee' : 'transparent',
-                                      color: mine ? '#fff' : courtClosed || slotClosed ? '#c5c0b5' : isLesson ? '#3b82f6' : isProgram ? '#d97706' : booked ? '#b5b0a5' : past || beyondWindow ? '#d5d0c8' : colors.accent,
-                                      cursor: available ? 'pointer' : mine ? 'pointer' : 'default',
-                                      border: mine ? `1.5px solid ${colors.accent}` : available ? '1.5px dashed #d4d0c7' : '1.5px solid transparent',
-                                    }}
-                                  >
-                                    {mine ? (
-                                      <span className="flex items-center justify-center gap-1">
-                                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
-                                        You
-                                      </span>
-                                    ) : courtClosed || slotClosed ? (
-                                      <span style={{ opacity: 0.4 }}>—</span>
-                                    ) : isLesson ? 'Lesson' : isProgram ? 'Program' : booked ? (
-                                      <span className="flex items-center justify-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-current opacity-40" />Taken</span>
-                                    ) : past || beyondWindow ? (
-                                      <span style={{ opacity: 0.3 }}>—</span>
-                                    ) : (
-                                      <span className="slot-book-label opacity-0 transition-opacity duration-150" style={{ color: '#d97706' }}>Book</span>
-                                    )}
-                                  </button>
-
-                                  {showTooltipHere && booked && (
-                                    <div className="absolute z-30 bottom-full left-1/2 -translate-x-1/2 mb-1 px-2.5 py-1.5 rounded-lg text-[0.65rem] font-medium whitespace-nowrap shadow-lg pointer-events-none animate-fadeIn" style={{ background: '#2a2f1e', color: '#e8e4d9' }}>
-                                      {isLesson ? 'Lesson' : isProgram ? 'Program session' : booked.userName}
-                                      <span className="block text-[0.55rem] font-normal" style={{ color: '#9ca3a0' }}>{getTimeRange(time, booked?.duration)}</span>
-                                      <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent" style={{ borderTopColor: '#2a2f1e' }} />
+                {/* All Courts Grid for selected day */}
+                {(() => {
+                  const selectedDate = toLocalDateStr(weekDays[mobileDayIdx] || weekDays[0]);
+                  return (
+                    <div className="glass-card rounded-2xl border overflow-hidden" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
+                      <div className="overflow-x-auto">
+                        <table className="w-full border-collapse table-fixed min-w-[500px]">
+                          <thead>
+                            <tr>
+                              <th className="sticky left-0 z-10 p-3 text-[0.7rem] font-medium text-left border-b" style={{ borderColor: '#f0ede6', background: '#faf8f3', color: '#9ca3a0', width: 72 }}>Time</th>
+                              {COURTS_CONFIG.map(c => {
+                                const closed = isCourtInMaintenance(courts, c.id);
+                                return (
+                                  <th key={c.id} className="p-2.5 text-center border-b" style={{ borderColor: '#f0ede6', background: '#faf8f3' }}>
+                                    <div className="flex items-center justify-center gap-1.5">
+                                      {closed ? (
+                                        <span className="w-2 h-2 rounded-full" style={{ background: '#dc2626' }} />
+                                      ) : (
+                                        <span className="w-2 h-2 rounded-full" style={{ background: '#6b7a3d' }} />
+                                      )}
+                                      <span className="text-sm font-semibold" style={{ color: '#2a2f1e' }}>{c.name}</span>
+                                      {c.floodlight && !closed && (
+                                        <svg className="inline-block w-4 h-4 -mt-px" viewBox="0 0 24 24" fill="none" stroke="#e8b624" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z" fill="rgba(232,182,36,0.2)"/></svg>
+                                      )}
                                     </div>
-                                  )}
-                                </td>
-                              );
-                            })}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
+                                    <div className="text-[0.6rem] font-normal mt-0.5" style={{ color: '#9ca3a0' }}>
+                                      {closed ? 'Closed' : c.floodlight ? 'Lit til 10 PM' : 'til 8 PM'}
+                                    </div>
+                                  </th>
+                                );
+                              })}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {TIME_SLOTS.map(time => (
+                              <tr key={time}>
+                                <td className="sticky left-0 z-10 px-3 py-0 text-[0.7rem] font-medium border-b" style={{ borderColor: '#f7f5f0', background: '#faf8f3', color: '#9ca3a0' }}>{time}</td>
+                                {COURTS_CONFIG.map(c => {
+                                  const courtClosed = isCourtInMaintenance(courts, c.id);
+                                  const slotClosed = isCourtClosed(c.id, time);
+                                  const booked = isSlotBooked(bookings, c.id, selectedDate, time);
+                                  const mine = isSlotMine(bookings, c.id, selectedDate, time, currentUser?.id);
+                                  const past = isSlotPast(selectedDate, time);
+                                  const beyondWindow = !canBookDate(selectedDate);
+                                  const isProgram = booked?.type === 'program';
+                                  const isLesson = booked?.type === 'lesson';
+                                  const eventSlot = !booked ? getEventForSlot(c.id, selectedDate, time) : null;
+                                  const available = !booked && !eventSlot && !past && !courtClosed && !slotClosed && !beyondWindow;
+                                  const colors = COURT_COLORS[c.id];
+                                  const slotKey = `wk-${c.id}-${selectedDate}-${time}`;
+                                  const showTooltipHere = hoveredSlot === slotKey && (booked || eventSlot) && !mine;
+
+                                  return (
+                                    <td key={c.id} className="border-b p-[3px] relative" style={{ borderColor: '#f7f5f0', background: courtClosed || slotClosed ? '#f5f2eb' : 'transparent', height: 44 }}>
+                                      <button
+                                        onClick={() => !eventSlot && handleSlotClick(c.id, c.name, selectedDate, time)}
+                                        onMouseEnter={() => ((booked && !mine) || eventSlot) ? handleSlotHover(slotKey) : undefined}
+                                        onMouseLeave={() => handleSlotHover(null)}
+                                        disabled={(!mine && !!booked) || !!eventSlot || past || courtClosed || slotClosed}
+                                        className={`slot-cell w-full h-full rounded-lg text-xs font-medium px-2 transition-all duration-150 relative overflow-hidden ${mine ? 'slot-booked-pulse' : ''} ${available ? 'hover:border-[#d97706] hover:border-solid hover:bg-[#d97706]/[0.04]' : ''}`}
+                                        style={{
+                                          background: mine ? colors.accent : courtClosed || slotClosed ? '#f0ede6' : eventSlot ? 'rgba(217, 119, 6, 0.1)' : isLesson ? 'rgba(59, 130, 246, 0.08)' : isProgram ? 'rgba(245, 158, 11, 0.08)' : booked ? '#f5f3ee' : 'transparent',
+                                          color: mine ? '#fff' : courtClosed || slotClosed ? '#c5c0b5' : eventSlot ? '#92400e' : isLesson ? '#3b82f6' : isProgram ? '#d97706' : booked ? '#b5b0a5' : past || beyondWindow ? '#d5d0c8' : colors.accent,
+                                          cursor: available ? 'pointer' : mine ? 'pointer' : 'default',
+                                          border: mine ? `1.5px solid ${colors.accent}` : eventSlot ? '1.5px solid rgba(217, 119, 6, 0.3)' : available ? '1.5px dashed #d4d0c7' : '1.5px solid transparent',
+                                        }}
+                                      >
+                                        {mine ? (
+                                          <span className="flex items-center justify-center gap-1">
+                                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
+                                            You
+                                          </span>
+                                        ) : courtClosed || slotClosed ? (
+                                          <span style={{ opacity: 0.4 }}>—</span>
+                                        ) : eventSlot ? (
+                                          <span className="flex items-center justify-center gap-1 truncate"><span className="w-1 h-1 rounded-full flex-shrink-0" style={{ background: '#d97706' }} /> {eventSlot.title.length > 12 ? eventSlot.title.slice(0, 12) + '…' : eventSlot.title}</span>
+                                        ) : isLesson ? 'Lesson' : isProgram ? 'Program' : booked ? (
+                                          <span className="flex items-center justify-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-current opacity-40" />Taken</span>
+                                        ) : past || beyondWindow ? (
+                                          <span style={{ opacity: 0.3 }}>—</span>
+                                        ) : (
+                                          <span className="slot-book-label opacity-0 transition-opacity duration-150" style={{ color: '#d97706' }}>Book</span>
+                                        )}
+                                      </button>
+
+                                      {showTooltipHere && (booked || eventSlot) && (
+                                        <div className="absolute z-30 bottom-full left-1/2 -translate-x-1/2 mb-1 px-2.5 py-1.5 rounded-lg text-[0.65rem] font-medium whitespace-nowrap shadow-lg pointer-events-none animate-fadeIn" style={{ background: '#2a2f1e', color: '#e8e4d9' }}>
+                                          {eventSlot ? eventSlot.title : isLesson ? 'Lesson' : isProgram ? 'Program session' : booked?.userName}
+                                          <span className="block text-[0.55rem] font-normal" style={{ color: '#9ca3a0' }}>{eventSlot ? eventSlot.time : getTimeRange(time, booked?.duration)}</span>
+                                          <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent" style={{ borderTopColor: '#2a2f1e' }} />
+                                        </div>
+                                      )}
+                                    </td>
+                                  );
+                                })}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  );
+                })()}
                 <div className="mt-4"><BookingLegend /></div>
               </>
             ) : (
@@ -538,7 +422,7 @@ export default function BookCourtPage() {
                         {(hasBooking || hasMine || hasEvent) && (
                           <div className="flex gap-1">
                             {hasMine && <span className="w-2 h-2 rounded-full calendar-dot-bounce" style={{ background: selected ? '#d4e157' : '#6b7a3d' }} />}
-                            {hasEvent && <span className="w-2 h-2 rounded-full calendar-dot-bounce" style={{ background: selected ? 'rgba(212,225,87,0.7)' : '#d4e157', animationDelay: '0.3s' }} />}
+                            {hasEvent && <span className="w-2 h-2 rounded-full calendar-dot-bounce" style={{ background: selected ? 'rgba(217,119,6,0.7)' : '#d97706', animationDelay: '0.3s' }} />}
                             {hasBooking && !hasMine && <span className="w-2 h-2 rounded-full calendar-dot-bounce" style={{ background: selected ? 'rgba(255,255,255,0.4)' : '#d4d0c7', animationDelay: '0.6s' }} />}
                           </div>
                         )}
@@ -547,36 +431,90 @@ export default function BookCourtPage() {
                   })}
                 </div>
 
-                {/* Selected date slots */}
+                {/* Selected date: events + all courts grid */}
                 {calSelectedDate && (
                   <div className="mt-5 pt-5 border-t" style={{ borderColor: '#f0ede6' }}>
                     <h4 className="font-semibold text-sm mb-3" style={{ color: '#2a2f1e' }}>
                       {new Date(calSelectedDate + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
                     </h4>
-                    <div className="space-y-1.5">
-                      {slotsForCourt.map(time => {
-                        const booked = isSlotBooked(bookings, selectedCourt, calSelectedDate, time);
-                        const mine = isSlotMine(bookings, selectedCourt, calSelectedDate, time, currentUser?.id);
-                        const past = isSlotPast(calSelectedDate, time);
-                        const calBeyondWindow = !canBookDate(calSelectedDate);
-                        const available = !booked && !past && !calBeyondWindow;
-                        const isLesson = booked?.type === 'lesson';
-                        const isProgram = booked?.type === 'program';
 
-                        if (past) return null;
-
-                        return (
-                          <button key={time} onClick={() => available || mine ? handleSlotClick(selectedCourt, courtConfig.name, calSelectedDate, time) : undefined} disabled={!available && !mine} className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm transition-all duration-150" style={{ background: mine ? '#6b7a3d' : isLesson ? 'rgba(59, 130, 246, 0.06)' : isProgram ? 'rgba(245, 158, 11, 0.06)' : available ? '#fff' : '#f9f7f3', color: mine ? '#fff' : available ? '#2a2f1e' : '#b5b0a5', border: mine ? '1px solid #6b7a3d' : isLesson ? '1px solid rgba(59, 130, 246, 0.15)' : isProgram ? '1px solid rgba(245, 158, 11, 0.15)' : available ? '1px solid #e0dcd3' : '1px solid #f0ede6', cursor: available || mine ? 'pointer' : 'default' }}>
-                            <div>
-                              <span className="font-medium">{time}</span>
-                              <span className="text-[0.65rem] ml-2" style={{ color: mine ? 'rgba(255,255,255,0.6)' : '#c5c0b8' }}>{getTimeRange(time).split(' – ')[1] ? `→ ${getTimeRange(time).split(' – ')[1]}` : ''}</span>
+                    {/* Event details for this date */}
+                    {eventsForDate(calSelectedDate).length > 0 && (
+                      <div className="mb-4 space-y-2">
+                        {eventsForDate(calSelectedDate).map(evt => (
+                          <div key={evt.id} className="flex items-start gap-3 px-4 py-3 rounded-xl border" style={{ background: 'rgba(217, 119, 6, 0.08)', borderColor: 'rgba(217, 119, 6, 0.25)' }}>
+                            <svg className="w-5 h-5 flex-shrink-0 mt-0.5" viewBox="0 0 20 20" fill="none" stroke="#d97706" strokeWidth="1.5"><rect x="3" y="4" width="14" height="13" rx="2" /><path d="M3 8h14" /><path d="M7 4V2M13 4V2" strokeLinecap="round" /></svg>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-semibold" style={{ color: '#2a2f1e' }}>{evt.title}</p>
+                              <p className="text-[0.65rem]" style={{ color: '#6b7266' }}>{evt.time} · {evt.location}</p>
+                              <p className="text-[0.65rem] mt-1" style={{ color: '#9ca3a0' }}>{evt.description}</p>
                             </div>
-                            <span className="text-xs font-medium" style={{ opacity: 0.8, color: mine ? '#fff' : isLesson ? '#3b82f6' : isProgram ? '#d97706' : booked ? '#b5b0a5' : '#9ca3a0' }}>
-                              {mine ? 'Your Booking ✓' : isLesson ? 'Lesson' : isProgram ? 'Program' : booked ? booked.userName : 'Available'}
-                            </span>
-                          </button>
-                        );
-                      })}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* All Courts Grid */}
+                    <div className="rounded-xl border overflow-hidden" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
+                      <div className="overflow-x-auto">
+                        <table className="w-full border-collapse table-fixed min-w-[420px]">
+                          <thead>
+                            <tr>
+                              <th className="sticky left-0 z-10 p-2.5 text-[0.65rem] font-medium text-left border-b" style={{ borderColor: '#f0ede6', background: '#faf8f3', color: '#9ca3a0', width: 64 }}>Time</th>
+                              {COURTS_CONFIG.map(c => {
+                                const closed = isCourtInMaintenance(courts, c.id);
+                                return (
+                                  <th key={c.id} className="p-2 text-center border-b" style={{ borderColor: '#f0ede6', background: '#faf8f3' }}>
+                                    <span className="text-[0.7rem] font-semibold" style={{ color: '#2a2f1e' }}>{c.name}</span>
+                                    <div className="text-[0.55rem] font-normal" style={{ color: '#9ca3a0' }}>{closed ? 'Closed' : c.floodlight ? 'til 10 PM' : 'til 8 PM'}</div>
+                                  </th>
+                                );
+                              })}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {TIME_SLOTS.map(time => {
+                              const past = isSlotPast(calSelectedDate, time);
+                              if (past) return null;
+                              return (
+                                <tr key={time}>
+                                  <td className="sticky left-0 z-10 px-2.5 py-0 text-[0.65rem] font-medium border-b" style={{ borderColor: '#f7f5f0', background: '#faf8f3', color: '#9ca3a0' }}>{time}</td>
+                                  {COURTS_CONFIG.map(c => {
+                                    const courtClosed = isCourtInMaintenance(courts, c.id);
+                                    const slotClosed = isCourtClosed(c.id, time);
+                                    const booked = isSlotBooked(bookings, c.id, calSelectedDate, time);
+                                    const mine = isSlotMine(bookings, c.id, calSelectedDate, time, currentUser?.id);
+                                    const calBeyondWindow = !canBookDate(calSelectedDate);
+                                    const isProgram = booked?.type === 'program';
+                                    const isLesson = booked?.type === 'lesson';
+                                    const eventSlot = !booked ? getEventForSlot(c.id, calSelectedDate, time) : null;
+                                    const available = !booked && !eventSlot && !past && !courtClosed && !slotClosed && !calBeyondWindow;
+                                    const colors = COURT_COLORS[c.id];
+
+                                    return (
+                                      <td key={c.id} className="border-b p-[2px]" style={{ borderColor: '#f7f5f0', background: courtClosed || slotClosed ? '#f5f2eb' : 'transparent', height: 36 }}>
+                                        <button
+                                          onClick={() => !eventSlot && (available || mine) && handleSlotClick(c.id, c.name, calSelectedDate, time)}
+                                          disabled={!available && !mine}
+                                          className={`w-full h-full rounded-lg text-[0.65rem] font-medium transition-all duration-150 ${mine ? 'slot-booked-pulse' : ''} ${available ? 'hover:border-[#d97706] hover:border-solid hover:bg-[#d97706]/[0.04]' : ''}`}
+                                          style={{
+                                            background: mine ? colors.accent : eventSlot ? 'rgba(217, 119, 6, 0.1)' : isLesson ? 'rgba(59, 130, 246, 0.06)' : isProgram ? 'rgba(245, 158, 11, 0.06)' : courtClosed || slotClosed ? '#f0ede6' : 'transparent',
+                                            color: mine ? '#fff' : eventSlot ? '#92400e' : isLesson ? '#3b82f6' : isProgram ? '#d97706' : booked ? '#b5b0a5' : available ? colors.accent : '#d5d0c8',
+                                            cursor: available || mine ? 'pointer' : 'default',
+                                            border: mine ? `1.5px solid ${colors.accent}` : eventSlot ? '1.5px solid rgba(217, 119, 6, 0.3)' : available ? '1.5px dashed #d4d0c7' : '1.5px solid transparent',
+                                          }}
+                                        >
+                                          {mine ? '✓' : eventSlot ? 'E' : isLesson ? 'L' : isProgram ? 'P' : booked ? '•' : courtClosed || slotClosed ? '—' : ''}
+                                        </button>
+                                      </td>
+                                    );
+                                  })}
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
                   </div>
                 )}

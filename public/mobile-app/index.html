@@ -47,42 +47,15 @@
     body { background: #e8e8e8; }
     @media (min-width: 501px) { body { background: #1a1a1a; } }
     
-    /* === FIX: Booking white space — fixed layout === */
+    /* === Booking layout: scrollable screen, tall grid === */
     #screen-book {
-      overflow: hidden;
-      padding-bottom: calc(90px + env(safe-area-inset-bottom, 0px));
-    }
-    #screen-book .screen-header,
-    #screen-book .booking-view-toggle,
-    #screen-book .booking-legend {
-      flex-shrink: 0;
-    }
-    #weekView {
-      display: flex;
-      flex-direction: column;
-      flex: 1;
-      min-height: 0;
-      overflow: hidden;
-    }
-    #weekView .week-navigator {
-      flex-shrink: 0;
-    }
-    #weekView .weekly-grid-container {
-      flex: 1;
-      min-height: 0;
-      display: flex;
-      flex-direction: column;
-      border-radius: 20px 20px 0 0;
-      margin-bottom: 0;
-    }
-    #weekView .weekly-grid-header {
-      flex-shrink: 0;
-    }
-    #weekView .weekly-grid-body {
-      flex: 1;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
-      padding-bottom: 60px;
+    }
+    #weekView .weekly-grid-body {
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      min-height: min(calc(100vh - 340px), 500px);
     }
     /* Calendar day view — same treatment */
     #bookingCalendarView {

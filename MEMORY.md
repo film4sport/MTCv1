@@ -7,6 +7,29 @@
 ## Current Status
 - **SMTP/Supabase email signups**: DONE. Google SMTP configured in Supabase dashboard. Email confirmation and password reset emails are live.
 
+### Cowork Session (2026-03-05) — Mobile PWA Booking Improvements
+
+**Booking grid enhancements (all in mobile PWA):**
+- **Now-line**: Red `::before` line on current time slot row using `var(--coral)` theme color, with time cell highlighted in coral bold
+- **Past-hours dimming**: Slots before current time on today show `—` dash and `.past` class
+- **Smart scroll**: Auto-scrolls to now-row on page load
+- **Court hours labels**: Shows "Lit til 10 PM" / "til 8 PM" under court headers
+- **Prime time glow**: Subtle background on peak hours (weekends 9:30am-12pm, weekdays 6pm-9pm)
+- **Active tap state**: `:active` scale animation on BOOK buttons
+- **Booking info panel**: Collapsible accordion below legend with guest fee, cancel window, durations, advance booking days, court hours, cancel reminder
+
+**Bugs fixed:**
+- **Duplicate `timeToMinutes` function**: Second definition (24h-only) at line 234 overwrote first (12h+24h) at line 149. Caused ALL PM times to parse as AM (e.g. 6pm → 360 mins). Fixed by removing duplicate.
+- **Grid layout collapse**: `#screen-book { overflow: hidden }` with rigid flex layout left only ~72px for grid body. Fixed by changing to `overflow-y: auto` scrollable layout with `min-height: min(calc(100vh - 340px), 500px)` on grid body.
+- **Season gate**: Added date check to skip recurring programs before Opening Day (May 9, 2026)
+
+**Files modified:**
+- `public/mobile-app/js/booking.js` — Now-line, past-hours, smart scroll, court hours, booking info toggle, season gate, removed duplicate timeToMinutes
+- `public/mobile-app/css/home.css` — Now-line CSS, prime time, court hours label, active states, booking info panel styles
+- `public/mobile-app/index.html` — Booking info panel HTML, flex layout fixes (overflow-y: auto)
+
+**New rule added:** CLAUDE.md #17 — Always verify changes before reporting done (rebuild + visual check in browser)
+
 ### Cowork Session (2026-03-04) — Cross-Platform Supabase Wiring (8 gaps)
 
 **All state now persists to Supabase — no more local-only features.**
