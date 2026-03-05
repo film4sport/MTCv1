@@ -49,6 +49,17 @@ export default function EventsPage() {
     social: 'Social', match: 'Match', roundrobin: 'Round Robin', lesson: 'Lesson', tournament: 'Tournament',
   };
 
+  // Event type colors — matches landing page calendar legend
+  const typeColors: Record<string, string> = {
+    social: '#6b7a3d',
+    match: '#d97706',
+    roundrobin: '#0891b2',
+    tournament: '#dc2626',
+    lesson: '#2563eb',
+    camp: '#2563eb',
+    special: '#d4e157',
+  };
+
   const detail = selectedEvent ? events.find(e => e.id === selectedEvent) : null;
 
   // Esc key closes modals
@@ -71,15 +82,18 @@ export default function EventsPage() {
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const monthName = calendarDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
-  // Get event dates for this month (for dots)
-  const eventDatesThisMonth = new Set(
-    filtered
-      .filter(e => {
-        const d = new Date(e.date + 'T00:00:00');
-        return d.getFullYear() === year && d.getMonth() === month;
-      })
-      .map(e => new Date(e.date + 'T00:00:00').getDate())
-  );
+  // Get event dates for this month (for colored dots per type)
+  const eventTypesThisMonth = new Map<number, Set<string>>();
+  filtered
+    .filter(e => {
+      const d = new Date(e.date + 'T00:00:00');
+      return d.getFullYear() === year && d.getMonth() === month;
+    })
+    .forEach(e => {
+      const day = new Date(e.date + 'T00:00:00').getDate();
+      if (!eventTypesThisMonth.has(day)) eventTypesThisMonth.set(day, new Set());
+      eventTypesThisMonth.get(day)!.add(e.type);
+    });
 
   const prevMonth = () => setCalendarDate(new Date(year, month - 1, 1));
   const nextMonth = () => setCalendarDate(new Date(year, month + 1, 1));
@@ -169,9 +183,9 @@ export default function EventsPage() {
               onClick={() => setFilter(f)}
               className="px-3 py-1.5 rounded-full text-xs font-medium transition-colors"
               style={{
-                background: filter === f ? '#6b7a3d' : 'rgba(255, 255, 255, 0.5)',
-                color: filter === f ? '#fff' : '#2a2f1e',
-                border: filter === f ? 'none' : '1px solid rgba(255, 255, 255, 0.4)',
+                background: filter === f ? (typeColors[f] || '#6b7a3d') : 'rgba(255, 255, 255, 0.5)',
+                color: filter === f ? '#fff' : (typeColors[f] || '#2a2f1e'),
+                border: filter === f ? `1.5px solid ${typeColors[f] || '#6b7a3d'}` : `1.5px solid ${f === 'all' ? 'rgba(200, 195, 185, 0.6)' : (typeColors[f] || 'rgba(200, 195, 185, 0.6)')}`,
               }}
             >
               {f === 'all' ? 'All Events' : typeLabels[f] || f}
@@ -217,7 +231,7 @@ export default function EventsPage() {
               {calendarCells.map((day, i) => {
                 if (day === null) return <div key={`empty-${i}`} />;
                 const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                const hasEvent = eventDatesThisMonth.has(day);
+                const dayTypes = eventTypesThisMonth.get(day);
                 const isToday = dateStr === todayStr;
                 const isSelected = dateStr === selectedDay;
 
@@ -232,11 +246,16 @@ export default function EventsPage() {
                     }}
                   >
                     <span className="text-sm font-medium">{day}</span>
-                    {hasEvent && (
-                      <span
-                        className="absolute bottom-1 w-2 h-2 rounded-full"
-                        style={{ background: isSelected ? '#fff' : '#d4e157' }}
-                      />
+                    {dayTypes && dayTypes.size > 0 && (
+                      <span className="absolute bottom-1 flex gap-0.5">
+                        {Array.from(dayTypes).slice(0, 3).map(type => (
+                          <span
+                            key={type}
+                            className="w-1.5 h-1.5 rounded-full"
+                            style={{ background: isSelected ? '#fff' : (typeColors[type] || '#6b7a3d') }}
+                          />
+                        ))}
+                      </span>
                     )}
                   </button>
                 );
@@ -303,31 +322,8 @@ export default function EventsPage() {
 
                   <p className="text-xs mb-3" style={{ color: '#6b7266' }}>{ev.location}</p>
 
-                  {/* Headcount */}
-                  {ev.spotsTotal != null && (
-                    <div className="mb-3">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-[0.65rem]" style={{ color: '#6b7266' }}>
-                          {ev.spotsTaken ?? ev.attendees.length}/{ev.spotsTotal} spots filled
-                        </span>
-                        <span className="text-[0.65rem] font-medium" style={{ color: (ev.spotsTotal - (ev.spotsTaken ?? ev.attendees.length)) <= 3 ? '#ef4444' : '#6b7a3d' }}>
-                          {ev.spotsTotal - (ev.spotsTaken ?? ev.attendees.length)} left
-                        </span>
-                      </div>
-                      <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ background: '#f0ede6' }}>
-                        <div
-                          className="h-full rounded-full transition-all duration-500"
-                          style={{
-                            width: `${Math.min(100, ((ev.spotsTaken ?? ev.attendees.length) / ev.spotsTotal) * 100)}%`,
-                            background: ((ev.spotsTaken ?? ev.attendees.length) / ev.spotsTotal) > 0.8 ? '#ef4444' : '#6b7a3d',
-                          }}
-                        />
-                      </div>
-                    </div>
-                  )}
-
                   <div className="flex items-center justify-between">
-                    <span className="text-[0.65rem] px-2 py-0.5 rounded-full" style={{ background: '#f5f2eb', color: '#6b7266' }}>
+                    <span className="text-[0.65rem] px-2 py-0.5 rounded-full font-medium" style={{ background: `${typeColors[ev.type] || '#6b7a3d'}15`, color: typeColors[ev.type] || '#6b7266', border: `1px solid ${typeColors[ev.type] || '#6b7a3d'}30` }}>
                       {typeLabels[ev.type] || ev.type}
                     </span>
                     <button
@@ -754,29 +750,6 @@ export default function EventsPage() {
                         </button>
                       </div>
                     ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Headcount bar */}
-              {detail.spotsTotal != null && (
-                <div className="mb-4 p-3 rounded-xl" style={{ background: '#faf8f3' }}>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-xs font-medium" style={{ color: '#2a2f1e' }}>
-                      {detail.spotsTaken ?? detail.attendees.length} / {detail.spotsTotal} going
-                    </span>
-                    <span className="text-xs" style={{ color: (detail.spotsTotal - (detail.spotsTaken ?? detail.attendees.length)) <= 3 ? '#ef4444' : '#6b7266' }}>
-                      {detail.spotsTotal - (detail.spotsTaken ?? detail.attendees.length)} spots left
-                    </span>
-                  </div>
-                  <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: '#e0dcd3' }}>
-                    <div
-                      className="h-full rounded-full transition-all duration-500"
-                      style={{
-                        width: `${Math.min(100, ((detail.spotsTaken ?? detail.attendees.length) / detail.spotsTotal) * 100)}%`,
-                        background: ((detail.spotsTaken ?? detail.attendees.length) / detail.spotsTotal) > 0.8 ? '#ef4444' : '#6b7a3d',
-                      }}
-                    />
                   </div>
                 </div>
               )}
