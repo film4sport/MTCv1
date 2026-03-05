@@ -52,19 +52,21 @@ function getEventsForDate(year: number, month: number, day: number): CalEvent[] 
 }
 
 const dotColors: Record<string, string> = {
-  social: '#6b7a3d',
-  match: '#d97706',
-  tournament: '#dc2626',
-  camp: '#2563eb',
-  special: '#d4e157',
+  social: '#d97706',
+  match: '#9333ea',
+  tournament: '#d4e157',
+  camp: '#dc2626',
+  programs: '#60a5fa',
+  special: '#60a5fa', // alias — data uses 'special', legend shows 'programs'
 };
 
 const bgColors: Record<string, string> = {
-  social: 'rgba(107,122,61,0.15)',
-  match: 'rgba(217,119,6,0.15)',
-  tournament: 'rgba(220,38,38,0.15)',
-  camp: 'rgba(37,99,235,0.15)',
-  special: 'rgba(212,225,87,0.15)',
+  social: 'rgba(217,119,6,0.15)',
+  match: 'rgba(147,51,234,0.15)',
+  tournament: 'rgba(212,225,87,0.15)',
+  camp: 'rgba(220,38,38,0.15)',
+  programs: 'rgba(96,165,250,0.15)',
+  special: 'rgba(96,165,250,0.15)', // alias
 };
 
 export default function Schedule() {
@@ -144,7 +146,7 @@ export default function Schedule() {
 
         {/* Legend */}
         <div className="flex flex-wrap justify-center gap-4 mb-8 fade-in">
-          {Object.entries(dotColors).map(([type, color]) => (
+          {Object.entries(dotColors).filter(([type]) => type !== 'special').map(([type, color]) => (
             <div key={type} className="flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: color }} />
               <span className="text-xs capitalize" style={{ color: 'rgba(232,228,217,0.5)' }}>
