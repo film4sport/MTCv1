@@ -122,12 +122,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [events, setEvents] = useState<ClubEvent[]>(DEFAULT_EVENTS);
   const [partners, setPartners] = useState<Partner[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [announcements, setAnnouncements] = useState<Announcement[]>(DEFAULT_ANNOUNCEMENTS);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [weather, setWeather] = useState<WeatherData>({
     tempC: 0, tempF: 32, condition: 'sunny', wind: 0, humidity: 0, description: 'Loading...', lastUpdated: null,
   });
-  const [programs, setPrograms] = useState<CoachingProgram[]>([]);
+  const [programs, setPrograms] = useState<CoachingProgram[]>(DEFAULT_PROGRAMS);
   const [notificationPreferences, setNotificationPreferences] = useState<NotificationPreferences>(DEFAULT_NOTIFICATION_PREFS);
   const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
   const [activeProfile, setActiveProfile] = useState<ActiveProfile>({ type: 'primary' });
@@ -354,9 +354,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
           if (courtsData.length > 0) setCourts(courtsData); // Keep defaults if DB has no courts yet
           setPartners(safeArray(partners));
           setConversations(safeArray(conversations));
-          setAnnouncements(safeArray(announcements));
+          if (safeArray(announcements).length > 0) setAnnouncements(safeArray(announcements)); // Keep defaults if DB has none
           setNotifications(safeArray(notifications));
-          setPrograms(safeArray(programs));
+          if (safeArray(programs).length > 0) setPrograms(safeArray(programs)); // Keep defaults if DB has none
           if (notifPrefs) setNotificationPreferences(notifPrefs);
         } catch (err) {
           reportError(err instanceof Error ? err : new Error(String(err)), 'Supabase init');
@@ -429,7 +429,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'announcements' }, () => {
         db.fetchAnnouncements(userId).then(a => {
-          setAnnouncements(safeArray(a));
+          const arr = safeArray(a); if (arr.length > 0) setAnnouncements(arr);
         }).catch(err => reportError(err, 'Realtime announcements'));
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'partners' }, () => {
@@ -444,10 +444,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
         db.fetchCourts().then(c => setCourts(safeArray(c))).catch(err => reportError(err, 'Realtime courts'));
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'coaching_programs' }, () => {
-        db.fetchPrograms().then(p => setPrograms(safeArray(p))).catch(err => reportError(err, 'Realtime programs'));
+        db.fetchPrograms().then(p => { const arr = safeArray(p); if (arr.length > 0) setPrograms(arr); }).catch(err => reportError(err, 'Realtime programs'));
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'program_enrollments' }, () => {
-        db.fetchPrograms().then(p => setPrograms(safeArray(p))).catch(err => reportError(err, 'Realtime enrollments'));
+        db.fetchPrograms().then(p => { const arr = safeArray(p); if (arr.length > 0) setPrograms(arr); }).catch(err => reportError(err, 'Realtime enrollments'));
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'events' }, () => {
         db.fetchEvents().then(e => { const arr = safeArray(e); if (arr.length > 0) setEvents(arr); }).catch(err => reportError(err, 'Realtime events'));
@@ -1074,13 +1074,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
       ]);
       setMembers(safeArray(m));
       setBookings(safeArray(b));
-      setEvents(safeArray(ev));
+      if (safeArray(ev).length > 0) setEvents(safeArray(ev));
       if (ct.length > 0) setCourts(ct);
       setPartners(safeArray(p));
       setConversations(safeArray(c));
-      setAnnouncements(safeArray(a));
+      if (safeArray(a).length > 0) setAnnouncements(safeArray(a));
       setNotifications(safeArray(n));
-      setPrograms(safeArray(pr));
+      if (safeArray(pr).length > 0) setPrograms(safeArray(pr));
       if (np) setNotificationPreferences(np);
     } catch (err) {
       reportError(err, 'Refresh');
