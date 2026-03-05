@@ -464,10 +464,7 @@
     // Add to notifications screen (optimistic local UI)
     addAnnouncementNotification(title, message, recipientLabel);
 
-    // Add announcement to MTC Club conversation in Messages
-    if (typeof addMessageToConversation === 'function') {
-      addMessageToConversation('club', '\uD83D\uDCE2 ' + title + '\n' + message, false);
-    }
+    // Announcements are notifications/banners only — not added to Messages
 
     // Show push notification
     showPushNotification('\uD83D\uDCE2 ' + title, message, null, {
@@ -505,6 +502,12 @@
     if (insertAfter && insertAfter.nextSibling) {
       insertAfter.parentNode.insertBefore(notifEl, insertAfter.nextSibling);
     }
+
+    // Hide empty state, show summary
+    var noNotifs = document.getElementById('noNotifications');
+    if (noNotifs) noNotifs.style.display = 'none';
+    var summaryEl = document.getElementById('notificationsSummary');
+    if (summaryEl) summaryEl.style.display = '';
 
     // Update unread count
     const unreadCount = document.querySelectorAll('.notification-item.unread').length;

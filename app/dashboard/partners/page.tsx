@@ -209,34 +209,58 @@ export default function PartnersPage() {
               </div>
               <div>
                 <label className="block text-sm mb-1.5" style={{ color: '#2a2f1e' }}>Time</label>
-                <div className="grid grid-cols-4 gap-1.5">
-                  {['8:00 AM', '9:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM', '6:00 PM', '7:00 PM'].map(t => {
-                    // Convert display time to 24h format for postTime state
-                    const match = t.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/);
-                    let val24 = '';
-                    if (match) {
-                      let h = parseInt(match[1]);
-                      if (match[3] === 'PM' && h !== 12) h += 12;
-                      if (match[3] === 'AM' && h === 12) h = 0;
-                      val24 = `${String(h).padStart(2, '0')}:${match[2]}`;
-                    }
-                    return (
-                      <button
-                        key={t}
-                        type="button"
-                        onClick={() => setPostTime(val24)}
-                        className="px-2 py-2 rounded-lg text-xs font-medium transition-all duration-200"
-                        style={{
-                          background: postTime === val24 ? '#6b7a3d' : 'rgba(245, 242, 235, 0.8)',
-                          color: postTime === val24 ? '#fff' : '#6b7266',
-                          border: `1px solid ${postTime === val24 ? '#6b7a3d' : '#e0dcd3'}`,
-                        }}
-                      >
-                        {t}
-                      </button>
-                    );
-                  })}
-                </div>
+                {[
+                  { label: 'Morning', times: ['8:00 AM', '9:00 AM', '10:00 AM', '11:00 AM'] },
+                  { label: 'Afternoon', times: ['12:00 PM', '1:00 PM', '2:00 PM', '3:00 PM'] },
+                  { label: 'Evening', times: ['4:00 PM', '5:00 PM', '6:00 PM', '7:00 PM'] },
+                ].map(group => {
+                  const to24 = (t: string) => {
+                    const m = t.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/);
+                    if (!m) return '';
+                    let h = parseInt(m[1]);
+                    if (m[3] === 'PM' && h !== 12) h += 12;
+                    if (m[3] === 'AM' && h === 12) h = 0;
+                    return `${String(h).padStart(2, '0')}:${m[2]}`;
+                  };
+                  return (
+                    <div key={group.label} className="mb-2">
+                      <div className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: '#9a9590' }}>{group.label}</div>
+                      <div className="grid grid-cols-4 gap-1.5">
+                        {group.times.map(t => {
+                          const val24 = to24(t);
+                          const active = postTime === val24;
+                          return (
+                            <button
+                              key={t}
+                              type="button"
+                              onClick={() => setPostTime(active ? '' : val24)}
+                              className="px-2 py-2 rounded-lg text-xs font-medium transition-all duration-200"
+                              style={{
+                                background: active ? '#6b7a3d' : 'rgba(245, 242, 235, 0.8)',
+                                color: active ? '#fff' : '#6b7266',
+                                border: `1px solid ${active ? '#6b7a3d' : '#e0dcd3'}`,
+                              }}
+                            >
+                              {t}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+                <button
+                  type="button"
+                  onClick={() => setPostTime('flexible')}
+                  className="w-full mt-1 py-2 rounded-lg text-xs font-medium transition-all duration-200"
+                  style={{
+                    background: postTime === 'flexible' ? '#6b7a3d' : 'rgba(245, 242, 235, 0.8)',
+                    color: postTime === 'flexible' ? '#fff' : '#6b7266',
+                    border: `1px solid ${postTime === 'flexible' ? '#6b7a3d' : '#e0dcd3'}`,
+                  }}
+                >
+                  I&apos;m Flexible — Any Time Works
+                </button>
               </div>
               <div>
                 <label className="block text-sm mb-1.5" style={{ color: '#2a2f1e' }}>Match Type</label>
@@ -297,7 +321,7 @@ export default function PartnersPage() {
               <button
                 onClick={() => {
                   if (!postDate || !postTime) {
-                    showToast('Please select a date and time', 'error');
+                    showToast('Please select a date and time preference', 'error');
                     return;
                   }
                   if (!currentUser) return;
@@ -309,7 +333,7 @@ export default function PartnersPage() {
                     showToast('Cannot post for a past date', 'error');
                     return;
                   }
-                  if (postDateTime.getTime() === today.getTime() && postTime) {
+                  if (postDateTime.getTime() === today.getTime() && postTime && postTime !== 'flexible') {
                     const [hours, minutes] = postTime.split(':').map(Number);
                     if (!isNaN(hours) && !isNaN(minutes)) {
                       const slotTime = new Date();
@@ -320,13 +344,15 @@ export default function PartnersPage() {
                       }
                     }
                   }
+                  const dateLabel = new Date(postDate + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                  const timeLabel = postTime === 'flexible' ? 'Flexible' : postTime;
                   const partner: import('../lib/types').Partner = {
                     id: generateId('p'),
                     userId: currentUser.id,
                     name: currentUser.name,
                     ntrp: currentUser.ntrp ?? 3.0,
                     skillLevel: postSkillLevel === 'any' ? undefined : postSkillLevel,
-                    availability: new Date(postDate + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) + ' at ' + postTime,
+                    availability: dateLabel + (postTime === 'flexible' ? ' — Flexible time' : ' at ' + timeLabel),
                     matchType: postType,
                     date: postDate,
                     time: postTime,
