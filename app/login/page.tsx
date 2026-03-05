@@ -650,40 +650,48 @@ function LoginContent() {
             </div>
           ) : (
           <>
-          {/* Logo / Welcome */}
+          {/* Welcome */}
           <div className="mb-6 lg:mb-8">
-            <h1 className="text-xl sm:text-2xl font-semibold" style={{ color: '#2a2f1e' }}>Welcome Back</h1>
+            <h1 className="headline-font text-2xl sm:text-3xl" style={{ color: '#2a2f1e' }}>Welcome Back</h1>
             <p className="mt-2 text-sm sm:text-base" style={{ color: '#6b7266' }}>Sign in to your Mono Tennis Club account</p>
           </div>
 
           {/* Login Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label htmlFor="login-email" className="block text-sm mb-2" style={{ color: '#2a2f1e' }}>Email</label>
-              <input
-                id="login-email"
-                type="email"
-                value={email}
-                onChange={(e) => { setEmail(e.target.value); setEmailError(false); }}
-                placeholder="your@email.com"
-                autoComplete="email"
-                maxLength={100}
-                className="w-full px-5 py-4 rounded-xl text-base transition-all focus:outline-none"
-                style={{
-                  background: '#fff',
-                  border: emailError ? '1px solid #ef4444' : '1px solid #e0dcd3',
-                  color: '#2a2f1e',
-                  boxShadow: emailError ? '0 0 0 3px rgba(239, 68, 68, 0.1)' : 'none',
-                }}
-                onFocus={(e) => { if (!emailError) e.currentTarget.style.borderColor = '#6b7a3d'; e.currentTarget.style.boxShadow = emailError ? '0 0 0 3px rgba(239,68,68,0.1)' : '0 0 0 3px rgba(107,122,61,0.15)'; }}
-                onBlur={(e) => { if (!emailError) { e.currentTarget.style.borderColor = '#e0dcd3'; e.currentTarget.style.boxShadow = 'none'; } }}
-              />
+              <div className="relative">
+                <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none" style={{ color: '#6b7266' }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                </svg>
+                <input
+                  id="login-email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => { setEmail(e.target.value); setEmailError(false); }}
+                  placeholder="your@email.com"
+                  autoComplete="email"
+                  maxLength={100}
+                  className="w-full pl-12 pr-5 py-4 rounded-xl text-base transition-all focus:outline-none"
+                  style={{
+                    background: '#fff',
+                    border: emailError ? '1px solid #ef4444' : '1px solid #e0dcd3',
+                    color: '#2a2f1e',
+                    boxShadow: emailError ? '0 0 0 3px rgba(239, 68, 68, 0.1)' : 'none',
+                  }}
+                  onFocus={(e) => { if (!emailError) e.currentTarget.style.borderColor = '#6b7a3d'; e.currentTarget.style.boxShadow = emailError ? '0 0 0 3px rgba(239,68,68,0.1)' : '0 0 0 3px rgba(107,122,61,0.15)'; }}
+                  onBlur={(e) => { if (!emailError) { e.currentTarget.style.borderColor = '#e0dcd3'; e.currentTarget.style.boxShadow = 'none'; } }}
+                />
+              </div>
               {emailError && <p className="text-xs mt-2" style={{ color: '#ef4444' }}>Please enter a valid email address</p>}
             </div>
 
             <div>
               <label htmlFor="login-password" className="block text-sm mb-2" style={{ color: '#2a2f1e' }}>Password</label>
               <div className="relative">
+                <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none" style={{ color: '#6b7266' }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                </svg>
                 <input
                   id="login-password"
                   type={showPassword ? 'text' : 'password'}
@@ -692,7 +700,7 @@ function LoginContent() {
                   placeholder="••••••••"
                   autoComplete="current-password"
                   maxLength={128}
-                  className="w-full px-5 py-4 pr-12 rounded-xl text-base transition-all focus:outline-none"
+                  className="w-full pl-12 pr-12 py-4 rounded-xl text-base transition-all focus:outline-none"
                   style={{
                     background: '#fff',
                     border: passwordError ? '1px solid #ef4444' : '1px solid #e0dcd3',
@@ -735,7 +743,7 @@ function LoginContent() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-4 rounded-xl font-semibold text-base text-white transition-all hover:-translate-y-0.5 active:scale-[0.97] disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none mt-6"
+              className="w-full py-4 rounded-full font-semibold text-base text-white transition-all hover:-translate-y-0.5 active:scale-[0.97] disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none mt-6"
               style={{
                 background: '#6b7a3d',
                 minHeight: 52,
