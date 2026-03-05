@@ -562,6 +562,21 @@ html {
   background: transparent;
 }
 
+/* ============================================
+   Dashboard quick-action cards — hover lift
+   ============================================ */
+.quick-action-card {
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease;
+}
+.quick-action-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12), 0 4px 10px rgba(0, 0, 0, 0.06);
+}
+.quick-action-card:active {
+  transform: translateY(-2px);
+  transition-duration: 0.1s;
+}
+
 /* Overscroll bounce on mobile */
 .overscroll-bounce {
   -webkit-overflow-scrolling: touch;
