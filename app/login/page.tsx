@@ -63,6 +63,11 @@ function LoginContent() {
     }
   }, []);
 
+  // Warm up Supabase on page load so login doesn't wait for cold start
+  useEffect(() => {
+    fetch('/api/keep-alive').catch(() => {});
+  }, []);
+
   // No auto-redirect — always show login page so users can see it
 
   const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/;
