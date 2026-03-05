@@ -231,10 +231,7 @@
     return timeToMinutes(time) >= timeToMinutes(closeTime);
   }
 
-  function timeToMinutes(time) {
-    const parts = time.split(':');
-    return parseInt(parts[0]) * 60 + parseInt(parts[1] || 0);
-  }
+  // timeToMinutes defined at line 149 (handles both 12h AM/PM and 24h formats)
 
 
   // ============================================
@@ -288,6 +285,8 @@
     const dateStr=formatDateStr(selectedDate);
     const todayMidnight=new Date(); todayMidnight.setHours(0,0,0,0);
     const isPastDay=selectedDate<todayMidnight;
+    const isToday=formatDateStr(selectedDate)===todayStr;
+    const nowMins=isToday?(new Date().getHours()*60+new Date().getMinutes()):-1;
 
     // Day tabs
     let tabsC=document.getElementById('weekDayTabs');
@@ -324,9 +323,17 @@
     });
 
     // Grid rows
-    let html='';
+    let html='', nowRowIdx=-1;
+    // Prime time: weekday evenings 6-9pm, weekend mornings 9:30-12pm
+    const isWeekend=selectedDate.getDay()===0||selectedDate.getDay()===6;
     MTC.config.timeSlots.forEach(function(time,rowIdx) {
-      html+='<div class="weekly-grid-row" data-row="'+rowIdx+'">';
+      const slotMins=timeToMinutes(time);
+      const isPastSlot=isToday&&slotMins<nowMins;
+      const isNowSlot=isToday&&slotMins<=nowMins&&(rowIdx+1>=MTC.config.timeSlots.length||timeToMinutes(MTC.config.timeSlots[rowIdx+1])>nowMins);
+      if (isNowSlot) nowRowIdx=rowIdx;
+      const isPrime=isWeekend?(slotMins>=570&&slotMins<720):(slotMins>=1080&&slotMins<1260); // weekend 9:30-12, weekday 6-9pm
+      let rowCls='weekly-grid-row'+(isNowSlot?' now-row':'')+(isPrime?' prime-time':'');
+      html+='<div class="'+rowCls+'" data-row="'+rowIdx+'">';
       html+='<div class="weekly-time-cell">'+formatTimeLabel(time)+'</div>';
 
       MTC.config.courts.forEach(function(co) {
@@ -335,7 +342,7 @@
         const evStart=isEventStart(dateStr,time,court);
         let sc='weekly-slot', inner='', click='';
 
-        if (isPastDay) {
+        if (isPastDay||(isPastSlot&&!booking)) {
           sc+=' past'; inner='<span class="slot-dash">\u2014</span>';
         } else if (isCourtClosed(court, time)) {
           sc+=' closed'; inner='<span class="slot-dash closed-label">Closed</span>';
@@ -366,12 +373,23 @@
     });
     gridBody.innerHTML=html;
 
-    // Floodlight headers
+    // Floodlight headers with court hours (#4)
     const headers=document.querySelectorAll('#screen-book .weekly-grid-header .court-header');
     headers.forEach(function(h,idx) {
       const c=MTC.config.courts[idx];
-      if (c) h.innerHTML=sanitizeHTML(c.name)+(c.floodlight?' <span class="floodlight-icon" title="Floodlights">\ud83d\udca1</span>':'');
+      if (c) {
+        const hrs=MTC.config.courtHours[c.id];
+        const closeH=hrs?parseInt(hrs.close):20;
+        const closeLabel=closeH>12?(closeH-12)+' PM':closeH+' AM';
+        h.innerHTML=sanitizeHTML(c.name)+(c.floodlight?' <span class="floodlight-icon" title="Floodlights">\ud83d\udca1</span>':'')+'<span class="court-hours-label">'+(c.floodlight?'Lit til ':'til ')+closeLabel+'</span>';
+      }
     });
+
+    // Smart scroll to now row (#8)
+    if (isToday&&nowRowIdx>=0) {
+      var nowEl=gridBody.querySelector('.now-row');
+      if (nowEl) setTimeout(function(){nowEl.scrollIntoView({behavior:'smooth',block:'start'});},100);
+    }
     } catch(e) {
       MTC.warn('renderWeeklyGrid error:', e);
       MTC.fn.renderError(gridBody, 'Could not load the booking grid. Please try again.');
@@ -995,7 +1013,18 @@
   MTC.fn.renderWeeklyGrid = renderWeeklyGrid;
   window.renderWeeklyGrid = renderWeeklyGrid; // Backward-compat alias
 
+  // Booking info panel toggle (#9)
+  function toggleBookingInfo() {
+    var content=document.getElementById('bookingInfoContent');
+    var toggle=document.querySelector('.booking-info-toggle');
+    if (!content||!toggle) return;
+    var open=content.classList.toggle('open');
+    toggle.setAttribute('aria-expanded',open?'true':'false');
+    content.setAttribute('aria-hidden',open?'false':'true');
+  }
+
   // Window exports for HTML onclick handlers
+  window.toggleBookingInfo = toggleBookingInfo;
   window.selectSlot = selectSlot;
   window.selectWeekDay = selectWeekDay;
   window.changeWeek = changeWeek;

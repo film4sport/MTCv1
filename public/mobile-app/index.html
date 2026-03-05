@@ -20,7 +20,7 @@
     if ('serviceWorker' in navigator) {
       caches.keys().then(function(names) {
         names.forEach(function(name) {
-          if (name.indexOf('mtc-court-5f236a78') === -1) {
+          if (name.indexOf('mtc-court-82c9f477') === -1) {
             caches.delete(name);
             console.log('[CacheBust] Deleted old cache:', name);
           }
@@ -761,6 +761,41 @@
         </div>
       </div>
       
+      <!-- Booking Info Collapsible (#9) -->
+      <div class="booking-info-panel" id="bookingInfoPanel">
+        <button class="booking-info-toggle" onclick="toggleBookingInfo()" aria-expanded="false" aria-controls="bookingInfoContent">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+          <span>Booking Rules</span>
+          <svg class="booking-info-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </button>
+        <div class="booking-info-content" id="bookingInfoContent" aria-hidden="true">
+          <div class="booking-info-item">
+            <span class="info-dot" style="background:var(--volt)"></span>
+            Guest fee: <strong>$10/visit</strong> &mdash; e-transfer to monotennis.payment@gmail.com
+          </div>
+          <div class="booking-info-item">
+            <span class="info-dot" style="background:var(--volt)"></span>
+            Cancel up to <strong>24h</strong> before your slot
+          </div>
+          <div class="booking-info-item">
+            <span class="info-dot" style="background:var(--volt)"></span>
+            Singles: up to <strong>1.5 hrs</strong>, Doubles: up to <strong>2 hrs</strong>
+          </div>
+          <div class="booking-info-item">
+            <span class="info-dot" style="background:var(--volt)"></span>
+            Book up to <strong>7 days</strong> in advance
+          </div>
+          <div class="booking-info-item">
+            <span class="info-dot" style="background:var(--volt)"></span>
+            Courts 1-2 lit til <strong>10 PM</strong>, Courts 3-4 til <strong>8 PM</strong>
+          </div>
+          <div class="booking-info-item" style="color:var(--coral)">
+            <span class="info-dot" style="background:var(--coral)"></span>
+            Please cancel bookings you no longer need
+          </div>
+        </div>
+      </div>
+
       <!-- Week View -->
       <div id="weekView">
         <!-- Week Navigation -->
