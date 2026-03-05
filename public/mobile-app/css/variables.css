@@ -117,6 +117,10 @@
   --radius-circle: 50%;
 }
 
+/* Coaching links — readable on both themes */
+.coaching-link { color: var(--text-primary); }
+[data-theme="dark"] .coaching-link { color: var(--volt); }
+
 [data-theme="dark"] {
   --bg-primary: #0b0a09;
   --bg-secondary: #151412;
