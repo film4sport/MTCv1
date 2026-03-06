@@ -355,7 +355,6 @@
   // ============================================
   // LOCALSTORAGE PERSISTENCE
   // ============================================
-  // Cross-file function (called from payments.js)
   /** Persists bookingsData + eventBookings to localStorage */
   MTC.fn.saveBookings = function() {
     if (typeof bookingsData !== 'undefined') {

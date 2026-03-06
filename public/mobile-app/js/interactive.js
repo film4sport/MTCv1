@@ -72,13 +72,6 @@
       document.getElementById('login-screen').classList.remove('active');
       document.getElementById('bottomNav').style.display = 'block';
 
-      // Sync membership status to payment data
-      if (typeof memberPaymentData !== 'undefined') {
-        memberPaymentData.currentUser.name = currentUser.name;
-        memberPaymentData.currentUser.email = currentUser.email;
-        memberPaymentData.currentUser.isMember = currentUser.isMember !== false;
-      }
-
       // Apply guest restrictions and route to correct screen
       if (typeof applyGuestRestrictions === 'function') applyGuestRestrictions();
 

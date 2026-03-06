@@ -27,11 +27,6 @@
       tabBtn.setAttribute('tabindex', '0');
     }
 
-    // Render payments tab content
-    if (tab === 'payments' && typeof renderAdminPayments === 'function') {
-      renderAdminPayments();
-    }
-
     announceToScreenReader(tab + ' tab selected');
   };
 
@@ -127,7 +122,7 @@
   // showAddMemberModal — defined below with full modal implementation
 
   window.editMember = function(id) {
-    const member = allMembersPayment.find(function(m) { return m.id === id; });
+    const member = (MTC.state.clubMembers || []).find(function(m) { return m.id === id; });
     if (!member) { showToast('Member not found'); return; }
 
     const modal = document.createElement('div');

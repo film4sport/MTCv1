@@ -901,22 +901,6 @@
               <span class="booking-modal-fee-label">Court Fee</span>
               <span class="booking-modal-fee-value" id="summaryFee">FREE</span>
             </div>
-            <div class="booking-modal-fee-row" id="guestFeeRow" style="display: none;">
-              <span class="booking-modal-fee-label">Guest Fee</span>
-              <span class="booking-modal-fee-value booking-modal-fee-value-coral">$10.00</span>
-            </div>
-            <div class="booking-modal-fee-row booking-modal-fee-row-summary">
-              <span class="booking-modal-fee-label booking-modal-fee-label-flex">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
-                Bringing a Guest?
-              </span>
-              <div class="toggle" id="guestToggle" role="switch" aria-checked="false" tabindex="0" onclick="toggleGuestFee()"></div>
-            </div>
-            <div id="summaryCreditNote" style="display: none;" class="booking-modal-credit">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="20 6 9 17 4 12"></polyline></svg>
-              <span id="summaryCreditText"></span>
-            </div>
-            <div id="summaryCreditExplain" style="display: none;" class="booking-modal-credit-explain"></div>
           </div>
           
           <div class="booking-modal-payment-info" id="paymentInfoBox">
@@ -2302,30 +2286,6 @@
       </div>
     </div>
 
-    <!-- Booking Pro-Tip Modal -->
-    <div class="protip-overlay" id="bookingProTip" role="dialog" aria-modal="true" aria-label="Booking tip">
-      <div class="protip-modal">
-        <div class="protip-badge">PRO TIP</div>
-        <div class="protip-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
-        </div>
-        <div class="protip-title">BOOKING TIPS</div>
-        <div class="protip-steps">
-          <div class="protip-step">
-            <div class="protip-step-num">1</div>
-            <div class="protip-step-text"><strong>Book courts freely</strong> — courts are free for all members!</div>
-          </div>
-          <div class="protip-step">
-            <div class="protip-step-num">2</div>
-            <div class="protip-step-text"><strong>Guests pay $10/hr</strong> — e-transfer guest fees to <strong>monotennis.payment@gmail.com</strong></div>
-          </div>
-        </div>
-        <div class="protip-note">Please cancel bookings you no longer need so others can use the court.</div>
-        <button class="protip-dismiss-btn" onclick="dismissBookingProTip(true)">GOT IT</button>
-        <button class="protip-never-btn" onclick="dismissBookingProTip(false)">DON'T SHOW ME AGAIN</button>
-      </div>
-    </div>
-    
     <!-- Reusable Confirmation Modal -->
     <div class="confirm-modal-overlay" id="confirmModal" onclick="closeConfirmModal(event)" role="dialog" aria-modal="true" aria-label="Confirm action">
       <div class="confirm-modal" onclick="event.stopPropagation()">
