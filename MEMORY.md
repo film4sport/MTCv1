@@ -1292,6 +1292,56 @@ CREATE TABLE IF NOT EXISTS lineup_entries (
 
 **Build verified:** `npm run check` passes clean (tsc + mobile build).
 
+### Cowork Session (2026-03-06) — Cross-Platform Realtime Sync Architecture
+
+**Problem:** Dashboard PWA had Supabase Realtime for live updates across 11 tables. Mobile PWA (phone + iPad/tablet) had ZERO realtime subscriptions — entirely pull-based. Dashboard→Mobile and Mobile→Mobile sync was broken (required manual refresh).
+
+**Solution — 6 changes to close the sync gap:**
+
+1. **`public/mobile-app/js/realtime-sync.js`** (NEW, 301 lines) — Supabase Realtime subscriptions for Mobile PWA:
+   - Subscribes to `bookings`, `booking_participants`, `partners`, `messages`, `conversations`, `events`, `event_attendees`, `notifications` tables
+   - Debounced refetch (1.5s) prevents refetch storms from rapid changes
+   - Heartbeat sync every 2 min as safety net (catches missed Realtime events)
+   - Visibility change handler: refetches stale data when app returns to foreground
+   - Online event handler: refetches after network recovery
+   - PUSH_RECEIVED SW message handler: auto-fetches data when push notification arrives (no user tap required)
+   - Stale data indicator CSS (green dot = fresh, red pulse = stale)
+   - Called from `auth.js` after login (`MTC.fn.startRealtimeSync()`), stopped on logout
+
+2. **`public/mobile-app/sw.js`** — Push handler now posts `PUSH_RECEIVED` message to all open app clients via `clients.matchAll()` + `postMessage()`. App auto-fetches without user tapping the notification.
+
+3. **`app/api/mobile/bookings/route.ts`** — Added `sendPushToUser()` helper. Now fires Web Push to all booking participants on both booking creation and cancellation (best-effort, non-blocking).
+
+4. **`app/api/mobile/partners/route.ts`** — Partner PATCH (match) now sends Web Push to the original poster when someone joins their request.
+
+5. **`public/mobile-app/js/pull-refresh.js`** — Pull-to-refresh now calls `MTC.fn.refetchAll()` (bookings + partners + messages + events + notifications) instead of just `fetchWeather()`.
+
+6. **`public/mobile-app/js/api-client.js`** — Added `getPendingQueueCount()`, `retryPendingQueue()`, and auto-updating queue badge for offline failure visibility.
+
+**Auth wiring:**
+- `auth.js`: Exposed `_supabaseClient` to `MTC.state._supabaseClient` for realtime-sync.js
+- `auth.js`: `completeLogin()` now calls `MTC.fn.startRealtimeSync()` after `loadAppDataFromAPI()`
+- `auth.js`: `handleLogout()` now calls `MTC.fn.stopRealtimeSync()`
+
+**Cross-platform sync matrix (AFTER changes):**
+- Dashboard → Dashboard: instant (Realtime) ✓
+- Mobile → Dashboard: instant (Realtime) ✓
+- Dashboard → Mobile: near-instant (Realtime) ✓ (was broken, now fixed)
+- Mobile → Mobile: near-instant (Realtime) ✓ (was broken, now fixed)
+
+**CI test fixes (13 failures → 0):**
+- `tests/mobile-pwa.spec.js`: Updated for Google + Magic Link auth (removed `#loginPassword`, `.login-btn` → `.login-btn-magic`/`.login-btn-google`, `showSignUp` → `showSignUpScreen`)
+- `tests/mobile-pwa-offline.spec.js`: Same auth updates for offline tests
+- `tests/landing.spec.js`: Updated `'Passion, Community,'` → `'Great Tennis'` (AboutTab heading changed)
+
+**Other changes in this session:**
+- Login page phone mockup: "Member" → "Sarah M." / "James K." partner card names
+- Login page phone mockup: Fixed second partner SVG (removed extra hair ellipse)
+- Desktop avatar picker: 4-column grid with "Tennis Players" / "Simple Avatars" category headers
+- Login page: Added "Club Tasks" checklist section (admin reminders)
+- Onboarding slide 4: Device-specific install instructions (iPad/iPhone/Android detection)
+- Tablet CSS: Skill-level colored avatar rings on partner cards (`data-skill` attribute)
+
 ### Environment Limitations (IMPORTANT)
 - **Cowork VM has NO Playwright browsers installed.** Never attempt to run E2E tests in Cowork — they will stall or error. E2E tests only run in CI (GitHub Actions) or on the dev machine.
 - **If a command fails once, diagnose and explain — don't retry.** Repeated blind retries waste the user's time.

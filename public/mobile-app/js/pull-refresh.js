@@ -44,13 +44,16 @@
       if (pullDistance > 80) {
         indicator.classList.add('refreshing');
 
-        // Refresh data
+        // Refresh ALL data (weather + bookings + partners + messages + events + notifications)
         fetchWeather();
+        if (typeof MTC.fn.refetchAll === 'function') {
+          MTC.fn.refetchAll();
+        }
 
         setTimeout(function() {
           indicator.classList.remove('visible', 'refreshing');
-          showToast('Refreshed!');
-        }, 1000);
+          showToast('All data refreshed!');
+        }, 1500);
       } else {
         indicator.classList.remove('visible');
       }

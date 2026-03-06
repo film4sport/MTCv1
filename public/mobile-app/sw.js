@@ -1,5 +1,5 @@
 // MTC Court Service Worker v48 (monorepo edition — served from /mobile-app/)
-const CACHE_NAME = 'mtc-court-af8c3613';
+const CACHE_NAME = 'mtc-court-ef2a9a1e';
 const OFFLINE_URL = '/mobile-app/offline.html';
 
 // Assets to cache immediately on install (bundles built by scripts/build-mobile.js)
@@ -17,7 +17,7 @@ const PRECACHE_ASSETS = [
 
 // Install event - cache core assets
 self.addEventListener('install', (event) => {
-  // [ServiceWorker] Installing mtc-court-af8c3613...
+  // [ServiceWorker] Installing mtc-court-ef2a9a1e...
 
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -34,7 +34,7 @@ self.addEventListener('install', (event) => {
 
 // Activate event - clean up ALL old caches
 self.addEventListener('activate', (event) => {
-  // [ServiceWorker] Activating mtc-court-af8c3613...
+  // [ServiceWorker] Activating mtc-court-ef2a9a1e...
 
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -172,6 +172,17 @@ self.addEventListener('push', (event) => {
 
   event.waitUntil(
     self.registration.showNotification(title, options)
+      .then(() => {
+        // Notify all open app clients so they can auto-fetch new data
+        return self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+      })
+      .then((clients) => {
+        clients.forEach((client) => {
+          if (client.url.includes('/mobile-app/')) {
+            client.postMessage({ type: 'PUSH_RECEIVED', tag: options.tag || '' });
+          }
+        });
+      })
   );
 });
 

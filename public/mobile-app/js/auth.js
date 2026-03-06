@@ -42,6 +42,7 @@
       .then(function(cfg) {
         if (cfg.supabaseUrl && cfg.supabaseAnonKey && window.supabase) {
           _supabaseClient = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+          MTC.state._supabaseClient = _supabaseClient; // Expose for realtime-sync.js
         }
         return _supabaseClient;
       })
@@ -314,6 +315,11 @@
     // Load data from Supabase API (non-blocking, falls back to cached data)
     loadAppDataFromAPI();
 
+    // Start realtime sync (Supabase Realtime + heartbeat fallback)
+    if (typeof MTC.fn.startRealtimeSync === 'function') {
+      MTC.fn.startRealtimeSync();
+    }
+
     // Register push notifications (best-effort, non-blocking)
     registerPushNotifications();
   }
@@ -326,6 +332,7 @@
     // Clear all app-related data on logout (prevents data leaks on shared devices)
     MTC.clearToken(); // Clear memory-cached token first
     MTC.clearAllTimers(); // Clear any tracked timers
+    if (typeof MTC.fn.stopRealtimeSync === 'function') MTC.fn.stopRealtimeSync(); // Stop realtime subscriptions
     ['mtc-user', 'mtc-session-time', 'mtc-session-hash',
      'mtc-bookings', 'mtc-conversations', 'mtc-notifications',
      'mtc-rsvps', 'mtc-profile', 'mtc-partner-joins', 'mtc-settings',

@@ -63,6 +63,7 @@ const JS_FILES = [
   'messaging.js',
   'account.js',
   'notifications.js',
+  'realtime-sync.js',
   'pull-refresh.js',
   'profile.js',
   'admin.js',

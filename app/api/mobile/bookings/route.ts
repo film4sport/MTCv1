@@ -32,6 +32,53 @@ async function createNotification(
   });
 }
 
+/** Helper: send a Web Push notification to a user (best-effort, non-blocking) */
+async function sendPushToUser(
+  supabase: ReturnType<typeof getAdminClient>,
+  userId: string,
+  payload: { title: string; body: string; tag?: string; url?: string }
+) {
+  try {
+    const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || '';
+    const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY || '';
+    const VAPID_EMAIL = process.env.VAPID_EMAIL || 'mailto:admin@monotennisclub.ca';
+    if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) return;
+
+    const { data: subscriptions } = await supabase
+      .from('push_subscriptions')
+      .select('endpoint, p256dh, auth')
+      .eq('user_id', userId);
+    if (!subscriptions?.length) return;
+
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const webpush = require('web-push') as {
+      setVapidDetails: (subject: string, publicKey: string, privateKey: string) => void;
+      sendNotification: (sub: object, payload: string) => Promise<void>;
+    };
+    webpush.setVapidDetails(VAPID_EMAIL, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
+
+    const pushPayload = JSON.stringify({
+      title: payload.title,
+      body: payload.body,
+      icon: '/mobile-app/icon-192.png',
+      badge: '/mobile-app/badge-72.png',
+      url: payload.url || '/mobile-app/index.html',
+      tag: payload.tag || 'booking-' + Date.now(),
+    });
+
+    await Promise.allSettled(
+      subscriptions.map(sub =>
+        webpush.sendNotification(
+          { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
+          pushPayload
+        )
+      )
+    );
+  } catch {
+    // Push is best-effort — don't break the booking flow
+  }
+}
+
 /** Helper: send a direct message via conversations/messages tables */
 async function sendMessage(
   supabase: ReturnType<typeof getAdminClient>,
@@ -115,6 +162,13 @@ async function fireBookingNotifications(
         toId: p.participant_id, toName: p.participant_name,
         text: `You've been added to a court booking!\n\n📅 ${formattedDate}\n⏰ ${booking.time} (${durationText})\n📍 ${booking.courtName} — Mono Tennis Club\nMatch: ${matchLabel}\n👥 Playing with: ${otherPlayers}\n\nA confirmation email with a calendar invite has been sent to your email. You can also add this to your calendar from Dashboard → Schedule.\n[booking:${booking.courtName}:${booking.date}:${booking.time}]`,
       });
+
+      // Web Push notification (best-effort)
+      sendPushToUser(supabase, p.participant_id, {
+        title: 'Added to Booking',
+        body: `${booker.name} added you to ${booking.courtName} on ${booking.date} at ${booking.time}`,
+        tag: 'booking-add-' + booking.id,
+      });
     }
   }
 
@@ -181,6 +235,13 @@ async function fireCancellationNotifications(
       fromId: booking.user_id, fromName: booking.user_name,
       toId: p.participant_id, toName: p.participant_name,
       text: `A court booking has been cancelled.\n\n❌ CANCELLED\n📅 ${cancelDate}\n⏰ ${booking.time}\n📍 ${booking.court_name} — Mono Tennis Club\n\nThe calendar invite has been removed. You can rebook from Dashboard → Book Court.`,
+    });
+
+    // Web Push notification (best-effort)
+    sendPushToUser(supabase, p.participant_id, {
+      title: 'Booking Cancelled',
+      body: `${booking.user_name} cancelled ${booking.court_name} on ${booking.date} at ${booking.time}`,
+      tag: 'booking-cancel-' + booking.id,
     });
   }
 
