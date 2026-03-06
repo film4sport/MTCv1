@@ -51,13 +51,14 @@ const STEPS: TourStep[] = [
 ];
 
 export default function OnboardingTour() {
-  const { currentUser } = useApp();
+  const { currentUser, isLoaded } = useApp();
   const [step, setStep] = useState(0);
   const [visible, setVisible] = useState(false);
   const [tooltipPos, setTooltipPos] = useState<{ top: number; left: number } | null>(null);
 
   useEffect(() => {
-    if (!currentUser?.id) return;
+    // Wait for Supabase data to load so preferences are populated
+    if (!isLoaded || !currentUser?.id) return;
     try {
       // Check localStorage first (fast), then Supabase preferences as fallback
       const key = `mtc-onboarding-done-${currentUser.id}`;
@@ -72,7 +73,7 @@ export default function OnboardingTour() {
     // Small delay so dashboard renders first
     const timer = setTimeout(() => setVisible(true), 1200);
     return () => clearTimeout(timer);
-  }, [currentUser?.id]);
+  }, [isLoaded, currentUser?.id]);
 
   const positionTooltip = useCallback(() => {
     const current = STEPS[step];
