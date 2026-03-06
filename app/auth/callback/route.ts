@@ -8,6 +8,7 @@ export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
   const code = searchParams.get('code');
   const type = searchParams.get('type'); // 'recovery', 'signup', etc.
+  const next = searchParams.get('next'); // custom redirect hint from OAuth flow
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.monotennisclub.com';
 
   if (!code) {
@@ -21,9 +22,16 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${siteUrl}/login?error=config`);
   }
 
-  const redirectUrl = type === 'recovery'
-    ? `${siteUrl}/login?reset=true`
-    : `${siteUrl}/dashboard`;
+  // Determine redirect: recovery → login reset, custom next → that path, default → dashboard
+  let redirectUrl: string;
+  if (type === 'recovery') {
+    redirectUrl = `${siteUrl}/login?reset=true`;
+  } else if (next) {
+    // Custom redirect from OAuth flow (e.g. /signup?oauth=true)
+    redirectUrl = `${siteUrl}${next.startsWith('/') ? next : `/${next}`}`;
+  } else {
+    redirectUrl = `${siteUrl}/dashboard`;
+  }
 
   const response = NextResponse.redirect(redirectUrl);
 
@@ -47,8 +55,39 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${siteUrl}/login?error=expired_link`);
   }
 
+  // ── OAuth: detect new users who need to complete the signup wizard ──
+  // If this is an OAuth login (no type=recovery, no explicit next param),
+  // check if the user has a membership_type in their profile.
+  // If not, redirect them to the signup wizard to complete registration.
+  if (type !== 'recovery' && !next && data?.session?.user) {
+    const isOAuthProvider = data.session.user.app_metadata?.provider !== 'email';
+    if (isOAuthProvider) {
+      const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+      const checkSupabase = serviceKey
+        ? createClient(supabaseUrl, serviceKey)
+        : createClient(supabaseUrl, supabaseAnonKey);
+
+      const { data: profile } = await checkSupabase
+        .from('profiles')
+        .select('membership_type')
+        .eq('id', data.session.user.id)
+        .single();
+
+      // New OAuth user with no membership type → send to signup wizard
+      if (!profile?.membership_type) {
+        const oauthRedirect = NextResponse.redirect(`${siteUrl}/signup?oauth=true`);
+        // Copy session cookies to the new response
+        response.cookies.getAll().forEach((cookie) => {
+          oauthRedirect.cookies.set(cookie.name, cookie.value);
+        });
+        return oauthRedirect;
+      }
+    }
+  }
+
   // ── Post-confirmation: welcome message + notification ──
-  // Only for signup confirmations (not password recovery)
+  // Only for signup confirmations (not password recovery) and NOT OAuth signups
+  // (OAuth signups get their welcome message after completing the wizard)
   if (type !== 'recovery' && data?.session?.user) {
     const user = data.session.user;
     const userName = user.user_metadata?.name || user.email?.split('@')[0] || 'Member';

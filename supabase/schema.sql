@@ -70,7 +70,7 @@ create table if not exists bookings (
   court_name text not null,
   date date not null,
   time text not null,
-  user_id uuid not null references profiles(id),
+  user_id uuid not null references profiles(id) on delete cascade,
   user_name text not null,
   booked_for text,              -- family member name if booked by a family profile
   guest_name text,
@@ -87,7 +87,7 @@ create table if not exists bookings (
 create table if not exists booking_participants (
   id serial primary key,
   booking_id text not null references bookings(id) on delete cascade,
-  participant_id uuid not null references profiles(id),
+  participant_id uuid not null references profiles(id) on delete cascade,
   participant_name text not null,
   confirmed_at timestamptz,          -- null = pending, timestamp = confirmed
   confirmed_via text check (confirmed_via in ('email', 'dashboard', 'mobile'))
@@ -128,7 +128,7 @@ create policy "event_attendees_delete" on event_attendees for delete
 -- ─── Partners ───────────────────────────────────────────
 create table if not exists partners (
   id text primary key,
-  user_id uuid not null references profiles(id),
+  user_id uuid not null references profiles(id) on delete cascade,
   name text not null,
   ntrp numeric(2,1) not null,
   skill_level text default 'intermediate' check (skill_level in ('beginner', 'intermediate', 'advanced', 'competitive')),
@@ -139,7 +139,7 @@ create table if not exists partners (
   avatar text,
   message text,
   status text not null default 'available' check (status in ('available', 'matched')),
-  matched_by uuid references profiles(id),
+  matched_by uuid references profiles(id) on delete set null,
   matched_at timestamptz,
   created_at timestamptz default now()
 );
@@ -147,8 +147,8 @@ create table if not exists partners (
 -- ─── Conversations ──────────────────────────────────────
 create table if not exists conversations (
   id serial primary key,
-  member_a uuid not null references profiles(id),
-  member_b uuid not null references profiles(id),
+  member_a uuid not null references profiles(id) on delete cascade,
+  member_b uuid not null references profiles(id) on delete cascade,
   last_message text,
   last_timestamp timestamptz,
   unique(member_a, member_b)
@@ -158,9 +158,9 @@ create table if not exists conversations (
 create table if not exists messages (
   id text primary key,
   conversation_id integer not null references conversations(id) on delete cascade,
-  from_id uuid not null references profiles(id),
+  from_id uuid not null references profiles(id) on delete cascade,
   from_name text not null,
-  to_id uuid not null references profiles(id),
+  to_id uuid not null references profiles(id) on delete cascade,
   to_name text not null,
   text text not null,
   timestamp timestamptz not null default now(),
@@ -181,14 +181,14 @@ create table if not exists announcements (
 create table if not exists announcement_dismissals (
   id serial primary key,
   announcement_id text not null references announcements(id) on delete cascade,
-  user_id uuid not null references profiles(id),
+  user_id uuid not null references profiles(id) on delete cascade,
   unique(announcement_id, user_id)
 );
 
 -- ─── Notifications ──────────────────────────────────────
 create table if not exists notifications (
   id text primary key,
-  user_id uuid not null references profiles(id),
+  user_id uuid not null references profiles(id) on delete cascade,
   type text not null check (type in ('booking', 'event', 'partner', 'message', 'program', 'announcement')),
   title text not null,
   body text not null,
@@ -236,7 +236,7 @@ create table if not exists program_sessions (
 create table if not exists program_enrollments (
   id serial primary key,
   program_id text not null references coaching_programs(id) on delete cascade,
-  member_id uuid not null references profiles(id),
+  member_id uuid not null references profiles(id) on delete cascade,
   enrolled_at timestamptz default now(),
   unique(program_id, member_id)
 );
@@ -351,7 +351,7 @@ create table if not exists club_settings (
   key text primary key,
   value text not null,
   updated_at timestamptz default now(),
-  updated_by uuid references profiles(id)
+  updated_by uuid references profiles(id) on delete set null
 );
 
 -- RLS: everyone can read, only admins can modify
@@ -365,13 +365,42 @@ create policy "club_settings_admin_delete" on club_settings for delete using (is
 insert into club_settings (key, value) values ('gate_code', '1234') on conflict do nothing;
 
 -- ─── Delete Member (Admin RPC) ────────────────────────────
+-- Deletes a user and all related data. Most FKs have ON DELETE CASCADE,
+-- but we explicitly clean up tables that use SET NULL or lack cascade
+-- (e.g. coaching_programs.coach_id) to ensure a clean deletion.
 create or replace function delete_member(target_user_id uuid)
 returns void as $$
+declare
+  uname text;
+  fid uuid;
 begin
-  -- Verify caller is admin (SECURITY DEFINER bypasses RLS, so we must check explicitly)
+  -- Verify caller is admin
   if not is_admin() then
     raise exception 'Unauthorized: admin only';
   end if;
+
+  -- Look up user name (for event_attendees) and family
+  select name into uname from public.profiles where id = target_user_id;
+  select id into fid from public.families where primary_user_id = target_user_id;
+
+  -- Clean up tables without ON DELETE CASCADE on profiles FK
+  -- coaching_programs.coach_id has no cascade (intentional — admin should reassign first)
+  if exists (select 1 from public.coaching_programs where coach_id = target_user_id) then
+    raise exception 'Cannot delete: user is a coach. Reassign their programs first.';
+  end if;
+
+  -- event_attendees uses user_name, not user_id FK
+  if uname is not null then
+    delete from public.event_attendees where user_name = uname;
+  end if;
+
+  -- Family cleanup (family_members cascade from families, families cascade from profiles)
+  -- but we clean up explicitly in case of any edge cases
+  if fid is not null then
+    delete from public.family_members where family_id = fid;
+  end if;
+
+  -- Everything else cascades from: delete auth.users → profiles → child tables
   delete from auth.users where id = target_user_id;
 end;
 $$ language plpgsql security definer set search_path = '';
@@ -504,14 +533,14 @@ create table if not exists match_lineups (
   opponent text,
   location text,
   notes text,
-  created_by uuid not null references profiles(id),
+  created_by uuid not null references profiles(id) on delete cascade,
   created_at timestamptz default now()
 );
 
 create table if not exists lineup_entries (
   id bigint generated always as identity primary key,
   lineup_id text not null references match_lineups(id) on delete cascade,
-  member_id uuid not null references profiles(id),
+  member_id uuid not null references profiles(id) on delete cascade,
   status text default 'pending' check (status in ('available', 'unavailable', 'maybe', 'pending')),
   position text,
   notes text,

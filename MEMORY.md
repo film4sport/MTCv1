@@ -5,7 +5,81 @@
 - **Code review reports**: `MTC-Code-Review-Report.docx` (38 findings) and `MTC-Bug-Hunting-Report.docx` (39 findings) in project root.
 
 ## Current Status
-- **SMTP/Supabase email signups**: DONE. Google SMTP configured in Supabase dashboard. Email confirmation and password reset emails are live.
+- **SMTP/Supabase email**: DONE. Resend SMTP (smtp.resend.com:465, noreply@monotennisclub.com). Email confirmation and password reset emails are live.
+- **Deployment**: Railway (NOT Vercel). NODE_VERSION=20 env var set.
+- **Google OAuth**: Code complete, awaiting external setup (Google Cloud Console + Supabase provider config). See session below.
+
+### Cowork Session (2026-03-06) — Google OAuth Implementation
+
+**Code changes (all pass `tsc --noEmit`):**
+
+1. **`app/dashboard/lib/auth.ts`** — Added `signInWithGoogle(nextPath?)` and `completeOAuthProfile(userId, data)` functions
+2. **`app/auth/callback/route.ts`** — Added `?next=` query param for custom OAuth redirects; detects new OAuth users (no `membership_type` in profile) → redirects to `/signup?oauth=true` instead of `/dashboard`; uses service role key for profile check
+3. **`app/login/page.tsx`** — Added "Continue with Google" button with divider below login form
+4. **`app/signup/page.tsx`** — Wrapped in `<Suspense>` for `useSearchParams`; on Step 2 shows "Sign up with Google" button (saves membership type to localStorage before redirect); on OAuth return (`?oauth=true`) detects session, pre-fills name/email from Google, restores membership type, skips to appropriate step; `completeSignup()` has OAuth branch that calls `completeOAuthProfile()` instead of `signUp()`, creates family if needed, skips email confirmation
+
+**OAuth flow (new users):**
+1. User picks membership type (Step 1) → Step 2 shows "Sign up with Google"
+2. Click → saves membership type to `localStorage('mtc-oauth-membership-type')` → redirects to Google consent
+3. Google → Supabase → `/auth/callback` → detects no `membership_type` → redirects to `/signup?oauth=true`
+4. Signup wizard detects `?oauth=true`, gets session, pre-fills name/email, restores membership type, skips ahead
+5. User completes remaining steps (family members, skill level, waiver, e-transfer)
+6. `completeOAuthProfile()` updates both auth metadata and profiles table
+7. Confirmation page shows "Go to Dashboard" (no email verification needed)
+
+**OAuth flow (returning users):**
+1. Click "Continue with Google" on login page → Google → Supabase → `/auth/callback`
+2. Profile has `membership_type` → redirect to `/dashboard`
+
+**Still needed (external setup by user):**
+- Google Cloud Console: Create OAuth 2.0 credentials, add authorized redirect URI `https://yocwrftyecgdhregjzrz.supabase.co/auth/v1/callback`
+- Supabase Dashboard: Auth → Providers → Google → Enable, paste Client ID + Secret
+- Test end-to-end after setup
+
+**Alternative to Apple Sign-In:** Suggested magic link (passwordless email) — no Apple Developer account needed. Not yet implemented.
+
+### Cowork Session (2026-03-06) — Auth Flow Testing & DB Cascade Fixes
+
+**Full auth cycle tested on live site (monotennisclub.com):**
+- Signup → confirmation email arrives via Resend (~30s) → click link → auto-login → dashboard with onboarding tour ✓
+- Sign out → sign back in ✓
+- Password reset email arrives via Resend → click link → BUT "Set New Password" form didn't appear
+
+**Password reset link bug found & fixed:**
+- Root cause: Login page only checked `?reset=true` query param (from PKCE callback flow), but Supabase sends `#type=recovery` in URL hash fragment (implicit grant flow)
+- Fix: Added `window.location.hash.includes('type=recovery')` detection in `app/login/page.tsx`
+- File modified: `app/login/page.tsx` — useEffect now checks both searchParams and hash fragment
+
+**Test user cleanup — exposed FK cascade gap:**
+- Test user `authtest2026@sharklasers.com` couldn't be deleted from Supabase dashboard due to FK constraint errors
+- Root cause: `delete_member` RPC only did `DELETE FROM auth.users` but most child tables of `profiles` lacked `ON DELETE CASCADE`
+
+**Fixed: Added ON DELETE CASCADE to all profile FK references:**
+- `bookings.user_id` → CASCADE
+- `booking_participants.participant_id` → CASCADE
+- `partners.user_id` → CASCADE, `partners.matched_by` → SET NULL
+- `conversations.member_a/member_b` → CASCADE
+- `messages.from_id/to_id` → CASCADE
+- `announcement_dismissals.user_id` → CASCADE
+- `notifications.user_id` → CASCADE
+- `program_enrollments.member_id` → CASCADE
+- `club_settings.updated_by` → SET NULL
+- `match_lineups.created_by` → CASCADE
+- `lineup_entries.member_id` → CASCADE
+- `coaching_programs.coach_id` — intentionally NO cascade (admin must reassign programs first)
+
+**Updated `delete_member` RPC function:**
+- Now handles `event_attendees` cleanup (uses `user_name` not FK)
+- Now handles `family_members` cleanup
+- Raises error if user is a coach (must reassign programs first)
+- Everything else cascades cleanly from `DELETE FROM auth.users`
+
+**Files modified:**
+- `app/login/page.tsx` — Hash fragment detection for recovery mode
+- `supabase/schema.sql` — ON DELETE CASCADE added to 12 FK constraints, delete_member function rewritten
+- `supabase/migrations/20260306_cascade_deletes.sql` — Migration to apply FK changes + updated RPC
+
+**Needs:** Run `npm run db:push` to apply migration to production Supabase.
 
 ### Cowork Session (2026-03-05) — Mobile PWA Booking Improvements
 
