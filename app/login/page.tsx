@@ -56,7 +56,7 @@ function LoginContent() {
       <div className="min-h-screen flex flex-col lg:flex-row" style={{ backgroundColor: '#f5f2eb' }}>
 
         {/* Left Side: App Preview (Desktop) */}
-        <div className="hidden lg:flex lg:w-1/2 xl:w-3/5 items-center justify-center p-12 relative overflow-hidden" style={{ background: '#edeae3' }}>
+        <div className="hidden lg:flex lg:w-1/2 items-start justify-center p-12 relative overflow-y-auto overflow-x-hidden" style={{ background: '#edeae3' }}>
           {/* Subtle grid pattern */}
           <div className="absolute inset-0 opacity-[0.04]">
             <svg width="100%" height="100%">
@@ -68,7 +68,7 @@ function LoginContent() {
           </div>
 
           {/* Content */}
-          <div className="relative z-10 text-center">
+          <div className="relative z-10 text-center my-auto py-8">
             <h2 className="headline-font text-3xl xl:text-4xl mb-4 login-app-title" style={{ color: '#2a2f1e' }}>
               MTC Court App
             </h2>
@@ -467,29 +467,64 @@ function LoginContent() {
                     display: 'flex', justifyContent: 'space-around', alignItems: 'center', padding: '4px 4px',
                     background: 'rgba(255,255,255,0.25)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)',
                     border: '1px solid rgba(255,255,255,0.35)', borderRadius: 16,
+                    boxShadow: '0 -4px 20px rgba(0,0,0,0.06)',
                   }}>
-                    {['Home', 'Schedule', 'Book', 'Partners', 'Messages'].map(label => (
-                      <div key={label} style={{
-                        fontSize: '0.36rem', fontWeight: 600, color: label === 'Home' ? '#0a0a0a' : '#666',
-                        textTransform: 'uppercase', letterSpacing: 0.3, padding: '3px 8px', borderRadius: 8,
-                        background: label === 'Home' ? 'rgba(200,255,0,0.18)' : 'transparent',
-                      }}>{label}</div>
+                    {[
+                      { label: 'Home', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6', active: true },
+                      { label: 'Schedule', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
+                    ].map(item => (
+                      <div key={item.label} style={{
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
+                        color: item.active ? '#0a0a0a' : '#666', fontSize: '0.34rem', fontWeight: 600,
+                        textTransform: 'uppercase', letterSpacing: 0.3, padding: '3px 6px', borderRadius: 8,
+                        background: item.active ? 'rgba(200,255,0,0.18)' : 'transparent',
+                      }}>
+                        <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                          <path strokeLinecap="round" strokeLinejoin="round" d={item.icon}/>
+                        </svg>
+                        {item.label}
+                      </div>
+                    ))}
+                    {/* Center Book button */}
+                    <div style={{
+                      width: 34, height: 34, marginTop: -18, background: '#c8ff00', borderRadius: '50%',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      boxShadow: '0 4px 12px rgba(200,255,0,0.4)', color: '#0a0a0a',
+                    }}>
+                      <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4"/>
+                      </svg>
+                    </div>
+                    {[
+                      { label: 'Partners', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z' },
+                      { label: 'Messages', icon: 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z' },
+                    ].map(item => (
+                      <div key={item.label} style={{
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
+                        color: '#666', fontSize: '0.34rem', fontWeight: 600,
+                        textTransform: 'uppercase', letterSpacing: 0.3, padding: '3px 6px', borderRadius: 8,
+                      }}>
+                        <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                          <path strokeLinecap="round" strokeLinejoin="round" d={item.icon}/>
+                        </svg>
+                        {item.label}
+                      </div>
                     ))}
                   </div>
                 </div>
               </div>
               <p className="text-sm mt-4 font-medium" style={{ color: '#8a8578' }}>
-                Works beautifully on iPad too
+                iPad / Tablet Version
               </p>
             </div>
           </div>
         </div>
 
         {/* Right Side: Login Form */}
-        <div className="w-full lg:w-1/2 xl:w-2/5 flex flex-col justify-center px-6 sm:px-8 md:px-16 lg:px-12 xl:px-20 py-8 lg:py-12 animate-slideUp">
+        <div className="w-full lg:w-1/2 flex flex-col px-6 sm:px-8 md:px-16 lg:px-16 xl:px-24 py-8 lg:py-10 animate-slideUp lg:overflow-y-auto lg:min-h-screen">
 
           {/* Back Link */}
-          <a href="/" className="inline-flex items-center gap-2 text-sm font-semibold mb-6 lg:mb-8 px-4 py-2 rounded-full transition-all hover:scale-105" style={{ color: '#2a2f1e', textDecoration: 'none', background: 'rgba(107, 122, 61, 0.1)', border: '1px solid rgba(107, 122, 61, 0.2)' }}>
+          <a href="/" className="inline-flex items-center gap-2 text-sm font-semibold mb-8 lg:mb-10 px-4 py-2 rounded-full transition-all hover:scale-105 self-start" style={{ color: '#2a2f1e', textDecoration: 'none', background: 'rgba(107, 122, 61, 0.1)', border: '1px solid rgba(107, 122, 61, 0.2)' }}>
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
             </svg>
@@ -538,13 +573,13 @@ function LoginContent() {
           </div>
 
           {/* Welcome */}
-          <div className="mb-6 lg:mb-8">
-            <h1 className="headline-font text-2xl sm:text-3xl" style={{ color: '#2a2f1e' }}>Welcome Back</h1>
-            <p className="mt-2 text-sm sm:text-base" style={{ color: '#6b7266' }}>Sign in to your Mono Tennis Club account</p>
+          <div className="mb-8 lg:mb-12">
+            <h1 className="headline-font text-4xl sm:text-5xl lg:text-[3.25rem] mb-3" style={{ color: '#2a2f1e' }}>Welcome Back</h1>
+            <p className="text-base sm:text-lg" style={{ color: '#6b7266' }}>Sign in to your Mono Tennis Club account</p>
           </div>
 
           {/* Sign-In Options: Google + Magic Link */}
-          <div className="space-y-4">
+          <div className="space-y-5 max-w-lg">
             {/* Google Sign-In (primary) */}
             <button
               type="button"
@@ -553,8 +588,8 @@ function LoginContent() {
                 const { error } = await signInWithGoogle();
                 if (error) setLoginError(error);
               }}
-              className="w-full py-4 rounded-full font-semibold text-base transition-all hover:-translate-y-0.5 active:scale-[0.97] flex items-center justify-center gap-3"
-              style={{ background: '#fff', border: '1px solid #e0dcd3', color: '#2a2f1e', minHeight: 52 }}
+              className="w-full py-5 rounded-full font-semibold text-base transition-all hover:-translate-y-0.5 active:scale-[0.97] flex items-center justify-center gap-3"
+              style={{ background: '#fff', border: '1px solid #e0dcd3', color: '#2a2f1e', minHeight: 56 }}
               onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#6b7a3d'; e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.08)'; }}
               onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e0dcd3'; e.currentTarget.style.boxShadow = 'none'; }}
             >
@@ -587,7 +622,7 @@ function LoginContent() {
                   placeholder="your@email.com"
                   autoComplete="email"
                   maxLength={100}
-                  className="w-full pl-12 pr-5 py-4 rounded-xl text-base transition-all focus:outline-none"
+                  className="w-full pl-12 pr-5 py-5 rounded-xl text-base transition-all focus:outline-none"
                   style={{
                     background: '#fff',
                     border: emailError ? '1px solid #ef4444' : '1px solid #e0dcd3',
@@ -620,8 +655,8 @@ function LoginContent() {
                 }
               }}
               disabled={loading}
-              className="w-full py-4 rounded-full font-semibold text-base transition-all hover:-translate-y-0.5 active:scale-[0.97] flex items-center justify-center gap-2 disabled:opacity-60"
-              style={{ background: '#6b7a3d', color: '#fff', minHeight: 52 }}
+              className="w-full py-5 rounded-full font-semibold text-base transition-all hover:-translate-y-0.5 active:scale-[0.97] flex items-center justify-center gap-2 disabled:opacity-60"
+              style={{ background: '#6b7a3d', color: '#fff', minHeight: 56 }}
               onMouseEnter={(e) => { if (!loading) { e.currentTarget.style.background = '#5a6832'; e.currentTarget.style.boxShadow = '0 10px 30px rgba(107, 122, 61, 0.25)'; } }}
               onMouseLeave={(e) => { e.currentTarget.style.background = '#6b7a3d'; e.currentTarget.style.boxShadow = 'none'; }}
             >
@@ -634,13 +669,22 @@ function LoginContent() {
             </button>
           </div>
 
+          {/* Error Display */}
+          {loginError && (
+            <p className="mt-4 text-sm text-center max-w-lg px-4 py-3 rounded-lg" style={{ color: '#dc2626', background: 'rgba(220, 38, 38, 0.06)', border: '1px solid rgba(220, 38, 38, 0.12)' }}>
+              {loginError}
+            </p>
+          )}
+
           {/* Register Link */}
-          <p className="mt-6 lg:mt-8 text-center text-sm sm:text-base" style={{ color: '#6b7266' }}>
+          <p className="mt-8 lg:mt-10 text-center text-sm sm:text-base max-w-lg" style={{ color: '#6b7266' }}>
             Don&apos;t have an account?{' '}
             <a href="/signup" className="font-medium hover:underline" style={{ color: '#6b7a3d' }}>
               Become a Member
             </a>
           </p>
+
+          {/* TODO: Reminder list section will go here (e.g. sun shades, court tasks) */}
 
           {/* Magic Link Sent — Full overlay */}
           {magicLinkSent && (
