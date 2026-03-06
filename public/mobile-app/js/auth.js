@@ -167,13 +167,6 @@
         // Offline re-authentication relies on the Supabase access token (stored above)
         // No password hash is stored — server-authenticated session token is the only credential
 
-        // Sync membership status to payment data
-        if (typeof memberPaymentData !== 'undefined') {
-          memberPaymentData.currentUser.name = currentUser.name;
-          memberPaymentData.currentUser.email = currentUser.email;
-          memberPaymentData.currentUser.isMember = currentUser.isMember !== false;
-        }
-
         completeLogin();
       }
     } catch (error) {
@@ -398,13 +391,6 @@
     window.currentUser = currentUser;
 
     MTC.storage.set('mtc-user', currentUser);
-
-    // Sync to payment data
-    if (typeof memberPaymentData !== 'undefined') {
-      memberPaymentData.currentUser.name = name;
-      memberPaymentData.currentUser.email = email;
-      memberPaymentData.currentUser.isMember = isMember;
-    }
 
     completeLogin();
 

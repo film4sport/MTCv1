@@ -38,21 +38,7 @@
       });
     }
 
-    // 2. Add court bookings from memberPaymentData
-    if (typeof memberPaymentData !== 'undefined' && memberPaymentData.bookings) {
-      memberPaymentData.bookings.forEach(function(b) {
-        if (b.status !== 'confirmed') return;
-        addEvent(b.date, {
-          title: 'Court ' + b.court + ' Booking',
-          time: (typeof formatTime === 'function') ? formatTime(b.time) : b.time,
-          court: 'Court ' + b.court,
-          type: 'booking',
-          rsvp: ['You']
-        });
-      });
-    }
-
-    // 3. Add partner matches and other event bookings from eventBookings
+    // 2. Add partner matches and other event bookings from eventBookings
     if (typeof eventBookings !== 'undefined') {
       eventBookings.forEach(function(ev) {
         // Skip events already added via userRsvps (any type)

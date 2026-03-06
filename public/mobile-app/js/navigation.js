@@ -566,7 +566,6 @@
         { id: 'confirmModal', check: 'active', fn: function(el) { closeConfirmModal(); } },
         { id: 'bookingModal', check: 'active', fn: function(el) { closeBookingModal(); } },
         { id: 'profileEditModal', check: 'active', fn: function(el) { el.classList.remove('active'); document.body.style.overflow = ''; } },
-        { id: 'bookingProTip', check: 'active', fn: function(el) { el.classList.remove('active'); } },
         { id: 'cancelModal', check: 'active', fn: function(el) { closeCancelModal(); } },
         { id: 'modifyModal', check: 'active', fn: function(el) { closeModifyModal(); } },
         { id: 'avatarPickerModal', check: 'active', fn: function(el) { closeAvatarPicker(); } },

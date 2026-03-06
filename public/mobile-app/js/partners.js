@@ -331,11 +331,6 @@
         }).catch(function() { MTC.warn('[MTC] Withdrawal sync failed'); });
       }
     } else {
-      let tabWarning = '';
-      if (typeof memberPaymentData !== 'undefined' && memberPaymentData.currentUser && memberPaymentData.currentUser.tab > 0) {
-        tabWarning = '\n\n\u26A0\uFE0F You have a $' + memberPaymentData.currentUser.tab + ' tab balance. Please settle up before attending.';
-      }
-
       btn.dataset.originalText = btn.textContent;
       btn.classList.add('enrolled');
       btn.textContent = '\u2713 Enrolled';
@@ -343,9 +338,6 @@
       btn.style.color = '#000';
 
       let celebMsg = name + ' \u2014 ' + cost + '. Check My Bookings for details.';
-      if (tabWarning) {
-        celebMsg += tabWarning;
-      }
       showCelebrationModal('ENROLLED!', celebMsg);
 
       if (typeof addEventToMyBookings === 'function') {

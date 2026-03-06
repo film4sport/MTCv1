@@ -210,18 +210,6 @@
     }
   });
 
-  // Admin payment actions
-  registerAction('adminMarkPaid', function(el, data) {
-    if (typeof window.adminMarkPaid === 'function') {
-      window.adminMarkPaid(parseInt(data.memberId));
-    }
-  });
-
-  registerAction('adminFlagMember', function(el, data) {
-    if (typeof window.adminFlagMember === 'function') {
-      window.adminFlagMember(parseInt(data.memberId));
-    }
-  });
 
   registerAction('adminUnflagMember', function(el, data) {
     if (typeof window.adminUnflagMember === 'function') {

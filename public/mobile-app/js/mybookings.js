@@ -67,9 +67,7 @@
     try {
     closeModifyModal();
     const bookingId = currentBookingToModify;
-    const booking = (typeof memberPaymentData !== 'undefined')
-      ? memberPaymentData.bookings.find(function(b) { return b.id === bookingId; })
-      : null;
+    const booking = null; // Payment tracking removed
 
     if (booking && typeof cancelBooking === 'function') {
       cancelBooking(bookingId);
@@ -94,9 +92,7 @@
     try {
     closeModifyModal();
     const bookingId = currentBookingToModify;
-    const booking = (typeof memberPaymentData !== 'undefined')
-      ? memberPaymentData.bookings.find(function(b) { return b.id === bookingId; })
-      : null;
+    const booking = null; // Payment tracking removed
 
     if (booking && typeof cancelBooking === 'function') {
       cancelBooking(bookingId);
