@@ -387,6 +387,7 @@
       const avatar = typeof getAvatar === 'function' ? getAvatar(p.name) : '';
       const card = document.createElement('div');
       card.className = 'partner-request-card stagger-item';
+      card.setAttribute('data-skill', (p.level || 'intermediate').toLowerCase());
       card.innerHTML =
         '<div class="partner-request-avatar">' + avatar + '</div>' +
         '<div class="partner-request-info">' +
