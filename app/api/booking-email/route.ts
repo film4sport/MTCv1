@@ -207,22 +207,24 @@ export async function POST(request: Request) {
       try {
         const supabase = createClient(supabaseUrl, supabaseServiceKey || supabaseAnonKey);
         const emails = recipientList.map(r => r.email.toLowerCase());
+        // Use case-insensitive comparison: fetch all profiles and compare lowercased
         const { data: profiles } = await supabase
           .from('profiles')
-          .select('email')
-          .in('email', emails);
+          .select('email');
 
-        const validEmails = new Set((profiles || []).map(p => p.email.toLowerCase()));
+        const validEmails = new Set((profiles || []).map(p => (p.email || '').toLowerCase()));
         const invalidEmails = emails.filter(e => !validEmails.has(e));
 
         if (invalidEmails.length > 0) {
+          console.warn('[booking-email] Unknown recipients:', invalidEmails.join(', '));
           return NextResponse.json(
             { error: `Unknown recipient(s): ${invalidEmails.join(', ')}` },
             { status: 400 }
           );
         }
-      } catch {
+      } catch (err) {
         // If validation fails, continue (don't block emails over a DB issue)
+        console.warn('[booking-email] Recipient validation failed, continuing:', err);
       }
     }
 
@@ -294,9 +296,13 @@ export async function POST(request: Request) {
           })
         );
 
-        results.forEach(r => {
-          if (r.status === 'fulfilled') sentCount++;
-          else failedCount++;
+        results.forEach((r, i) => {
+          if (r.status === 'fulfilled') {
+            sentCount++;
+          } else {
+            failedCount++;
+            console.error(`[booking-email] Failed to send to ${recipientList[i]?.email}:`, r.reason);
+          }
         });
 
         // Log each email to email_logs
@@ -310,9 +316,13 @@ export async function POST(request: Request) {
             error: results[i].status === 'rejected' ? String((results[i] as PromiseRejectedResult).reason) : undefined,
           }))
         );
+      } else {
+        console.warn('[booking-email] SMTP not configured. SMTP_HOST:', !!smtpHost, 'SMTP_USER:', !!smtpUser, 'SMTP_PASS:', !!smtpPass);
       }
-    } catch {
-      // nodemailer not installed or SMTP not configured
+    } catch (err) {
+      console.error('[booking-email] SMTP/nodemailer error:', err);
+      // Don't swallow — record the error so it surfaces in the response
+      failedCount = recipientList.length;
     }
 
     // Stamp email_sent_at on the booking row if at least one email was sent
@@ -325,15 +335,21 @@ export async function POST(request: Request) {
       }
     }
 
+    const allFailed = sentCount === 0 && recipientList.length > 0;
     return NextResponse.json({
-      success: true,
+      success: sentCount > 0,
       sent: sentCount,
       failed: failedCount,
       totalRecipients: recipientList.length,
       ics: icsContent,
-      message: sentCount > 0 ? `${sentCount} confirmation email(s) sent` : 'Email not configured — ICS generated',
-    });
-  } catch {
+      message: sentCount > 0
+        ? `${sentCount} confirmation email(s) sent`
+        : failedCount > 0
+          ? `All ${failedCount} email(s) failed to send`
+          : 'SMTP not configured — no emails sent',
+    }, { status: allFailed ? 502 : 200 });
+  } catch (err) {
+    console.error('[booking-email] Unhandled error:', err);
     return NextResponse.json({ error: 'Failed to process booking email' }, { status: 500 });
   }
 }
@@ -508,12 +524,13 @@ export async function DELETE(request: Request) {
           }))
         );
       }
-    } catch {
-      // nodemailer not installed
+    } catch (err) {
+      console.error('[booking-email] Cancellation SMTP error:', err);
     }
 
-    return NextResponse.json({ success: true, sent: sentCount });
-  } catch {
+    return NextResponse.json({ success: sentCount > 0, sent: sentCount });
+  } catch (err) {
+    console.error('[booking-email] Cancellation unhandled error:', err);
     return NextResponse.json({ error: 'Failed to send cancellation email' }, { status: 500 });
   }
 }

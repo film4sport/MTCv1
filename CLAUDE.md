@@ -129,8 +129,17 @@ Use grep to find all occurrences before editing. Verify 0 stale values remain af
 
 ---
 
+## #19: DEPLOYMENT IS RAILWAY — NOT VERCEL
+**The production site is deployed on Railway. NEVER say Vercel.**
+- Railway runs Next.js as a standard Node.js server (long-running process, NOT serverless)
+- Environment variables (SMTP, Supabase, VAPID, etc.) are set in Railway dashboard
+- NODE_VERSION=20 is set in Railway env vars
+- `npm run build` then `npm start` — standard Next.js production server
+- No vercel.json, no @vercel packages, no edge runtime
+
 ## PROJECT OVERVIEW
 - **Mono Tennis Club** — Next.js 14 + TypeScript (strict mode) + Tailwind CSS monorepo
+- **Deployment**: Railway (standard Node.js server) — NOT Vercel, NOT serverless
 - Tennis club management for Mono Tennis Club, Ontario
 - PWA-ready with manifest.json
 - Mobile PWA (vanilla JS SPA) merged into monorepo at `public/mobile-app/`
