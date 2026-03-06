@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { signIn, resetPassword, updatePassword, signInWithGoogle, signInWithMagicLink } from '../dashboard/lib/auth';
+import { useState, useEffect, Suspense } from 'react';
+import { signInWithGoogle, signInWithMagicLink } from '../dashboard/lib/auth';
 
 export default function LoginPage() {
   return (
@@ -13,52 +12,9 @@ export default function LoginPage() {
 }
 
 function LoginContent() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [emailError, setEmailError] = useState(false);
-  const [passwordError, setPasswordError] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-
-  // Password reset mode
-  const [resetMode, setResetMode] = useState(false);
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmNewPassword, setConfirmNewPassword] = useState('');
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
-  const [resetUpdateError, setResetUpdateError] = useState('');
-  const [resetUpdateLoading, setResetUpdateLoading] = useState(false);
-  const [resetSuccess, setResetSuccess] = useState(false);
-
-  // Detect recovery mode or error from URL
-  useEffect(() => {
-    if (searchParams.get('reset') === 'true') {
-      setResetMode(true);
-    }
-    if (searchParams.get('error') === 'expired_link') {
-      setLoginError('Your reset link has expired. Please request a new one.');
-    }
-    // Also detect recovery from hash fragment (Supabase implicit grant flow)
-    if (typeof window !== 'undefined') {
-      const hash = window.location.hash;
-      if (hash.includes('type=recovery')) {
-        setResetMode(true);
-      }
-    }
-  }, [searchParams]);
-
-  // Restore remembered email on mount
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem('mtc-remember-email');
-      if (saved) { setEmail(saved); setRememberMe(true); }
-      // Clean up legacy password storage (never store passwords client-side)
-      localStorage.removeItem('mtc-remember-pwd');
-    } catch { /* ignore */ }
-  }, []);
 
   // Bebas Neue font is preloaded in login/layout.tsx — no client-side injection needed
 
@@ -79,81 +35,7 @@ function LoginContent() {
   const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/;
 
   const [loginError, setLoginError] = useState('');
-  const [showForgotPassword, setShowForgotPassword] = useState(false);
-  const [resetEmail, setResetEmail] = useState('');
-  const [resetSent, setResetSent] = useState(false);
-  const [resetError, setResetError] = useState('');
-  const [resetLoading, setResetLoading] = useState(false);
-  const [resetCooldown, setResetCooldown] = useState(0);
   const [magicLinkSent, setMagicLinkSent] = useState(false);
-  const modalRef = useRef<HTMLDivElement>(null);
-
-  // Cooldown timer for password reset rate limiting
-  useEffect(() => {
-    if (resetCooldown <= 0) return;
-    const timer = setTimeout(() => setResetCooldown(c => c - 1), 1000);
-    return () => clearTimeout(timer);
-  }, [resetCooldown]);
-
-  // Focus trap for forgot password modal
-  useEffect(() => {
-    if (!showForgotPassword || !modalRef.current) return;
-    const focusable = modalRef.current.querySelectorAll<HTMLElement>('input, button, a, [tabindex]:not([tabindex="-1"])');
-    if (focusable.length > 0) focusable[0].focus();
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') { setShowForgotPassword(false); return; }
-      if (e.key !== 'Tab' || !focusable.length) return;
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [showForgotPassword, resetSent]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    let valid = true;
-    setLoginError('');
-
-    if (!email || !emailRegex.test(email)) {
-      setEmailError(true);
-      valid = false;
-    }
-    if (!password) {
-      setPasswordError(true);
-      valid = false;
-    }
-    if (!valid) return;
-
-    setLoading(true);
-    setLoginError('');
-
-    const user = await signIn(email.trim().toLowerCase(), password);
-    if (!user) {
-      setLoginError('Invalid email or password');
-      setPasswordError(true);
-      setLoading(false);
-      return;
-    }
-
-    // Cache user in localStorage for instant hydration
-    localStorage.setItem('mtc-current-user', JSON.stringify(user));
-
-    // Remember email only if checked (never store passwords client-side)
-    if (rememberMe) {
-      localStorage.setItem('mtc-remember-email', email.trim().toLowerCase());
-    } else {
-      localStorage.removeItem('mtc-remember-email');
-    }
-    localStorage.removeItem('mtc-remember-pwd'); // Clean up legacy password storage
-
-    setTimeout(() => {
-      router.push('/dashboard');
-    }, 600);
-  };
 
   return (
     <>
@@ -481,8 +363,8 @@ function LoginContent() {
         <div className="w-full lg:w-1/2 xl:w-2/5 flex flex-col justify-center px-6 sm:px-8 md:px-16 lg:px-12 xl:px-20 py-8 lg:py-12 animate-slideUp">
 
           {/* Back Link */}
-          <a href="/" className="inline-flex items-center gap-2 text-sm mb-6 lg:mb-8 transition-all hover:text-[#2a2f1e]" style={{ color: '#6b7266', textDecoration: 'none' }}>
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <a href="/" className="inline-flex items-center gap-2 text-sm font-semibold mb-6 lg:mb-8 px-4 py-2 rounded-full transition-all hover:scale-105" style={{ color: '#2a2f1e', textDecoration: 'none', background: 'rgba(107, 122, 61, 0.1)', border: '1px solid rgba(107, 122, 61, 0.2)' }}>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
             </svg>
             Back to Home
@@ -529,137 +411,44 @@ function LoginContent() {
             </div>
           </div>
 
-          {/* Password Reset Mode */}
-          {resetMode ? (
-            <div>
-              <div className="mb-6 lg:mb-8">
-                <h1 className="text-xl sm:text-2xl font-semibold" style={{ color: '#2a2f1e' }}>
-                  {resetSuccess ? 'Password Updated!' : 'Set New Password'}
-                </h1>
-                <p className="mt-2 text-sm sm:text-base" style={{ color: '#6b7266' }}>
-                  {resetSuccess ? 'You can now sign in with your new password.' : 'Enter your new password below.'}
-                </p>
-              </div>
-
-              {resetSuccess ? (
-                <button
-                  onClick={() => { setResetMode(false); setPassword(''); setResetSuccess(false); }}
-                  className="w-full py-4 rounded-xl font-semibold text-base text-white transition-all hover:-translate-y-0.5"
-                  style={{ background: '#6b7a3d' }}
-                >
-                  Sign In
-                </button>
-              ) : (
-                <div className="space-y-4">
-                  <div>
-                    <label htmlFor="reset-new-password" className="block text-sm mb-2" style={{ color: '#2a2f1e' }}>New Password</label>
-                    <div className="relative">
-                      <input
-                        id="reset-new-password"
-                        type={showNewPassword ? 'text' : 'password'}
-                        value={newPassword}
-                        onChange={(e) => { setNewPassword(e.target.value); setResetUpdateError(''); }}
-                        placeholder="Min. 8 chars, uppercase, lowercase & number"
-                        maxLength={128}
-                        autoComplete="new-password"
-                        className="w-full px-5 py-4 pr-12 rounded-xl text-base transition-all focus:outline-none"
-                        style={{ background: '#fff', border: '1px solid #e0dcd3', color: '#2a2f1e' }}
-                        onFocus={(e) => { e.currentTarget.style.borderColor = '#6b7a3d'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(107,122,61,0.15)'; }}
-                        onBlur={(e) => { e.currentTarget.style.borderColor = '#e0dcd3'; e.currentTarget.style.boxShadow = 'none'; }}
-                      />
-                      <button type="button" onClick={() => setShowNewPassword(!showNewPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 p-1" style={{ color: '#6b7266' }} aria-label={showNewPassword ? 'Hide password' : 'Show password'}>
-                        {showNewPassword ? (
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5"><path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" /></svg>
-                        ) : (
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5"><path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                  <div>
-                    <label htmlFor="reset-confirm-password" className="block text-sm mb-2" style={{ color: '#2a2f1e' }}>Confirm New Password</label>
-                    <div className="relative">
-                      <input
-                        id="reset-confirm-password"
-                        type={showConfirmNewPassword ? 'text' : 'password'}
-                        value={confirmNewPassword}
-                        onChange={(e) => { setConfirmNewPassword(e.target.value); setResetUpdateError(''); }}
-                        placeholder="Re-enter your new password"
-                        maxLength={128}
-                        autoComplete="new-password"
-                        className="w-full px-5 py-4 pr-12 rounded-xl text-base transition-all focus:outline-none"
-                        style={{
-                          background: '#fff',
-                          border: `1px solid ${confirmNewPassword && confirmNewPassword !== newPassword ? '#ef4444' : '#e0dcd3'}`,
-                          color: '#2a2f1e',
-                        }}
-                        onFocus={(e) => { e.currentTarget.style.boxShadow = '0 0 0 3px rgba(107,122,61,0.15)'; }}
-                        onBlur={(e) => { e.currentTarget.style.boxShadow = 'none'; }}
-                      />
-                      <button type="button" onClick={() => setShowConfirmNewPassword(!showConfirmNewPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 p-1" style={{ color: '#6b7266' }} aria-label={showConfirmNewPassword ? 'Hide password' : 'Show password'}>
-                        {showConfirmNewPassword ? (
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5"><path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" /></svg>
-                        ) : (
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5"><path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                        )}
-                      </button>
-                    </div>
-                    {confirmNewPassword && confirmNewPassword !== newPassword && (
-                      <p className="text-xs mt-2" style={{ color: '#ef4444' }}>Passwords do not match</p>
-                    )}
-                  </div>
-                  {resetUpdateError && <p className="text-sm text-center" style={{ color: '#ef4444' }}>{resetUpdateError}</p>}
-                  <button
-                    onClick={async () => {
-                      const pwd = newPassword;
-                      if (pwd.length < 8 || !/[A-Z]/.test(pwd) || !/[a-z]/.test(pwd) || !/[0-9]/.test(pwd)) {
-                        setResetUpdateError('Password must be at least 8 characters with uppercase, lowercase, and a number');
-                        return;
-                      }
-                      if (confirmNewPassword !== newPassword) {
-                        setResetUpdateError('Passwords do not match');
-                        return;
-                      }
-                      setResetUpdateLoading(true);
-                      const err = await updatePassword(newPassword);
-                      setResetUpdateLoading(false);
-                      if (err) {
-                        setResetUpdateError(err);
-                      } else {
-                        setResetSuccess(true);
-                      }
-                    }}
-                    disabled={resetUpdateLoading || newPassword.length < 8 || confirmNewPassword !== newPassword}
-                    className="w-full py-4 rounded-xl font-semibold text-base text-white transition-all hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none mt-2"
-                    style={{
-                      background: newPassword.length >= 8 && confirmNewPassword === newPassword ? '#6b7a3d' : '#e0dcd3',
-                      color: newPassword.length >= 8 && confirmNewPassword === newPassword ? '#fff' : '#999',
-                    }}
-                  >
-                    {resetUpdateLoading ? 'Updating...' : 'Update Password'}
-                  </button>
-                  <button
-                    onClick={() => { setResetMode(false); setNewPassword(''); setConfirmNewPassword(''); }}
-                    className="w-full text-center text-sm mt-2 hover:underline"
-                    style={{ color: '#6b7266', background: 'none', border: 'none', cursor: 'pointer' }}
-                  >
-                    Back to Sign In
-                  </button>
-                </div>
-              )}
-            </div>
-          ) : (
-          <>
           {/* Welcome */}
           <div className="mb-6 lg:mb-8">
             <h1 className="headline-font text-2xl sm:text-3xl" style={{ color: '#2a2f1e' }}>Welcome Back</h1>
             <p className="mt-2 text-sm sm:text-base" style={{ color: '#6b7266' }}>Sign in to your Mono Tennis Club account</p>
           </div>
 
-          {/* Login Form */}
-          <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Sign-In Options: Google + Magic Link */}
+          <div className="space-y-4">
+            {/* Google Sign-In (primary) */}
+            <button
+              type="button"
+              onClick={async () => {
+                setLoginError('');
+                const { error } = await signInWithGoogle();
+                if (error) setLoginError(error);
+              }}
+              className="w-full py-4 rounded-full font-semibold text-base transition-all hover:-translate-y-0.5 active:scale-[0.97] flex items-center justify-center gap-3"
+              style={{ background: '#fff', border: '1px solid #e0dcd3', color: '#2a2f1e', minHeight: 52 }}
+              onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#6b7a3d'; e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.08)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e0dcd3'; e.currentTarget.style.boxShadow = 'none'; }}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A10.96 10.96 0 001 12c0 1.77.42 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+              </svg>
+              Continue with Google
+            </button>
+
+            <div className="flex items-center gap-3">
+              <div className="flex-1 h-px" style={{ backgroundColor: '#e0dcd3' }} />
+              <span className="text-xs font-medium" style={{ color: '#999' }}>or</span>
+              <div className="flex-1 h-px" style={{ backgroundColor: '#e0dcd3' }} />
+            </div>
+
+            {/* Magic Link: email input + button */}
             <div>
-              <label htmlFor="login-email" className="block text-sm mb-2" style={{ color: '#2a2f1e' }}>Email</label>
               <div className="relative">
                 <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none" style={{ color: '#6b7266' }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
@@ -685,114 +474,11 @@ function LoginContent() {
               </div>
               {emailError && <p className="text-xs mt-2" style={{ color: '#ef4444' }}>Please enter a valid email address</p>}
             </div>
-
-            <div>
-              <label htmlFor="login-password" className="block text-sm mb-2" style={{ color: '#2a2f1e' }}>Password</label>
-              <div className="relative">
-                <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none" style={{ color: '#6b7266' }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-                </svg>
-                <input
-                  id="login-password"
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => { setPassword(e.target.value); setPasswordError(false); }}
-                  placeholder="••••••••"
-                  autoComplete="current-password"
-                  maxLength={128}
-                  className="w-full pl-12 pr-12 py-4 rounded-xl text-base transition-all focus:outline-none"
-                  style={{
-                    background: '#fff',
-                    border: passwordError ? '1px solid #ef4444' : '1px solid #e0dcd3',
-                    color: '#2a2f1e',
-                    boxShadow: passwordError ? '0 0 0 3px rgba(239, 68, 68, 0.1)' : 'none',
-                  }}
-                  onFocus={(e) => { if (!passwordError) e.currentTarget.style.borderColor = '#6b7a3d'; e.currentTarget.style.boxShadow = passwordError ? '0 0 0 3px rgba(239,68,68,0.1)' : '0 0 0 3px rgba(107,122,61,0.15)'; }}
-                  onBlur={(e) => { if (!passwordError) { e.currentTarget.style.borderColor = '#e0dcd3'; e.currentTarget.style.boxShadow = 'none'; } }}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 p-1"
-                  style={{ color: '#6b7266' }}
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                >
-                  {showPassword ? (
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5"><path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" /></svg>
-                  ) : (
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5"><path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                  )}
-                </button>
-              </div>
-              {passwordError && <p className="text-xs mt-2" style={{ color: '#ef4444' }}>{loginError || 'Password is required'}</p>}
-            </div>
-
-            <div className="flex items-center justify-between text-sm">
-              <label className="flex items-center gap-2 cursor-pointer select-none" style={{ color: '#2a2f1e' }}>
-                <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  className="w-4 h-4 rounded border-gray-300 accent-[#6b7a3d]"
-                />
-                <span className="text-sm" style={{ color: '#6b7266' }}>Remember me</span>
-              </label>
-              <button type="button" onClick={() => { setShowForgotPassword(true); setResetEmail(email); setResetSent(false); setResetError(''); }} className="font-medium hover:underline" style={{ color: '#6b7a3d', background: 'none', border: 'none', cursor: 'pointer' }}>Forgot password?</button>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-4 rounded-full font-semibold text-base text-white transition-all hover:-translate-y-0.5 active:scale-[0.97] disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none mt-6"
-              style={{
-                background: '#6b7a3d',
-                minHeight: 52,
-                boxShadow: loading ? 'none' : undefined,
-              }}
-              onMouseEnter={(e) => { if (!loading) { e.currentTarget.style.background = '#5a6832'; e.currentTarget.style.boxShadow = '0 10px 30px rgba(107, 122, 61, 0.25)'; } }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = '#6b7a3d'; e.currentTarget.style.boxShadow = 'none'; }}
-            >
-              {loading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <span className="inline-block w-[18px] h-[18px] border-2 border-white/30 border-t-white rounded-full" style={{ animation: 'spin 0.8s linear infinite' }} />
-                  Signing in...
-                </span>
-              ) : 'Sign In'}
-            </button>
-          </form>
-
-          {/* OAuth Divider + Google Sign-In */}
-          <div className="mt-6">
-            <div className="flex items-center gap-3 mb-5">
-              <div className="flex-1 h-px" style={{ backgroundColor: '#e0dcd3' }} />
-              <span className="text-xs font-medium" style={{ color: '#999' }}>or</span>
-              <div className="flex-1 h-px" style={{ backgroundColor: '#e0dcd3' }} />
-            </div>
-            <button
-              type="button"
-              onClick={async () => {
-                setLoginError('');
-                const { error } = await signInWithGoogle();
-                if (error) setLoginError(error);
-              }}
-              className="w-full py-3.5 rounded-full text-sm font-medium transition-all hover:-translate-y-0.5 flex items-center justify-center gap-3"
-              style={{ background: '#fff', border: '1px solid #e0dcd3', color: '#2a2f1e' }}
-              onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#6b7a3d'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.06)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e0dcd3'; e.currentTarget.style.boxShadow = 'none'; }}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
-                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A10.96 10.96 0 001 12c0 1.77.42 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
-                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-              </svg>
-              Continue with Google
-            </button>
             <button
               type="button"
               onClick={async () => {
                 if (!email || !emailRegex.test(email)) {
-                  setLoginError('Enter your email above, then click this button to get a sign-in link.');
+                  setLoginError('Enter your email to receive a sign-in link.');
                   setEmailError(true);
                   return;
                 }
@@ -808,102 +494,19 @@ function LoginContent() {
                 }
               }}
               disabled={loading}
-              className="w-full py-3.5 rounded-full text-sm font-medium transition-all hover:-translate-y-0.5 flex items-center justify-center gap-3 mt-3 disabled:opacity-60"
-              style={{ background: '#faf8f3', border: '1px solid #e0dcd3', color: '#2a2f1e' }}
-              onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#6b7a3d'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.06)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e0dcd3'; e.currentTarget.style.boxShadow = 'none'; }}
+              className="w-full py-4 rounded-full font-semibold text-base transition-all hover:-translate-y-0.5 active:scale-[0.97] flex items-center justify-center gap-2 disabled:opacity-60"
+              style={{ background: '#6b7a3d', color: '#fff', minHeight: 52 }}
+              onMouseEnter={(e) => { if (!loading) { e.currentTarget.style.background = '#5a6832'; e.currentTarget.style.boxShadow = '0 10px 30px rgba(107, 122, 61, 0.25)'; } }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = '#6b7a3d'; e.currentTarget.style.boxShadow = 'none'; }}
             >
-              <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
-              </svg>
-              Sign in with Email Link
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <span className="inline-block w-[18px] h-[18px] border-2 border-white/30 border-t-white rounded-full" style={{ animation: 'spin 0.8s linear infinite' }} />
+                  Sending link...
+                </span>
+              ) : 'Sign in with Email Link'}
             </button>
-            {magicLinkSent && (
-              <div className="mt-4 rounded-xl p-4 text-center" style={{ background: 'rgba(107, 122, 61, 0.08)', border: '1px solid rgba(107, 122, 61, 0.2)' }}>
-                <p className="text-sm font-medium" style={{ color: '#2a2f1e' }}>Check your email</p>
-                <p className="text-xs mt-1" style={{ color: '#6b7266' }}>We sent a sign-in link to <strong>{email}</strong></p>
-              </div>
-            )}
           </div>
-
-          {/* Forgot Password Modal */}
-          {showForgotPassword && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowForgotPassword(false)} role="dialog" aria-modal="true" aria-label="Reset password">
-              <div ref={modalRef} className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm mx-4" onClick={(e) => e.stopPropagation()}>
-                <h2 className="text-lg font-semibold mb-1" style={{ color: '#2a2f1e' }}>Reset Password</h2>
-                <p className="text-sm mb-4" style={{ color: '#6b7266' }}>
-                  Enter your email and we&apos;ll send a reset link.
-                </p>
-                {resetSent ? (
-                  <div className="text-center py-4">
-                    <div className="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center" style={{ background: 'rgba(107, 122, 61, 0.1)' }}>
-                      <svg className="w-6 h-6" style={{ color: '#6b7a3d' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                    <p className="text-sm font-medium" style={{ color: '#2a2f1e' }}>Check your email</p>
-                    <p className="text-xs mt-1" style={{ color: '#6b7266' }}>We sent a reset link to {resetEmail}</p>
-                    <button
-                      type="button"
-                      onClick={() => setShowForgotPassword(false)}
-                      className="mt-4 px-6 py-2 rounded-xl text-sm font-medium text-white"
-                      style={{ background: '#6b7a3d' }}
-                    >
-                      Done
-                    </button>
-                  </div>
-                ) : (
-                  <>
-                    <input
-                      type="email"
-                      value={resetEmail}
-                      onChange={(e) => { setResetEmail(e.target.value); setResetError(''); }}
-                      placeholder="your@email.com"
-                      className="w-full px-4 py-3 rounded-xl text-sm focus:outline-none mb-3"
-                      style={{ background: '#f5f2eb', border: '1px solid #e0dcd3', color: '#2a2f1e' }}
-                      onFocus={(e) => { e.currentTarget.style.borderColor = '#6b7a3d'; }}
-                      onBlur={(e) => { e.currentTarget.style.borderColor = '#e0dcd3'; }}
-                    />
-                    {resetError && <p className="text-xs mb-3" style={{ color: '#ef4444' }}>{resetError}</p>}
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setShowForgotPassword(false)}
-                        className="flex-1 py-2.5 rounded-xl text-sm font-medium"
-                        style={{ color: '#6b7266', border: '1px solid #e0dcd3' }}
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        type="button"
-                        disabled={resetLoading || resetCooldown > 0}
-                        onClick={async () => {
-                          if (!resetEmail || !emailRegex.test(resetEmail)) {
-                            setResetError('Please enter a valid email');
-                            return;
-                          }
-                          if (resetCooldown > 0) return;
-                          setResetLoading(true);
-                          const err = await resetPassword(resetEmail);
-                          setResetLoading(false);
-                          if (err) {
-                            setResetError(err);
-                          } else {
-                            setResetSent(true);
-                            setResetCooldown(60); // 60-second cooldown between requests
-                          }
-                        }}
-                        className="flex-1 py-2.5 rounded-xl text-sm font-medium text-white disabled:opacity-60"
-                        style={{ background: '#6b7a3d' }}
-                      >
-                        {resetLoading ? 'Sending...' : resetCooldown > 0 ? `Wait ${resetCooldown}s` : 'Send Reset Link'}
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-          )}
 
           {/* Register Link */}
           <p className="mt-6 lg:mt-8 text-center text-sm sm:text-base" style={{ color: '#6b7266' }}>
@@ -912,7 +515,41 @@ function LoginContent() {
               Become a Member
             </a>
           </p>
-          </>
+
+          {/* Magic Link Sent — Full overlay */}
+          {magicLinkSent && (
+            <div
+              className="fixed inset-0 z-50 flex items-center justify-center"
+              style={{ background: 'rgba(26, 31, 18, 0.6)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)' }}
+              onClick={() => setMagicLinkSent(false)}
+            >
+              <div
+                className="rounded-2xl p-8 sm:p-10 text-center max-w-sm w-full mx-4 animate-slideUp"
+                style={{ background: '#fff', boxShadow: '0 25px 60px rgba(0,0,0,0.2)' }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Email icon */}
+                <div className="mx-auto mb-5 flex items-center justify-center" style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(107, 122, 61, 0.12)' }}>
+                  <svg width="32" height="32" fill="none" stroke="#6b7a3d" viewBox="0 0 24 24" strokeWidth="1.5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                  </svg>
+                </div>
+                <h2 className="headline-font text-xl sm:text-2xl mb-2" style={{ color: '#2a2f1e' }}>Check Your Email</h2>
+                <p className="text-sm sm:text-base mb-1" style={{ color: '#6b7266' }}>
+                  We sent a sign-in link to
+                </p>
+                <p className="text-sm sm:text-base font-semibold mb-5" style={{ color: '#2a2f1e' }}>{email}</p>
+                <p className="text-xs" style={{ color: '#999' }}>Click the link in your email to sign in. Check your spam folder if you don&apos;t see it.</p>
+                <button
+                  type="button"
+                  onClick={() => setMagicLinkSent(false)}
+                  className="mt-6 text-sm font-medium hover:underline"
+                  style={{ color: '#6b7a3d' }}
+                >
+                  Back to sign in
+                </button>
+              </div>
+            </div>
           )}
 
         </div>

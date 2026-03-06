@@ -626,6 +626,178 @@
 }
 
 /* ============================================
+   GOOGLE SIGN-IN BUTTON
+============================================ */
+.login-btn-google {
+  width: 100%;
+  padding: 16px;
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  border-radius: 16px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.95);
+  color: #1a1a1a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  position: relative;
+  z-index: 1;
+}
+
+.login-btn-google:hover,
+.login-btn-google:active {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  border-color: rgba(200, 255, 0, 0.5);
+}
+
+/* ============================================
+   LOGIN DIVIDER
+============================================ */
+.login-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 12px 0;
+}
+
+.login-divider::before,
+.login-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.login-divider span {
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: lowercase;
+}
+
+/* ============================================
+   MAGIC LINK BUTTON
+============================================ */
+.login-btn-magic {
+  width: 100%;
+  padding: 16px;
+  border: none;
+  border-radius: 16px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: linear-gradient(135deg, #6b7a3d 0%, #5a6832 100%);
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(107, 122, 61, 0.35);
+  position: relative;
+  z-index: 1;
+}
+
+.login-btn-magic:hover,
+.login-btn-magic:active {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(107, 122, 61, 0.5);
+}
+
+.login-btn-magic:disabled {
+  opacity: 0.6;
+  transform: none;
+}
+
+/* ============================================
+   MAGIC LINK SENT OVERLAY
+============================================ */
+.magic-link-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 10, 10, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 24px;
+}
+
+.magic-link-card {
+  background: rgba(30, 32, 28, 0.95);
+  border: 1.5px solid rgba(200, 255, 0, 0.15);
+  border-radius: 24px;
+  padding: 36px 28px;
+  text-align: center;
+  max-width: 340px;
+  width: 100%;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
+  animation: fadeSlideUp 0.3s ease;
+}
+
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.magic-link-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(200, 255, 0, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+}
+
+.magic-link-title {
+  font-family: 'Bebas Neue', 'Inter', sans-serif;
+  font-size: 1.5rem;
+  letter-spacing: 2px;
+  color: #fff;
+  margin-bottom: 8px;
+}
+
+.magic-link-text {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 4px;
+}
+
+.magic-link-email {
+  font-size: 15px;
+  font-weight: 600;
+  color: #c8ff00;
+  margin-bottom: 16px;
+  word-break: break-all;
+}
+
+.magic-link-hint {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.4);
+  line-height: 1.4;
+}
+
+.magic-link-back {
+  margin-top: 20px;
+  background: none;
+  border: none;
+  color: #c8ff00;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 16px;
+}
+
+.magic-link-back:hover {
+  text-decoration: underline;
+}
+
+/* ============================================
    LOGIN FOOTER
 ============================================ */
 .login-footer {
