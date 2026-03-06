@@ -38,6 +38,7 @@ const CSS_FILES = [
   'neumorphic.css',
   'chat.css',
   'captain.css',
+  'tablet.css',
 ];
 
 // JS files in load order (must match original index.html dependency chain)

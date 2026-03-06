@@ -1,0 +1,232 @@
+/* tablet.css - iPad/Tablet overrides (768px+) */
+/* ============================================
+   TABLET LAYOUT ENHANCEMENTS
+   Target: iPad (768px-1024px) and wider tablets
+   Strategy: More breathing room, wider grids,
+   larger touch targets, centered content
+============================================ */
+
+@media (min-width: 768px) {
+
+  /* ── Global Spacing ── */
+  .screen {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  .section-header {
+    padding: 0 24px;
+  }
+
+  /* ── Home Screen ── */
+  .court-status-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    padding: 0 24px;
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .court-grid-item {
+    padding: 20px;
+  }
+
+  .quick-actions {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    padding: 0 24px;
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .quick-action {
+    height: 110px;
+  }
+
+  /* ── Booking Screen ── */
+  .booking-card {
+    margin: 0 24px 16px;
+    padding: 24px;
+  }
+
+  .booking-card-details {
+    gap: 24px;
+  }
+
+  .bookings-tabs {
+    padding: 0 24px;
+    gap: 10px;
+  }
+
+  /* ── Time Slots Grid ── */
+  .time-slots-container,
+  .skeleton-slot-grid {
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* ── Events ── */
+  .events-list,
+  .event-cards {
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 24px;
+  }
+
+  /* ── Messages ── */
+  .message-item {
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .chat-messages {
+    padding: 20px 24px;
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .chat-bubble {
+    max-width: 65%;
+  }
+
+  .chat-input-area {
+    padding: 12px 24px;
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* ── Profile / Settings ── */
+  .profile-section,
+  .settings-section {
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .avatar-grid {
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
+  }
+
+  /* ── Partners / Social ── */
+  .partner-cards,
+  .social-feed {
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* ── Schedule ── */
+  .schedule-container {
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 24px;
+  }
+
+  /* ── Admin Panel ── */
+  .admin-tabs {
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .admin-stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .admin-report-cards {
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .admin-quick-actions {
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* ── Typography bumps ── */
+  .headline {
+    font-size: 48px;
+  }
+
+  .headline-sm {
+    font-size: 32px;
+  }
+
+  /* ── Navigation Bar ── */
+  .nav-bar {
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 24px 24px 0 0;
+  }
+
+  /* ── Login Screen ── */
+  .login-card {
+    max-width: 420px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* ── Modals ── */
+  .modal-content,
+  .action-sheet {
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* ── Notifications ── */
+  .notifications-list {
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+/* ── Landscape-specific (wider iPads) ── */
+@media (min-width: 768px) and (orientation: landscape) {
+  .court-status-grid {
+    grid-template-columns: repeat(4, 1fr);
+    max-width: 900px;
+  }
+
+  .quick-actions {
+    max-width: 900px;
+  }
+
+  .chat-messages,
+  .events-list,
+  .event-cards,
+  .partner-cards,
+  .social-feed,
+  .notifications-list,
+  .admin-stats-grid,
+  .admin-report-cards,
+  .admin-quick-actions,
+  .schedule-container {
+    max-width: 900px;
+  }
+
+  .chat-bubble {
+    max-width: 50%;
+  }
+
+  .admin-stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}

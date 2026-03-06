@@ -274,12 +274,42 @@ body {
   }
 }
 
-/* iPad / Tablet - simpler texture for Safari compatibility */
+/* iPad / Tablet - fullscreen like mobile, no phone frame */
 @media (min-width: 501px) and (max-width: 1024px) {
-  #app {
-    background-image: none;
+  html {
+    height: 100%;
+    height: -webkit-fill-available;
+    height: 100dvh;
   }
-  
+
+  body {
+    height: 100%;
+    height: -webkit-fill-available;
+    height: 100dvh;
+    background-color: var(--color-light-border);
+    background-image: none;
+    align-items: stretch;
+    overscroll-behavior: none;
+  }
+
+  #app {
+    width: 100%;
+    height: 100%;
+    height: -webkit-fill-available;
+    height: 100dvh;
+    min-height: 100%;
+    min-height: -webkit-fill-available;
+    min-height: 100dvh;
+    max-height: 100%;
+    max-height: -webkit-fill-available;
+    max-height: 100dvh;
+    max-width: none;
+    border-radius: 0;
+    box-shadow: none;
+    background-image: none;
+    background-color: var(--bg-primary);
+  }
+
   #app[data-theme="dark"] {
     background-image: none;
   }

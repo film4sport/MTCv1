@@ -3,12 +3,12 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { allCardEvents, eventFilters, type MTCEvent } from '../../lib/events';
 
-const categoryColors: Record<string, { accent: string; bg: string; text: string }> = {
-  tournament: { accent: '#6b7a3d', bg: 'rgba(107, 122, 61, 0.08)', text: '#4a5528' },
-  camp: { accent: '#d4e157', bg: 'rgba(212, 225, 87, 0.12)', text: '#3b4229' },
-  coaching: { accent: '#6b7a3d', bg: 'rgba(107, 122, 61, 0.08)', text: '#4a5528' },
-  social: { accent: '#1a1f12', bg: 'rgba(26, 31, 18, 0.05)', text: '#1a1f12' },
-};
+// Rotating palette: cards cycle through these 3 colors by position, not category
+const cardPalette: Array<{ accent: string; bg: string; text: string }> = [
+  { accent: '#6b7a3d', bg: 'rgba(107, 122, 61, 0.08)', text: '#4a5528' },   // MTC green
+  { accent: '#d4e157', bg: 'rgba(212, 225, 87, 0.12)', text: '#3b4229' },   // lime
+  { accent: '#1a1f12', bg: 'rgba(26, 31, 18, 0.05)', text: '#1a1f12' },     // dark
+];
 
 // Use shared event data
 const events = allCardEvents;
@@ -136,7 +136,7 @@ export default function Events() {
             </div>
           )}
           {mounted && upcoming.map((event, index) => {
-            const colors = categoryColors[event.category] || categoryColors.social;
+            const colors = cardPalette[index % cardPalette.length];
             return (
               <div
                 key={`${event.title}-${animKey}`}
