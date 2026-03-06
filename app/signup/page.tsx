@@ -1,12 +1,23 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 
-import { signUp, signIn } from '../dashboard/lib/auth';
+import { signUp, signIn, signInWithGoogle, completeOAuthProfile } from '../dashboard/lib/auth';
+import { supabase } from '../lib/supabase';
 import { sendWelcomeMessage, createFamily, addFamilyMember } from '../dashboard/lib/db';
 import { membershipTypes, signupMembershipTypes, waiverText, acknowledgementText } from '../info/data';
 
 export default function SignupPage() {
+  return (
+    <Suspense fallback={null}>
+      <SignupContent />
+    </Suspense>
+  );
+}
+
+function SignupContent() {
+  const searchParams = useSearchParams();
   const waiverRef = useRef<HTMLDivElement>(null);
   const ackRef = useRef<HTMLDivElement>(null);
 
@@ -23,6 +34,8 @@ export default function SignupPage() {
   const [emailConfirmPending, setEmailConfirmPending] = useState(false);
   const [existingProfile, setExistingProfile] = useState<{ name: string; email: string; role?: string; status?: string } | null>(null);
   const [familyMemberInputs, setFamilyMemberInputs] = useState<{ name: string; type: 'adult' | 'junior'; birthYear: string }[]>([]);
+  const [isOAuthUser, setIsOAuthUser] = useState(false);
+  const [oauthUserId, setOauthUserId] = useState<string | null>(null);
   const isFamily = signupData.membershipType === 'family';
   const totalSteps = 7;
 
@@ -33,6 +46,45 @@ export default function SignupPage() {
       if (stored) setExistingProfile(JSON.parse(stored));
     } catch { /* ignore */ }
   }, []);
+
+  // Detect OAuth return — user is coming back from Google with an active session
+  useEffect(() => {
+    if (searchParams.get('oauth') !== 'true') return;
+
+    const detectOAuthUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) return;
+
+      const user = session.user;
+      const fullName = user.user_metadata?.full_name || user.user_metadata?.name || '';
+      const userEmail = user.email || '';
+
+      setIsOAuthUser(true);
+      setOauthUserId(user.id);
+
+      // Pre-fill name and email from Google
+      setSignupData((prev) => ({
+        ...prev,
+        name: fullName || prev.name,
+        email: userEmail || prev.email,
+      }));
+
+      // Restore membership type from localStorage (saved before OAuth redirect)
+      const savedType = localStorage.getItem('mtc-oauth-membership-type');
+      if (savedType) {
+        setSignupData((prev) => ({ ...prev, membershipType: savedType }));
+        localStorage.removeItem('mtc-oauth-membership-type');
+        // Skip to the step after info (family members or skill level)
+        const isFam = savedType === 'family';
+        setSignupStep(isFam ? 3 : 4);
+      } else {
+        // No saved membership type — start from step 1
+        setSignupStep(1);
+      }
+    };
+
+    detectOAuthUser();
+  }, [searchParams]);
 
   // Auto-detect if waiver/ack content fits without scrolling (large screens)
   useEffect(() => {
@@ -79,6 +131,62 @@ export default function SignupPage() {
     try {
       const trimmedEmail = signupData.email.trim().toLowerCase();
       const trimmedName = signupData.name.trim();
+
+      // ── OAuth path: user already authenticated via Google ──
+      if (isOAuthUser && oauthUserId) {
+        const { error: profileError } = await completeOAuthProfile(oauthUserId, {
+          membershipType: signupData.membershipType,
+          skillLevel: signupData.skillLevel || undefined,
+          name: trimmedName || undefined,
+        });
+        if (profileError) {
+          setSignupError(profileError);
+          setSignupLoading(false);
+          return;
+        }
+
+        // Send welcome message
+        sendWelcomeMessage(oauthUserId, trimmedName).catch(err => console.error('[MTC] welcome message:', err));
+
+        // Create family group and add family members if this is a family membership
+        if (isFamily && familyMemberInputs.length > 0) {
+          try {
+            const familyName = `The ${trimmedName.split(' ').pop() || trimmedName} Family`;
+            const familyId = await createFamily(oauthUserId, familyName);
+            if (familyId) {
+              const validMembers = familyMemberInputs.filter(fm => fm.name.trim());
+              await Promise.all(validMembers.map(fm =>
+                addFamilyMember(familyId, {
+                  name: fm.name.trim(),
+                  type: fm.type,
+                  birthYear: fm.birthYear ? parseInt(fm.birthYear) : undefined,
+                })
+              ));
+            }
+          } catch (err) {
+            console.error('[MTC] family creation:', err);
+          }
+        }
+
+        // Cache user for dashboard hydration
+        localStorage.setItem('mtc-current-user', JSON.stringify({
+          id: oauthUserId,
+          name: trimmedName,
+          email: trimmedEmail,
+          role: 'member',
+          membershipType: signupData.membershipType,
+          skillLevel: signupData.skillLevel || undefined,
+          memberSince: new Date().toISOString().slice(0, 7),
+        }));
+
+        // OAuth users skip email confirmation — go straight to confirmation step
+        setEmailConfirmPending(false);
+        setSignupLoading(false);
+        setSignupStep(totalSteps);
+        return;
+      }
+
+      // ── Email/password path (original flow) ──
       const { user, error, emailConfirmRequired } = await signUp(trimmedEmail, signupData.password, trimmedName, signupData.membershipType, signupData.skillLevel || undefined);
       if (error || !user) {
         const msg = error?.toLowerCase() || '';
@@ -268,6 +376,37 @@ export default function SignupPage() {
           <div>
             <h3 className="headline-font text-2xl mb-2 text-center" style={{ color: '#2a2f1e' }}>Your Information</h3>
             <p className="text-sm text-center mb-8" style={{ color: '#6b7266' }}>Tell us a bit about yourself.</p>
+
+            {/* Google OAuth option (only for non-OAuth users — OAuth users already authenticated) */}
+            {!isOAuthUser && (
+              <div className="mb-6">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    // Save membership type before redirecting to Google
+                    localStorage.setItem('mtc-oauth-membership-type', signupData.membershipType);
+                    const { error } = await signInWithGoogle('/signup?oauth=true');
+                    if (error) setSignupError(error);
+                  }}
+                  className="w-full py-3.5 rounded-xl text-sm font-medium transition-all hover:-translate-y-0.5 flex items-center justify-center gap-3"
+                  style={{ background: '#faf8f3', border: '1px solid #e0dcd3', color: '#2a2f1e' }}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A10.96 10.96 0 001 12c0 1.77.42 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                  </svg>
+                  Sign up with Google
+                </button>
+                <div className="flex items-center gap-3 mt-5 mb-1">
+                  <div className="flex-1 h-px" style={{ backgroundColor: '#e0dcd3' }} />
+                  <span className="text-xs font-medium" style={{ color: '#999' }}>or continue with email</span>
+                  <div className="flex-1 h-px" style={{ backgroundColor: '#e0dcd3' }} />
+                </div>
+              </div>
+            )}
+
             <div className="space-y-5">
               <div>
                 <label htmlFor="signup-name" className="block text-sm font-medium mb-2" style={{ color: '#6b7266' }}>Full Name</label>

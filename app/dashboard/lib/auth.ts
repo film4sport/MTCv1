@@ -78,6 +78,94 @@ export async function signUp(
 }
 
 /**
+ * Sign in (or sign up) with Google OAuth.
+ * Redirects to Google's consent screen. After auth, Supabase sends
+ * the user back to /auth/callback with a ?next= hint so the callback
+ * knows where to go (e.g. /signup for new users, /dashboard for logins).
+ */
+export async function signInWithGoogle(nextPath?: string): Promise<{ error: string | null }> {
+  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.monotennisclub.com';
+  const redirectTo = `${origin}/auth/callback${nextPath ? `?next=${encodeURIComponent(nextPath)}` : ''}`;
+
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo,
+      queryParams: {
+        access_type: 'offline',
+        prompt: 'consent',
+      },
+    },
+  });
+
+  return { error: error?.message || null };
+}
+
+/**
+ * Send a magic link (passwordless email login).
+ * Only works for existing users — new users should go through the signup wizard.
+ */
+export async function signInWithMagicLink(email: string): Promise<{ error: string | null }> {
+  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.monotennisclub.com';
+
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: {
+      shouldCreateUser: false,
+      emailRedirectTo: `${origin}/auth/callback`,
+    },
+  });
+
+  if (error) {
+    // Supabase returns "Signups not allowed for otp" when user doesn't exist
+    if (error.message?.toLowerCase().includes('signups not allowed') || error.message?.toLowerCase().includes('user not found')) {
+      return { error: 'No account found with this email. Please sign up first.' };
+    }
+    return { error: error.message };
+  }
+
+  return { error: null };
+}
+
+/**
+ * Complete an OAuth signup by updating the user's profile with wizard data.
+ * Called after an OAuth user finishes the signup wizard steps.
+ */
+export async function completeOAuthProfile(
+  userId: string,
+  data: { membershipType: string; skillLevel?: string; name?: string },
+): Promise<{ error: string | null }> {
+  // Update user metadata in Supabase Auth
+  const { error: metaError } = await supabase.auth.updateUser({
+    data: {
+      membership_type: data.membershipType,
+      skill_level: data.skillLevel || undefined,
+      skill_level_set: data.skillLevel ? true : false,
+      ...(data.name ? { name: data.name } : {}),
+    },
+  });
+  if (metaError) return { error: metaError.message };
+
+  // Update the profiles table directly
+  const updateFields: Record<string, unknown> = {
+    membership_type: data.membershipType,
+  };
+  if (data.skillLevel) {
+    updateFields.skill_level = data.skillLevel;
+    updateFields.skill_level_set = true;
+  }
+  if (data.name) {
+    updateFields.name = data.name;
+  }
+  const { error: profileError } = await supabase
+    .from('profiles')
+    .update(updateFields)
+    .eq('id', userId);
+
+  return { error: profileError?.message || null };
+}
+
+/**
  * Sign out the current user.
  */
 export async function signOut(): Promise<void> {
