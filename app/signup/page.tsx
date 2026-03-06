@@ -722,16 +722,23 @@ function SignupContent() {
             <p className="text-sm text-center mb-8" style={{ color: '#6b7266' }}>Please read both documents carefully. Scroll to the bottom of each to proceed.</p>
 
             <p className="text-xs font-semibold mb-2" style={{ color: '#4a5528' }}>1. Waiver & Release of Liability</p>
-            <div
-              ref={waiverRef}
-              onScroll={handleWaiverScroll}
-              className="rounded-xl p-6 text-sm leading-relaxed overflow-y-auto"
-              style={{ backgroundColor: '#faf8f3', border: `1px solid ${waiverScrolled ? '#6b7a3d' : '#e0dcd3'}`, color: '#555', maxHeight: '280px', whiteSpace: 'pre-wrap' }}
-            >
-              {waiverText}
+            <div className="relative">
+              <div
+                ref={waiverRef}
+                onScroll={handleWaiverScroll}
+                className="rounded-xl p-6 text-sm leading-relaxed overflow-y-auto"
+                style={{ backgroundColor: '#faf8f3', border: `2px solid ${waiverScrolled ? '#6b7a3d' : '#e0dcd3'}`, color: '#555', maxHeight: '280px', whiteSpace: 'pre-wrap' }}
+              >
+                {waiverText}
+              </div>
+              {!waiverScrolled && (
+                <div className="absolute bottom-0 left-0 right-0 rounded-b-xl pointer-events-none" style={{ height: '60px', background: 'linear-gradient(to bottom, transparent, #faf8f3 80%)' }} />
+              )}
             </div>
             {!waiverScrolled && (
-              <p className="text-xs text-center mt-2" style={{ color: '#6b7a3d' }}>↓ Scroll to the bottom of the waiver</p>
+              <div className="flex items-center justify-center gap-2 mt-3 py-2 px-4 rounded-full mx-auto w-fit animate-bounce" style={{ backgroundColor: '#4a5528', color: '#e8e4d9' }}>
+                <span className="text-xs font-semibold">↓ Scroll to bottom to continue</span>
+              </div>
             )}
             {waiverScrolled && (
               <p className="text-xs text-center mt-2 flex items-center justify-center gap-1" style={{ color: '#6b7a3d' }}>
@@ -741,16 +748,23 @@ function SignupContent() {
             )}
 
             <p className="text-xs font-semibold mb-2 mt-6" style={{ color: '#4a5528' }}>2. Acknowledgement Agreement</p>
-            <div
-              ref={ackRef}
-              onScroll={handleAckScroll}
-              className="rounded-xl p-6 text-sm leading-relaxed overflow-y-auto"
-              style={{ backgroundColor: '#faf8f3', border: `1px solid ${ackScrolled ? '#6b7a3d' : '#e0dcd3'}`, color: '#555', maxHeight: '280px', whiteSpace: 'pre-wrap' }}
-            >
-              {acknowledgementText}
+            <div className="relative">
+              <div
+                ref={ackRef}
+                onScroll={handleAckScroll}
+                className="rounded-xl p-6 text-sm leading-relaxed overflow-y-auto"
+                style={{ backgroundColor: '#faf8f3', border: `2px solid ${ackScrolled ? '#6b7a3d' : '#e0dcd3'}`, color: '#555', maxHeight: '280px', whiteSpace: 'pre-wrap' }}
+              >
+                {acknowledgementText}
+              </div>
+              {!ackScrolled && (
+                <div className="absolute bottom-0 left-0 right-0 rounded-b-xl pointer-events-none" style={{ height: '60px', background: 'linear-gradient(to bottom, transparent, #faf8f3 80%)' }} />
+              )}
             </div>
             {!ackScrolled && (
-              <p className="text-xs text-center mt-2" style={{ color: '#6b7a3d' }}>↓ Scroll to the bottom of the acknowledgement</p>
+              <div className="flex items-center justify-center gap-2 mt-3 py-2 px-4 rounded-full mx-auto w-fit animate-bounce" style={{ backgroundColor: '#4a5528', color: '#e8e4d9' }}>
+                <span className="text-xs font-semibold">↓ Scroll to bottom to continue</span>
+              </div>
             )}
             {ackScrolled && (
               <p className="text-xs text-center mt-2 flex items-center justify-center gap-1" style={{ color: '#6b7a3d' }}>
