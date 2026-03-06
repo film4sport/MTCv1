@@ -319,7 +319,7 @@ test.describe('Info Page', () => {
     await page.waitForTimeout(1000);
     const heading = page.getByText('About Us').first();
     await expect(heading).toBeAttached();
-    const passion = page.getByText('Passion, Community,');
+    const passion = page.getByText('Great Tennis');
     await expect(passion).toBeAttached();
   });
 
@@ -348,7 +348,7 @@ test.describe('Info Page', () => {
     // Click About tab (use dispatchEvent for mobile horizontal scroll container)
     await page.getByRole('tab', { name: 'About' }).dispatchEvent('click');
     await page.waitForTimeout(500);
-    const aboutContent = page.getByText('Passion, Community,');
+    const aboutContent = page.getByText('Great Tennis');
     await expect(aboutContent).toBeAttached();
     // Click FAQ tab
     await page.getByRole('tab', { name: 'FAQ' }).dispatchEvent('click');

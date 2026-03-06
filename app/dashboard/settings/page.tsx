@@ -638,24 +638,47 @@ export default function SettingsPage() {
           <div ref={avatarModalRef} className="rounded-2xl p-6 w-full max-w-sm" style={{ background: '#fff' }} onClick={e => e.stopPropagation()}>
             <h3 id="avatar-modal-title" className="font-semibold text-lg mb-4" style={{ color: '#2a2f1e' }}>Choose Avatar</h3>
 
-            <div className="grid grid-cols-2 gap-3 mb-4">
-              {AVATAR_OPTIONS.map(opt => (
-                <button
-                  key={opt.id}
-                  onClick={() => selectAvatar(opt.id)}
-                  className="p-3 rounded-xl border-2 transition-all duration-200 hover:shadow-md flex flex-col items-center gap-2"
-                  style={{
-                    borderColor: currentUser.avatar === opt.id ? '#6b7a3d' : '#e0dcd3',
-                    background: currentUser.avatar === opt.id ? 'rgba(107, 122, 61, 0.05)' : '#fff',
-                  }}
-                >
-                  <div
-                    className="w-16 h-16 rounded-full overflow-hidden"
-                    dangerouslySetInnerHTML={{ __html: AVATAR_SVGS[opt.id] }}
-                  />
-                  <span className="text-xs font-medium" style={{ color: '#6b7266' }}>{opt.label}</span>
-                </button>
-              ))}
+            <div className="mb-4" style={{ maxHeight: 360, overflowY: 'auto' }}>
+              <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: '#6b7a3d' }}>Tennis Players</p>
+              <div className="grid grid-cols-4 gap-2 mb-4">
+                {AVATAR_OPTIONS.filter(o => o.id.startsWith('tennis-')).map(opt => (
+                  <button
+                    key={opt.id}
+                    onClick={() => selectAvatar(opt.id)}
+                    className="p-2 rounded-xl border-2 transition-all duration-200 hover:shadow-md flex flex-col items-center gap-1"
+                    style={{
+                      borderColor: currentUser.avatar === opt.id ? '#6b7a3d' : '#e0dcd3',
+                      background: currentUser.avatar === opt.id ? 'rgba(107, 122, 61, 0.05)' : '#fff',
+                    }}
+                  >
+                    <div
+                      className="w-12 h-12 rounded-full overflow-hidden"
+                      dangerouslySetInnerHTML={{ __html: AVATAR_SVGS[opt.id] }}
+                    />
+                    <span className="text-[10px] font-medium" style={{ color: '#6b7266' }}>{opt.label}</span>
+                  </button>
+                ))}
+              </div>
+              <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: '#6b7a3d' }}>Simple Avatars</p>
+              <div className="grid grid-cols-4 gap-2">
+                {AVATAR_OPTIONS.filter(o => o.id.startsWith('simple-')).map(opt => (
+                  <button
+                    key={opt.id}
+                    onClick={() => selectAvatar(opt.id)}
+                    className="p-2 rounded-xl border-2 transition-all duration-200 hover:shadow-md flex flex-col items-center gap-1"
+                    style={{
+                      borderColor: currentUser.avatar === opt.id ? '#6b7a3d' : '#e0dcd3',
+                      background: currentUser.avatar === opt.id ? 'rgba(107, 122, 61, 0.05)' : '#fff',
+                    }}
+                  >
+                    <div
+                      className="w-12 h-12 rounded-full overflow-hidden"
+                      dangerouslySetInnerHTML={{ __html: AVATAR_SVGS[opt.id] }}
+                    />
+                    <span className="text-[10px] font-medium" style={{ color: '#6b7266' }}>{opt.label}</span>
+                  </button>
+                ))}
+              </div>
             </div>
 
             <button

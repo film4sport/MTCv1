@@ -43,10 +43,9 @@ test.describe('Mobile PWA — Offline Resilience', () => {
     await page.waitForTimeout(1000);
     await dismissOnboarding(page);
 
-    // Fill in login form
+    // Fill in email and use magic link (no password field — Google + Magic Link auth)
     await page.fill('#loginEmail', 'test@mtc.ca');
-    await page.fill('#loginPassword', 'password123');
-    await page.locator('.login-btn').first().click();
+    await page.locator('.login-btn-magic').click();
     await page.waitForTimeout(2000);
 
     // Login screen should still be visible (not crashed)
@@ -83,8 +82,7 @@ test.describe('Mobile PWA — Offline Resilience', () => {
     await dismissOnboarding(page);
 
     await page.fill('#loginEmail', 'test@mtc.ca');
-    await page.fill('#loginPassword', 'password123');
-    await page.locator('.login-btn').first().click();
+    await page.locator('.login-btn-magic').click();
     await page.waitForTimeout(2000);
 
     // Should have no unhandled JS errors (global error handler catches them)
@@ -105,8 +103,7 @@ test.describe('Mobile PWA — Offline Resilience', () => {
     await dismissOnboarding(page);
 
     await page.fill('#loginEmail', 'test@mtc.ca');
-    await page.fill('#loginPassword', 'password123');
-    await page.locator('.login-btn').first().click();
+    await page.locator('.login-btn-magic').click();
     await page.waitForTimeout(2000);
 
     // Login screen should still be showing (not navigated away)

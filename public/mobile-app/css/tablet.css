@@ -138,6 +138,25 @@
     min-width: 0;
   }
 
+  /* Skill-level colored avatar rings on tablet */
+  .partner-request-card[data-skill="beginner"] .partner-request-avatar img,
+  .partner-request-card[data-skill="beginner"] .partner-request-avatar svg {
+    border-color: var(--electric-blue);
+    box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.2);
+  }
+
+  .partner-request-card[data-skill="intermediate"] .partner-request-avatar img,
+  .partner-request-card[data-skill="intermediate"] .partner-request-avatar svg {
+    border-color: var(--volt);
+    box-shadow: 0 0 0 2px rgba(200, 255, 0, 0.2);
+  }
+
+  .partner-request-card[data-skill="advanced"] .partner-request-avatar img,
+  .partner-request-card[data-skill="advanced"] .partner-request-avatar svg {
+    border-color: var(--coral);
+    box-shadow: 0 0 0 2px rgba(255, 90, 95, 0.2);
+  }
+
   /* ── Schedule ── */
   .schedule-container {
     max-width: 720px;

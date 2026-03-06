@@ -18,9 +18,36 @@
     }
   };
 
+  // Private helper — detect device for install slide
+  function customizeInstallSlide() {
+    var titleEl = document.getElementById('onboardingInstallTitle');
+    var textEl = document.getElementById('onboardingInstallText');
+    var iconEl = document.getElementById('onboardingDeviceIcon');
+    if (!titleEl || !textEl) return;
+
+    var ua = navigator.userAgent || '';
+    var isIPad = /iPad/.test(ua) || (/Macintosh/.test(ua) && 'ontouchend' in document);
+    var isAndroid = /Android/.test(ua);
+    var isIPhone = /iPhone/.test(ua);
+
+    if (isIPad) {
+      titleEl.textContent = 'ADD TO YOUR IPAD';
+      textEl.textContent = 'Tap the Share button in Safari, then "Add to Home Screen". MTC Court works full-screen on your iPad — like a native app!';
+      if (iconEl) iconEl.innerHTML = '<rect x="2" y="3" width="20" height="18" rx="2" ry="2"/><line x1="12" y1="17" x2="12.01" y2="17"/><path d="M9 9l3-3 3 3M12 6v7" stroke-linecap="round" stroke-linejoin="round"/>';
+    } else if (isIPhone) {
+      titleEl.textContent = 'ADD TO YOUR IPHONE';
+      textEl.textContent = 'Tap the Share button in Safari, then "Add to Home Screen". MTC Court will appear on your home screen — no App Store needed!';
+    } else if (isAndroid) {
+      titleEl.textContent = 'INSTALL THE APP';
+      textEl.textContent = 'Tap the menu button in Chrome, then "Add to Home Screen" or "Install App". MTC Court works offline — no Play Store needed!';
+    }
+    // Default text stays for desktop/other
+  }
+
   // Private helper
   function showOnboarding() {
     currentOnboardingSlide = 0;
+    customizeInstallSlide();
     updateOnboardingUI();
     document.getElementById('onboardingOverlay').classList.add('active');
 

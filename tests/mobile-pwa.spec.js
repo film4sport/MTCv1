@@ -40,23 +40,22 @@ test.describe('Mobile PWA — Login Screen', () => {
   test('login screen renders with all elements', async ({ page }) => {
     await expect(page.locator('#login-screen')).toBeVisible();
     await expect(page.locator('#loginEmail')).toBeVisible();
-    await expect(page.locator('#loginPassword')).toBeVisible();
-    await expect(page.locator('.login-btn').first()).toBeVisible();
-    await expect(page.locator('#rememberMe')).toBeAttached();
+    // Auth uses Google + Magic Link (no password field)
+    await expect(page.locator('.login-btn-google')).toBeVisible();
+    await expect(page.locator('.login-btn-magic')).toBeVisible();
   });
 
-  test('login form validates empty fields', async ({ page }) => {
-    await page.locator('.login-btn').first().click();
+  test('magic link validates empty email', async ({ page }) => {
+    // Click magic link with empty email — should show error
+    await page.locator('.login-btn-magic').click();
     await page.waitForTimeout(500);
-    // Should show field errors for empty email and password
     const errors = page.locator('.field-error');
     await expect(errors.first()).toBeAttached();
   });
 
-  test('login form validates invalid email format', async ({ page }) => {
+  test('magic link validates invalid email format', async ({ page }) => {
     await page.fill('#loginEmail', 'not-an-email');
-    await page.fill('#loginPassword', 'somepassword');
-    await page.locator('.login-btn').first().click();
+    await page.locator('.login-btn-magic').click();
     await page.waitForTimeout(500);
     const emailError = page.locator('#loginEmail ~ .field-error, #loginEmail + .field-error').or(
       page.locator('.field-error').filter({ hasText: /email/i })
@@ -68,7 +67,7 @@ test.describe('Mobile PWA — Login Screen', () => {
     const signupCard = page.locator('#signupCard');
     await expect(signupCard).toBeHidden();
     // Use dispatchEvent to bypass any overlay interception
-    await page.locator('a[onclick*="showSignUp"]').dispatchEvent('click');
+    await page.locator('a[onclick*="showSignUpScreen"]').dispatchEvent('click');
     await page.waitForTimeout(500);
     await expect(signupCard).toBeVisible();
     await expect(page.locator('#signupName')).toBeVisible();
@@ -78,7 +77,7 @@ test.describe('Mobile PWA — Login Screen', () => {
 
   test('signup form validates empty fields', async ({ page }) => {
     // Show signup card via JS
-    await page.locator('a[onclick*="showSignUp"]').dispatchEvent('click');
+    await page.locator('a[onclick*="showSignUpScreen"]').dispatchEvent('click');
     await page.waitForTimeout(500);
     // Submit empty — target the signup card's button specifically
     await page.locator('#signupCard .login-btn').click();
@@ -87,9 +86,9 @@ test.describe('Mobile PWA — Login Screen', () => {
     await expect(errors.first()).toBeAttached();
   });
 
-  test('forgot password link exists', async ({ page }) => {
-    const forgotLink = page.getByText('Forgot').or(page.getByText('Reset'));
-    await expect(forgotLink.first()).toBeAttached();
+  test('sign up link exists on login screen', async ({ page }) => {
+    const signupLink = page.getByText('Sign up');
+    await expect(signupLink.first()).toBeAttached();
   });
 
   test('no horizontal overflow on login screen', async ({ page }) => {

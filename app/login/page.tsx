@@ -246,7 +246,7 @@ function LoginContent() {
                           </svg>
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <p style={{ fontSize: '0.6rem', fontWeight: 700, color: '#0a0a0a', marginBottom: 2 }}>Member</p>
+                          <p style={{ fontSize: '0.6rem', fontWeight: 700, color: '#0a0a0a', marginBottom: 2 }}>Sarah M.</p>
                           <span style={{ fontSize: '0.46rem', color: '#666', textTransform: 'uppercase' as const, fontWeight: 600, display: 'block', marginBottom: 2 }}>Saturday 10AM</span>
                           <span style={{ fontSize: '0.42rem', fontWeight: 700, color: '#0a0a0a', background: '#c8ff00', borderRadius: 6, padding: '1px 6px', textTransform: 'uppercase' as const, letterSpacing: 0.5 }}>Intermediate</span>
                         </div>
@@ -260,11 +260,11 @@ function LoginContent() {
                       }}>
                         <div style={{ width: 36, height: 36, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, background: '#fce4ec', border: '2px solid #ff5a5f' }}>
                           <svg viewBox="0 0 100 100" style={{ width: '100%', height: '100%' }}>
-                            <circle cx="50" cy="50" r="50" fill="#fce4ec"/><circle cx="50" cy="38" r="16" fill="#f5c6a0"/><ellipse cx="50" cy="28" rx="18" ry="10" fill="#d4a030"/><ellipse cx="50" cy="80" rx="24" ry="20" fill="#e91e63"/>
+                            <circle cx="50" cy="50" r="50" fill="#fce4ec"/><circle cx="50" cy="38" r="16" fill="#d4a574"/><ellipse cx="50" cy="80" rx="24" ry="20" fill="#e91e63"/>
                           </svg>
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <p style={{ fontSize: '0.6rem', fontWeight: 700, color: '#0a0a0a', marginBottom: 2 }}>Member</p>
+                          <p style={{ fontSize: '0.6rem', fontWeight: 700, color: '#0a0a0a', marginBottom: 2 }}>James K.</p>
                           <span style={{ fontSize: '0.46rem', color: '#666', textTransform: 'uppercase' as const, fontWeight: 600, display: 'block', marginBottom: 2 }}>Tomorrow 9AM</span>
                           <span style={{ fontSize: '0.42rem', fontWeight: 700, color: '#fff', background: '#00d4ff', borderRadius: 6, padding: '1px 6px', textTransform: 'uppercase' as const, letterSpacing: 0.5 }}>Beginner</span>
                         </div>
@@ -722,7 +722,43 @@ function LoginContent() {
             </a>
           </p>
 
-          {/* TODO: Reminder list section will go here (e.g. sun shades, court tasks) */}
+          {/* Club Tasks — admin reminders checklist */}
+          <div className="mt-8 rounded-2xl p-5 sm:p-6" style={{ background: 'rgba(107, 122, 61, 0.06)', border: '1px solid rgba(107, 122, 61, 0.15)' }}>
+            <div className="flex items-center gap-2 mb-4">
+              <svg width="18" height="18" fill="none" stroke="#6b7a3d" viewBox="0 0 24 24" strokeWidth="1.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <h3 className="text-sm font-semibold" style={{ color: '#2a2f1e' }}>Club Tasks</h3>
+            </div>
+            <ul className="space-y-2.5">
+              {[
+                { done: true, text: 'Open sun shades on courts 1-4' },
+                { done: true, text: 'Check net tension & height' },
+                { done: false, text: 'Sweep clay off hard courts' },
+                { done: false, text: 'Restock ball hopper by court 2' },
+                { done: false, text: 'Post weekend tournament draw' },
+              ].map((task, i) => (
+                <li key={i} className="flex items-center gap-2.5">
+                  <div style={{
+                    width: 18, height: 18, borderRadius: 5, flexShrink: 0,
+                    border: task.done ? 'none' : '1.5px solid #c5c0b6',
+                    background: task.done ? '#6b7a3d' : '#fff',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    {task.done && (
+                      <svg width="11" height="11" fill="none" stroke="#fff" viewBox="0 0 24 24" strokeWidth="3">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                      </svg>
+                    )}
+                  </div>
+                  <span className="text-sm" style={{ color: task.done ? '#999' : '#2a2f1e', textDecoration: task.done ? 'line-through' : 'none' }}>
+                    {task.text}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <p className="text-xs mt-3" style={{ color: '#999' }}>Visible to admins after sign in</p>
+          </div>
 
           {/* Magic Link Sent — Full overlay */}
           {magicLinkSent && (
