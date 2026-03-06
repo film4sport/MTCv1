@@ -201,9 +201,17 @@ export default function BookingModal({ modalData, members, currentUser, bookings
         </div>
 
         {/* Add Participants */}
-        <div className="rounded-xl p-4 mb-6" style={{ background: '#faf8f3', border: '1px solid #e0dcd3' }}>
-          <p className="text-sm font-medium mb-1" style={{ color: '#2a2f1e' }}>Add Participants</p>
-          <p className="text-xs mb-3" style={{ color: '#6b7266' }}>
+        <div className="rounded-xl p-4 mb-6 transition-all" style={{
+          background: selectedParticipants.length > 0 || participantSearch ? '#faf8f3' : '#1a1f12',
+          border: selectedParticipants.length > 0 || participantSearch ? '1px solid #e0dcd3' : '1px solid #2a3018',
+        }}>
+          <div className="flex items-center gap-2 mb-1">
+            <svg className="w-4 h-4" fill="none" stroke={selectedParticipants.length > 0 || participantSearch ? '#6b7a3d' : '#d4e157'} viewBox="0 0 24 24" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+            </svg>
+            <p className="text-sm font-semibold" style={{ color: selectedParticipants.length > 0 || participantSearch ? '#2a2f1e' : '#e8e4d9' }}>Add Participants</p>
+          </div>
+          <p className="text-xs mb-3" style={{ color: selectedParticipants.length > 0 || participantSearch ? '#6b7266' : '#8b9a6b' }}>
             Search members to add (max {maxParticipants})
           </p>
           {selectedParticipants.length < maxParticipants && (
@@ -213,15 +221,19 @@ export default function BookingModal({ modalData, members, currentUser, bookings
                 value={participantSearch}
                 onChange={(e) => setParticipantSearch(e.target.value)}
                 onKeyDown={handleParticipantKeyDown}
-                placeholder="Search members..."
+                placeholder="Type a member's name..."
                 role="combobox"
                 aria-label="Search members to add as participants"
                 aria-expanded={participantResults.length > 0}
                 aria-controls="participant-listbox"
                 aria-autocomplete="list"
                 aria-activedescendant={activeIndex >= 0 ? `participant-option-${activeIndex}` : undefined}
-                className="w-full px-3 py-2 rounded-lg text-sm border focus:outline-none focus:ring-2 focus:ring-[#6b7a3d]/20"
-                style={{ borderColor: '#e0dcd3', background: '#fff', color: '#2a2f1e' }}
+                className="w-full px-3 py-2.5 rounded-lg text-sm border focus:outline-none focus:ring-2 transition-all"
+                style={{
+                  borderColor: selectedParticipants.length > 0 || participantSearch ? '#e0dcd3' : 'rgba(212, 225, 87, 0.3)',
+                  background: selectedParticipants.length > 0 || participantSearch ? '#fff' : 'rgba(255,255,255,0.08)',
+                  color: selectedParticipants.length > 0 || participantSearch ? '#2a2f1e' : '#e8e4d9',
+                }}
               />
               {participantResults.length > 0 && (
                 <div role="listbox" id="participant-listbox" className="absolute left-0 right-0 top-full mt-1 rounded-lg border shadow-lg z-10 max-h-40 overflow-y-auto" style={{ background: '#fff', borderColor: '#e0dcd3' }}>
