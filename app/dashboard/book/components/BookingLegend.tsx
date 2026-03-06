@@ -18,8 +18,12 @@ export default function BookingLegend() {
         Program
       </div>
       <div className="flex items-center gap-1.5">
-        <span className="w-5 h-3 rounded" style={{ background: 'rgba(217, 119, 6, 0.15)', border: '1px solid rgba(217, 119, 6, 0.4)' }} />
-        Club Event
+        <span className="w-5 h-3 rounded" style={{ background: 'rgba(217, 119, 6, 0.1)', border: '1px solid rgba(217, 119, 6, 0.3)' }} />
+        Social
+      </div>
+      <div className="flex items-center gap-1.5">
+        <span className="w-5 h-3 rounded" style={{ background: 'rgba(147, 51, 234, 0.1)', border: '1px solid rgba(147, 51, 234, 0.3)' }} />
+        Match
       </div>
     </div>
   );

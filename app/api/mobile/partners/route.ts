@@ -146,7 +146,7 @@ export async function PATCH(request: Request) {
         id: notifId,
         user_id: partner.user_id,
         type: 'partner',
-        title: '🎾 Partner Matched!',
+        title: 'Partner Matched!',
         body: `${authResult.name} wants to play with you!`,
         timestamp: new Date().toISOString(),
         read: false,

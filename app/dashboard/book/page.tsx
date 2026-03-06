@@ -200,6 +200,16 @@ export default function BookCourtPage() {
 
   const eventsForDate = (dateStr: string) => events.filter(e => e.date === dateStr);
 
+  // Event type color mapping — matches landing page Schedule.tsx dotColors
+  const eventTypeColors: Record<string, { accent: string; bg: string; border: string; text: string }> = {
+    social: { accent: '#d97706', bg: 'rgba(217, 119, 6, 0.08)', border: 'rgba(217, 119, 6, 0.25)', text: '#92400e' },
+    match: { accent: '#9333ea', bg: 'rgba(147, 51, 234, 0.08)', border: 'rgba(147, 51, 234, 0.25)', text: '#6b21a8' },
+    tournament: { accent: '#3a3a3a', bg: 'rgba(58, 58, 58, 0.08)', border: 'rgba(58, 58, 58, 0.25)', text: '#2a2a2a' },
+    camp: { accent: '#dc2626', bg: 'rgba(220, 38, 38, 0.08)', border: 'rgba(220, 38, 38, 0.25)', text: '#991b1b' },
+    lesson: { accent: '#60a5fa', bg: 'rgba(96, 165, 250, 0.08)', border: 'rgba(96, 165, 250, 0.25)', text: '#1d4ed8' },
+  };
+  const getEventColors = (type: string) => eventTypeColors[type] || eventTypeColors.social;
+
   const handleSlotHover = (slotKey: string | null) => {
     if (tooltipTimeout.current) clearTimeout(tooltipTimeout.current);
     if (slotKey) { tooltipTimeout.current = setTimeout(() => setHoveredSlot(slotKey), 300); } else { setHoveredSlot(null); }
@@ -207,6 +217,19 @@ export default function BookCourtPage() {
 
   const mobileDay = weekDays[mobileDayIdx] || weekDays[0];
   const mobileDateStr = toLocalDateStr(mobileDay);
+
+  // Now-line: current time indicator for today
+  const [nowMinutes, setNowMinutes] = useState(() => { const d = new Date(); return d.getHours() * 60 + d.getMinutes(); });
+  useEffect(() => {
+    const iv = setInterval(() => { const d = new Date(); setNowMinutes(d.getHours() * 60 + d.getMinutes()); }, 60000);
+    return () => clearInterval(iv);
+  }, []);
+  const isNowSlot = (dateStr: string, time: string, nextTime?: string) => {
+    if (!isToday(new Date(dateStr + 'T00:00:00'))) return false;
+    const slotMins = parseTimeMinutes(time);
+    const nextMins = nextTime ? parseTimeMinutes(nextTime) : slotMins + 30;
+    return nowMinutes >= slotMins && nowMinutes < nextMins;
+  };
 
   return (
     <div className="min-h-screen dashboard-gradient-bg">
@@ -271,16 +294,19 @@ export default function BookCourtPage() {
                   if (dayEvts.length === 0) return null;
                   return (
                     <div className="mb-4 space-y-2">
-                      {dayEvts.map(evt => (
-                        <div key={evt.id} className="flex items-center gap-3 px-4 py-3 rounded-xl border" style={{ background: 'rgba(217, 119, 6, 0.08)', borderColor: 'rgba(217, 119, 6, 0.25)' }}>
-                          <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 20 20" fill="none" stroke="#d97706" strokeWidth="1.5"><rect x="3" y="4" width="14" height="13" rx="2" /><path d="M3 8h14" /><path d="M7 4V2M13 4V2" strokeLinecap="round" /></svg>
+                      {dayEvts.map(evt => {
+                        const ec = getEventColors(evt.type);
+                        return (
+                        <div key={evt.id} className="flex items-center gap-3 px-4 py-3 rounded-xl border" style={{ background: ec.bg, borderColor: ec.border }}>
+                          <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 20 20" fill="none" stroke={ec.accent} strokeWidth="1.5"><rect x="3" y="4" width="14" height="13" rx="2" /><path d="M3 8h14" /><path d="M7 4V2M13 4V2" strokeLinecap="round" /></svg>
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-semibold" style={{ color: '#2a2f1e' }}>{evt.title}</p>
                             <p className="text-[0.65rem]" style={{ color: '#6b7266' }}>{evt.time} · {evt.location}</p>
                           </div>
                           {evt.spotsTotal && <span className="text-[0.6rem] px-2 py-1 rounded-lg" style={{ background: '#f5f2eb', color: '#6b7266' }}>{evt.spotsTaken || 0}/{evt.spotsTotal}</span>}
                         </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   );
                 })()}
@@ -319,9 +345,12 @@ export default function BookCourtPage() {
                             </tr>
                           </thead>
                           <tbody>
-                            {TIME_SLOTS.map(time => (
-                              <tr key={time}>
-                                <td className="sticky left-0 z-10 px-3 py-0 text-[0.7rem] font-medium border-b" style={{ borderColor: '#f7f5f0', background: '#faf8f3', color: '#9ca3a0' }}>{time}</td>
+                            {TIME_SLOTS.map((time, tIdx) => {
+                              const nowRow = isNowSlot(selectedDate, time, TIME_SLOTS[tIdx + 1]);
+                              return (
+                              <tr key={time} className="relative">
+                                {nowRow && <td colSpan={5} className="absolute top-0 left-0 right-0 h-0 z-20 pointer-events-none" style={{ borderTop: '2px solid #ff5a5f', boxShadow: '0 0 6px rgba(255, 90, 95, 0.4)' }} />}
+                                <td className="sticky left-0 z-10 px-3 py-0 text-[0.7rem] font-medium border-b" style={{ borderColor: '#f7f5f0', background: '#faf8f3', color: nowRow ? '#ff5a5f' : '#9ca3a0', fontWeight: nowRow ? 700 : 500 }}>{time}</td>
                                 {COURTS_CONFIG.map(c => {
                                   const courtClosed = isCourtInMaintenance(courts, c.id);
                                   const slotClosed = isCourtClosed(c.id, time);
@@ -346,10 +375,10 @@ export default function BookCourtPage() {
                                         disabled={(!mine && !!booked) || !!eventSlot || past || courtClosed || slotClosed}
                                         className={`slot-cell w-full h-full rounded-lg text-xs font-medium px-2 transition-all duration-150 relative overflow-hidden ${mine ? 'slot-booked-pulse' : ''} ${available ? 'hover:border-[#d97706] hover:border-solid hover:bg-[#d97706]/[0.04]' : ''}`}
                                         style={{
-                                          background: mine ? colors.accent : courtClosed || slotClosed ? '#f0ede6' : eventSlot ? 'rgba(217, 119, 6, 0.1)' : isLesson ? 'rgba(59, 130, 246, 0.08)' : isProgram ? 'rgba(245, 158, 11, 0.08)' : booked ? '#f5f3ee' : 'transparent',
-                                          color: mine ? '#fff' : courtClosed || slotClosed ? '#c5c0b5' : eventSlot ? '#92400e' : isLesson ? '#3b82f6' : isProgram ? '#d97706' : booked ? '#b5b0a5' : past || beyondWindow ? '#d5d0c8' : colors.accent,
+                                          background: mine ? colors.accent : courtClosed || slotClosed ? '#f0ede6' : eventSlot ? getEventColors(eventSlot.type).bg : isLesson ? 'rgba(59, 130, 246, 0.08)' : isProgram ? 'rgba(245, 158, 11, 0.08)' : booked ? '#f5f3ee' : 'transparent',
+                                          color: mine ? '#fff' : courtClosed || slotClosed ? '#c5c0b5' : eventSlot ? getEventColors(eventSlot.type).text : isLesson ? '#3b82f6' : isProgram ? '#d97706' : booked ? '#b5b0a5' : past || beyondWindow ? '#d5d0c8' : colors.accent,
                                           cursor: available ? 'pointer' : mine ? 'pointer' : 'default',
-                                          border: mine ? `1.5px solid ${colors.accent}` : eventSlot ? '1.5px solid rgba(217, 119, 6, 0.3)' : available ? '1.5px dashed #d4d0c7' : '1.5px solid transparent',
+                                          border: mine ? `1.5px solid ${colors.accent}` : eventSlot ? `1.5px solid ${getEventColors(eventSlot.type).border}` : available ? '1.5px dashed #d4d0c7' : '1.5px solid transparent',
                                         }}
                                       >
                                         {mine ? (
@@ -360,7 +389,7 @@ export default function BookCourtPage() {
                                         ) : courtClosed || slotClosed ? (
                                           <span style={{ opacity: 0.4 }}>—</span>
                                         ) : eventSlot ? (
-                                          <span className="flex items-center justify-center gap-1 truncate"><span className="w-1 h-1 rounded-full flex-shrink-0" style={{ background: '#d97706' }} /> {eventSlot.title.length > 12 ? eventSlot.title.slice(0, 12) + '…' : eventSlot.title}</span>
+                                          <span className="flex items-center justify-center gap-1 truncate"><span className="w-1 h-1 rounded-full flex-shrink-0" style={{ background: getEventColors(eventSlot.type).accent }} /> {eventSlot.title.length > 12 ? eventSlot.title.slice(0, 12) + '…' : eventSlot.title}</span>
                                         ) : isLesson ? 'Lesson' : isProgram ? 'Program' : booked ? (
                                           <span className="flex items-center justify-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-current opacity-40" />Taken</span>
                                         ) : past || beyondWindow ? (
@@ -381,7 +410,8 @@ export default function BookCourtPage() {
                                   );
                                 })}
                               </tr>
-                            ))}
+                              );
+                            })}
                           </tbody>
                         </table>
                       </div>
@@ -441,16 +471,19 @@ export default function BookCourtPage() {
                     {/* Event details for this date */}
                     {eventsForDate(calSelectedDate).length > 0 && (
                       <div className="mb-4 space-y-2">
-                        {eventsForDate(calSelectedDate).map(evt => (
-                          <div key={evt.id} className="flex items-start gap-3 px-4 py-3 rounded-xl border" style={{ background: 'rgba(217, 119, 6, 0.08)', borderColor: 'rgba(217, 119, 6, 0.25)' }}>
-                            <svg className="w-5 h-5 flex-shrink-0 mt-0.5" viewBox="0 0 20 20" fill="none" stroke="#d97706" strokeWidth="1.5"><rect x="3" y="4" width="14" height="13" rx="2" /><path d="M3 8h14" /><path d="M7 4V2M13 4V2" strokeLinecap="round" /></svg>
+                        {eventsForDate(calSelectedDate).map(evt => {
+                          const ec = getEventColors(evt.type);
+                          return (
+                          <div key={evt.id} className="flex items-start gap-3 px-4 py-3 rounded-xl border" style={{ background: ec.bg, borderColor: ec.border }}>
+                            <svg className="w-5 h-5 flex-shrink-0 mt-0.5" viewBox="0 0 20 20" fill="none" stroke={ec.accent} strokeWidth="1.5"><rect x="3" y="4" width="14" height="13" rx="2" /><path d="M3 8h14" /><path d="M7 4V2M13 4V2" strokeLinecap="round" /></svg>
                             <div className="flex-1 min-w-0">
                               <p className="text-sm font-semibold" style={{ color: '#2a2f1e' }}>{evt.title}</p>
                               <p className="text-[0.65rem]" style={{ color: '#6b7266' }}>{evt.time} · {evt.location}</p>
                               <p className="text-[0.65rem] mt-1" style={{ color: '#9ca3a0' }}>{evt.description}</p>
                             </div>
                           </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     )}
 
@@ -498,10 +531,10 @@ export default function BookCourtPage() {
                                           disabled={!available && !mine}
                                           className={`w-full h-full rounded-lg text-[0.65rem] font-medium transition-all duration-150 ${mine ? 'slot-booked-pulse' : ''} ${available ? 'hover:border-[#d97706] hover:border-solid hover:bg-[#d97706]/[0.04]' : ''}`}
                                           style={{
-                                            background: mine ? colors.accent : eventSlot ? 'rgba(217, 119, 6, 0.1)' : isLesson ? 'rgba(59, 130, 246, 0.06)' : isProgram ? 'rgba(245, 158, 11, 0.06)' : courtClosed || slotClosed ? '#f0ede6' : 'transparent',
-                                            color: mine ? '#fff' : eventSlot ? '#92400e' : isLesson ? '#3b82f6' : isProgram ? '#d97706' : booked ? '#b5b0a5' : available ? colors.accent : '#d5d0c8',
+                                            background: mine ? colors.accent : eventSlot ? getEventColors(eventSlot.type).bg : isLesson ? 'rgba(59, 130, 246, 0.06)' : isProgram ? 'rgba(245, 158, 11, 0.06)' : courtClosed || slotClosed ? '#f0ede6' : 'transparent',
+                                            color: mine ? '#fff' : eventSlot ? getEventColors(eventSlot.type).text : isLesson ? '#3b82f6' : isProgram ? '#d97706' : booked ? '#b5b0a5' : available ? colors.accent : '#d5d0c8',
                                             cursor: available || mine ? 'pointer' : 'default',
-                                            border: mine ? `1.5px solid ${colors.accent}` : eventSlot ? '1.5px solid rgba(217, 119, 6, 0.3)' : available ? '1.5px dashed #d4d0c7' : '1.5px solid transparent',
+                                            border: mine ? `1.5px solid ${colors.accent}` : eventSlot ? `1.5px solid ${getEventColors(eventSlot.type).border}` : available ? '1.5px dashed #d4d0c7' : '1.5px solid transparent',
                                           }}
                                         >
                                           {mine ? '✓' : eventSlot ? 'E' : isLesson ? 'L' : isProgram ? 'P' : booked ? '•' : courtClosed || slotClosed ? '—' : ''}

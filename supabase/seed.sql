@@ -70,7 +70,7 @@ begin
     -- Thursday: Freedom 55 League
     if dow = 4 then
       insert into events (id, title, date, time, location, badge, price, spots_total, spots_taken, description, type)
-      values ('freedom-55-' || ds, 'Freedom 55 League', d, '9:00 AM - 11:00 AM', 'Courts 1-2', 'members', 'Members', 16, 0,
+      values ('freedom-55-' || ds, 'Freedom 55 League', d, '9:00 AM - 11:00 AM', 'All Courts', 'members', 'Members', 16, 0,
               'Thursday morning league for the 55+ crowd. Fun and social tennis.', 'social')
       on conflict (id) do nothing;
     end if;
@@ -78,7 +78,7 @@ begin
     -- Thursday: Interclub Competitive League
     if dow = 4 then
       insert into events (id, title, date, time, location, badge, price, spots_total, spots_taken, description, type)
-      values ('interclub-' || ds, 'Interclub Competitive League', d, '7:00 PM - 9:30 PM', 'Courts 1-2', 'members', 'Team Only', 12, 0,
+      values ('interclub-' || ds, 'Interclub Competitive League', d, '7:00 PM - 9:30 PM', 'All Courts', 'members', 'Team Only', 12, 0,
               'A & B teams interclub competitive league. RSVP required for team selection.', 'match')
       on conflict (id) do nothing;
     end if;

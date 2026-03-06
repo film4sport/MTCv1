@@ -143,7 +143,7 @@ export const recurringCardEvents: MTCEvent[] = [
     date: 'Every Thursday · Starts May 14',
     title: 'Freedom 55 League',
     description:
-      'Thursday morning league for the 55+ crowd. Fun and social tennis. Courts 1-2.',
+      'Thursday morning league for the 55+ crowd. Fun and social tennis. All Courts.',
     highlight: '9:00 - 11:00 AM',
     time: '9:00 - 11:00 AM',
     calendarType: 'social',
