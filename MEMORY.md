@@ -26,7 +26,9 @@
 
 **OnboardingTour fix:** `app/dashboard/components/OnboardingTour.tsx` — Welcome tour was showing every login because useEffect didn't depend on `onboardingDone`. Extracted `onboardingDone` boolean from `currentUser.preferences.onboardingCompleted`, added as dependency. Also fixed `finish()` to log errors instead of silently swallowing.
 
-**RSVP visibility fix:** Members RSVPing to events could only see their own RSVP, not other members'. Root cause: `event_attendees` table was not added to the Supabase Realtime publication, so the realtime subscription in store.tsx (line 477) never fired. Fix: (1) Migration `20260306_enable_realtime_event_attendees.sql` adds the table to `supabase_realtime` publication. (2) Code fix in `store.tsx` `toggleRsvp`: after successful DB write, re-fetches events as a safety net. **User must run the migration** via `npm run db:push` or Supabase SQL Editor.
+**RSVP visibility fix:** Members RSVPing to events could only see their own RSVP, not other members'. Root cause: `event_attendees` table was not added to the Supabase Realtime publication, so the realtime subscription in store.tsx (line 477) never fired. Fix: (1) Migration `20260306_enable_realtime_event_attendees.sql` adds ALL 11 subscribed tables to `supabase_realtime` publication (user ran SQL in Supabase dashboard). (2) Code fix in `store.tsx` `toggleRsvp`: after successful DB write, re-fetches events as a safety net.
+
+**Mobile PWA booking parity fix:** `app/api/mobile/bookings/route.ts` — Was completely silent: no notifications, no messages, no emails when booking via mobile. Now matches desktop PWA: (1) Inserts participants into `booking_participants` table, (2) Creates bell notifications for booker + each participant, (3) Sends direct messages to each participant with full booking details, (4) Calls `/api/booking-email` for confirmation emails + ICS calendar invites. Same for cancellations: bell notifications, direct messages, and cancellation emails all fire. All notification logic is non-blocking (fire-and-forget) so the booking response isn't delayed.
 
 ### Cowork Session (2026-03-06) — Google OAuth Implementation
 

@@ -321,7 +321,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
             const body = await res.clone().json();
             if (body.sent > 0) return; // emails actually sent
             // 200 but sent: 0 — SMTP likely not configured
-            console.warn(`[email] ${label}: API returned ok but sent 0 emails.`, body.message);
+            console.error(`[email] ${label}: API returned ok but sent 0 emails.`, body.message);
           } catch {
             return; // couldn't parse response, assume success
           }
