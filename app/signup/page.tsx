@@ -1,18 +1,16 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
+
 import { signUp, signIn } from '../dashboard/lib/auth';
 import { sendWelcomeMessage, createFamily, addFamilyMember } from '../dashboard/lib/db';
 import { membershipTypes, signupMembershipTypes, waiverText, acknowledgementText } from '../info/data';
 
 export default function SignupPage() {
-  const router = useRouter();
   const waiverRef = useRef<HTMLDivElement>(null);
   const ackRef = useRef<HTMLDivElement>(null);
 
   const [signupStep, setSignupStep] = useState(1);
-  const [redirectCount, setRedirectCount] = useState(5);
   const [signupData, setSignupData] = useState({ membershipType: '', name: '', email: '', password: '', skillLevel: '' });
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -26,7 +24,7 @@ export default function SignupPage() {
   const [existingProfile, setExistingProfile] = useState<{ name: string; email: string; role?: string; status?: string } | null>(null);
   const [familyMemberInputs, setFamilyMemberInputs] = useState<{ name: string; type: 'adult' | 'junior'; birthYear: string }[]>([]);
   const isFamily = signupData.membershipType === 'family';
-  const totalSteps = isFamily ? 7 : 6;
+  const totalSteps = 7;
 
   // Load existing profile from localStorage
   useEffect(() => {
@@ -53,21 +51,12 @@ export default function SignupPage() {
     }
   }, [signupStep]);
 
-  // Auto-redirect to dashboard after signup completion (skip if email verification pending)
+  // Scroll to top when entering E-Transfer or confirmation step so user sees content immediately
   useEffect(() => {
-    if (signupStep !== totalSteps || emailConfirmPending) return;
-    const interval = setInterval(() => {
-      setRedirectCount(prev => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          router.push('/dashboard');
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [signupStep, totalSteps, router, emailConfirmPending]);
+    if (signupStep >= 6) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [signupStep]);
 
   const handleWaiverScroll = () => {
     if (waiverRef.current) {
@@ -213,32 +202,39 @@ export default function SignupPage() {
           </div>
         )}
 
-        {/* Progress Steps */}
-        <div className="flex items-center justify-center gap-2 mb-10">
-          {Array.from({ length: totalSteps }, (_, i) => i + 1).map((step) => (
-            <div key={step} className="flex items-center gap-2">
-              <div
-                className={`${totalSteps > 6 ? 'w-6 h-6 sm:w-7 sm:h-7' : 'w-7 h-7 sm:w-8 sm:h-8'} rounded-full flex items-center justify-center text-xs font-bold transition-colors`}
-                style={
-                  signupStep >= step
-                    ? { backgroundColor: '#6b7a3d', color: '#fff' }
-                    : { backgroundColor: '#faf8f3', color: '#999', border: '1px solid #e0dcd3' }
-                }
-              >
-                {signupStep > step ? (
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                  </svg>
-                ) : (
-                  step
-                )}
-              </div>
-              {step < totalSteps && (
-                <div className={`${totalSteps > 6 ? 'w-4 sm:w-6' : 'w-6 sm:w-8'} h-0.5`} style={{ backgroundColor: signupStep > step ? '#6b7a3d' : '#e0dcd3' }} />
-              )}
+        {/* Progress Steps — skip step 3 dot for non-family */}
+        {(() => {
+          const visibleSteps = isFamily
+            ? [1, 2, 3, 4, 5, 6, 7]
+            : [1, 2, 4, 5, 6, 7];
+          return (
+            <div className="flex items-center justify-center gap-2 mb-10">
+              {visibleSteps.map((step, idx) => (
+                <div key={step} className="flex items-center gap-2">
+                  <div
+                    className={`${visibleSteps.length > 6 ? 'w-6 h-6 sm:w-7 sm:h-7' : 'w-7 h-7 sm:w-8 sm:h-8'} rounded-full flex items-center justify-center text-xs font-bold transition-colors`}
+                    style={
+                      signupStep >= step
+                        ? { backgroundColor: '#6b7a3d', color: '#fff' }
+                        : { backgroundColor: '#faf8f3', color: '#999', border: '1px solid #e0dcd3' }
+                    }
+                  >
+                    {signupStep > step ? (
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                      </svg>
+                    ) : (
+                      idx + 1
+                    )}
+                  </div>
+                  {idx < visibleSteps.length - 1 && (
+                    <div className={`${visibleSteps.length > 6 ? 'w-4 sm:w-6' : 'w-6 sm:w-8'} h-0.5`} style={{ backgroundColor: signupStep > step ? '#6b7a3d' : '#e0dcd3' }} />
+                  )}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          );
+        })()}
 
         {/* Step 1: Select Membership Type */}
         {signupStep === 1 && (
@@ -785,7 +781,7 @@ export default function SignupPage() {
                   <a href="/dashboard" className="inline-block px-8 py-3 rounded-full text-sm font-semibold transition-all hover:opacity-90" style={{ backgroundColor: '#6b7a3d', color: '#fff' }}>Go to Dashboard</a>
                   <a href="/" className="inline-block px-8 py-3 rounded-full text-sm font-semibold transition-all hover:opacity-90" style={{ backgroundColor: '#faf8f3', color: '#6b7a3d', border: '1px solid #e0dcd3' }}>Back to Home</a>
                 </div>
-                <p className="text-xs mt-4" style={{ color: '#6b7266' }}>Redirecting to dashboard in {redirectCount}...</p>
+                <p className="text-xs mt-4" style={{ color: '#6b7266' }}>Your membership will be activated once payment is confirmed.</p>
               </>
             )}
           </div>
