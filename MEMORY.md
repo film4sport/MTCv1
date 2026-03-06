@@ -30,6 +30,55 @@
 
 **New rule added:** CLAUDE.md #17 — Always verify changes before reporting done (rebuild + visual check in browser)
 
+### Cowork Session (2026-03-05/06) — Dashboard Booking View Restructure
+
+**View restructure:**
+- Removed "All Courts" toggle button — Week and Month views both default to showing all 4 courts as columns
+- `ViewMode` changed from `'week' | 'calendar' | 'all-courts'` to `'week' | 'calendar'`
+- Week view: day tabs at top + all 4 courts grid for selected day + event banners above grid
+- Calendar view: month grid + event detail cards + all 4 courts grid below when date selected
+
+**Event slot filling:**
+- Added `parseEventTimeRange()`, `getEventCourts()`, `getEventForSlot()`, `eventsForDate()` helpers
+- Events with parseable times (e.g. "1:00 PM - 3:00 PM") fill corresponding time slots on their courts
+- Event slots show type-specific colors matching landing page Schedule.tsx dotColors
+
+**Event type-specific colors (matching landing page):**
+- social: amber (#d97706) — round robins, Freedom 55, Friday Mixed
+- match: purple (#9333ea) — Interclub Competitive League
+- tournament: dark (#3a3a3a), camp: red (#dc2626), lesson: blue (#60a5fa)
+- Event banners use SVG calendar icons (stroke color matches event type)
+- Event grid cells show colored dot + truncated title (week view) or "E" letter (calendar compact view)
+
+**Legend updates:**
+- Removed "Closed" from legend
+- Split "Club Event" into "Social" (amber) and "Match" (purple) entries
+- Colors match landing page Schedule.tsx dotColors exactly
+
+**Now-line (current time indicator):**
+- Added coral red (#ff5a5f) line across current time slot row in week view grid
+- Time label highlighted in coral bold when it's the current slot
+- Updates every 60 seconds via interval
+- Matches mobile PWA's now-line styling
+
+**Data fixes:**
+- Freedom 55 League: location changed from "Courts 1-2" to "All Courts" (all platforms)
+- Interclub Competitive League: location changed from "Courts 1-2" to "All Courts" (all platforms)
+- Updated in: data.ts, seed.sql, booking.js (mobile PWA), events.ts (landing page)
+
+**New rules added:**
+- CLAUDE.md #18 — NO TENNIS EMOJI: Never use 🎾 or any tennis-related emoji anywhere in the codebase
+
+**Files modified:**
+- `app/dashboard/book/page.tsx` — Major restructure: view modes, event helpers, type-specific colors, now-line
+- `app/dashboard/book/components/BookingLegend.tsx` — Removed Closed, split Club Event into Social + Match
+- `app/dashboard/book/components/booking-utils.ts` — ViewMode type changed
+- `app/dashboard/lib/data.ts` — Freedom 55 + Interclub location → "All Courts"
+- `app/lib/events.ts` — Freedom 55 description updated
+- `supabase/seed.sql` — Freedom 55 + Interclub location → "All Courts"
+- `public/mobile-app/js/booking.js` — Freedom 55 + Interclub courts → [1,2,3,4]
+- `CLAUDE.md` — Added rule #18 (no tennis emoji)
+
 ### Cowork Session (2026-03-04) — Cross-Platform Supabase Wiring (8 gaps)
 
 **All state now persists to Supabase — no more local-only features.**

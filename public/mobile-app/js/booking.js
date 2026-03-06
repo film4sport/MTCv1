@@ -49,13 +49,13 @@
         desc:'Weekly men\'s round robin. All skill levels welcome.' },
 
       // THURSDAY AM - Freedom 55 League 9-11am
-      { day:3, start:'9:00 AM', end:'11:00 AM', courts:[1,2], type:'openplay',
+      { day:3, start:'9:00 AM', end:'11:00 AM', courts:[1,2,3,4], type:'openplay',
         title:'Freedom 55 League', fee:0, guestFee:10,
         coach: null, regKey:'freedom55',
         desc:'Weekday morning league for the 55+ crowd. Fun and social!' },
 
       // THURSDAY PM - Interclub Competitive A & B 7-9:30pm
-      { day:3, start:'7:00 PM', end:'9:30 PM', courts:[1,2], type:'doubles',
+      { day:3, start:'7:00 PM', end:'9:30 PM', courts:[1,2,3,4], type:'doubles',
         title:'Interclub Competitive League', fee:0, guestFee:0,
         coach: null, regKey:'thu-interclub-a', rsvp:true,
         desc:'Thursday night competitive interclub. Team A & B. RSVP required.' },

@@ -50,7 +50,10 @@ export async function signUp(
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: { name, role: 'member', membership_type: membershipType || 'adult', skill_level: skillLevel || undefined, skill_level_set: skillLevel ? true : false } },
+    options: {
+      data: { name, role: 'member', membership_type: membershipType || 'adult', skill_level: skillLevel || undefined, skill_level_set: skillLevel ? true : false },
+      emailRedirectTo: `${typeof window !== 'undefined' ? window.location.origin : 'https://www.monotennisclub.com'}/auth/callback`,
+    },
   });
 
   if (error) return { user: null, error: error.message };
