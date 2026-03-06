@@ -6,8 +6,23 @@
 
 ## Current Status
 - **SMTP/Supabase email**: DONE. Resend SMTP (smtp.resend.com:465, noreply@monotennisclub.com). Email confirmation and password reset emails are live.
-- **Deployment**: Railway (NOT Vercel). NODE_VERSION=20 env var set.
+- **Deployment**: Railway (NOT Vercel). NODE_VERSION=20 env var set. 13 env vars total.
 - **Google OAuth**: Code complete, awaiting external setup (Google Cloud Console + Supabase provider config). See session below.
+- **Booking emails**: Fixed silent error swallowing, case-insensitive email validation, proper error responses. Railway SMTP vars updated from old Google to Resend (2026-03-06).
+- **Message notifications**: Bell + push notifications now trigger on message send. New `/api/notify-message` route for push.
+
+### Cowork Session (2026-03-06) — Booking Email Fix + Message Notifications
+
+**Root cause of booking emails not sending:** Railway had stale Google SMTP env vars while code expected Resend. User updated Railway: SMTP_HOST=smtp.resend.com, SMTP_PORT=465, SMTP_USER=resend, SMTP_PASS=re_K7g..., added RESEND_API_KEY + NEXT_PUBLIC_SITE_URL.
+
+**Code fixes:**
+1. `app/api/booking-email/route.ts` — Fixed empty `catch {}` blocks that silently swallowed ALL SMTP errors. Added `console.error` logging. Changed response: returns 502 (not 200) when emails fail. Fixed case-insensitive email validation.
+2. `app/dashboard/lib/store.tsx` — `fetchWithRetry` now checks `body.sent > 0` (not just HTTP 200). `sendMessage` now creates bell notification + push notification for recipient on success.
+3. `app/api/notify-message/route.ts` — NEW. Lightweight push notification endpoint for messages. Any authenticated user can call it (not admin-only). Rate-limited 30/min per sender.
+4. `app/dashboard/messages/page.tsx` — Redesigned "+" button: now a prominent dark green "New" button with text label.
+5. `app/dashboard/book/components/BookingModal.tsx` — "Add Participants" box redesigned: dark green (#1a1f12) background when empty, transitions to cream when active. User icon + bolder text.
+
+**CLAUDE.md updated:** Added rule #19 (Railway NOT Vercel) and added deployment info to PROJECT OVERVIEW.
 
 ### Cowork Session (2026-03-06) — Google OAuth Implementation
 

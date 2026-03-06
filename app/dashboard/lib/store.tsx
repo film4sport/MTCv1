@@ -1036,6 +1036,36 @@ export function AppProvider({ children }: { children: ReactNode }) {
     db.sendMessageByUsers({
       id: msg.id, fromId: currentUser.id, fromName: currentUser.name,
       toId, toName, text,
+    }).then(() => {
+      // Success: create bell notification for recipient
+      const notif: Notification = {
+        id: generateId('notif'),
+        type: 'message',
+        title: `New message from ${currentUser.name}`,
+        body: text.length > 80 ? text.slice(0, 80) + '…' : text,
+        timestamp: new Date().toISOString(),
+        read: false,
+      };
+      db.createNotification(toId, notif).catch((err) => {
+        console.error('[sendMessage] Failed to create notification:', err);
+      });
+
+      // Send push notification to recipient's device (fire and forget)
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (!session?.access_token) return;
+        fetch('/api/notify-message', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({
+            recipientId: toId,
+            senderName: currentUser.name,
+            preview: text.length > 80 ? text.slice(0, 80) + '…' : text,
+          }),
+        }).catch(() => { /* push is best-effort */ });
+      });
     }).catch((err) => {
       reportError(err, 'Supabase');
       setConversations(prev => prev.map(c => {
