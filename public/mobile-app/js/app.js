@@ -17,8 +17,4 @@
     }
   }
 
-  // Initialize payment system
-  if (typeof initPaymentSystem === 'function') {
-    initPaymentSystem();
-  }
 })();

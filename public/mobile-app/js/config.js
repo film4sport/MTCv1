@@ -12,7 +12,7 @@
  * @property {Object<number, {close: string}>} courtHours - Court operating hours keyed by court ID
  * @property {Object<string, {label: string, color: string, textColor: string}>} eventTypes - Event type display config
  * @property {string} headCoach - Head coach name
- * @property {{booking: number, guest: number, tabWarning: number, tabBlock: number, cancelWindowHours: number}} fees - Fee structure
+ * @property {number} cancelWindowHours - Free cancellation window in hours
  * @property {{lat: number, lon: number, name: string}} club - Club location coordinates and name
  * @property {string[]} guestAllowedScreens - Screens accessible without membership
  * @property {string[]} dayNamesShort - Abbreviated day names (Sun-Sat)
@@ -63,14 +63,8 @@ MTC.config = {
   // Head coach
   headCoach: 'Mark Taylor',
 
-  // Fee structure
-  fees: {
-    booking: 0,           // Free for members
-    guest: 10,            // $10 when bringing a guest
-    tabWarning: 20,       // Nudge to pay at $20
-    tabBlock: 30,         // Block bookings at $30
-    cancelWindowHours: 24 // Free cancel window
-  },
+  // Cancellation policy
+  cancelWindowHours: 24,  // Free cancel window
 
   // Club location
   club: {
@@ -99,9 +93,5 @@ const timeSlots = MTC.config.timeSlots;
 const COURT_HOURS = MTC.config.courtHours;
 const EVENT_TYPES = MTC.config.eventTypes;
 const HEAD_COACH = MTC.config.headCoach;
-const BOOKING_FEE = MTC.config.fees.booking;
-const GUEST_FEE = MTC.config.fees.guest;
-const TAB_WARNING_THRESHOLD = MTC.config.fees.tabWarning;
-const TAB_BLOCK_THRESHOLD = MTC.config.fees.tabBlock;
-const CANCEL_WINDOW_HOURS = MTC.config.fees.cancelWindowHours;
+const CANCEL_WINDOW_HOURS = MTC.config.cancelWindowHours;
 const GUEST_ALLOWED_SCREENS = MTC.config.guestAllowedScreens;

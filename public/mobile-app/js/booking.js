@@ -434,25 +434,13 @@
     // Fee display - only show for non-social events
     const feeText = ev.fee > 0 ? '$'+ev.fee.toFixed(2) : 'FREE for members';
     const feeHtml = isSocialEvent ? '' : '<div class="event-meta-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> '+sanitizeHTML(feeText)+'</div>';
-    let guestFeeHtml = '';
-    if (!isSocialEvent && ev.guestFee && ev.guestFee > 0) {
-      guestFeeHtml = '<div class="event-meta-row guest-fee"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg> Non-members: $'+ev.guestFee.toFixed(2)+'</div>';
-    }
+    const guestFeeHtml = '';
 
     const regCount = (ev.registered||[]).length;
     const slotsClass = '';
     const slotsText = regCount > 0 ? regCount + ' registered' : 'Be the first to sign up!';
     let btnText = ev.rsvp ? 'RSVP' : 'REGISTER';
     const btnClass = '';
-
-    // Non-member: show fee on button
-    let userIsMember = true;
-    if (typeof memberPaymentData !== 'undefined' && memberPaymentData.currentUser) {
-      userIsMember = memberPaymentData.currentUser.isMember !== false;
-    }
-    if (!userIsMember && ev.guestFee > 0 && btnText === 'REGISTER') {
-      btnText = 'REGISTER \u2014 $' + ev.guestFee.toFixed(2);
-    }
 
     // Coach info
     let coachHtml = '';
@@ -550,116 +538,6 @@
       ev.registered.push('You');
     }
 
-    // Non-member: show payment popup if event has a guest fee
-    let userIsMember = true;
-    if (typeof memberPaymentData !== 'undefined' && memberPaymentData.currentUser) {
-      userIsMember = memberPaymentData.currentUser.isMember !== false;
-    }
-    if (!userIsMember && ev && ev.guestFee > 0) {
-      setTimeout(function() {
-        showNonMemberEventPayment(ev.title, ev.guestFee);
-      }, 800);
-    }
-  }
-
-
-  // ============================================
-  // NON-MEMBER / GUEST BOOKING (future: separate login flow)
-  // ============================================
-
-  // Guest payment popup - shown when a non-member books a court
-  function showGuestPaymentPopup(courtNum, time) {
-    const existing = document.getElementById('guestPaymentPopup');
-    if (existing) existing.remove();
-
-    const popup = document.createElement('div');
-    popup.id = 'guestPaymentPopup';
-    popup.className = 'event-detail-overlay';
-    popup.onclick = function(e) { if (e.target === popup) popup.remove(); };
-
-    const tennisBall = '<svg viewBox="0 0 100 100" width="56" height="56">' +
-      '<circle cx="50" cy="50" r="48" fill="#c8ff00" stroke="#a8d600" stroke-width="2"/>' +
-      '<path d="M 18 22 Q 50 48 18 78" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/>' +
-      '<path d="M 82 22 Q 50 48 82 78" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/>' +
-      '<line x1="12" y1="1" x2="12" y2="23" transform="translate(38,25) scale(1.2)" fill="none" stroke="#1a1a1a" stroke-width="3" stroke-linecap="round"/>' +
-      '<path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" transform="translate(38,25) scale(1.2)" fill="none" stroke="#1a1a1a" stroke-width="3" stroke-linecap="round"/>' +
-      '</svg>';
-
-    popup.innerHTML =
-      '<div class="event-detail-card" style="text-align:center;">' +
-        '<button class="event-detail-close" onclick="document.getElementById(\'guestPaymentPopup\').remove()" aria-label="Close">' +
-          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>' +
-        '</button>' +
-        '<div style="margin-bottom:16px;">' + tennisBall + '</div>' +
-        '<div class="event-detail-title" style="color:var(--coral);">GUEST BOOKING \u2014 $' + MTC.config.fees.guest.toFixed(2) + '</div>' +
-        '<div class="event-detail-desc" style="text-align:center;">Court ' + sanitizeHTML(String(courtNum)) + ' has been booked for your guest.</div>' +
-        '<div class="guest-payment-box">' +
-          '<div class="guest-payment-label">Please send e-transfer to:</div>' +
-          '<div class="guest-payment-email" onclick="copyGuestEmail()">monotennis.payment@gmail.com</div>' +
-          '<div class="guest-payment-amount">Amount: <strong>$' + MTC.config.fees.guest.toFixed(2) + '</strong></div>' +
-          '<div class="guest-payment-note">Include your name & court time in the message</div>' +
-        '</div>' +
-        '<button class="event-detail-btn" onclick="copyGuestEmail(); document.getElementById(\'guestPaymentPopup\').remove();" style="margin-top:12px;">COPY EMAIL & CLOSE</button>' +
-      '</div>';
-
-    const app = document.getElementById('app') || document.body;
-    app.appendChild(popup);
-    requestAnimationFrame(function() { popup.classList.add('show'); });
-  }
-
-  function copyGuestEmail() {
-    const email = 'monotennis.payment@gmail.com';
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(email).then(function() {
-        showToast('Email copied: ' + email);
-      });
-    } else {
-      const ta = document.createElement('textarea');
-      ta.value = email;
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand('copy');
-      document.body.removeChild(ta);
-      showToast('Email copied: ' + email);
-    }
-  }
-
-  // Non-member event registration payment popup
-  function showNonMemberEventPayment(eventTitle, fee) {
-    const existing = document.getElementById('guestPaymentPopup');
-    if (existing) existing.remove();
-
-    const popup = document.createElement('div');
-    popup.id = 'guestPaymentPopup';
-    popup.className = 'event-detail-overlay';
-    popup.onclick = function(e) { if (e.target === popup) popup.remove(); };
-
-    const tennisBall = '<svg viewBox="0 0 100 100" width="56" height="56">' +
-      '<circle cx="50" cy="50" r="48" fill="#c8ff00" stroke="#a8d600" stroke-width="2"/>' +
-      '<path d="M 18 22 Q 50 48 18 78" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/>' +
-      '<path d="M 82 22 Q 50 48 82 78" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/>' +
-      '</svg>';
-
-    popup.innerHTML =
-      '<div class="event-detail-card" style="text-align:center;">' +
-        '<button class="event-detail-close" onclick="document.getElementById(\'guestPaymentPopup\').remove()" aria-label="Close">' +
-          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>' +
-        '</button>' +
-        '<div style="margin-bottom:16px;">' + tennisBall + '</div>' +
-        '<div class="event-detail-title" style="color:var(--coral);">NON-MEMBER FEE \u2014 $' + fee.toFixed(2) + '</div>' +
-        '<div class="event-detail-desc" style="text-align:center;">You\'re registered for <strong>' + sanitizeHTML(eventTitle) + '</strong>!</div>' +
-        '<div class="guest-payment-box">' +
-          '<div class="guest-payment-label">Please send e-transfer to:</div>' +
-          '<div class="guest-payment-email" onclick="copyGuestEmail()">monotennis.payment@gmail.com</div>' +
-          '<div class="guest-payment-amount">Amount: <strong>$' + fee.toFixed(2) + '</strong></div>' +
-          '<div class="guest-payment-note">Include your name & the program name in the message</div>' +
-        '</div>' +
-        '<button class="event-detail-btn" onclick="copyGuestEmail(); document.getElementById(\'guestPaymentPopup\').remove();" style="margin-top:12px;">COPY EMAIL & CLOSE</button>' +
-      '</div>';
-
-    const app = document.getElementById('app') || document.body;
-    app.appendChild(popup);
-    requestAnimationFrame(function() { popup.classList.add('show'); });
   }
 
 
@@ -690,40 +568,17 @@
     courtEl.textContent='Court '+selectedSlot.court;
 
     const feeEl=document.getElementById('summaryFee');
-    const creditNote=document.getElementById('summaryCreditNote');
-    const creditText=document.getElementById('summaryCreditText');
-    const creditExplain=document.getElementById('summaryCreditExplain');
     const paymentBox=document.getElementById('paymentInfoBox');
     const paymentTitle=document.getElementById('paymentInfoTitle');
     const paymentText=document.getElementById('paymentInfoText');
     const paymentNote=document.getElementById('paymentInfoNote');
 
-    // Hide credit note/explain (legacy)
-    if (creditNote) creditNote.style.display='none';
-    if (creditExplain) creditExplain.style.display='none';
-
-    // Check if user is a member or non-member
-    let isMember = true;
-    if (typeof memberPaymentData !== 'undefined' && memberPaymentData.currentUser) {
-      isMember = memberPaymentData.currentUser.isMember !== false;
-    }
-
-    if (isMember) {
-      if (feeEl) feeEl.textContent='FREE';
-      if (paymentBox){
-        paymentBox.className='booking-modal-payment-info covered';
-        paymentTitle.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="20 6 9 17 4 12"></polyline></svg> Free for Members';
-        paymentText.innerHTML='Court bookings are <strong>free</strong> for all MTC members.';
-        paymentNote.textContent='Cancel 24+ hrs in advance to free up the slot for others.';
-      }
-    } else {
-      if (feeEl) feeEl.textContent='$10.00';
-      if (paymentBox){
-        paymentBox.className='booking-modal-payment-info warning';
-        paymentTitle.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> Court Fee: $10.00';
-        paymentText.innerHTML='Non-member court fee is <strong>$10/hr</strong>. After booking, you will be prompted to send an <strong>e-transfer</strong> to <strong>monotennis.payment@gmail.com</strong>.';
-        paymentNote.textContent='Include your name and court time in the e-transfer message.';
-      }
+    if (feeEl) feeEl.textContent='FREE';
+    if (paymentBox){
+      paymentBox.className='booking-modal-payment-info covered';
+      paymentTitle.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="20 6 9 17 4 12"></polyline></svg> Free for Members';
+      paymentText.innerHTML='Court bookings are <strong>free</strong> for all MTC members.';
+      paymentNote.textContent='Cancel 24+ hrs in advance to free up the slot for others.';
     }
     openBookingModal();
   }
@@ -1035,9 +890,6 @@
   window.confirmBooking = confirmBooking;
   window.closeBookingModal = closeBookingModal;
   window.registerForGridEvent = registerForGridEvent;
-  window.showNonMemberEventPayment = showNonMemberEventPayment;
-  window.showGuestPaymentPopup = showGuestPaymentPopup;
-  window.copyGuestEmail = copyGuestEmail;
   window.switchScheduleView = switchScheduleView;
   window.switchScheduleTab = switchScheduleTab;
   window.animateCountUp = animateCountUp;
