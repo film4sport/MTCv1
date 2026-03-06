@@ -31,12 +31,15 @@
 1. Click "Continue with Google" on login page → Google → Supabase → `/auth/callback`
 2. Profile has `membership_type` → redirect to `/dashboard`
 
-**Still needed (external setup by user):**
-- Google Cloud Console: Create OAuth 2.0 credentials, add authorized redirect URI `https://yocwrftyecgdhregjzrz.supabase.co/auth/v1/callback`
-- Supabase Dashboard: Auth → Providers → Google → Enable, paste Client ID + Secret
-- Test end-to-end after setup
+**Google OAuth external setup: DONE** — User configured Google Cloud Console + Supabase provider. Deployed.
 
-**Alternative to Apple Sign-In:** Suggested magic link (passwordless email) — no Apple Developer account needed. Not yet implemented.
+**Magic link (passwordless email login) — implemented as Apple Sign-In alternative:**
+- `auth.ts`: `signInWithMagicLink(email)` — uses `signInWithOtp({ shouldCreateUser: false })` so only existing users can use it
+- `login/page.tsx`: "Sign in with Email Link" button below Google button; uses email from the login form field; shows green "Check your email" confirmation after sending
+- Auth callback handles magic links automatically (same PKCE code exchange flow)
+- Error handling: if no account found, shows "No account found with this email. Please sign up first."
+
+**Still needed:** Test Google OAuth + magic link end-to-end on live site.
 
 ### Cowork Session (2026-03-06) — Auth Flow Testing & DB Cascade Fixes
 

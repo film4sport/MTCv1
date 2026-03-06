@@ -67,9 +67,20 @@ export default function Footer() {
 
         {/* Bottom Row */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          <p className="text-sm" style={{ color: 'rgba(232, 228, 217, 0.4)' }}>
-            &copy; Mono Tennis Club 2026
-          </p>
+          <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4">
+            <p className="text-sm" style={{ color: 'rgba(232, 228, 217, 0.4)' }}>
+              &copy; Mono Tennis Club 2026
+            </p>
+            <span className="hidden sm:inline text-sm" style={{ color: 'rgba(232, 228, 217, 0.2)' }}>|</span>
+            <div className="flex items-center gap-4">
+              <a href="/info?tab=privacy" className="footer-link text-sm" style={{ color: 'rgba(232, 228, 217, 0.4)' }}>
+                Privacy Policy
+              </a>
+              <a href="/info?tab=terms" className="footer-link text-sm" style={{ color: 'rgba(232, 228, 217, 0.4)' }}>
+                Terms of Service
+              </a>
+            </div>
+          </div>
 
           {/* Social Icons */}
           <div className="flex items-center gap-4">

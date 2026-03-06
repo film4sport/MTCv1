@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { signIn, resetPassword, updatePassword, signInWithGoogle } from '../dashboard/lib/auth';
+import { signIn, resetPassword, updatePassword, signInWithGoogle, signInWithMagicLink } from '../dashboard/lib/auth';
 
 export default function LoginPage() {
   return (
@@ -85,6 +85,7 @@ function LoginContent() {
   const [resetError, setResetError] = useState('');
   const [resetLoading, setResetLoading] = useState(false);
   const [resetCooldown, setResetCooldown] = useState(0);
+  const [magicLinkSent, setMagicLinkSent] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
 
   // Cooldown timer for password reset rate limiting
@@ -787,6 +788,42 @@ function LoginContent() {
               </svg>
               Continue with Google
             </button>
+            <button
+              type="button"
+              onClick={async () => {
+                if (!email || !emailRegex.test(email)) {
+                  setLoginError('Enter your email above, then click this button to get a sign-in link.');
+                  setEmailError(true);
+                  return;
+                }
+                setLoginError('');
+                setLoading(true);
+                const { error } = await signInWithMagicLink(email.trim().toLowerCase());
+                setLoading(false);
+                if (error) {
+                  setLoginError(error);
+                } else {
+                  setLoginError('');
+                  setMagicLinkSent(true);
+                }
+              }}
+              disabled={loading}
+              className="w-full py-3.5 rounded-full text-sm font-medium transition-all hover:-translate-y-0.5 flex items-center justify-center gap-3 mt-3 disabled:opacity-60"
+              style={{ background: '#faf8f3', border: '1px solid #e0dcd3', color: '#2a2f1e' }}
+              onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#6b7a3d'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.06)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e0dcd3'; e.currentTarget.style.boxShadow = 'none'; }}
+            >
+              <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+              </svg>
+              Sign in with Email Link
+            </button>
+            {magicLinkSent && (
+              <div className="mt-4 rounded-xl p-4 text-center" style={{ background: 'rgba(107, 122, 61, 0.08)', border: '1px solid rgba(107, 122, 61, 0.2)' }}>
+                <p className="text-sm font-medium" style={{ color: '#2a2f1e' }}>Check your email</p>
+                <p className="text-xs mt-1" style={{ color: '#6b7266' }}>We sent a sign-in link to <strong>{email}</strong></p>
+              </div>
+            )}
           </div>
 
           {/* Forgot Password Modal */}
