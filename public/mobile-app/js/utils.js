@@ -107,7 +107,6 @@ const MTC = {
  * @property {Object} profileData - User profile data (profile.js)
  * @property {Object} homeToClubEventMap - Maps home events to club event IDs (avatar.js)
  * @property {Object} avatarSVGs - Avatar SVG markup keyed by name (avatar.js)
- * @property {Array<Object>} memberPaymentData - Admin payment data (payments.js)
  */
 MTC.state = {};
 
