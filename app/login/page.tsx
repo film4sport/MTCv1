@@ -41,6 +41,13 @@ function LoginContent() {
     if (searchParams.get('error') === 'expired_link') {
       setLoginError('Your reset link has expired. Please request a new one.');
     }
+    // Also detect recovery from hash fragment (Supabase implicit grant flow)
+    if (typeof window !== 'undefined') {
+      const hash = window.location.hash;
+      if (hash.includes('type=recovery')) {
+        setResetMode(true);
+      }
+    }
   }, [searchParams]);
 
   // Restore remembered email on mount
