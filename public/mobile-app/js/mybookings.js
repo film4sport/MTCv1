@@ -222,7 +222,7 @@
   // ============================================
   // EVENT BOOKINGS → MY BOOKINGS CONNECTION
   // ============================================
-  // Shared state (read by schedule.js, payments.js)
+  // Shared state (read by schedule.js)
   MTC.state.eventBookings = [];
   window.eventBookings = MTC.state.eventBookings; // Backward-compat alias
 
@@ -276,7 +276,6 @@
   };
   window.removeEventFromMyBookings = MTC.fn.removeEventFromMyBookings;
 
-  // Cross-file function (called from payments.js)
   /** Renders RSVP/event booking cards into the My Bookings screen */
   MTC.fn.renderEventBookings = function() {
     try {
@@ -286,7 +285,7 @@
     const oldCards = container.querySelectorAll('.event-booking-card');
     oldCards.forEach(function(c) { c.remove(); });
 
-    // If adding event cards, remove any empty state that payments.js may have rendered
+    // If adding event cards, remove any empty state
     if (MTC.state.eventBookings.length > 0) {
       const emptyState = container.querySelector('.empty-state');
       if (emptyState) emptyState.remove();

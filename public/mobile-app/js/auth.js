@@ -5,7 +5,7 @@
 (function() {
   'use strict';
 
-  // Shared state (read by navigation.js, payments.js, booking.js, interactive.js, confirm-modal.js)
+  // Shared state (read by navigation.js, booking.js, interactive.js, confirm-modal.js)
   MTC.state.currentUser = null;
   window.currentUser = null; // Backward-compat alias (reassigned on login)
 
