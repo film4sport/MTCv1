@@ -20,7 +20,7 @@
     if ('serviceWorker' in navigator) {
       caches.keys().then(function(names) {
         names.forEach(function(name) {
-          if (name.indexOf('mtc-court-3fc936a7') === -1) {
+          if (name.indexOf('mtc-court-580b3c33') === -1) {
             caches.delete(name);
             console.log('[CacheBust] Deleted old cache:', name);
           }
@@ -438,13 +438,43 @@
             </div>
           </div>
         </div>
-        
+
+        <div class="avatar-category">
+          <div class="avatar-category-title">Simple Avatars</div>
+          <div class="avatar-grid">
+            <div class="avatar-option illustrated" onclick="selectAvatar('simple-1')" data-avatar="simple-1">
+              <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#f5e6d0"/><circle cx="50" cy="38" r="16" fill="#d4a030"/><ellipse cx="50" cy="80" rx="24" ry="20" fill="#4a90d9"/></svg>
+            </div>
+            <div class="avatar-option illustrated" onclick="selectAvatar('simple-2')" data-avatar="simple-2">
+              <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#e8d5c4"/><circle cx="50" cy="38" r="16" fill="#8B4513"/><ellipse cx="50" cy="80" rx="24" ry="20" fill="#2d8659"/></svg>
+            </div>
+            <div class="avatar-option illustrated" onclick="selectAvatar('simple-3')" data-avatar="simple-3">
+              <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#fce4ec"/><circle cx="50" cy="38" r="16" fill="#d4a574"/><ellipse cx="50" cy="80" rx="24" ry="20" fill="#e91e63"/></svg>
+            </div>
+            <div class="avatar-option illustrated" onclick="selectAvatar('simple-4')" data-avatar="simple-4">
+              <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#8D5524"/><circle cx="50" cy="38" r="16" fill="#1a1a1a"/><ellipse cx="50" cy="80" rx="24" ry="20" fill="#c8ff00"/></svg>
+            </div>
+            <div class="avatar-option illustrated" onclick="selectAvatar('simple-5')" data-avatar="simple-5">
+              <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#FFE0BD"/><circle cx="50" cy="38" r="16" fill="#c0392b"/><ellipse cx="50" cy="80" rx="24" ry="20" fill="#8e44ad"/></svg>
+            </div>
+            <div class="avatar-option illustrated" onclick="selectAvatar('simple-6')" data-avatar="simple-6">
+              <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#d4a574"/><circle cx="50" cy="38" r="16" fill="#2c3e50"/><ellipse cx="50" cy="80" rx="24" ry="20" fill="#e67e22"/></svg>
+            </div>
+            <div class="avatar-option illustrated" onclick="selectAvatar('simple-7')" data-avatar="simple-7">
+              <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#f0dcc8"/><circle cx="50" cy="38" r="16" fill="#5d4037"/><ellipse cx="50" cy="80" rx="24" ry="20" fill="#ff5a5f"/></svg>
+            </div>
+            <div class="avatar-option illustrated" onclick="selectAvatar('simple-8')" data-avatar="simple-8">
+              <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#c68642"/><circle cx="50" cy="38" r="16" fill="#1a1a1a"/><ellipse cx="50" cy="80" rx="24" ry="20" fill="#00d4ff"/></svg>
+            </div>
+          </div>
+        </div>
+
         <button class="modal-btn-secondary" onclick="closeAvatarPicker()" aria-label="Cancel">
           Cancel
         </button>
       </div>
     </div>
-    
+
     <!-- Toast Notification -->
     <div class="toast" id="toast" role="alert" aria-live="assertive" aria-atomic="true" style="opacity: 0; visibility: hidden;">
       <div class="toast-icon" aria-hidden="true">
@@ -2341,6 +2371,13 @@
           <div class="onboarding-text">Connect with members, join tournaments, and sign up for clinics — all from the app.</div>
         </div>
         <div class="onboarding-slide" data-slide="4">
+          <div class="onboarding-icon onboarding-icon-volt">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/><path d="M9 9l3-3 3 3M12 6v8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="onboarding-title">ADD TO HOME SCREEN</div>
+          <div class="onboarding-text">Install MTC Court as an app! Tap the Share button, then "Add to Home Screen" — works on iPhone, iPad, and Android. No App Store needed.</div>
+        </div>
+        <div class="onboarding-slide" data-slide="5">
           <div class="onboarding-icon onboarding-theme-toggle">
             <div class="onboarding-theme-circle-light">
               <svg class="onboarding-theme-svg-glow" viewBox="0 0 24 24" fill="none" stroke="#f5a623" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
@@ -2353,13 +2390,14 @@
           <div class="onboarding-text">Tap the sun/moon toggle in the top-left to switch between light and dark mode.</div>
         </div>
       </div>
-      
+
       <div class="onboarding-dots" id="onboardingDots">
         <div class="onboarding-dot active" data-dot="0"></div>
         <div class="onboarding-dot" data-dot="1"></div>
         <div class="onboarding-dot" data-dot="2"></div>
         <div class="onboarding-dot" data-dot="3"></div>
         <div class="onboarding-dot" data-dot="4"></div>
+        <div class="onboarding-dot" data-dot="5"></div>
       </div>
       
       <div class="onboarding-actions">
