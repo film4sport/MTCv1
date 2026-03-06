@@ -31,148 +31,243 @@
   }
 
   // ============================================
-  // LOGIN
+  // SUPABASE CLIENT (initialized on DOMContentLoaded)
   // ============================================
-  // onclick handler (index.html)
-  window.handleLogin = function() {
-    try {
-      const emailInput = document.getElementById('loginEmail');
-      const passwordInput = document.getElementById('loginPassword');
-      const email = emailInput.value.trim();
-      const password = passwordInput.value;
-      const rememberCheckbox = document.getElementById('rememberMe');
-      const remember = rememberCheckbox ? rememberCheckbox.checked : false;
+  var _supabaseClient = null;
 
-      emailInput.classList.remove('input-error');
-      passwordInput.classList.remove('input-error');
-      clearFieldErrors(emailInput);
-      clearFieldErrors(passwordInput);
+  function initSupabase() {
+    if (_supabaseClient) return Promise.resolve(_supabaseClient);
+    return fetch('/api/mobile-auth/config')
+      .then(function(r) { return r.json(); })
+      .then(function(cfg) {
+        if (cfg.supabaseUrl && cfg.supabaseAnonKey && window.supabase) {
+          _supabaseClient = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+        }
+        return _supabaseClient;
+      })
+      .catch(function() { return null; });
+  }
 
-      // Validate required fields
-      const errors = [];
-      if (!email) { showFieldError(emailInput, 'Email is required'); errors.push('email'); }
-      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showFieldError(emailInput, 'Enter a valid email address'); errors.push('email format'); }
-      if (!password) { showFieldError(passwordInput, 'Password is required'); errors.push('password'); }
+  // ============================================
+  // CHECK FOR AUTH CALLBACK (after OAuth / Magic Link redirect)
+  // ============================================
+  function checkAuthCallback() {
+    // Supabase PKCE flow: after redirect, the URL has ?code=... that the
+    // Supabase client auto-detects. We also check the session endpoint for
+    // server-side cookie sessions (set by /auth/callback).
+    initSupabase().then(function(sb) {
+      if (!sb) return;
+      // Let Supabase client process any auth params in the URL
+      sb.auth.getSession().then(function(result) {
+        if (result.data && result.data.session) {
+          finishOAuthLogin(result.data.session);
+          // Clean URL params
+          if (window.history && window.history.replaceState) {
+            window.history.replaceState({}, '', window.location.pathname);
+          }
+          return;
+        }
+        // No client-side session — try server-side session cookies
+        // (set by /auth/callback for Google OAuth)
+        fetch('/api/mobile-auth/session')
+          .then(function(r) { return r.ok ? r.json() : null; })
+          .then(function(data) {
+            if (data && data.data) {
+              finishLogin(data.data.email, data.data);
+            }
+          })
+          .catch(function() { /* no session, show login */ });
+      });
+    });
+  }
 
-      if (errors.length > 0) {
-        const loginCard = document.querySelector('.login-card:not(.signup-card)');
-        if (loginCard) { loginCard.style.animation='none'; loginCard.offsetHeight; loginCard.style.animation='shakeX 0.4s ease'; }
-        showToast('Please enter a valid ' + errors[0]);
+  // Process a Supabase session (from OAuth or Magic Link)
+  function finishOAuthLogin(session) {
+    var user = session.user;
+    var email = user.email || '';
+    // Fetch full profile from server (uses cookie session set by Supabase)
+    fetch('/api/mobile-auth/session')
+      .then(function(r) { return r.ok ? r.json() : null; })
+      .then(function(data) {
+        if (data && data.data) {
+          finishLogin(email, data.data);
+        } else {
+          // Fallback: build minimal user from session
+          finishLogin(email, {
+            name: user.user_metadata && user.user_metadata.name || email.split('@')[0],
+            email: email,
+            role: 'member',
+            userId: user.id,
+            accessToken: session.access_token,
+            membershipType: 'individual',
+            familyId: null,
+            interclubTeam: '',
+            interclubCaptain: false,
+            familyMembers: []
+          });
+        }
+      })
+      .catch(function() {
+        // Fallback
+        finishLogin(email, {
+          name: user.user_metadata && user.user_metadata.name || email.split('@')[0],
+          email: email,
+          role: 'member',
+          userId: user.id,
+          accessToken: session.access_token,
+          membershipType: 'individual',
+          familyId: null,
+          interclubTeam: '',
+          interclubCaptain: false,
+          familyMembers: []
+        });
+      });
+  }
+
+  // ============================================
+  // GOOGLE SIGN-IN
+  // ============================================
+  window.handleGoogleSignIn = function() {
+    initSupabase().then(function(sb) {
+      if (!sb) {
+        showToast('Cannot connect to server. Please try again.');
         return;
       }
-
-      // Validate via server-side API (passwords never stored client-side)
-      var loginBtn = document.querySelector('.login-btn');
-      if (loginBtn) { loginBtn.disabled = true; loginBtn.textContent = 'Signing in...'; }
-
-        fetch('/api/mobile-auth', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: email.toLowerCase(), password: password })
-        })
-        .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
-        .then(function(result) {
-          if (loginBtn) { loginBtn.disabled = false; loginBtn.textContent = 'Sign In'; }
-          if (!result.ok) {
-            if (result.data.error === 'invalid_password') {
-              showFieldError(passwordInput, 'Incorrect password');
-              showToast('Incorrect password');
-            } else if (result.data.error === 'unknown_account') {
-              showFieldError(emailInput, 'Account not found');
-              showToast('Account not found');
-            } else {
-              showToast('Login failed');
-            }
-            var lc = document.querySelector('.login-card:not(.signup-card)');
-            if (lc) { lc.style.animation='none'; lc.offsetHeight; lc.style.animation='shakeX 0.4s ease'; }
-            return;
+      var origin = window.location.origin;
+      sb.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: origin + '/auth/callback?next=' + encodeURIComponent('/mobile-app/index.html'),
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent'
           }
-          // Server returned valid credentials
-          finishLogin(email, result.data);
-        })
-        .catch(function() {
-          if (loginBtn) { loginBtn.disabled = false; loginBtn.textContent = 'Sign In'; }
-          // Offline fallback: only resume a previously authenticated session
-          // Requires: valid Supabase access token stored + email match + session not expired (24 hours)
-          // No password-based offline check — we only resume sessions authenticated by the server
-          var stored = MTC.storage.get('mtc-user', null);
-          var sessionTime = MTC.storage.get('mtc-session-time', 0);
-          var sessionAge = Date.now() - sessionTime;
-          var hasToken = !!MTC.getToken();
-          var MAX_SESSION_AGE = 24 * 60 * 60 * 1000; // 24 hours
-          if (stored && hasToken && stored.email === email.toLowerCase() && sessionAge < MAX_SESSION_AGE) {
-            showToast('Offline — resuming cached session');
-            finishLogin(email, stored);
-          } else {
-            if (sessionAge >= MAX_SESSION_AGE || !hasToken) {
-              MTC.storage.remove('mtc-user');
-              MTC.storage.remove('mtc-session-time');
-              MTC.clearToken();
-              MTC.storage.remove('mtc-session-hash');
-            }
-            showToast('Cannot connect to server. Please try again when online.');
-          }
-        });
-        return; // async — exit handleLogin, finishLogin continues
-
-      function finishLogin(loginEmail, matchedLogin) {
-        // Check for stored user
-        var storedUser = MTC.storage.get('mtc-user', null);
-        if (storedUser && !matchedLogin) {
-          currentUser = storedUser;
-          MTC.state.currentUser = currentUser;
-          if (loginEmail && loginEmail !== currentUser.email) {
-            currentUser.email = loginEmail;
-            currentUser.name = loginEmail.split('@')[0];
-          }
-          // Restore family state from localStorage
-          var storedFamily = MTC.storage.get('mtc-family-members', []);
-          if (storedFamily && storedFamily.length > 0) {
-            MTC.state.familyMembers = storedFamily;
-          }
-          var storedActiveMember = MTC.storage.get('mtc-active-family-member', null);
-          if (storedActiveMember) {
-            MTC.state.activeFamilyMember = storedActiveMember;
-          }
-        } else if (matchedLogin) {
-          currentUser = {
-            name: matchedLogin.name,
-            email: loginEmail.toLowerCase(),
-            role: matchedLogin.role,
-            id: matchedLogin.userId || null,
-            isMember: true,
-            membershipType: matchedLogin.membershipType || 'adult',
-            familyId: matchedLogin.familyId || null,
-            interclubTeam: matchedLogin.interclubTeam || 'none',
-            interclubCaptain: matchedLogin.interclubCaptain === true
-          };
-          MTC.state.currentUser = currentUser;
-          window.currentUser = currentUser;
-          // Store family members if present
-          if (matchedLogin.familyMembers && matchedLogin.familyMembers.length > 0) {
-            MTC.storage.set('mtc-family-members', matchedLogin.familyMembers);
-            MTC.state.familyMembers = matchedLogin.familyMembers;
-          }
-          currentRole = matchedLogin.role;
         }
-
-        // Store Supabase access token for API calls (returned by mobile-auth)
-        if (matchedLogin && matchedLogin.accessToken) {
-          MTC.setToken(matchedLogin.accessToken);
+      }).then(function(result) {
+        if (result.error) {
+          showToast('Google sign-in failed: ' + result.error.message);
         }
+        // Browser will redirect to Google...
+      });
+    });
+  };
 
-        // Always persist session + timestamp for offline expiry
-        MTC.storage.set('mtc-user', currentUser);
-        MTC.storage.set('mtc-session-time', Date.now());
-        // Offline re-authentication relies on the Supabase access token (stored above)
-        // No password hash is stored — server-authenticated session token is the only credential
+  // ============================================
+  // MAGIC LINK SIGN-IN
+  // ============================================
+  window.handleMagicLink = function() {
+    var emailInput = document.getElementById('loginEmail');
+    var email = emailInput ? emailInput.value.trim().toLowerCase() : '';
 
-        completeLogin();
+    emailInput.classList.remove('input-error');
+    clearFieldErrors(emailInput);
+
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      showFieldError(emailInput, 'Enter a valid email address');
+      showToast('Enter your email to receive a sign-in link.');
+      return;
+    }
+
+    var btn = document.getElementById('magicLinkBtn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Sending link...'; }
+
+    initSupabase().then(function(sb) {
+      if (!sb) {
+        if (btn) { btn.disabled = false; btn.textContent = 'Sign in with Email Link'; }
+        showToast('Cannot connect to server. Please try again.');
+        return;
       }
+      var origin = window.location.origin;
+      sb.auth.signInWithOtp({
+        email: email,
+        options: {
+          shouldCreateUser: false,
+          emailRedirectTo: origin + '/auth/callback?next=' + encodeURIComponent('/mobile-app/index.html')
+        }
+      }).then(function(result) {
+        if (btn) { btn.disabled = false; btn.textContent = 'Sign in with Email Link'; }
+        if (result.error) {
+          var msg = result.error.message || '';
+          if (msg.toLowerCase().includes('not allowed') || msg.toLowerCase().includes('not found')) {
+            showToast('No account found with this email.');
+          } else {
+            showToast('Failed to send link: ' + msg);
+          }
+          return;
+        }
+        // Show magic link sent overlay
+        var overlay = document.getElementById('magicLinkOverlay');
+        var emailEl = document.getElementById('magicLinkEmail');
+        if (emailEl) emailEl.textContent = email;
+        if (overlay) overlay.style.display = 'flex';
+      });
+    });
+  };
+
+  window.closeMagicLinkOverlay = function() {
+    var overlay = document.getElementById('magicLinkOverlay');
+    if (overlay) overlay.style.display = 'none';
+  };
+
+  // ============================================
+  // FINISH LOGIN (shared by all auth methods)
+  // ============================================
+  function finishLogin(loginEmail, matchedLogin) {
+    try {
+      var storedUser = MTC.storage.get('mtc-user', null);
+      if (storedUser && !matchedLogin) {
+        currentUser = storedUser;
+        MTC.state.currentUser = currentUser;
+        if (loginEmail && loginEmail !== currentUser.email) {
+          currentUser.email = loginEmail;
+          currentUser.name = loginEmail.split('@')[0];
+        }
+        var storedFamily = MTC.storage.get('mtc-family-members', []);
+        if (storedFamily && storedFamily.length > 0) {
+          MTC.state.familyMembers = storedFamily;
+        }
+        var storedActiveMember = MTC.storage.get('mtc-active-family-member', null);
+        if (storedActiveMember) {
+          MTC.state.activeFamilyMember = storedActiveMember;
+        }
+      } else if (matchedLogin) {
+        currentUser = {
+          name: matchedLogin.name,
+          email: (loginEmail || '').toLowerCase(),
+          role: matchedLogin.role,
+          id: matchedLogin.userId || null,
+          isMember: true,
+          membershipType: matchedLogin.membershipType || 'adult',
+          familyId: matchedLogin.familyId || null,
+          interclubTeam: matchedLogin.interclubTeam || 'none',
+          interclubCaptain: matchedLogin.interclubCaptain === true
+        };
+        MTC.state.currentUser = currentUser;
+        window.currentUser = currentUser;
+        if (matchedLogin.familyMembers && matchedLogin.familyMembers.length > 0) {
+          MTC.storage.set('mtc-family-members', matchedLogin.familyMembers);
+          MTC.state.familyMembers = matchedLogin.familyMembers;
+        }
+        currentRole = matchedLogin.role;
+      }
+
+      if (matchedLogin && matchedLogin.accessToken) {
+        MTC.setToken(matchedLogin.accessToken);
+      }
+
+      MTC.storage.set('mtc-user', currentUser);
+      MTC.storage.set('mtc-session-time', Date.now());
+
+      completeLogin();
     } catch (error) {
       MTC.warn('Login error:', error);
       showToast('Login failed. Please try again.');
     }
+  }
+
+  // Legacy handler kept for backward compat (signup flow still uses it)
+  window.handleLogin = function() {
+    showToast('Please use Google or Email Link to sign in.');
   };
 
   function completeLogin() {
@@ -630,5 +725,11 @@
         clearFieldErrors(e.target);
       }
     });
+
+    // Check if returning from Google OAuth or Magic Link redirect
+    var url = new URL(window.location.href);
+    if (url.searchParams.has('code') || url.hash.includes('access_token')) {
+      checkAuthCallback();
+    }
   });
 })();

@@ -23,8 +23,8 @@ export default function AboutTab() {
             <div className="fade-in-right">
               <span className="section-label">// About Us</span>
               <h2 className="headline-font text-3xl md:text-4xl lg:text-[2.75rem] leading-tight mt-4 mb-6" style={{ color: '#2a2f1e' }}>
-                Mono Tennis Club — Empowering Your Tennis Journey with{' '}
-                <span style={{ color: '#6b7a3d' }}>Passion, Community,</span> and Dedication.
+                Mono Tennis Club — Where{' '}
+                <span style={{ color: '#6b7a3d' }}>Great Tennis</span> and Good Neighbours Come Together.
               </h2>
               <p className="leading-relaxed mb-6" style={{ color: '#6b7266' }}>
                 Welcome to Mono Tennis Club, a not-for-profit community tennis club located in the heart of Mono, Ontario.
