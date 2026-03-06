@@ -5,7 +5,7 @@
   "start_url": "/mobile-app/index.html",
   "scope": "/mobile-app/",
   "display": "standalone",
-  "orientation": "portrait",
+  "orientation": "any",
   "background_color": "#0a0a0a",
   "theme_color": "#c8ff00",
   "categories": ["sports", "lifestyle"],

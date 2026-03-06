@@ -7,8 +7,10 @@ import * as db from '../lib/db';
 interface TourStep {
   title: string;
   body: string;
+  richBody?: React.ReactNode; // Optional JSX body (overrides plain text body)
   target: string; // CSS selector or 'center' for modal
   position: 'bottom' | 'right' | 'center';
+  wide?: boolean; // Extra width for richer content
 }
 
 const STEPS: TourStep[] = [
@@ -38,9 +40,53 @@ const STEPS: TourStep[] = [
   },
   {
     title: 'Your Preferences',
-    body: 'Head to Settings to manage your notification preferences and access the MTC Court mobile app.',
+    body: 'Head to Settings to manage your notification preferences and account details.',
     target: '[data-tour="settings"]',
     position: 'right',
+  },
+  {
+    title: 'Get the App',
+    body: '',
+    richBody: (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <p style={{ color: '#6b7a3d', fontSize: 14, lineHeight: 1.6, margin: 0 }}>
+          MTC Court works as a native-feeling app on your phone or iPad — no App Store needed!
+        </p>
+        <div style={{ display: 'flex', gap: 12 }}>
+          {/* Phone */}
+          <div style={{ flex: 1, background: 'rgba(107, 122, 61, 0.08)', borderRadius: 12, padding: 14 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+              <svg width="20" height="20" fill="none" stroke="#6b7a3d" viewBox="0 0 24 24" strokeWidth="2">
+                <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/>
+              </svg>
+              <span style={{ fontWeight: 600, color: '#1a1f12', fontSize: 13 }}>iPhone / Android</span>
+            </div>
+            <ol style={{ margin: 0, paddingLeft: 18, color: '#4a5528', fontSize: 12, lineHeight: 1.8 }}>
+              <li>Open <a href="/mobile-app/index.html" target="_blank" rel="noopener" style={{ color: '#6b7a3d', fontWeight: 600 }}>MTC Court App</a> in Safari/Chrome</li>
+              <li>Tap the <strong>Share</strong> button</li>
+              <li>Select <strong>&quot;Add to Home Screen&quot;</strong></li>
+            </ol>
+          </div>
+          {/* iPad */}
+          <div style={{ flex: 1, background: 'rgba(107, 122, 61, 0.08)', borderRadius: 12, padding: 14 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+              <svg width="20" height="20" fill="none" stroke="#6b7a3d" viewBox="0 0 24 24" strokeWidth="2">
+                <rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/>
+              </svg>
+              <span style={{ fontWeight: 600, color: '#1a1f12', fontSize: 13 }}>iPad / Tablet</span>
+            </div>
+            <ol style={{ margin: 0, paddingLeft: 18, color: '#4a5528', fontSize: 12, lineHeight: 1.8 }}>
+              <li>Open <a href="/mobile-app/index.html" target="_blank" rel="noopener" style={{ color: '#6b7a3d', fontWeight: 600 }}>MTC Court App</a> in Safari</li>
+              <li>Tap the <strong>Share</strong> icon (box with arrow)</li>
+              <li>Select <strong>&quot;Add to Home Screen&quot;</strong></li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    ),
+    target: 'center',
+    position: 'center',
+    wide: true,
   },
   {
     title: 'You\'re All Set!',
@@ -149,7 +195,8 @@ export default function OnboardingTour() {
               ? { top: tooltipPos.top, left: tooltipPos.left }
               : { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }
           ),
-          width: isCenter ? 380 : 320,
+          width: current.wide ? 520 : isCenter ? 380 : 320,
+          maxWidth: 'calc(100vw - 32px)',
           backgroundColor: '#faf8f3',
           borderRadius: 16,
           padding: 24,
@@ -177,9 +224,13 @@ export default function OnboardingTour() {
         <h3 style={{ color: '#1a1f12', fontSize: 18, fontWeight: 600, marginBottom: 8 }}>
           {current.title}
         </h3>
-        <p style={{ color: '#6b7a3d', fontSize: 14, lineHeight: 1.6, marginBottom: 20 }}>
-          {current.body}
-        </p>
+        {current.richBody ? (
+          <div style={{ marginBottom: 20 }}>{current.richBody}</div>
+        ) : (
+          <p style={{ color: '#6b7a3d', fontSize: 14, lineHeight: 1.6, marginBottom: 20 }}>
+            {current.body}
+          </p>
+        )}
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <button

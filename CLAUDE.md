@@ -125,6 +125,7 @@ Use grep to find all occurrences before editing. Verify 0 stale values remain af
 - **localStorage is a cache, not a source of truth**: Data flow is Supabase → localStorage → React state. New features must follow the same `store.tsx` pattern: optimistic update → Supabase write → rollback on failure.
 - **E2E tests for new features**: Every new user-facing feature needs at least one Playwright happy-path test in `tests/`.
 - **Mobile PWA `dist/` is build output**: Never edit `dist/app.bundle.*` directly — edit source files in `css/` and `js/`, then run `npm run build:mobile`. The build script auto-bumps the SW cache version from content hash.
+- **Cowork esbuild fix**: node_modules are installed on Windows. In Cowork (Linux VM), run `npm install @esbuild/linux-x64 --no-save` before `npm run build:mobile`.
 - **Dependency updates**: Run `npm run deps:check` monthly to review outdated packages.
 
 ---

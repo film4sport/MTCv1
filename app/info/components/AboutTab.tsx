@@ -1,6 +1,13 @@
 import Image from 'next/image';
+import { specialEvents } from '../../lib/events';
 
 export default function AboutTab() {
+  const today = new Date().toISOString().slice(0, 10);
+  const upcomingNews = specialEvents
+    .filter(e => e.isoDate >= today)
+    .sort((a, b) => a.isoDate.localeCompare(b.isoDate))
+    .slice(0, 3);
+
   return (
     <>
       <section className="py-16 lg:py-20 px-8 lg:px-16" style={{ backgroundColor: '#edeae3' }}>
@@ -106,21 +113,17 @@ export default function AboutTab() {
             </h2>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 fade-in">
-            {[
-              { badge: 'Announcement', date: 'March 2026', title: 'Registration Opens March 1st', desc: 'The 2026 season registration opens on March 1st. Pay online via Interac e-transfer. Early bird discounts may apply.' },
-              { badge: 'Newsletter', date: 'April 2026', title: 'Spring Newsletter', desc: 'Get the latest updates on the upcoming season, new programs, coaching staff changes, and social events planned for the summer.' },
-              { badge: 'Fundraiser', date: 'Ongoing', title: 'Court Resurfacing Fund', desc: 'Help us maintain and improve our courts. Donations go toward resurfacing and upgrading our facilities for future seasons.' },
-            ].map((news, i) => (
-              <div key={i} className="rounded-xl p-6" style={{ background: '#faf8f3', border: '1px solid #e0dcd3' }}>
+          <div className={`grid gap-8 fade-in ${upcomingNews.length >= 3 ? 'md:grid-cols-3' : upcomingNews.length === 2 ? 'md:grid-cols-2 max-w-3xl mx-auto' : 'max-w-md mx-auto'}`}>
+            {upcomingNews.map((event) => (
+              <div key={event.id} className="rounded-xl p-6" style={{ background: '#faf8f3', border: '1px solid #e0dcd3' }}>
                 <div className="flex items-center gap-2 mb-4">
-                  <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: 'rgba(107, 122, 61, 0.15)', color: '#4a5528' }}>
-                    {news.badge}
+                  <span className="px-3 py-1 rounded-full text-xs font-medium capitalize" style={{ backgroundColor: 'rgba(107, 122, 61, 0.15)', color: '#4a5528' }}>
+                    {event.category}
                   </span>
-                  <span className="text-xs" style={{ color: '#999' }}>{news.date}</span>
+                  <span className="text-xs" style={{ color: '#999' }}>{event.date}</span>
                 </div>
-                <h3 className="font-bold text-lg mb-3" style={{ color: '#2a2f1e' }}>{news.title}</h3>
-                <p className="text-sm leading-relaxed" style={{ color: '#6b7266' }}>{news.desc}</p>
+                <h3 className="font-bold text-lg mb-3" style={{ color: '#2a2f1e' }}>{event.title}</h3>
+                <p className="text-sm leading-relaxed" style={{ color: '#6b7266' }}>{event.description}</p>
               </div>
             ))}
           </div>
