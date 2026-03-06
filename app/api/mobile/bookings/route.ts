@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { authenticateMobileRequest, getAdminClient, sanitizeInput, isRateLimited } from '../auth-helper';
 import type { BookingRules } from '../types';
+import crypto from 'crypto';
 
 const BOOKING_RULES: BookingRules = {
   maxAdvanceDays: 7,
@@ -12,6 +13,211 @@ const BOOKING_RULES: BookingRules = {
 };
 
 const COURT_NAMES: Record<number, string> = { 1: 'Court 1', 2: 'Court 2', 3: 'Court 3', 4: 'Court 4' };
+
+function generateId(prefix: string): string {
+  return `${prefix}-${crypto.randomUUID().slice(0, 8)}`;
+}
+
+/** Helper: create a bell notification in Supabase */
+async function createNotification(
+  supabase: ReturnType<typeof getAdminClient>,
+  userId: string,
+  notif: { id: string; type: string; title: string; body: string; timestamp: string }
+) {
+  await supabase.from('notifications').insert({
+    id: notif.id, user_id: userId, type: notif.type,
+    title: notif.title, body: notif.body, timestamp: notif.timestamp, read: false,
+  }).then(({ error }) => {
+    if (error) console.error(`[mobile-booking] Failed to create notification for ${userId}:`, error.message);
+  });
+}
+
+/** Helper: send a direct message via conversations/messages tables */
+async function sendMessage(
+  supabase: ReturnType<typeof getAdminClient>,
+  msg: { id: string; fromId: string; fromName: string; toId: string; toName: string; text: string }
+) {
+  const timestamp = new Date().toISOString();
+
+  // Find or create conversation
+  const { data: conv } = await supabase
+    .from('conversations')
+    .select('id')
+    .or(`and(member_a.eq.${msg.fromId},member_b.eq.${msg.toId}),and(member_a.eq.${msg.toId},member_b.eq.${msg.fromId})`)
+    .single();
+
+  let conversationId: number;
+  if (conv) {
+    conversationId = conv.id;
+  } else {
+    const { data: newConv } = await supabase
+      .from('conversations')
+      .insert({ member_a: msg.fromId, member_b: msg.toId, last_message: msg.text, last_timestamp: timestamp })
+      .select('id')
+      .single();
+    if (!newConv) { console.error('[mobile-booking] Failed to create conversation'); return; }
+    conversationId = newConv.id;
+  }
+
+  // Insert message
+  const { error: msgErr } = await supabase.from('messages').insert({
+    id: msg.id, conversation_id: conversationId,
+    from_id: msg.fromId, from_name: msg.fromName,
+    to_id: msg.toId, to_name: msg.toName,
+    text: msg.text, timestamp, read: false,
+  });
+  if (msgErr) console.error(`[mobile-booking] Failed to send message to ${msg.toName}:`, msgErr.message);
+
+  // Update conversation summary
+  await supabase.from('conversations').update({ last_message: msg.text, last_timestamp: timestamp }).eq('id', conversationId);
+}
+
+/** Fire booking notifications: bell + message + email (non-blocking, best-effort) */
+async function fireBookingNotifications(
+  supabase: ReturnType<typeof getAdminClient>,
+  booking: { id: string; courtName: string; date: string; time: string; matchType?: string; duration?: number },
+  booker: { id: string; name: string; email: string },
+  participantRows: { participant_id: string; participant_name: string }[],
+) {
+  const now = new Date().toISOString();
+  const formattedDate = new Date(booking.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+  const durationText = booking.duration ? `${booking.duration * 30} min` : '60 min';
+  const matchLabel = booking.matchType ? booking.matchType.charAt(0).toUpperCase() + booking.matchType.slice(1) : 'Singles';
+
+  // 1. Bell notification for booker
+  await createNotification(supabase, booker.id, {
+    id: generateId('n'), type: 'booking',
+    title: 'Booking Confirmed',
+    body: `${booking.courtName} booked for ${booking.date} at ${booking.time}.`,
+    timestamp: now,
+  });
+
+  // 2. For each participant: bell notification + direct message
+  if (participantRows.length > 0) {
+    // Look up participant profiles to get IDs and names
+    const allPlayerNames = [booker.name, ...participantRows.map(p => p.participant_name)];
+
+    for (const p of participantRows) {
+      const otherPlayers = allPlayerNames.filter(n => n !== p.participant_name).join(', ');
+
+      // Bell notification
+      await createNotification(supabase, p.participant_id, {
+        id: generateId('n'), type: 'booking',
+        title: 'Added to Booking',
+        body: `${booker.name} added you to a booking: ${booking.courtName} on ${booking.date} at ${booking.time}.`,
+        timestamp: now,
+      });
+
+      // Direct message with full details
+      await sendMessage(supabase, {
+        id: generateId('msg'),
+        fromId: booker.id, fromName: booker.name,
+        toId: p.participant_id, toName: p.participant_name,
+        text: `You've been added to a court booking!\n\n📅 ${formattedDate}\n⏰ ${booking.time} (${durationText})\n📍 ${booking.courtName} — Mono Tennis Club\nMatch: ${matchLabel}\n👥 Playing with: ${otherPlayers}\n\nA confirmation email with a calendar invite has been sent to your email. You can also add this to your calendar from Dashboard → Schedule.\n[booking:${booking.courtName}:${booking.date}:${booking.time}]`,
+      });
+    }
+  }
+
+  // 3. Send confirmation emails (to booker + participants) via the booking-email route
+  try {
+    const recipients: { email: string; name: string; role: 'booker' | 'participant' }[] = [
+      { email: booker.email, name: booker.name, role: 'booker' },
+    ];
+
+    // Look up participant emails
+    if (participantRows.length > 0) {
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, name, email')
+        .in('id', participantRows.map(p => p.participant_id));
+      (profiles || []).forEach(prof => {
+        if (prof.email) recipients.push({ email: prof.email, name: prof.name, role: 'participant' });
+      });
+    }
+
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://monotennisclub.com';
+    await fetch(`${siteUrl}/api/booking-email`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        bookingId: booking.id,
+        recipients,
+        bookerName: booker.name,
+        courtName: booking.courtName,
+        date: booking.date,
+        time: booking.time,
+        duration: booking.duration,
+        matchType: booking.matchType,
+      }),
+    }).then(res => {
+      if (!res.ok) console.error(`[mobile-booking] Email API returned ${res.status}`);
+    });
+  } catch (err) {
+    console.error('[mobile-booking] Failed to send confirmation emails:', err);
+  }
+}
+
+/** Fire cancellation notifications: bell + message + email (non-blocking, best-effort) */
+async function fireCancellationNotifications(
+  supabase: ReturnType<typeof getAdminClient>,
+  booking: { id: string; court_name: string; date: string; time: string; user_id: string; user_name: string },
+  participantRows: { participant_id: string; participant_name: string }[],
+) {
+  const now = new Date().toISOString();
+  const cancelDate = new Date(booking.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+
+  for (const p of participantRows) {
+    // Bell notification
+    await createNotification(supabase, p.participant_id, {
+      id: generateId('n'), type: 'booking',
+      title: 'Booking Cancelled',
+      body: `${booking.user_name} cancelled the booking: ${booking.court_name} on ${booking.date} at ${booking.time}.`,
+      timestamp: now,
+    });
+
+    // Direct message
+    await sendMessage(supabase, {
+      id: generateId('msg'),
+      fromId: booking.user_id, fromName: booking.user_name,
+      toId: p.participant_id, toName: p.participant_name,
+      text: `A court booking has been cancelled.\n\n❌ CANCELLED\n📅 ${cancelDate}\n⏰ ${booking.time}\n📍 ${booking.court_name} — Mono Tennis Club\n\nThe calendar invite has been removed. You can rebook from Dashboard → Book Court.`,
+    });
+  }
+
+  // Send cancellation emails
+  try {
+    const cancelRecipients: { email: string; name: string }[] = [];
+    const allIds = [booking.user_id, ...participantRows.map(p => p.participant_id)];
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id, name, email')
+      .in('id', allIds);
+    (profiles || []).forEach(prof => {
+      if (prof.email) cancelRecipients.push({ email: prof.email, name: prof.name });
+    });
+
+    if (cancelRecipients.length > 0) {
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://monotennisclub.com';
+      await fetch(`${siteUrl}/api/booking-email`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bookingId: booking.id,
+          recipients: cancelRecipients,
+          courtName: booking.court_name,
+          date: booking.date,
+          time: booking.time,
+        }),
+      }).then(res => {
+        if (!res.ok) console.error(`[mobile-booking] Cancel email API returned ${res.status}`);
+      });
+    }
+  } catch (err) {
+    console.error('[mobile-booking] Failed to send cancellation emails:', err);
+  }
+}
+
+// ─────────────────────────────────────────────────────────
 
 /** GET — Fetch all confirmed bookings (for calendar grid) */
 export async function GET(request: Request) {
@@ -170,15 +376,18 @@ export async function POST(request: Request) {
       }
     }
 
+    const courtName = COURT_NAMES[courtId] || `Court ${courtId}`;
+    const bookerName = userName ? sanitizeInput(userName, 200) : authResult.name || 'Member';
+
     const { data: newBooking, error: insertError } = await supabase
       .from('bookings')
       .insert({
         court_id: courtId,
-        court_name: COURT_NAMES[courtId] || `Court ${courtId}`,
+        court_name: courtName,
         date,
         time,
         user_id: authResult.id,
-        user_name: userName ? sanitizeInput(userName, 200) : authResult.name || 'Member',
+        user_name: bookerName,
         booked_for: bookedFor ? sanitizeInput(bookedFor, 200) : null,
         match_type: matchType,
         duration,
@@ -195,6 +404,31 @@ export async function POST(request: Request) {
       }
       return NextResponse.json({ error: 'Failed to create booking' }, { status: 500 });
     }
+
+    // ── Insert participants into booking_participants ──
+    const participantRows: { participant_id: string; participant_name: string }[] = [];
+    if (participants && Array.isArray(participants) && participants.length > 0) {
+      const rows = participants.map((p: { id: string; name: string }) => ({
+        booking_id: newBooking.id,
+        participant_id: p.id,
+        participant_name: sanitizeInput(p.name, 200),
+      }));
+      const { error: pErr } = await supabase.from('booking_participants').insert(rows);
+      if (pErr) {
+        console.error('[mobile-booking] Failed to insert participants:', pErr.message);
+      } else {
+        rows.forEach(r => participantRows.push({ participant_id: r.participant_id, participant_name: r.participant_name }));
+      }
+    }
+
+    // ── Fire notifications (non-blocking) ─────────────
+    // Don't await — respond to client immediately, notifications fire in background
+    fireBookingNotifications(
+      supabase,
+      { id: newBooking.id, courtName, date, time, matchType, duration },
+      { id: authResult.id, name: bookerName, email: authResult.email },
+      participantRows,
+    ).catch(err => console.error('[mobile-booking] Notification error:', err));
 
     return NextResponse.json({ success: true, booking: newBooking });
   } catch {
@@ -219,7 +453,7 @@ export async function DELETE(request: Request) {
     // Fetch booking to verify ownership / check cancellation window
     const { data: booking } = await supabase
       .from('bookings')
-      .select('user_id, date, time')
+      .select('id, user_id, user_name, court_name, date, time')
       .eq('id', bookingId)
       .single();
 
@@ -252,12 +486,25 @@ export async function DELETE(request: Request) {
       }
     }
 
+    // Fetch participants BEFORE cancelling (for notifications)
+    const { data: participants } = await supabase
+      .from('booking_participants')
+      .select('participant_id, participant_name')
+      .eq('booking_id', bookingId);
+
     const { error } = await supabase
       .from('bookings')
       .update({ status: 'cancelled' })
       .eq('id', bookingId);
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+    // Fire cancellation notifications (non-blocking)
+    if (participants && participants.length > 0) {
+      fireCancellationNotifications(supabase, booking, participants)
+        .catch(err => console.error('[mobile-booking] Cancel notification error:', err));
+    }
+
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
