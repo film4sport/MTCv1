@@ -1015,3 +1015,57 @@ body.offline .offline-banner {
   100% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
 }
 
+/* ── Sync Status Indicator ── */
+.sync-status-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin-left: 6px;
+  vertical-align: middle;
+  transition: background 0.3s ease;
+}
+.sync-status-dot.fresh {
+  background: var(--volt, #c8ff00);
+  box-shadow: 0 0 4px rgba(200, 255, 0, 0.4);
+}
+.sync-status-dot.stale {
+  background: var(--coral, #ff5a5f);
+  box-shadow: 0 0 4px rgba(255, 90, 95, 0.4);
+  animation: stalePulse 2s ease-in-out infinite;
+}
+@keyframes stalePulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+/* ── Failed Message Retry UI ── */
+.msg-failed {
+  opacity: 0.5;
+  position: relative;
+}
+.msg-failed::after {
+  content: 'Tap to retry';
+  position: absolute;
+  bottom: -14px;
+  right: 0;
+  font-size: 9px;
+  color: var(--coral, #ff5a5f);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.queue-pending-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 100px;
+  font-size: 10px;
+  font-weight: 700;
+  background: rgba(255, 90, 95, 0.15);
+  color: var(--coral, #ff5a5f);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+

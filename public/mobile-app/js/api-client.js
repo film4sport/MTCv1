@@ -336,6 +336,51 @@
   }
 
   // ============================================
+  // PENDING QUEUE STATUS — expose for UI indicators
+  // ============================================
+
+  /** Get count of pending items in the offline queue */
+  function getPendingQueueCount() {
+    return pendingQueue.length;
+  }
+
+  /** Retry all pending items manually (triggered by user tap) */
+  function retryPendingQueue() {
+    if (!navigator.onLine) {
+      if (typeof showToast === 'function') showToast('Still offline — will sync when connected');
+      return;
+    }
+    processPendingQueue();
+  }
+
+  /** Show/hide the pending queue badge in the UI */
+  function updateQueueBadge() {
+    var badge = document.getElementById('syncQueueBadge');
+    if (!badge) return;
+    var count = pendingQueue.length;
+    if (count > 0) {
+      badge.textContent = count + ' pending';
+      badge.style.display = 'inline-flex';
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+
+  // Update badge whenever queue changes
+  var _origQueueForSync = queueForSync;
+  queueForSync = function(type, data, retries) {
+    _origQueueForSync(type, data, retries);
+    updateQueueBadge();
+  };
+
+  // Also update badge after processing
+  var _origProcessQueue = processPendingQueue;
+  processPendingQueue = function() {
+    _origProcessQueue();
+    setTimeout(updateQueueBadge, 2000); // Delay to let processing finish
+  };
+
+  // ============================================
   // API RESPONSE VALIDATION — guards against schema drift
   // ============================================
   /**
@@ -405,6 +450,8 @@
   MTC.fn.signup = signup;
   MTC.fn.loadFromAPI = loadFromAPI;
   MTC.fn.validateResponse = validateResponse;
+  MTC.fn.getPendingQueueCount = getPendingQueueCount;
+  MTC.fn.retryPendingQueue = retryPendingQueue;
 
   window.apiRequest = apiRequest;
   window.optimisticAction = optimisticAction;

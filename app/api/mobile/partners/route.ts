@@ -153,6 +153,41 @@ export async function PATCH(request: Request) {
       });
     } catch { /* non-critical */ }
 
+    // Web Push notification (best-effort)
+    try {
+      const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || '';
+      const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY || '';
+      const VAPID_EMAIL = process.env.VAPID_EMAIL || 'mailto:admin@monotennisclub.ca';
+      if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
+        const { data: subs } = await supabase
+          .from('push_subscriptions')
+          .select('endpoint, p256dh, auth')
+          .eq('user_id', partner.user_id);
+        if (subs?.length) {
+          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          const webpush = require('web-push') as {
+            setVapidDetails: (s: string, p: string, k: string) => void;
+            sendNotification: (sub: object, payload: string) => Promise<void>;
+          };
+          webpush.setVapidDetails(VAPID_EMAIL, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
+          const payload = JSON.stringify({
+            title: 'Partner Matched!',
+            body: `${authResult.name} wants to play with you!`,
+            icon: '/mobile-app/icon-192.png',
+            badge: '/mobile-app/badge-72.png',
+            url: '/mobile-app/index.html',
+            tag: 'partner-match-' + partnerId,
+          });
+          await Promise.allSettled(subs.map(sub =>
+            webpush.sendNotification(
+              { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
+              payload
+            )
+          ));
+        }
+      }
+    } catch { /* push is best-effort */ }
+
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
