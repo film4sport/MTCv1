@@ -315,7 +315,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
         const res = await fetch(url, options);
-        if (res.ok) return; // success
+        if (res.ok) {
+          // Check that emails were actually sent (not just a 200 with sent: 0)
+          try {
+            const body = await res.clone().json();
+            if (body.sent > 0) return; // emails actually sent
+            // 200 but sent: 0 — SMTP likely not configured
+            console.warn(`[email] ${label}: API returned ok but sent 0 emails.`, body.message);
+          } catch {
+            return; // couldn't parse response, assume success
+          }
+        }
         if (attempt < maxRetries) {
           await new Promise(r => setTimeout(r, 1000 * (attempt + 1))); // backoff
           continue;
@@ -661,7 +671,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
             timestamp: new Date().toISOString(),
             read: false,
           };
-          db.sendMessageByUsers({ id: msg.id, fromId: booking.userId, fromName: booking.userName, toId: participant.id, toName: participant.name, text: msg.text }).catch((err) => reportError(err, 'Supabase'));
+          db.sendMessageByUsers({ id: msg.id, fromId: booking.userId, fromName: booking.userName, toId: participant.id, toName: participant.name, text: msg.text }).catch((err) => {
+            console.error(`[booking] Failed to send message to ${participant.name}:`, err);
+            reportError(err, 'Supabase');
+          });
         });
       }
     }
@@ -732,7 +745,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
               timestamp: new Date().toISOString(),
               read: false,
             };
-            db.sendMessageByUsers({ id: msg.id, fromId: booking.userId, fromName: booking.userName, toId: participant.id, toName: participant.name, text: msg.text }).catch((err) => reportError(err, 'Supabase'));
+            db.sendMessageByUsers({ id: msg.id, fromId: booking.userId, fromName: booking.userName, toId: participant.id, toName: participant.name, text: msg.text }).catch((err) => {
+            console.error(`[booking] Failed to send message to ${participant.name}:`, err);
+            reportError(err, 'Supabase');
+          });
           });
 
           // Send cancellation emails to booker + all participants (fire and forget)
