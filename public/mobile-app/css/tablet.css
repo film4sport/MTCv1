@@ -123,6 +123,21 @@
     margin-right: auto;
   }
 
+  /* Looking for Partners on home — horizontal row on tablet */
+  .partner-requests {
+    display: flex;
+    gap: 12px;
+    padding: 0 24px 16px;
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .partner-request-card {
+    flex: 1;
+    min-width: 0;
+  }
+
   /* ── Schedule ── */
   .schedule-container {
     max-width: 720px;
@@ -228,5 +243,9 @@
 
   .admin-stats-grid {
     grid-template-columns: repeat(4, 1fr);
+  }
+
+  .partner-requests {
+    max-width: 900px;
   }
 }

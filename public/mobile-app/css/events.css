@@ -215,14 +215,16 @@
   padding: 16px;
   background: transparent;
   border: none;
-  color: rgba(255, 255, 255, 0.4);
+  color: #c8ff00;
   font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
   cursor: pointer;
   margin-top: 8px;
-  transition: color 0.2s ease;
+  transition: opacity 0.2s ease;
 }
 
 .onboarding-skip:hover {
-  color: rgba(255, 255, 255, 0.7);
+  opacity: 0.7;
 }
 
