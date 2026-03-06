@@ -125,6 +125,10 @@ create policy "event_attendees_insert" on event_attendees for insert
 create policy "event_attendees_delete" on event_attendees for delete
   using (user_name = (select name from public.profiles where id = auth.uid()) or is_admin());
 
+-- Enable Realtime so changes broadcast to all connected clients
+-- (dashboard subscribes to all these tables via supabase.channel)
+DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE event_attendees; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- ─── Partners ───────────────────────────────────────────
 create table if not exists partners (
   id text primary key,
@@ -591,3 +595,17 @@ create policy "entries_captain_delete" on lineup_entries for delete using (
 create index if not exists idx_lineups_team_date on match_lineups(team, match_date);
 create index if not exists idx_entries_lineup on lineup_entries(lineup_id);
 create index if not exists idx_entries_member on lineup_entries(member_id);
+
+-- ─── Realtime Publication ─────────────────────────────────
+-- Dashboard subscribes to all these tables via supabase.channel().
+-- Each must be in the supabase_realtime publication for live updates.
+DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE bookings; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE messages; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE notifications; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE announcements; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE partners; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE profiles; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE courts; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE coaching_programs; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE program_enrollments; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE events; EXCEPTION WHEN duplicate_object THEN NULL; END $$;

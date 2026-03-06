@@ -56,24 +56,23 @@ export default function OnboardingTour() {
   const [visible, setVisible] = useState(false);
   const [tooltipPos, setTooltipPos] = useState<{ top: number; left: number } | null>(null);
 
+  // Derive onboarding status outside useEffect so we can use it as a stable dependency
+  const onboardingDone = currentUser?.preferences?.onboardingCompleted === true;
+
   useEffect(() => {
     // Wait for Supabase data to load so preferences are populated
     if (!isLoaded || !currentUser?.id) return;
+    // Already completed — never show again
+    if (onboardingDone) return;
     try {
-      // Check localStorage first (fast), then Supabase preferences as fallback
+      // Check localStorage (fast cross-session cache)
       const key = `mtc-onboarding-done-${currentUser.id}`;
       if (localStorage.getItem(key) === 'true') return;
-      // Also check Supabase preferences (synced across devices)
-      const prefs = currentUser.preferences;
-      if (prefs?.onboardingCompleted) {
-        localStorage.setItem(key, 'true'); // cache locally
-        return;
-      }
     } catch { /* ignore */ }
     // Small delay so dashboard renders first
     const timer = setTimeout(() => setVisible(true), 1200);
     return () => clearTimeout(timer);
-  }, [isLoaded, currentUser?.id]);
+  }, [isLoaded, currentUser?.id, onboardingDone]);
 
   const positionTooltip = useCallback(() => {
     const current = STEPS[step];
@@ -108,13 +107,16 @@ export default function OnboardingTour() {
 
   const finish = () => {
     setVisible(false);
+    if (!currentUser?.id) return;
     try {
-      if (currentUser?.id) {
-        localStorage.setItem(`mtc-onboarding-done-${currentUser.id}`, 'true');
-        // Sync to Supabase so it persists across devices
-        db.updateProfile(currentUser.id, { preferences: { ...(currentUser.preferences || {}), onboardingCompleted: true } }).catch(() => {});
-      }
-    } catch { /* ignore */ }
+      localStorage.setItem(`mtc-onboarding-done-${currentUser.id}`, 'true');
+    } catch { /* localStorage full or blocked */ }
+    // Sync to Supabase so it persists across devices/browsers
+    db.updateProfile(currentUser.id, {
+      preferences: { ...(currentUser.preferences || {}), onboardingCompleted: true },
+    }).catch((err) => {
+      console.error('[OnboardingTour] Failed to save onboarding preference:', err);
+    });
   };
 
   if (!visible) return null;

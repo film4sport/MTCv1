@@ -992,8 +992,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
           ...(e.spotsTaken != null ? { spotsTaken: attending ? e.spotsTaken - 1 : e.spotsTaken + 1 } : {}),
         };
       });
-      // Persist to Supabase — rollback on failure
+      // Persist to Supabase — rollback on failure, re-fetch on success
       db.toggleEventRsvp(eventId, userName)
+        .then(() => {
+          // Re-fetch to pick up other members' RSVPs (safety net if Realtime is slow)
+          db.fetchEvents().then(e => setEvents(mergeEventsWithDefaults(e))).catch(() => {});
+        })
         .catch((err) => {
           reportError(err, 'Supabase');
           setEvents(snapshot);
