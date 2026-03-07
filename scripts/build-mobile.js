@@ -55,6 +55,7 @@ const JS_FILES = [
   'booking.js',
   'schedule.js',
   'events.js',
+  'home-calendar.js',
   'interactive.js',
   'mybookings.js',
   'onboarding.js',
