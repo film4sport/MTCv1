@@ -20,7 +20,7 @@
     if ('serviceWorker' in navigator) {
       caches.keys().then(function(names) {
         names.forEach(function(name) {
-          if (name.indexOf('mtc-court-1182d9d5') === -1) {
+          if (name.indexOf('mtc-court-9af830c2') === -1) {
             caches.delete(name);
             console.log('[CacheBust] Deleted old cache:', name);
           }
@@ -698,16 +698,6 @@
           <div class="calendar-weekday">S</div>
         </div>
         <div class="calendar-grid" id="homeCalendarGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;padding:0 16px 16px;"></div>
-        <div class="calendar-events" style="padding:0 16px;">
-          <div class="section-header" style="margin-bottom:0;">
-            <h3 class="section-title" id="homeCalendarDateTitle" style="font-size:14px;">SELECT A DATE</h3>
-          </div>
-          <div id="homeCalendarEvents">
-            <div class="calendar-event-item-empty" style="text-align:center;padding:16px;color:var(--text-muted);font-size:13px;">
-              Tap a date to see events
-            </div>
-          </div>
-        </div>
       </div>
     </div>
     
@@ -1006,67 +996,7 @@
         <div class="filter-pill" onclick="filterPartners(this, 'advanced')">Advanced</div>
       </div>
       
-      <div class="partner-card stagger-item" data-match-type="singles" data-level="advanced" data-available="true">
-        <div class="partner-match-type singles">Singles</div>
-        <svg class="partner-avatar" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#FFE0BD"/><path d="M30 38 Q35 20 55 22 Q75 24 72 42 L68 38 Q60 30 45 32 Q35 34 30 38 Z" fill="#6B4423"/><rect x="28" y="36" width="44" height="6" rx="2" fill="#2563EB"/><ellipse cx="50" cy="52" rx="22" ry="20" fill="#FFE0BD"/><circle cx="42" cy="50" r="3" fill="#333"/><circle cx="58" cy="50" r="3" fill="#333"/><path d="M42 60 Q50 68 58 60" stroke="#333" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M30 78 Q50 72 70 78 L72 100 L28 100 Z" fill="#3BAFDA"/><ellipse cx="82" cy="35" rx="12" ry="15" fill="#fff" stroke="#333" stroke-width="2.5"/><line x1="74" y1="26" x2="90" y2="26" stroke="#333" stroke-width="1"/><line x1="73" y1="31" x2="91" y2="31" stroke="#333" stroke-width="1"/><line x1="73" y1="36" x2="91" y2="36" stroke="#333" stroke-width="1"/><line x1="73" y1="41" x2="91" y2="41" stroke="#333" stroke-width="1"/><line x1="74" y1="46" x2="90" y2="46" stroke="#333" stroke-width="1"/><line x1="76" y1="22" x2="76" y2="48" stroke="#333" stroke-width="1"/><line x1="80" y1="21" x2="80" y2="49" stroke="#333" stroke-width="1"/><line x1="84" y1="21" x2="84" y2="49" stroke="#333" stroke-width="1"/><line x1="88" y1="22" x2="88" y2="48" stroke="#333" stroke-width="1"/><line x1="82" y1="50" x2="82" y2="65" stroke="#333" stroke-width="4"/></svg>
-        <div class="partner-info">
-          <div class="partner-name">—</div>
-          <div class="partner-level">Advanced</div>
-          <div class="partner-availability">Available now</div>
-        </div>
-        <div class="partner-action">
-          <button class="partner-action-btn ripple" onclick="navigateTo('messages'); setTimeout(function(){ openConversation('mike'); }, 300);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-          </button>
-        </div>
-      </div>
-      
-      <div class="partner-card stagger-item" data-match-type="mixed" data-level="intermediate" data-available="false">
-        <div class="partner-match-type mixed">Mixed Doubles</div>
-        <svg class="partner-avatar" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#8D5524"/><path d="M68 30 Q85 35 80 55 Q78 65 72 60 Q75 45 68 38 Z" fill="#1a1a1a"/><path d="M28 40 Q30 25 50 24 Q70 25 72 40 L68 42 Q60 32 40 34 Q32 36 28 40 Z" fill="#1a1a1a"/><rect x="26" y="36" width="48" height="7" rx="2" fill="#c8ff00"/><rect x="26" y="38" width="48" height="2" fill="#fff"/><ellipse cx="50" cy="52" rx="21" ry="19" fill="#8D5524"/><circle cx="42" cy="50" r="2.5" fill="#222"/><circle cx="58" cy="50" r="2.5" fill="#222"/><path d="M43 59 Q50 66 57 59" stroke="#222" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M32 78 Q50 72 68 78 L70 100 L30 100 Z" fill="#3BAFDA"/><ellipse cx="82" cy="38" rx="11" ry="14" fill="#fff" stroke="#333" stroke-width="2.5"/><line x1="74" y1="29" x2="90" y2="29" stroke="#333" stroke-width="1"/><line x1="73" y1="34" x2="91" y2="34" stroke="#333" stroke-width="1"/><line x1="73" y1="39" x2="91" y2="39" stroke="#333" stroke-width="1"/><line x1="73" y1="44" x2="91" y2="44" stroke="#333" stroke-width="1"/><line x1="74" y1="49" x2="90" y2="49" stroke="#333" stroke-width="1"/><line x1="76" y1="25" x2="76" y2="51" stroke="#333" stroke-width="1"/><line x1="80" y1="24" x2="80" y2="52" stroke="#333" stroke-width="1"/><line x1="84" y1="24" x2="84" y2="52" stroke="#333" stroke-width="1"/><line x1="88" y1="25" x2="88" y2="51" stroke="#333" stroke-width="1"/><line x1="82" y1="52" x2="82" y2="68" stroke="#333" stroke-width="4"/></svg>
-        <div class="partner-info">
-          <div class="partner-name">—</div>
-          <div class="partner-level">Intermediate</div>
-          <div class="partner-availability">Available at 3:00 PM</div>
-        </div>
-        <div class="partner-action">
-          <button class="partner-action-btn ripple" onclick="navigateTo('messages'); setTimeout(function(){ openConversation('sarah'); }, 300);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-          </button>
-        </div>
-      </div>
-      
-      <div class="partner-card stagger-item" data-match-type="mens" data-level="advanced" data-available="true">
-        <div class="partner-match-type mens">Men's Doubles</div>
-        <svg class="partner-avatar" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#8D5524"/><path d="M30 38 Q35 20 55 22 Q75 24 72 42 L68 38 Q60 30 45 32 Q35 34 30 38 Z" fill="#1a1a1a"/><rect x="28" y="36" width="44" height="6" rx="2" fill="#c8ff00"/><ellipse cx="50" cy="52" rx="22" ry="20" fill="#8D5524"/><circle cx="42" cy="50" r="3" fill="#222"/><circle cx="58" cy="50" r="3" fill="#222"/><path d="M42 60 Q50 68 58 60" stroke="#222" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M30 78 Q50 72 70 78 L72 100 L28 100 Z" fill="#3BAFDA"/><ellipse cx="82" cy="35" rx="12" ry="15" fill="#fff" stroke="#333" stroke-width="2.5"/><line x1="74" y1="26" x2="90" y2="26" stroke="#333" stroke-width="1"/><line x1="73" y1="31" x2="91" y2="31" stroke="#333" stroke-width="1"/><line x1="73" y1="36" x2="91" y2="36" stroke="#333" stroke-width="1"/><line x1="73" y1="41" x2="91" y2="41" stroke="#333" stroke-width="1"/><line x1="74" y1="46" x2="90" y2="46" stroke="#333" stroke-width="1"/><line x1="76" y1="22" x2="76" y2="48" stroke="#333" stroke-width="1"/><line x1="80" y1="21" x2="80" y2="49" stroke="#333" stroke-width="1"/><line x1="84" y1="21" x2="84" y2="49" stroke="#333" stroke-width="1"/><line x1="88" y1="22" x2="88" y2="48" stroke="#333" stroke-width="1"/><line x1="82" y1="50" x2="82" y2="65" stroke="#333" stroke-width="4"/></svg>
-        <div class="partner-info">
-          <div class="partner-name">—</div>
-          <div class="partner-level">Advanced</div>
-          <div class="partner-availability">Available tomorrow</div>
-        </div>
-        <div class="partner-action">
-          <button class="partner-action-btn ripple" onclick="navigateTo('messages'); setTimeout(function(){ openConversation('james'); }, 300);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-          </button>
-        </div>
-      </div>
-      
-      <div class="partner-card stagger-item" data-match-type="womens" data-level="intermediate" data-available="false">
-        <div class="partner-match-type womens">Women's Doubles</div>
-        <svg class="partner-avatar" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#FFE0BD"/><path d="M68 30 Q85 35 80 55 Q78 65 72 60 Q75 45 68 38 Z" fill="#8B4513"/><path d="M28 40 Q30 25 50 24 Q70 25 72 40 L68 42 Q60 32 40 34 Q32 36 28 40 Z" fill="#8B4513"/><rect x="26" y="36" width="48" height="7" rx="2" fill="#3BAFDA"/><rect x="26" y="38" width="48" height="2" fill="#fff"/><ellipse cx="50" cy="52" rx="21" ry="19" fill="#FFE0BD"/><circle cx="42" cy="50" r="2.5" fill="#333"/><circle cx="58" cy="50" r="2.5" fill="#333"/><path d="M43 59 Q50 66 57 59" stroke="#333" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M32 78 Q50 72 68 78 L70 100 L30 100 Z" fill="#3BAFDA"/><ellipse cx="82" cy="38" rx="11" ry="14" fill="#fff" stroke="#333" stroke-width="2.5"/><line x1="74" y1="29" x2="90" y2="29" stroke="#333" stroke-width="1"/><line x1="73" y1="34" x2="91" y2="34" stroke="#333" stroke-width="1"/><line x1="73" y1="39" x2="91" y2="39" stroke="#333" stroke-width="1"/><line x1="73" y1="44" x2="91" y2="44" stroke="#333" stroke-width="1"/><line x1="74" y1="49" x2="90" y2="49" stroke="#333" stroke-width="1"/><line x1="76" y1="25" x2="76" y2="51" stroke="#333" stroke-width="1"/><line x1="80" y1="24" x2="80" y2="52" stroke="#333" stroke-width="1"/><line x1="84" y1="24" x2="84" y2="52" stroke="#333" stroke-width="1"/><line x1="88" y1="25" x2="88" y2="51" stroke="#333" stroke-width="1"/><line x1="82" y1="52" x2="82" y2="68" stroke="#333" stroke-width="4"/></svg>
-        <div class="partner-info">
-          <div class="partner-name">—</div>
-          <div class="partner-level">Intermediate</div>
-          <div class="partner-availability">Available now</div>
-        </div>
-        <div class="partner-action">
-          <button class="partner-action-btn ripple" onclick="navigateTo('messages'); setTimeout(function(){ openConversation('emily'); }, 300);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-          </button>
-        </div>
-      </div>
-      
-      <div class="empty-state" id="noPartners">
+      <div class="empty-state" id="noPartners" style="display: block;">
         <div class="empty-state-icon">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
         </div>
