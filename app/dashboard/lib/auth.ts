@@ -107,14 +107,17 @@ export async function signInWithGoogle(nextPath?: string): Promise<{ error: stri
  * Send a magic link (passwordless email login).
  * Only works for existing users — new users should go through the signup wizard.
  */
-export async function signInWithMagicLink(email: string): Promise<{ error: string | null }> {
+export async function signInWithMagicLink(email: string, nextPath?: string): Promise<{ error: string | null }> {
   const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.monotennisclub.com';
+  const redirectTo = nextPath
+    ? `${origin}/auth/callback?next=${encodeURIComponent(nextPath)}`
+    : `${origin}/auth/callback`;
 
   const { error } = await supabase.auth.signInWithOtp({
     email,
     options: {
       shouldCreateUser: false,
-      emailRedirectTo: `${origin}/auth/callback`,
+      emailRedirectTo: redirectTo,
     },
   });
 
