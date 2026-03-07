@@ -5,6 +5,7 @@ import { logEmailBatch } from '../lib/email-logger';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+const SMTP_FROM = process.env.SMTP_FROM || 'noreply@monotennisclub.com';
 
 // ICS generator (server-compatible copy from dashboard/lib/calendar.ts)
 const TIMEZONE = 'America/Toronto';
@@ -283,7 +284,7 @@ export async function POST(request: Request) {
               : '';
 
             return transporter.sendMail({
-              from: `"Mono Tennis Club" <${smtpUser}>`,
+              from: `"Mono Tennis Club" <${SMTP_FROM}>`,
               to: recipient.email,
               subject,
               html: buildEmailHTML(recipient, courtName, formattedDate, time, matchType, durationMinutes, actualBookerName, allNames, bookedFor, trackParams),
@@ -497,7 +498,7 @@ export async function DELETE(request: Request) {
         const results = await Promise.allSettled(
           recipientList.map(recipient =>
             transporter.sendMail({
-              from: `"Mono Tennis Club" <${smtpUser}>`,
+              from: `"Mono Tennis Club" <${SMTP_FROM}>`,
               to: recipient.email,
               subject: `Booking Cancelled — ${courtName}, ${formattedDate}`,
               html: buildCancelEmailHTML(recipient.name, cancelledBy || 'A member', courtName, formattedDate, time),
