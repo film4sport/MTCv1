@@ -111,15 +111,21 @@
 
     // Update nav - new order: Home, Schedule, Book, Partners, Messages
     document.querySelectorAll('.nav-container .nav-item').forEach(function(n) {
-      n.classList.remove('active');
+      n.classList.remove('active', 'nav-tapped');
       n.setAttribute('aria-current', '');
     });
     const navMap = { home: 0, schedule: 1, book: 2, partners: 3, messages: 4 };
     if (navMap[screen] !== undefined) {
       const navItems = document.querySelectorAll('.nav-container .nav-item');
       if (navItems[navMap[screen]]) {
-        navItems[navMap[screen]].classList.add('active');
-        navItems[navMap[screen]].setAttribute('aria-current', 'page');
+        var tappedNav = navItems[navMap[screen]];
+        tappedNav.classList.add('active');
+        tappedNav.setAttribute('aria-current', 'page');
+        // Trigger spring bounce animation
+        void tappedNav.offsetWidth; // Force reflow to restart animation
+        tappedNav.classList.add('nav-tapped');
+        // Clean up animation class after it finishes
+        setTimeout(function() { tappedNav.classList.remove('nav-tapped'); }, 550);
       }
     }
 

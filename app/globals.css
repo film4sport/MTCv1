@@ -569,6 +569,59 @@ html {
   background: transparent;
 }
 
+/* ── Sidebar nav spring bounce on click ── */
+@keyframes sidebarBounce {
+  0%   { transform: scale(0.85); }
+  35%  { transform: scale(1.08); }
+  55%  { transform: scale(0.96); }
+  72%  { transform: scale(1.04); }
+  87%  { transform: scale(0.99); }
+  100% { transform: scale(1); }
+}
+
+@keyframes sidebarIconBounce {
+  0%   { transform: scale(0.5) rotate(-10deg); }
+  30%  { transform: scale(1.4) rotate(6deg); }
+  50%  { transform: scale(0.85) rotate(-3deg); }
+  70%  { transform: scale(1.18) rotate(2deg); }
+  85%  { transform: scale(0.95) rotate(-1deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+@keyframes sidebarLabelSlide {
+  0%   { transform: translateX(-6px); opacity: 0.3; }
+  40%  { transform: translateX(4px); opacity: 1; }
+  70%  { transform: translateX(-1px); }
+  100% { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes sidebarGlowFlash {
+  0%   { background-color: rgba(212, 225, 87, 0.35); box-shadow: 0 0 24px rgba(212, 225, 87, 0.4); }
+  100% { background-color: rgba(212, 225, 87, 0.15); box-shadow: none; }
+}
+
+.sidebar-nav-link.sidebar-tapped {
+  animation: sidebarBounce 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.sidebar-nav-link.sidebar-tapped > svg {
+  animation: sidebarIconBounce 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.sidebar-nav-link.sidebar-tapped > span {
+  animation: sidebarLabelSlide 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.sidebar-nav-link.sidebar-nav-active.sidebar-tapped {
+  animation: sidebarBounce 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+             sidebarGlowFlash 0.5s ease-out forwards;
+}
+
+.sidebar-nav-link:active {
+  transform: scale(0.9);
+  transition-duration: 0.08s;
+}
+
 /* Overscroll bounce on mobile */
 .overscroll-bounce {
   -webkit-overflow-scrolling: touch;
