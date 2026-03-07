@@ -6,6 +6,25 @@ import { useEffect, useRef } from 'react';
 export default function Hero() {
   const heroContentRef = useRef<HTMLDivElement>(null);
   const heroBgRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // React doesn't reliably set the HTML `muted` attribute from JSX props,
+  // which Chrome requires for autoplay. Set it programmatically + force play.
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.muted = true;
+    video.play().catch(() => {
+      // Autoplay blocked — try again after user interaction
+      const tryPlay = () => {
+        video.play().catch(() => {});
+        document.removeEventListener('click', tryPlay);
+        document.removeEventListener('scroll', tryPlay);
+      };
+      document.addEventListener('click', tryPlay, { once: true });
+      document.addEventListener('scroll', tryPlay, { once: true });
+    });
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -36,6 +55,7 @@ export default function Hero() {
       {/* Background Video with Parallax */}
       <div className="absolute inset-0 parallax-bg" ref={heroBgRef}>
         <video
+          ref={videoRef}
           autoPlay
           loop
           muted
