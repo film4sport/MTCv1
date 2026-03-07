@@ -114,13 +114,23 @@ After making code changes, verify they won't break GitHub Actions CI:
 
 Use grep to find all occurrences before editing. Verify 0 stale values remain after.
 
-## #20: CROSS-PLATFORM NOTIFICATION & SYNC CONSISTENCY
-**Every user-facing action that creates data (bookings, messages, events, announcements) MUST work across ALL THREE platforms:**
+## #20: CROSS-PLATFORM CONSISTENCY — ALWAYS CHECK ALL THREE
+**When making ANY change to one platform, ALWAYS ask: "Does this apply to the other platforms too?"**
+
+The three platforms are:
 1. **Dashboard** (React + Supabase Realtime in `store.tsx`)
 2. **Mobile PWA** (vanilla JS + Supabase Realtime in `realtime-sync.js`)
 3. **Mobile API** (Next.js API routes in `app/api/mobile/`)
 
-**For notifications, ALL of these must fire (where applicable):**
+**This applies to EVERYTHING, not just notifications:**
+- UI/UX changes (e.g. new button on mobile → does dashboard need it too?)
+- Bug fixes (e.g. fix on dashboard → does mobile have the same bug?)
+- Feature additions (e.g. new feature on one platform → implement on all applicable platforms)
+- Data format changes (e.g. new field in API → update both consumers)
+- Styling changes (e.g. new color/theme → apply everywhere)
+- Validation rules (e.g. input validation → same rules on all platforms)
+
+**For notifications specifically, ALL of these must fire (where applicable):**
 - Bell notification (insert into `notifications` table)
 - Push notification (Web Push via `sendPushToUser()` or `/api/notify-message`)
 - Nav bar badge update (bell badge + feature-specific badge like messages)
@@ -131,11 +141,11 @@ Use grep to find all occurrences before editing. Verify 0 stale values remain af
 - A DB write on ANY platform triggers live updates on ALL other platforms automatically
 - Mobile PWA has 2-min heartbeat fallback if Realtime disconnects
 
-**When adding a new feature that creates/modifies data:**
-1. Ensure the Supabase table has Realtime enabled
-2. Verify both `store.tsx` and `realtime-sync.js` subscribe to that table
-3. Add bell + push notifications for affected users
-4. Update nav bar badges on all platforms
+**When making any change, always grep across all three codebases:**
+1. `app/dashboard/` — Dashboard
+2. `public/mobile-app/` — Mobile PWA
+3. `app/api/mobile/` — Mobile API
+4. Verify the change is consistent everywhere it applies
 
 ## #11: MAINTENANCE CONVENTIONS
 - **Supabase schema**: `supabase/schema.sql` is the single source of truth. All DB changes go there FIRST, then apply to Supabase. No ad-hoc ALTER TABLEs.
