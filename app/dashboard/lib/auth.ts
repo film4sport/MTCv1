@@ -36,20 +36,22 @@ export async function signIn(email: string, password: string): Promise<User | nu
 }
 
 /**
- * Sign up a new member with Supabase Auth.
+ * Sign up a new member with Supabase Auth (passwordless).
+ * A random password is generated internally — users log in via Google or Magic Link only.
  * Profile row is auto-created by the database trigger.
- * Returns the User or an error message.
  */
 export async function signUp(
   email: string,
-  password: string,
   name: string,
   membershipType?: string,
   skillLevel?: string,
 ): Promise<{ user: User | null; error: string | null; emailConfirmRequired?: boolean }> {
+  // Generate a strong random password the user never sees (Supabase requires one)
+  const randomPassword = crypto.randomUUID() + '-Aa1!';
+
   const { data, error } = await supabase.auth.signUp({
     email,
-    password,
+    password: randomPassword,
     options: {
       data: { name, role: 'member', membership_type: membershipType || 'adult', skill_level: skillLevel || undefined, skill_level_set: skillLevel ? true : false },
       emailRedirectTo: `${typeof window !== 'undefined' ? window.location.origin : 'https://www.monotennisclub.com'}/auth/callback`,

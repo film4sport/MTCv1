@@ -20,7 +20,7 @@
     if ('serviceWorker' in navigator) {
       caches.keys().then(function(names) {
         names.forEach(function(name) {
-          if (name.indexOf('mtc-court-068ae8e4') === -1) {
+          if (name.indexOf('mtc-court-76368532') === -1) {
             caches.delete(name);
             console.log('[CacheBust] Deleted old cache:', name);
           }
@@ -314,7 +314,7 @@
         <input type="text" class="login-input" placeholder="Full Name" id="signupName" aria-label="Full name">
         <input type="email" class="login-input" placeholder="Email" id="signupEmail" aria-label="Email address">
         <input type="tel" class="login-input" placeholder="Phone (optional)" id="signupPhone" aria-label="Phone number">
-        <input type="password" class="login-input" placeholder="Create Password" id="signupPassword" aria-label="Create password">
+        <p style="font-size: 11px; color: var(--text-muted); margin: 4px 0 8px; text-align: center;">You'll sign in with Google or a magic email link — no password needed.</p>
 
         <button type="button" class="login-btn" onclick="handleSignUp()" aria-label="Create account">Create Account</button>
 

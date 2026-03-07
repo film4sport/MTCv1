@@ -98,6 +98,8 @@ export async function GET(request: NextRequest) {
       ? createClient(supabaseUrl, serviceKey)
       : createClient(supabaseUrl, supabaseAnonKey);
 
+    const now = new Date().toISOString();
+
     // Run all post-confirmation tasks in parallel — one failure shouldn't block others
     const results = await Promise.allSettled([
       // Send welcome message (gate code + greeting via admin conversation)
@@ -112,7 +114,27 @@ export async function GET(request: NextRequest) {
         type: 'message',
         title: 'Welcome to Mono Tennis Club!',
         body: 'Your email has been confirmed. Check your messages for your court gate code.',
-        timestamp: new Date().toISOString(),
+        timestamp: now,
+        read: false,
+      }),
+      // Opening day notification
+      adminSupabase.from('notifications').insert({
+        id: `opening-day-${user.id}`,
+        user_id: user.id,
+        type: 'event',
+        title: 'Opening Day — May 9th!',
+        body: 'Mark your calendar! Mono Tennis Club opens for the 2026 season on May 9th. See you on the courts!',
+        timestamp: new Date(Date.parse(now) + 1000).toISOString(),
+        read: false,
+      }),
+      // Under-construction notice (shown until May 9th)
+      adminSupabase.from('notifications').insert({
+        id: `beta-notice-${user.id}`,
+        user_id: user.id,
+        type: 'info',
+        title: 'App Under Construction',
+        body: 'Our app and website are still in development. If you find any bugs or have feedback, please email monotennisclub1@gmail.com — we appreciate your help!',
+        timestamp: new Date(Date.parse(now) + 2000).toISOString(),
         read: false,
       }),
       // Log the confirmed email to email_logs
@@ -129,7 +151,7 @@ export async function GET(request: NextRequest) {
     // Log any failures (non-critical — don't block redirect)
     results.forEach((r, i) => {
       if (r.status === 'rejected') {
-        const labels = ['welcome_message', 'notification', 'email_log'];
+        const labels = ['welcome_message', 'welcome_notif', 'opening_day_notif', 'beta_notice_notif', 'email_log'];
         console.error(`[MTC] Post-confirmation ${labels[i]} failed:`, r.reason);
       }
     });

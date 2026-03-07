@@ -365,6 +365,49 @@
 
     // Register push notifications (best-effort, non-blocking)
     registerPushNotifications();
+
+    // ── One-time beta + opening day notifications for existing users ──
+    // New users get these from /auth/callback; this catches users who signed up before they were added.
+    if (currentUser && currentUser.id && new Date() < new Date('2026-05-09T00:00:00')) {
+      var betaKey = 'mtc-beta-notice-sent-' + currentUser.id;
+      if (!MTC.storage.get(betaKey, null)) {
+        MTC.storage.set(betaKey, true);
+        // Insert via Supabase client (already initialized after login)
+        initSupabase().then(function(sb) {
+          if (!sb) return;
+          var userId = currentUser.id;
+          sb.from('notifications').select('id').in('id', ['opening-day-' + userId, 'beta-notice-' + userId])
+            .then(function(res) {
+              var existing = ((res.data || []).map(function(n) { return n.id; }));
+              var inserts = [];
+              if (existing.indexOf('opening-day-' + userId) === -1) {
+                inserts.push({
+                  id: 'opening-day-' + userId,
+                  user_id: userId, type: 'event',
+                  title: 'Opening Day \u2014 May 9th!',
+                  body: 'Mark your calendar! Mono Tennis Club opens for the 2026 season on May 9th. See you on the courts!',
+                  timestamp: new Date().toISOString(), read: false
+                });
+              }
+              if (existing.indexOf('beta-notice-' + userId) === -1) {
+                inserts.push({
+                  id: 'beta-notice-' + userId,
+                  user_id: userId, type: 'info',
+                  title: 'App Under Construction',
+                  body: 'Our app and website are still in development. If you find any bugs or have feedback, please email monotennisclub1@gmail.com \u2014 we appreciate your help!',
+                  timestamp: new Date(Date.now() + 1000).toISOString(), read: false
+                });
+              }
+              if (inserts.length > 0) {
+                sb.from('notifications').insert(inserts).then(function() {
+                  // Refresh notification badge
+                  if (typeof MTC.fn.updateUnreadCount === 'function') MTC.fn.updateUnreadCount();
+                }, function() {});
+              }
+            });
+        });
+      }
+    }
   }
 
   // onclick handler (index.html)
@@ -500,21 +543,18 @@
     const nameInput = document.getElementById('signupName');
     const emailInput = document.getElementById('signupEmail');
     const phoneInput = document.getElementById('signupPhone');
-    const passwordInput = document.getElementById('signupPassword');
 
     const name = nameInput.value.trim();
     const email = emailInput.value.trim();
     const phone = phoneInput.value.trim();
-    const password = passwordInput.value;
 
-    [nameInput, emailInput, phoneInput, passwordInput].forEach(function(el) { el.classList.remove('input-error'); clearFieldErrors(el); });
+    [nameInput, emailInput, phoneInput].forEach(function(el) { el.classList.remove('input-error'); clearFieldErrors(el); });
 
     const errors = [];
     if (!name || name.length < 2) { showFieldError(nameInput, 'Name must be at least 2 characters'); errors.push('name (min 2 chars)'); }
     if (!email) { showFieldError(emailInput, 'Email is required'); errors.push('valid email'); }
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showFieldError(emailInput, 'Enter a valid email address'); errors.push('valid email'); }
     if (phone && !/^[\d\s\-\+\(\)]{7,15}$/.test(phone)) { showFieldError(phoneInput, 'Enter a valid phone number'); errors.push('valid phone number'); }
-    if (!password || password.length < 8 || !/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/\d/.test(password)) { showFieldError(passwordInput, 'Password must be 8+ chars with uppercase, lowercase & number'); errors.push('stronger password (min 8 chars, mixed case + number)'); }
 
     if (errors.length > 0) {
       const signupCard = document.getElementById('signupCard');

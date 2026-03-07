@@ -29,6 +29,30 @@
 - 2 tests were failing: "login shows error when API is unreachable" (onboarding overlay race) and "page structure intact even without network" (screen count timing).
 - Fix: Added `page.addInitScript` to pre-set `mtc-onboarding-complete` in localStorage before page load (prevents onboarding overlay race with 600ms setTimeout). Changed `waitUntil` from `domcontentloaded` to `load`. Added `{ force: true }` on login button clicks. Used `waitForFunction` for screen count instead of static timeout. Applied same pattern to all 4 tests that interact with login form.
 
+**Fake announcements removed:**
+- `data.ts` `DEFAULT_ANNOUNCEMENTS` emptied (was 2 hardcoded fake entries: "Courts 3-4 resurfacing" and "Spring 2026 season"). These showed on every login because `store.tsx` kept defaults when the Supabase `announcements` table was empty.
+
+**Tablet nag banner added:**
+- New `TabletNagBanner.tsx` component detects iPad/Android tablet via UA + touch detection.
+- Shows a persistent "This dashboard is built for desktop — switch to MTC Court App" banner with an "Open App" CTA link.
+- Can only be dismissed per-session (uses `sessionStorage`), NOT permanently. Returns every time they open the dashboard.
+- Added to `layout.tsx` above `MobileAppBanner`.
+
+**New-user + existing-user notifications:**
+- **New users** (via `/auth/callback/route.ts`): 3 notifications inserted on first login — welcome, opening day (May 9th), and beta/under-construction notice (report bugs to monotennisclub1@gmail.com).
+- **Existing dashboard users** (`store.tsx`): One-time check on init (localStorage flag `mtc-beta-notice-sent-{userId}`) inserts missing opening-day + beta notifications if before May 9th 2026.
+- **Existing mobile users** (`auth.js`): Same one-time check after `completeLogin()`, uses Supabase client to insert directly, checks for duplicates via `.select('id').in('id', [...])`.
+
+**Password removed from signup (passwordless only — Google + Magic Link):**
+- `auth.ts`: `signUp()` no longer takes a password param. Generates random password internally (`crypto.randomUUID() + '-Aa1!'`) because Supabase requires one.
+- `app/signup/page.tsx`: Removed all password/confirmPassword state, UI fields, validation, and post-signup `signIn()` calls. Added "no password needed" note.
+- `public/mobile-app/js/auth.js`: `handleSignUp()` no longer reads `signupPassword` input. No password validation.
+- `public/mobile-app/index.html`: Password input replaced with "no password needed" note.
+
+**About section updates (`AboutTab.tsx`):**
+- Clubhouse facility card desc updated to "Two modern washrooms (one wheelchair accessible) & facilities".
+- Contact Us card added with `mailto:monotennisclub1@gmail.com` link, in a 2-column grid next to the Location card.
+
 ### Cowork Session (2026-03-07) — Home Calendar, Booking Email From Fix, Push Notifications
 
 **Booking email `from` address bug:** Emails used `from: "Mono Tennis Club" <${smtpUser}>` where SMTP_USER=`resend` (Resend SMTP username). This is not a valid email — Resend rejected or nodemailer failed silently. Fixed: added `SMTP_FROM` env var, code now uses `from: "Mono Tennis Club" <${SMTP_FROM}>`. Default: `noreply@monotennisclub.com`. Domain is verified on Resend. **User must add `SMTP_FROM=noreply@monotennisclub.com` to Railway env vars.**
