@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import Image from 'next/image';
+
 
 export default function Hero() {
   const heroContentRef = useRef<HTMLDivElement>(null);
@@ -33,19 +33,18 @@ export default function Hero() {
 
   return (
     <section className="relative h-dvh w-full overflow-hidden texture-overlay" style={{ zIndex: 0 }}>
-      {/* Background Image with Parallax */}
+      {/* Background Video with Parallax */}
       <div className="absolute inset-0 parallax-bg" ref={heroBgRef}>
-        <Image
-          src="https://cdn.jsdelivr.net/gh/film4sport/my-webapp-images@main/mtc-images/hero-aerial-court.png"
-          alt="Mono Tennis Club outdoor courts aerial view surrounded by nature in Mono, Ontario"
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
           className="w-full h-full object-cover scale-110"
-          fill
-          priority
-          sizes="100vw"
-          onError={(e) => {
-            (e.target as HTMLImageElement).style.opacity = '0';
-          }}
-        />
+          poster="https://cdn.jsdelivr.net/gh/film4sport/my-webapp-images@main/mtc-images/hero-aerial-court.png"
+        >
+          <source src="/videos/hero-clubhouse.mp4" type="video/mp4" />
+        </video>
       </div>
       <div className="absolute inset-0 hero-overlay"></div>
 
