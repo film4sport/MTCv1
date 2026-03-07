@@ -17,6 +17,9 @@
 - **Mobile PWA home calendar**: Replaced "Looking for Partners" section with club calendar (neumorphic month grid, reuses Events screen CSS classes). Source: `home-calendar.js`.
 - **Cross-platform push notifications**: Added push+bell to conversations POST, events PATCH/DELETE, announcements POST.
 - **Login screen**: Email Link button restyled to electric-blue/cyan (matches PWA theme). "or" divider made more visible.
+- **Login page mockups**: Rewrote left panel — phone (scale 0.40) + tablet (scale 0.525) side by side, desktop mockup below matching real dashboard layout (dark sidebar, glass quick action cards, two-column bookings+events).
+- **Desktop login redirect fix**: `signInWithGoogle('/dashboard')` and `signInWithMagicLink(email, '/dashboard')` now pass `?next=/dashboard` through OAuth/magic link flow. Callback goes directly to `/dashboard`, bypassing `/auth/complete` (which had stale `mtc-auth-redirect` localStorage from mobile PWA sessions).
+- **Mobile PWA scroll-to-now-row fix**: Replaced `offsetTop`-based scroll with `getBoundingClientRect()` in `booking.js` for reliable scroll positioning regardless of CSS layout/offsetParent.
 
 ### Cowork Session (2026-03-07) — Mobile Admin Parity, Court Blocking, Login Fixes
 
