@@ -213,7 +213,7 @@
       sb.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: origin + '/auth/callback?next=' + encodeURIComponent('/mobile-app/index.html'),
+          redirectTo: origin + '/auth/callback',
           queryParams: {
             access_type: 'offline',
             prompt: 'consent'
@@ -262,7 +262,7 @@
         email: email,
         options: {
           shouldCreateUser: false,
-          emailRedirectTo: origin + '/auth/callback?next=' + encodeURIComponent('/mobile-app/index.html')
+          emailRedirectTo: origin + '/auth/callback'
         }
       }).then(function(result) {
         if (btn) { btn.disabled = false; btn.textContent = 'Sign in with Email Link'; }
@@ -875,8 +875,13 @@
 
     // Check if returning from Google OAuth or Magic Link redirect
     var url = new URL(window.location.href);
-    if (url.searchParams.has('code') || url.hash.includes('access_token')) {
+    if (url.searchParams.has('code') || url.hash.includes('access_token') || url.searchParams.has('auth')) {
       checkAuthCallback();
+      // Clean the ?auth=callback param from URL
+      if (url.searchParams.has('auth') && window.history && window.history.replaceState) {
+        url.searchParams.delete('auth');
+        window.history.replaceState({}, '', url.pathname + (url.search || ''));
+      }
     }
   });
 })();

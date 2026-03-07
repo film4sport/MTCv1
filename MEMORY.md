@@ -4,6 +4,7 @@
 - **Cowork (Claude Desktop)** is available for interactive browser-based visual verification. Use Cowork for subjective visual checks ("does this look right?", hover states, animations, glass morphism rendering, full-page scrollthroughs). Use Claude Code + Playwright for automated regression checks ("did this break?").
 - **Code review reports**: `MTC-Code-Review-Report.docx` (38 findings) and `MTC-Bug-Hunting-Report.docx` (39 findings) in project root.
 - **⚠️ Image upload MIME bug (Claude Code)**: API throws `400 invalid_request_error` ("image was specified using image/jpeg media type, but appears to be image/png") when a file with `.jpg` extension contains PNG data. This kills the session. **Workaround**: ALWAYS share screenshots as `.png` — never `.jpg`. Windows screenshots (Snipping Tool, Win+Shift+S) are always PNG internally. If pasting from clipboard triggers the error, use `/rewind` immediately. This is a Claude Code bug (MIME detection trusts extension, not actual bytes).
+- **User flow testing**: Use BDG (Claude in Chrome) + Guerrilla Mail (guerrillamail.com) to create test accounts and test real user flows (Google login, magic link, signup, booking, etc.) before shipping auth changes. Always verify auth flows end-to-end in the browser — never ship auth changes without testing.
 
 ## Current Status
 - **SMTP/Supabase email**: DONE. Resend SMTP (smtp.resend.com:465, noreply@monotennisclub.com). Email confirmation and password reset emails are live.
@@ -51,6 +52,32 @@
 **Desktop admin tab restyling:**
 - Added SVG icons next to each tab label (dashboard grid, people, court, send)
 - Bolder font weight (font-bold), 3px underline indicator on active tab (was 0.5), larger touch targets (py-3 px-5)
+
+### Cowork Session (2026-03-07) — Hero Video, Opening Day Card, OAuth Redirect Fix
+
+**Hero section video background:**
+- Replaced static hero image with looping video (`public/videos/hero-clubhouse.mp4`, 4.8MB, 1220x700, no audio)
+- Video has poster fallback to hero-aerial-court.png
+- LOGIN navbar button restyled to frosted glass white (was lime/transparent, invisible against video)
+
+**Opening Day card:**
+- Frosted glass card on right side of hero: "Opening Day" / "May 9" / "BBQ & Meet the Pro's"
+- Only visible on md+ (tablet/desktop), hidden on mobile
+- cardFadeIn animation with 1.8s delay (after hero text stagger)
+
+**About section updates:**
+- "Clubhouse" amenity tag → "Modern Washrooms"
+- Logo image → Clubhouse-Inside.png from GitHub images repo
+
+**Mobile PWA Google OAuth redirect fix (CRITICAL):**
+- **Bug**: After Google login, mobile PWA users landed on landing page instead of mobile PWA
+- **Root cause**: `auth.js` sent `?next=/mobile-app/index.html` in OAuth redirectTo URL. The callback route saw `next` and redirected DIRECTLY to `/mobile-app/index.html`, bypassing `/auth/complete`. The mobile PWA loaded fresh with no auth params, so `checkAuthCallback()` never fired → login screen shown.
+- **Fix**: (1) Removed `?next=` from OAuth/magic link redirect URLs in `auth.js` — now relies solely on localStorage. (2) `/auth/complete` appends `?auth=callback` when redirecting to mobile PWA. (3) `auth.js` DOMContentLoaded detects `?auth=callback` and triggers `checkAuthCallback()` to pick up the server-side session.
+- Files: `public/mobile-app/js/auth.js`, `app/auth/complete/page.tsx`
+
+**CI test fixes:**
+- `signupPassword` field assertion removed (passwordless auth)
+- ARIA labels test: added `addInitScript` for onboarding bypass + `waitUntil: 'load'`
 
 ### Cowork Session (2026-03-07) — Login Resilience, CI Test Fixes, Notification Parity
 

@@ -16,7 +16,9 @@ export default function AuthCompletePage() {
       const redirect = localStorage.getItem('mtc-auth-redirect');
       if (redirect) {
         localStorage.removeItem('mtc-auth-redirect');
-        window.location.replace(redirect);
+        // Append auth hint so the target page knows to check for a session
+        const separator = redirect.includes('?') ? '&' : '?';
+        window.location.replace(redirect + separator + 'auth=callback');
         return;
       }
     } catch {
