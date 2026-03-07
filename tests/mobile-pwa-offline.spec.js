@@ -39,13 +39,18 @@ test.describe('Mobile PWA — Offline Resilience', () => {
       route.abort('connectionrefused');
     });
 
-    await page.goto(MOBILE_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    // Pre-set onboarding complete so overlay never activates (avoids race with 600ms setTimeout)
+    await page.addInitScript(() => {
+      localStorage.setItem('mtc-onboarding-complete', 'true');
+    });
+
+    await page.goto(MOBILE_URL, { waitUntil: 'load', timeout: 30000 });
     await page.waitForTimeout(1000);
     await dismissOnboarding(page);
 
     // Fill in email and use magic link (no password field — Google + Magic Link auth)
     await page.fill('#loginEmail', 'test@mtc.ca');
-    await page.locator('.login-btn-magic').click();
+    await page.locator('.login-btn-magic').click({ force: true });
     await page.waitForTimeout(2000);
 
     // Login screen should still be visible (not crashed)
@@ -57,8 +62,10 @@ test.describe('Mobile PWA — Offline Resilience', () => {
     await page.route('**supabase**', (route) => route.abort('connectionrefused'));
     await page.route('**/api/**', (route) => route.abort('connectionrefused'));
 
-    await page.goto(MOBILE_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
-    await page.waitForTimeout(1000);
+    await page.goto(MOBILE_URL, { waitUntil: 'load', timeout: 30000 });
+
+    // Wait for all static screens to be parsed into the DOM
+    await page.waitForFunction(() => document.querySelectorAll('.screen').length >= 8, { timeout: 10000 });
 
     // DOM should still have all screens (they're in the HTML, not JS-rendered)
     const screens = page.locator('.screen');
@@ -77,12 +84,17 @@ test.describe('Mobile PWA — Offline Resilience', () => {
       route.fulfill({ status: 500, contentType: 'application/json', body: '{"error":"Server error"}' });
     });
 
-    await page.goto(MOBILE_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    // Pre-set onboarding complete so overlay never activates
+    await page.addInitScript(() => {
+      localStorage.setItem('mtc-onboarding-complete', 'true');
+    });
+
+    await page.goto(MOBILE_URL, { waitUntil: 'load', timeout: 30000 });
     await page.waitForTimeout(1000);
     await dismissOnboarding(page);
 
     await page.fill('#loginEmail', 'test@mtc.ca');
-    await page.locator('.login-btn-magic').click();
+    await page.locator('.login-btn-magic').click({ force: true });
     await page.waitForTimeout(2000);
 
     // Should have no unhandled JS errors (global error handler catches them)
@@ -98,12 +110,17 @@ test.describe('Mobile PWA — Offline Resilience', () => {
       });
     });
 
-    await page.goto(MOBILE_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    // Pre-set onboarding complete so overlay never activates
+    await page.addInitScript(() => {
+      localStorage.setItem('mtc-onboarding-complete', 'true');
+    });
+
+    await page.goto(MOBILE_URL, { waitUntil: 'load', timeout: 30000 });
     await page.waitForTimeout(1000);
     await dismissOnboarding(page);
 
     await page.fill('#loginEmail', 'test@mtc.ca');
-    await page.locator('.login-btn-magic').click();
+    await page.locator('.login-btn-magic').click({ force: true });
     await page.waitForTimeout(2000);
 
     // Login screen should still be showing (not navigated away)
