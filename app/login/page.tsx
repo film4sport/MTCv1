@@ -77,12 +77,12 @@ function LoginContent() {
             </p>
 
             {/* ── Row 1: Phone + Tablet side by side ── */}
-            <div style={{ display: 'flex', gap: 20, justifyContent: 'center', alignItems: 'flex-end', marginBottom: 20 }}>
+            <div style={{ display: 'flex', gap: 16, justifyContent: 'center', alignItems: 'flex-end', marginBottom: 16 }}>
 
-            {/* Phone Mockup (scaled down via transform) */}
+            {/* Phone Mockup — smaller than tablet */}
             <div style={{ textAlign: 'center' }}>
-            <div style={{ width: 132, height: 282, position: 'relative' }}>
-            <div className="relative" style={{ transform: 'scale(0.44)', transformOrigin: 'top left', position: 'absolute', top: 0, left: 0 }}>
+            <div style={{ width: 120, height: 256, position: 'relative' }}>
+            <div style={{ transform: 'scale(0.4)', transformOrigin: 'top left', position: 'absolute', top: 0, left: 0 }}>
               <div style={{
                 width: 300, height: 640, background: '#000', borderRadius: 40, padding: 12,
                 boxShadow: '0 50px 100px rgba(0,0,0,0.15), 0 0 0 2px #333', position: 'relative',
@@ -154,48 +154,20 @@ function LoginContent() {
                   <div style={{ padding: '4px 12px 8px', position: 'relative', zIndex: 2 }}>
                     <p style={{ fontFamily: "'Bebas Neue', 'Inter', sans-serif", fontSize: '0.92rem', letterSpacing: 1, color: '#0a0a0a', marginBottom: 6, fontWeight: 400, textAlign: 'left' }}>QUICK ACTIONS</p>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 7 }}>
-                      {/* Book Court - Volt */}
-                      <div style={{
-                        background: '#c8ff00', borderRadius: 16, height: 80, padding: '10px 12px',
-                        display: 'flex', flexDirection: 'column' as const, justifyContent: 'space-between',
-                        boxShadow: '0 2px 8px rgba(200,255,0,0.2)',
-                      }}>
-                        <svg width="22" height="22" fill="none" stroke="#0a0a0a" viewBox="0 0 24 24" strokeWidth="2">
-                          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-                        </svg>
+                      <div style={{ background: '#c8ff00', borderRadius: 16, height: 80, padding: '10px 12px', display: 'flex', flexDirection: 'column' as const, justifyContent: 'space-between', boxShadow: '0 2px 8px rgba(200,255,0,0.2)' }}>
+                        <svg width="22" height="22" fill="none" stroke="#0a0a0a" viewBox="0 0 24 24" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                         <p style={{ fontFamily: "'Bebas Neue', 'Inter', sans-serif", fontSize: '0.9rem', letterSpacing: 0.8, color: '#0a0a0a', fontWeight: 400 }}>BOOK COURT</p>
                       </div>
-                      {/* Find Partner - Coral */}
-                      <div style={{
-                        background: '#ff5a5f', borderRadius: 16, height: 80, padding: '10px 12px',
-                        display: 'flex', flexDirection: 'column' as const, justifyContent: 'space-between',
-                        boxShadow: '0 2px 8px rgba(255,90,95,0.2)',
-                      }}>
-                        <svg width="22" height="22" fill="none" stroke="#fff" viewBox="0 0 24 24" strokeWidth="2">
-                          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                        </svg>
+                      <div style={{ background: '#ff5a5f', borderRadius: 16, height: 80, padding: '10px 12px', display: 'flex', flexDirection: 'column' as const, justifyContent: 'space-between', boxShadow: '0 2px 8px rgba(255,90,95,0.2)' }}>
+                        <svg width="22" height="22" fill="none" stroke="#fff" viewBox="0 0 24 24" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
                         <p style={{ fontFamily: "'Bebas Neue', 'Inter', sans-serif", fontSize: '0.9rem', letterSpacing: 0.8, color: '#fff', fontWeight: 400 }}>FIND PARTNER</p>
                       </div>
-                      {/* Club Events - Electric Blue */}
-                      <div style={{
-                        background: '#00d4ff', borderRadius: 16, height: 80, padding: '10px 12px',
-                        display: 'flex', flexDirection: 'column' as const, justifyContent: 'space-between',
-                        boxShadow: '0 2px 8px rgba(0,212,255,0.2)',
-                      }}>
-                        <svg width="22" height="22" fill="none" stroke="#0a0a0a" viewBox="0 0 24 24" strokeWidth="2">
-                          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-                        </svg>
+                      <div style={{ background: '#00d4ff', borderRadius: 16, height: 80, padding: '10px 12px', display: 'flex', flexDirection: 'column' as const, justifyContent: 'space-between', boxShadow: '0 2px 8px rgba(0,212,255,0.2)' }}>
+                        <svg width="22" height="22" fill="none" stroke="#0a0a0a" viewBox="0 0 24 24" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                         <p style={{ fontFamily: "'Bebas Neue', 'Inter', sans-serif", fontSize: '0.9rem', letterSpacing: 0.8, color: '#0a0a0a', fontWeight: 400 }}>CLUB EVENTS</p>
                       </div>
-                      {/* My Schedule - Dark */}
-                      <div style={{
-                        background: '#0a0a0a', borderRadius: 16, height: 80, padding: '10px 12px',
-                        display: 'flex', flexDirection: 'column' as const, justifyContent: 'space-between',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-                      }}>
-                        <svg width="22" height="22" fill="none" stroke="#fff" viewBox="0 0 24 24" strokeWidth="2">
-                          <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
-                        </svg>
+                      <div style={{ background: '#0a0a0a', borderRadius: 16, height: 80, padding: '10px 12px', display: 'flex', flexDirection: 'column' as const, justifyContent: 'space-between', boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}>
+                        <svg width="22" height="22" fill="none" stroke="#fff" viewBox="0 0 24 24" strokeWidth="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
                         <p style={{ fontFamily: "'Bebas Neue', 'Inter', sans-serif", fontSize: '0.9rem', letterSpacing: 0.8, color: '#fff', fontWeight: 400 }}>MY SCHEDULE</p>
                       </div>
                     </div>
@@ -205,16 +177,15 @@ function LoginContent() {
                   <div style={{ padding: '6px 12px 8px', position: 'relative', zIndex: 2 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                       <p style={{ fontFamily: "'Bebas Neue', 'Inter', sans-serif", fontSize: '0.92rem', letterSpacing: 1, color: '#0a0a0a', fontWeight: 400 }}>UPCOMING EVENTS</p>
-                      <span style={{ fontFamily: "'Bebas Neue', 'Inter', sans-serif", fontSize: '0.6rem', color: '#0a0a0a', fontWeight: 400, letterSpacing: 0.8 }}>SEE ALL →</span>
+                      <span style={{ fontFamily: "'Bebas Neue', 'Inter', sans-serif", fontSize: '0.6rem', color: '#0a0a0a', fontWeight: 400, letterSpacing: 0.8 }}>SEE ALL</span>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column' as const, gap: 6 }}>
                       {[
-                        { month: 'MAY', day: '9', title: 'Opening Day BBQ', details: '1:00 PM • All Courts • Free' },
-                        { month: 'MAY', day: '12', title: "Men's Round Robin", details: 'Tue 9:00 AM • Courts 1-2' },
-                        { month: 'MAY', day: '15', title: 'Friday Night Mixed', details: 'Fri 6:00 PM • All Courts' },
+                        { month: 'MAY', day: '9', title: 'Opening Day BBQ', details: '1:00 PM' },
+                        { month: 'MAY', day: '12', title: "Men's Round Robin", details: '9:00 AM' },
                       ].map((evt) => (
                         <div key={evt.day} style={{
-                          background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(12px) saturate(180%)', WebkitBackdropFilter: 'blur(12px) saturate(180%)',
+                          background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
                           border: '1.5px solid rgba(0,0,0,0.08)', borderRadius: 14, padding: '10px 10px',
                           display: 'flex', alignItems: 'center', gap: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
                         }}>
@@ -227,50 +198,6 @@ function LoginContent() {
                             <p style={{ fontSize: '0.5rem', color: '#666', marginTop: 2 }}>{evt.details}</p>
                           </div>
                           <div style={{ background: '#c8ff00', borderRadius: 8, padding: '6px 14px', fontSize: '0.58rem', fontWeight: 700, color: '#0a0a0a', flexShrink: 0 }}>RSVP</div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Club Calendar */}
-                  <div style={{ padding: '4px 12px 12px', position: 'relative', zIndex: 2 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                      <p style={{ fontFamily: "'Bebas Neue', 'Inter', sans-serif", fontSize: '0.92rem', letterSpacing: 1, color: '#0a0a0a', fontWeight: 400 }}>CLUB CALENDAR</p>
-                      <span style={{ fontFamily: "'Bebas Neue', 'Inter', sans-serif", fontSize: '0.6rem', color: '#0a0a0a', fontWeight: 400, letterSpacing: 0.8 }}>SEE ALL →</span>
-                    </div>
-                    <div style={{
-                      background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(12px) saturate(180%)', WebkitBackdropFilter: 'blur(12px) saturate(180%)',
-                      border: '1.5px solid rgba(0,0,0,0.08)', borderRadius: 14, padding: '8px 10px',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-                    }}>
-                      {/* Month header */}
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                        <span style={{ fontSize: '0.5rem', color: '#999' }}>‹</span>
-                        <span style={{ fontSize: '0.58rem', fontWeight: 600, color: '#0a0a0a' }}>March 2026</span>
-                        <span style={{ fontSize: '0.5rem', color: '#999' }}>›</span>
-                      </div>
-                      {/* Day headers */}
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', textAlign: 'center', marginBottom: 4 }}>
-                        {['S','M','T','W','T','F','S'].map((d, i) => (
-                          <span key={i} style={{ fontSize: '0.4rem', fontWeight: 600, color: '#999' }}>{d}</span>
-                        ))}
-                      </div>
-                      {/* Calendar grid — first 3 weeks of March 2026 (starts Sunday) */}
-                      {[[1,2,3,4,5,6,7],[8,9,10,11,12,13,14],[15,16,17,18,19,20,21]].map((week, wi) => (
-                        <div key={wi} style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', textAlign: 'center', gap: 1 }}>
-                          {week.map(day => (
-                            <div key={day} style={{
-                              fontSize: '0.48rem', fontWeight: day === 7 ? 700 : 500,
-                              color: day === 7 ? '#fff' : '#0a0a0a',
-                              background: day === 7 ? '#00d4ff' : 'transparent',
-                              borderRadius: day === 7 ? 6 : 0,
-                              padding: '3px 0',
-                              position: 'relative' as const,
-                            }}>
-                              {day}
-                              {day === 14 && <span style={{ position: 'absolute', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: 3, height: 3, borderRadius: '50%', background: '#ff5a5f' }}/>}
-                            </div>
-                          ))}
                         </div>
                       ))}
                     </div>
@@ -289,69 +216,59 @@ function LoginContent() {
                   }}>
                     {[
                       { label: 'Home', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6', active: true },
-                      { label: 'Schedule', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
+                      { label: 'Book', icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' },
                     ].map(item => (
                       <div key={item.label} style={{
                         display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
-                        color: item.active ? '#0a0a0a' : '#666', fontSize: '0.45rem', fontWeight: 600,
-                        textTransform: 'uppercase', letterSpacing: 0.3, padding: '4px 6px', borderRadius: 10,
+                        color: item.active ? '#0a0a0a' : '#666', fontSize: '0.42rem', fontWeight: 600,
+                        textTransform: 'uppercase', letterSpacing: 0.3, padding: '4px 5px', borderRadius: 10,
                         background: item.active ? 'rgba(200,255,0,0.18)' : 'transparent',
                       }}>
-                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
                           <path strokeLinecap="round" strokeLinejoin="round" d={item.icon}/>
                         </svg>
                         {item.label}
                       </div>
                     ))}
-                    {/* Center Book button */}
                     <div style={{
-                      width: 44, height: 44, marginTop: -28, background: '#c8ff00', borderRadius: '50%',
+                      width: 40, height: 40, marginTop: -26, background: '#c8ff00', borderRadius: '50%',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      boxShadow: '0 4px 16px rgba(200,255,0,0.5), 0 0 24px rgba(200,255,0,0.2)', color: '#0a0a0a',
+                      boxShadow: '0 4px 16px rgba(200,255,0,0.5)', color: '#0a0a0a',
                     }}>
-                      <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+                      <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4"/>
                       </svg>
                     </div>
                     {[
                       { label: 'Partners', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z' },
-                      { label: 'Messages', icon: 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z', badge: 2 },
+                      { label: 'Chat', icon: 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z' },
                     ].map(item => (
                       <div key={item.label} style={{
                         display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
-                        color: '#666', fontSize: '0.45rem', fontWeight: 600,
-                        textTransform: 'uppercase', letterSpacing: 0.3, padding: '4px 6px', borderRadius: 10, position: 'relative',
+                        color: '#666', fontSize: '0.42rem', fontWeight: 600,
+                        textTransform: 'uppercase', letterSpacing: 0.3, padding: '4px 5px', borderRadius: 10,
                       }}>
-                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
                           <path strokeLinecap="round" strokeLinejoin="round" d={item.icon}/>
                         </svg>
-                        {'badge' in item && (
-                          <span style={{
-                            position: 'absolute', top: -2, right: '50%', transform: 'translateX(10px)',
-                            minWidth: 12, height: 12, background: '#00d4ff', borderRadius: '50%',
-                            fontSize: 7, color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700,
-                          }}>{item.badge}</span>
-                        )}
                         {item.label}
                       </div>
                     ))}
                   </div>
                 </div>
               </div>
-
-            </div>{/* end phone scale wrapper */}
+            </div>{/* end phone scale */}
             </div>{/* end phone size wrapper */}
             <p className="text-xs font-medium mt-1" style={{ color: '#8a8578' }}>Mobile</p>
             </div>{/* end phone column */}
 
-            {/* Tablet Mockup (scaled) */}
+            {/* Tablet Mockup — larger than phone */}
             <div style={{ textAlign: 'center' }}>
-            <div style={{ width: 211, height: 154, position: 'relative' }}>
-            <div style={{ transform: 'scale(0.44)', transformOrigin: 'top left', position: 'absolute', top: 0, left: 0 }}>
+            <div style={{ width: 252, height: 184, position: 'relative' }}>
+            <div style={{ transform: 'scale(0.525)', transformOrigin: 'top left', position: 'absolute', top: 0, left: 0 }}>
               <div style={{
                 width: 480, height: 350, background: '#000', borderRadius: 24, padding: 10,
                 boxShadow: '0 40px 80px rgba(0,0,0,0.12), 0 0 0 2px #333', position: 'relative',
-                margin: '0 auto',
               }}>
                 <div style={{
                   width: '100%', height: '100%', background: '#f0f0f0', borderRadius: 18,
@@ -396,332 +313,249 @@ function LoginContent() {
                     </div>
                   </div>
 
-                  {/* iPad Content - Landscape layout */}
+                  {/* iPad Content */}
                   <div style={{ flex: 1, overflow: 'hidden', padding: '4px 12px 0' }}>
-                    {/* Top row: Quick Actions + Events side by side */}
-                    <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
-                      {/* Left: Quick Actions */}
+                    <div style={{ display: 'flex', gap: 10 }}>
                       <div style={{ flex: 1 }}>
-                        <p style={{ fontFamily: "'Bebas Neue', 'Inter', sans-serif", fontSize: '0.72rem', letterSpacing: 1, color: '#0a0a0a', marginBottom: 6, fontWeight: 400 }}>QUICK ACTIONS</p>
+                        <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '0.72rem', letterSpacing: 1, color: '#0a0a0a', marginBottom: 6 }}>QUICK ACTIONS</p>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 6 }}>
-                          <div style={{ background: '#c8ff00', borderRadius: 12, height: 66, padding: '8px 9px', display: 'flex', flexDirection: 'column' as const, justifyContent: 'space-between' }}>
-                            <svg width="16" height="16" fill="none" stroke="#0a0a0a" viewBox="0 0 24 24" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                            <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '0.62rem', letterSpacing: 0.6, color: '#0a0a0a', fontWeight: 400 }}>BOOK COURT</p>
-                          </div>
-                          <div style={{ background: '#ff5a5f', borderRadius: 12, height: 66, padding: '8px 9px', display: 'flex', flexDirection: 'column' as const, justifyContent: 'space-between' }}>
-                            <svg width="16" height="16" fill="none" stroke="#fff" viewBox="0 0 24 24" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-                            <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '0.62rem', letterSpacing: 0.6, color: '#fff', fontWeight: 400 }}>FIND PARTNER</p>
-                          </div>
-                          <div style={{ background: '#00d4ff', borderRadius: 12, height: 66, padding: '8px 9px', display: 'flex', flexDirection: 'column' as const, justifyContent: 'space-between' }}>
-                            <svg width="16" height="16" fill="none" stroke="#0a0a0a" viewBox="0 0 24 24" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                            <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '0.62rem', letterSpacing: 0.6, color: '#0a0a0a', fontWeight: 400 }}>CLUB EVENTS</p>
-                          </div>
-                          <div style={{ background: '#0a0a0a', borderRadius: 12, height: 66, padding: '8px 9px', display: 'flex', flexDirection: 'column' as const, justifyContent: 'space-between' }}>
-                            <svg width="16" height="16" fill="none" stroke="#fff" viewBox="0 0 24 24" strokeWidth="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
-                            <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '0.62rem', letterSpacing: 0.6, color: '#fff', fontWeight: 400 }}>MY SCHEDULE</p>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Right: 3 Events */}
-                      <div style={{ flex: 1.2 }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
-                          <p style={{ fontFamily: "'Bebas Neue', 'Inter', sans-serif", fontSize: '0.72rem', letterSpacing: 1, color: '#0a0a0a', fontWeight: 400 }}>UPCOMING EVENTS</p>
-                          <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '0.42rem', color: '#0a0a0a', letterSpacing: 0.6 }}>SEE ALL →</span>
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column' as const, gap: 5 }}>
                           {[
-                            { month: 'MAY', day: '9', title: 'Opening Day BBQ', time: '1:00 PM' },
-                            { month: 'MAY', day: '12', title: "Men's Round Robin", time: '9:00 AM' },
-                            { month: 'JUN', day: '7', title: 'French Open Social', time: '1:00 PM' },
-                          ].map((evt) => (
-                            <div key={`${evt.month}-${evt.day}`} style={{
-                              background: 'rgba(255,255,255,0.75)', border: '1px solid rgba(0,0,0,0.06)',
-                              borderRadius: 10, padding: '7px 10px', display: 'flex', alignItems: 'center', gap: 8,
-                            }}>
-                              <div style={{ background: '#c8ff00', borderRadius: 7, padding: '4px 7px', textAlign: 'center', minWidth: 34 }}>
-                                <div style={{ fontSize: '0.36rem', color: '#0a0a0a', fontWeight: 700, textTransform: 'uppercase' as const }}>{evt.month}</div>
-                                <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '0.78rem', color: '#0a0a0a', lineHeight: 1 }}>{evt.day}</div>
-                              </div>
-                              <div style={{ flex: 1 }}>
-                                <p style={{ fontSize: '0.52rem', fontWeight: 700, color: '#0a0a0a' }}>{evt.title}</p>
-                                <p style={{ fontSize: '0.4rem', color: '#666' }}>{evt.time}</p>
-                              </div>
-                              <div style={{ background: '#c8ff00', borderRadius: 6, padding: '3px 10px', fontSize: '0.42rem', fontWeight: 700, color: '#0a0a0a' }}>RSVP</div>
+                            { bg: '#c8ff00', label: 'BOOK COURT', stroke: '#0a0a0a', icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' },
+                            { bg: '#ff5a5f', label: 'FIND PARTNER', stroke: '#fff', icon: 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2' },
+                            { bg: '#00d4ff', label: 'CLUB EVENTS', stroke: '#0a0a0a', icon: 'M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674' },
+                            { bg: '#0a0a0a', label: 'MY SCHEDULE', stroke: '#fff', icon: 'M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z' },
+                          ].map(a => (
+                            <div key={a.label} style={{ background: a.bg, borderRadius: 12, height: 60, padding: '8px 9px', display: 'flex', flexDirection: 'column' as const, justifyContent: 'space-between' }}>
+                              <svg width="14" height="14" fill="none" stroke={a.stroke} viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d={a.icon}/></svg>
+                              <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '0.58rem', letterSpacing: 0.6, color: a.stroke }}>{a.label}</p>
                             </div>
                           ))}
                         </div>
                       </div>
-                    </div>
-
-                    {/* Bottom: Club Calendar — full width */}
-                    <div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
-                        <p style={{ fontFamily: "'Bebas Neue', 'Inter', sans-serif", fontSize: '0.72rem', letterSpacing: 1, color: '#0a0a0a', fontWeight: 400 }}>CLUB CALENDAR</p>
-                        <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '0.42rem', color: '#0a0a0a', letterSpacing: 0.6 }}>SEE ALL →</span>
-                      </div>
-                      <div style={{
-                        background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
-                        border: '1px solid rgba(0,0,0,0.06)', borderRadius: 10, padding: '6px 8px',
-                      }}>
-                        {/* Month header */}
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                          <span style={{ fontSize: '0.38rem', color: '#999' }}>‹</span>
-                          <span style={{ fontSize: '0.44rem', fontWeight: 600, color: '#0a0a0a' }}>March 2026</span>
-                          <span style={{ fontSize: '0.38rem', color: '#999' }}>›</span>
-                        </div>
-                        {/* Day headers */}
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', textAlign: 'center', marginBottom: 2 }}>
-                          {['S','M','T','W','T','F','S'].map((d, i) => (
-                            <span key={i} style={{ fontSize: '0.32rem', fontWeight: 600, color: '#999' }}>{d}</span>
-                          ))}
-                        </div>
-                        {/* Calendar grid — first 3 weeks */}
-                        {[[1,2,3,4,5,6,7],[8,9,10,11,12,13,14],[15,16,17,18,19,20,21]].map((week, wi) => (
-                          <div key={wi} style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', textAlign: 'center', gap: 1 }}>
-                            {week.map(day => (
-                              <div key={day} style={{
-                                fontSize: '0.38rem', fontWeight: day === 7 ? 700 : 500,
-                                color: day === 7 ? '#fff' : '#0a0a0a',
-                                background: day === 7 ? '#00d4ff' : 'transparent',
-                                borderRadius: day === 7 ? 5 : 0,
-                                padding: '2px 0',
-                                position: 'relative' as const,
-                              }}>
-                                {day}
-                                {day === 14 && <span style={{ position: 'absolute', bottom: -1, left: '50%', transform: 'translateX(-50%)', width: 2.5, height: 2.5, borderRadius: '50%', background: '#ff5a5f' }}/>}
-                              </div>
-                            ))}
+                      <div style={{ flex: 1.2 }}>
+                        <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '0.72rem', letterSpacing: 1, color: '#0a0a0a', marginBottom: 5 }}>UPCOMING EVENTS</p>
+                        {[
+                          { month: 'MAY', day: '9', title: 'Opening Day BBQ', time: '1:00 PM' },
+                          { month: 'MAY', day: '12', title: "Round Robin", time: '9:00 AM' },
+                          { month: 'JUN', day: '7', title: 'French Open Social', time: '1:00 PM' },
+                        ].map((evt) => (
+                          <div key={`${evt.month}-${evt.day}`} style={{
+                            background: 'rgba(255,255,255,0.75)', border: '1px solid rgba(0,0,0,0.06)',
+                            borderRadius: 10, padding: '6px 8px', display: 'flex', alignItems: 'center', gap: 6, marginBottom: 5,
+                          }}>
+                            <div style={{ background: '#c8ff00', borderRadius: 7, padding: '3px 6px', textAlign: 'center', minWidth: 30 }}>
+                              <div style={{ fontSize: '0.32rem', color: '#0a0a0a', fontWeight: 700, textTransform: 'uppercase' as const }}>{evt.month}</div>
+                              <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '0.7rem', color: '#0a0a0a', lineHeight: 1 }}>{evt.day}</div>
+                            </div>
+                            <div style={{ flex: 1 }}>
+                              <p style={{ fontSize: '0.48rem', fontWeight: 700, color: '#0a0a0a' }}>{evt.title}</p>
+                              <p style={{ fontSize: '0.36rem', color: '#666' }}>{evt.time}</p>
+                            </div>
                           </div>
                         ))}
                       </div>
                     </div>
                   </div>
 
-                  {/* Bottom Nav — matches phone mockup liquid glass style */}
+                  {/* Bottom Nav */}
                   <div style={{
                     position: 'absolute', bottom: 8, left: 8, right: 8, zIndex: 20,
-                    display: 'flex', justifyContent: 'space-around', alignItems: 'center', padding: '6px 4px',
+                    display: 'flex', justifyContent: 'space-around', alignItems: 'center', padding: '5px 4px',
                     background: 'rgba(255,255,255,0.25)',
-                    backdropFilter: 'blur(24px) saturate(180%)', WebkitBackdropFilter: 'blur(24px) saturate(180%)',
-                    border: '1px solid rgba(255,255,255,0.35)', borderRadius: 22,
-                    boxShadow: '0 -4px 30px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.5)',
+                    backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)',
+                    border: '1px solid rgba(255,255,255,0.35)', borderRadius: 20,
                   }}>
-                    {[
-                      { label: 'Home', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6', active: true },
-                      { label: 'Schedule', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
-                    ].map(item => (
-                      <div key={item.label} style={{
-                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
-                        color: item.active ? '#0a0a0a' : '#666', fontSize: '0.38rem', fontWeight: 600,
-                        textTransform: 'uppercase', letterSpacing: 0.3, padding: '4px 6px', borderRadius: 10,
-                        background: item.active ? 'rgba(200,255,0,0.18)' : 'transparent',
-                      }}>
-                        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-                          <path strokeLinecap="round" strokeLinejoin="round" d={item.icon}/>
-                        </svg>
-                        {item.label}
+                    {['Home','Schedule'].map((l, i) => (
+                      <div key={l} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, color: i===0?'#0a0a0a':'#666', fontSize: '0.36rem', fontWeight: 600, padding: '3px 5px', borderRadius: 8, background: i===0?'rgba(200,255,0,0.18)':'transparent' }}>
+                        <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d={i===0?'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6':'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'}/></svg>
+                        {l}
                       </div>
                     ))}
-                    {/* Center Book button */}
-                    <div style={{
-                      width: 38, height: 38, marginTop: -22, background: '#c8ff00', borderRadius: '50%',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      boxShadow: '0 4px 16px rgba(200,255,0,0.5), 0 0 24px rgba(200,255,0,0.2)', color: '#0a0a0a',
-                    }}>
-                      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4"/>
-                      </svg>
+                    <div style={{ width: 34, height: 34, marginTop: -20, background: '#c8ff00', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 16px rgba(200,255,0,0.5)' }}>
+                      <svg width="14" height="14" fill="none" stroke="#0a0a0a" viewBox="0 0 24 24" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4"/></svg>
                     </div>
-                    {[
-                      { label: 'Partners', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z' },
-                      { label: 'Messages', icon: 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z' },
-                    ].map(item => (
-                      <div key={item.label} style={{
-                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
-                        color: '#666', fontSize: '0.38rem', fontWeight: 600,
-                        textTransform: 'uppercase', letterSpacing: 0.3, padding: '4px 6px', borderRadius: 10,
-                      }}>
-                        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-                          <path strokeLinecap="round" strokeLinejoin="round" d={item.icon}/>
-                        </svg>
-                        {item.label}
+                    {['Partners','Chat'].map(l => (
+                      <div key={l} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, color: '#666', fontSize: '0.36rem', fontWeight: 600, padding: '3px 5px', borderRadius: 8 }}>
+                        <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d={l==='Partners'?'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z':'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z'}/></svg>
+                        {l}
                       </div>
                     ))}
                   </div>
                 </div>
               </div>
-            </div>{/* end tablet scale wrapper */}
+            </div>{/* end tablet scale */}
             </div>{/* end tablet size wrapper */}
             <p className="text-xs font-medium mt-1" style={{ color: '#8a8578' }}>Tablet</p>
             </div>{/* end tablet column */}
 
             </div>{/* end Row 1 flex */}
 
-            {/* ── Row 2: Desktop Dashboard Mockup (laptop frame) ── */}
-            <div style={{ textAlign: 'center', width: '100%', maxWidth: 540, margin: '0 auto' }}>
+            {/* ── Row 2: Desktop Dashboard — REAL dashboard layout ── */}
+            <div style={{ textAlign: 'center', width: '100%', maxWidth: 560, margin: '0 auto' }}>
               {/* Laptop screen bezel */}
               <div style={{
                 background: '#2a2a2a', borderRadius: '12px 12px 0 0', padding: '3px 3px 0',
                 boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
               }}>
-                {/* macOS title bar */}
-                <div style={{ display: 'flex', gap: 4, padding: '5px 10px', alignItems: 'center', background: '#1a1f12', borderRadius: '10px 10px 0 0' }}>
-                  <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#ff5f57' }} />
-                  <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#febc2e' }} />
-                  <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#28c840' }} />
-                  <span style={{ flex: 1 }} />
-                  <span style={{ fontSize: 7, color: '#6b7266', fontFamily: 'Inter, sans-serif' }}>monotennisclub.com/dashboard</span>
-                  <span style={{ flex: 1 }} />
+                {/* Title bar — dark sidebar extends into it */}
+                <div style={{ display: 'flex', overflow: 'hidden', borderRadius: '10px 10px 0 0' }}>
+                  {/* Sidebar title area */}
+                  <div style={{ width: 150, background: '#1a1f12', padding: '6px 10px', display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                    <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#ff5f57' }} />
+                    <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#febc2e' }} />
+                    <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#28c840' }} />
+                  </div>
+                  {/* URL bar area */}
+                  <div style={{ flex: 1, background: '#faf8f3', padding: '5px 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderBottom: '1px solid #e0dcd3' }}>
+                    <div style={{ background: '#f0ede6', borderRadius: 6, padding: '2px 16px', display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <svg width="8" height="8" fill="none" stroke="#999" viewBox="0 0 24 24" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                      <span style={{ fontSize: 7, color: '#888' }}>monotennisclub.com/dashboard</span>
+                    </div>
+                  </div>
                 </div>
-                {/* Desktop dashboard layout: dark sidebar + cream main */}
+                {/* Dashboard body: sidebar + main */}
                 <div style={{
-                  background: '#f5f2eb', overflow: 'hidden',
-                  display: 'flex', height: 240,
+                  display: 'flex', height: 260, overflow: 'hidden',
                 }}>
                   {/* Dark sidebar — matches real dashboard */}
                   <div style={{
-                    width: 140, background: '#1a1f12', display: 'flex', flexDirection: 'column' as const,
-                    padding: '10px 6px', gap: 1, flexShrink: 0, borderRight: '1px solid rgba(200,255,0,0.08)',
+                    width: 150, background: '#1a1f12', display: 'flex', flexDirection: 'column' as const,
+                    padding: '10px 8px', gap: 1, flexShrink: 0,
                   }}>
                     {/* Logo */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12, padding: '2px 6px' }}>
-                      <div style={{ width: 24, height: 24, borderRadius: 8, background: '#c8ff00', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 11, color: '#0a0a0a', fontWeight: 700 }}>M</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10, padding: '2px 6px' }}>
+                      <div style={{ width: 22, height: 22, borderRadius: 7, background: '#c8ff00', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 10, color: '#0a0a0a', fontWeight: 700 }}>M</span>
                       </div>
                       <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 10, color: '#e8e4d9', letterSpacing: 2 }}>MTC COURT</span>
                     </div>
                     {/* Nav items */}
                     {[
-                      { label: 'Dashboard', icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z', active: true },
-                      { label: 'Book Court', icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' },
-                      { label: 'Partners', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z' },
-                      { label: 'Messages', icon: 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z' },
-                      { label: 'Events', icon: 'M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z' },
-                      { label: 'Settings', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z' },
+                      { label: 'Home', active: true },
+                      { label: 'Book Court' },
+                      { label: 'My Schedule' },
+                      { label: 'Partners' },
+                      { label: 'Events' },
+                      { label: 'Lessons' },
+                      { label: 'Messages', badge: 2 },
+                      { label: 'Settings' },
                     ].map(item => (
                       <div key={item.label} style={{
-                        display: 'flex', alignItems: 'center', gap: 8, padding: '6px 8px', borderRadius: 8,
+                        display: 'flex', alignItems: 'center', gap: 7, padding: '5px 8px', borderRadius: 7,
                         background: item.active ? 'rgba(200,255,0,0.12)' : 'transparent',
-                        cursor: 'default',
+                        position: 'relative' as const,
                       }}>
-                        <svg width="12" height="12" fill="none" stroke={item.active ? '#c8ff00' : '#6b7266'} viewBox="0 0 24 24" strokeWidth="1.8">
-                          <path strokeLinecap="round" strokeLinejoin="round" d={item.icon}/>
-                        </svg>
-                        <span style={{ fontSize: 8, fontWeight: item.active ? 600 : 400, color: item.active ? '#c8ff00' : '#8a8578', letterSpacing: 0.3 }}>{item.label}</span>
+                        {item.active && <div style={{ position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)', width: 3, height: 16, background: '#d4e157', borderRadius: 2 }} />}
+                        <div style={{ width: 12, height: 12, borderRadius: 3, background: item.active ? 'rgba(200,255,0,0.3)' : 'rgba(255,255,255,0.05)', flexShrink: 0 }} />
+                        <span style={{ fontSize: 8, fontWeight: item.active ? 600 : 400, color: item.active ? '#e8e4d9' : '#8a8578', letterSpacing: 0.2 }}>{item.label}</span>
+                        {'badge' in item && <span style={{ marginLeft: 'auto', minWidth: 13, height: 13, background: '#ff5a5f', borderRadius: '50%', fontSize: 6.5, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>{item.badge}</span>}
                       </div>
                     ))}
-                    {/* Spacer + user avatar at bottom */}
+                    {/* Spacer + user */}
                     <div style={{ flex: 1 }} />
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 8px', borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: 4, paddingTop: 8 }}>
-                      <div style={{ width: 20, height: 20, background: '#6b7a3d', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                        <span style={{ fontSize: 8, color: '#fff', fontWeight: 700 }}>T</span>
+                      <div style={{ width: 18, height: 18, background: '#6b7a3d', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <span style={{ fontSize: 7, color: '#fff', fontWeight: 700 }}>T</span>
                       </div>
                       <span style={{ fontSize: 7, color: '#8a8578' }}>Test User</span>
                     </div>
                   </div>
-                  {/* Main content area */}
-                  <div style={{ flex: 1, padding: '14px 16px', overflow: 'hidden', display: 'flex', flexDirection: 'column' as const }}>
-                    {/* Header */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                      <div>
-                        <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 14, color: '#2a2f1e', letterSpacing: 1 }}>DASHBOARD</span>
-                        <p style={{ fontSize: 7, color: '#8a8578', marginTop: 1 }}>Welcome back, Test User</p>
-                      </div>
+                  {/* Main content — cream bg, real dashboard layout */}
+                  <div style={{ flex: 1, background: '#f5f2eb', padding: '14px 16px', overflow: 'hidden', display: 'flex', flexDirection: 'column' as const }}>
+                    {/* Header bar */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, paddingBottom: 8, borderBottom: '1px solid #e0dcd3' }}>
+                      <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 12, color: '#2a2f1e', letterSpacing: 1.5 }}>HOME</span>
                       <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                        <div style={{ position: 'relative', width: 22, height: 22, background: '#fff', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(0,0,0,0.08)' }}>
-                          <svg width="11" height="11" fill="none" stroke="#666" viewBox="0 0 24 24" strokeWidth="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-                          <span style={{ position: 'absolute', top: -2, right: -2, width: 8, height: 8, background: '#ff5a5f', borderRadius: '50%', fontSize: 5, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, border: '1.5px solid #f5f2eb' }}>3</span>
+                        <div style={{ position: 'relative', width: 20, height: 20, background: '#fff', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #e0dcd3' }}>
+                          <svg width="10" height="10" fill="none" stroke="#666" viewBox="0 0 24 24" strokeWidth="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/></svg>
+                          <span style={{ position: 'absolute', top: -2, right: -2, width: 8, height: 8, background: '#d4e157', borderRadius: '50%', fontSize: 5, color: '#0a0a0a', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, border: '1.5px solid #f5f2eb' }}>3</span>
+                        </div>
+                        <div style={{ width: 8, height: 8, display: 'flex', flexDirection: 'column' as const, gap: 1.5, justifyContent: 'center' }}>
+                          <span style={{ width: 8, height: 1.5, background: '#666', borderRadius: 1 }} />
+                          <span style={{ width: 8, height: 1.5, background: '#666', borderRadius: 1 }} />
+                          <span style={{ width: 6, height: 1.5, background: '#666', borderRadius: 1 }} />
                         </div>
                       </div>
                     </div>
-                    {/* Quick action cards */}
-                    <div style={{ display: 'flex', gap: 6, marginBottom: 12 }}>
+                    {/* Welcome */}
+                    <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 14, color: '#2a2f1e', letterSpacing: 0.5, marginBottom: 10 }}>Good afternoon, Test User</p>
+                    {/* Quick Actions — glass cards row */}
+                    <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
                       {[
-                        { bg: '#c8ff00', label: 'BOOK COURT', color: '#0a0a0a', iconStroke: '#0a0a0a', icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' },
-                        { bg: '#ff5a5f', label: 'FIND PARTNER', color: '#fff', iconStroke: '#fff', icon: 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2' },
-                        { bg: '#00d4ff', label: 'CLUB EVENTS', color: '#0a0a0a', iconStroke: '#0a0a0a', icon: 'M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888' },
-                        { bg: '#0a0a0a', label: 'MY SCHEDULE', color: '#fff', iconStroke: '#fff', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2' },
+                        { label: 'Book Court', bg: 'rgba(200,255,0,0.15)', border: 'rgba(200,255,0,0.3)', color: '#2a2f1e' },
+                        { label: 'View Schedule', bg: 'rgba(0,0,0,0.04)', border: 'rgba(0,0,0,0.08)', color: '#2a2f1e' },
+                        { label: 'Club Events', bg: 'rgba(0,212,255,0.1)', border: 'rgba(0,212,255,0.2)', color: '#2a2f1e' },
+                        { label: 'Find Partner', bg: 'rgba(255,90,95,0.1)', border: 'rgba(255,90,95,0.2)', color: '#2a2f1e' },
                       ].map(a => (
                         <div key={a.label} style={{
-                          flex: 1, background: a.bg, borderRadius: 8, padding: '8px 7px',
-                          display: 'flex', flexDirection: 'column' as const, justifyContent: 'space-between', height: 48,
-                          boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                          flex: 1, background: a.bg, border: `1px solid ${a.border}`, borderRadius: 10, padding: '10px 6px',
+                          textAlign: 'center', cursor: 'default',
                         }}>
-                          <svg width="12" height="12" fill="none" stroke={a.iconStroke} viewBox="0 0 24 24" strokeWidth="2">
-                            <path strokeLinecap="round" strokeLinejoin="round" d={a.icon}/>
-                          </svg>
-                          <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 7, color: a.color, letterSpacing: 0.5 }}>{a.label}</span>
+                          <div style={{ width: 16, height: 16, background: 'rgba(0,0,0,0.06)', borderRadius: 5, margin: '0 auto 5px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <svg width="9" height="9" fill="none" stroke="#2a2f1e" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                          </div>
+                          <span style={{ fontSize: 6.5, fontWeight: 600, color: a.color }}>{a.label}</span>
                         </div>
                       ))}
                     </div>
-                    {/* Bottom row: Events + Calendar + Weather */}
-                    <div style={{ display: 'flex', gap: 6, flex: 1, minHeight: 0 }}>
-                      {/* Events */}
-                      <div style={{ flex: 1.3, background: '#fff', borderRadius: 8, padding: '8px 10px', border: '1px solid rgba(0,0,0,0.06)' }}>
+                    {/* Two-column: Bookings + Events — like the real dashboard */}
+                    <div style={{ display: 'flex', gap: 8, flex: 1, minHeight: 0 }}>
+                      {/* Upcoming Bookings */}
+                      <div style={{ flex: 1, background: 'rgba(255,255,255,0.6)', borderRadius: 10, padding: '8px 10px', border: '1px solid rgba(255,255,255,0.5)' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                          <span style={{ fontSize: 7, fontWeight: 700, color: '#2a2f1e' }}>Upcoming Events</span>
-                          <span style={{ fontSize: 6, color: '#6b7a3d' }}>See all</span>
+                          <span style={{ fontSize: 7, fontWeight: 700, color: '#2a2f1e' }}>Upcoming Bookings</span>
+                          <span style={{ fontSize: 5.5, color: '#6b7a3d' }}>View All</span>
                         </div>
                         {[
-                          { title: 'Opening Day BBQ', date: 'May 9 • 1:00 PM' },
-                          { title: "Men's Round Robin", date: 'May 12 • 9:00 AM' },
-                          { title: 'French Open Social', date: 'Jun 7 • 1:00 PM' },
-                        ].map(evt => (
-                          <div key={evt.title} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 5 }}>
-                            <div style={{ width: 4, height: 20, background: '#c8ff00', borderRadius: 2, flexShrink: 0 }} />
-                            <div>
-                              <span style={{ fontSize: 6.5, fontWeight: 600, color: '#2a2f1e', display: 'block' }}>{evt.title}</span>
-                              <span style={{ fontSize: 5.5, color: '#999' }}>{evt.date}</span>
+                          { date: 'May 10', court: 'Court 1', time: '10:00 AM - 11:30 AM' },
+                          { date: 'May 14', court: 'Court 3', time: '6:00 PM - 7:30 PM' },
+                        ].map(b => (
+                          <div key={b.date} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6, padding: '5px 6px', background: '#fff', borderRadius: 7, border: '1px solid rgba(0,0,0,0.04)' }}>
+                            <div style={{ background: '#f5f2eb', borderRadius: 5, padding: '3px 5px', textAlign: 'center', minWidth: 28, flexShrink: 0 }}>
+                              <div style={{ fontSize: 4.5, color: '#999', fontWeight: 600 }}>{b.date.split(' ')[0]}</div>
+                              <div style={{ fontSize: 9, fontWeight: 700, color: '#2a2f1e', lineHeight: 1 }}>{b.date.split(' ')[1]}</div>
                             </div>
+                            <div>
+                              <span style={{ fontSize: 6, fontWeight: 600, color: '#2a2f1e', display: 'block' }}>{b.court}</span>
+                              <span style={{ fontSize: 5, color: '#999' }}>{b.time}</span>
+                            </div>
+                            <span style={{ marginLeft: 'auto', fontSize: 5, background: 'rgba(251,146,60,0.15)', color: '#ea580c', padding: '2px 5px', borderRadius: 4, fontWeight: 600, flexShrink: 0 }}>Confirmed</span>
                           </div>
                         ))}
                       </div>
-                      {/* Calendar */}
-                      <div style={{ flex: 1, background: '#fff', borderRadius: 8, padding: '8px 10px', border: '1px solid rgba(0,0,0,0.06)' }}>
-                        <span style={{ fontSize: 7, fontWeight: 700, color: '#2a2f1e', display: 'block', marginBottom: 5 }}>Club Calendar</span>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>
-                          <span style={{ fontSize: 5, color: '#999' }}>‹</span>
-                          <span style={{ fontSize: 6, fontWeight: 600, color: '#2a2f1e' }}>May 2026</span>
-                          <span style={{ fontSize: 5, color: '#999' }}>›</span>
+                      {/* Upcoming Events */}
+                      <div style={{ flex: 1, background: 'rgba(255,255,255,0.6)', borderRadius: 10, padding: '8px 10px', border: '1px solid rgba(255,255,255,0.5)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                          <span style={{ fontSize: 7, fontWeight: 700, color: '#2a2f1e' }}>Upcoming Events</span>
+                          <span style={{ fontSize: 5.5, color: '#6b7a3d' }}>View All</span>
                         </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 1, textAlign: 'center' }}>
-                          {['S','M','T','W','T','F','S'].map((d, i) => (
-                            <span key={i} style={{ fontSize: 5, color: '#999', fontWeight: 600 }}>{d}</span>
-                          ))}
-                          {[1,2,3,4,5,6,7,8,9,10,11,12,13,14].map(d => (
-                            <span key={d} style={{
-                              fontSize: 5, color: d === 9 ? '#fff' : '#444', padding: '1.5px 0',
-                              background: d === 9 ? '#c8ff00' : 'transparent', borderRadius: 3,
-                              fontWeight: d === 9 ? 700 : 400,
-                            }}>{d}</span>
-                          ))}
-                        </div>
-                      </div>
-                      {/* Weather */}
-                      <div style={{ flex: 0.6, background: '#fff', borderRadius: 8, padding: '8px 8px', border: '1px solid rgba(0,0,0,0.06)', textAlign: 'center', display: 'flex', flexDirection: 'column' as const, alignItems: 'center', justifyContent: 'center' }}>
-                        <span style={{ fontSize: 7, fontWeight: 700, color: '#2a2f1e', display: 'block', marginBottom: 4 }}>Weather</span>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2">
-                          <circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
-                        </svg>
-                        <p style={{ fontSize: 10, fontWeight: 700, color: '#2a2f1e', marginTop: 3 }}>12°C</p>
-                        <p style={{ fontSize: 5.5, color: '#999' }}>Mono, ON</p>
+                        {[
+                          { date: 'May 9', title: 'Opening Day BBQ', time: '1:00 PM', tag: 'Free' },
+                          { date: 'May 12', title: "Men's Round Robin", time: '9:00 AM', tag: 'Members' },
+                        ].map(e => (
+                          <div key={e.date} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6, padding: '5px 6px', background: '#fff', borderRadius: 7, border: '1px solid rgba(0,0,0,0.04)' }}>
+                            <div style={{ background: '#f5f2eb', borderRadius: 5, padding: '3px 5px', textAlign: 'center', minWidth: 28, flexShrink: 0 }}>
+                              <div style={{ fontSize: 4.5, color: '#999', fontWeight: 600 }}>{e.date.split(' ')[0]}</div>
+                              <div style={{ fontSize: 9, fontWeight: 700, color: '#2a2f1e', lineHeight: 1 }}>{e.date.split(' ')[1]}</div>
+                            </div>
+                            <div>
+                              <span style={{ fontSize: 6, fontWeight: 600, color: '#2a2f1e', display: 'block' }}>{e.title}</span>
+                              <span style={{ fontSize: 5, color: '#999' }}>{e.time}</span>
+                            </div>
+                            <span style={{ marginLeft: 'auto', fontSize: 5, background: 'rgba(34,197,94,0.12)', color: '#16a34a', padding: '2px 5px', borderRadius: 4, fontWeight: 600, flexShrink: 0 }}>{e.tag}</span>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-              {/* Laptop base/hinge */}
-              <div style={{
-                height: 10, background: 'linear-gradient(180deg, #333, #555)',
-                borderRadius: '0 0 2px 2px', margin: '0 20px',
-              }} />
-              <div style={{
-                height: 4, background: '#ccc', borderRadius: '0 0 8px 8px', margin: '0 60px',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-              }} />
+              {/* Laptop base */}
+              <div style={{ height: 10, background: 'linear-gradient(180deg, #333, #555)', borderRadius: '0 0 2px 2px', margin: '0 20px' }} />
+              <div style={{ height: 4, background: '#ccc', borderRadius: '0 0 8px 8px', margin: '0 60px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }} />
               <p className="text-xs font-medium mt-3" style={{ color: '#8a8578' }}>Desktop Dashboard</p>
             </div>
+
 
           </div>
         </div>
@@ -790,7 +624,7 @@ function LoginContent() {
               type="button"
               onClick={async () => {
                 setLoginError('');
-                const { error } = await signInWithGoogle();
+                const { error } = await signInWithGoogle('/dashboard');
                 if (error) setLoginError(error);
               }}
               className="w-full py-5 rounded-full font-semibold text-base transition-all hover:-translate-y-0.5 active:scale-[0.97] flex items-center justify-center gap-3"
@@ -850,7 +684,7 @@ function LoginContent() {
                 }
                 setLoginError('');
                 setLoading(true);
-                const { error } = await signInWithMagicLink(email.trim().toLowerCase());
+                const { error } = await signInWithMagicLink(email.trim().toLowerCase(), '/dashboard');
                 setLoading(false);
                 if (error) {
                   setLoginError(error);
