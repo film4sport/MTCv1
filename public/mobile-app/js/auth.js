@@ -83,7 +83,9 @@
         // Wait up to 8s for supabase lib (CDN or local fallback)
         return waitForSupabaseLib(8000).then(function(loaded) {
           if (loaded && window.supabase) {
-            _supabaseClient = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+            _supabaseClient = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey, {
+              auth: { flowType: 'pkce' }
+            });
             MTC.state._supabaseClient = _supabaseClient; // Expose for realtime-sync.js
             _supabaseReady = true;
             enableAuthButtons();

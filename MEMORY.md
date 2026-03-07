@@ -5,6 +5,7 @@
 - **Code review reports**: `MTC-Code-Review-Report.docx` (38 findings) and `MTC-Bug-Hunting-Report.docx` (39 findings) in project root.
 - **⚠️ Image upload MIME bug (Claude Code)**: API throws `400 invalid_request_error` ("image was specified using image/jpeg media type, but appears to be image/png") when a file with `.jpg` extension contains PNG data. This kills the session. **Workaround**: ALWAYS share screenshots as `.png` — never `.jpg`. Windows screenshots (Snipping Tool, Win+Shift+S) are always PNG internally. If pasting from clipboard triggers the error, use `/rewind` immediately. This is a Claude Code bug (MIME detection trusts extension, not actual bytes).
 - **User flow testing**: Use BDG (Claude in Chrome) + Guerrilla Mail (guerrillamail.com) to create test accounts and test real user flows (Google login, magic link, signup, booking, etc.) before shipping auth changes. Always verify auth flows end-to-end in the browser — never ship auth changes without testing.
+- **Test mock rule**: Before writing/updating E2E test mocks, ALWAYS grep the real source code for the actual localStorage keys, API endpoints, and DOM IDs. Never guess. Past CI failures from wrong mocks: `mtc-current-user` vs `mtc-user`, missing `mtc-onboarding-complete`, asserting on removed `signupPassword` field.
 
 ## Current Status
 - **SMTP/Supabase email**: DONE. Resend SMTP (smtp.resend.com:465, noreply@monotennisclub.com). Email confirmation and password reset emails are live.
@@ -70,10 +71,10 @@
 - Logo image → Clubhouse-Inside.png from GitHub images repo
 
 **Mobile PWA Google OAuth redirect fix (CRITICAL):**
-- **Bug**: After Google login, mobile PWA users landed on landing page instead of mobile PWA
-- **Root cause**: Callback route redirected DIRECTLY to `/mobile-app/index.html` when `?next=` was present, bypassing `/auth/complete`. The mobile PWA loaded fresh with no auth params, so `checkAuthCallback()` never fired.
-- **Fix**: (1) `auth.js` still sends `?next=/mobile-app/index.html` (REQUIRED for Supabase redirect URL allowlist). (2) Callback route now detects `mobile-app` in `next` and redirects to `/auth/complete` instead of directly to the PWA. (3) `/auth/complete` reads localStorage, appends `?auth=callback` when redirecting. (4) `auth.js` DOMContentLoaded detects `?auth=callback` and triggers `checkAuthCallback()`.
-- **Key insight**: Supabase Redirect URLs allowlist requires the `?next=` param in the URL. Removing it causes Supabase to fall back to Site URL (implicit flow to `/login`), bypassing `/auth/callback` entirely.
+- **Bug**: After Google login, mobile PWA users landed on `/login#access_token=...` instead of mobile PWA
+- **Root cause**: Mobile PWA's Supabase client used the default IMPLICIT OAuth flow. Implicit flow puts tokens in the URL hash (`#access_token=...`), which the server at `/auth/callback` can't see (hash fragments are client-only). Server saw no `?code=` param → redirected to `/login`. Desktop Next.js uses `@supabase/ssr` which defaults to PKCE flow (uses `?code=`), so desktop OAuth worked fine.
+- **Fix**: Added `{ auth: { flowType: 'pkce' } }` to `window.supabase.createClient()` in `auth.js`. This makes the mobile PWA use the same PKCE flow as desktop — Supabase now redirects to `/auth/callback?code=...` which the server can exchange for a session.
+- **Full flow after fix**: (1) `auth.js` sets `localStorage('mtc-auth-redirect', '/mobile-app/index.html')` + calls `signInWithOAuth({ redirectTo: '/auth/callback?next=...' })` with PKCE. (2) Google auth → Supabase redirects to `/auth/callback?code=...&next=...`. (3) Server exchanges code for session, sees `next` contains `mobile-app`, redirects to `/auth/complete`. (4) `/auth/complete` reads localStorage, redirects to `/mobile-app/index.html?auth=callback`. (5) `auth.js` detects `?auth=callback`, calls `checkAuthCallback()`.
 - Files: `public/mobile-app/js/auth.js`, `app/auth/callback/route.ts`, `app/auth/complete/page.tsx`
 
 **CI test fixes:**
