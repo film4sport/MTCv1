@@ -3,6 +3,7 @@
 ## Workflow Tools
 - **Cowork (Claude Desktop)** is available for interactive browser-based visual verification. Use Cowork for subjective visual checks ("does this look right?", hover states, animations, glass morphism rendering, full-page scrollthroughs). Use Claude Code + Playwright for automated regression checks ("did this break?").
 - **Code review reports**: `MTC-Code-Review-Report.docx` (38 findings) and `MTC-Bug-Hunting-Report.docx` (39 findings) in project root.
+- **⚠️ Image upload MIME bug (Claude Code)**: API throws `400 invalid_request_error` ("image was specified using image/jpeg media type, but appears to be image/png") when a file with `.jpg` extension contains PNG data. This kills the session. **Workaround**: ALWAYS share screenshots as `.png` — never `.jpg`. Windows screenshots (Snipping Tool, Win+Shift+S) are always PNG internally. If pasting from clipboard triggers the error, use `/rewind` immediately. This is a Claude Code bug (MIME detection trusts extension, not actual bytes).
 
 ## Current Status
 - **SMTP/Supabase email**: DONE. Resend SMTP (smtp.resend.com:465, noreply@monotennisclub.com). Email confirmation and password reset emails are live.

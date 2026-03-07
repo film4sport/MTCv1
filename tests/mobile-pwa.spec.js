@@ -72,7 +72,7 @@ test.describe('Mobile PWA — Login Screen', () => {
     await expect(signupCard).toBeVisible();
     await expect(page.locator('#signupName')).toBeVisible();
     await expect(page.locator('#signupEmail')).toBeVisible();
-    await expect(page.locator('#signupPassword')).toBeVisible();
+    // Password field was removed (passwordless auth — Google + Magic Link only)
   });
 
   test('signup form validates empty fields', async ({ page }) => {
