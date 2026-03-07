@@ -71,13 +71,15 @@
 
 **Mobile PWA Google OAuth redirect fix (CRITICAL):**
 - **Bug**: After Google login, mobile PWA users landed on landing page instead of mobile PWA
-- **Root cause**: `auth.js` sent `?next=/mobile-app/index.html` in OAuth redirectTo URL. The callback route saw `next` and redirected DIRECTLY to `/mobile-app/index.html`, bypassing `/auth/complete`. The mobile PWA loaded fresh with no auth params, so `checkAuthCallback()` never fired → login screen shown.
-- **Fix**: (1) Removed `?next=` from OAuth/magic link redirect URLs in `auth.js` — now relies solely on localStorage. (2) `/auth/complete` appends `?auth=callback` when redirecting to mobile PWA. (3) `auth.js` DOMContentLoaded detects `?auth=callback` and triggers `checkAuthCallback()` to pick up the server-side session.
-- Files: `public/mobile-app/js/auth.js`, `app/auth/complete/page.tsx`
+- **Root cause**: Callback route redirected DIRECTLY to `/mobile-app/index.html` when `?next=` was present, bypassing `/auth/complete`. The mobile PWA loaded fresh with no auth params, so `checkAuthCallback()` never fired.
+- **Fix**: (1) `auth.js` still sends `?next=/mobile-app/index.html` (REQUIRED for Supabase redirect URL allowlist). (2) Callback route now detects `mobile-app` in `next` and redirects to `/auth/complete` instead of directly to the PWA. (3) `/auth/complete` reads localStorage, appends `?auth=callback` when redirecting. (4) `auth.js` DOMContentLoaded detects `?auth=callback` and triggers `checkAuthCallback()`.
+- **Key insight**: Supabase Redirect URLs allowlist requires the `?next=` param in the URL. Removing it causes Supabase to fall back to Site URL (implicit flow to `/login`), bypassing `/auth/callback` entirely.
+- Files: `public/mobile-app/js/auth.js`, `app/auth/callback/route.ts`, `app/auth/complete/page.tsx`
 
 **CI test fixes:**
 - `signupPassword` field assertion removed (passwordless auth)
 - ARIA labels test: added `addInitScript` for onboarding bypass + `waitUntil: 'load'`
+- Settings navigation tests (2 failures): `mockAuthenticatedState` was setting `mtc-current-user` but app reads `mtc-user` on boot (interactive.js line 70). Fixed mock to set both keys + `mtc-onboarding-complete`.
 
 ### Cowork Session (2026-03-07) — Login Resilience, CI Test Fixes, Notification Parity
 

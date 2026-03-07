@@ -61,9 +61,12 @@ async function mockAuthenticatedState(page) {
   });
 
   // Set localStorage via addInitScript BEFORE page loads (prevents context-destroyed errors)
+  // IMPORTANT: app reads 'mtc-user' (not 'mtc-current-user') on boot — interactive.js line 70
   await page.addInitScript((user) => {
-    localStorage.setItem('mtc-current-user', JSON.stringify(user));
+    localStorage.setItem('mtc-user', JSON.stringify(user));
+    localStorage.setItem('mtc-current-user', JSON.stringify(user)); // backward compat
     localStorage.setItem('mtc-access-token', user.accessToken);
+    localStorage.setItem('mtc-onboarding-complete', 'true');
     localStorage.setItem('mtc-session', JSON.stringify({
       email: user.email,
       name: user.name,
