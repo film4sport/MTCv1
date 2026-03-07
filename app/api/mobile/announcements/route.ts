@@ -1,6 +1,43 @@
 import { NextResponse } from 'next/server';
 import { authenticateMobileRequest, getAdminClient, sanitizeInput, isRateLimited } from '../auth-helper';
 
+/** Helper: send a Web Push notification to a user (best-effort) */
+async function sendPushToUser(
+  supabase: ReturnType<typeof getAdminClient>,
+  userId: string,
+  payload: { title: string; body: string; tag?: string; url?: string }
+) {
+  try {
+    const VAPID_PUBLIC = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || '';
+    const VAPID_PRIVATE = process.env.VAPID_PRIVATE_KEY || '';
+    const VAPID_EMAIL = process.env.VAPID_EMAIL || 'mailto:admin@monotennisclub.ca';
+    if (!VAPID_PUBLIC || !VAPID_PRIVATE) return;
+
+    const { data: subs } = await supabase
+      .from('push_subscriptions').select('endpoint, p256dh, auth').eq('user_id', userId);
+    if (!subs?.length) return;
+
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const webpush = require('web-push') as {
+      setVapidDetails: (s: string, pub: string, priv: string) => void;
+      sendNotification: (sub: object, payload: string) => Promise<void>;
+    };
+    webpush.setVapidDetails(VAPID_EMAIL, VAPID_PUBLIC, VAPID_PRIVATE);
+
+    const pushPayload = JSON.stringify({
+      title: payload.title, body: payload.body,
+      icon: '/mobile-app/icons/icon-192x192.png', badge: '/mobile-app/icons/icon-72x72.png',
+      url: payload.url || '/mobile-app/index.html', tag: payload.tag || 'ann-' + Date.now(),
+    });
+
+    await Promise.allSettled(
+      subs.map(sub => webpush.sendNotification(
+        { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } }, pushPayload
+      ))
+    );
+  } catch { /* best-effort */ }
+}
+
 export async function GET(request: Request) {
   const authResult = await authenticateMobileRequest(request);
   if (authResult instanceof NextResponse) return authResult;
@@ -125,6 +162,18 @@ export async function POST(request: Request) {
         // Log but don't fail the announcement creation
         console.error('Failed to create announcement notifications:', notifErr.message);
       }
+
+      // Send push notifications to all targeted members (fire-and-forget)
+      Promise.all(
+        targetMembers.map(member =>
+          sendPushToUser(supabase, member.id, {
+            title: notifTitle,
+            body: sanitizedText.slice(0, 100),
+            tag: `ann-${id}`,
+            url: '/mobile-app/index.html#home',
+          })
+        )
+      ).catch(() => { /* best-effort */ });
     }
 
     return NextResponse.json({ success: true, id });

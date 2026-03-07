@@ -2,6 +2,72 @@ import { NextResponse } from 'next/server';
 import { authenticateMobileRequest, getAdminClient, sanitizeInput, isRateLimited } from '../auth-helper';
 import type { EventUpdate } from '../types';
 
+/** Helper: send a Web Push notification to a user (best-effort) */
+async function sendPushToUser(
+  supabase: ReturnType<typeof getAdminClient>,
+  userId: string,
+  payload: { title: string; body: string; tag?: string; url?: string }
+) {
+  try {
+    const VAPID_PUBLIC = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || '';
+    const VAPID_PRIVATE = process.env.VAPID_PRIVATE_KEY || '';
+    const VAPID_EMAIL = process.env.VAPID_EMAIL || 'mailto:admin@monotennisclub.ca';
+    if (!VAPID_PUBLIC || !VAPID_PRIVATE) return;
+
+    const { data: subs } = await supabase
+      .from('push_subscriptions').select('endpoint, p256dh, auth').eq('user_id', userId);
+    if (!subs?.length) return;
+
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const webpush = require('web-push') as {
+      setVapidDetails: (s: string, pub: string, priv: string) => void;
+      sendNotification: (sub: object, payload: string) => Promise<void>;
+    };
+    webpush.setVapidDetails(VAPID_EMAIL, VAPID_PUBLIC, VAPID_PRIVATE);
+
+    const pushPayload = JSON.stringify({
+      title: payload.title, body: payload.body,
+      icon: '/mobile-app/icons/icon-192x192.png', badge: '/mobile-app/icons/icon-72x72.png',
+      url: payload.url || '/mobile-app/index.html', tag: payload.tag || 'event-' + Date.now(),
+    });
+
+    await Promise.allSettled(
+      subs.map(sub => webpush.sendNotification(
+        { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } }, pushPayload
+      ))
+    );
+  } catch { /* best-effort */ }
+}
+
+/** Helper: create a bell notification */
+async function createNotification(
+  supabase: ReturnType<typeof getAdminClient>,
+  userId: string,
+  notif: { id: string; type: string; title: string; body: string; timestamp: string }
+) {
+  await supabase.from('notifications').insert({
+    id: notif.id, user_id: userId, type: notif.type,
+    title: notif.title, body: notif.body, timestamp: notif.timestamp, read: false,
+  }).then(({ error }) => {
+    if (error) console.error(`[events] Failed to create notification for ${userId}:`, error.message);
+  });
+}
+
+/** Get user IDs from attendee names (for push notifications) */
+async function getAttendeeUserIds(
+  supabase: ReturnType<typeof getAdminClient>,
+  eventId: string
+): Promise<string[]> {
+  const { data: attendees } = await supabase
+    .from('event_attendees').select('user_name').eq('event_id', eventId);
+  if (!attendees?.length) return [];
+
+  const names = attendees.map(a => a.user_name);
+  const { data: profiles } = await supabase
+    .from('profiles').select('id, name').in('name', names);
+  return (profiles || []).map(p => p.id);
+}
+
 export async function GET(request: Request) {
   const authResult = await authenticateMobileRequest(request);
   if (authResult instanceof NextResponse) return authResult;
@@ -136,6 +202,32 @@ export async function PATCH(request: Request) {
 
     const { error } = await supabase.from('events').update(updates).eq('id', id);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+    // If date or time changed, notify attendees (fire-and-forget)
+    if (updates.date !== undefined || updates.time !== undefined) {
+      const { data: evt } = await supabase.from('events').select('title, date, time').eq('id', id).single();
+      const attendeeIds = await getAttendeeUserIds(supabase, id);
+      if (evt && attendeeIds.length > 0) {
+        const now = new Date().toISOString();
+        const changeDetail = `Now: ${evt.date} at ${evt.time}`;
+        Promise.all(
+          attendeeIds.map(uid => Promise.all([
+            createNotification(supabase, uid, {
+              id: `notif-evt-edit-${id}-${uid.slice(0, 8)}`,
+              type: 'event', title: 'Event Updated',
+              body: `"${evt.title}" has been rescheduled. ${changeDetail}`,
+              timestamp: now,
+            }),
+            sendPushToUser(supabase, uid, {
+              title: 'Event Updated',
+              body: `"${evt.title}" rescheduled — ${changeDetail}`,
+              tag: `event-edit-${id}`,
+            }),
+          ]))
+        ).catch(() => { /* best-effort */ });
+      }
+    }
+
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
@@ -156,11 +248,36 @@ export async function DELETE(request: Request) {
 
     const supabase = getAdminClient();
 
+    // Get event details + attendee user IDs before deleting
+    const { data: event } = await supabase.from('events').select('title, date').eq('id', id).single();
+    const attendeeIds = await getAttendeeUserIds(supabase, id);
+
     // Delete attendees first (FK constraint)
     await supabase.from('event_attendees').delete().eq('event_id', id);
 
     const { error } = await supabase.from('events').delete().eq('id', id);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+    // Notify all attendees that the event was cancelled (fire-and-forget)
+    if (event && attendeeIds.length > 0) {
+      const now = new Date().toISOString();
+      Promise.all(
+        attendeeIds.map(uid => Promise.all([
+          createNotification(supabase, uid, {
+            id: `notif-evt-cancel-${id}-${uid.slice(0, 8)}`,
+            type: 'event', title: 'Event Cancelled',
+            body: `"${event.title}" on ${event.date} has been cancelled`,
+            timestamp: now,
+          }),
+          sendPushToUser(supabase, uid, {
+            title: 'Event Cancelled',
+            body: `"${event.title}" on ${event.date} has been cancelled`,
+            tag: `event-cancel-${id}`,
+          }),
+        ]))
+      ).catch(() => { /* best-effort */ });
+    }
+
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });

@@ -1,5 +1,67 @@
 import { NextResponse } from 'next/server';
 import { authenticateMobileRequest, getAdminClient, sanitizeInput, isRateLimited } from '../auth-helper';
+import crypto from 'crypto';
+
+/** Helper: send a Web Push notification to a user (best-effort, non-blocking) */
+async function sendPushToUser(
+  supabase: ReturnType<typeof getAdminClient>,
+  userId: string,
+  payload: { title: string; body: string; tag?: string; url?: string }
+) {
+  try {
+    const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || '';
+    const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY || '';
+    const VAPID_EMAIL = process.env.VAPID_EMAIL || 'mailto:admin@monotennisclub.ca';
+    if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) return;
+
+    const { data: subscriptions } = await supabase
+      .from('push_subscriptions')
+      .select('endpoint, p256dh, auth')
+      .eq('user_id', userId);
+    if (!subscriptions?.length) return;
+
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const webpush = require('web-push') as {
+      setVapidDetails: (subject: string, publicKey: string, privateKey: string) => void;
+      sendNotification: (sub: object, payload: string) => Promise<void>;
+    };
+    webpush.setVapidDetails(VAPID_EMAIL, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
+
+    const pushPayload = JSON.stringify({
+      title: payload.title,
+      body: payload.body,
+      icon: '/mobile-app/icons/icon-192x192.png',
+      badge: '/mobile-app/icons/icon-72x72.png',
+      url: payload.url || '/mobile-app/index.html',
+      tag: payload.tag || 'msg-' + Date.now(),
+    });
+
+    await Promise.allSettled(
+      subscriptions.map(sub =>
+        webpush.sendNotification(
+          { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
+          pushPayload
+        )
+      )
+    );
+  } catch {
+    // Push is best-effort — don't break the messaging flow
+  }
+}
+
+/** Helper: create a bell notification in Supabase */
+async function createNotification(
+  supabase: ReturnType<typeof getAdminClient>,
+  userId: string,
+  notif: { id: string; type: string; title: string; body: string; timestamp: string }
+) {
+  await supabase.from('notifications').insert({
+    id: notif.id, user_id: userId, type: notif.type,
+    title: notif.title, body: notif.body, timestamp: notif.timestamp, read: false,
+  }).then(({ error }) => {
+    if (error) console.error(`[conversations] Failed to create notification for ${userId}:`, error.message);
+  });
+}
 
 export async function GET(request: Request) {
   const authResult = await authenticateMobileRequest(request);
@@ -171,6 +233,27 @@ export async function POST(request: Request) {
       // Message was sent but metadata update failed — log but don't fail
       console.error('[conversations] metadata update failed:', updateErr.message);
     }
+
+    // Send push notification + bell notification to recipient (best-effort, non-blocking)
+    const truncatedPreview = sanitizedText.slice(0, 100);
+    const notifId = `notif-msg-${crypto.randomUUID().slice(0, 8)}`;
+
+    // Fire and forget — don't block the response
+    Promise.all([
+      sendPushToUser(supabase, toId, {
+        title: `Message from ${fromName}`,
+        body: truncatedPreview,
+        tag: `msg-${fromId}-${Date.now()}`,
+        url: '/mobile-app/index.html#messages',
+      }),
+      createNotification(supabase, toId, {
+        id: notifId,
+        type: 'message',
+        title: `New message from ${fromName}`,
+        body: truncatedPreview,
+        timestamp,
+      }),
+    ]).catch(() => { /* best-effort */ });
 
     return NextResponse.json({ success: true, messageId: msgId, conversationId });
   } catch {
