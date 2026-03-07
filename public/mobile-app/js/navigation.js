@@ -10,6 +10,7 @@
   // ============================================
   let _currentScreen = 'home';
   const _scrollPositions = {};
+  let _skipNextPop = false; // Flag to ignore popstate we triggered ourselves
 
   // ============================================
   // MTC.fn + WINDOW: Navigate To (called from EVERYWHERE - onclick, cross-file)
@@ -123,8 +124,33 @@
     }
 
     closeMenu();
+
+    // Push browser history so back gesture = previous screen (not external OAuth pages)
+    // Skip if this navigation was triggered by popstate (back button) to avoid double-push
+    if (!_skipNextPop) {
+      history.pushState({ screen: screen }, '', '');
+    }
   };
   window.navigateTo = MTC.fn.navigateTo;
+
+  // ============================================
+  // BROWSER BACK BUTTON / SWIPE-BACK SUPPORT
+  // ============================================
+  // Set initial history state so we have something to go back from
+  history.replaceState({ screen: 'home' }, '', '');
+
+  window.addEventListener('popstate', function(e) {
+    if (e.state && e.state.screen) {
+      // Going back to a previous screen within the PWA
+      _skipNextPop = true;
+      MTC.fn.navigateTo(e.state.screen, 'right');
+      _skipNextPop = false;
+    } else {
+      // No PWA state — user is trying to leave the app (back to OAuth/external page)
+      // Push a dummy state to trap them inside the PWA
+      history.pushState({ screen: _currentScreen }, '', '');
+    }
+  });
 
   // ============================================
   // WINDOW: Open Menu (onclick from index.html)

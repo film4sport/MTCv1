@@ -130,9 +130,10 @@
       sb.auth.getSession().then(function(result) {
         if (result.data && result.data.session) {
           finishOAuthLogin(result.data.session);
-          // Clean URL params
+          // Clean URL and wipe OAuth history entries (Google consent, Supabase redirect)
+          // so back gesture stays inside the PWA instead of going to external OAuth pages
           if (window.history && window.history.replaceState) {
-            window.history.replaceState({}, '', window.location.pathname);
+            window.history.replaceState({ screen: 'home' }, '', window.location.pathname);
           }
           return;
         }
