@@ -27,6 +27,21 @@
 
 **Login screen restyled:** `.login-btn-magic` changed from dark green gradient to `var(--electric-blue)` cyan gradient. `.login-divider` made brighter (0.7 opacity, gradient lines, larger font).
 
+**Railway build fix:** Next.js 16 uses Turbopack by default, which has a Vercel-only Google Fonts dependency. Fixed: `package.json` build command changed to `next build --webpack`.
+
+**Mobile PWA messaging unread tracking fixed:**
+- `updateConversationsFromAPI()` now stores `read` and `id` fields per message (previously discarded)
+- `renderConversationsList()` adds `.message-unread` pulsing dot for conversations with unread messages
+- `updateMessageBadge()` now called after API load (previously only called from `openConversation`)
+- `openConversation()` marks messages read locally AND sends PATCH to server
+- Stored `conversationIdMap` (memberId → server conversationId) for mark-as-read API calls
+
+**Cross-platform notification/sync audit (2026-03-07):**
+- Bookings: Real-time sync WORKS on both Dashboard (Supabase Realtime in store.tsx) and Mobile PWA (Supabase Realtime in realtime-sync.js + 2-min heartbeat fallback). No fix needed.
+- Messages: Dashboard creates bell+push on send. Mobile API creates bell+push on send. Mobile PWA unread tracking was broken (fixed above).
+- Member search: Both platforms search ALL active members. No restriction.
+- Rule #20 added to CLAUDE.md: every user-facing data action must work across all 3 platforms with bell+push+badge+email where applicable.
+
 ### Cowork Session (2026-03-06) — Booking Email Fix + Message Notifications
 
 **Root cause of booking emails not sending:** Railway had stale Google SMTP env vars while code expected Resend. User updated Railway: SMTP_HOST=smtp.resend.com, SMTP_PORT=465, SMTP_USER=resend, SMTP_PASS=re_K7g..., added RESEND_API_KEY + NEXT_PUBLIC_SITE_URL.
