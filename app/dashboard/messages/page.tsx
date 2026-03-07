@@ -343,9 +343,17 @@ function MessagesContent() {
                               </div>
                             );
                           })()}
-                          <p className="text-[0.6rem] mt-1 opacity-60">
-                            {new Date(msg.timestamp).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
-                          </p>
+                          <div className="flex items-center gap-1 mt-1">
+                            <p className="text-[0.6rem] opacity-60">
+                              {new Date(msg.timestamp).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+                            </p>
+                            {isMine && (
+                              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: msg.read ? 0.8 : 0.4 }}>
+                                <polyline points="20 6 9 17 4 12" />
+                                {msg.read && <polyline points="15 6 4 17" style={{ opacity: 0.6 }} />}
+                              </svg>
+                            )}
+                          </div>
                         </div>
                       </div>
                     );

@@ -46,6 +46,58 @@ export default function DashboardHeader({ title }: DashboardHeaderProps) {
     prevUnread.current = unreadCount;
   }, [unreadCount]);
 
+  // Push notification subscription — silently subscribe if permission is granted,
+  // or show prompt on first visit. Mirrors mobile PWA auth.js registerPushNotifications().
+  useEffect(() => {
+    if (!currentUser || typeof window === 'undefined') return;
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+
+    const subscribeToPush = async () => {
+      try {
+        const reg = await navigator.serviceWorker.ready;
+        const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+        if (!vapidKey) return;
+
+        // Convert base64 VAPID key to Uint8Array
+        const padding = '='.repeat((4 - (vapidKey.length % 4)) % 4);
+        const base64 = (vapidKey + padding).replace(/-/g, '+').replace(/_/g, '/');
+        const rawData = atob(base64);
+        const outputArray = new Uint8Array(rawData.length);
+        for (let i = 0; i < rawData.length; i++) outputArray[i] = rawData.charCodeAt(i);
+
+        const subscription = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: outputArray,
+        });
+
+        // Register subscription with the server
+        const { data: { session } } = await (await import('../../lib/supabase')).supabase.auth.getSession();
+        if (!session?.access_token) return;
+
+        await fetch('/api/push-subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+          body: JSON.stringify({ userId: currentUser.id, subscription: subscription.toJSON() }),
+        });
+      } catch {
+        // Push subscription is best-effort — don't disrupt dashboard
+      }
+    };
+
+    if (Notification.permission === 'granted') {
+      subscribeToPush();
+    } else if (Notification.permission === 'default') {
+      // Wait 5 seconds then prompt — don't interrupt initial load
+      const timer = setTimeout(() => {
+        Notification.requestPermission().then((perm) => {
+          if (perm === 'granted') subscribeToPush();
+        });
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+    // If 'denied', don't do anything
+  }, [currentUser]);
+
   // Close dropdowns on outside click
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {

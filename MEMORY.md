@@ -1373,6 +1373,19 @@ CREATE TABLE IF NOT EXISTS lineup_entries (
 - Onboarding slide 4: Device-specific install instructions (iPad/iPhone/Android detection)
 - Tablet CSS: Skill-level colored avatar rings on partner cards (`data-skill` attribute)
 
+### Messaging & Notification Infrastructure Upgrade (Cowork Session — Mar 7 2026)
+**Shared push utility created:** `app/api/lib/push.ts` — single `sendPushToUser()` used by all 4 mobile API routes + new generic `/api/notify-push` endpoint. Eliminates 4x code duplication. Includes notification preference enforcement (checks `notification_preferences` table) and expired subscription cleanup (410/404 auto-delete).
+
+**Push triggers added to Dashboard store:** `addBooking()` → push to participants, `cancelBooking()` → push to participants, `enrollInProgram()` → push to enrolled member. Uses `firePush()` helper that calls `/api/notify-push` (fire-and-forget). Partner/RSVP notifications are self-notifications so push is skipped.
+
+**Mobile PWA notification center fixed:** Added missing `.notifications-list` container in `index.html`, updated notification badge from 10px dot to 16px circle with count, added type-specific SVG icons (booking=calendar, message=chat, partner=users, event=flag, program=book, announcement=bell), `updateNotificationsFromAPI()` now shows all notifications (not just unread) and toggles empty state.
+
+**Dashboard Realtime heartbeat added:** 2-min fallback polling for notifications, conversations, and bookings in `store.tsx`. Mirrors Mobile PWA's `realtime-sync.js` heartbeat pattern. Only fires when tab visible + online.
+
+**Icon path fix (bonus):** 3 mobile API routes had wrong icon paths (`/mobile-app/icons/icon-192x192.png` which doesn't exist) — shared utility uses correct `/mobile-app/icon-192.png`.
+
+**SEO improvements also in this session:** JSON-LD sameAs (Facebook/Instagram), font-display:swap, SSR for Schedule/Partners, hero preload, footer links, Next.js Image for logo, BreadcrumbList schema, logo PNG optimization (123KB→101KB), GSC placeholder.
+
 ### Environment Limitations (IMPORTANT)
 - **Cowork VM has NO Playwright browsers installed.** Never attempt to run E2E tests in Cowork — they will stall or error. E2E tests only run in CI (GitHub Actions) or on the dev machine.
 - **If a command fails once, diagnose and explain — don't retry.** Repeated blind retries waste the user's time.

@@ -105,3 +105,75 @@ self.addEventListener('fetch', (event) => {
     })
   );
 });
+
+// ─── Web Push ─────────────────────────────────────────────
+// Receive push notifications from the server and display them.
+// Mirrors the mobile PWA sw.js push handler.
+
+self.addEventListener('push', (event) => {
+  const defaultOptions = {
+    title: 'Mono Tennis Club',
+    body: 'You have a new notification',
+    icon: '/favicon.png',
+    badge: '/favicon.png',
+    url: '/dashboard',
+    tag: 'mtc-' + Date.now(),
+  };
+
+  let data = defaultOptions;
+  if (event.data) {
+    try {
+      const parsed = event.data.json();
+      data = { ...defaultOptions, ...parsed };
+    } catch {
+      data.body = event.data.text() || data.body;
+    }
+  }
+
+  const options = {
+    body: data.body,
+    icon: data.icon || defaultOptions.icon,
+    badge: data.badge || defaultOptions.badge,
+    tag: data.tag || defaultOptions.tag,
+    data: { url: data.url || defaultOptions.url },
+    actions: [
+      { action: 'view', title: 'View' },
+      { action: 'close', title: 'Dismiss' },
+    ],
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(data.title || defaultOptions.title, options)
+      .then(() => {
+        // Notify open Dashboard tabs to refetch data
+        return self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+      })
+      .then((clients) => {
+        clients.forEach((client) => {
+          client.postMessage({ type: 'PUSH_RECEIVED', tag: options.tag });
+        });
+      })
+  );
+});
+
+// Handle notification click — focus existing dashboard tab or open new one
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+
+  if (event.action === 'close') return;
+
+  const targetUrl = event.notification.data?.url || '/dashboard';
+
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
+      // Focus an existing dashboard tab if one is open
+      for (const client of clients) {
+        if (client.url.includes('/dashboard') && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      // Otherwise open a new tab
+      return self.clients.openWindow(targetUrl);
+    })
+  );
+});

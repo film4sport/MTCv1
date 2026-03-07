@@ -8,7 +8,9 @@ export type EmailLogType =
   | 'push_notification'
   | 'program_enrollment'
   | 'program_withdrawal'
-  | 'event_rsvp';
+  | 'event_rsvp'
+  | 'partner_request'
+  | 'general_notification';
 
 export type EmailLogStatus = 'sent' | 'failed' | 'requested' | 'opened';
 
