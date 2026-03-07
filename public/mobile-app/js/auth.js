@@ -213,7 +213,7 @@
       sb.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: origin + '/auth/callback',
+          redirectTo: origin + '/auth/callback?next=' + encodeURIComponent('/mobile-app/index.html'),
           queryParams: {
             access_type: 'offline',
             prompt: 'consent'
@@ -262,7 +262,7 @@
         email: email,
         options: {
           shouldCreateUser: false,
-          emailRedirectTo: origin + '/auth/callback'
+          emailRedirectTo: origin + '/auth/callback?next=' + encodeURIComponent('/mobile-app/index.html')
         }
       }).then(function(result) {
         if (btn) { btn.disabled = false; btn.textContent = 'Sign in with Email Link'; }

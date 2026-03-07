@@ -22,10 +22,15 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${siteUrl}/login?error=config`);
   }
 
-  // Determine redirect: recovery → login reset, custom next → that path, default → auth/complete (client-side router)
+  // Determine redirect: recovery → login reset, mobile-app → auth/complete (reads localStorage),
+  // other custom next → that path, default → auth/complete
   let redirectUrl: string;
   if (type === 'recovery') {
     redirectUrl = `${siteUrl}/login?reset=true`;
+  } else if (next && next.includes('mobile-app')) {
+    // Mobile PWA: always go through /auth/complete so it can read localStorage
+    // and redirect with ?auth=callback hint for the PWA to detect the session
+    redirectUrl = `${siteUrl}/auth/complete`;
   } else if (next) {
     // Custom redirect from OAuth flow (e.g. /signup?oauth=true)
     redirectUrl = `${siteUrl}${next.startsWith('/') ? next : `/${next}`}`;
