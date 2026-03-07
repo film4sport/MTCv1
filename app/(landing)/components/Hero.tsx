@@ -97,9 +97,9 @@ export default function Hero() {
         </div>
 
         {/* Opening Day Card — right side on desktop, below buttons on tablet, hidden on mobile */}
-        <div className="hidden md:flex md:flex-1 md:justify-end md:mt-8 lg:mt-0">
+        <div className="hidden md:flex md:flex-1 md:justify-end">
           <div
-            className="inline-flex flex-col items-center px-6 py-4 lg:px-8 lg:py-6 rounded-2xl"
+            className="opening-day-card inline-flex flex-col items-center px-5 py-3 md:px-6 md:py-4 lg:px-8 lg:py-6 rounded-2xl"
             style={{
               background: 'rgba(255, 255, 255, 0.1)',
               backdropFilter: 'blur(12px)',
@@ -110,7 +110,7 @@ export default function Hero() {
             <span className="text-xs tracking-[0.2em] uppercase font-medium mb-2" style={{ color: 'rgba(232, 228, 217, 0.6)' }}>
               // Opening Day
             </span>
-            <span className="headline-font text-3xl md:text-4xl lg:text-5xl" style={{ color: '#e8e4d9' }}>
+            <span className="headline-font text-3xl lg:text-5xl" style={{ color: '#e8e4d9' }}>
               May 9
             </span>
             <span className="text-sm mt-2 font-medium" style={{ color: 'rgba(212, 225, 87, 0.9)' }}>
