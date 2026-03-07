@@ -91,7 +91,10 @@
 
 
 /* Smooth scroll behavior */
-html, .screen, .main-content, .courts-scroll {
+/* NOTE: html is intentionally excluded — smooth-scrolling html in an SPA
+   where screens are position:absolute inside overflow:hidden #app can cause
+   the <html> element to scroll and permanently break all screens. */
+.screen, .main-content, .courts-scroll {
   scroll-behavior: smooth;
 }
 

@@ -56,7 +56,7 @@ function LoginContent() {
       <div className="min-h-screen flex flex-col lg:flex-row" style={{ backgroundColor: '#f5f2eb' }}>
 
         {/* Left Side: App Preview (Desktop) */}
-        <div className="hidden lg:flex lg:w-1/2 items-start justify-center p-12 relative overflow-y-auto overflow-x-hidden" style={{ background: '#edeae3' }}>
+        <div className="hidden lg:flex lg:w-1/2 items-start justify-center p-8 xl:p-12 relative overflow-y-auto overflow-x-hidden" style={{ background: '#edeae3' }}>
           {/* Subtle grid pattern */}
           <div className="absolute inset-0 opacity-[0.04]">
             <svg width="100%" height="100%">
@@ -68,16 +68,20 @@ function LoginContent() {
           </div>
 
           {/* Content */}
-          <div className="relative z-10 text-center my-auto py-8">
-            <h2 className="headline-font text-3xl xl:text-4xl mb-4 login-app-title" style={{ color: '#2a2f1e' }}>
+          <div className="relative z-10 text-center my-auto py-4">
+            <h2 className="headline-font text-2xl xl:text-3xl mb-2 login-app-title" style={{ color: '#2a2f1e' }}>
               MTC Court App
             </h2>
-            <p className="text-base mb-12 max-w-md mx-auto" style={{ color: '#6b7266' }}>
+            <p className="text-sm mb-6 max-w-md mx-auto" style={{ color: '#6b7266' }}>
               Book courts and lessons, find partners, and message members — all in one place.
             </p>
 
-            {/* Phone Mockup */}
-            <div className="relative inline-block">
+            {/* ── Row 1: Phone + Tablet side by side ── */}
+            <div style={{ display: 'flex', gap: 24, justifyContent: 'center', alignItems: 'flex-start', marginBottom: 24 }}>
+
+            {/* Phone Mockup (scaled) */}
+            <div style={{ textAlign: 'center' }}>
+            <div className="relative inline-block" style={{ transform: 'scale(0.52)', transformOrigin: 'top center', marginBottom: -260 }}>
               <div style={{
                 width: 300, height: 640, background: '#000', borderRadius: 40, padding: 12,
                 boxShadow: '0 50px 100px rgba(0,0,0,0.15), 0 0 0 2px #333', position: 'relative',
@@ -334,29 +338,13 @@ function LoginContent() {
                 </div>
               </div>
 
-              {/* Floating Badges */}
-              <div style={{
-                position: 'absolute', top: '28%', left: -60,
-                background: '#6b7a3d', color: '#fff', padding: '8px 16px', borderRadius: 20,
-                fontSize: '0.75rem', fontWeight: 600, boxShadow: '0 10px 30px rgba(107, 122, 61, 0.3)',
-                animation: 'float 3s ease-in-out infinite', zIndex: 10,
-              }}>Book Courts</div>
-              <div style={{
-                position: 'absolute', top: '45%', right: -70,
-                background: '#6b7a3d', color: '#fff', padding: '8px 16px', borderRadius: 20,
-                fontSize: '0.75rem', fontWeight: 600, boxShadow: '0 10px 30px rgba(107, 122, 61, 0.3)',
-                animation: 'float 3s ease-in-out infinite 1s', zIndex: 10,
-              }}>Club Events</div>
-              <div style={{
-                position: 'absolute', bottom: '8%', left: -70,
-                background: '#6b7a3d', color: '#fff', padding: '8px 16px', borderRadius: 20,
-                fontSize: '0.75rem', fontWeight: 600, boxShadow: '0 10px 30px rgba(107, 122, 61, 0.3)',
-                animation: 'float 3s ease-in-out infinite 2s', zIndex: 10,
-              }}>Find Partners</div>
-            </div>
+            </div>{/* end phone scale wrapper */}
+            <p className="text-xs font-medium" style={{ color: '#8a8578' }}>Mobile</p>
+            </div>{/* end phone column */}
 
-            {/* iPad Mockup */}
-            <div className="mt-10">
+            {/* Tablet Mockup (scaled) */}
+            <div style={{ textAlign: 'center' }}>
+            <div style={{ transform: 'scale(0.52)', transformOrigin: 'top center', marginBottom: -140 }}>
               <div style={{
                 width: 480, height: 350, background: '#000', borderRadius: 24, padding: 10,
                 boxShadow: '0 40px 80px rgba(0,0,0,0.12), 0 0 0 2px #333', position: 'relative',
@@ -560,10 +548,134 @@ function LoginContent() {
                   </div>
                 </div>
               </div>
-              <p className="text-sm mt-4 font-medium" style={{ color: '#8a8578' }}>
-                iPad / Tablet Version
-              </p>
+            </div>{/* end tablet scale wrapper */}
+            <p className="text-xs font-medium" style={{ color: '#8a8578' }}>Tablet</p>
+            </div>{/* end tablet column */}
+
+            </div>{/* end Row 1 flex */}
+
+            {/* ── Row 2: Desktop PWA Mockup + Under Construction ── */}
+            <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start', justifyContent: 'center' }}>
+              {/* Laptop Frame */}
+              <div style={{ textAlign: 'center', flex: 1, maxWidth: 440 }}>
+                <div style={{
+                  background: '#222', borderRadius: '12px 12px 0 0', padding: '6px 6px 0',
+                  boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
+                }}>
+                  {/* Screen bezel dots */}
+                  <div style={{ display: 'flex', gap: 4, padding: '4px 8px 6px' }}>
+                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#ff5f57' }} />
+                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#febc2e' }} />
+                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#28c840' }} />
+                  </div>
+                  {/* Dashboard preview */}
+                  <div style={{
+                    background: '#f0f0f0', borderRadius: '4px 4px 0 0', overflow: 'hidden',
+                    display: 'flex', height: 180,
+                  }}>
+                    {/* Sidebar */}
+                    <div style={{
+                      width: 52, background: '#1a1f12', display: 'flex', flexDirection: 'column' as const,
+                      alignItems: 'center', padding: '10px 0', gap: 8, flexShrink: 0,
+                    }}>
+                      <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 7, color: '#c8ff00', letterSpacing: 1, marginBottom: 4 }}>MTC</div>
+                      {['M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6',
+                        'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
+                        'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z',
+                        'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z',
+                      ].map((d, i) => (
+                        <div key={i} style={{
+                          width: 28, height: 28, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          background: i === 0 ? 'rgba(200,255,0,0.15)' : 'transparent',
+                        }}>
+                          <svg width="12" height="12" fill="none" stroke={i === 0 ? '#c8ff00' : '#6b7266'} viewBox="0 0 24 24" strokeWidth="2">
+                            <path strokeLinecap="round" strokeLinejoin="round" d={d}/>
+                          </svg>
+                        </div>
+                      ))}
+                    </div>
+                    {/* Main content area */}
+                    <div style={{ flex: 1, padding: 10, overflow: 'hidden' }}>
+                      {/* Top bar */}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                        <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 11, color: '#2a2f1e', letterSpacing: 1 }}>DASHBOARD</span>
+                        <div style={{ display: 'flex', gap: 4 }}>
+                          <div style={{ width: 18, height: 18, background: '#e8e8e8', borderRadius: '50%' }} />
+                          <div style={{ width: 18, height: 18, background: '#e8e8e8', borderRadius: '50%' }} />
+                        </div>
+                      </div>
+                      {/* Quick actions row */}
+                      <div style={{ display: 'flex', gap: 4, marginBottom: 8 }}>
+                        {[
+                          { bg: '#c8ff00', label: 'BOOK', color: '#0a0a0a' },
+                          { bg: '#ff5a5f', label: 'PARTNER', color: '#fff' },
+                          { bg: '#00d4ff', label: 'EVENTS', color: '#0a0a0a' },
+                          { bg: '#0a0a0a', label: 'SCHEDULE', color: '#fff' },
+                        ].map(a => (
+                          <div key={a.label} style={{
+                            flex: 1, background: a.bg, borderRadius: 6, padding: '6px 4px',
+                            display: 'flex', flexDirection: 'column' as const, justifyContent: 'flex-end', height: 36,
+                          }}>
+                            <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 6, color: a.color, letterSpacing: 0.5 }}>{a.label}</span>
+                          </div>
+                        ))}
+                      </div>
+                      {/* Content cards */}
+                      <div style={{ display: 'flex', gap: 6 }}>
+                        <div style={{ flex: 1, background: 'rgba(255,255,255,0.8)', borderRadius: 6, padding: 6, border: '1px solid rgba(0,0,0,0.06)' }}>
+                          <span style={{ fontSize: 6, fontWeight: 700, color: '#2a2f1e' }}>Upcoming Events</span>
+                          <div style={{ marginTop: 4, display: 'flex', flexDirection: 'column' as const, gap: 3 }}>
+                            {['Opening Day BBQ', "Men's Round Robin"].map(e => (
+                              <div key={e} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                                <div style={{ width: 16, height: 16, background: '#c8ff00', borderRadius: 4, flexShrink: 0 }} />
+                                <span style={{ fontSize: 5, color: '#444' }}>{e}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        <div style={{ flex: 1, background: 'rgba(255,255,255,0.8)', borderRadius: 6, padding: 6, border: '1px solid rgba(0,0,0,0.06)' }}>
+                          <span style={{ fontSize: 6, fontWeight: 700, color: '#2a2f1e' }}>Club Calendar</span>
+                          <div style={{ marginTop: 4, display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 1, textAlign: 'center' }}>
+                            {['S','M','T','W','T','F','S'].map((d, i) => (
+                              <span key={i} style={{ fontSize: 4, color: '#999' }}>{d}</span>
+                            ))}
+                            {[1,2,3,4,5,6,7,8,9,10,11,12,13,14].map(d => (
+                              <span key={d} style={{
+                                fontSize: 4, color: d === 7 ? '#fff' : '#444',
+                                background: d === 7 ? '#00d4ff' : 'transparent', borderRadius: 2,
+                              }}>{d}</span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {/* Laptop base */}
+                <div style={{
+                  height: 10, background: '#2a2a2a', borderRadius: '0 0 8px 8px',
+                  margin: '0 -8px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                }} />
+                <p className="text-xs font-medium mt-2" style={{ color: '#8a8578' }}>Desktop Dashboard</p>
+              </div>
+
+              {/* Under Construction Notice */}
+              <div style={{
+                flex: '0 0 auto', maxWidth: 180, padding: '14px 16px',
+                background: 'rgba(255, 200, 0, 0.06)', border: '1px solid rgba(255, 200, 0, 0.18)',
+                borderRadius: 14, textAlign: 'center', fontSize: 11, color: '#6b7266', lineHeight: 1.5,
+              }}>
+                <span style={{ fontSize: 20, display: 'block', marginBottom: 4 }}>&#x1F6A7;</span>
+                <span style={{ fontWeight: 700, color: '#2a2f1e', fontSize: 12 }}>Under Construction</span><br/>
+                <span style={{ fontSize: 10 }}>
+                  Our desktop and mobile/tablet apps are still in development. Bugs or feedback?
+                </span><br/>
+                <a href="mailto:monotennisclub1@gmail.com" style={{ color: '#6b7a3d', textDecoration: 'none', fontWeight: 600, fontSize: 10 }}>
+                  monotennisclub1@gmail.com
+                </a>
+              </div>
             </div>
+
           </div>
         </div>
 
