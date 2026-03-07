@@ -179,14 +179,26 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: 'Failed to join partner request' }, { status: 500 });
     }
 
-    // Notify the original poster that someone joined (non-critical)
+    // Notify both parties about the match (non-critical)
+    const now = new Date().toISOString();
     const matchBody = `${authResult.name} wants to play with you!`;
+    const joinerBody = `You joined ${partner.name || 'a member'}'s partner request!`;
     try {
-      // Bell notification
+      // Bell + push for joiner (confirmation)
+      await supabase.from('notifications').insert({
+        id: generateId('n'), user_id: userId, type: 'partner',
+        title: 'Partner Match Joined', body: joinerBody,
+        timestamp: now, read: false,
+      });
+      await sendPushToUser(supabase, userId, {
+        title: 'Partner Match Joined', body: joinerBody,
+        type: 'partner', tag: `partner-joined-${partnerId}`,
+      });
+      // Bell notification for poster
       await supabase.from('notifications').insert({
         id: generateId('n'), user_id: partner.user_id, type: 'partner',
         title: 'Partner Matched!', body: matchBody,
-        timestamp: new Date().toISOString(), read: false,
+        timestamp: now, read: false,
       });
       // Push notification (shared utility — checks preferences, cleans expired subs)
       await sendPushToUser(supabase, partner.user_id, {
@@ -239,7 +251,18 @@ export async function DELETE(request: Request) {
 
     const supabase = getAdminClient();
 
-    // Only allow deleting own requests
+    // Fetch partner before deleting (to notify matched person if any)
+    const { data: partner } = await supabase
+      .from('partners')
+      .select('user_id, matched_by, name, match_type')
+      .eq('id', partnerId)
+      .eq('user_id', userId)
+      .single();
+
+    if (!partner) {
+      return NextResponse.json({ error: 'Partner request not found or not yours' }, { status: 404 });
+    }
+
     const { error } = await supabase
       .from('partners')
       .delete()
@@ -248,6 +271,22 @@ export async function DELETE(request: Request) {
 
     if (error) {
       return NextResponse.json({ error: 'Failed to remove partner request' }, { status: 500 });
+    }
+
+    // If someone had matched, notify them (non-critical)
+    if (partner.matched_by) {
+      try {
+        const cancelBody = `${authResult.name || 'A member'} cancelled their partner request.`;
+        await supabase.from('notifications').insert({
+          id: generateId('n'), user_id: partner.matched_by, type: 'partner',
+          title: 'Partner Request Cancelled', body: cancelBody,
+          timestamp: new Date().toISOString(), read: false,
+        });
+        await sendPushToUser(supabase, partner.matched_by, {
+          title: 'Partner Request Cancelled', body: cancelBody,
+          type: 'partner', tag: `partner-cancel-${partnerId}`,
+        });
+      } catch { /* non-critical */ }
     }
 
     return NextResponse.json({ success: true });

@@ -174,6 +174,50 @@ export async function POST(request: Request) {
         .eq('member_id', memberId);
       if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
+      // Withdrawal notifications (non-blocking, best-effort)
+      try {
+        const { data: prog } = await supabase
+          .from('coaching_programs').select('title, coach_id, coach').eq('id', programId).single();
+        if (prog?.title) {
+          const wTitle = `Withdrawn from ${prog.title}`;
+          const wBody = `You have been withdrawn from ${prog.title}.`;
+          // Bell + push for member
+          await supabase.from('notifications').insert({
+            id: `n-${crypto.randomUUID().slice(0, 8)}`, user_id: memberId, type: 'program',
+            title: wTitle, body: wBody, timestamp: new Date().toISOString(), read: false,
+          });
+          await sendPushToUser(supabase, memberId, {
+            title: wTitle, body: wBody, type: 'program', tag: `program-withdraw-${programId}`,
+          });
+          // Message to coach
+          if (prog.coach_id) {
+            const timestamp = new Date().toISOString();
+            const convFilter = `and(member_a.eq.${prog.coach_id},member_b.eq.${memberId}),and(member_a.eq.${memberId},member_b.eq.${prog.coach_id})`;
+            const { data: conv } = await supabase
+              .from('conversations').select('id').or(convFilter).single();
+            let conversationId: number;
+            if (conv) {
+              conversationId = conv.id;
+            } else {
+              const { data: newConv } = await supabase
+                .from('conversations')
+                .insert({ member_a: memberId, member_b: prog.coach_id, last_message: wTitle, last_timestamp: timestamp })
+                .select('id').single();
+              if (!newConv) throw new Error('conv');
+              conversationId = newConv.id;
+            }
+            await supabase.from('messages').insert({
+              id: `msg-${crypto.randomUUID().slice(0, 8)}`, conversation_id: conversationId,
+              from_id: memberId, from_name: authResult.name || 'Member',
+              to_id: prog.coach_id, to_name: prog.coach || 'Coach',
+              text: `${authResult.name || 'A member'} has withdrawn from ${prog.title}.`,
+              timestamp, read: false,
+            });
+            await supabase.from('conversations').update({ last_message: wTitle, last_timestamp: timestamp }).eq('id', conversationId);
+          }
+        }
+      } catch { /* non-critical */ }
+
       return NextResponse.json({ success: true, action: 'withdrawn' });
     }
   } catch {

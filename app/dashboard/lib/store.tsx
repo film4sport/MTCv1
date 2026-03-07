@@ -944,6 +944,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setPrograms(prev => prev.map(p => p.id === programId ? { ...p, enrolledMembers: [...p.enrolledMembers, memberId] } : p));
       showToast('Failed to withdraw. Please try again.', 'error');
     });
+    // Bell + push confirmation to withdrawing member
+    if (currentUser && shouldNotify('program')) {
+      const notif: Notification = {
+        id: generateId('n'), type: 'program',
+        title: `Withdrawn from ${program.title}`,
+        body: `You have been withdrawn from ${program.title}.`,
+        timestamp: new Date().toISOString(), read: false,
+      };
+      addNotification(notif);
+      db.createNotification(currentUser.id, notif).catch(err => reportError(err, 'Supabase'));
+      firePush(currentUser.id, notif.title, notif.body, 'program', `program-withdraw-${programId}`);
+    }
     // Notify coach about withdrawal
     const withdrawMsg = `${memberName} has withdrawn from ${program.title}.`;
     db.sendMessageByUsers({
@@ -1009,12 +1021,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const removePartner = useCallback((partnerId: string) => {
     const removed = partners.find(p => p.id === partnerId);
     setPartners(prev => prev.filter(p => p.id !== partnerId));
+    // If matched, notify the matched person before deleting
+    if (removed?.status === 'matched' && currentUser) {
+      Promise.resolve(supabase.from('partners').select('matched_by').eq('id', partnerId).single()).then(({ data }) => {
+        if (data?.matched_by) {
+          const cancelBody = `${currentUser.name} cancelled their partner request.`;
+          const notif: Notification = { id: generateId('n'), type: 'partner', title: 'Partner Request Cancelled', body: cancelBody, timestamp: new Date().toISOString(), read: false };
+          db.createNotification(data.matched_by, notif).then(() => {}, () => {});
+          firePush(data.matched_by, notif.title, notif.body, 'partner', `partner-cancel-${partnerId}`);
+        }
+      }).catch(() => {});
+    }
     db.deletePartner(partnerId).catch((err) => {
       reportError(err, 'Supabase');
       if (removed) setPartners(prev => [...prev, removed]);
       showToast('Failed to remove partner request.', 'error');
     });
-  }, [partners]);
+  }, [partners, currentUser]);
 
   const toggleRsvp = useCallback((eventId: string, userName: string) => {
     // Debounce: prevent rapid double-clicks on the same event

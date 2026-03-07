@@ -7,7 +7,8 @@
 ## Current Status
 - **SMTP/Supabase email**: DONE. Resend SMTP (smtp.resend.com:465, noreply@monotennisclub.com). Email confirmation and password reset emails are live.
 - **Deployment**: Railway (NOT Vercel). NODE_VERSION=20 env var set. 13 env vars total.
-- **Google OAuth**: Code complete, awaiting external setup (Google Cloud Console + Supabase provider config). See session below.
+- **Google OAuth**: LIVE. Users log in with Google on both Dashboard and Mobile PWA.
+- **GSC**: Verified (HTML file method). Sitemap (`/sitemap.xml`) already submitted. No meta tag needed.
 - **Booking emails**: Fixed `from` address bug (was using SMTP username `resend` instead of real email). Now uses `SMTP_FROM=noreply@monotennisclub.com`. User must add `SMTP_FROM` env var to Railway. Domain verified on Resend.
 - **Message notifications**: Bell + push notifications now trigger on message send. New `/api/notify-message` route for push.
 - **Mobile PWA home calendar**: Replaced "Looking for Partners" section with club calendar (neumorphic month grid, reuses Events screen CSS classes). Source: `home-calendar.js`.
@@ -1404,6 +1405,15 @@ CREATE TABLE IF NOT EXISTS lineup_entries (
 5. **Mobile API `programs POST`** (`programs/route.ts`): Added bell, push, email, and coach welcome message on enrollment. Expanded program query to include `title, coach_id, coach`. Coach message creates/reuses conversation + inserts message (same pattern as `bookings/route.ts`). Was: nothing. Now: bell + push + email + coach message.
 
 **Verification:** `npm run check` passes (tsc clean + mobile build OK). `sendPushToUser` now imported in 6/6 mobile API routes. Zero inline `require('web-push')` remaining. `/api/notify-email` called from 3 consumer files (store.tsx, partners, programs).
+
+**Follow-up edge-case gaps closed (same session):**
+6. **Mobile API `partners PATCH`** (joiner confirmation): Joiner now gets bell + push ("Partner Match Joined") in addition to the poster getting bell + push + email.
+7. **Dashboard `withdrawFromProgram()`** (`store.tsx`): Added bell + push confirmation to withdrawing member. Was: coach message + audit log only.
+8. **Mobile API `programs POST` withdraw**: Added bell + push + coach message on withdrawal. Mirrors Dashboard behavior.
+9. **Dashboard `removePartner()`** (`store.tsx`): If partner was matched, looks up `matched_by` from Supabase and sends bell + push ("Partner Request Cancelled") to the matched person before deleting.
+10. **Mobile API `partners DELETE`**: Same — fetches partner before deleting, notifies `matched_by` with bell + push if someone had matched.
+
+**Final state:** Every user-facing action across both platforms now fires symmetric notifications. No remaining gaps.
 
 ### Cowork Session (2026-03-07) — Login Mockup Calendar Update + Phase 6-8 Verification
 **Login page mockup updated:** Both phone and tablet/iPad mockups on `/login` page (`app/login/page.tsx`) now show "CLUB CALENDAR" with a March 2026 month grid instead of the old "LOOKING FOR PARTNERS" section. Matches the actual mobile PWA home screen which was updated in a previous session. Calendar shows day-of-week headers, 3-week grid, today (7th) highlighted in cyan, and an event dot on the 14th.
