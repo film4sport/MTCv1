@@ -114,6 +114,29 @@ After making code changes, verify they won't break GitHub Actions CI:
 
 Use grep to find all occurrences before editing. Verify 0 stale values remain after.
 
+## #20: CROSS-PLATFORM NOTIFICATION & SYNC CONSISTENCY
+**Every user-facing action that creates data (bookings, messages, events, announcements) MUST work across ALL THREE platforms:**
+1. **Dashboard** (React + Supabase Realtime in `store.tsx`)
+2. **Mobile PWA** (vanilla JS + Supabase Realtime in `realtime-sync.js`)
+3. **Mobile API** (Next.js API routes in `app/api/mobile/`)
+
+**For notifications, ALL of these must fire (where applicable):**
+- Bell notification (insert into `notifications` table)
+- Push notification (Web Push via `sendPushToUser()` or `/api/notify-message`)
+- Nav bar badge update (bell badge + feature-specific badge like messages)
+- Email notification (via `/api/booking-email` for bookings)
+
+**For real-time visibility:**
+- Both Dashboard and Mobile PWA subscribe to Supabase Realtime on key tables (bookings, messages, notifications, etc.)
+- A DB write on ANY platform triggers live updates on ALL other platforms automatically
+- Mobile PWA has 2-min heartbeat fallback if Realtime disconnects
+
+**When adding a new feature that creates/modifies data:**
+1. Ensure the Supabase table has Realtime enabled
+2. Verify both `store.tsx` and `realtime-sync.js` subscribe to that table
+3. Add bell + push notifications for affected users
+4. Update nav bar badges on all platforms
+
 ## #11: MAINTENANCE CONVENTIONS
 - **Supabase schema**: `supabase/schema.sql` is the single source of truth. All DB changes go there FIRST, then apply to Supabase. No ad-hoc ALTER TABLEs.
 - **DB migrations**: Use Supabase CLI for schema changes:

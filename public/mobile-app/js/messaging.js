@@ -18,6 +18,7 @@
 
   // Private state
   let conversations = JSON.parse(JSON.stringify(defaultConversations));
+  let conversationIdMap = {}; // memberId → server conversationId
   let currentConversation = null;
 
   // Cross-file function (called from enhancements.js)
@@ -79,6 +80,7 @@
     var clubIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="5"></circle><path d="M12 13v8"></path><path d="M9 18h6"></path></svg>';
 
     var html = '';
+    var userId = MTC.state.currentUser ? MTC.state.currentUser.id : null;
     keys.forEach(function(memberId) {
       var msgs = conversations[memberId] || [];
       var member = MTC.state.clubMembers.find(function(m) { return m.id === memberId; });
@@ -88,6 +90,9 @@
       var time = lastMsg ? (lastMsg.time || '') : '';
       var isClub = (memberId === 'club');
       var avatarHtml;
+
+      // Check for unread messages (received messages where read is false)
+      var hasUnread = msgs.some(function(m) { return !m.sent && m.read === false; });
 
       if (isClub) {
         avatarHtml = '<div class="message-avatar-wrap club-avatar">' + clubIcon + '</div>';
@@ -100,7 +105,9 @@
       // Truncate preview
       if (preview.length > 60) preview = preview.substring(0, 57) + '...';
 
-      html += '<div class="message-item stagger-item" onclick="openConversation(\'' + sanitizeHTML(memberId) + '\')">' +
+      var unreadDot = hasUnread ? '<span class="message-unread"></span>' : '';
+
+      html += '<div class="message-item stagger-item' + (hasUnread ? ' has-unread' : '') + '" onclick="openConversation(\'' + sanitizeHTML(memberId) + '\')">' +
         avatarHtml +
         '<div class="message-content">' +
           '<div class="message-header">' +
@@ -109,6 +116,7 @@
           '</div>' +
           '<div class="message-preview">' + sanitizeHTML(preview) + '</div>' +
         '</div>' +
+        unreadDot +
       '</div>';
     });
 
@@ -159,18 +167,39 @@
     // Navigate to conversation
     navigateTo('conversation');
 
-    // Mark as read
+    // Mark messages as read locally
+    var msgs = conversations[memberId] || [];
+    var unreadIds = [];
+    msgs.forEach(function(m) {
+      if (!m.sent && m.read === false) {
+        m.read = true;
+        if (m.id) unreadIds.push(m.id);
+      }
+    });
+    MTC.fn.saveConversations();
+
+    // Remove unread dot from DOM
     const messageItems = document.querySelectorAll('.message-item');
     messageItems.forEach(function(item) {
       const onclickAttr = item.getAttribute('onclick') || '';
       if (onclickAttr.includes(memberId)) {
         const unread = item.querySelector('.message-unread');
         if (unread) unread.remove();
+        item.classList.remove('has-unread');
       }
     });
 
     // Update message badge count
     updateMessageBadge();
+
+    // Tell server to mark messages read (best-effort)
+    var convId = conversationIdMap[memberId];
+    if (unreadIds.length > 0 && convId && typeof MTC.fn.apiRequest === 'function') {
+      MTC.fn.apiRequest('/mobile/conversations', {
+        method: 'PATCH',
+        body: JSON.stringify({ conversationId: convId })
+      }).catch(function() { /* best-effort */ });
+    }
     } catch(e) { MTC.warn('openConversation error:', e); }
   };
 
@@ -376,10 +405,13 @@
     var userId = MTC.state.currentUser ? MTC.state.currentUser.id : null;
     apiConvos.forEach(function(conv) {
       var key = conv.otherUserId || conv.id;
+      if (conv.id) conversationIdMap[key] = conv.id;
       conversations[key] = (conv.messages || []).map(function(m) {
         return {
+          id: m.id || null,
           text: m.text,
           sent: m.fromId === userId,
+          read: m.read !== false,
           time: m.timestamp ? new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''
         };
       });
@@ -387,5 +419,7 @@
     MTC.fn.saveConversations();
     // Re-render conversation list if messages screen is visible
     if (typeof renderConversationsList === 'function') renderConversationsList();
+    // Update message badge on nav bar
+    updateMessageBadge();
   };
 })();
