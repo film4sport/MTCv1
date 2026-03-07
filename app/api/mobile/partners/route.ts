@@ -1,5 +1,11 @@
 import { NextResponse } from 'next/server';
 import { authenticateMobileRequest, getAdminClient, isRateLimited } from '../auth-helper';
+import { sendPushToUser } from '../../lib/push';
+import crypto from 'crypto';
+
+function generateId(prefix: string): string {
+  return `${prefix}-${crypto.randomUUID().slice(0, 8)}`;
+}
 
 export async function GET(request: Request) {
   const authResult = await authenticateMobileRequest(request);
@@ -88,6 +94,40 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Failed to create partner request' }, { status: 500 });
     }
 
+    // Notifications (non-blocking, best-effort)
+    const notifBody = `Looking for ${type === 'any' ? 'any match type' : type} on ${todayStr} at ${timeStr}.`;
+    try {
+      // Bell notification
+      await supabase.from('notifications').insert({
+        id: generateId('n'), user_id: userId, type: 'partner',
+        title: 'Partner Request Posted', body: notifBody,
+        timestamp: new Date().toISOString(), read: false,
+      });
+      // Push notification
+      await sendPushToUser(supabase, userId, {
+        title: 'Partner Request Posted', body: notifBody,
+        type: 'partner', tag: `partner-post-${partnerId}`,
+      });
+      // Email confirmation
+      const token = request.headers.get('authorization')?.slice(7);
+      if (token && authResult.email) {
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://monotennisclub.com';
+        fetch(`${siteUrl}/api/notify-email`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({
+            recipientEmail: authResult.email, recipientName: authResult.name,
+            recipientUserId: userId,
+            subject: 'Partner Request Posted — Mono Tennis Club',
+            heading: 'Partner Request Posted',
+            body: `Your partner request is live! Looking for ${type === 'any' ? 'any match type' : type} on ${todayStr} at ${timeStr}. You'll be notified when someone responds.`,
+            ctaText: 'View Requests', ctaUrl: `${siteUrl}/mobile-app/index.html#partners`,
+            logType: 'partner_request',
+          }),
+        }).catch(() => { /* email is best-effort */ });
+      }
+    } catch { /* notifications are non-critical */ }
+
     return NextResponse.json({ success: true, id: partnerId });
   } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
@@ -112,7 +152,7 @@ export async function PATCH(request: Request) {
     // Can't join your own request
     const { data: partner } = await supabase
       .from('partners')
-      .select('user_id, status')
+      .select('user_id, status, name')
       .eq('id', partnerId)
       .single();
 
@@ -140,53 +180,42 @@ export async function PATCH(request: Request) {
     }
 
     // Notify the original poster that someone joined (non-critical)
-    const notifId = `notif-partner-${partnerId}-${userId.slice(0, 8)}`;
+    const matchBody = `${authResult.name} wants to play with you!`;
     try {
+      // Bell notification
       await supabase.from('notifications').insert({
-        id: notifId,
-        user_id: partner.user_id,
-        type: 'partner',
-        title: 'Partner Matched!',
-        body: `${authResult.name} wants to play with you!`,
-        timestamp: new Date().toISOString(),
-        read: false,
+        id: generateId('n'), user_id: partner.user_id, type: 'partner',
+        title: 'Partner Matched!', body: matchBody,
+        timestamp: new Date().toISOString(), read: false,
       });
-    } catch { /* non-critical */ }
-
-    // Web Push notification (best-effort)
-    try {
-      const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || '';
-      const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY || '';
-      const VAPID_EMAIL = process.env.VAPID_EMAIL || 'mailto:admin@monotennisclub.ca';
-      if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
-        const { data: subs } = await supabase
-          .from('push_subscriptions')
-          .select('endpoint, p256dh, auth')
-          .eq('user_id', partner.user_id);
-        if (subs?.length) {
-          // eslint-disable-next-line @typescript-eslint/no-var-requires
-          const webpush = require('web-push') as {
-            setVapidDetails: (s: string, p: string, k: string) => void;
-            sendNotification: (sub: object, payload: string) => Promise<void>;
-          };
-          webpush.setVapidDetails(VAPID_EMAIL, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
-          const payload = JSON.stringify({
-            title: 'Partner Matched!',
-            body: `${authResult.name} wants to play with you!`,
-            icon: '/mobile-app/icon-192.png',
-            badge: '/mobile-app/badge-72.png',
-            url: '/mobile-app/index.html',
-            tag: 'partner-match-' + partnerId,
-          });
-          await Promise.allSettled(subs.map(sub =>
-            webpush.sendNotification(
-              { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
-              payload
-            )
-          ));
+      // Push notification (shared utility — checks preferences, cleans expired subs)
+      await sendPushToUser(supabase, partner.user_id, {
+        title: 'Partner Matched!', body: matchBody,
+        type: 'partner', tag: `partner-match-${partnerId}`,
+      });
+      // Email to poster
+      const token = request.headers.get('authorization')?.slice(7);
+      if (token) {
+        const { data: posterProfile } = await supabase
+          .from('profiles').select('email, name').eq('id', partner.user_id).single();
+        if (posterProfile?.email) {
+          const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://monotennisclub.com';
+          fetch(`${siteUrl}/api/notify-email`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({
+              recipientEmail: posterProfile.email, recipientName: posterProfile.name || partner.name,
+              recipientUserId: partner.user_id,
+              subject: 'Partner Match — Someone Wants to Play!',
+              heading: 'Partner Match Found',
+              body: `${authResult.name} wants to play with you! Open the app to confirm your match.`,
+              ctaText: 'View Match', ctaUrl: `${siteUrl}/mobile-app/index.html#partners`,
+              logType: 'partner_match',
+            }),
+          }).catch(() => { /* email is best-effort */ });
         }
       }
-    } catch { /* push is best-effort */ }
+    } catch { /* notifications are non-critical */ }
 
     return NextResponse.json({ success: true });
   } catch {

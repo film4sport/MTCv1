@@ -1393,6 +1393,18 @@ CREATE TABLE IF NOT EXISTS lineup_entries (
 - **Partner + program emails wired:** `store.tsx` `addPartner()` sends confirmation email to poster. `enrollInProgram()` sends enrollment confirmation email to member (looks up email from `members` list).
 - All verified: `npm run check` passes (tsc clean + mobile build OK). 2 `/api/notify-email` calls confirmed in store.tsx.
 
+### Cowork Session (2026-03-07) — Notification Parity (10/10 Cross-Platform)
+**Closed all notification asymmetries across Dashboard and Mobile API.** Every user-facing action now fires the same notification stack regardless of which platform triggers it.
+
+**Changes made (5 changes across 3 files):**
+1. **Dashboard `addPartner()`** (`store.tsx`): Added `firePush()` call after bell notification. Was: bell + email. Now: bell + push + email.
+2. **Dashboard `toggleRsvp()`** (`store.tsx`): Added `firePush()` call after bell notification. Was: bell only. Now: bell + push.
+3. **Mobile API `partners POST`** (`partners/route.ts`): Added bell notification (insert into `notifications`), push (`sendPushToUser`), and email (fire-and-forget to `/api/notify-email`). Was: nothing. Now: bell + push + email.
+4. **Mobile API `partners PATCH`** (`partners/route.ts`): Replaced 33-line inline `require('web-push')` block with 1-line `sendPushToUser()` call (gains preference checking + expired sub cleanup). Added email to poster via `/api/notify-email`. Expanded `partner` select to include `name` for email personalization. Was: bell + inline push. Now: bell + shared push + email.
+5. **Mobile API `programs POST`** (`programs/route.ts`): Added bell, push, email, and coach welcome message on enrollment. Expanded program query to include `title, coach_id, coach`. Coach message creates/reuses conversation + inserts message (same pattern as `bookings/route.ts`). Was: nothing. Now: bell + push + email + coach message.
+
+**Verification:** `npm run check` passes (tsc clean + mobile build OK). `sendPushToUser` now imported in 6/6 mobile API routes. Zero inline `require('web-push')` remaining. `/api/notify-email` called from 3 consumer files (store.tsx, partners, programs).
+
 ### Cowork Session (2026-03-07) — Login Mockup Calendar Update + Phase 6-8 Verification
 **Login page mockup updated:** Both phone and tablet/iPad mockups on `/login` page (`app/login/page.tsx`) now show "CLUB CALENDAR" with a March 2026 month grid instead of the old "LOOKING FOR PARTNERS" section. Matches the actual mobile PWA home screen which was updated in a previous session. Calendar shows day-of-week headers, 3-week grid, today (7th) highlighted in cyan, and an event dot on the 14th.
 
