@@ -1386,6 +1386,22 @@ CREATE TABLE IF NOT EXISTS lineup_entries (
 
 **SEO improvements also in this session:** JSON-LD sameAs (Facebook/Instagram), font-display:swap, SSR for Schedule/Partners, hero preload, footer links, Next.js Image for logo, BreadcrumbList schema, logo PNG optimization (123KB→101KB), GSC placeholder.
 
+**Phase 6-8 follow-up (same session):**
+- **Read receipts (Phase 6):** Dashboard `messages/page.tsx` and Mobile `messaging.js` + `chat.css` — sent messages show single checkmark (delivered) or double checkmark (read). `msg.read` boolean drives the visual. CSS class `.chat-read-receipt` added to mobile.
+- **Desktop push (Phase 7):** `public/sw.js` now has `push` + `notificationclick` handlers (mirrors mobile SW). `DashboardHeader.tsx` has useEffect that subscribes to Web Push on login (checks `Notification.permission`, requests if `default`, silently re-subscribes if `granted`). VAPID key from `NEXT_PUBLIC_VAPID_PUBLIC_KEY`.
+- **Generic email endpoint (Phase 8):** `app/api/notify-email/route.ts` — accepts `{ recipientEmail, recipientName, subject, heading, body, ctaText?, ctaUrl?, logType? }`. JWT auth, 20/hr rate limit, cream-themed HTML matching site design. Logs via `email-logger.ts`.
+- **Partner + program emails wired:** `store.tsx` `addPartner()` sends confirmation email to poster. `enrollInProgram()` sends enrollment confirmation email to member (looks up email from `members` list).
+- All verified: `npm run check` passes (tsc clean + mobile build OK). 2 `/api/notify-email` calls confirmed in store.tsx.
+
+### Cowork Session (2026-03-07) — Login Mockup Calendar Update + Phase 6-8 Verification
+**Login page mockup updated:** Both phone and tablet/iPad mockups on `/login` page (`app/login/page.tsx`) now show "CLUB CALENDAR" with a March 2026 month grid instead of the old "LOOKING FOR PARTNERS" section. Matches the actual mobile PWA home screen which was updated in a previous session. Calendar shows day-of-week headers, 3-week grid, today (7th) highlighted in cyan, and an event dot on the 14th.
+
+**Phase 6-8 code verified (read-only audit):**
+- Phase 6 (Read Receipts): Single/double checkmark on sent messages in both Dashboard (`messages/page.tsx`) and Mobile (`messaging.js` + `chat.css`). Driven by `msg.read` boolean. Realtime updates working on both platforms.
+- Phase 7 (Desktop Push): `public/sw.js` has `push` + `notificationclick` handlers. `DashboardHeader.tsx` subscribes to Web Push on login (5s delay for default permission state).
+- Phase 8 (Generic Email): `/api/notify-email/route.ts` with JWT auth, 20/hr rate limit, cream-themed HTML. Wired into `addPartner()` and `enrollInProgram()` in store.tsx.
+- All three phases confirmed complete and correct. No issues found.
+
 ### Environment Limitations (IMPORTANT)
 - **Cowork VM has NO Playwright browsers installed.** Never attempt to run E2E tests in Cowork — they will stall or error. E2E tests only run in CI (GitHub Actions) or on the dev machine.
 - **If a command fails once, diagnose and explain — don't retry.** Repeated blind retries waste the user's time.
