@@ -8,7 +8,7 @@
   "scripts": {
     "dev": "next dev",
     "build:mobile": "node scripts/build-mobile.js",
-    "build": "node scripts/build-mobile.js && next build",
+    "build": "node scripts/build-mobile.js && next build --webpack",
     "start": "next start",
     "test": "npx playwright test",
     "test:unit": "vitest run",
