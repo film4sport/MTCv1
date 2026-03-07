@@ -83,9 +83,7 @@
         // Wait up to 8s for supabase lib (CDN or local fallback)
         return waitForSupabaseLib(8000).then(function(loaded) {
           if (loaded && window.supabase) {
-            _supabaseClient = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey, {
-              auth: { flowType: 'pkce' }
-            });
+            _supabaseClient = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
             MTC.state._supabaseClient = _supabaseClient; // Expose for realtime-sync.js
             _supabaseReady = true;
             enableAuthButtons();
@@ -215,7 +213,7 @@
       sb.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: origin + '/auth/callback?next=' + encodeURIComponent('/mobile-app/index.html'),
+          redirectTo: origin + '/mobile-app/index.html',
           queryParams: {
             access_type: 'offline',
             prompt: 'consent'
