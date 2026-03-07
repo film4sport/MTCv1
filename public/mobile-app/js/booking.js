@@ -417,7 +417,15 @@
     // Smart scroll to now row (#8)
     if (isToday&&nowRowIdx>=0) {
       var nowEl=gridBody.querySelector('.now-row');
-      if (nowEl) setTimeout(function(){nowEl.scrollIntoView({behavior:'smooth',block:'start'});},100);
+      if (nowEl) setTimeout(function(){
+        // Use scrollTop on the screen container instead of scrollIntoView
+        // scrollIntoView can scroll ancestor containers (body/html) which breaks other screens
+        var screen = document.getElementById('screen-book');
+        if (screen) {
+          var scrollTarget = nowEl.offsetTop - screen.offsetTop - 60; // 60px offset for header
+          screen.scrollTo({ top: Math.max(0, scrollTarget), behavior: 'smooth' });
+        }
+      },100);
     }
     } catch(e) {
       MTC.warn('renderWeeklyGrid error:', e);
