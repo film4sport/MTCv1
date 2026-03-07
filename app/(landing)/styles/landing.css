@@ -114,6 +114,21 @@ html, body {
   transform: translateY(0);
 }
 
+/* Opening Day card animation */
+@keyframes cardFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.opening-day-card {
+  animation: cardFadeIn 0.7s cubic-bezier(0.4, 0, 0.2, 1) 1.8s both;
+}
+
 /* Glass button styles */
 .glass-btn {
   background: rgba(255, 255, 255, 0.08);
