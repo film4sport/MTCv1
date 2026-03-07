@@ -69,7 +69,7 @@ export default function AboutTab() {
             {[
               { icon: 'M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z', title: 'Season', desc: 'May through October' },
               { icon: 'M4 6h16M4 10h16M4 14h16M4 18h16', title: '4 Courts', desc: 'Courts 1 & 2 have lights' },
-              { icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6', title: 'Clubhouse', desc: 'Washrooms & facilities' },
+              { icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6', title: 'Clubhouse', desc: 'Two modern washrooms (one wheelchair accessible) & facilities' },
               { icon: 'M5 13l4 4L19 7', title: 'Accessible', desc: 'Wheelchair accessible & free parking' },
             ].map((item, i) => (
               <div key={i} className="rounded-xl p-6 text-center" style={{ background: '#faf8f3', border: '1px solid #e0dcd3' }}>
@@ -84,19 +84,40 @@ export default function AboutTab() {
             ))}
           </div>
 
-          <div className="mt-12 rounded-xl p-8 fade-in" style={{ background: '#faf8f3', border: '1px solid #e0dcd3' }}>
-            <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-              <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(107, 122, 61, 0.12)' }}>
-                <svg className="w-5 h-5" style={{ color: '#6b7a3d' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
+          <div className="mt-12 grid md:grid-cols-2 gap-6">
+            <div className="rounded-xl p-8 fade-in" style={{ background: '#faf8f3', border: '1px solid #e0dcd3' }}>
+              <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+                <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(107, 122, 61, 0.12)' }}>
+                  <svg className="w-5 h-5" style={{ color: '#6b7a3d' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <h4 className="font-bold text-lg mb-1" style={{ color: '#2a2f1e' }}>Location</h4>
+                  <address className="not-italic text-sm leading-relaxed" style={{ color: '#6b7266' }}>
+                    754483 Mono Centre Rd, Mono, Ontario, L9W 5W9
+                  </address>
+                </div>
               </div>
-              <div>
-                <h4 className="font-bold text-lg mb-1" style={{ color: '#2a2f1e' }}>Location</h4>
-                <address className="not-italic text-sm leading-relaxed" style={{ color: '#6b7266' }}>
-                  754483 Mono Centre Rd, Mono, Ontario, L9W 5W9
-                </address>
+            </div>
+
+            <div className="rounded-xl p-8 fade-in" style={{ background: '#faf8f3', border: '1px solid #e0dcd3' }}>
+              <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+                <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(107, 122, 61, 0.12)' }}>
+                  <svg className="w-5 h-5" style={{ color: '#6b7a3d' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <div>
+                  <h4 className="font-bold text-lg mb-1" style={{ color: '#2a2f1e' }}>Contact Us</h4>
+                  <a href="mailto:monotennisclub1@gmail.com" className="text-sm hover:underline" style={{ color: '#6b7a3d' }}>
+                    monotennisclub1@gmail.com
+                  </a>
+                  <p className="text-xs mt-1" style={{ color: '#6b7266' }}>
+                    Questions, feedback, or bug reports — we&apos;d love to hear from you.
+                  </p>
+                </div>
               </div>
             </div>
           </div>

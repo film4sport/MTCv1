@@ -240,10 +240,7 @@ export const DEFAULT_PARTNERS: Partner[] = [];
 export const DEFAULT_CONVERSATIONS: Conversation[] = [];
 
 // ─── Announcements ──────────────────────────────────────
-export const DEFAULT_ANNOUNCEMENTS: Announcement[] = [
-  { id: 'a1', text: 'Courts 3-4 resurfacing completed! Now open for booking.', type: 'info', date: '2026-03-01', dismissedBy: [] },
-  { id: 'a2', text: 'Spring 2026 season begins May 1st — register now!', type: 'info', date: '2026-03-04', dismissedBy: [] },
-];
+export const DEFAULT_ANNOUNCEMENTS: Announcement[] = [];
 
 // ─── Notifications ──────────────────────────────────────
 export const DEFAULT_NOTIFICATIONS: Notification[] = [];

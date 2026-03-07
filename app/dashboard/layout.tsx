@@ -8,6 +8,7 @@ import { UIProvider, useUI } from './lib/ui';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import Sidebar from './components/Sidebar';
 import MobileAppBanner from './components/MobileAppBanner';
+import TabletNagBanner from './components/TabletNagBanner';
 import Toast from './components/Toast';
 
 function DashboardGuard({ children }: { children: React.ReactNode }) {
@@ -108,6 +109,7 @@ function DashboardGuard({ children }: { children: React.ReactNode }) {
           sidebarCollapsed ? 'lg:ml-[72px]' : 'lg:ml-[240px]'
         }`}
       >
+        <TabletNagBanner />
         <MobileAppBanner />
         <div className="animate-fadeIn">
           {children}

@@ -385,6 +385,42 @@ export function AppProvider({ children }: { children: ReactNode }) {
           // State falls back to localStorage cache — user can still interact
         }
 
+        // ── One-time notifications for existing users (beta notice + opening day) ──
+        // Runs once per user — checks localStorage flag to avoid duplicates.
+        // New users get these from /auth/callback; this catches users who signed up before these were added.
+        const betaNotifKey = `mtc-beta-notice-sent-${user.id}`;
+        if (!localStorage.getItem(betaNotifKey) && new Date() < new Date('2026-05-09T00:00:00')) {
+          localStorage.setItem(betaNotifKey, 'true');
+          const now = new Date().toISOString();
+          // Check if they already have these notifications (from auth callback)
+          db.fetchNotifications(user.id).then(existing => {
+            const ids = safeArray(existing).map((n: Notification) => n.id);
+            const inserts: Array<{ id: string; user_id: string; type: string; title: string; body: string; timestamp: string; read: boolean }> = [];
+            if (!ids.includes(`opening-day-${user.id}`)) {
+              inserts.push({
+                id: `opening-day-${user.id}`, user_id: user.id, type: 'event',
+                title: 'Opening Day — May 9th!',
+                body: 'Mark your calendar! Mono Tennis Club opens for the 2026 season on May 9th. See you on the courts!',
+                timestamp: now, read: false,
+              });
+            }
+            if (!ids.includes(`beta-notice-${user.id}`)) {
+              inserts.push({
+                id: `beta-notice-${user.id}`, user_id: user.id, type: 'info',
+                title: 'App Under Construction',
+                body: 'Our app and website are still in development. If you find any bugs or have feedback, please email monotennisclub1@gmail.com — we appreciate your help!',
+                timestamp: new Date(Date.parse(now) + 1000).toISOString(), read: false,
+              });
+            }
+            if (inserts.length > 0) {
+              supabase.from('notifications').insert(inserts).then(() => {
+                // Re-fetch to update bell
+                db.fetchNotifications(user.id).then(n => setNotifications(safeArray(n))).catch(() => {});
+              }, () => {});
+            }
+          }).catch(() => {});
+        }
+
         // Fetch family members if user has a family membership
         if (user.familyId) {
           db.fetchFamilyMembers(user.familyId).then(fm => setFamilyMembers(safeArray(fm))).catch(err => reportError(err, 'Family'));
