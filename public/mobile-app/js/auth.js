@@ -35,16 +35,50 @@
   // ============================================
   var _supabaseClient = null;
 
+  /** Fetch with retry — retries up to `retries` times with exponential backoff */
+  function fetchWithRetry(url, retries, delay) {
+    return fetch(url).then(function(r) {
+      if (!r.ok && retries > 0) {
+        return new Promise(function(resolve) { setTimeout(resolve, delay); })
+          .then(function() { return fetchWithRetry(url, retries - 1, delay * 2); });
+      }
+      return r;
+    }).catch(function(err) {
+      if (retries > 0) {
+        return new Promise(function(resolve) { setTimeout(resolve, delay); })
+          .then(function() { return fetchWithRetry(url, retries - 1, delay * 2); });
+      }
+      throw err;
+    });
+  }
+
+  /** Wait for window.supabase to be defined (local fallback script may still be loading) */
+  function waitForSupabaseLib(timeout) {
+    if (window.supabase) return Promise.resolve(true);
+    return new Promise(function(resolve) {
+      var elapsed = 0;
+      var interval = setInterval(function() {
+        elapsed += 100;
+        if (window.supabase) { clearInterval(interval); resolve(true); }
+        else if (elapsed >= timeout) { clearInterval(interval); resolve(false); }
+      }, 100);
+    });
+  }
+
   function initSupabase() {
     if (_supabaseClient) return Promise.resolve(_supabaseClient);
-    return fetch('/api/mobile-auth/config')
+    return fetchWithRetry('/api/mobile-auth/config', 2, 1000)
       .then(function(r) { return r.json(); })
       .then(function(cfg) {
-        if (cfg.supabaseUrl && cfg.supabaseAnonKey && window.supabase) {
-          _supabaseClient = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
-          MTC.state._supabaseClient = _supabaseClient; // Expose for realtime-sync.js
-        }
-        return _supabaseClient;
+        if (!cfg.supabaseUrl || !cfg.supabaseAnonKey) return null;
+        // Wait up to 3s for supabase lib (CDN or local fallback)
+        return waitForSupabaseLib(3000).then(function(loaded) {
+          if (loaded && window.supabase) {
+            _supabaseClient = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+            MTC.state._supabaseClient = _supabaseClient; // Expose for realtime-sync.js
+          }
+          return _supabaseClient;
+        });
       })
       .catch(function() { return null; });
   }
@@ -129,9 +163,14 @@
   // GOOGLE SIGN-IN
   // ============================================
   window.handleGoogleSignIn = function() {
+    var btn = document.querySelector('.login-btn-google');
+    if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; }
+    showToast('Connecting...');
+
     initSupabase().then(function(sb) {
       if (!sb) {
-        showToast('Cannot connect to server. Please try again.');
+        if (btn) { btn.disabled = false; btn.style.opacity = ''; }
+        showToast('Cannot reach the server. Check your connection and try again.');
         return;
       }
       var origin = window.location.origin;
@@ -146,10 +185,14 @@
         }
       }).then(function(result) {
         if (result.error) {
+          if (btn) { btn.disabled = false; btn.style.opacity = ''; }
           showToast('Google sign-in failed: ' + result.error.message);
         }
         // Browser will redirect to Google...
       });
+    }).catch(function() {
+      if (btn) { btn.disabled = false; btn.style.opacity = ''; }
+      showToast('Something went wrong. Please try again.');
     });
   };
 
@@ -175,7 +218,7 @@
     initSupabase().then(function(sb) {
       if (!sb) {
         if (btn) { btn.disabled = false; btn.textContent = 'Sign in with Email Link'; }
-        showToast('Cannot connect to server. Please try again.');
+        showToast('Cannot reach the server. Check your connection and try again.');
         return;
       }
       var origin = window.location.origin;
