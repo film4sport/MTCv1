@@ -56,7 +56,7 @@ function LoginContent() {
       <div className="min-h-screen flex flex-col lg:flex-row" style={{ backgroundColor: '#f5f2eb' }}>
 
         {/* Left Side: App Preview (Desktop) */}
-        <div className="hidden lg:flex lg:w-1/2 items-start justify-center p-8 xl:p-12 relative overflow-y-auto overflow-x-hidden" style={{ background: '#edeae3' }}>
+        <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-6 xl:p-10 relative overflow-y-auto overflow-x-hidden" style={{ background: '#edeae3' }}>
           {/* Subtle grid pattern */}
           <div className="absolute inset-0 opacity-[0.04]">
             <svg width="100%" height="100%">
@@ -68,20 +68,21 @@ function LoginContent() {
           </div>
 
           {/* Content */}
-          <div className="relative z-10 text-center my-auto py-4">
+          <div className="relative z-10 text-center my-auto py-4" style={{ maxWidth: 600, width: '100%' }}>
             <h2 className="headline-font text-2xl xl:text-3xl mb-2 login-app-title" style={{ color: '#2a2f1e' }}>
               MTC Court App
             </h2>
-            <p className="text-sm mb-6 max-w-md mx-auto" style={{ color: '#6b7266' }}>
+            <p className="text-sm mb-5 max-w-md mx-auto" style={{ color: '#6b7266' }}>
               Book courts and lessons, find partners, and message members — all in one place.
             </p>
 
             {/* ── Row 1: Phone + Tablet side by side ── */}
-            <div style={{ display: 'flex', gap: 24, justifyContent: 'center', alignItems: 'flex-start', marginBottom: 24 }}>
+            <div style={{ display: 'flex', gap: 20, justifyContent: 'center', alignItems: 'flex-end', marginBottom: 20 }}>
 
-            {/* Phone Mockup (scaled) */}
+            {/* Phone Mockup (scaled down via transform) */}
             <div style={{ textAlign: 'center' }}>
-            <div className="relative inline-block" style={{ transform: 'scale(0.52)', transformOrigin: 'top center', marginBottom: -260 }}>
+            <div style={{ width: 132, height: 282, position: 'relative' }}>
+            <div className="relative" style={{ transform: 'scale(0.44)', transformOrigin: 'top left', position: 'absolute', top: 0, left: 0 }}>
               <div style={{
                 width: 300, height: 640, background: '#000', borderRadius: 40, padding: 12,
                 boxShadow: '0 50px 100px rgba(0,0,0,0.15), 0 0 0 2px #333', position: 'relative',
@@ -339,12 +340,14 @@ function LoginContent() {
               </div>
 
             </div>{/* end phone scale wrapper */}
-            <p className="text-xs font-medium" style={{ color: '#8a8578' }}>Mobile</p>
+            </div>{/* end phone size wrapper */}
+            <p className="text-xs font-medium mt-1" style={{ color: '#8a8578' }}>Mobile</p>
             </div>{/* end phone column */}
 
             {/* Tablet Mockup (scaled) */}
             <div style={{ textAlign: 'center' }}>
-            <div style={{ transform: 'scale(0.52)', transformOrigin: 'top center', marginBottom: -140 }}>
+            <div style={{ width: 211, height: 154, position: 'relative' }}>
+            <div style={{ transform: 'scale(0.44)', transformOrigin: 'top left', position: 'absolute', top: 0, left: 0 }}>
               <div style={{
                 width: 480, height: 350, background: '#000', borderRadius: 24, padding: 10,
                 boxShadow: '0 40px 80px rgba(0,0,0,0.12), 0 0 0 2px #333', position: 'relative',
@@ -549,131 +552,175 @@ function LoginContent() {
                 </div>
               </div>
             </div>{/* end tablet scale wrapper */}
-            <p className="text-xs font-medium" style={{ color: '#8a8578' }}>Tablet</p>
+            </div>{/* end tablet size wrapper */}
+            <p className="text-xs font-medium mt-1" style={{ color: '#8a8578' }}>Tablet</p>
             </div>{/* end tablet column */}
 
             </div>{/* end Row 1 flex */}
 
-            {/* ── Row 2: Desktop PWA Mockup + Under Construction ── */}
-            <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start', justifyContent: 'center' }}>
-              {/* Laptop Frame */}
-              <div style={{ textAlign: 'center', flex: 1, maxWidth: 440 }}>
+            {/* ── Row 2: Desktop Dashboard Mockup (laptop frame) ── */}
+            <div style={{ textAlign: 'center', width: '100%', maxWidth: 540, margin: '0 auto' }}>
+              {/* Laptop screen bezel */}
+              <div style={{
+                background: '#2a2a2a', borderRadius: '12px 12px 0 0', padding: '3px 3px 0',
+                boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
+              }}>
+                {/* macOS title bar */}
+                <div style={{ display: 'flex', gap: 4, padding: '5px 10px', alignItems: 'center', background: '#1a1f12', borderRadius: '10px 10px 0 0' }}>
+                  <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#ff5f57' }} />
+                  <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#febc2e' }} />
+                  <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#28c840' }} />
+                  <span style={{ flex: 1 }} />
+                  <span style={{ fontSize: 7, color: '#6b7266', fontFamily: 'Inter, sans-serif' }}>monotennisclub.com/dashboard</span>
+                  <span style={{ flex: 1 }} />
+                </div>
+                {/* Desktop dashboard layout: dark sidebar + cream main */}
                 <div style={{
-                  background: '#222', borderRadius: '12px 12px 0 0', padding: '6px 6px 0',
-                  boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
+                  background: '#f5f2eb', overflow: 'hidden',
+                  display: 'flex', height: 240,
                 }}>
-                  {/* Screen bezel dots */}
-                  <div style={{ display: 'flex', gap: 4, padding: '4px 8px 6px' }}>
-                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#ff5f57' }} />
-                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#febc2e' }} />
-                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#28c840' }} />
-                  </div>
-                  {/* Dashboard preview */}
+                  {/* Dark sidebar — matches real dashboard */}
                   <div style={{
-                    background: '#f0f0f0', borderRadius: '4px 4px 0 0', overflow: 'hidden',
-                    display: 'flex', height: 180,
+                    width: 140, background: '#1a1f12', display: 'flex', flexDirection: 'column' as const,
+                    padding: '10px 6px', gap: 1, flexShrink: 0, borderRight: '1px solid rgba(200,255,0,0.08)',
                   }}>
-                    {/* Sidebar */}
-                    <div style={{
-                      width: 52, background: '#1a1f12', display: 'flex', flexDirection: 'column' as const,
-                      alignItems: 'center', padding: '10px 0', gap: 8, flexShrink: 0,
-                    }}>
-                      <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 7, color: '#c8ff00', letterSpacing: 1, marginBottom: 4 }}>MTC</div>
-                      {['M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6',
-                        'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
-                        'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z',
-                        'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z',
-                      ].map((d, i) => (
-                        <div key={i} style={{
-                          width: 28, height: 28, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          background: i === 0 ? 'rgba(200,255,0,0.15)' : 'transparent',
+                    {/* Logo */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12, padding: '2px 6px' }}>
+                      <div style={{ width: 24, height: 24, borderRadius: 8, background: '#c8ff00', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 11, color: '#0a0a0a', fontWeight: 700 }}>M</span>
+                      </div>
+                      <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 10, color: '#e8e4d9', letterSpacing: 2 }}>MTC COURT</span>
+                    </div>
+                    {/* Nav items */}
+                    {[
+                      { label: 'Dashboard', icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z', active: true },
+                      { label: 'Book Court', icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' },
+                      { label: 'Partners', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z' },
+                      { label: 'Messages', icon: 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z' },
+                      { label: 'Events', icon: 'M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z' },
+                      { label: 'Settings', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z' },
+                    ].map(item => (
+                      <div key={item.label} style={{
+                        display: 'flex', alignItems: 'center', gap: 8, padding: '6px 8px', borderRadius: 8,
+                        background: item.active ? 'rgba(200,255,0,0.12)' : 'transparent',
+                        cursor: 'default',
+                      }}>
+                        <svg width="12" height="12" fill="none" stroke={item.active ? '#c8ff00' : '#6b7266'} viewBox="0 0 24 24" strokeWidth="1.8">
+                          <path strokeLinecap="round" strokeLinejoin="round" d={item.icon}/>
+                        </svg>
+                        <span style={{ fontSize: 8, fontWeight: item.active ? 600 : 400, color: item.active ? '#c8ff00' : '#8a8578', letterSpacing: 0.3 }}>{item.label}</span>
+                      </div>
+                    ))}
+                    {/* Spacer + user avatar at bottom */}
+                    <div style={{ flex: 1 }} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 8px', borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: 4, paddingTop: 8 }}>
+                      <div style={{ width: 20, height: 20, background: '#6b7a3d', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <span style={{ fontSize: 8, color: '#fff', fontWeight: 700 }}>T</span>
+                      </div>
+                      <span style={{ fontSize: 7, color: '#8a8578' }}>Test User</span>
+                    </div>
+                  </div>
+                  {/* Main content area */}
+                  <div style={{ flex: 1, padding: '14px 16px', overflow: 'hidden', display: 'flex', flexDirection: 'column' as const }}>
+                    {/* Header */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                      <div>
+                        <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 14, color: '#2a2f1e', letterSpacing: 1 }}>DASHBOARD</span>
+                        <p style={{ fontSize: 7, color: '#8a8578', marginTop: 1 }}>Welcome back, Test User</p>
+                      </div>
+                      <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                        <div style={{ position: 'relative', width: 22, height: 22, background: '#fff', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(0,0,0,0.08)' }}>
+                          <svg width="11" height="11" fill="none" stroke="#666" viewBox="0 0 24 24" strokeWidth="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                          <span style={{ position: 'absolute', top: -2, right: -2, width: 8, height: 8, background: '#ff5a5f', borderRadius: '50%', fontSize: 5, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, border: '1.5px solid #f5f2eb' }}>3</span>
+                        </div>
+                      </div>
+                    </div>
+                    {/* Quick action cards */}
+                    <div style={{ display: 'flex', gap: 6, marginBottom: 12 }}>
+                      {[
+                        { bg: '#c8ff00', label: 'BOOK COURT', color: '#0a0a0a', iconStroke: '#0a0a0a', icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' },
+                        { bg: '#ff5a5f', label: 'FIND PARTNER', color: '#fff', iconStroke: '#fff', icon: 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2' },
+                        { bg: '#00d4ff', label: 'CLUB EVENTS', color: '#0a0a0a', iconStroke: '#0a0a0a', icon: 'M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888' },
+                        { bg: '#0a0a0a', label: 'MY SCHEDULE', color: '#fff', iconStroke: '#fff', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2' },
+                      ].map(a => (
+                        <div key={a.label} style={{
+                          flex: 1, background: a.bg, borderRadius: 8, padding: '8px 7px',
+                          display: 'flex', flexDirection: 'column' as const, justifyContent: 'space-between', height: 48,
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
                         }}>
-                          <svg width="12" height="12" fill="none" stroke={i === 0 ? '#c8ff00' : '#6b7266'} viewBox="0 0 24 24" strokeWidth="2">
-                            <path strokeLinecap="round" strokeLinejoin="round" d={d}/>
+                          <svg width="12" height="12" fill="none" stroke={a.iconStroke} viewBox="0 0 24 24" strokeWidth="2">
+                            <path strokeLinecap="round" strokeLinejoin="round" d={a.icon}/>
                           </svg>
+                          <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 7, color: a.color, letterSpacing: 0.5 }}>{a.label}</span>
                         </div>
                       ))}
                     </div>
-                    {/* Main content area */}
-                    <div style={{ flex: 1, padding: 10, overflow: 'hidden' }}>
-                      {/* Top bar */}
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                        <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 11, color: '#2a2f1e', letterSpacing: 1 }}>DASHBOARD</span>
-                        <div style={{ display: 'flex', gap: 4 }}>
-                          <div style={{ width: 18, height: 18, background: '#e8e8e8', borderRadius: '50%' }} />
-                          <div style={{ width: 18, height: 18, background: '#e8e8e8', borderRadius: '50%' }} />
+                    {/* Bottom row: Events + Calendar + Weather */}
+                    <div style={{ display: 'flex', gap: 6, flex: 1, minHeight: 0 }}>
+                      {/* Events */}
+                      <div style={{ flex: 1.3, background: '#fff', borderRadius: 8, padding: '8px 10px', border: '1px solid rgba(0,0,0,0.06)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                          <span style={{ fontSize: 7, fontWeight: 700, color: '#2a2f1e' }}>Upcoming Events</span>
+                          <span style={{ fontSize: 6, color: '#6b7a3d' }}>See all</span>
                         </div>
-                      </div>
-                      {/* Quick actions row */}
-                      <div style={{ display: 'flex', gap: 4, marginBottom: 8 }}>
                         {[
-                          { bg: '#c8ff00', label: 'BOOK', color: '#0a0a0a' },
-                          { bg: '#ff5a5f', label: 'PARTNER', color: '#fff' },
-                          { bg: '#00d4ff', label: 'EVENTS', color: '#0a0a0a' },
-                          { bg: '#0a0a0a', label: 'SCHEDULE', color: '#fff' },
-                        ].map(a => (
-                          <div key={a.label} style={{
-                            flex: 1, background: a.bg, borderRadius: 6, padding: '6px 4px',
-                            display: 'flex', flexDirection: 'column' as const, justifyContent: 'flex-end', height: 36,
-                          }}>
-                            <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 6, color: a.color, letterSpacing: 0.5 }}>{a.label}</span>
+                          { title: 'Opening Day BBQ', date: 'May 9 • 1:00 PM' },
+                          { title: "Men's Round Robin", date: 'May 12 • 9:00 AM' },
+                          { title: 'French Open Social', date: 'Jun 7 • 1:00 PM' },
+                        ].map(evt => (
+                          <div key={evt.title} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 5 }}>
+                            <div style={{ width: 4, height: 20, background: '#c8ff00', borderRadius: 2, flexShrink: 0 }} />
+                            <div>
+                              <span style={{ fontSize: 6.5, fontWeight: 600, color: '#2a2f1e', display: 'block' }}>{evt.title}</span>
+                              <span style={{ fontSize: 5.5, color: '#999' }}>{evt.date}</span>
+                            </div>
                           </div>
                         ))}
                       </div>
-                      {/* Content cards */}
-                      <div style={{ display: 'flex', gap: 6 }}>
-                        <div style={{ flex: 1, background: 'rgba(255,255,255,0.8)', borderRadius: 6, padding: 6, border: '1px solid rgba(0,0,0,0.06)' }}>
-                          <span style={{ fontSize: 6, fontWeight: 700, color: '#2a2f1e' }}>Upcoming Events</span>
-                          <div style={{ marginTop: 4, display: 'flex', flexDirection: 'column' as const, gap: 3 }}>
-                            {['Opening Day BBQ', "Men's Round Robin"].map(e => (
-                              <div key={e} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                                <div style={{ width: 16, height: 16, background: '#c8ff00', borderRadius: 4, flexShrink: 0 }} />
-                                <span style={{ fontSize: 5, color: '#444' }}>{e}</span>
-                              </div>
-                            ))}
-                          </div>
+                      {/* Calendar */}
+                      <div style={{ flex: 1, background: '#fff', borderRadius: 8, padding: '8px 10px', border: '1px solid rgba(0,0,0,0.06)' }}>
+                        <span style={{ fontSize: 7, fontWeight: 700, color: '#2a2f1e', display: 'block', marginBottom: 5 }}>Club Calendar</span>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>
+                          <span style={{ fontSize: 5, color: '#999' }}>‹</span>
+                          <span style={{ fontSize: 6, fontWeight: 600, color: '#2a2f1e' }}>May 2026</span>
+                          <span style={{ fontSize: 5, color: '#999' }}>›</span>
                         </div>
-                        <div style={{ flex: 1, background: 'rgba(255,255,255,0.8)', borderRadius: 6, padding: 6, border: '1px solid rgba(0,0,0,0.06)' }}>
-                          <span style={{ fontSize: 6, fontWeight: 700, color: '#2a2f1e' }}>Club Calendar</span>
-                          <div style={{ marginTop: 4, display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 1, textAlign: 'center' }}>
-                            {['S','M','T','W','T','F','S'].map((d, i) => (
-                              <span key={i} style={{ fontSize: 4, color: '#999' }}>{d}</span>
-                            ))}
-                            {[1,2,3,4,5,6,7,8,9,10,11,12,13,14].map(d => (
-                              <span key={d} style={{
-                                fontSize: 4, color: d === 7 ? '#fff' : '#444',
-                                background: d === 7 ? '#00d4ff' : 'transparent', borderRadius: 2,
-                              }}>{d}</span>
-                            ))}
-                          </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 1, textAlign: 'center' }}>
+                          {['S','M','T','W','T','F','S'].map((d, i) => (
+                            <span key={i} style={{ fontSize: 5, color: '#999', fontWeight: 600 }}>{d}</span>
+                          ))}
+                          {[1,2,3,4,5,6,7,8,9,10,11,12,13,14].map(d => (
+                            <span key={d} style={{
+                              fontSize: 5, color: d === 9 ? '#fff' : '#444', padding: '1.5px 0',
+                              background: d === 9 ? '#c8ff00' : 'transparent', borderRadius: 3,
+                              fontWeight: d === 9 ? 700 : 400,
+                            }}>{d}</span>
+                          ))}
                         </div>
+                      </div>
+                      {/* Weather */}
+                      <div style={{ flex: 0.6, background: '#fff', borderRadius: 8, padding: '8px 8px', border: '1px solid rgba(0,0,0,0.06)', textAlign: 'center', display: 'flex', flexDirection: 'column' as const, alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ fontSize: 7, fontWeight: 700, color: '#2a2f1e', display: 'block', marginBottom: 4 }}>Weather</span>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2">
+                          <circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+                        </svg>
+                        <p style={{ fontSize: 10, fontWeight: 700, color: '#2a2f1e', marginTop: 3 }}>12°C</p>
+                        <p style={{ fontSize: 5.5, color: '#999' }}>Mono, ON</p>
                       </div>
                     </div>
                   </div>
                 </div>
-                {/* Laptop base */}
-                <div style={{
-                  height: 10, background: '#2a2a2a', borderRadius: '0 0 8px 8px',
-                  margin: '0 -8px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                }} />
-                <p className="text-xs font-medium mt-2" style={{ color: '#8a8578' }}>Desktop Dashboard</p>
               </div>
-
-              {/* Under Construction Notice */}
+              {/* Laptop base/hinge */}
               <div style={{
-                flex: '0 0 auto', maxWidth: 180, padding: '14px 16px',
-                background: 'rgba(255, 200, 0, 0.06)', border: '1px solid rgba(255, 200, 0, 0.18)',
-                borderRadius: 14, textAlign: 'center', fontSize: 11, color: '#6b7266', lineHeight: 1.5,
-              }}>
-                <span style={{ fontSize: 20, display: 'block', marginBottom: 4 }}>&#x1F6A7;</span>
-                <span style={{ fontWeight: 700, color: '#2a2f1e', fontSize: 12 }}>Under Construction</span><br/>
-                <span style={{ fontSize: 10 }}>
-                  Our desktop and mobile/tablet apps are still in development. Bugs or feedback?
-                </span><br/>
-                <a href="mailto:monotennisclub1@gmail.com" style={{ color: '#6b7a3d', textDecoration: 'none', fontWeight: 600, fontSize: 10 }}>
-                  monotennisclub1@gmail.com
-                </a>
-              </div>
+                height: 10, background: 'linear-gradient(180deg, #333, #555)',
+                borderRadius: '0 0 2px 2px', margin: '0 20px',
+              }} />
+              <div style={{
+                height: 4, background: '#ccc', borderRadius: '0 0 8px 8px', margin: '0 60px',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+              }} />
+              <p className="text-xs font-medium mt-3" style={{ color: '#8a8578' }}>Desktop Dashboard</p>
             </div>
 
           </div>
@@ -841,6 +888,20 @@ function LoginContent() {
               Become a Member
             </a>
           </p>
+
+          {/* Under Construction Notice */}
+          <div className="mt-6 max-w-lg text-center" style={{
+            padding: '14px 20px', background: 'rgba(255, 200, 0, 0.06)',
+            border: '1px solid rgba(255, 200, 0, 0.18)', borderRadius: 14,
+            fontSize: 12, color: '#6b7266', lineHeight: 1.6,
+          }}>
+            <span style={{ fontSize: 18 }}>&#x1F6A7;</span>{' '}
+            <span style={{ fontWeight: 700, color: '#2a2f1e' }}>Under Construction</span><br/>
+            Our desktop and mobile/tablet apps are still in development. Bugs or feedback? Email{' '}
+            <a href="mailto:monotennisclub1@gmail.com" style={{ color: '#6b7a3d', textDecoration: 'none', fontWeight: 600 }}>
+              monotennisclub1@gmail.com
+            </a>
+          </div>
 
           {/* Magic Link Sent — Full overlay */}
           {magicLinkSent && (
