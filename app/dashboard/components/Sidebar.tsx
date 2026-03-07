@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, memo } from 'react';
+import { useMemo, memo, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useApp } from '../lib/store';
@@ -38,6 +38,12 @@ function Sidebar() {
   }), [isAdmin, isCoach]);
 
   const closeMobileSidebar = () => setMobileSidebarOpen(false);
+  const [tappedHref, setTappedHref] = useState<string | null>(null);
+  const handleNavClick = useCallback((href: string) => {
+    setTappedHref(href);
+    setTimeout(() => setTappedHref(null), 500);
+    closeMobileSidebar();
+  }, []);
 
   return (
     <>
@@ -110,14 +116,14 @@ function Sidebar() {
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    onClick={closeMobileSidebar}
+                    onClick={() => handleNavClick(item.href)}
                     aria-current={isActive ? 'page' : undefined}
                     data-tour={item.label === 'Messages' ? 'messages' : item.label === 'Settings' ? 'settings' : undefined}
                     className={`sidebar-nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative ${
                       isActive
                         ? 'sidebar-nav-active font-semibold'
                         : ''
-                    }`}
+                    } ${tappedHref === item.href ? 'sidebar-tapped' : ''}`}
                     title={sidebarCollapsed ? item.label : undefined}
                   >
                     <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={isActive ? 2.5 : 2} aria-hidden="true">
@@ -140,13 +146,13 @@ function Sidebar() {
               <li className="pt-2 mt-2" style={{ borderTop: '1px solid rgba(232, 228, 217, 0.1)' }}>
                 <Link
                   href={coachItem.href}
-                  onClick={closeMobileSidebar}
+                  onClick={() => handleNavClick(coachItem.href)}
                   aria-current={pathname.startsWith(coachItem.href) ? 'page' : undefined}
                   className={`sidebar-nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${
                     pathname.startsWith(coachItem.href)
                       ? 'sidebar-nav-active font-semibold'
                       : ''
-                  }`}
+                  } ${tappedHref === coachItem.href ? 'sidebar-tapped' : ''}`}
                   title={sidebarCollapsed ? coachItem.label : undefined}
                 >
                   <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={pathname.startsWith(coachItem.href) ? 2.5 : 2} aria-hidden="true">
@@ -162,13 +168,13 @@ function Sidebar() {
               <li className="pt-2 mt-2" style={{ borderTop: '1px solid rgba(232, 228, 217, 0.1)' }}>
                 <Link
                   href="/dashboard/captain"
-                  onClick={closeMobileSidebar}
+                  onClick={() => handleNavClick('/dashboard/captain')}
                   aria-current={pathname.startsWith('/dashboard/captain') ? 'page' : undefined}
                   className={`sidebar-nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${
                     pathname.startsWith('/dashboard/captain')
                       ? 'sidebar-nav-active font-semibold'
                       : ''
-                  }`}
+                  } ${tappedHref === '/dashboard/captain' ? 'sidebar-tapped' : ''}`}
                   title={sidebarCollapsed ? 'My Team' : undefined}
                 >
                   <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={pathname.startsWith('/dashboard/captain') ? 2.5 : 2} aria-hidden="true">
@@ -184,13 +190,13 @@ function Sidebar() {
               <li className="pt-2 mt-2" style={{ borderTop: '1px solid rgba(232, 228, 217, 0.1)' }}>
                 <Link
                   href={adminItem.href}
-                  onClick={closeMobileSidebar}
+                  onClick={() => handleNavClick(adminItem.href)}
                   aria-current={pathname.startsWith(adminItem.href) ? 'page' : undefined}
                   className={`sidebar-nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${
                     pathname.startsWith(adminItem.href)
                       ? 'sidebar-nav-active font-semibold'
                       : ''
-                  }`}
+                  } ${tappedHref === adminItem.href ? 'sidebar-tapped' : ''}`}
                   title={sidebarCollapsed ? adminItem.label : undefined}
                 >
                   <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={pathname.startsWith(adminItem.href) ? 2.5 : 2} aria-hidden="true">
