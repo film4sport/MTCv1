@@ -49,8 +49,8 @@ export default function Hero() {
       <div className="absolute inset-0 hero-overlay"></div>
 
       {/* Hero Content */}
-      <div className="absolute inset-0 flex flex-col lg:flex-row lg:items-center justify-center px-8 lg:px-16 z-10 pt-16 sm:pt-24 md:pt-28">
-        <div className="max-w-2xl hero-content lg:flex-1" ref={heroContentRef}>
+      <div className="absolute inset-0 flex flex-col md:flex-row md:items-start justify-center px-8 lg:px-16 z-10 pt-16 sm:pt-24 md:pt-28">
+        <div className="max-w-2xl hero-content md:flex-1" ref={heroContentRef}>
           {/* Section Label */}
           <span className="hero-subtext text-xs md:text-sm tracking-[0.25em] uppercase mb-4 block font-medium" style={{ color: 'rgba(232, 228, 217, 0.6)' }}>
             // Mono Tennis Club
@@ -96,10 +96,10 @@ export default function Hero() {
 
         </div>
 
-        {/* Opening Day Card — right side on desktop, below buttons on mobile */}
-        <div className="hidden md:flex lg:flex-1 lg:justify-end mt-6 lg:mt-0">
+        {/* Opening Day Card — right side on desktop, below buttons on tablet, hidden on mobile */}
+        <div className="hidden md:flex md:flex-1 md:justify-end md:mt-8 lg:mt-0">
           <div
-            className="inline-flex flex-col items-center px-8 py-6 rounded-2xl"
+            className="inline-flex flex-col items-center px-6 py-4 lg:px-8 lg:py-6 rounded-2xl"
             style={{
               background: 'rgba(255, 255, 255, 0.1)',
               backdropFilter: 'blur(12px)',
