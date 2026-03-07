@@ -44,7 +44,7 @@ export default function AboutTab() {
                 lasting memories on the court.
               </p>
               <div className="flex flex-wrap gap-3">
-                {['Parking', 'Wheelchair Accessible', 'Clubhouse', 'Pro Courts'].map((tag) => (
+                {['Parking', 'Wheelchair Accessible', 'Modern Washrooms', 'Pro Courts'].map((tag) => (
                   <span key={tag} className="px-4 py-2 rounded-full text-sm font-medium" style={{ backgroundColor: 'rgba(107, 122, 61, 0.12)', color: '#4a5528' }}>
                     {tag}
                   </span>
