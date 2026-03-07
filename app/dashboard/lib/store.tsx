@@ -982,6 +982,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (shouldNotify('partner')) {
         addNotification(notif);
         db.createNotification(currentUser.id, notif).catch(err => reportError(err, 'Supabase'));
+        firePush(currentUser.id, notif.title, notif.body, 'partner', `partner-post-${partner.id}`);
       }
       // Send confirmation email (fire and forget)
       if (currentUser.email) {
@@ -1039,6 +1040,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           if (shouldNotify('event')) {
             addNotification(notif);
             db.createNotification(currentUser.id, notif).catch(err => reportError(err, 'Supabase'));
+            firePush(currentUser.id, notif.title, notif.body, 'event', `event-rsvp-${eventId}`);
           }
           // Log RSVP to audit trail
           fetch('/api/log-email', {
