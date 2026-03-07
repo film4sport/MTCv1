@@ -613,7 +613,7 @@ function LoginContent() {
 
           {/* Welcome */}
           <div className="mb-8 lg:mb-12">
-            <h1 className="headline-font text-3xl sm:text-4xl lg:text-[2.75rem]" style={{ color: '#2a2f1e' }}>Sign in to your Mono Tennis Club acct</h1>
+            <h1 className="headline-font text-3xl sm:text-4xl lg:text-[2.75rem] leading-tight tracking-tight" style={{ color: '#2a2f1e' }}>Sign in to your<br />Mono Tennis Club account</h1>
           </div>
 
           {/* Sign-In Options: Google + Magic Link */}
@@ -721,44 +721,6 @@ function LoginContent() {
               Become a Member
             </a>
           </p>
-
-          {/* Club Tasks — admin reminders checklist */}
-          <div className="mt-8 rounded-2xl p-5 sm:p-6" style={{ background: 'rgba(107, 122, 61, 0.06)', border: '1px solid rgba(107, 122, 61, 0.15)' }}>
-            <div className="flex items-center gap-2 mb-4">
-              <svg width="18" height="18" fill="none" stroke="#6b7a3d" viewBox="0 0 24 24" strokeWidth="1.5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <h3 className="text-sm font-semibold" style={{ color: '#2a2f1e' }}>Club Tasks</h3>
-            </div>
-            <ul className="space-y-2.5">
-              {[
-                { done: true, text: 'Open sun shades on courts 1-4' },
-                { done: true, text: 'Check net tension & height' },
-                { done: false, text: 'Sweep clay off hard courts' },
-                { done: false, text: 'Restock ball hopper by court 2' },
-                { done: false, text: 'Post weekend tournament draw' },
-              ].map((task, i) => (
-                <li key={i} className="flex items-center gap-2.5">
-                  <div style={{
-                    width: 18, height: 18, borderRadius: 5, flexShrink: 0,
-                    border: task.done ? 'none' : '1.5px solid #c5c0b6',
-                    background: task.done ? '#6b7a3d' : '#fff',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}>
-                    {task.done && (
-                      <svg width="11" height="11" fill="none" stroke="#fff" viewBox="0 0 24 24" strokeWidth="3">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                      </svg>
-                    )}
-                  </div>
-                  <span className="text-sm" style={{ color: task.done ? '#999' : '#2a2f1e', textDecoration: task.done ? 'line-through' : 'none' }}>
-                    {task.text}
-                  </span>
-                </li>
-              ))}
-            </ul>
-            <p className="text-xs mt-3" style={{ color: '#999' }}>Visible to admins after sign in</p>
-          </div>
 
           {/* Magic Link Sent — Full overlay */}
           {magicLinkSent && (
