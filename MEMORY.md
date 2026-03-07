@@ -8,8 +8,24 @@
 - **SMTP/Supabase email**: DONE. Resend SMTP (smtp.resend.com:465, noreply@monotennisclub.com). Email confirmation and password reset emails are live.
 - **Deployment**: Railway (NOT Vercel). NODE_VERSION=20 env var set. 13 env vars total.
 - **Google OAuth**: Code complete, awaiting external setup (Google Cloud Console + Supabase provider config). See session below.
-- **Booking emails**: Fixed silent error swallowing, case-insensitive email validation, proper error responses. Railway SMTP vars updated from old Google to Resend (2026-03-06).
+- **Booking emails**: Fixed `from` address bug (was using SMTP username `resend` instead of real email). Now uses `SMTP_FROM=noreply@monotennisclub.com`. User must add `SMTP_FROM` env var to Railway. Domain verified on Resend.
 - **Message notifications**: Bell + push notifications now trigger on message send. New `/api/notify-message` route for push.
+- **Mobile PWA home calendar**: Replaced "Looking for Partners" section with club calendar (neumorphic month grid, reuses Events screen CSS classes). Source: `home-calendar.js`.
+- **Cross-platform push notifications**: Added push+bell to conversations POST, events PATCH/DELETE, announcements POST.
+- **Login screen**: Email Link button restyled to electric-blue/cyan (matches PWA theme). "or" divider made more visible.
+
+### Cowork Session (2026-03-07) — Home Calendar, Booking Email From Fix, Push Notifications
+
+**Booking email `from` address bug:** Emails used `from: "Mono Tennis Club" <${smtpUser}>` where SMTP_USER=`resend` (Resend SMTP username). This is not a valid email — Resend rejected or nodemailer failed silently. Fixed: added `SMTP_FROM` env var, code now uses `from: "Mono Tennis Club" <${SMTP_FROM}>`. Default: `noreply@monotennisclub.com`. Domain is verified on Resend. **User must add `SMTP_FROM=noreply@monotennisclub.com` to Railway env vars.**
+
+**Mobile PWA home calendar:** Replaced "Looking for Partners" on homepage with month-grid club calendar. Uses existing Events screen CSS classes (`calendar-day`, `calendar-nav-btn`, `calendar-event-item`) for neumorphic styling. New file: `public/mobile-app/js/home-calendar.js`. Reads from `clubEventsData` (events.js). Added to build pipeline in `scripts/build-mobile.js`.
+
+**Cross-platform push notifications added to:**
+- `app/api/mobile/conversations/route.ts` — push+bell on message send
+- `app/api/mobile/events/route.ts` — push+bell on event cancel (DELETE) and reschedule (PATCH)
+- `app/api/mobile/announcements/route.ts` — push on announcement create (POST)
+
+**Login screen restyled:** `.login-btn-magic` changed from dark green gradient to `var(--electric-blue)` cyan gradient. `.login-divider` made brighter (0.7 opacity, gradient lines, larger font).
 
 ### Cowork Session (2026-03-06) — Booking Email Fix + Message Notifications
 

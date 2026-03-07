@@ -661,8 +661,8 @@
 .login-divider {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin: 12px 0;
+  gap: 14px;
+  margin: 16px 0;
 }
 
 .login-divider::before,
@@ -670,14 +670,15 @@
   content: '';
   flex: 1;
   height: 1px;
-  background: rgba(255, 255, 255, 0.15);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
 }
 
 .login-divider span {
-  font-size: 12px;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.5);
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
   text-transform: lowercase;
+  letter-spacing: 1px;
 }
 
 /* ============================================
@@ -692,17 +693,18 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  background: linear-gradient(135deg, #6b7a3d 0%, #5a6832 100%);
-  color: #fff;
-  box-shadow: 0 4px 20px rgba(107, 122, 61, 0.35);
+  background: linear-gradient(135deg, var(--electric-blue) 0%, #00b8d9 100%);
+  color: #0a1628;
+  box-shadow: 0 4px 20px rgba(0, 212, 255, 0.35);
   position: relative;
   z-index: 1;
+  letter-spacing: 0.3px;
 }
 
 .login-btn-magic:hover,
 .login-btn-magic:active {
   transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(107, 122, 61, 0.5);
+  box-shadow: 0 8px 30px rgba(0, 212, 255, 0.5);
 }
 
 .login-btn-magic:disabled {

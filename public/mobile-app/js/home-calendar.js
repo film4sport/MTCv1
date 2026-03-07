@@ -1,7 +1,8 @@
 /**
- * home-calendar.js — Compact month-grid calendar for the home screen.
+ * home-calendar.js — Month-grid calendar for the home screen.
  * Shows club events as colored dots. Tap a day to see that day's events.
- * Re-uses clubEventsData from events.js.
+ * Reuses the same CSS classes as the Events screen calendar for consistent
+ * neumorphic styling (calendar-day, calendar-nav-btn, calendar-event-item, etc.)
  */
 (function() {
   'use strict';
@@ -27,11 +28,10 @@
     return map;
   }
 
-  /** Generate the home calendar grid */
+  /** Generate the home calendar grid — uses same classes as Events screen */
   function renderHomeCalendar() {
     var grid = document.getElementById('homeCalendarGrid');
     var label = document.getElementById('homeCalendarMonth');
-    var listContainer = document.getElementById('homeCalendarEvents');
     if (!grid || !label) return;
 
     var year = calDate.getFullYear();
@@ -50,40 +50,41 @@
 
     // Previous month filler days
     for (var i = firstDay - 1; i >= 0; i--) {
-      html += '<div class="hc-day other">' + (daysInPrev - i) + '</div>';
+      html += '<div class="calendar-day other-month">' + (daysInPrev - i) + '</div>';
     }
 
     // Current month days
     for (var day = 1; day <= daysInMonth; day++) {
       var ds = toDateStr(year, month, day);
       var evts = eventsByDate[ds];
-      var cls = 'hc-day';
+      var cls = 'calendar-day';
       if (ds === todayStr) cls += ' today';
       if (evts && evts.length > 0) cls += ' has-event';
-      if (evts && evts.length > 1) cls += ' multi';
+      if (evts && evts.length > 1) cls += ' has-events-multi';
       html += '<div class="' + cls + '" data-date="' + ds + '">' + day + '</div>';
     }
 
     // Next month filler
     var totalCells = Math.ceil((firstDay + daysInMonth) / 7) * 7;
     for (var j = 1; j <= totalCells - firstDay - daysInMonth; j++) {
-      html += '<div class="hc-day other">' + j + '</div>';
+      html += '<div class="calendar-day other-month">' + j + '</div>';
     }
 
     grid.innerHTML = html;
 
-    // Clear event list when month changes
+    // Reset event list
+    var listContainer = document.getElementById('homeCalendarEvents');
+    var titleEl = document.getElementById('homeCalendarDateTitle');
     if (listContainer) {
-      listContainer.innerHTML = '<div class="hc-empty">Tap a date to see events</div>';
-      var titleEl = document.getElementById('homeCalendarDateTitle');
-      if (titleEl) titleEl.textContent = '';
+      listContainer.innerHTML = '<div class="calendar-event-item-empty" style="text-align:center;padding:16px;color:var(--text-muted);font-size:13px;">Tap a date to see events</div>';
     }
+    if (titleEl) titleEl.textContent = 'SELECT A DATE';
   }
 
-  /** Show events for a tapped date */
+  /** Show events for a tapped date — uses calendar-event-item markup */
   function showHomeCalendarDate(dateStr, el) {
     // Highlight selected
-    document.querySelectorAll('#homeCalendarGrid .hc-day').forEach(function(d) {
+    document.querySelectorAll('#homeCalendarGrid .calendar-day').forEach(function(d) {
       d.classList.remove('selected');
     });
     if (el) el.classList.add('selected');
@@ -97,12 +98,12 @@
 
     // Format date title
     var date = new Date(dateStr + 'T12:00:00');
-    var dayName = date.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
-    var monthDay = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase();
-    if (titleEl) titleEl.textContent = dayName + ', ' + monthDay;
+    if (titleEl) {
+      titleEl.textContent = date.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' }).toUpperCase();
+    }
 
     if (evts.length === 0) {
-      container.innerHTML = '<div class="hc-empty">No events on this date</div>';
+      container.innerHTML = '<div class="calendar-event-item-empty" style="text-align:center;padding:16px;color:var(--text-muted);font-size:13px;">No events on this date</div>';
       return;
     }
 
@@ -110,15 +111,19 @@
     evts.forEach(function(ev) {
       var timeStr = ev.time ? ev.time.split(' - ')[0] : '';
       var going = ev.spotsTaken || 0;
-      var badgeCls = ev.badge === 'paid' ? 'gold' : 'green';
-      html += '<div class="hc-event" onclick="if(typeof showEventModal===\'function\')showEventModal(\'' + ev.id + '\')">' +
-        '<div class="hc-event-dot ' + badgeCls + '"></div>' +
-        '<div class="hc-event-body">' +
-          '<div class="hc-event-title">' + (typeof sanitizeHTML === 'function' ? sanitizeHTML(ev.title) : ev.title) + '</div>' +
-          '<div class="hc-event-meta">' + (typeof sanitizeHTML === 'function' ? sanitizeHTML(timeStr) : timeStr) + ' · ' + (typeof sanitizeHTML === 'function' ? sanitizeHTML(ev.location || '') : (ev.location || '')) + '</div>' +
-        '</div>' +
-        '<div class="hc-event-going">' + going + ' going</div>' +
-      '</div>';
+      var dotCls = ev.badge === 'paid' ? 'gold' : ev.badge === 'free' ? 'blue' : '';
+      var safeTitle = typeof sanitizeHTML === 'function' ? sanitizeHTML(ev.title) : ev.title;
+      var safeLoc = typeof sanitizeHTML === 'function' ? sanitizeHTML(ev.location || '') : (ev.location || '');
+      var safeTime = typeof sanitizeHTML === 'function' ? sanitizeHTML(timeStr) : timeStr;
+
+      html += '<div class="calendar-event-item" onclick="if(typeof showEventModal===\'function\')showEventModal(\'' + ev.id + '\')">' +
+        '  <div class="calendar-event-time">' + safeTime + '</div>' +
+        '  <div class="calendar-event-info">' +
+        '    <div class="calendar-event-title">' + safeTitle + '</div>' +
+        '    <div class="calendar-event-location">' + safeLoc + ' \u2022 ' + going + ' going</div>' +
+        '  </div>' +
+        '  <div class="calendar-event-dot ' + dotCls + '"></div>' +
+        '</div>';
     });
     container.innerHTML = html;
   }
@@ -130,7 +135,7 @@
 
   // Click delegation on the grid
   function handleGridClick(e) {
-    var day = e.target.closest('.hc-day:not(.other)');
+    var day = e.target.closest('.calendar-day:not(.other-month)');
     if (!day) return;
     var ds = day.getAttribute('data-date');
     if (ds) showHomeCalendarDate(ds, day);

@@ -20,7 +20,7 @@
     if ('serviceWorker' in navigator) {
       caches.keys().then(function(names) {
         names.forEach(function(name) {
-          if (name.indexOf('mtc-court-08e81a81') === -1) {
+          if (name.indexOf('mtc-court-1248ca83') === -1) {
             caches.delete(name);
             console.log('[CacheBust] Deleted old cache:', name);
           }
@@ -666,23 +666,35 @@
         <span class="section-action" onclick="navigateTo('events')">See All →</span>
       </div>
 
-      <div class="home-calendar">
-        <div class="hc-header">
-          <button class="hc-nav" onclick="MTC.fn.changeHomeMonth(-1)" aria-label="Previous month">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      <div class="home-calendar-wrap">
+        <div class="calendar-header" style="display:flex;justify-content:space-between;align-items:center;padding:0 16px 12px;">
+          <button class="calendar-nav-btn" onclick="MTC.fn.changeHomeMonth(-1)" aria-label="Previous month">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
           </button>
-          <div class="hc-month" id="homeCalendarMonth">—</div>
-          <button class="hc-nav" onclick="MTC.fn.changeHomeMonth(1)" aria-label="Next month">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          <div class="calendar-month-label" id="homeCalendarMonth">—</div>
+          <button class="calendar-nav-btn" onclick="MTC.fn.changeHomeMonth(1)" aria-label="Next month">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
           </button>
         </div>
-        <div class="hc-weekdays">
-          <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
+        <div class="calendar-weekdays" style="display:grid;grid-template-columns:repeat(7,1fr);padding:0 16px 8px;text-align:center;">
+          <div class="calendar-weekday">S</div>
+          <div class="calendar-weekday">M</div>
+          <div class="calendar-weekday">T</div>
+          <div class="calendar-weekday">W</div>
+          <div class="calendar-weekday">T</div>
+          <div class="calendar-weekday">F</div>
+          <div class="calendar-weekday">S</div>
         </div>
-        <div class="hc-grid" id="homeCalendarGrid"></div>
-        <div class="hc-date-title" id="homeCalendarDateTitle"></div>
-        <div class="hc-events" id="homeCalendarEvents">
-          <div class="hc-empty">Tap a date to see events</div>
+        <div class="calendar-grid" id="homeCalendarGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;padding:0 16px 16px;"></div>
+        <div class="calendar-events" style="padding:0 16px;">
+          <div class="section-header" style="margin-bottom:0;">
+            <h3 class="section-title" id="homeCalendarDateTitle" style="font-size:14px;">SELECT A DATE</h3>
+          </div>
+          <div id="homeCalendarEvents">
+            <div class="calendar-event-item-empty" style="text-align:center;padding:16px;color:var(--text-muted);font-size:13px;">
+              Tap a date to see events
+            </div>
+          </div>
         </div>
       </div>
     </div>

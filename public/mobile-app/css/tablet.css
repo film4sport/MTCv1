@@ -268,19 +268,9 @@
     max-width: 900px;
   }
 
-  /* Home calendar — wider on tablet, side-by-side layout */
-  .home-calendar {
+  /* Home calendar — wider on tablet */
+  .home-calendar-wrap {
     margin: 0 24px 32px;
-    padding: 20px 24px;
-  }
-  .hc-month {
-    font-size: 20px;
-  }
-  .hc-day {
-    font-size: 14px;
-    padding: 10px 0;
-  }
-  .hc-event-title {
-    font-size: 15px;
+    padding: 20px 0;
   }
 }
