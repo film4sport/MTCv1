@@ -96,6 +96,29 @@ export default function Hero() {
 
         </div>
 
+        {/* Opening Day Card — right side on desktop, below buttons on mobile */}
+        <div className="hidden md:flex lg:flex-1 lg:justify-end mt-6 lg:mt-0">
+          <div
+            className="inline-flex flex-col items-center px-8 py-6 rounded-2xl"
+            style={{
+              background: 'rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+            }}
+          >
+            <span className="text-xs tracking-[0.2em] uppercase font-medium mb-2" style={{ color: 'rgba(232, 228, 217, 0.6)' }}>
+              // Opening Day
+            </span>
+            <span className="headline-font text-3xl md:text-4xl lg:text-5xl" style={{ color: '#e8e4d9' }}>
+              May 9
+            </span>
+            <span className="text-sm mt-2 font-medium" style={{ color: 'rgba(212, 225, 87, 0.9)' }}>
+              BBQ &amp; Meet the Pro&apos;s
+            </span>
+          </div>
+        </div>
+
       </div>
 
       {/* Bottom Bar */}

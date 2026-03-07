@@ -427,9 +427,11 @@ html, body {
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  background: transparent;
-  color: #d4e157;
-  border: 1.5px solid rgba(212, 225, 87, 0.4);
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #e8e4d9;
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   text-decoration: none;
@@ -440,7 +442,7 @@ html, body {
   content: '';
   position: absolute;
   inset: 0;
-  background: #d4e157;
+  background: rgba(255, 255, 255, 0.9);
   border-radius: 9999px;
   transform: scaleX(0);
   transform-origin: left;
@@ -449,8 +451,8 @@ html, body {
 }
 .login-btn:hover {
   color: #1a1f12;
-  border-color: #d4e157;
-  box-shadow: 0 0 20px rgba(212, 225, 87, 0.3), 0 0 40px rgba(212, 225, 87, 0.1);
+  border-color: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.2), 0 0 40px rgba(255, 255, 255, 0.1);
 }
 .login-btn:hover::before {
   transform: scaleX(1);
