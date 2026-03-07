@@ -22,7 +22,7 @@ export default function AboutTab() {
                   <Image src="https://cdn.jsdelivr.net/gh/film4sport/my-webapp-images@main/mtc-images/gallery-01-community.jpeg" alt="Mono Tennis Club Community" fill className="object-cover" sizes="25vw" />
                 </div>
                 <div className="aspect-video rounded-lg overflow-hidden relative">
-                  <Image src="https://cdn.jsdelivr.net/gh/film4sport/my-webapp-images@main/mtc-images/MTC%20logo.jpg" alt="Mono Tennis Club Logo" fill className="object-cover" sizes="25vw" />
+                  <Image src="https://cdn.jsdelivr.net/gh/film4sport/my-webapp-images@main/mtc-images/Clubhouse-Inside.png" alt="Mono Tennis Club Clubhouse Interior" fill className="object-cover" sizes="25vw" />
                 </div>
               </div>
             </div>
