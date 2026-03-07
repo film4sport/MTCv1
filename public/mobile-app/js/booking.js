@@ -21,6 +21,9 @@
   const bookingsData = {};
   const eventsData = {};
 
+  // Court blocks data (populated from API)
+  let courtBlocksData = [];
+
   // Registered member lists (populated from API)
   const eventRegistrations = {};
 
@@ -253,6 +256,27 @@
 
 
   // ============================================
+  // COURT BLOCK HELPERS
+  // ============================================
+  function isSlotBlocked(dateStr, time, courtId) {
+    if (!courtBlocksData || courtBlocksData.length === 0) return null;
+    var slotMins = timeToMinutes(time);
+    for (var i = 0; i < courtBlocksData.length; i++) {
+      var block = courtBlocksData[i];
+      if (block.block_date !== dateStr) continue;
+      // court_id null means ALL courts
+      if (block.court_id !== null && block.court_id !== courtId) continue;
+      // Full-day block (no time_start/time_end)
+      if (!block.time_start && !block.time_end) return block;
+      // Time-range block — parse start/end
+      var startMins = block.time_start ? timeToMinutes(block.time_start) : 0;
+      var endMins = block.time_end ? timeToMinutes(block.time_end) : 1440;
+      if (slotMins >= startMins && slotMins < endMins) return block;
+    }
+    return null;
+  }
+
+  // ============================================
   // WEEKLY GRID - CourtReserve Style
   // ============================================
   function changeWeek(dir) { currentWeekOffset+=dir; selectedWeekDay=null; renderWeeklyGrid(); }
@@ -342,10 +366,15 @@
         const evStart=isEventStart(dateStr,time,court);
         let sc='weekly-slot', inner='', click='';
 
+        var blockInfo=isSlotBlocked(dateStr,time,court);
+
         if (isPastDay||(isPastSlot&&!booking)) {
           sc+=' past'; inner='<span class="slot-dash">\u2014</span>';
         } else if (isCourtClosed(court, time)) {
           sc+=' closed'; inner='<span class="slot-dash closed-label">Closed</span>';
+        } else if (blockInfo) {
+          sc+=' blocked'; var reasonShort=blockInfo.reason||'Blocked'; if(reasonShort.length>12)reasonShort=reasonShort.slice(0,11)+'\u2026';
+          inner='<span class="slot-blocked-label">'+sanitizeHTML(reasonShort)+'</span>';
         } else if (evStart) {
           const ev=evStart, span=getEventSpan(ev), info=MTC.config.eventTypes[ev.type]||MTC.config.eventTypes.reserved;
           sc+=' event-start';
@@ -960,6 +989,19 @@
    * Update announcements from Supabase API.
    * Called by auth.js after login when API data is available.
    */
+  /**
+   * Update court blocks from API.
+   * Called by auth.js after login and by realtime-sync when court_blocks table changes.
+   */
+  window.updateCourtBlocksFromAPI = function(apiBlocks) {
+    if (!Array.isArray(apiBlocks)) return;
+    courtBlocksData = apiBlocks;
+    // Store for offline access
+    MTC.storage.set('mtc-api-court-blocks', apiBlocks);
+    // Re-render booking grid if currently on that screen
+    try { initBookingSystem(); } catch(e) { /* may not be on booking screen */ }
+  };
+
   window.updateAnnouncementsFromAPI = function(apiAnnouncements) {
     if (!Array.isArray(apiAnnouncements)) return;
     // Update the home screen announcement banner if present

@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${siteUrl}/login?error=config`);
   }
 
-  // Determine redirect: recovery → login reset, custom next → that path, default → dashboard
+  // Determine redirect: recovery → login reset, custom next → that path, default → auth/complete (client-side router)
   let redirectUrl: string;
   if (type === 'recovery') {
     redirectUrl = `${siteUrl}/login?reset=true`;
@@ -30,7 +30,8 @@ export async function GET(request: NextRequest) {
     // Custom redirect from OAuth flow (e.g. /signup?oauth=true)
     redirectUrl = `${siteUrl}${next.startsWith('/') ? next : `/${next}`}`;
   } else {
-    redirectUrl = `${siteUrl}/dashboard`;
+    // Use client-side redirect page — checks localStorage for mobile PWA redirect
+    redirectUrl = `${siteUrl}/auth/complete`;
   }
 
   const response = NextResponse.redirect(redirectUrl);
@@ -56,10 +57,10 @@ export async function GET(request: NextRequest) {
   }
 
   // ── OAuth: detect new users who need to complete the signup wizard ──
-  // If this is an OAuth login (no type=recovery, no explicit next param),
-  // check if the user has a membership_type in their profile.
-  // If not, redirect them to the signup wizard to complete registration.
-  if (type !== 'recovery' && !next && data?.session?.user) {
+  // If this is an OAuth login (no type=recovery), check if the user has a
+  // membership_type in their profile. If not, redirect to signup wizard.
+  // Works for both desktop and mobile OAuth flows.
+  if (type !== 'recovery' && data?.session?.user) {
     const isOAuthProvider = data.session.user.app_metadata?.provider !== 'email';
     if (isOAuthProvider) {
       const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -74,8 +75,12 @@ export async function GET(request: NextRequest) {
         .single();
 
       // New OAuth user with no membership type → send to signup wizard
+      // Preserve mobile redirect hint so signup can return user to mobile PWA
       if (!profile?.membership_type) {
-        const oauthRedirect = NextResponse.redirect(`${siteUrl}/signup?oauth=true`);
+        const signupUrl = next
+          ? `${siteUrl}/signup?oauth=true&next=${encodeURIComponent(next)}`
+          : `${siteUrl}/signup?oauth=true`;
+        const oauthRedirect = NextResponse.redirect(signupUrl);
         // Copy session cookies to the new response
         response.cookies.getAll().forEach((cookie) => {
           oauthRedirect.cookies.set(cookie.name, cookie.value);

@@ -4,30 +4,598 @@
   // ============================================
   // ADMIN FUNCTIONS
   // ============================================
+  // ============================================
+  // ADMIN STATE
+  // ============================================
+  var _adminMembers = [];
+  var _adminBookings = [];
+  var _adminCourts = [];
+  var _adminBlocks = [];
+  var _adminSearchTerm = '';
+  var _adminTeamFilter = 'all';
+  var _adminDataLoaded = {};
+
+  // ============================================
+  // TAB SWITCHING
+  // ============================================
   window.switchAdminTab = function(tab) {
-    // Hide all admin content and deactivate tabs
-    document.querySelectorAll('.admin-content').forEach(function(c) { c.style.display = 'none'; });
-    document.querySelectorAll('.admin-tab').forEach(function(t) {
-      t.classList.remove('active');
-      t.setAttribute('aria-selected', 'false');
-      t.setAttribute('tabindex', '-1');
+    // Hide all tab content panels
+    document.querySelectorAll('.admin-tab-content').forEach(function(c) { c.classList.remove('active'); });
+    // Deactivate all tab buttons
+    document.querySelectorAll('.admin-tabs-bar .admin-tab').forEach(function(t) { t.classList.remove('active'); });
+
+    // Show selected content panel
+    var contentId = 'adminTab' + tab.charAt(0).toUpperCase() + tab.slice(1);
+    var content = document.getElementById(contentId);
+    if (content) content.classList.add('active');
+
+    // Activate tab button
+    var tabBtn = document.querySelector('.admin-tabs-bar .admin-tab[data-tab="' + tab + '"]');
+    if (tabBtn) tabBtn.classList.add('active');
+
+    // Load data for the tab (lazy, only once or on stale)
+    if (tab === 'dashboard' && !_adminDataLoaded.dashboard) { loadAdminDashboard(); }
+    if (tab === 'members' && !_adminDataLoaded.members) { loadMembersList(); }
+    if (tab === 'courts' && !_adminDataLoaded.courts) { loadCourts(); }
+    if (tab === 'announcements' && !_adminDataLoaded.announcements) { loadAnnouncementHistory(); }
+  };
+
+  // ============================================
+  // DASHBOARD TAB
+  // ============================================
+  function loadAdminDashboard() {
+    _adminDataLoaded.dashboard = true;
+    var token = MTC.state.currentUser && MTC.state.currentUser.accessToken;
+    if (!token) return;
+    var headers = { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' };
+
+    // Fetch bookings, members, courts, settings in parallel
+    Promise.all([
+      fetch('/api/mobile/bookings', { headers: headers }).then(function(r) { return r.ok ? r.json() : { bookings: [] }; }),
+      fetch('/api/mobile/members', { headers: headers }).then(function(r) { return r.ok ? r.json() : { members: [] }; }),
+      fetch('/api/mobile/courts', { headers: headers }).then(function(r) { return r.ok ? r.json() : { courts: [] }; }),
+      fetch('/api/mobile/settings', { headers: headers }).then(function(r) { return r.ok ? r.json() : { settings: [] }; })
+    ]).then(function(results) {
+      _adminBookings = results[0].bookings || [];
+      _adminMembers = results[1].members || [];
+      _adminCourts = results[2].courts || [];
+      var settings = results[3].settings || [];
+
+      renderAnalyticsCards();
+      renderPeakTimes();
+      renderCourtUsage();
+
+      // Gate code
+      var gateCodeSetting = settings.find(function(s) { return s.key === 'gate_code'; });
+      var codeEl = document.getElementById('currentGateCode');
+      if (codeEl) codeEl.textContent = (gateCodeSetting && gateCodeSetting.value) || '----';
+    }).catch(function(err) {
+      console.error('[Admin] Dashboard load error:', err);
     });
+  }
 
-    // Show selected tab
-    const contentId = 'admin' + tab.charAt(0).toUpperCase() + tab.slice(1);
-    const tabId = 'admin' + tab.charAt(0).toUpperCase() + tab.slice(1) + 'Tab';
+  function renderAnalyticsCards() {
+    var now = new Date();
+    var monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+    var confirmed = _adminBookings.filter(function(b) { return b.status === 'confirmed'; });
+    var thisMonth = confirmed.filter(function(b) { return b.date >= monthStart; });
+    var activeMembers = _adminMembers.filter(function(m) { return m.status !== 'paused'; });
+    var openCourts = _adminCourts.filter(function(c) { return c.status !== 'maintenance'; });
 
-    const content = document.getElementById(contentId);
-    const tabBtn = document.getElementById(tabId);
+    var el;
+    el = document.getElementById('statBookingsMonth'); if (el) el.textContent = thisMonth.length;
+    el = document.getElementById('statBookingsTotal'); if (el) el.textContent = confirmed.length;
+    el = document.getElementById('statActiveMembers'); if (el) el.textContent = activeMembers.length;
+    el = document.getElementById('statCourtsOpen'); if (el) el.textContent = openCourts.length + '/' + _adminCourts.length;
+  }
 
-    if (content) content.style.display = 'block';
-    if (tabBtn) {
-      tabBtn.classList.add('active');
-      tabBtn.setAttribute('aria-selected', 'true');
-      tabBtn.setAttribute('tabindex', '0');
+  function renderPeakTimes() {
+    var container = document.getElementById('peakTimesList');
+    if (!container) return;
+    var confirmed = _adminBookings.filter(function(b) { return b.status === 'confirmed'; });
+    var counts = {};
+    var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    confirmed.forEach(function(b) {
+      if (!b.date || !b.time) return;
+      var d = new Date(b.date + 'T12:00:00');
+      var key = days[d.getDay()] + ' ' + b.time;
+      counts[key] = (counts[key] || 0) + 1;
+    });
+    var sorted = Object.entries(counts).sort(function(a, b) { return b[1] - a[1]; }).slice(0, 5);
+    if (!sorted.length) { container.innerHTML = '<div class="admin-empty-state">No booking data yet</div>'; return; }
+    var maxCount = sorted[0][1];
+    container.innerHTML = sorted.map(function(entry) {
+      var pct = Math.round((entry[1] / maxCount) * 100);
+      return '<div class="peak-row"><span class="peak-label">' + entry[0] + '</span><div class="peak-bar"><div class="peak-bar-fill" style="width:' + pct + '%"></div></div><span class="peak-count">' + entry[1] + '</span></div>';
+    }).join('');
+  }
+
+  function renderCourtUsage() {
+    var confirmed = _adminBookings.filter(function(b) { return b.status === 'confirmed'; });
+    var now = new Date();
+    var today = now.toISOString().split('T')[0];
+    var weekStart = new Date(now); weekStart.setDate(now.getDate() - now.getDay());
+    var weekStr = weekStart.toISOString().split('T')[0];
+    var monthStr = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+
+    var usageToday = confirmed.filter(function(b) { return b.date === today; }).length;
+    var usageWeek = confirmed.filter(function(b) { return b.date >= weekStr; }).length;
+    var usageMonth = confirmed.filter(function(b) { return b.date >= monthStr; }).length;
+
+    var el;
+    el = document.getElementById('usageToday'); if (el) el.textContent = usageToday;
+    el = document.getElementById('usageWeek'); if (el) el.textContent = usageWeek;
+    el = document.getElementById('usageMonth'); if (el) el.textContent = usageMonth;
+  }
+
+  // Gate Code
+  window.updateGateCodeAndNotify = function() {
+    var input = document.getElementById('newGateCodeInput');
+    if (!input || !input.value.trim()) { showToast('Enter a new gate code'); return; }
+    var code = input.value.trim();
+    var token = MTC.state.currentUser && MTC.state.currentUser.accessToken;
+    if (!token) return;
+    var headers = { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' };
+
+    fetch('/api/mobile/settings', {
+      method: 'POST', headers: headers,
+      body: JSON.stringify({ key: 'gate_code', value: code })
+    }).then(function(r) {
+      if (!r.ok) throw new Error('Failed');
+      var codeEl = document.getElementById('currentGateCode');
+      if (codeEl) codeEl.textContent = code;
+      input.value = '';
+
+      // Notify all active members via messages
+      var activeMembers = _adminMembers.filter(function(m) {
+        return m.status !== 'paused' && m.role !== 'admin' && m.id !== MTC.state.currentUser.userId;
+      });
+      var msgBody = 'The court gate code has been updated. Your new gate code is: ' + code + '. Please keep this code private and do not share it outside the club.';
+      var notifyPromises = activeMembers.map(function(m) {
+        return fetch('/api/mobile/conversations', {
+          method: 'POST', headers: headers,
+          body: JSON.stringify({ recipientId: m.id, message: msgBody })
+        }).catch(function() {});
+      });
+      Promise.all(notifyPromises).then(function() {
+        showToast('Gate code updated. ' + activeMembers.length + ' members notified.');
+      });
+    }).catch(function() { showToast('Failed to update gate code'); });
+  };
+
+  // CSV Exports
+  function downloadCSV(filename, csvContent) {
+    var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    var link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(link.href);
+  }
+
+  window.exportMembersCSV = function() {
+    if (!_adminMembers.length) { showToast('No member data loaded'); return; }
+    var feeMap = { adult: 120, family: 240, junior: 55 };
+    var rows = [['Name','Email','Role','Membership','Fee','Skill Level','Status','Since']];
+    _adminMembers.forEach(function(m) {
+      rows.push([m.name || '', m.email || '', m.role || 'member', m.membership_type || 'adult',
+        '$' + (feeMap[m.membership_type] || 120), m.skill_level || '', m.status || 'active', m.created_at ? m.created_at.split('T')[0] : '']);
+    });
+    downloadCSV('mtc-members-' + new Date().toISOString().split('T')[0] + '.csv', rows.map(function(r) { return r.join(','); }).join('\n'));
+    showToast('Members exported');
+  };
+
+  window.exportPaymentsCSV = function() {
+    if (!_adminMembers.length) { showToast('No member data loaded'); return; }
+    var feeMap = { adult: 120, family: 240, junior: 55 };
+    var rows = [['Name','Email','Membership','Annual Fee','Since','Status']];
+    var total = 0;
+    _adminMembers.forEach(function(m) {
+      var fee = feeMap[m.membership_type] || 120;
+      total += fee;
+      rows.push([m.name || '', m.email || '', m.membership_type || 'adult', '$' + fee, m.created_at ? m.created_at.split('T')[0] : '', m.status || 'active']);
+    });
+    rows.push(['TOTAL','','',('$' + total),'','']);
+    downloadCSV('mtc-payments-' + new Date().toISOString().split('T')[0] + '.csv', rows.map(function(r) { return r.join(','); }).join('\n'));
+    showToast('Payments exported');
+  };
+
+  window.exportCourtUsageCSV = function() {
+    if (!_adminBookings.length) { showToast('No booking data loaded'); return; }
+    var confirmed = _adminBookings.filter(function(b) { return b.status === 'confirmed'; });
+    var rows = [['Date','Time','Court','Member','Match Type','Duration','Status']];
+    confirmed.forEach(function(b) {
+      rows.push([b.date || '', b.time || '', b.court_name || ('Court ' + b.court_id), b.booker_name || '', b.match_type || '', (b.duration || 2) * 30 + ' min', b.status]);
+    });
+    downloadCSV('mtc-court-usage-' + new Date().toISOString().split('T')[0] + '.csv', rows.map(function(r) { return r.join(','); }).join('\n'));
+    showToast('Court usage exported');
+  };
+
+  // ============================================
+  // MEMBERS TAB
+  // ============================================
+  function loadMembersList() {
+    _adminDataLoaded.members = true;
+    var token = MTC.state.currentUser && MTC.state.currentUser.accessToken;
+    if (!token) return;
+    fetch('/api/mobile/members', { headers: { 'Authorization': 'Bearer ' + token } })
+      .then(function(r) { return r.ok ? r.json() : { members: [] }; })
+      .then(function(data) {
+        _adminMembers = data.members || [];
+        renderMembersList();
+      })
+      .catch(function() { showToast('Failed to load members'); });
+  }
+
+  function renderMembersList() {
+    var container = document.getElementById('adminMembersList');
+    if (!container) return;
+    var filtered = _adminMembers.filter(function(m) {
+      if (_adminTeamFilter !== 'all' && m.interclub_team !== _adminTeamFilter) return false;
+      if (_adminSearchTerm) {
+        var term = _adminSearchTerm.toLowerCase();
+        return (m.name && m.name.toLowerCase().indexOf(term) >= 0) || (m.email && m.email.toLowerCase().indexOf(term) >= 0);
+      }
+      return true;
+    });
+    if (!filtered.length) {
+      container.innerHTML = '<div class="admin-empty-state">No members found</div>';
+      return;
+    }
+    var currentUserId = MTC.state.currentUser && MTC.state.currentUser.userId;
+    container.innerHTML = filtered.map(function(m) {
+      var initials = (m.name || '?').split(' ').map(function(n) { return n[0]; }).join('').toUpperCase().substring(0, 2);
+      var isSelf = m.id === currentUserId;
+      var isAdmin = m.role === 'admin';
+      var isPaused = m.status === 'paused';
+      var badges = '';
+      badges += '<span class="admin-badge admin-badge-' + (m.role || 'member') + '">' + (m.role || 'member') + '</span>';
+      badges += '<span class="admin-badge admin-badge-' + (m.membership_type || 'adult') + '">' + (m.membership_type || 'adult') + '</span>';
+      if (m.skill_level) badges += '<span class="admin-badge">' + m.skill_level + '</span>';
+      badges += '<span class="admin-badge admin-badge-' + (isPaused ? 'paused' : 'active') + '">' + (isPaused ? 'paused' : 'active') + '</span>';
+      if (m.interclub_team) badges += '<span class="admin-badge admin-badge-team">Team ' + m.interclub_team.toUpperCase() + '</span>';
+      if (m.interclub_captain) badges += '<span class="admin-badge admin-badge-captain">Captain</span>';
+
+      var actions = '';
+      if (!isSelf && !isAdmin) {
+        // Captain toggle (only if on a team)
+        if (m.interclub_team) {
+          if (m.interclub_captain) {
+            actions += '<button class="admin-btn admin-btn-warning" onclick="toggleCaptain(\'' + m.id + '\', false)">Remove Captain</button>';
+          } else {
+            actions += '<button class="admin-btn admin-btn-secondary" onclick="toggleCaptain(\'' + m.id + '\', true)">Make Captain</button>';
+          }
+        }
+        // Pause / Reactivate
+        if (isPaused) {
+          actions += '<button class="admin-btn admin-btn-success" onclick="unpauseMember(\'' + m.id + '\', \'' + (m.name || '').replace(/'/g, "\\'") + '\')">Reactivate</button>';
+        } else {
+          actions += '<button class="admin-btn admin-btn-warning" onclick="pauseMember(\'' + m.id + '\', \'' + (m.name || '').replace(/'/g, "\\'") + '\')">Pause</button>';
+        }
+        // Delete
+        actions += '<button class="admin-btn admin-btn-danger" onclick="removeMember(\'' + m.id + '\', \'' + (m.name || '').replace(/'/g, "\\'") + '\')">Cancel</button>';
+      }
+
+      return '<div class="admin-member-card">' +
+        '<div class="admin-member-header">' +
+          '<div class="admin-member-avatar">' + initials + '</div>' +
+          '<div class="admin-member-info">' +
+            '<div class="admin-member-name">' + (m.name || 'Unknown') + '</div>' +
+            '<div class="admin-member-email">' + (m.email || '') + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="admin-member-badges">' + badges + '</div>' +
+        (actions ? '<div class="admin-member-actions">' + actions + '</div>' : '') +
+      '</div>';
+    }).join('');
+  }
+
+  window.filterAdminMembers = function(term) {
+    _adminSearchTerm = term || '';
+    renderMembersList();
+  };
+
+  window.filterMembersByTeam = function(team, btn) {
+    _adminTeamFilter = team;
+    document.querySelectorAll('.admin-filter-btn').forEach(function(b) { b.classList.remove('active'); });
+    if (btn) btn.classList.add('active');
+    renderMembersList();
+  };
+
+  window.toggleCaptain = function(userId, value) {
+    var token = MTC.state.currentUser && MTC.state.currentUser.accessToken;
+    if (!token) return;
+    fetch('/api/mobile/members', {
+      method: 'PATCH',
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: userId, interclub_captain: value })
+    }).then(function(r) {
+      if (!r.ok) throw new Error('Failed');
+      // Update local state
+      _adminMembers.forEach(function(m) { if (m.id === userId) m.interclub_captain = value; });
+      renderMembersList();
+      showToast(value ? 'Captain assigned' : 'Captain removed');
+    }).catch(function() { showToast('Failed to update captain status'); });
+  };
+
+  window.pauseMember = function(userId, name) {
+    if (!confirm('Pause ' + name + "'s membership? They won't be able to book courts.")) return;
+    var token = MTC.state.currentUser && MTC.state.currentUser.accessToken;
+    fetch('/api/mobile/members', {
+      method: 'PATCH',
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: userId, status: 'paused' })
+    }).then(function(r) {
+      if (!r.ok) throw new Error('Failed');
+      _adminMembers.forEach(function(m) { if (m.id === userId) m.status = 'paused'; });
+      renderMembersList();
+      showToast(name + "'s membership paused");
+    }).catch(function() { showToast('Failed to pause member'); });
+  };
+
+  window.unpauseMember = function(userId, name) {
+    var token = MTC.state.currentUser && MTC.state.currentUser.accessToken;
+    fetch('/api/mobile/members', {
+      method: 'PATCH',
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: userId, status: 'active' })
+    }).then(function(r) {
+      if (!r.ok) throw new Error('Failed');
+      _adminMembers.forEach(function(m) { if (m.id === userId) m.status = 'active'; });
+      renderMembersList();
+      showToast(name + "'s membership reactivated");
+    }).catch(function() { showToast('Failed to reactivate member'); });
+  };
+
+  // ============================================
+  // COURTS TAB
+  // ============================================
+  function loadCourts() {
+    _adminDataLoaded.courts = true;
+    var token = MTC.state.currentUser && MTC.state.currentUser.accessToken;
+    if (!token) return;
+    Promise.all([
+      fetch('/api/mobile/courts', { headers: { 'Authorization': 'Bearer ' + token } }).then(function(r) { return r.ok ? r.json() : { courts: [] }; }),
+      fetch('/api/mobile/court-blocks', { headers: { 'Authorization': 'Bearer ' + token } }).then(function(r) { return r.ok ? r.json() : { blocks: [] }; }).catch(function() { return { blocks: [] }; })
+    ]).then(function(results) {
+      _adminCourts = results[0].courts || [];
+      _adminBlocks = results[1].blocks || [];
+      renderCourts();
+      renderBlocksList();
+    });
+  }
+
+  function renderCourts() {
+    var container = document.getElementById('adminCourtsList');
+    if (!container) return;
+    if (!_adminCourts.length) { container.innerHTML = '<div class="admin-empty-state">No courts found</div>'; return; }
+    container.innerHTML = _adminCourts.map(function(c) {
+      var isOpen = c.status !== 'maintenance';
+      var closeTime = c.floodlight ? '10:00 PM' : '8:00 PM';
+      return '<div class="admin-court-card">' +
+        '<div class="admin-court-name">' + (c.name || 'Court ' + c.id) + '</div>' +
+        '<div class="admin-court-detail">Floodlight: ' + (c.floodlight ? 'Yes' : 'No') + ' · Closes: ' + closeTime + '</div>' +
+        '<div class="admin-court-status ' + (isOpen ? 'open' : 'closed') + '">' + (isOpen ? 'Active' : 'Closed') + '</div><br>' +
+        '<button class="admin-btn ' + (isOpen ? 'admin-btn-danger' : 'admin-btn-success') + '" style="width:100%" onclick="toggleCourtStatus(' + c.id + ', \'' + (isOpen ? 'maintenance' : 'available') + '\')">' +
+          (isOpen ? 'Close Court' : 'Reopen Court') +
+        '</button>' +
+      '</div>';
+    }).join('');
+  }
+
+  window.toggleCourtStatus = function(courtId, newStatus) {
+    var token = MTC.state.currentUser && MTC.state.currentUser.accessToken;
+    fetch('/api/mobile/courts', {
+      method: 'PATCH',
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ courtId: courtId, status: newStatus })
+    }).then(function(r) {
+      if (!r.ok) throw new Error('Failed');
+      _adminCourts.forEach(function(c) { if (c.id === courtId) c.status = newStatus; });
+      renderCourts();
+      showToast('Court ' + (newStatus === 'maintenance' ? 'closed' : 'reopened'));
+    }).catch(function() { showToast('Failed to update court status'); });
+  };
+
+  // Court Blocks
+  function renderBlocksList() {
+    var container = document.getElementById('adminBlocksList');
+    if (!container) return;
+    var today = new Date().toISOString().split('T')[0];
+    var upcoming = _adminBlocks.filter(function(b) { return b.block_date >= today; });
+    upcoming.sort(function(a, b) { return a.block_date.localeCompare(b.block_date); });
+    if (!upcoming.length) { container.innerHTML = '<div class="admin-empty-state">No upcoming blocks</div>'; return; }
+    container.innerHTML = upcoming.map(function(b) {
+      var courtLabel = b.court_id ? ('Court ' + b.court_id) : 'All Courts';
+      var timeLabel = b.time_start ? (b.time_start + ' – ' + b.time_end) : 'All Day';
+      return '<div class="admin-block-item">' +
+        '<div class="admin-block-info">' +
+          '<div class="admin-block-court">' + courtLabel + ' · ' + b.block_date + '</div>' +
+          '<div class="admin-block-time">' + timeLabel + '</div>' +
+          '<div class="admin-block-reason">' + (b.reason || '') + '</div>' +
+        '</div>' +
+        '<button class="admin-btn admin-btn-danger" onclick="deleteCourtBlock(\'' + b.id + '\')">Delete</button>' +
+      '</div>';
+    }).join('');
+  }
+
+  window.showBlockCourtModal = function() {
+    var courts = _adminCourts.map(function(c) {
+      return '<option value="' + c.id + '">' + (c.name || 'Court ' + c.id) + '</option>';
+    }).join('');
+
+    var timeSlots = ['9:30 AM','10:00 AM','10:30 AM','11:00 AM','11:30 AM','12:00 PM','12:30 PM',
+      '1:00 PM','1:30 PM','2:00 PM','2:30 PM','3:00 PM','3:30 PM','4:00 PM','4:30 PM',
+      '5:00 PM','5:30 PM','6:00 PM','6:30 PM','7:00 PM','7:30 PM','8:00 PM','8:30 PM','9:00 PM','9:30 PM'];
+    var timeOptions = timeSlots.map(function(t) { return '<option value="' + t + '">' + t + '</option>'; }).join('');
+
+    var today = new Date().toISOString().split('T')[0];
+    var html = '<div class="modal-overlay active" id="blockCourtModal" onclick="closeBlockCourtModal()">' +
+      '<div class="modal" onclick="event.stopPropagation()" style="max-width:400px">' +
+        '<div class="modal-title">BLOCK COURT TIME</div>' +
+        '<select id="blockCourtSelect" class="admin-select"><option value="">All Courts</option>' + courts + '</select>' +
+        '<input type="date" id="blockDate" class="admin-input" value="' + today + '" min="' + today + '">' +
+        '<label style="display:flex;align-items:center;gap:8px;margin-bottom:8px;color:var(--text-primary);font-size:14px">' +
+          '<input type="checkbox" id="blockFullDay" onchange="toggleBlockTimeInputs()" checked> Full Day' +
+        '</label>' +
+        '<div id="blockTimeInputs" style="display:none;gap:8px;margin-bottom:8px">' +
+          '<select id="blockTimeStart" class="admin-select" style="flex:1">' + timeOptions + '</select>' +
+          '<select id="blockTimeEnd" class="admin-select" style="flex:1"><option value="">End Time</option>' + timeOptions + '</select>' +
+        '</div>' +
+        '<select id="blockReason" class="admin-select">' +
+          '<option value="Maintenance">Maintenance</option><option value="Tournament">Tournament</option>' +
+          '<option value="Weather">Weather</option><option value="Private Event">Private Event</option>' +
+          '<option value="Other">Other</option></select>' +
+        '<input type="text" id="blockNotes" class="admin-input" placeholder="Notes (optional)">' +
+        '<div style="display:flex;gap:8px;margin-top:8px">' +
+          '<button class="admin-btn admin-btn-secondary" style="flex:1" onclick="closeBlockCourtModal()">Cancel</button>' +
+          '<button class="admin-btn admin-btn-primary" style="flex:1" onclick="createCourtBlock()">Block</button>' +
+        '</div>' +
+      '</div></div>';
+    document.body.insertAdjacentHTML('beforeend', html);
+  };
+
+  window.toggleBlockTimeInputs = function() {
+    var fullDay = document.getElementById('blockFullDay');
+    var inputs = document.getElementById('blockTimeInputs');
+    if (inputs) inputs.style.display = fullDay && fullDay.checked ? 'none' : 'flex';
+  };
+
+  window.closeBlockCourtModal = function() {
+    var modal = document.getElementById('blockCourtModal');
+    if (modal) modal.remove();
+  };
+
+  window.createCourtBlock = function() {
+    var date = document.getElementById('blockDate');
+    var reason = document.getElementById('blockReason');
+    var courtSelect = document.getElementById('blockCourtSelect');
+    var fullDay = document.getElementById('blockFullDay');
+    var notes = document.getElementById('blockNotes');
+    if (!date || !date.value) { showToast('Select a date'); return; }
+
+    var body = {
+      court_id: courtSelect && courtSelect.value ? parseInt(courtSelect.value) : null,
+      block_date: date.value,
+      time_start: null,
+      time_end: null,
+      reason: reason ? reason.value : 'Maintenance',
+      notes: notes ? notes.value.trim() : ''
+    };
+    if (fullDay && !fullDay.checked) {
+      var start = document.getElementById('blockTimeStart');
+      var end = document.getElementById('blockTimeEnd');
+      if (!start || !start.value || !end || !end.value) { showToast('Select start and end times'); return; }
+      body.time_start = start.value;
+      body.time_end = end.value;
     }
 
-    announceToScreenReader(tab + ' tab selected');
+    var token = MTC.state.currentUser && MTC.state.currentUser.accessToken;
+    fetch('/api/mobile/court-blocks', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    }).then(function(r) {
+      if (!r.ok) throw new Error('Failed');
+      return r.json();
+    }).then(function(data) {
+      if (data.block) _adminBlocks.push(data.block);
+      renderBlocksList();
+      closeBlockCourtModal();
+      showToast('Court blocked');
+    }).catch(function() { showToast('Failed to create block'); });
+  };
+
+  window.deleteCourtBlock = function(blockId) {
+    if (!confirm('Remove this court block?')) return;
+    var token = MTC.state.currentUser && MTC.state.currentUser.accessToken;
+    fetch('/api/mobile/court-blocks?id=' + encodeURIComponent(blockId), {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + token }
+    }).then(function(r) {
+      if (!r.ok) throw new Error('Failed');
+      _adminBlocks = _adminBlocks.filter(function(b) { return b.id !== blockId; });
+      renderBlocksList();
+      showToast('Block removed');
+    }).catch(function() { showToast('Failed to remove block'); });
+  };
+
+  // ============================================
+  // ANNOUNCEMENTS TAB
+  // ============================================
+  function loadAnnouncementHistory() {
+    _adminDataLoaded.announcements = true;
+    var token = MTC.state.currentUser && MTC.state.currentUser.accessToken;
+    if (!token) return;
+    fetch('/api/mobile/announcements', { headers: { 'Authorization': 'Bearer ' + token } })
+      .then(function(r) { return r.ok ? r.json() : { announcements: [] }; })
+      .then(function(data) {
+        var container = document.getElementById('adminAnnouncementHistory');
+        if (!container) return;
+        var anns = data.announcements || [];
+        if (!anns.length) { container.innerHTML = '<div class="admin-empty-state">No announcements sent yet</div>'; return; }
+        container.innerHTML = anns.map(function(a) {
+          var icon = a.type === 'urgent' ? '<span style="color:#ef4444">URGENT</span>' : a.type === 'warning' ? '<span style="color:#f59e0b">WARNING</span>' : '<span style="color:#3b82f6">INFO</span>';
+          var audience = a.audience && a.audience !== 'all' ? ' <span class="admin-badge admin-badge-team">' + a.audience + '</span>' : '';
+          return '<div class="admin-card" style="margin-bottom:8px">' +
+            '<div style="display:flex;justify-content:space-between;align-items:start">' +
+              '<div style="flex:1">' +
+                '<div style="font-size:12px;margin-bottom:4px">' + icon + audience + ' · ' + (a.created_at ? a.created_at.split('T')[0] : '') + '</div>' +
+                '<div style="font-size:14px;color:var(--text-primary)">' + (a.text || a.message || '') + '</div>' +
+              '</div>' +
+              '<button class="admin-btn admin-btn-danger" style="min-height:32px;padding:4px 10px;font-size:11px" onclick="deleteAdminAnnouncement(\'' + a.id + '\')">Delete</button>' +
+            '</div>' +
+          '</div>';
+        }).join('');
+      });
+  }
+
+  window.postAdminAnnouncement = function() {
+    var msg = document.getElementById('adminAnnMessage');
+    var type = document.getElementById('adminAnnType');
+    var audience = document.getElementById('adminAnnAudience');
+    if (!msg || !msg.value.trim()) { showToast('Write an announcement message'); return; }
+    var token = MTC.state.currentUser && MTC.state.currentUser.accessToken;
+    var title = document.getElementById('adminAnnTitle');
+    fetch('/api/mobile/announcements', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        text: msg.value.trim(),
+        title: title && title.value.trim() ? title.value.trim() : undefined,
+        type: type ? type.value : 'info',
+        audience: audience ? audience.value : 'all'
+      })
+    }).then(function(r) {
+      if (!r.ok) throw new Error('Failed');
+      msg.value = '';
+      if (title) title.value = '';
+      showToast('Announcement posted');
+      _adminDataLoaded.announcements = false;
+      loadAnnouncementHistory();
+    }).catch(function() { showToast('Failed to post announcement'); });
+  };
+
+  window.deleteAdminAnnouncement = function(id) {
+    if (!confirm('Delete this announcement?')) return;
+    var token = MTC.state.currentUser && MTC.state.currentUser.accessToken;
+    fetch('/api/mobile/announcements?id=' + encodeURIComponent(id), {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + token }
+    }).then(function(r) {
+      if (!r.ok) throw new Error('Failed');
+      _adminDataLoaded.announcements = false;
+      loadAnnouncementHistory();
+      showToast('Announcement deleted');
+    }).catch(function() { showToast('Failed to delete announcement'); });
+  };
+
+  // ============================================
+  // INIT — Load dashboard tab by default when admin navigates here
+  // ============================================
+  window.initAdminPanel = function() {
+    _adminDataLoaded = {};
+    switchAdminTab('dashboard');
   };
 
   window.postAnnouncement = function() {

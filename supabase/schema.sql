@@ -368,6 +368,29 @@ create policy "club_settings_admin_delete" on club_settings for delete using (is
 -- Seed default gate code
 insert into club_settings (key, value) values ('gate_code', '1234') on conflict do nothing;
 
+-- ─── Court Blocks (admin-scheduled closures) ────────────────────────────
+create table if not exists court_blocks (
+  id text primary key default 'cb-' || gen_random_uuid()::text,
+  court_id integer references courts(id) on delete cascade,  -- null = ALL courts
+  block_date date not null,
+  time_start text,      -- null = all day; format: '9:30 AM'
+  time_end text,        -- null = all day
+  reason text not null default 'Maintenance',
+  notes text,
+  created_by uuid references profiles(id) on delete set null,
+  created_at timestamptz default now()
+);
+
+create index if not exists idx_court_blocks_date on court_blocks(block_date);
+create index if not exists idx_court_blocks_court_date on court_blocks(court_id, block_date);
+
+-- RLS: everyone can read (for booking calendar), only admins can modify
+alter table court_blocks enable row level security;
+create policy "court_blocks_select" on court_blocks for select using (true);
+create policy "court_blocks_admin_insert" on court_blocks for insert with check (is_admin());
+create policy "court_blocks_admin_update" on court_blocks for update using (is_admin());
+create policy "court_blocks_admin_delete" on court_blocks for delete using (is_admin());
+
 -- ─── Delete Member (Admin RPC) ────────────────────────────
 -- Deletes a user and all related data. Most FKs have ON DELETE CASCADE,
 -- but we explicitly clean up tables that use SET NULL or lack cascade

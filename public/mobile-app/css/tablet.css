@@ -166,7 +166,17 @@
   }
 
   /* ── Admin Panel ── */
-  .admin-tabs {
+  .admin-tabs-bar {
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+    justify-content: center;
+  }
+  .admin-tab {
+    padding: 12px 20px;
+    font-size: 14px;
+  }
+  .admin-tab-content {
     max-width: 720px;
     margin-left: auto;
     margin-right: auto;
@@ -175,21 +185,35 @@
   .admin-stats-grid {
     grid-template-columns: repeat(4, 1fr);
     gap: 12px;
-    max-width: 720px;
-    margin-left: auto;
-    margin-right: auto;
   }
 
-  .admin-report-cards {
-    max-width: 720px;
-    margin-left: auto;
-    margin-right: auto;
+  .admin-courts-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
   }
 
-  .admin-quick-actions {
-    max-width: 720px;
-    margin-left: auto;
-    margin-right: auto;
+  .admin-members-list .admin-member-card {
+    padding: 18px;
+  }
+  .admin-member-header {
+    gap: 16px;
+  }
+  .admin-member-avatar {
+    width: 48px;
+    height: 48px;
+    font-size: 16px;
+  }
+  .admin-member-name { font-size: 16px; }
+  .admin-member-email { font-size: 13px; }
+
+  .admin-gate-code-value { font-size: 40px; }
+  .admin-stat-value { font-size: 32px; }
+
+  .admin-fab {
+    bottom: 90px;
+    right: 32px;
+    width: 64px;
+    height: 64px;
   }
 
   /* ── Typography bumps ── */
