@@ -96,6 +96,11 @@
       setTimeout(function() { if (typeof initCaptainScreen === 'function') initCaptainScreen(); }, 100);
     }
 
+    // Initialize admin panel
+    if (screen === 'admin') {
+      setTimeout(function() { if (typeof initAdminPanel === 'function') initAdminPanel(); }, 100);
+    }
+
     // Render schedule bookings dynamically
     if (screen === 'schedule') {
       setTimeout(function() {

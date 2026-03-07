@@ -1113,6 +1113,46 @@
   background: rgba(255,255,255,0.02);
 }
 
+/* Blocked court cells (admin court blocks) */
+.weekly-slot.blocked {
+  cursor: default;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(220, 38, 38, 0.04),
+    rgba(220, 38, 38, 0.04) 4px,
+    rgba(220, 38, 38, 0.08) 4px,
+    rgba(220, 38, 38, 0.08) 8px
+  );
+}
+
+.slot-blocked-label {
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: #dc2626;
+  opacity: 0.8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+}
+
+[data-theme="dark"] .weekly-slot.blocked {
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(220, 38, 38, 0.08),
+    rgba(220, 38, 38, 0.08) 4px,
+    rgba(220, 38, 38, 0.14) 4px,
+    rgba(220, 38, 38, 0.14) 8px
+  );
+}
+
+[data-theme="dark"] .slot-blocked-label {
+  color: #f87171;
+}
+
 /* Guest toggle in booking modal */
 .guest-toggle-row {
   display: flex;

@@ -15,6 +15,38 @@
 - **Cross-platform push notifications**: Added push+bell to conversations POST, events PATCH/DELETE, announcements POST.
 - **Login screen**: Email Link button restyled to electric-blue/cyan (matches PWA theme). "or" divider made more visible.
 
+### Cowork Session (2026-03-07) — Mobile Admin Parity, Court Blocking, Login Fixes
+
+**Google login first-click fix:**
+- Root cause: `initSupabase()` was only called on button click. CDN/fallback script loaded async, `waitForSupabaseLib(3000)` timed out before script loaded.
+- Fix: Eager `initSupabase()` call on DOMContentLoaded. Google/Magic Link buttons disabled until Supabase is ready. Fallback script gets `onload`/`onerror`. Timeout increased to 8s. Init promise cached to prevent duplicate clients.
+
+**Google OAuth redirect to mobile PWA fix:**
+- Root cause: Supabase OAuth flow strips `?next=` query param from `redirectTo` URL. `/auth/callback` got `next=null` → defaulted to `/dashboard`.
+- Fix: Mobile `auth.js` stores `localStorage.setItem('mtc-auth-redirect', '/mobile-app/index.html')` before OAuth. `/auth/callback` now defaults to `/auth/complete` (not `/dashboard`). New client page `app/auth/complete/page.tsx` reads localStorage and redirects accordingly.
+- Also fixed: `!next` condition in callback meant new mobile OAuth users skipped signup wizard. Removed that check.
+
+**Mobile admin panel — full feature parity with desktop:**
+- Replaced single "Send Announcement" screen with 4-tab admin panel: Dashboard | Members | Courts | Announcements
+- Removed "Full admin features on desktop" info box
+- **Dashboard tab**: Analytics cards (bookings this month, total, active members, courts open), gate code management (view/update/notify all members), CSV exports (members, payments, court usage), peak booking times, court usage stats (today/week/month)
+- **Members tab**: Searchable/filterable roster with member cards showing badges (role, membership, skill, team, captain, status). Actions: Make/Remove Captain, Pause/Reactivate, Cancel (delete). Team filter buttons (All/Team A/Team B). Add Member FAB.
+- **Courts tab**: Court status cards with toggle (Active/Closed). Court blocking section (see below).
+- **Announcements tab**: Create form with type (Info/Warning/Urgent) + audience (All/Team A/Team B/All Interclub). History with delete buttons.
+- Tab switching loads data lazily on first visit.
+- Files: `index.html` (new HTML), `admin.js` (+568 lines of new functions, 1645 total), `admin.css` (+400 lines), `tablet.css` (responsive grid rules)
+
+**Court blocking system (new feature):**
+- New `court_blocks` table in `supabase/schema.sql`: court_id (nullable = all courts), block_date, time_start/time_end (nullable = all day), reason, notes, created_by
+- New API route `app/api/mobile/court-blocks/route.ts`: GET (list), POST (create, admin), DELETE (remove, admin)
+- Admin UI: "Block Court Time" modal with court selector, date picker, full-day toggle vs time range, reason dropdown, notes
+- Booking validation: `app/api/mobile/bookings/route.ts` POST now checks `court_blocks` before allowing booking. Returns 409 with reason if blocked.
+- Blocked slots will show greyed out on booking calendars (implementation pending for desktop `booking-utils.ts` and mobile `booking.js` rendering)
+
+**Desktop admin tab restyling:**
+- Added SVG icons next to each tab label (dashboard grid, people, court, send)
+- Bolder font weight (font-bold), 3px underline indicator on active tab (was 0.5), larger touch targets (py-3 px-5)
+
 ### Cowork Session (2026-03-07) — Login Resilience, CI Test Fixes, Notification Parity
 
 **Mobile PWA login resilience (bulletproofing):**

@@ -61,26 +61,60 @@
         elapsed += 100;
         if (window.supabase) { clearInterval(interval); resolve(true); }
         else if (elapsed >= timeout) { clearInterval(interval); resolve(false); }
-      }, 100);
+      }, 200);
     });
   }
 
+  // Track eager init state
+  var _supabaseInitPromise = null;
+  var _supabaseReady = false;
+
   function initSupabase() {
     if (_supabaseClient) return Promise.resolve(_supabaseClient);
-    return fetchWithRetry('/api/mobile-auth/config', 2, 1000)
+    // Cache the init promise so multiple callers don't create duplicate clients
+    if (_supabaseInitPromise) return _supabaseInitPromise;
+    _supabaseInitPromise = fetchWithRetry('/api/mobile-auth/config', 2, 1000)
       .then(function(r) { return r.json(); })
       .then(function(cfg) {
-        if (!cfg.supabaseUrl || !cfg.supabaseAnonKey) return null;
-        // Wait up to 3s for supabase lib (CDN or local fallback)
-        return waitForSupabaseLib(3000).then(function(loaded) {
+        if (!cfg.supabaseUrl || !cfg.supabaseAnonKey) {
+          _supabaseInitPromise = null;
+          return null;
+        }
+        // Wait up to 8s for supabase lib (CDN or local fallback)
+        return waitForSupabaseLib(8000).then(function(loaded) {
           if (loaded && window.supabase) {
             _supabaseClient = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
             MTC.state._supabaseClient = _supabaseClient; // Expose for realtime-sync.js
+            _supabaseReady = true;
+            enableAuthButtons();
+          } else {
+            _supabaseInitPromise = null; // Allow retry
           }
           return _supabaseClient;
         });
       })
-      .catch(function() { return null; });
+      .catch(function() {
+        _supabaseInitPromise = null; // Allow retry
+        return null;
+      });
+    return _supabaseInitPromise;
+  }
+
+  /** Enable Google + Magic Link buttons once Supabase is ready */
+  function enableAuthButtons() {
+    var googleBtn = document.querySelector('.login-btn-google');
+    var magicBtn = document.querySelector('.login-btn-magic');
+    if (googleBtn) {
+      googleBtn.disabled = false;
+      googleBtn.style.opacity = '';
+      // Remove "Loading..." text if set
+      var label = googleBtn.querySelector('.google-btn-label');
+      if (label && label.textContent === 'Loading...') label.textContent = 'Continue with Google';
+    }
+    if (magicBtn) {
+      magicBtn.disabled = false;
+      magicBtn.style.opacity = '';
+    }
   }
 
   // ============================================
@@ -165,7 +199,9 @@
   window.handleGoogleSignIn = function() {
     var btn = document.querySelector('.login-btn-google');
     if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; }
-    showToast('Connecting...');
+
+    // Store redirect target BEFORE leaving for OAuth (survives the redirect chain)
+    try { localStorage.setItem('mtc-auth-redirect', '/mobile-app/index.html'); } catch(e) {}
 
     initSupabase().then(function(sb) {
       if (!sb) {
@@ -647,6 +683,13 @@
       }
     });
 
+    // Load court blocks (admin-created blocks for specific dates/times)
+    MTC.fn.loadFromAPI('/mobile/court-blocks', 'mtc-api-court-blocks', null).then(function(blocks) {
+      if (blocks && typeof window.updateCourtBlocksFromAPI === 'function') {
+        window.updateCourtBlocksFromAPI(blocks);
+      }
+    });
+
     // Load notifications from Supabase
     MTC.fn.loadFromAPI('/mobile/notifications', 'mtc-api-notifications', null).then(function(notifications) {
       if (notifications && typeof window.updateNotificationsFromAPI === 'function') {
@@ -807,6 +850,20 @@
     if (adminMenuItem) adminMenuItem.classList.add('admin-hidden');
     const captainMenuItem = document.getElementById('menuCaptainItem');
     if (captainMenuItem) captainMenuItem.classList.add('admin-hidden');
+
+    // Disable auth buttons until Supabase is ready (prevents first-click failure)
+    var googleBtn = document.querySelector('.login-btn-google');
+    var magicBtn = document.querySelector('.login-btn-magic');
+    if (googleBtn) { googleBtn.disabled = true; googleBtn.style.opacity = '0.6'; }
+    if (magicBtn) { magicBtn.disabled = true; magicBtn.style.opacity = '0.6'; }
+
+    // Eagerly initialize Supabase client on page load (not on first click)
+    initSupabase().then(function(sb) {
+      if (!sb) {
+        // Still enable buttons — initSupabase will retry on click
+        enableAuthButtons();
+      }
+    });
 
     // Clear validation error styling when user focuses an input
     document.addEventListener('focusin', function(e) {

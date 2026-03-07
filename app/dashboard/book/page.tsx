@@ -10,8 +10,9 @@ import { TIME_SLOTS, COURTS_CONFIG, FEES, BOOKING_RULES } from '../lib/types';
 import { generateId } from '../lib/utils';
 import {
   ViewMode, COURT_COLORS, getTimeRange, formatDuration, parseTimeMinutes,
-  isSlotBooked, isSlotMine, isSlotPast, isCourtClosed, isCourtInMaintenance, canCancel, canBookDate,
+  isSlotBooked, isSlotMine, isSlotPast, isCourtClosed, isCourtInMaintenance, isSlotBlocked, canCancel, canBookDate,
   formatDateShort, isToday, toLocalDateStr,
+  type CourtBlockSlot,
 } from './components/booking-utils';
 import BookingLegend from './components/BookingLegend';
 import BookingSidebar from './components/BookingSidebar';
@@ -41,6 +42,14 @@ export default function BookCourtPage() {
   const [contentKey, setContentKey] = useState(0);
   const tooltipTimeout = useRef<NodeJS.Timeout | null>(null);
   const [mobileDayIdx, setMobileDayIdx] = useState(0); // Today is always first in rolling view
+  const [courtBlocks, setCourtBlocks] = useState<CourtBlockSlot[]>([]);
+
+  // Fetch court blocks from Supabase
+  useEffect(() => {
+    import('../lib/db').then(db => {
+      db.fetchCourtBlocks().then(blocks => setCourtBlocks(blocks as CourtBlockSlot[])).catch(() => {});
+    });
+  }, [bookings]); // re-fetch when bookings change (piggyback on realtime)
 
   const weekDays = useMemo(() => {
     return Array.from({ length: 7 }, (_, i) => {
@@ -354,6 +363,7 @@ export default function BookCourtPage() {
                                 {COURTS_CONFIG.map(c => {
                                   const courtClosed = isCourtInMaintenance(courts, c.id);
                                   const slotClosed = isCourtClosed(c.id, time);
+                                  const blocked = isSlotBlocked(courtBlocks, c.id, selectedDate, time);
                                   const booked = isSlotBooked(bookings, c.id, selectedDate, time);
                                   const mine = isSlotMine(bookings, c.id, selectedDate, time, currentUser?.id);
                                   const past = isSlotPast(selectedDate, time);
@@ -361,24 +371,24 @@ export default function BookCourtPage() {
                                   const isProgram = booked?.type === 'program';
                                   const isLesson = booked?.type === 'lesson';
                                   const eventSlot = !booked ? getEventForSlot(c.id, selectedDate, time) : null;
-                                  const available = !booked && !eventSlot && !past && !courtClosed && !slotClosed && !beyondWindow;
+                                  const available = !booked && !eventSlot && !blocked && !past && !courtClosed && !slotClosed && !beyondWindow;
                                   const colors = COURT_COLORS[c.id];
                                   const slotKey = `wk-${c.id}-${selectedDate}-${time}`;
-                                  const showTooltipHere = hoveredSlot === slotKey && (booked || eventSlot) && !mine;
+                                  const showTooltipHere = hoveredSlot === slotKey && (booked || eventSlot || blocked) && !mine;
 
                                   return (
-                                    <td key={c.id} className="border-b p-[3px] relative" style={{ borderColor: '#f7f5f0', background: courtClosed || slotClosed ? '#f5f2eb' : 'transparent', height: 44 }}>
+                                    <td key={c.id} className="border-b p-[3px] relative" style={{ borderColor: '#f7f5f0', background: courtClosed || slotClosed ? '#f5f2eb' : blocked ? 'repeating-linear-gradient(-45deg, #f5f2eb, #f5f2eb 4px, #ebe8e0 4px, #ebe8e0 8px)' : 'transparent', height: 44 }}>
                                       <button
-                                        onClick={() => !eventSlot && handleSlotClick(c.id, c.name, selectedDate, time)}
-                                        onMouseEnter={() => ((booked && !mine) || eventSlot) ? handleSlotHover(slotKey) : undefined}
+                                        onClick={() => !eventSlot && !blocked && handleSlotClick(c.id, c.name, selectedDate, time)}
+                                        onMouseEnter={() => ((booked && !mine) || eventSlot || blocked) ? handleSlotHover(slotKey) : undefined}
                                         onMouseLeave={() => handleSlotHover(null)}
-                                        disabled={(!mine && !!booked) || !!eventSlot || past || courtClosed || slotClosed}
+                                        disabled={(!mine && !!booked) || !!eventSlot || !!blocked || past || courtClosed || slotClosed}
                                         className={`slot-cell w-full h-full rounded-lg text-xs font-medium px-2 transition-all duration-150 relative overflow-hidden ${mine ? 'slot-booked-pulse' : ''} ${available ? 'hover:border-[#d97706] hover:border-solid hover:bg-[#d97706]/[0.04]' : ''}`}
                                         style={{
-                                          background: mine ? colors.accent : courtClosed || slotClosed ? '#f0ede6' : eventSlot ? getEventColors(eventSlot.type).bg : isLesson ? 'rgba(59, 130, 246, 0.08)' : isProgram ? 'rgba(245, 158, 11, 0.08)' : booked ? '#f5f3ee' : 'transparent',
-                                          color: mine ? '#fff' : courtClosed || slotClosed ? '#c5c0b5' : eventSlot ? getEventColors(eventSlot.type).text : isLesson ? '#3b82f6' : isProgram ? '#d97706' : booked ? '#b5b0a5' : past || beyondWindow ? '#d5d0c8' : colors.accent,
+                                          background: mine ? colors.accent : courtClosed || slotClosed ? '#f0ede6' : blocked ? 'rgba(220, 38, 38, 0.06)' : eventSlot ? getEventColors(eventSlot.type).bg : isLesson ? 'rgba(59, 130, 246, 0.08)' : isProgram ? 'rgba(245, 158, 11, 0.08)' : booked ? '#f5f3ee' : 'transparent',
+                                          color: mine ? '#fff' : courtClosed || slotClosed ? '#c5c0b5' : blocked ? '#dc2626' : eventSlot ? getEventColors(eventSlot.type).text : isLesson ? '#3b82f6' : isProgram ? '#d97706' : booked ? '#b5b0a5' : past || beyondWindow ? '#d5d0c8' : colors.accent,
                                           cursor: available ? 'pointer' : mine ? 'pointer' : 'default',
-                                          border: mine ? `1.5px solid ${colors.accent}` : eventSlot ? `1.5px solid ${getEventColors(eventSlot.type).border}` : available ? '1.5px dashed #d4d0c7' : '1.5px solid transparent',
+                                          border: mine ? `1.5px solid ${colors.accent}` : blocked ? '1.5px solid rgba(220, 38, 38, 0.2)' : eventSlot ? `1.5px solid ${getEventColors(eventSlot.type).border}` : available ? '1.5px dashed #d4d0c7' : '1.5px solid transparent',
                                         }}
                                       >
                                         {mine ? (
@@ -388,6 +398,11 @@ export default function BookCourtPage() {
                                           </span>
                                         ) : courtClosed || slotClosed ? (
                                           <span style={{ opacity: 0.4 }}>—</span>
+                                        ) : blocked ? (
+                                          <span className="flex items-center justify-center gap-1 truncate" title={blocked.reason + (blocked.notes ? ': ' + blocked.notes : '')}>
+                                            <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M4.93 4.93l14.14 14.14"/></svg>
+                                            {blocked.reason.length > 10 ? blocked.reason.slice(0, 9) + '…' : blocked.reason}
+                                          </span>
                                         ) : eventSlot ? (
                                           <span className="flex items-center justify-center gap-1 truncate"><span className="w-1 h-1 rounded-full flex-shrink-0" style={{ background: getEventColors(eventSlot.type).accent }} /> {eventSlot.title.length > 12 ? eventSlot.title.slice(0, 12) + '…' : eventSlot.title}</span>
                                         ) : isLesson ? 'Lesson' : isProgram ? 'Program' : booked ? (
@@ -399,10 +414,10 @@ export default function BookCourtPage() {
                                         )}
                                       </button>
 
-                                      {showTooltipHere && (booked || eventSlot) && (
+                                      {showTooltipHere && (booked || eventSlot || blocked) && (
                                         <div className="absolute z-30 bottom-full left-1/2 -translate-x-1/2 mb-1 px-2.5 py-1.5 rounded-lg text-[0.65rem] font-medium whitespace-nowrap shadow-lg pointer-events-none animate-fadeIn" style={{ background: '#2a2f1e', color: '#e8e4d9' }}>
-                                          {eventSlot ? eventSlot.title : isLesson ? 'Lesson' : isProgram ? 'Program session' : booked?.userName}
-                                          <span className="block text-[0.55rem] font-normal" style={{ color: '#9ca3a0' }}>{eventSlot ? eventSlot.time : getTimeRange(time, booked?.duration)}</span>
+                                          {blocked ? blocked.reason : eventSlot ? eventSlot.title : isLesson ? 'Lesson' : isProgram ? 'Program session' : booked?.userName}
+                                          <span className="block text-[0.55rem] font-normal" style={{ color: '#9ca3a0' }}>{blocked ? (blocked.notes || 'Court unavailable') : eventSlot ? eventSlot.time : getTimeRange(time, booked?.duration)}</span>
                                           <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent" style={{ borderTopColor: '#2a2f1e' }} />
                                         </div>
                                       )}

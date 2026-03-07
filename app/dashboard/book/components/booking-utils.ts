@@ -139,6 +139,32 @@ export function isCourtClosed(courtId: number, time: string): boolean {
   return parseTimeHour(time) >= closeHour;
 }
 
+export interface CourtBlockSlot {
+  id: string;
+  court_id: number | null;
+  block_date: string;
+  time_start: string | null;
+  time_end: string | null;
+  reason: string;
+  notes: string | null;
+}
+
+/** Check if a slot is blocked by an admin court block */
+export function isSlotBlocked(blocks: CourtBlockSlot[], courtId: number, date: string, time: string): CourtBlockSlot | null {
+  const slotMins = parseTimeMinutes(time);
+  for (const block of blocks) {
+    if (block.block_date !== date) continue;
+    if (block.court_id !== null && block.court_id !== courtId) continue;
+    // Full-day block
+    if (!block.time_start && !block.time_end) return block;
+    // Time-range block
+    const startMins = block.time_start ? parseTimeMinutes(block.time_start) : 0;
+    const endMins = block.time_end ? parseTimeMinutes(block.time_end) : 1440;
+    if (slotMins >= startMins && slotMins < endMins) return block;
+  }
+  return null;
+}
+
 export function isCourtInMaintenance(courts: Court[], courtId: number): boolean {
   const court = courts.find(c => c.id === courtId);
   return court?.status === 'maintenance';

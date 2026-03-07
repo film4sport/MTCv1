@@ -351,6 +351,29 @@ export async function updateCourtStatus(courtId: number, status: string): Promis
   if (error) throw error;
 }
 
+// ─── Court Blocks ──────────────────────────────────────
+
+export interface CourtBlock {
+  id: string;
+  court_id: number | null;
+  block_date: string;
+  time_start: string | null;
+  time_end: string | null;
+  reason: string;
+  notes: string | null;
+  created_by: string | null;
+  created_at: string;
+}
+
+export async function fetchCourtBlocks(): Promise<CourtBlock[]> {
+  const { data } = await supabase
+    .from('court_blocks')
+    .select('*')
+    .gte('block_date', new Date().toISOString().split('T')[0])
+    .order('block_date', { ascending: true });
+  return data || [];
+}
+
 // ─── Notifications ──────────────────────────────────────
 
 export async function fetchNotifications(userId: string): Promise<Notification[]> {

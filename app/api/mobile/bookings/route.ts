@@ -393,6 +393,26 @@ export async function POST(request: Request) {
       }
     }
 
+    // ── Check for court blocks (admin-scheduled closures) ──────────
+    const { data: blocks } = await supabase
+      .from('court_blocks')
+      .select('id, court_id, time_start, time_end, reason')
+      .eq('block_date', date)
+      .or(`court_id.eq.${courtId},court_id.is.null`);
+
+    if (blocks && blocks.length > 0) {
+      const blocked = blocks.find((b: { time_start: string | null; time_end: string | null }) => {
+        if (!b.time_start || !b.time_end) return true; // full-day block
+        // Check if requested time falls within block range
+        return time >= b.time_start && time < b.time_end;
+      });
+      if (blocked) {
+        return NextResponse.json({
+          error: `Court is blocked: ${(blocked as { reason?: string }).reason || 'Maintenance'}`
+        }, { status: 409 });
+      }
+    }
+
     const courtName = COURT_NAMES[courtId] || `Court ${courtId}`;
     const bookerName = userName ? sanitizeInput(userName, 200) : authResult.name || 'Member';
 

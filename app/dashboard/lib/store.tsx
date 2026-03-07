@@ -513,6 +513,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'event_attendees' }, () => {
         db.fetchEvents().then(e => setEvents(mergeEventsWithDefaults(e))).catch(err => reportError(err, 'Realtime RSVPs'));
       })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'court_blocks' }, () => {
+        // Court blocks are fetched directly in the booking page — trigger a bookings refetch
+        // to cause the booking page to re-render and re-fetch blocks
+        db.fetchBookings().then(b => setBookings(Array.isArray(b) ? b : [])).catch(err => reportError(err, 'Realtime court_blocks'));
+      })
       .subscribe();
 
     // Heartbeat fallback: refetch critical data every 2 min if tab visible + online

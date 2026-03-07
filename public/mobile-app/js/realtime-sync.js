@@ -81,6 +81,17 @@
     });
   }
 
+  function refetchCourtBlocks() {
+    if (!MTC.fn.loadFromAPI) return;
+    MTC.fn.loadFromAPI('/mobile/court-blocks', 'mtc-api-court-blocks', null).then(function(blocks) {
+      if (blocks && typeof window.updateCourtBlocksFromAPI === 'function') {
+        window.updateCourtBlocksFromAPI(blocks);
+      }
+      _lastSyncTimestamps.courtBlocks = Date.now();
+      updateStaleIndicators();
+    });
+  }
+
   /** Refetch all data types (used by heartbeat + pull-to-refresh) */
   function refetchAll() {
     refetchBookings();
@@ -88,6 +99,7 @@
     refetchConversations();
     refetchEvents();
     refetchNotifications();
+    refetchCourtBlocks();
   }
 
   // ============================================
@@ -164,6 +176,9 @@
         })
         .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications' }, function() {
           debouncedRefetch('notifications', refetchNotifications);
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'court_blocks' }, function() {
+          debouncedRefetch('courtBlocks', refetchCourtBlocks);
         })
         .subscribe(function(status) {
           if (status === 'SUBSCRIBED') {

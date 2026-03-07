@@ -170,11 +170,11 @@ export default function AdminPage() {
     db.deleteAnnouncement(id).catch((err) => reportError(err instanceof Error ? err : new Error(String(err)), 'Supabase'));
   };
 
-  const tabs: { key: AdminTab; label: string }[] = [
-    { key: 'dashboard', label: 'Dashboard' },
-    { key: 'members', label: 'Members' },
-    { key: 'courts', label: 'Courts' },
-    { key: 'announcements', label: 'Announcements' },
+  const tabs: { key: AdminTab; label: string; icon: React.ReactNode }[] = [
+    { key: 'dashboard', label: 'Dashboard', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /></svg> },
+    { key: 'members', label: 'Members', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg> },
+    { key: 'courts', label: 'Courts', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="4" width="20" height="16" rx="2" /><line x1="12" y1="4" x2="12" y2="20" /><line x1="2" y1="12" x2="22" y2="12" /></svg> },
+    { key: 'announcements', label: 'Announcements', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 2L11 13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg> },
   ];
 
   return (
@@ -191,12 +191,16 @@ export default function AdminPage() {
               onClick={() => setTab(t.key)}
               role="tab"
               aria-selected={tab === t.key}
-              className="px-4 py-2.5 text-sm font-medium transition-colors relative"
-              style={{ color: tab === t.key ? '#6b7a3d' : '#6b7266' }}
+              className="flex items-center gap-2 px-5 py-3 text-sm font-bold transition-colors relative"
+              style={{
+                color: tab === t.key ? '#6b7a3d' : '#9a9689',
+                fontSize: '0.9375rem',
+              }}
             >
+              <span style={{ opacity: tab === t.key ? 1 : 0.5 }}>{t.icon}</span>
               {t.label}
               {tab === t.key && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full" style={{ background: '#6b7a3d' }} />
+                <div className="absolute bottom-0 left-0 right-0 h-[3px] rounded-full" style={{ background: '#6b7a3d' }} />
               )}
             </button>
           ))}
