@@ -41,7 +41,11 @@
 - New API route `app/api/mobile/court-blocks/route.ts`: GET (list), POST (create, admin), DELETE (remove, admin)
 - Admin UI: "Block Court Time" modal with court selector, date picker, full-day toggle vs time range, reason dropdown, notes
 - Booking validation: `app/api/mobile/bookings/route.ts` POST now checks `court_blocks` before allowing booking. Returns 409 with reason if blocked.
-- Blocked slots will show greyed out on booking calendars (implementation pending for desktop `booking-utils.ts` and mobile `booking.js` rendering)
+- Blocked slots now show visually on BOTH booking calendars:
+  - **Mobile PWA** (`booking.js`): `isSlotBlocked()` checks `courtBlocksData` array. Blocked slots get `.blocked` CSS class (red striped background + reason label). Data fetched on login via `/mobile/court-blocks` API.
+  - **Desktop** (`book/page.tsx`): `isSlotBlocked()` in `booking-utils.ts`. Blocked cells show red striped background + no-entry icon + reason text. Tooltip shows full reason + notes on hover.
+  - **Realtime**: Both platforms subscribe to `court_blocks` table via Supabase Realtime. Mobile in `realtime-sync.js`, desktop in `store.tsx`. When admin creates/deletes a block, all members see the change live without refreshing.
+  - **CSS**: `.weekly-slot.blocked` + `.slot-blocked-label` in `home.css` (mobile). Desktop uses inline Tailwind styles.
 
 **Desktop admin tab restyling:**
 - Added SVG icons next to each tab label (dashboard grid, people, court, send)

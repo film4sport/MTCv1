@@ -91,7 +91,7 @@ describe('auth — signUp', () => {
       error: null,
     });
 
-    const result = await auth.signUp('a@b.com', 'Pass1234', 'Alice');
+    const result = await auth.signUp('a@b.com', 'Alice');
     expect(result.error).toBeNull();
     expect(result.user).not.toBeNull();
     expect(result.user.name).toBe('Alice');
@@ -104,7 +104,7 @@ describe('auth — signUp', () => {
       error: { message: 'Email taken' },
     });
 
-    const result = await auth.signUp('a@b.com', 'Pass1234', 'Alice');
+    const result = await auth.signUp('a@b.com', 'Alice');
     expect(result.user).toBeNull();
     expect(result.error).toBe('Email taken');
   });
@@ -115,7 +115,7 @@ describe('auth — signUp', () => {
       error: null,
     });
 
-    const result = await auth.signUp('a@b.com', 'Pass1234', 'Alice');
+    const result = await auth.signUp('a@b.com', 'Alice');
     expect(result.user).toBeNull();
     expect(result.error).toBe('Signup failed');
   });
