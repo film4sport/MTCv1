@@ -40,7 +40,7 @@
 - Bookings: Real-time sync WORKS on both Dashboard (Supabase Realtime in store.tsx) and Mobile PWA (Supabase Realtime in realtime-sync.js + 2-min heartbeat fallback). No fix needed.
 - Messages: Dashboard creates bell+push on send. Mobile API creates bell+push on send. Mobile PWA unread tracking was broken (fixed above).
 - Member search: Both platforms search ALL active members. No restriction.
-- Rule #20 added to CLAUDE.md: every user-facing data action must work across all 3 platforms with bell+push+badge+email where applicable.
+- Rule #20 added to CLAUDE.md: **ANY change to one platform must be checked against all three** (Dashboard, Mobile PWA, Mobile API). Not just notifications — UI changes, bug fixes, feature additions, data formats, styling, validation. Always grep across `app/dashboard/`, `public/mobile-app/`, and `app/api/mobile/`.
 
 ### Cowork Session (2026-03-06) — Booking Email Fix + Message Notifications
 
