@@ -227,49 +227,47 @@ function LoginContent() {
                     </div>
                   </div>
 
-                  {/* Looking for Partners */}
+                  {/* Club Calendar */}
                   <div style={{ padding: '4px 12px 12px', position: 'relative', zIndex: 2 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                      <p style={{ fontFamily: "'Bebas Neue', 'Inter', sans-serif", fontSize: '0.92rem', letterSpacing: 1, color: '#0a0a0a', fontWeight: 400 }}>LOOKING FOR PARTNERS</p>
+                      <p style={{ fontFamily: "'Bebas Neue', 'Inter', sans-serif", fontSize: '0.92rem', letterSpacing: 1, color: '#0a0a0a', fontWeight: 400 }}>CLUB CALENDAR</p>
                       <span style={{ fontFamily: "'Bebas Neue', 'Inter', sans-serif", fontSize: '0.6rem', color: '#0a0a0a', fontWeight: 400, letterSpacing: 0.8 }}>SEE ALL →</span>
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column' as const, gap: 6 }}>
-                      {/* Partner preview 1 */}
-                      <div style={{
-                        background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(12px) saturate(180%)', WebkitBackdropFilter: 'blur(12px) saturate(180%)',
-                        border: '1.5px solid rgba(0,0,0,0.08)', borderRadius: 14, padding: 10,
-                        display: 'flex', alignItems: 'center', gap: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-                      }}>
-                        <div style={{ width: 36, height: 36, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, background: '#f5e6d0', border: '2px solid #ff5a5f' }}>
-                          <svg viewBox="0 0 100 100" style={{ width: '100%', height: '100%' }}>
-                            <circle cx="50" cy="50" r="50" fill="#f5e6d0"/><circle cx="50" cy="38" r="16" fill="#d4a574"/><ellipse cx="50" cy="80" rx="24" ry="20" fill="#4a90d9"/>
-                          </svg>
-                        </div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <p style={{ fontSize: '0.6rem', fontWeight: 700, color: '#0a0a0a', marginBottom: 2 }}>Sarah M.</p>
-                          <span style={{ fontSize: '0.46rem', color: '#666', textTransform: 'uppercase' as const, fontWeight: 600, display: 'block', marginBottom: 2 }}>Saturday 10AM</span>
-                          <span style={{ fontSize: '0.42rem', fontWeight: 700, color: '#0a0a0a', background: '#c8ff00', borderRadius: 6, padding: '1px 6px', textTransform: 'uppercase' as const, letterSpacing: 0.5 }}>Intermediate</span>
-                        </div>
-                        <div style={{ background: '#ff5a5f', borderRadius: 8, padding: '5px 12px', fontSize: '0.54rem', fontWeight: 700, color: '#fff', flexShrink: 0 }}>Join</div>
+                    <div style={{
+                      background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(12px) saturate(180%)', WebkitBackdropFilter: 'blur(12px) saturate(180%)',
+                      border: '1.5px solid rgba(0,0,0,0.08)', borderRadius: 14, padding: '8px 10px',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+                    }}>
+                      {/* Month header */}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                        <span style={{ fontSize: '0.5rem', color: '#999' }}>‹</span>
+                        <span style={{ fontSize: '0.58rem', fontWeight: 600, color: '#0a0a0a' }}>March 2026</span>
+                        <span style={{ fontSize: '0.5rem', color: '#999' }}>›</span>
                       </div>
-                      {/* Partner preview 2 */}
-                      <div style={{
-                        background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(12px) saturate(180%)', WebkitBackdropFilter: 'blur(12px) saturate(180%)',
-                        border: '1.5px solid rgba(0,0,0,0.08)', borderRadius: 14, padding: 10,
-                        display: 'flex', alignItems: 'center', gap: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-                      }}>
-                        <div style={{ width: 36, height: 36, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, background: '#fce4ec', border: '2px solid #ff5a5f' }}>
-                          <svg viewBox="0 0 100 100" style={{ width: '100%', height: '100%' }}>
-                            <circle cx="50" cy="50" r="50" fill="#fce4ec"/><circle cx="50" cy="38" r="16" fill="#d4a574"/><ellipse cx="50" cy="80" rx="24" ry="20" fill="#e91e63"/>
-                          </svg>
-                        </div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <p style={{ fontSize: '0.6rem', fontWeight: 700, color: '#0a0a0a', marginBottom: 2 }}>James K.</p>
-                          <span style={{ fontSize: '0.46rem', color: '#666', textTransform: 'uppercase' as const, fontWeight: 600, display: 'block', marginBottom: 2 }}>Tomorrow 9AM</span>
-                          <span style={{ fontSize: '0.42rem', fontWeight: 700, color: '#fff', background: '#00d4ff', borderRadius: 6, padding: '1px 6px', textTransform: 'uppercase' as const, letterSpacing: 0.5 }}>Beginner</span>
-                        </div>
-                        <div style={{ background: '#ff5a5f', borderRadius: 8, padding: '5px 12px', fontSize: '0.54rem', fontWeight: 700, color: '#fff', flexShrink: 0 }}>Join</div>
+                      {/* Day headers */}
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', textAlign: 'center', marginBottom: 4 }}>
+                        {['S','M','T','W','T','F','S'].map((d, i) => (
+                          <span key={i} style={{ fontSize: '0.4rem', fontWeight: 600, color: '#999' }}>{d}</span>
+                        ))}
                       </div>
+                      {/* Calendar grid — first 3 weeks of March 2026 (starts Sunday) */}
+                      {[[1,2,3,4,5,6,7],[8,9,10,11,12,13,14],[15,16,17,18,19,20,21]].map((week, wi) => (
+                        <div key={wi} style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', textAlign: 'center', gap: 1 }}>
+                          {week.map(day => (
+                            <div key={day} style={{
+                              fontSize: '0.48rem', fontWeight: day === 7 ? 700 : 500,
+                              color: day === 7 ? '#fff' : '#0a0a0a',
+                              background: day === 7 ? '#00d4ff' : 'transparent',
+                              borderRadius: day === 7 ? 6 : 0,
+                              padding: '3px 0',
+                              position: 'relative' as const,
+                            }}>
+                              {day}
+                              {day === 14 && <span style={{ position: 'absolute', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: 3, height: 3, borderRadius: '50%', background: '#ff5a5f' }}/>}
+                            </div>
+                          ))}
+                        </div>
+                      ))}
                     </div>
                   </div>
 
@@ -465,34 +463,44 @@ function LoginContent() {
                       </div>
                     </div>
 
-                    {/* Bottom: Looking for Partners — full width */}
+                    {/* Bottom: Club Calendar — full width */}
                     <div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
-                        <p style={{ fontFamily: "'Bebas Neue', 'Inter', sans-serif", fontSize: '0.72rem', letterSpacing: 1, color: '#0a0a0a', fontWeight: 400 }}>LOOKING FOR PARTNERS</p>
+                        <p style={{ fontFamily: "'Bebas Neue', 'Inter', sans-serif", fontSize: '0.72rem', letterSpacing: 1, color: '#0a0a0a', fontWeight: 400 }}>CLUB CALENDAR</p>
                         <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '0.42rem', color: '#0a0a0a', letterSpacing: 0.6 }}>SEE ALL →</span>
                       </div>
-                      <div style={{ display: 'flex', gap: 6 }}>
-                        {[
-                          { name: 'Sarah M.', time: 'Saturday 10AM', level: 'Intermediate', levelColor: '#c8ff00', levelTextColor: '#0a0a0a', avatarBg: '#f5e6d0', avatarHair: '#d4a030', avatarShirt: '#4a90d9', borderColor: '#ff5a5f' },
-                          { name: 'James K.', time: 'Tomorrow 9AM', level: 'Beginner', levelColor: '#00d4ff', levelTextColor: '#fff', avatarBg: '#e8d5c4', avatarHair: '#8B4513', avatarShirt: '#2d8659', borderColor: '#c8ff00' },
-                          { name: 'Lisa T.', time: 'Friday 6PM', level: 'Advanced', levelColor: '#ff5a5f', levelTextColor: '#fff', avatarBg: '#fce4ec', avatarHair: '#d4a574', avatarShirt: '#e91e63', borderColor: '#00d4ff' },
-                        ].map((p) => (
-                          <div key={p.name} style={{
-                            flex: 1, background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
-                            border: '1px solid rgba(0,0,0,0.06)', borderRadius: 10, padding: '6px 8px',
-                            display: 'flex', alignItems: 'center', gap: 6,
-                          }}>
-                            <div style={{ width: 28, height: 28, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, background: p.avatarBg, border: `2px solid ${p.borderColor}` }}>
-                              <svg viewBox="0 0 100 100" style={{ width: '100%', height: '100%' }}>
-                                <circle cx="50" cy="50" r="50" fill={p.avatarBg}/><circle cx="50" cy="38" r="16" fill={p.avatarHair}/><ellipse cx="50" cy="80" rx="24" ry="20" fill={p.avatarShirt}/>
-                              </svg>
-                            </div>
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <p style={{ fontSize: '0.48rem', fontWeight: 700, color: '#0a0a0a', marginBottom: 1 }}>{p.name}</p>
-                              <span style={{ fontSize: '0.36rem', color: '#666', textTransform: 'uppercase' as const, fontWeight: 600, display: 'block', marginBottom: 1 }}>{p.time}</span>
-                              <span style={{ fontSize: '0.34rem', fontWeight: 700, color: p.levelTextColor, background: p.levelColor, borderRadius: 5, padding: '1px 5px', textTransform: 'uppercase' as const, letterSpacing: 0.3 }}>{p.level}</span>
-                            </div>
-                            <div style={{ background: '#ff5a5f', borderRadius: 6, padding: '3px 8px', fontSize: '0.4rem', fontWeight: 700, color: '#fff', flexShrink: 0 }}>Join</div>
+                      <div style={{
+                        background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
+                        border: '1px solid rgba(0,0,0,0.06)', borderRadius: 10, padding: '6px 8px',
+                      }}>
+                        {/* Month header */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                          <span style={{ fontSize: '0.38rem', color: '#999' }}>‹</span>
+                          <span style={{ fontSize: '0.44rem', fontWeight: 600, color: '#0a0a0a' }}>March 2026</span>
+                          <span style={{ fontSize: '0.38rem', color: '#999' }}>›</span>
+                        </div>
+                        {/* Day headers */}
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', textAlign: 'center', marginBottom: 2 }}>
+                          {['S','M','T','W','T','F','S'].map((d, i) => (
+                            <span key={i} style={{ fontSize: '0.32rem', fontWeight: 600, color: '#999' }}>{d}</span>
+                          ))}
+                        </div>
+                        {/* Calendar grid — first 3 weeks */}
+                        {[[1,2,3,4,5,6,7],[8,9,10,11,12,13,14],[15,16,17,18,19,20,21]].map((week, wi) => (
+                          <div key={wi} style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', textAlign: 'center', gap: 1 }}>
+                            {week.map(day => (
+                              <div key={day} style={{
+                                fontSize: '0.38rem', fontWeight: day === 7 ? 700 : 500,
+                                color: day === 7 ? '#fff' : '#0a0a0a',
+                                background: day === 7 ? '#00d4ff' : 'transparent',
+                                borderRadius: day === 7 ? 5 : 0,
+                                padding: '2px 0',
+                                position: 'relative' as const,
+                              }}>
+                                {day}
+                                {day === 14 && <span style={{ position: 'absolute', bottom: -1, left: '50%', transform: 'translateX(-50%)', width: 2.5, height: 2.5, borderRadius: '50%', background: '#ff5a5f' }}/>}
+                              </div>
+                            ))}
                           </div>
                         ))}
                       </div>
