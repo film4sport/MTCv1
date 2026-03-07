@@ -415,14 +415,16 @@
     });
 
     // Smart scroll to now row (#8)
-    // IMPORTANT: Scroll the gridBody itself (not #screen-book) because gridBody
-    // has overflow-y:auto and is the actual scroll container for the time slots.
-    // Using scrollIntoView or scrolling ancestors breaks scroll for the entire app.
+    // Scroll gridBody (the overflow-y:auto container) to bring the current-time row into view.
+    // We use getBoundingClientRect to reliably compute position regardless of offsetParent.
     if (isToday&&nowRowIdx>=0) {
       var nowEl=gridBody.querySelector('.now-row');
       if (nowEl) setTimeout(function(){
-        gridBody.scrollTop = Math.max(0, nowEl.offsetTop - 60);
-      },100);
+        var bodyRect = gridBody.getBoundingClientRect();
+        var nowRect = nowEl.getBoundingClientRect();
+        var scrollOffset = nowRect.top - bodyRect.top + gridBody.scrollTop - 60;
+        gridBody.scrollTop = Math.max(0, scrollOffset);
+      },150);
     }
     } catch(e) {
       MTC.warn('renderWeeklyGrid error:', e);

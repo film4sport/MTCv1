@@ -162,7 +162,8 @@ test.describe('Mobile PWA — Authenticated Navigation', () => {
         MTC.fn.navigateTo('settings');
       }
     });
-    await page.waitForTimeout(500);
+    // Settings screen may load async data — wait for screen transition + render
+    await page.waitForTimeout(1000);
 
     const active = await page.evaluate(() => {
       const screen = document.getElementById('screen-settings');
