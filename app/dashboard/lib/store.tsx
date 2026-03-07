@@ -479,7 +479,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
       })
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    // Heartbeat fallback: refetch critical data every 2 min if tab visible + online
+    // Mirrors Mobile PWA's realtime-sync.js heartbeat pattern
+    const HEARTBEAT_MS = 120_000;
+    const heartbeat = setInterval(() => {
+      if (document.visibilityState !== 'visible' || !navigator.onLine) return;
+      db.fetchNotifications(userId).then(n => setNotifications(safeArray(n))).catch(() => {});
+      db.fetchConversations(userId).then(c => setConversations(safeArray(c))).catch(() => {});
+      db.fetchBookings().then(b => setBookings(Array.isArray(b) ? b : [])).catch(() => {});
+    }, HEARTBEAT_MS);
+
+    return () => { supabase.removeChannel(channel); clearInterval(heartbeat); };
     // Only re-subscribe when user logs in/out — not on every profile update
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoaded, currentUser?.id]);
@@ -597,6 +607,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  // Helper: fire-and-forget push notification via /api/notify-push
+  const firePush = useCallback((recipientId: string, title: string, body: string, type: string, tag?: string) => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session?.access_token) return;
+      fetch('/api/notify-push', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+        body: JSON.stringify({ recipientId, title, body: body.slice(0, 200), type, tag: tag || `${type}-${Date.now()}` }),
+      }).catch(() => { /* push is best-effort */ });
+    });
+  }, []);
+
   // Actions
   const addBooking = useCallback((booking: Booking) => {
     setBookings(prev => [...prev, booking]);
@@ -648,9 +670,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
           read: false,
         }));
         setNotifications(prev => [...participantNotifs, ...prev]);
-        // Persist participant notifications to Supabase
+        // Persist participant notifications to Supabase + send push
         booking.participants.forEach((p, i) => {
           db.createNotification(p.id, participantNotifs[i]).catch((err) => reportError(err, 'Supabase'));
+          firePush(p.id, 'Added to Booking', participantNotifs[i].body, 'booking', `booking-add-${booking.id}`);
         });
 
         // Send message to each participant with full calendar invite details
@@ -727,9 +750,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
             read: false,
           }));
           setNotifications(prev => [...cancelNotifs, ...prev]);
-          // Persist participant notifications to Supabase (1:1 mapping)
+          // Persist participant notifications to Supabase (1:1 mapping) + send push
           booking.participants!.forEach((p, i) => {
             db.createNotification(p.id, cancelNotifs[i]).catch((err) => reportError(err, 'Supabase'));
+            firePush(p.id, 'Booking Cancelled', cancelNotifs[i].body, 'booking', `booking-cancel-${booking.id}`);
           });
 
           // Send cancellation message to each participant with full details
@@ -850,6 +874,28 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (shouldNotify('program')) {
       addNotification(notif);
       db.createNotification(memberId, notif).catch((err) => reportError(err, 'Supabase'));
+      firePush(memberId, notif.title, notif.body, 'program', `program-enroll-${program.id}`);
+    }
+    // Send enrollment confirmation email (fire and forget)
+    const enrolledMember = members.find(m => m.id === memberId);
+    if (enrolledMember?.email) {
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (!session?.access_token) return;
+        const startDate = program.sessions[0]?.date ? new Date(program.sessions[0].date + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric' }) : 'TBD';
+        fetch('/api/notify-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+          body: JSON.stringify({
+            recipientEmail: enrolledMember.email, recipientName: enrolledMember.name,
+            recipientUserId: memberId,
+            subject: `Enrollment Confirmed — ${program.title}`,
+            heading: 'Enrollment Confirmed',
+            body: `You're enrolled in ${program.title}! ${program.sessions.length} sessions starting ${startDate}. Fee: $${program.fee}. See you on the court!`,
+            ctaText: 'View Schedule', ctaUrl: 'https://www.monotennisclub.com/dashboard',
+            logType: 'program_enrollment',
+          }),
+        }).catch(() => { /* email is best-effort */ });
+      });
     }
     // Send message from coach (persist to Supabase)
     const coachMsgText = `Welcome to ${program.title}! Your enrollment is confirmed. ${program.sessions.length} sessions starting ${new Date(program.sessions[0]?.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}. See you on the court!`;
@@ -936,6 +982,25 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (shouldNotify('partner')) {
         addNotification(notif);
         db.createNotification(currentUser.id, notif).catch(err => reportError(err, 'Supabase'));
+      }
+      // Send confirmation email (fire and forget)
+      if (currentUser.email) {
+        supabase.auth.getSession().then(({ data: { session } }) => {
+          if (!session?.access_token) return;
+          fetch('/api/notify-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+            body: JSON.stringify({
+              recipientEmail: currentUser.email, recipientName: currentUser.name,
+              recipientUserId: currentUser.id,
+              subject: 'Partner Request Posted — Mono Tennis Club',
+              heading: 'Partner Request Posted',
+              body: `Your partner request is live! Looking for ${partner.matchType === 'any' ? 'any match type' : partner.matchType} on ${partner.date} at ${partner.time}. You'll be notified when someone responds.`,
+              ctaText: 'View Requests', ctaUrl: 'https://www.monotennisclub.com/dashboard/partners',
+              logType: 'partner_request',
+            }),
+          }).catch(() => { /* email is best-effort */ });
+        });
       }
     }
   }, [currentUser]);

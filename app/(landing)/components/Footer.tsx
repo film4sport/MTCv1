@@ -37,6 +37,16 @@ export default function Footer() {
                   FAQ
                 </a>
               </li>
+              <li>
+                <a href="/info?tab=coaching" className="footer-link text-base" style={{ color: 'rgba(232, 228, 217, 0.7)' }}>
+                  Coaching
+                </a>
+              </li>
+              <li>
+                <a href="/signup" className="footer-link text-base" style={{ color: 'rgba(232, 228, 217, 0.7)' }}>
+                  Sign Up
+                </a>
+              </li>
             </ul>
           </div>
 

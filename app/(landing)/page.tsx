@@ -10,8 +10,8 @@ import Events from './components/Events';
 import Loader from './components/Loader';
 
 // Below-the-fold components — dynamically imported for smaller initial bundle
-const Schedule = dynamic(() => import('./components/Schedule'), { ssr: false });
-const Partners = dynamic(() => import('./components/Partners'), { ssr: false });
+const Schedule = dynamic(() => import('./components/Schedule'), { ssr: true });
+const Partners = dynamic(() => import('./components/Partners'), { ssr: true });
 const Gallery = dynamic(() => import('./components/Gallery'), { ssr: false });
 const Footer = dynamic(() => import('./components/Footer'), { ssr: false });
 const Lightbox = dynamic(() => import('./components/Lightbox'), { ssr: false });

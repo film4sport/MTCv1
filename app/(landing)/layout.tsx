@@ -161,7 +161,10 @@ const jsonLd = {
       priceRange: '$',
       foundingDate: '1980',
       nonprofitStatus: 'Nonprofit',
-      sameAs: [],
+      sameAs: [
+        'https://facebook.com/monotennisclub',
+        'https://instagram.com/monotennisclub',
+      ],
     },
     {
       '@type': 'WebSite',
@@ -181,6 +184,19 @@ const jsonLd = {
       description:
         'Mono Tennis Club is a not-for-profit community tennis club in Mono, Ontario — serving Orangeville, Caledon, Bolton, Shelburne, Brampton, Dufferin County, and the GTA since 1980.',
       inLanguage: 'en-CA',
+    },
+    // BreadcrumbList — improves search result snippets
+    {
+      '@type': 'BreadcrumbList',
+      '@id': `${SITE_URL}/#breadcrumb`,
+      itemListElement: [
+        {
+          '@type': 'ListItem',
+          position: 1,
+          name: 'Home',
+          item: SITE_URL,
+        },
+      ],
     },
     // Events generated from shared data source (app/lib/events.ts)
     ...getJsonLdEvents(),

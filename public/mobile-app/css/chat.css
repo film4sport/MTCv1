@@ -195,6 +195,17 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
+/* Read receipt checkmark on sent messages */
+.chat-read-receipt {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+.chat-read-receipt svg {
+  stroke: currentColor;
+}
+
 /* Time divider - glass pill */
 .chat-time-divider {
   text-align: center;

@@ -236,7 +236,15 @@
         lastTime = msg.time;
       }
 
-      html += '<div class="chat-bubble ' + (msg.sent ? 'sent' : 'received') + '">' + sanitizeHTML(msg.text) + '</div>';
+      var readReceipt = '';
+      if (msg.sent) {
+        var checkOpacity = msg.read ? '0.8' : '0.4';
+        var doubleCheck = msg.read ? '<polyline points="15 6 4 17" style="opacity:0.6"/>' : '';
+        readReceipt = '<span class="chat-read-receipt" style="opacity:' + checkOpacity + '">' +
+          '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">' +
+          '<polyline points="20 6 9 17 4 12"/>' + doubleCheck + '</svg></span>';
+      }
+      html += '<div class="chat-bubble ' + (msg.sent ? 'sent' : 'received') + '">' + sanitizeHTML(msg.text) + readReceipt + '</div>';
     });
 
     container.innerHTML = html;

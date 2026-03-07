@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef, useCallback } from 'react';
+import Image from 'next/image';
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -68,11 +69,14 @@ export default function Navbar() {
     <>
       <nav className={`navbar flex items-center justify-between${scrolled ? ' scrolled' : ''}`} id="navbar">
         <div className="logo-group">
-          <img
+          <Image
             src="/mono-logo-transparent.png"
             alt="Mono Tennis Club"
+            width={160}
+            height={64}
             className="h-12 md:h-14 lg:h-16 w-auto"
             style={{ filter: 'brightness(0) invert(1)' }}
+            priority
           />
         </div>
 

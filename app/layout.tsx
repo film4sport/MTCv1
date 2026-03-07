@@ -64,6 +64,10 @@ export default function RootLayout({
         {/* JSON-LD is in app/(landing)/layout.tsx — richer version with @graph */}
         {/* Preload critical fonts to avoid FOIT/FOUT */}
         <link rel="preload" href="/Gotham_Rounded_Medium.otf" as="font" type="font/otf" crossOrigin="anonymous" />
+        {/* Preload hero image for faster LCP */}
+        <link rel="preload" href="https://cdn.jsdelivr.net/gh/film4sport/my-webapp-images@main/mtc-images/hero-aerial-court.png" as="image" />
+        {/* Google Search Console verification — uncomment and replace VERIFICATION_CODE with your GSC code */}
+        {/* <meta name="google-site-verification" content="VERIFICATION_CODE" /> */}
         {/* Preconnect to external origins for faster resource loading */}
         <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />

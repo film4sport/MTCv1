@@ -20,7 +20,7 @@
     if ('serviceWorker' in navigator) {
       caches.keys().then(function(names) {
         names.forEach(function(name) {
-          if (name.indexOf('mtc-court-746bc858') === -1) {
+          if (name.indexOf('mtc-court-011198ee') === -1) {
             caches.delete(name);
             console.log('[CacheBust] Deleted old cache:', name);
           }
@@ -723,7 +723,8 @@
         <h3 class="section-title">TODAY</h3>
       </div>
 
-      <!-- Notifications rendered dynamically — no hardcoded demo items -->
+      <!-- Container for dynamically-rendered notifications -->
+      <div class="notifications-list"></div>
 
       <!-- Empty state (shown when no notifications exist) -->
       <div class="empty-state" id="noNotifications">

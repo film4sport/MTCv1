@@ -1,43 +1,9 @@
 import { NextResponse } from 'next/server';
 import { authenticateMobileRequest, getAdminClient, sanitizeInput, isRateLimited } from '../auth-helper';
+import { sendPushToUser } from '../../lib/push';
 import type { EventUpdate } from '../types';
 
-/** Helper: send a Web Push notification to a user (best-effort) */
-async function sendPushToUser(
-  supabase: ReturnType<typeof getAdminClient>,
-  userId: string,
-  payload: { title: string; body: string; tag?: string; url?: string }
-) {
-  try {
-    const VAPID_PUBLIC = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || '';
-    const VAPID_PRIVATE = process.env.VAPID_PRIVATE_KEY || '';
-    const VAPID_EMAIL = process.env.VAPID_EMAIL || 'mailto:admin@monotennisclub.ca';
-    if (!VAPID_PUBLIC || !VAPID_PRIVATE) return;
-
-    const { data: subs } = await supabase
-      .from('push_subscriptions').select('endpoint, p256dh, auth').eq('user_id', userId);
-    if (!subs?.length) return;
-
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const webpush = require('web-push') as {
-      setVapidDetails: (s: string, pub: string, priv: string) => void;
-      sendNotification: (sub: object, payload: string) => Promise<void>;
-    };
-    webpush.setVapidDetails(VAPID_EMAIL, VAPID_PUBLIC, VAPID_PRIVATE);
-
-    const pushPayload = JSON.stringify({
-      title: payload.title, body: payload.body,
-      icon: '/mobile-app/icons/icon-192x192.png', badge: '/mobile-app/icons/icon-72x72.png',
-      url: payload.url || '/mobile-app/index.html', tag: payload.tag || 'event-' + Date.now(),
-    });
-
-    await Promise.allSettled(
-      subs.map(sub => webpush.sendNotification(
-        { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } }, pushPayload
-      ))
-    );
-  } catch { /* best-effort */ }
-}
+// sendPushToUser imported from ../../lib/push (shared utility)
 
 /** Helper: create a bell notification */
 async function createNotification(
