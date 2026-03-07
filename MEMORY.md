@@ -15,6 +15,20 @@
 - **Cross-platform push notifications**: Added push+bell to conversations POST, events PATCH/DELETE, announcements POST.
 - **Login screen**: Email Link button restyled to electric-blue/cyan (matches PWA theme). "or" divider made more visible.
 
+### Cowork Session (2026-03-07) — Login Resilience, CI Test Fixes, Notification Parity
+
+**Mobile PWA login resilience (bulletproofing):**
+- **Root cause of "Cannot connect to server"**: `initSupabase()` had zero retry logic — a single failed fetch to `/api/mobile-auth/config` or a slow CDN load of `supabase.min.js` would show a dead-end toast with no recovery.
+- **Fix 1 — Retry logic**: `initSupabase()` now uses `fetchWithRetry()` (up to 3 attempts with exponential backoff: 1s, 2s, 4s) for the config fetch. Also added `waitForSupabaseLib()` which polls up to 3s for `window.supabase` to appear (handles slow CDN or local fallback still loading).
+- **Fix 2 — Local Supabase fallback**: Copied `@supabase/supabase-js` UMD bundle to `public/mobile-app/js/vendor/supabase.min.js` (164KB). HTML loads CDN first, then inline script checks `typeof supabase === 'undefined'` and dynamically loads local copy. Added to SW precache for offline availability.
+- **Fix 3 — Better UX**: Google button shows "Connecting..." toast + disabled state during init. Error messages improved from "Cannot connect to server" to "Cannot reach the server. Check your connection and try again."
+- Desktop dashboard is NOT affected — it uses bundled `@supabase/ssr` via npm, no CDN dependency.
+- Files changed: `public/mobile-app/js/auth.js`, `public/mobile-app/index.html`, `public/mobile-app/sw.js`, new `public/mobile-app/js/vendor/supabase.min.js`
+
+**CI test fixes (`tests/mobile-pwa-offline.spec.js`):**
+- 2 tests were failing: "login shows error when API is unreachable" (onboarding overlay race) and "page structure intact even without network" (screen count timing).
+- Fix: Added `page.addInitScript` to pre-set `mtc-onboarding-complete` in localStorage before page load (prevents onboarding overlay race with 600ms setTimeout). Changed `waitUntil` from `domcontentloaded` to `load`. Added `{ force: true }` on login button clicks. Used `waitForFunction` for screen count instead of static timeout. Applied same pattern to all 4 tests that interact with login form.
+
 ### Cowork Session (2026-03-07) — Home Calendar, Booking Email From Fix, Push Notifications
 
 **Booking email `from` address bug:** Emails used `from: "Mono Tennis Club" <${smtpUser}>` where SMTP_USER=`resend` (Resend SMTP username). This is not a valid email — Resend rejected or nodemailer failed silently. Fixed: added `SMTP_FROM` env var, code now uses `from: "Mono Tennis Club" <${SMTP_FROM}>`. Default: `noreply@monotennisclub.com`. Domain is verified on Resend. **User must add `SMTP_FROM=noreply@monotennisclub.com` to Railway env vars.**
