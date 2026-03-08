@@ -39,7 +39,7 @@ function LoginContent() {
 
   return (
     <>
-      <style jsx global>{`
+      <style dangerouslySetInnerHTML={{ __html: `
         @keyframes accentShimmer {
           0% { background-position: 200% 0; }
           100% { background-position: -200% 0; }
@@ -51,7 +51,7 @@ function LoginContent() {
         @keyframes spin {
           to { transform: rotate(360deg); }
         }
-      `}</style>
+      ` }} />
 
       <div className="min-h-screen flex flex-col lg:flex-row" style={{ backgroundColor: '#f5f2eb' }}>
 
@@ -162,25 +162,23 @@ function LoginContent() {
                     {[
                       { month: 'MAR', day: '14', title: 'Euchre Tournament', details: 'Saturday Evening • Clubhouse' },
                       { month: 'MAY', day: '9', title: 'Opening Day BBQ', details: '1:00 PM • All Courts • Free' },
+                      { month: 'MAY', day: '12', title: "Men's Round Robin", details: '9:00 AM • All Courts' },
                     ].map((evt) => (
                       <div key={evt.day + evt.month} style={{
-                        background: '#fff', borderRadius: 16, padding: '12px', marginBottom: 8,
+                        background: '#fff', borderRadius: 16, padding: '10px 12px', marginBottom: 8,
+                        display: 'flex', alignItems: 'center', gap: 10,
                         boxShadow: '4px 4px 10px rgba(0,0,0,0.06), -2px -2px 8px rgba(255,255,255,0.8)',
                         border: '1px solid rgba(0,0,0,0.04)',
                       }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                          <div style={{ background: '#c8ff00', borderRadius: 12, padding: '6px 10px', textAlign: 'center', minWidth: 42 }}>
-                            <div style={{ fontSize: 8, color: '#0a0a0a', fontWeight: 700, letterSpacing: 0.5 }}>{evt.month}</div>
-                            <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 18, color: '#0a0a0a', lineHeight: 1 }}>{evt.day}</div>
-                          </div>
-                          <div style={{ flex: 1 }}>
-                            <p style={{ fontSize: 11, fontWeight: 700, color: '#1a1f12' }}>{evt.title}</p>
-                            <p style={{ fontSize: 9, color: '#888', marginTop: 2 }}>{evt.details}</p>
-                          </div>
+                        <div style={{ background: '#c8ff00', borderRadius: 12, padding: '6px 10px', textAlign: 'center', minWidth: 42 }}>
+                          <div style={{ fontSize: 8, color: '#0a0a0a', fontWeight: 700, letterSpacing: 0.5 }}>{evt.month}</div>
+                          <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 18, color: '#0a0a0a', lineHeight: 1 }}>{evt.day}</div>
                         </div>
-                        <div style={{ marginTop: 8 }}>
-                          <span style={{ background: '#c8ff00', borderRadius: 8, padding: '5px 16px', fontSize: 10, fontWeight: 700, color: '#0a0a0a' }}>RSVP</span>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <p style={{ fontSize: 11, fontWeight: 700, color: '#1a1f12' }}>{evt.title}</p>
+                          <p style={{ fontSize: 9, color: '#888', marginTop: 2 }}>{evt.details}</p>
                         </div>
+                        <span style={{ background: '#c8ff00', borderRadius: 8, padding: '5px 12px', fontSize: 10, fontWeight: 700, color: '#0a0a0a', flexShrink: 0 }}>RSVP</span>
                       </div>
                     ))}
                   </div>
@@ -210,7 +208,7 @@ function LoginContent() {
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       boxShadow: '0 4px 20px rgba(200,255,0,0.5)',
                     }}>
-                      <svg width="18" height="18" fill="none" stroke="#1a1f12" viewBox="0 0 24 24" strokeWidth="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                      <svg width="18" height="18" fill="none" stroke="#1a1f12" viewBox="0 0 24 24" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                     </div>
                     {[
                       { label: 'PARTNERS', d: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z' },
@@ -231,10 +229,10 @@ function LoginContent() {
 
             {/* ── Tablet Mockup ── */}
             <div style={{ textAlign: 'center' }}>
-            <div style={{ width: 270, height: 200, position: 'relative' }}>
+            <div style={{ width: 270, height: 210, position: 'relative' }}>
             <div style={{ transform: 'scale(0.55)', transformOrigin: 'top left', position: 'absolute', top: 0, left: 0 }}>
               <div style={{
-                width: 490, height: 360, background: '#1a1f12', borderRadius: 28, padding: 10,
+                width: 490, height: 380, background: '#1a1f12', borderRadius: 28, padding: 10,
                 boxShadow: '0 30px 60px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.06)',
               }}>
                 <div style={{
@@ -261,6 +259,7 @@ function LoginContent() {
                     <div style={{ display: 'flex', gap: 5 }}>
                       <div style={{ width: 26, height: 26, background: '#e8e4d9', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '2px 2px 5px rgba(0,0,0,0.06), -2px -2px 5px rgba(255,255,255,0.8)', position: 'relative' }}>
                         <svg width="12" height="12" fill="none" stroke="#555" viewBox="0 0 24 24" strokeWidth="1.8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                        <span style={{ position: 'absolute', top: -3, right: -3, width: 12, height: 12, background: '#ff3b30', borderRadius: '50%', fontSize: 7, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, border: '1.5px solid #f5f2eb' }}>2</span>
                       </div>
                       <div style={{ width: 26, height: 26, background: '#e8e4d9', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '2px 2px 5px rgba(0,0,0,0.06), -2px -2px 5px rgba(255,255,255,0.8)' }}>
                         <svg width="12" height="12" fill="none" stroke="#555" viewBox="0 0 24 24" strokeWidth="1.8"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
@@ -269,13 +268,13 @@ function LoginContent() {
                   </div>
 
                   {/* Tablet content: Quick Actions + Events on top, Calendar below */}
-                  <div style={{ flex: 1, overflow: 'hidden', padding: '2px 16px 0', display: 'flex', flexDirection: 'column' as const, gap: 6 }}>
+                  <div style={{ flex: 1, overflow: 'hidden', padding: '2px 16px 0', display: 'flex', flexDirection: 'column' as const, gap: 8 }}>
                     {/* Top row: Quick Actions (left) + Events (right) */}
-                    <div style={{ display: 'flex', gap: 10 }}>
-                      {/* Left: Quick Actions 2x2 */}
+                    <div style={{ display: 'flex', gap: 12 }}>
+                      {/* Left: Quick Actions 2x2 — matching phone style */}
                       <div style={{ flex: 1 }}>
-                        <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 11, letterSpacing: 1.5, color: '#1a1f12', marginBottom: 5 }}>QUICK ACTIONS</p>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 5 }}>
+                        <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 11, letterSpacing: 1.5, color: '#1a1f12', marginBottom: 6, textAlign: 'left' }}>QUICK ACTIONS</p>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 6 }}>
                           {[
                             { bg: '#c8ff00', label: 'BOOK', fg: '#0a0a0a', icon: <><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></> },
                             { bg: '#ff5a5f', label: 'PARTNER', fg: '#fff', icon: <><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></> },
@@ -283,19 +282,21 @@ function LoginContent() {
                             { bg: '#1a1f12', label: 'SCHEDULE', fg: '#e8e4d9', icon: <><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></> },
                           ].map(a => (
                             <div key={a.label} style={{
-                              background: a.bg, borderRadius: 12, height: 48, padding: '6px 8px',
-                              display: 'flex', flexDirection: 'column' as const, justifyContent: 'space-between',
-                              boxShadow: `0 3px 8px ${a.bg === '#1a1f12' ? 'rgba(0,0,0,0.25)' : a.bg + '33'}`,
+                              background: a.bg, borderRadius: 14, height: 62, padding: '8px 10px',
+                              display: 'flex', flexDirection: 'column' as const, justifyContent: 'space-between', alignItems: 'flex-start',
+                              boxShadow: a.bg === '#1a1f12'
+                                ? '3px 3px 8px rgba(0,0,0,0.3), -1px -1px 4px rgba(255,255,255,0.05)'
+                                : `3px 3px 8px ${a.bg}33, -2px -2px 6px rgba(255,255,255,0.7)`,
                             }}>
-                              <svg width="13" height="13" fill="none" stroke={a.fg} viewBox="0 0 24 24" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{a.icon}</svg>
-                              <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 8, letterSpacing: 0.8, color: a.fg }}>{a.label}</p>
+                              <svg width="18" height="18" fill="none" stroke={a.fg} viewBox="0 0 24 24" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{a.icon}</svg>
+                              <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 10, letterSpacing: 0.8, color: a.fg }}>{a.label}</p>
                             </div>
                           ))}
                         </div>
                       </div>
                       {/* Right: Events */}
                       <div style={{ flex: 1.2 }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
                           <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 11, letterSpacing: 1.5, color: '#1a1f12' }}>UPCOMING EVENTS</p>
                           <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 8, color: '#1a1f12', letterSpacing: 0.5 }}>SEE ALL →</span>
                         </div>
@@ -307,7 +308,7 @@ function LoginContent() {
                           <div key={evt.day + evt.month} style={{
                             background: '#fff', borderRadius: 10, padding: '5px 8px', marginBottom: 4,
                             display: 'flex', alignItems: 'center', gap: 7,
-                            boxShadow: '2px 2px 6px rgba(0,0,0,0.05), -1px -1px 4px rgba(255,255,255,0.7)',
+                            boxShadow: '3px 3px 6px rgba(0,0,0,0.06), -2px -2px 5px rgba(255,255,255,0.8)',
                             border: '1px solid rgba(0,0,0,0.03)',
                           }}>
                             <div style={{ background: '#c8ff00', borderRadius: 7, padding: '3px 6px', textAlign: 'center', minWidth: 28 }}>
@@ -323,61 +324,84 @@ function LoginContent() {
                         ))}
                       </div>
                     </div>
-                    {/* Bottom: Club Calendar full-width */}
-                    <div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>
-                        <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 11, letterSpacing: 1.5, color: '#1a1f12' }}>CLUB CALENDAR</p>
-                        <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-                          <span style={{ fontSize: 9, color: '#888' }}>{'<'}</span>
-                          <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 9, color: '#1a1f12' }}>MAR 2026</span>
-                          <span style={{ fontSize: 9, color: '#888' }}>{'>'}</span>
+                    {/* Bottom: Club Calendar — glassmorphic container */}
+                    <div style={{
+                      background: 'rgba(255,255,255,0.45)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
+                      borderRadius: 14, padding: '10px 10px 8px',
+                      border: '1px solid rgba(255,255,255,0.6)',
+                      boxShadow: '0 4px 16px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.7)',
+                    }}>
+                      {/* Header: month label left, nav arrows right */}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                        <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 13, color: '#1a1f12' }}>March 2026</span>
+                        <div style={{ display: 'flex', gap: 4 }}>
+                          <div style={{ width: 18, height: 18, background: 'rgba(255,255,255,0.5)', borderRadius: 5, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <svg width="8" height="8" fill="none" stroke="#555" viewBox="0 0 24 24" strokeWidth="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+                          </div>
+                          <div style={{ width: 18, height: 18, background: 'rgba(255,255,255,0.5)', borderRadius: 5, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <svg width="8" height="8" fill="none" stroke="#555" viewBox="0 0 24 24" strokeWidth="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                          </div>
                         </div>
                       </div>
                       {/* Weekday headers */}
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2, marginBottom: 2 }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2, marginBottom: 3 }}>
                         {['S','M','T','W','T','F','S'].map((d, i) => (
                           <div key={d + i} style={{ fontSize: 6, fontWeight: 700, color: '#999', textAlign: 'center' }}>{d}</div>
                         ))}
                       </div>
                       {/* Calendar grid — March 2026 starts on Sunday */}
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2 }}>
-                        {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
-                          <div key={day} style={{
-                            aspectRatio: '1', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            fontSize: 7, borderRadius: 4, fontWeight: day === 7 ? 700 : 400,
-                            background: day === 7 ? '#c8ff00' : 'rgba(255,255,255,0.5)',
-                            color: day === 7 ? '#0a0a0a' : '#555',
-                            position: 'relative' as const,
-                          }}>
-                            {day}
-                            {[14, 9].includes(day) && (
-                              <div style={{ position: 'absolute', bottom: 1, left: '50%', transform: 'translateX(-50%)', width: 3, height: 3, borderRadius: '50%', background: '#c8ff00' }} />
-                            )}
-                          </div>
+                        {Array.from({ length: 31 }, (_, i) => i + 1).map(day => {
+                          const isToday = day === 7;
+                          const hasEvent = [9, 14, 21, 28].includes(day);
+                          const isPast = day < 7;
+                          return (
+                            <div key={day} style={{
+                              aspectRatio: '1', display: 'flex', flexDirection: 'column' as const, alignItems: 'center', justifyContent: 'center',
+                              fontSize: 7, borderRadius: 5, fontWeight: isToday ? 700 : 500,
+                              background: isToday ? '#00d4ff' : '#fff',
+                              color: isToday ? '#0a0a0a' : isPast ? '#ccc' : '#333',
+                              boxShadow: isToday
+                                ? 'inset 2px 2px 4px rgba(0,180,220,0.3), inset -2px -2px 4px rgba(255,255,255,0.5)'
+                                : '2px 2px 4px rgba(0,0,0,0.06), -2px -2px 4px rgba(255,255,255,0.9)',
+                              position: 'relative' as const,
+                            }}>
+                              {day}
+                              {hasEvent && !isToday && (
+                                <div style={{ position: 'absolute', bottom: 2, left: '50%', transform: 'translateX(-50%)', width: 3, height: 3, borderRadius: '50%', background: '#ff5a5f', boxShadow: '0 0 3px rgba(255,90,95,0.5)' }} />
+                              )}
+                            </div>
+                          );
+                        })}
+                        {/* Trailing empty cells */}
+                        {Array.from({ length: 4 }, (_, i) => (
+                          <div key={`empty-${i}`} style={{ aspectRatio: '1', borderRadius: 5 }} />
                         ))}
                       </div>
                     </div>
                   </div>
 
-                  {/* Bottom Nav — liquid glass */}
+                  {/* Bottom Nav — liquid glass (matching phone style) */}
                   <div style={{
                     position: 'absolute', bottom: 8, left: 10, right: 10, zIndex: 20,
-                    display: 'flex', justifyContent: 'space-around', alignItems: 'center', padding: '6px',
-                    background: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
-                    border: '1px solid rgba(255,255,255,0.5)', borderRadius: 20, boxShadow: '0 4px 16px rgba(0,0,0,0.06)',
+                    display: 'flex', justifyContent: 'space-around', alignItems: 'center', padding: '8px 6px',
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.7), rgba(255,255,255,0.5))',
+                    backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
+                    border: '1px solid rgba(255,255,255,0.6)', borderRadius: 24,
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.8)',
                   }}>
                     {['HOME', 'SCHEDULE'].map((l, i) => (
-                      <div key={l} style={{ display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: 1, color: i === 0 ? '#1a1f12' : '#999', fontSize: 6, fontWeight: 600 }}>
-                        <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d={i === 0 ? 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' : 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'} /></svg>
+                      <div key={l} style={{ display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: 2, color: i === 0 ? '#1a1f12' : '#999', fontSize: 6, fontWeight: 600, letterSpacing: 0.3 }}>
+                        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d={i === 0 ? 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' : 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'} /></svg>
                         {l}
                       </div>
                     ))}
-                    <div style={{ width: 36, height: 36, marginTop: -20, background: '#c8ff00', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 16px rgba(200,255,0,0.5)' }}>
-                      <svg width="14" height="14" fill="none" stroke="#1a1f12" viewBox="0 0 24 24" strokeWidth="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    <div style={{ width: 38, height: 38, marginTop: -22, background: '#c8ff00', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 16px rgba(200,255,0,0.5)', border: '2px solid rgba(255,255,255,0.6)' }}>
+                      <svg width="14" height="14" fill="none" stroke="#1a1f12" viewBox="0 0 24 24" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                     </div>
                     {['PARTNERS', 'MESSAGES'].map(l => (
-                      <div key={l} style={{ display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: 1, color: '#999', fontSize: 6, fontWeight: 600 }}>
-                        <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d={l === 'PARTNERS' ? 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z' : 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z'} /></svg>
+                      <div key={l} style={{ display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: 2, color: '#999', fontSize: 6, fontWeight: 600, letterSpacing: 0.3 }}>
+                        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d={l === 'PARTNERS' ? 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z' : 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z'} /></svg>
                         {l}
                       </div>
                     ))}
@@ -446,28 +470,26 @@ function LoginContent() {
                   </div>
                   {/* Main content */}
                   <div style={{ flex: 1, background: '#f5f2eb', overflow: 'hidden', display: 'flex', flexDirection: 'column' as const }}>
-                    {/* Dashboard header bar */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 14px', background: '#faf8f3', borderBottom: '1px solid #e0dcd3' }}>
-                      <div style={{ width: 18, height: 18 }}>
-                        <svg width="18" height="18" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="18" fill="#1a1f12"/><text x="20" y="26" textAnchor="middle" fill="#e8e4d9" fontSize="16" fontWeight="700" fontFamily="serif">M</text></svg>
-                      </div>
-                      <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 11, color: '#2a2f1e', letterSpacing: 1 }}>Home</span>
-                      <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
-                        <div style={{ width: 20, height: 20, background: 'rgba(107,122,61,0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <svg width="10" height="10" fill="none" stroke="#1a1f12" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    {/* Dashboard header bar — matching real h-16 proportions */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 14px', background: '#faf8f3', borderBottom: '1px solid #e0dcd3', position: 'relative', height: 32 }}>
+                      <img src="/mono-logo-transparent.png" alt="" width={24} height={24} style={{ filter: 'brightness(0.2)' }} />
+                      <span style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', fontSize: 8, fontWeight: 600, color: '#2a2f1e' }}>HOME</span>
+                      <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                        <div style={{ width: 22, height: 22, background: 'rgba(107,122,61,0.1)', borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <svg width="11" height="11" fill="none" stroke="#1a1f12" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                         </div>
-                        <div style={{ position: 'relative', width: 20, height: 20, background: 'rgba(107,122,61,0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <svg width="10" height="10" fill="none" stroke="#1a1f12" viewBox="0 0 24 24" strokeWidth="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-                          <span style={{ position: 'absolute', top: -2, right: -2, width: 10, height: 10, background: '#d4e157', borderRadius: '50%', fontSize: 6, color: '#1a1f12', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, border: '1.5px solid #faf8f3' }}>1</span>
+                        <div style={{ position: 'relative', width: 22, height: 22, background: 'rgba(107,122,61,0.1)', borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <svg width="12" height="12" fill="none" stroke="#1a1f12" viewBox="0 0 24 24" strokeWidth="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                          <span style={{ position: 'absolute', top: -3, right: -3, width: 11, height: 11, background: '#d4e157', borderRadius: '50%', fontSize: 6, color: '#1a1f12', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, border: '1.5px solid #faf8f3' }}>1</span>
                         </div>
-                        <div style={{ width: 20, height: 20, background: 'rgba(107,122,61,0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <svg width="10" height="10" fill="none" stroke="#1a1f12" viewBox="0 0 24 24" strokeWidth="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+                        <div style={{ width: 22, height: 22, background: 'rgba(107,122,61,0.1)', borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <svg width="11" height="11" fill="none" stroke="#1a1f12" viewBox="0 0 24 24" strokeWidth="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
                         </div>
                       </div>
                     </div>
                     {/* Content area */}
                     <div style={{ flex: 1, padding: '10px 14px', overflow: 'hidden', display: 'flex', flexDirection: 'column' as const }}>
-                      <p style={{ fontSize: 13, color: '#2a2f1e', marginBottom: 8 }}>Good evening, Member</p>
+                      {/* Greeting removed — wastes space */}
                       {/* Quick Actions — matching real dashboard colors */}
                       <div style={{ display: 'flex', gap: 5, marginBottom: 8 }}>
                         {[

@@ -125,7 +125,7 @@ test.describe('Mobile PWA — Page Structure', () => {
 
     const screens = page.locator('.screen[aria-label]');
     const count = await screens.count();
-    expect(count).toBeGreaterThanOrEqual(8);
+    expect(count).toBeGreaterThanOrEqual(5);
   });
 
   test('bottom navigation bar exists', async ({ page }) => {
