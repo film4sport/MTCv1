@@ -93,7 +93,8 @@
       var member = MTC.state.clubMembers.find(function(m) { return m.id === memberId; });
       // Fallback: use API-provided name/avatar from conversationMetaMap if clubMembers lookup fails
       var meta = conversationMetaMap[memberId];
-      var name = member ? member.name : (meta ? meta.name : memberId);
+      // Admins always display as "Mono Tennis Club"
+      var name = (member && member.role === 'admin') ? 'Mono Tennis Club' : (member ? member.name : (meta ? meta.name : memberId));
       var lastMsg = msgs.length > 0 ? msgs[msgs.length - 1] : null;
       var preview = lastMsg ? lastMsg.text : 'No messages yet';
       var time = lastMsg ? (lastMsg.time || '') : '';
@@ -298,7 +299,8 @@
     const member = MTC.state.clubMembers.find(function(m) { return m.id === memberId; });
     // Fallback: use API-provided name/avatar from conversationMetaMap
     var meta = conversationMetaMap[memberId];
-    var displayName = member ? member.name : (meta ? meta.name : 'Member');
+    // Admins always display as "Mono Tennis Club"
+    var displayName = (member && member.role === 'admin') ? 'Mono Tennis Club' : (member ? member.name : (meta ? meta.name : 'Member'));
     var displayAvatar = member ? member.avatar : (meta ? meta.avatar : 'default');
 
     // Update header
@@ -423,7 +425,8 @@
       if (!msg.sent && msg.id) {
         var member = MTC.state.clubMembers.find(function(m) { return m.id === memberId; });
         var meta = conversationMetaMap[memberId];
-        var senderName = member ? member.name : (meta ? meta.name : 'Member');
+        // Admins always display as "Mono Tennis Club"
+        var senderName = (member && member.role === 'admin') ? 'Mono Tennis Club' : (member ? member.name : (meta ? meta.name : 'Member'));
         replyData = ' data-reply-name="' + sanitizeHTML(senderName) + '" data-reply-text="' + sanitizeHTML(msg.text.slice(0, 80)) + '"';
       }
 

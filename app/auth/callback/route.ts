@@ -96,8 +96,7 @@ export async function GET(request: NextRequest) {
   }
 
   // ── Post-confirmation: welcome message + notification ──
-  // Only for signup confirmations (not password recovery) and NOT OAuth signups
-  // (OAuth signups get their welcome message after completing the wizard)
+  // Only for FIRST-TIME signups (not recovery, not returning users)
   if (type !== 'recovery' && data?.session?.user) {
     const user = data.session.user;
     const userName = user.user_metadata?.name || user.email?.split('@')[0] || 'Member';
@@ -107,6 +106,18 @@ export async function GET(request: NextRequest) {
     const adminSupabase = serviceKey
       ? createClient(supabaseUrl, serviceKey)
       : createClient(supabaseUrl, supabaseAnonKey);
+
+    // Guard: only send welcome tasks if this user hasn't received them yet
+    const { data: existingWelcome } = await adminSupabase
+      .from('messages')
+      .select('id')
+      .eq('id', `welcome-${user.id}`)
+      .maybeSingle();
+
+    if (existingWelcome) {
+      // Returning user — skip welcome tasks
+      return response;
+    }
 
     const now = new Date().toISOString();
 

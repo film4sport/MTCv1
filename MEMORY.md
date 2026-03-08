@@ -631,11 +631,32 @@ Closed ALL notification asymmetries. Every action fires symmetric bell + push + 
 
 ---
 
+### Cowork Session (2026-03-08m) — Welcome Message Fixes + Admin Name Override
+
+**Welcome message firing on every login (BUG FIX):**
+- Root cause: Auth callback (`app/auth/callback/route.ts`) ran welcome tasks on EVERY login — no guard for returning users.
+- Fix: Added guard checking if `welcome-{userId}` message already exists in DB before running welcome tasks. If exists → skip all welcome tasks and return response immediately.
+- File: `app/auth/callback/route.ts` (lines 111-120)
+
+**Admin conversations always show "Mono Tennis Club" (BUG FIX — cross-platform):**
+- Root cause: Conversation list resolved other member's PROFILE name. Admin's profile was "F4Sport"/"F4S", so that's what displayed.
+- Fix (3 codebases updated):
+  1. **Dashboard** (`db.ts` `fetchConversations()`): Batch-fetches `role` for all other-member IDs. If `role === 'admin'` → override `memberName` to "Mono Tennis Club".
+  2. **Mobile API** (`conversations/route.ts`): Added `role` to profile SELECT. If `role === 'admin'` → override `otherUserName` to "Mono Tennis Club" in profileMap.
+  3. **Mobile PWA** (`messaging.js`): 3 locations (conversation list, chat header, reply sender name) now check `member.role === 'admin'` → display "Mono Tennis Club".
+- Files: `app/dashboard/lib/db.ts`, `app/api/mobile/conversations/route.ts`, `public/mobile-app/js/messaging.js`
+
+**Welcome message migration:** Run on production Supabase (via SQL editor in browser). `send_welcome_message` function now says "gate code will be provided after Opening Day."
+
+**Build:** 29 JS → 358KB, 23 CSS → 225KB, cache: mtc-court-7444603e. TypeScript clean.
+
+---
+
 ## TODO / REMINDERS
-- **Deploy to Railway** — booking cancel fix + cross-platform migration + sidebar fix + ARIA test fix + events calendar + login mockup
+- **Deploy to Railway** — all pending changes (welcome guard, admin name override, booking cancel fix, cross-platform migration, sidebar fix, events calendar, login mockup)
 - **Delete orphaned Alex RSVP** — `DELETE FROM event_attendees WHERE user_name = 'Alex';` on production Supabase
 - **Junior Summer Camp dates**: User is waiting on real dates from Mark Taylor. When received, update the `junior-summer-camp` event across: `supabase/seed.sql`, `app/dashboard/lib/data.ts`, `public/mobile-app/js/events.js`, and run UPDATE SQL on live Supabase. Also update date/time in `app/(landing)/layout.tsx` JSON-LD if camp is featured there.
-- **Run welcome message migration** on production Supabase (`npm run db:push` or SQL manually)
+- **Finish visual verification**: Settings, Book Lessons, Admin Panel still need checking (session expired during previous verification)
 
 ## Decisions Made
 - Double-booking prevention: DB-level partial unique index on `(court_id, date, time) WHERE status = 'confirmed'`

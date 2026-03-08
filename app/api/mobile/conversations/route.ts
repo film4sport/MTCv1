@@ -51,7 +51,7 @@ export async function GET(request: Request) {
 
     const { data: profiles, error: profilesError } = await supabase
       .from('profiles')
-      .select('id, name, avatar')
+      .select('id, name, avatar, role')
       .in('id', Array.from(userIds));
 
     if (profilesError) {
@@ -60,7 +60,8 @@ export async function GET(request: Request) {
 
     const profileMap: Record<string, { name: string; avatar: string | null }> = {};
     (profiles || []).forEach(p => {
-      profileMap[p.id] = { name: p.name, avatar: p.avatar };
+      // Admins always display as "Mono Tennis Club" in conversations
+      profileMap[p.id] = { name: p.role === 'admin' ? 'Mono Tennis Club' : p.name, avatar: p.avatar };
     });
 
     // Fetch messages for all conversations
