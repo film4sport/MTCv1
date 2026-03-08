@@ -162,14 +162,8 @@ test.describe('Mobile PWA — Authenticated Navigation', () => {
         MTC.fn.navigateTo('settings');
       }
     });
-    // Settings screen may load async data — wait for screen transition + render
-    await page.waitForTimeout(1000);
-
-    const active = await page.evaluate(() => {
-      const screen = document.getElementById('screen-settings');
-      return screen ? screen.classList.contains('active') : false;
-    });
-    expect(active).toBe(true);
+    // Use Playwright's built-in locator assertion (auto-retries, avoids flaky fixed timeout)
+    await expect(page.locator('#screen-settings.active')).toBeAttached({ timeout: 5000 });
   });
 });
 
