@@ -50,12 +50,14 @@
     // Hide all screens
     document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
 
-    // Safety: always reset html/body scroll to 0.
+    // Safety: always reset html/body/app scroll to 0.
     // Booking grid's scroll-to-now (or scroll-behavior:smooth on html) can
     // accidentally shift <html> down, which breaks ALL screens since they're
     // position:absolute inside #app.
     document.documentElement.scrollTop = 0;
     document.body.scrollTop = 0;
+    var appEl = document.getElementById('app');
+    if (appEl) appEl.scrollTop = 0;
 
     if (targetScreen) {
       targetScreen.classList.add('active');

@@ -60,7 +60,75 @@
 - Client-side only (no API DELETE endpoint for conversations exists). Conversations reappear after re-login from API.
 - Files: `messaging.js`, `messaging.css`
 
-**Build:** Mobile PWA build passes (29 JS → 326KB, 23 CSS → 213KB, cache: mtc-court-183735a0). TypeScript clean.
+**Booking page fixes (mobile PWA):**
+- Day tabs rendering as vertical lime bars: Root cause was `switchBookingView('week')` setting `#weekView` to `display: flex` (caused horizontal layout). Fixed to `display: block`.
+- Auto-scroll to current time not working: Root cause was scrolling `gridBody` which has no `max-height` constraint (never actually scrolls). Changed to target `#screen-book` as the scroll container using `getBoundingClientRect()`.
+- Files: `booking.js`
+
+**Booking confirmation modal cleanup (mobile PWA):**
+- Removed black "Court Fee" bar and "FREE FOR MEMBERS" / "Payment Info" section.
+- Replaced with single guest fee note: "Bringing a guest? A $10 guest fee applies per non-member and will be added to your tab."
+- Removed JS that dynamically set the removed elements.
+- Files: `index.html`, `booking.js`
+
+**24hr cancellation restriction removed (cross-platform):**
+- Users can now cancel bookings anytime before the slot starts (was: 24hr minimum).
+- Mobile API (`app/api/mobile/bookings/route.ts`): Changed to only block past bookings.
+- Desktop `canCancel()` in `booking-utils.ts`: Now allows any future booking.
+- Desktop `book/page.tsx`, `BookingSidebar.tsx`, `schedule/page.tsx`: Updated error messages.
+- Files: `bookings/route.ts`, `booking-utils.ts`, `book/page.tsx`, `BookingSidebar.tsx`, `schedule/page.tsx`
+
+**FAQ "Still have questions?" email section (landing page):**
+- Added email contact box below FAQ accordion, above "Find Us" map.
+- Links to monotennisclub1@gmail.com with mailto: link.
+- Styled with cream background, green accent on email link.
+- Files: `app/info/components/FAQTab.tsx`
+
+**Court blocking date range support (mobile PWA):**
+- Admin modal now has Start Date + End Date (optional) inputs.
+- `createCourtBlock()` generates array of dates in range, creates blocks in parallel via Promise.all.
+- Files: `admin.js`
+
+**Court blocking UI added to desktop admin panel (NEW):**
+- `AdminCourtsTab.tsx` expanded from 45 lines (just court status cards) to full court management panel:
+  - Court Status section (existing): court cards with Active/Closed toggle.
+  - Block Court Time form (new): court selector, reason dropdown, start/end date range, full day vs time range toggle, notes field.
+  - Upcoming Blocks list (new): shows all future blocks with date, court, time, reason, notes. Delete button per block.
+- Uses Supabase direct inserts (same `court_blocks` table). Realtime subscription for live updates.
+- TypeScript clean.
+- Files: `app/dashboard/admin/components/AdminCourtsTab.tsx`
+
+**Three production bugs found & fixed (Cowork BDG testing on monotennisclub.com):**
+
+Bug 1 — clubMembers not populating after fresh login (CRITICAL):
+- Root cause: `loadFromAPI()` in `api-client.js` inferred `expectedType` from `fallback` param. All callers passed `null` as fallback, so `Array.isArray(null)` = false → `expectedType = 'object'`. `validateResponse()` then REJECTED the array response from `/mobile/members` (and all other array endpoints), returning `null`. On fresh login (no cache), members never loaded.
+- Fix: When `fallback === null`, skip type validation entirely — accept whatever the API returns.
+- Files: `api-client.js`
+
+Bug 2 — Partners screen header scrolled off-screen:
+- Root cause: `navigateTo()` in `navigation.js` reset `document.documentElement.scrollTop` and `document.body.scrollTop` but NOT the `#app` container, which retained scroll position from previous screen.
+- Fix: Added `document.getElementById('app').scrollTop = 0` to `navigateTo()`.
+- Files: `navigation.js`
+
+Bug 3 — Clicking member in New Message modal didn't start conversation:
+- Root cause: `#newMessageModal` overlay has `onclick="closeNewMessageModal()"`, and the inner `.modal` has `onclick="event.stopPropagation()"`. The stopPropagation prevents clicks from reaching the document-level event delegation handler in `event-delegation.js`. So `data-action="startConversation"` was never triggered.
+- Fix: Added local click handler directly on `#memberSearchResults` container that catches clicks on `[data-action="startConversation"]` elements and calls `window.startConversation()`.
+- Files: `messaging.js`
+
+**Build:** Mobile PWA build passes (29 JS → 327KB, 23 CSS → 213KB, cache: mtc-court-8c67a014). TypeScript clean.
+
+**Visual verification (Cowork BDG):**
+- Booking page: day tabs horizontal ✓, grid layout correct ✓, no tennis emoji ✓
+- Booking modal: guest fee note shows ✓, no Court Fee bar ✓, no FREE section ✓
+- FAQ email section: renders between accordion and map ✓
+- Messaging: member search works with real members ✓, search filtering works ✓
+- Partners: Post Partner Request works, cards render ✓
+- Auto-scroll: can't verify at 1am (now-row only rendered during operating hours) — code reviewed
+- Admin panels: can't verify on localhost (Supabase OAuth redirects to production) — code reviewed, TypeScript clean
+
+**Still needs:**
+- Run welcome message migration on production Supabase
+- Deploy to Railway to verify admin panels and bug fixes in production
 
 ### Cowork Session (2026-03-07) — Mobile Admin Parity, Court Blocking, Login Fixes
 

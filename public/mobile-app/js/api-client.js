@@ -420,12 +420,13 @@
       return Promise.resolve(MTC.storage.get(storageKey, fallback));
     }
 
-    var expectedType = Array.isArray(fallback) ? 'array' : 'object';
+    // When fallback is null, we don't know the expected shape — skip validation
+    var expectedType = fallback === null ? null : (Array.isArray(fallback) ? 'array' : 'object');
 
     return apiRequest(endpoint, { method: 'GET' })
       .then(function(result) {
         if (result.ok && result.data) {
-          var validated = validateResponse(result.data, expectedType, endpoint);
+          var validated = expectedType === null ? result.data : validateResponse(result.data, expectedType, endpoint);
           if (validated !== null) {
             MTC.storage.set(storageKey, validated);
             return validated;
