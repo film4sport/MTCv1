@@ -134,6 +134,10 @@ export async function PATCH(request: Request) {
     if (body.ntrp !== undefined) updates.ntrp = Number(body.ntrp) || 3.0;
     if (body.skillLevel !== undefined) updates.skill_level = sanitizeInput(body.skillLevel, 20);
     if (body.skillLevelSet !== undefined) updates.skill_level_set = !!body.skillLevelSet;
+    if (body.residence !== undefined) {
+      const res = sanitizeInput(body.residence, 10).toLowerCase();
+      if (res === 'mono' || res === 'other') updates.residence = res;
+    }
 
     // Preferences JSONB merge (court prefs, privacy, onboarding, active profile, etc.)
     if (body.preferences !== undefined && typeof body.preferences === 'object') {

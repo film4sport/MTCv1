@@ -45,6 +45,7 @@ export async function signUp(
   name: string,
   membershipType?: string,
   skillLevel?: string,
+  residence?: string,
 ): Promise<{ user: User | null; error: string | null; emailConfirmRequired?: boolean }> {
   // Generate a strong random password the user never sees (Supabase requires one)
   const randomPassword = crypto.randomUUID() + '-Aa1!';
@@ -53,7 +54,7 @@ export async function signUp(
     email,
     password: randomPassword,
     options: {
-      data: { name, role: 'member', membership_type: membershipType || 'adult', skill_level: skillLevel || undefined, skill_level_set: skillLevel ? true : false },
+      data: { name, role: 'member', membership_type: membershipType || 'adult', skill_level: skillLevel || undefined, skill_level_set: skillLevel ? true : false, residence: residence || 'mono' },
       emailRedirectTo: `${typeof window !== 'undefined' ? window.location.origin : 'https://www.monotennisclub.com'}/auth/callback`,
     },
   });
@@ -138,7 +139,7 @@ export async function signInWithMagicLink(email: string, nextPath?: string): Pro
  */
 export async function completeOAuthProfile(
   userId: string,
-  data: { membershipType: string; skillLevel?: string; name?: string },
+  data: { membershipType: string; skillLevel?: string; name?: string; residence?: string },
 ): Promise<{ error: string | null }> {
   // Update user metadata in Supabase Auth
   const { error: metaError } = await supabase.auth.updateUser({
@@ -146,6 +147,7 @@ export async function completeOAuthProfile(
       membership_type: data.membershipType,
       skill_level: data.skillLevel || undefined,
       skill_level_set: data.skillLevel ? true : false,
+      residence: data.residence || 'mono',
       ...(data.name ? { name: data.name } : {}),
     },
   });
@@ -154,6 +156,7 @@ export async function completeOAuthProfile(
   // Update the profiles table directly
   const updateFields: Record<string, unknown> = {
     membership_type: data.membershipType,
+    residence: data.residence || 'mono',
   };
   if (data.skillLevel) {
     updateFields.skill_level = data.skillLevel;

@@ -20,7 +20,7 @@
     if ('serviceWorker' in navigator) {
       caches.keys().then(function(names) {
         names.forEach(function(name) {
-          if (name.indexOf('mtc-court-9c06bc0c') === -1) {
+          if (name.indexOf('mtc-court-a5431365') === -1) {
             caches.delete(name);
             console.log('[CacheBust] Deleted old cache:', name);
           }
@@ -324,6 +324,13 @@
         <input type="text" class="login-input" placeholder="Full Name" id="signupName" aria-label="Full name">
         <input type="email" class="login-input" placeholder="Email" id="signupEmail" aria-label="Email address">
         <input type="tel" class="login-input" placeholder="Phone (optional)" id="signupPhone" aria-label="Phone number">
+
+        <!-- Residence: Mono vs Other -->
+        <div style="display: flex; gap: 8px; margin: 8px 0 12px;">
+          <button type="button" id="residenceMono" onclick="selectResidence('mono')" style="flex:1; padding: 10px 8px; border-radius: 12px; border: 2px solid var(--accent-primary); background: rgba(107, 122, 61, 0.08); font-size: 13px; font-weight: 600; color: var(--text-primary); cursor: pointer; text-align: center;" aria-label="I live in Mono">Mono</button>
+          <button type="button" id="residenceOther" onclick="selectResidence('other')" style="flex:1; padding: 10px 8px; border-radius: 12px; border: 2px solid var(--border-primary); background: var(--bg-secondary); font-size: 13px; font-weight: 500; color: var(--text-secondary); cursor: pointer; text-align: center;" aria-label="I live elsewhere">Other</button>
+        </div>
+
         <p style="font-size: 13px; color: var(--text-secondary); margin: 8px 0 12px; text-align: center; font-weight: 500; line-height: 1.4; padding: 8px 12px; background: rgba(107, 122, 61, 0.08); border-radius: 10px;">You'll sign in with Google or a magic email link — <strong style="color: var(--text-primary);">no password needed</strong>.</p>
 
         <button type="button" class="login-btn" onclick="handleSignUp()" aria-label="Create account">Create Account</button>

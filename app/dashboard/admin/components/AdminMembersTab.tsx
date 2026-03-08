@@ -21,17 +21,22 @@ export default function AdminMembersTab({
   onSetCaptain,
 }: AdminMembersTabProps) {
   const [teamFilter, setTeamFilter] = useState<'all' | 'a' | 'b'>('all');
+  const [residenceFilter, setResidenceFilter] = useState<'all' | 'mono' | 'other'>('all');
 
   const filteredMembers = useMemo(
     () => members.filter(m => {
       const matchesSearch = m.name.toLowerCase().includes(memberSearch.toLowerCase()) ||
         m.email.toLowerCase().includes(memberSearch.toLowerCase());
       if (!matchesSearch) return false;
-      if (teamFilter === 'all') return true;
-      return m.interclubTeam === teamFilter;
+      if (teamFilter !== 'all' && m.interclubTeam !== teamFilter) return false;
+      if (residenceFilter !== 'all' && (m.residence || 'mono') !== residenceFilter) return false;
+      return true;
     }),
-    [members, memberSearch, teamFilter]
+    [members, memberSearch, teamFilter, residenceFilter]
   );
+
+  const monoCount = members.filter(m => (m.residence || 'mono') === 'mono').length;
+  const otherCount = members.filter(m => m.residence === 'other').length;
 
   return (
     <div>
@@ -44,7 +49,7 @@ export default function AdminMembersTab({
         className="w-full max-w-sm px-4 py-2.5 rounded-xl text-sm border focus:outline-none focus:ring-2 focus:ring-[#6b7a3d]/20 mb-4"
         style={{ borderColor: '#e0dcd3', color: '#2a2f1e' }}
       />
-      <div className="flex gap-2 mb-4">
+      <div className="flex flex-wrap gap-2 mb-4">
         {([['all', 'All Members'], ['a', 'Team A'], ['b', 'Team B']] as const).map(([val, label]) => (
           <button
             key={val}
@@ -53,6 +58,20 @@ export default function AdminMembersTab({
             style={{
               background: teamFilter === val ? '#6b7a3d' : 'rgba(107, 122, 61, 0.08)',
               color: teamFilter === val ? '#fff' : '#6b7266',
+            }}
+          >
+            {label}
+          </button>
+        ))}
+        <span className="mx-1" style={{ borderLeft: '1px solid #e0dcd3' }} />
+        {([['all', 'All', null], ['mono', `Mono (${monoCount})`, null], ['other', `Out of Town (${otherCount})`, null]] as const).map(([val, label]) => (
+          <button
+            key={val}
+            onClick={() => setResidenceFilter(val as 'all' | 'mono' | 'other')}
+            className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+            style={{
+              background: residenceFilter === val ? '#3b82f6' : 'rgba(59, 130, 246, 0.08)',
+              color: residenceFilter === val ? '#fff' : '#6b7266',
             }}
           >
             {label}
@@ -69,6 +88,7 @@ export default function AdminMembersTab({
               <th className="text-left px-4 py-3 text-xs font-medium" style={{ color: '#6b7266' }}>Membership</th>
               <th className="text-left px-4 py-3 text-xs font-medium" style={{ color: '#6b7266' }}>Skill</th>
               <th className="text-left px-4 py-3 text-xs font-medium" style={{ color: '#6b7266' }}>Team</th>
+              <th className="text-left px-4 py-3 text-xs font-medium" style={{ color: '#6b7266' }}>Residence</th>
               <th className="text-left px-4 py-3 text-xs font-medium" style={{ color: '#6b7266' }}>Status</th>
               <th className="text-left px-4 py-3 text-xs font-medium" style={{ color: '#6b7266' }}>Since</th>
               <th className="text-right px-4 py-3 text-xs font-medium" style={{ color: '#6b7266' }}>Actions</th>
@@ -126,6 +146,14 @@ export default function AdminMembersTab({
                   ) : (
                     <span className="text-xs" style={{ color: '#6b7266' }}>—</span>
                   )}
+                </td>
+                <td className="px-4 py-3">
+                  <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{
+                    background: m.residence === 'other' ? 'rgba(59, 130, 246, 0.08)' : 'rgba(107, 122, 61, 0.08)',
+                    color: m.residence === 'other' ? '#3b82f6' : '#6b7a3d',
+                  }}>
+                    {m.residence === 'other' ? 'Out of Town' : 'Mono'}
+                  </span>
                 </td>
                 <td className="px-4 py-3">
                   <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{
