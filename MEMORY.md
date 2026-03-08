@@ -280,6 +280,29 @@ Closed ALL notification asymmetries. Every action fires symmetric bell + push + 
 
 **Build:** 29 JS → 329KB, 23 CSS → 213KB, cache: mtc-court-c25e9387. TypeScript clean.
 
+### Cowork Session (2026-03-08c) — Court Blocking Auto-Cancel + Bulk Delete
+
+**Auto-cancel conflicting bookings (NEW):**
+- When admin creates a court block, `cancelConflictingBookings()` automatically finds and cancels all confirmed bookings that overlap with the block (by date, court, and time range).
+- Each affected user receives: bell notification ("Booking cancelled — court blocked") + push notification with details.
+- POST response now includes `cancelledBookings` count and `cancelledDetails` array.
+
+**Bulk delete court blocks (NEW):**
+- DELETE endpoint now supports 3 modes: `?id=...` (single), `{ ids: [...] }` (bulk by IDs), `{ from, to, courtId }` (range delete by dates + optional court filter).
+- Dashboard: "Clear All" button on blocks list, calls bulk DELETE with all block IDs.
+- Mobile PWA: "Clear All" button in `renderBlocksList()`, same bulk DELETE API call.
+
+**Dashboard time format fix:**
+- `AdminCourtsTab.tsx` was sending 24h "08:00" but API/DB uses 12h "9:30 AM". Added `to12h()` converter.
+- Block creation now goes through API route (not direct Supabase insert) so auto-cancel triggers.
+
+**Files changed:**
+- `app/api/mobile/court-blocks/route.ts` (78→228 lines) — `parseTimeMinutes()`, `cancelConflictingBookings()`, bulk DELETE
+- `app/dashboard/admin/components/AdminCourtsTab.tsx` (373→425 lines) — API route, to12h(), bulk delete, Clear All
+- `public/mobile-app/js/admin.js` — cancelled count toast, `clearAllCourtBlocks()`, Clear All button
+
+**Build:** 29 JS → 329KB, 23 CSS → 213KB, cache: mtc-court-0dbe4763. TypeScript clean.
+
 ---
 
 ### Environment Limitations (IMPORTANT)

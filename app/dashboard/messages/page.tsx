@@ -6,6 +6,7 @@ import { useApp } from '../lib/store';
 import { useToast } from '../lib/toast';
 import DashboardHeader from '../components/DashboardHeader';
 import { downloadICS } from '../lib/calendar';
+import { supabase } from '../../lib/supabase';
 
 export default function MessagesPage() {
   return (
@@ -59,7 +60,41 @@ function MessagesContent() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showNewConvo, setShowNewConvo] = useState(false);
   const [memberActiveIndex, setMemberActiveIndex] = useState(-1);
+  const [replyTo, setReplyTo] = useState<{ id: string; text: string; fromName: string } | null>(null);
+  const [typingUsers, setTypingUsers] = useState<Record<string, number>>({}); // memberId → timeout id
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const typingChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const lastTypingSentRef = useRef(0);
+
+  // Typing indicator — Supabase Realtime broadcast
+  useEffect(() => {
+    if (!currentUser) return;
+    const channel = supabase.channel('typing-indicators', { config: { broadcast: { self: false } } })
+      .on('broadcast', { event: 'typing' }, ({ payload }) => {
+        if (payload?.toId === currentUser.id && payload?.fromId) {
+          // Show typing for this user, clear after 3s
+          setTypingUsers(prev => {
+            const existing = prev[payload.fromId];
+            if (existing) clearTimeout(existing);
+            const timeout = window.setTimeout(() => {
+              setTypingUsers(p => { const next = { ...p }; delete next[payload.fromId]; return next; });
+            }, 3000);
+            return { ...prev, [payload.fromId]: timeout };
+          });
+        }
+      })
+      .subscribe();
+    typingChannelRef.current = channel;
+    return () => { supabase.removeChannel(channel); };
+  }, [currentUser?.id]);
+
+  const broadcastTyping = useCallback((toId: string) => {
+    if (!currentUser || !typingChannelRef.current) return;
+    const now = Date.now();
+    if (now - lastTypingSentRef.current < 2000) return; // Throttle: max once per 2s
+    lastTypingSentRef.current = now;
+    typingChannelRef.current.send({ type: 'broadcast', event: 'typing', payload: { fromId: currentUser.id, toId } });
+  }, [currentUser]);
 
   const activeConvo = conversations.find(c => c.memberId === selectedConvo);
 
@@ -77,8 +112,12 @@ function MessagesContent() {
 
   const handleSend = () => {
     if (!messageText.trim() || !selectedConvo) return;
-    sendMessage(selectedConvo, messageText.trim());
+    const text = replyTo
+      ? `[reply:${replyTo.fromName}:${replyTo.text.slice(0, 80)}]\n${messageText.trim()}`
+      : messageText.trim();
+    sendMessage(selectedConvo, text);
     setMessageText('');
+    setReplyTo(null);
     showToast('Message sent');
   };
 
@@ -306,22 +345,53 @@ function MessagesContent() {
                     const isMine = msg.fromId === currentUser?.id;
                     // Detect booking calendar marker [booking:courtName:date:time]
                     const bookingMatch = msg.text.match(/\[booking:([^:]+):(\d{4}-\d{2}-\d{2}):([^\]]+)\]/);
-                    const displayText = bookingMatch ? msg.text.replace(bookingMatch[0], '').trim() : msg.text;
+                    // Detect reply-to quote [reply:Name:quoted text]
+                    const replyMatch = msg.text.match(/^\[reply:([^:]+):([^\]]*)\]\n?([\s\S]*)$/);
+                    const displayText = replyMatch
+                      ? replyMatch[3].trim()
+                      : (bookingMatch ? msg.text.replace(bookingMatch[0], '').trim() : msg.text);
+                    const quotedReply = replyMatch ? { fromName: replyMatch[1], text: replyMatch[2] } : null;
+
                     return (
                       <div key={msg.id} className={`group/msg flex ${isMine ? 'justify-end' : 'justify-start'} animate-fadeIn`}>
+                        {/* Action buttons — delete (sent) and reply (all) */}
                         {isMine && (
-                          <button
-                            onClick={() => { deleteMessage(selectedConvo!, msg.id); showToast('Message deleted'); }}
-                            className="self-center p-1 rounded-lg opacity-0 group-hover/msg:opacity-100 hover:bg-red-50 transition-all mr-1"
-                            title="Delete message"
-                          >
-                            <svg className="w-3.5 h-3.5" fill="none" stroke="#ccc" viewBox="0 0 24 24" strokeWidth="2">
-                              <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                            </svg>
-                          </button>
+                          <div className="self-center flex gap-0.5 opacity-0 group-hover/msg:opacity-100 transition-all mr-1">
+                            <button
+                              onClick={() => setReplyTo({ id: msg.id, text: msg.text, fromName: msg.from })}
+                              className="p-1 rounded-lg hover:bg-gray-100 transition-all"
+                              title="Reply"
+                            >
+                              <svg className="w-3.5 h-3.5" fill="none" stroke="#aaa" viewBox="0 0 24 24" strokeWidth="2">
+                                <polyline points="9 17 4 12 9 7" /><path d="M20 18v-2a4 4 0 00-4-4H4" />
+                              </svg>
+                            </button>
+                            <button
+                              onClick={() => { deleteMessage(selectedConvo!, msg.id); showToast('Message deleted'); }}
+                              className="p-1 rounded-lg hover:bg-red-50 transition-all"
+                              title="Delete message"
+                            >
+                              <svg className="w-3.5 h-3.5" fill="none" stroke="#ccc" viewBox="0 0 24 24" strokeWidth="2">
+                                <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                              </svg>
+                            </button>
+                          </div>
+                        )}
+                        {!isMine && (
+                          <div className="self-center flex gap-0.5 opacity-0 group-hover/msg:opacity-100 transition-all order-2 ml-1">
+                            <button
+                              onClick={() => setReplyTo({ id: msg.id, text: msg.text, fromName: msg.from })}
+                              className="p-1 rounded-lg hover:bg-gray-100 transition-all"
+                              title="Reply"
+                            >
+                              <svg className="w-3.5 h-3.5" fill="none" stroke="#aaa" viewBox="0 0 24 24" strokeWidth="2">
+                                <polyline points="9 17 4 12 9 7" /><path d="M20 18v-2a4 4 0 00-4-4H4" />
+                              </svg>
+                            </button>
+                          </div>
                         )}
                         <div
-                          className="max-w-[80%] sm:max-w-[70%] rounded-2xl px-4 py-2.5 transition-all"
+                          className="max-w-[80%] sm:max-w-[70%] rounded-2xl px-4 py-2.5 transition-all group/bubble"
                           style={{
                             background: isMine ? '#6b7a3d' : '#f5f2eb',
                             color: isMine ? '#fff' : '#2a2f1e',
@@ -329,6 +399,17 @@ function MessagesContent() {
                             borderBottomLeftRadius: isMine ? 16 : 4,
                           }}
                         >
+                          {/* Quoted reply */}
+                          {quotedReply && (
+                            <div className="mb-1.5 px-2.5 py-1.5 rounded-lg text-[0.7rem] border-l-2" style={{
+                              background: isMine ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.04)',
+                              borderColor: isMine ? 'rgba(255,255,255,0.4)' : '#6b7a3d',
+                              opacity: 0.85,
+                            }}>
+                              <span className="font-semibold">{quotedReply.fromName}</span>
+                              <p className="truncate mt-0.5">{quotedReply.text}</p>
+                            </div>
+                          )}
                           <p className="text-sm whitespace-pre-line">{displayText}</p>
                           {bookingMatch && (() => {
                             const bCourtName = bookingMatch[1];
@@ -364,9 +445,11 @@ function MessagesContent() {
                               </div>
                             );
                           })()}
-                          <div className="flex items-center gap-1 mt-1">
+                          {/* Timestamp + read receipt — click to show full date */}
+                          <div className="flex items-center gap-1 mt-1 group/ts cursor-default">
                             <p className="text-[0.6rem] opacity-60">
-                              {new Date(msg.timestamp).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+                              <span className="group-hover/ts:hidden">{new Date(msg.timestamp).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}</span>
+                              <span className="hidden group-hover/ts:inline">{new Date(msg.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</span>
                             </p>
                             {isMine && (
                               <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: msg.read ? 0.8 : 0.4 }}>
@@ -379,16 +462,42 @@ function MessagesContent() {
                       </div>
                     );
                   })}
+                  {/* Typing indicator */}
+                  {selectedConvo && typingUsers[selectedConvo] && (
+                    <div className="flex justify-start animate-fadeIn">
+                      <div className="rounded-2xl px-4 py-2.5" style={{ background: '#f5f2eb', borderBottomLeftRadius: 4 }}>
+                        <div className="flex gap-1 items-center h-5">
+                          <span className="w-2 h-2 rounded-full animate-bounce" style={{ background: '#6b7a3d', animationDelay: '0ms' }} />
+                          <span className="w-2 h-2 rounded-full animate-bounce" style={{ background: '#6b7a3d', animationDelay: '150ms' }} />
+                          <span className="w-2 h-2 rounded-full animate-bounce" style={{ background: '#6b7a3d', animationDelay: '300ms' }} />
+                        </div>
+                      </div>
+                    </div>
+                  )}
                   <div ref={messagesEndRef} />
                 </div>
 
-                {/* Input */}
+                {/* Reply-to preview + Input */}
                 <div className="p-3 sm:p-4 border-t" style={{ borderColor: '#f0ede6' }}>
+                  {replyTo && (
+                    <div className="mb-2 px-3 py-2 rounded-lg flex items-center gap-2 text-xs border-l-2" style={{ background: 'rgba(107,122,61,0.05)', borderColor: '#6b7a3d' }}>
+                      <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="#6b7a3d" viewBox="0 0 24 24" strokeWidth="2">
+                        <polyline points="9 17 4 12 9 7" /><path d="M20 18v-2a4 4 0 00-4-4H4" />
+                      </svg>
+                      <div className="flex-1 min-w-0">
+                        <span className="font-semibold" style={{ color: '#6b7a3d' }}>{replyTo.fromName}</span>
+                        <p className="truncate" style={{ color: '#6b7266' }}>{replyTo.text.slice(0, 80)}</p>
+                      </div>
+                      <button onClick={() => setReplyTo(null)} className="shrink-0 p-1 rounded hover:bg-black/5">
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="#999" viewBox="0 0 24 24" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                      </button>
+                    </div>
+                  )}
                   <div className="flex gap-2">
                     <input
                       type="text"
                       value={messageText}
-                      onChange={(e) => setMessageText(e.target.value)}
+                      onChange={(e) => { setMessageText(e.target.value); if (selectedConvo) broadcastTyping(selectedConvo); }}
                       onKeyDown={handleKeyDown}
                       placeholder="Type a message..."
                       aria-label="Type a message"

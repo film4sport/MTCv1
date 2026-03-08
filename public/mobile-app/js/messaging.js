@@ -362,26 +362,156 @@
           '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">' +
           '<polyline points="20 6 9 17 4 12"/>' + doubleCheck + '</svg></span>';
       }
+
+      // Parse reply-to quote: [reply:Name:quoted text]\nactual message
+      var displayText = msg.text;
+      var quotedHtml = '';
+      var replyMatch = msg.text.match(/^\[reply:([^:]+):([^\]]*)\]\n?([\s\S]*)$/);
+      if (replyMatch) {
+        quotedHtml = '<div class="chat-quote"><span class="chat-quote-name">' + sanitizeHTML(replyMatch[1]) + '</span><span class="chat-quote-text">' + sanitizeHTML(replyMatch[2]) + '</span></div>';
+        displayText = replyMatch[3].trim();
+      }
+
+      // Timestamp for tap-to-reveal (ISO string if available)
+      var fullTimestamp = '';
+      if (msg.timestamp) {
+        var d = new Date(msg.timestamp);
+        fullTimestamp = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' ' + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+      }
+      var timestampAttr = fullTimestamp ? ' data-full-time="' + sanitizeHTML(fullTimestamp) + '"' : '';
+
       var msgIdAttr = msg.id ? ' data-msg-id="' + sanitizeHTML(msg.id) + '"' : '';
-      html += '<div class="chat-bubble ' + (msg.sent ? 'sent' : 'received') + '"' + msgIdAttr + '>' + sanitizeHTML(msg.text) + readReceipt + '</div>';
+      // Reply action data for received messages
+      var replyData = '';
+      if (!msg.sent && msg.id) {
+        var member = MTC.state.clubMembers.find(function(m) { return m.id === memberId; });
+        var meta = conversationMetaMap[memberId];
+        var senderName = member ? member.name : (meta ? meta.name : 'Member');
+        replyData = ' data-reply-name="' + sanitizeHTML(senderName) + '" data-reply-text="' + sanitizeHTML(msg.text.slice(0, 80)) + '"';
+      }
+
+      var bubbleContent = quotedHtml + sanitizeHTML(displayText) + readReceipt;
+
+      if (msg.sent && msg.id) {
+        // Sent messages get swipe-to-delete wrapper
+        html += '<div class="msg-swipe-container" data-msg-id="' + sanitizeHTML(msg.id) + '">' +
+          '<div class="msg-swipe-delete-bg"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#fff" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></div>' +
+          '<div class="chat-bubble sent msg-swipe-content"' + timestampAttr + '>' + bubbleContent + '</div>' +
+          '</div>';
+      } else {
+        html += '<div class="chat-bubble ' + (msg.sent ? 'sent' : 'received') + '"' + msgIdAttr + timestampAttr + replyData + '>' + bubbleContent + '</div>';
+      }
     });
 
     container.innerHTML = html;
     container.scrollTop = container.scrollHeight;
 
-    // Long-press to delete own messages
-    container.querySelectorAll('.chat-bubble.sent').forEach(function(bubble) {
+    // Swipe-to-delete on sent messages
+    initSwipeToDeleteMessages(container, memberId);
+
+    // Tap to show full timestamp
+    container.querySelectorAll('.chat-bubble[data-full-time]').forEach(function(bubble) {
+      bubble.addEventListener('click', function(e) {
+        // Toggle timestamp tooltip
+        var existing = bubble.querySelector('.chat-timestamp-tooltip');
+        if (existing) { existing.remove(); return; }
+        // Remove all other tooltips first
+        container.querySelectorAll('.chat-timestamp-tooltip').forEach(function(t) { t.remove(); });
+        var tip = document.createElement('div');
+        tip.className = 'chat-timestamp-tooltip';
+        tip.textContent = bubble.getAttribute('data-full-time');
+        bubble.appendChild(tip);
+        setTimeout(function() { tip.remove(); }, 3000);
+      });
+    });
+
+    // Long-press on received messages to reply
+    container.querySelectorAll('.chat-bubble.received[data-reply-name]').forEach(function(bubble) {
       var timer = null;
-      bubble.addEventListener('touchstart', function(e) {
+      bubble.addEventListener('touchstart', function() {
         timer = setTimeout(function() {
+          var name = bubble.getAttribute('data-reply-name');
+          var text = bubble.getAttribute('data-reply-text');
           var msgId = bubble.getAttribute('data-msg-id');
-          if (msgId) showDeleteMessageConfirm(memberId, msgId, bubble);
-        }, 600);
+          if (name && text) setMessageReply(msgId || '', text, name);
+        }, 500);
       }, { passive: true });
       bubble.addEventListener('touchend', function() { clearTimeout(timer); });
       bubble.addEventListener('touchmove', function() { clearTimeout(timer); });
     });
+
+    // Show swipe hint once (first time user sees sent messages)
+    var sentCount = container.querySelectorAll('.msg-swipe-container').length;
+    if (sentCount > 0 && !MTC.storage.get('mtc-swipe-msg-hint')) {
+      MTC.storage.set('mtc-swipe-msg-hint', true);
+      var hint = document.createElement('div');
+      hint.className = 'swipe-hint';
+      hint.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg> Swipe left on your messages to delete';
+      container.appendChild(hint);
+      setTimeout(function() { hint.style.opacity = '0'; setTimeout(function() { hint.remove(); }, 500); }, 4000);
+    }
     } catch(e) { MTC.warn('renderMessages error:', e); }
+  }
+
+  // ============================================
+  // SWIPE TO DELETE — individual messages
+  // ============================================
+  function initSwipeToDeleteMessages(container, memberId) {
+    var swipeThreshold = 60; // px to show delete action
+    var deleteThreshold = 120; // px to auto-delete
+    container.querySelectorAll('.msg-swipe-container').forEach(function(el) {
+      var content = el.querySelector('.msg-swipe-content');
+      if (!content) return;
+      var startX = 0, currentX = 0, isDragging = false;
+
+      content.addEventListener('touchstart', function(e) {
+        startX = e.touches[0].clientX;
+        currentX = 0;
+        isDragging = false;
+        content.style.transition = 'none';
+      }, { passive: true });
+
+      content.addEventListener('touchmove', function(e) {
+        var dx = e.touches[0].clientX - startX;
+        if (dx > 0) dx = 0; // only swipe left
+        currentX = dx;
+        if (Math.abs(dx) > 10) isDragging = true;
+        content.style.transform = 'translateX(' + dx + 'px)';
+        var bg = el.querySelector('.msg-swipe-delete-bg');
+        if (bg) bg.style.opacity = Math.min(1, Math.abs(dx) / swipeThreshold);
+      }, { passive: true });
+
+      content.addEventListener('touchend', function() {
+        content.style.transition = 'transform 0.25s ease';
+        if (Math.abs(currentX) >= deleteThreshold) {
+          // Auto-delete: slide off
+          content.style.transform = 'translateX(-100%)';
+          if (navigator.vibrate) navigator.vibrate(20);
+          setTimeout(function() {
+            var msgId = el.getAttribute('data-msg-id');
+            deleteMessage(memberId, msgId, el);
+          }, 200);
+        } else if (Math.abs(currentX) >= swipeThreshold) {
+          // Show delete area — stay swiped
+          content.style.transform = 'translateX(-' + swipeThreshold + 'px)';
+          var bg = el.querySelector('.msg-swipe-delete-bg');
+          if (bg) {
+            bg.onclick = function() {
+              content.style.transform = 'translateX(-100%)';
+              content.style.transition = 'transform 0.2s ease';
+              if (navigator.vibrate) navigator.vibrate(20);
+              setTimeout(function() {
+                var msgId = el.getAttribute('data-msg-id');
+                deleteMessage(memberId, msgId, el);
+              }, 200);
+            };
+          }
+        } else {
+          // Snap back
+          content.style.transform = 'translateX(0)';
+        }
+      });
+    });
   }
 
   function showDeleteMessageConfirm(memberId, msgId, bubble) {
@@ -409,12 +539,16 @@
     };
   }
 
-  function deleteMessage(memberId, msgId, bubble) {
-    // Animate out
-    bubble.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
-    bubble.style.opacity = '0';
-    bubble.style.transform = 'scale(0.8)';
-    setTimeout(function() { bubble.remove(); }, 200);
+  function deleteMessage(memberId, msgId, el) {
+    // Animate out — el can be .msg-swipe-container or .chat-bubble
+    el.style.transition = 'opacity 0.2s ease, max-height 0.2s ease';
+    el.style.opacity = '0';
+    el.style.maxHeight = el.offsetHeight + 'px';
+    el.style.overflow = 'hidden';
+    setTimeout(function() {
+      el.style.maxHeight = '0';
+      setTimeout(function() { el.remove(); }, 200);
+    }, 50);
 
     // Remove from local state
     var msgs = conversations[memberId] || [];
@@ -442,9 +576,15 @@
   window.sendMessage = function() {
     try {
     const input = document.getElementById('chatInput');
-    const text = input.value.trim();
+    var rawText = input.value.trim();
 
-    if (!text || !currentConversation) return;
+    if (!rawText || !currentConversation) return;
+
+    // Prepend reply-to quote if replying
+    var text = rawText;
+    if (_replyTo) {
+      text = '[reply:' + _replyTo.fromName + ':' + _replyTo.text.slice(0, 80) + ']\n' + rawText;
+    }
 
     if (!conversations[currentConversation]) {
       conversations[currentConversation] = [];
@@ -464,6 +604,7 @@
 
     MTC.fn.saveConversations();
     input.value = '';
+    clearMessageReply();
     renderMessages(currentConversation);
 
     // Persist to Supabase via API
@@ -607,6 +748,106 @@
     window.clubMembers = MTC.state.clubMembers;
   };
 
+  // ============================================
+  // TYPING INDICATOR — Supabase Realtime broadcast
+  // ============================================
+  var _typingChannel = null;
+  var _typingTimeout = null;
+  var _lastTypingSent = 0;
+
+  /** Start typing indicator subscription (called after login) */
+  MTC.fn.startTypingIndicator = function() {
+    var sb = MTC.state._supabaseClient;
+    if (!sb || _typingChannel) return;
+    try {
+      _typingChannel = sb.channel('typing-indicators', { config: { broadcast: { self: false } } })
+        .on('broadcast', { event: 'typing' }, function(msg) {
+          var payload = msg.payload;
+          var userId = MTC.state.currentUser ? MTC.state.currentUser.id : null;
+          if (!payload || payload.toId !== userId) return;
+          // Show typing indicator if in conversation with this person
+          if (currentConversation === payload.fromId) {
+            showTypingIndicator();
+          }
+        })
+        .subscribe();
+    } catch (e) { MTC.warn('Typing indicator subscribe failed:', e); }
+  };
+
+  function showTypingIndicator() {
+    var container = document.getElementById('chatMessages');
+    if (!container) return;
+    var existing = container.querySelector('.typing-indicator');
+    if (!existing) {
+      existing = document.createElement('div');
+      existing.className = 'typing-indicator';
+      existing.innerHTML = '<span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>';
+      container.appendChild(existing);
+      container.scrollTop = container.scrollHeight;
+    }
+    // Clear previous timeout and set new one
+    if (_typingTimeout) clearTimeout(_typingTimeout);
+    _typingTimeout = setTimeout(function() {
+      var el = container.querySelector('.typing-indicator');
+      if (el) el.remove();
+    }, 3000);
+  }
+
+  function broadcastTyping() {
+    var sb = MTC.state._supabaseClient;
+    var userId = MTC.state.currentUser ? MTC.state.currentUser.id : null;
+    if (!sb || !_typingChannel || !currentConversation || !userId) return;
+    var now = Date.now();
+    if (now - _lastTypingSent < 2000) return; // Throttle
+    _lastTypingSent = now;
+    try {
+      _typingChannel.send({ type: 'broadcast', event: 'typing', payload: { fromId: userId, toId: currentConversation } });
+    } catch (e) { /* silent */ }
+  }
+
+  // Hook into chat input — broadcast typing on keypress
+  document.addEventListener('input', function(e) {
+    if (e.target && e.target.id === 'chatInput') broadcastTyping();
+  });
+
+  // ============================================
+  // REPLY-TO-QUOTE
+  // ============================================
+  var _replyTo = null; // { id, text, fromName }
+
+  /** Set reply-to context (called from long-press on received messages or swipe-right) */
+  window.setMessageReply = function(msgId, text, fromName) {
+    _replyTo = { id: msgId, text: text, fromName: fromName };
+    var bar = document.getElementById('replyBar');
+    if (!bar) {
+      // Create reply bar above input
+      bar = document.createElement('div');
+      bar.id = 'replyBar';
+      bar.className = 'reply-bar';
+      var inputArea = document.querySelector('.chat-input-area');
+      if (inputArea) inputArea.insertBefore(bar, inputArea.firstChild);
+    }
+    bar.style.display = 'flex';
+    bar.innerHTML =
+      '<div class="reply-bar-content">' +
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--volt)" stroke-width="2"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 00-4-4H4"/></svg>' +
+        '<div class="reply-bar-text"><span class="reply-bar-name">' + sanitizeHTML(fromName) + '</span>' +
+        '<span class="reply-bar-preview">' + sanitizeHTML(text.slice(0, 60)) + '</span></div>' +
+      '</div>' +
+      '<button class="reply-bar-close" onclick="clearMessageReply()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>';
+    // Focus input
+    var input = document.getElementById('chatInput');
+    if (input) input.focus();
+    // Haptic
+    if (navigator.vibrate) navigator.vibrate(15);
+  };
+
+  window.clearMessageReply = function() {
+    _replyTo = null;
+    var bar = document.getElementById('replyBar');
+    if (bar) bar.style.display = 'none';
+  };
+
   /**
    * Update conversations from Supabase API.
    * Called by auth.js after login when API data is available.
@@ -630,7 +871,8 @@
           text: m.text,
           sent: m.fromId === userId,
           read: m.read !== false,
-          time: m.timestamp ? new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''
+          time: m.timestamp ? new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '',
+          timestamp: m.timestamp || null
         };
       });
     });

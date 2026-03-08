@@ -39,6 +39,201 @@
 }
 
 /* ============================================
+   SWIPE TO DELETE — individual chat messages
+============================================ */
+.msg-swipe-container {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.msg-swipe-container .chat-bubble.msg-swipe-content {
+  position: relative;
+  z-index: 2;
+  will-change: transform;
+  flex-shrink: 0;
+}
+
+.msg-swipe-delete-bg {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  background: var(--coral, #ff5a5f);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 16px;
+  gap: 6px;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  opacity: 0;
+  z-index: 1;
+  border-radius: 18px 4px 18px 18px;
+}
+
+/* ============================================
+   TYPING INDICATOR
+============================================ */
+.typing-indicator {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  padding: 10px 16px;
+  background: var(--bg-card);
+  border-radius: 18px 18px 18px 4px;
+  width: fit-content;
+  margin: 8px 0;
+}
+
+.typing-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--volt);
+  animation: typingBounce 1.2s ease-in-out infinite;
+}
+
+.typing-dot:nth-child(2) { animation-delay: 0.15s; }
+.typing-dot:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes typingBounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-5px); opacity: 1; }
+}
+
+/* ============================================
+   REPLY BAR (above chat input)
+============================================ */
+.reply-bar {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--bg-card);
+  border-left: 3px solid var(--volt);
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.reply-bar-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.reply-bar-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.reply-bar-name {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--volt);
+}
+
+.reply-bar-preview {
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.reply-bar-close {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* ============================================
+   QUOTED REPLY IN CHAT BUBBLE
+============================================ */
+.chat-quote {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 10px;
+  margin-bottom: 6px;
+  border-radius: 8px;
+  border-left: 2px solid var(--volt);
+  font-size: 11px;
+  opacity: 0.85;
+}
+
+.chat-bubble.sent .chat-quote {
+  background: rgba(255,255,255,0.12);
+  border-color: rgba(255,255,255,0.5);
+}
+
+.chat-bubble.received .chat-quote {
+  background: rgba(0,0,0,0.04);
+  border-color: var(--volt);
+}
+
+.chat-quote-name {
+  font-weight: 600;
+}
+
+.chat-quote-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ============================================
+   TIMESTAMP TOOLTIP
+============================================ */
+.chat-timestamp-tooltip {
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-black, #1a1a1a);
+  color: #fff;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  z-index: 10;
+  pointer-events: none;
+  animation: fadeInUp 0.15s ease;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateX(-50%) translateY(4px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* Ensure chat bubbles are positioned for tooltip */
+.chat-bubble {
+  position: relative;
+}
+
+/* Swipe hint toast */
+.swipe-hint {
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-muted);
+  padding: 8px 0 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  opacity: 1;
+  transition: opacity 0.5s ease;
+}
+
+/* ============================================
    BOOKING CONFIRMATION SCREEN
 ============================================ */
 

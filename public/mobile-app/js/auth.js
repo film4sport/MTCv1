@@ -400,6 +400,11 @@
       MTC.fn.startRealtimeSync();
     }
 
+    // Start typing indicator (Supabase Realtime broadcast)
+    if (typeof MTC.fn.startTypingIndicator === 'function') {
+      MTC.fn.startTypingIndicator();
+    }
+
     // Register push notifications (best-effort, non-blocking)
     registerPushNotifications();
 
