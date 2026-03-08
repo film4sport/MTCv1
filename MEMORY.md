@@ -611,8 +611,28 @@ Closed ALL notification asymmetries. Every action fires symmetric bell + push + 
 
 ---
 
+### Cowork Session (2026-03-08l) — Events Calendar Month Filter + Login Mockup Glassmorphism
+
+**Dashboard events calendar — limited to current month:**
+- Was showing ALL season events regardless of which month was selected
+- Fixed: events filter now checks `d.getFullYear() === calendarDate.getFullYear() && d.getMonth() === calendarDate.getMonth()`
+- Mobile PWA unaffected (uses different filtering approach)
+- File: `app/dashboard/events/page.tsx` (lines 39-46)
+
+**Login page desktop mockup — glassmorphism aligned with real dashboard:**
+- Quick action cards: `blur(16px)` (was 12px), `border: rgba(255,255,255,0.3)` (was 0.35), `boxShadow: 0 4px 24px` (was 16px), added WebkitBackdropFilter
+- Content cards (Bookings/Events): `background: rgba(255,255,255,0.6)` (was 0.55), exact same shadow as glass-card class
+- Header bar: `blur(16px)` (was 12px), softened border
+- Background silhouette: `opacity: 0.6` (was 0.55), warmer cream tone `#e8e4d9`
+- All values now match `glass-card` CSS class exactly: `backdrop-filter: blur(16px)`, `box-shadow: 0 4px 24px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04)`
+- File: `app/login/page.tsx`
+
+**TypeScript:** Clean (0 errors).
+
+---
+
 ## TODO / REMINDERS
-- **Deploy to Railway** — booking cancel fix + cross-platform migration + sidebar fix + ARIA test fix
+- **Deploy to Railway** — booking cancel fix + cross-platform migration + sidebar fix + ARIA test fix + events calendar + login mockup
 - **Delete orphaned Alex RSVP** — `DELETE FROM event_attendees WHERE user_name = 'Alex';` on production Supabase
 - **Junior Summer Camp dates**: User is waiting on real dates from Mark Taylor. When received, update the `junior-summer-camp` event across: `supabase/seed.sql`, `app/dashboard/lib/data.ts`, `public/mobile-app/js/events.js`, and run UPDATE SQL on live Supabase. Also update date/time in `app/(landing)/layout.tsx` JSON-LD if camp is featured there.
 - **Run welcome message migration** on production Supabase (`npm run db:push` or SQL manually)
