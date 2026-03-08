@@ -405,7 +405,8 @@
     var upcoming = _adminBlocks.filter(function(b) { return b.block_date >= today; });
     upcoming.sort(function(a, b) { return a.block_date.localeCompare(b.block_date); });
     if (!upcoming.length) { container.innerHTML = '<div class="admin-empty-state">No upcoming blocks</div>'; return; }
-    container.innerHTML = upcoming.map(function(b) {
+    var clearBtn = upcoming.length > 1 ? '<div style="text-align:right;margin-bottom:8px;"><button class="admin-btn admin-btn-danger" onclick="clearAllCourtBlocks()" style="font-size:12px;padding:6px 12px;">Clear All (' + upcoming.length + ')</button></div>' : '';
+    container.innerHTML = clearBtn + upcoming.map(function(b) {
       var courtLabel = b.court_id ? ('Court ' + b.court_id) : 'All Courts';
       var timeLabel = b.time_start ? (b.time_start + ' – ' + b.time_end) : 'All Day';
       return '<div class="admin-block-item">' +
@@ -519,13 +520,17 @@
     });
 
     Promise.all(promises).then(function(results) {
+      var totalCancelled = 0;
       results.forEach(function(data) {
         if (data && data.block) _adminBlocks.push(data.block);
+        if (data && data.cancelledBookings) totalCancelled += data.cancelledBookings;
       });
       renderBlocksList();
       closeBlockCourtModal();
       var count = results.filter(function(r) { return r && r.block; }).length;
-      showToast(count > 1 ? count + ' days blocked' : 'Court blocked');
+      var msg = count > 1 ? count + ' days blocked' : 'Court blocked';
+      if (totalCancelled > 0) msg += ' — ' + totalCancelled + ' booking' + (totalCancelled > 1 ? 's' : '') + ' cancelled & users notified';
+      showToast(msg);
     }).catch(function() { showToast('Failed to create block'); });
   };
 
@@ -541,6 +546,27 @@
       renderBlocksList();
       showToast('Block removed');
     }).catch(function() { showToast('Failed to remove block'); });
+  };
+
+  window.clearAllCourtBlocks = function() {
+    var today = new Date().toISOString().split('T')[0];
+    var upcoming = _adminBlocks.filter(function(b) { return b.block_date >= today; });
+    if (!upcoming.length) return;
+    if (!confirm('Delete all ' + upcoming.length + ' court blocks?')) return;
+    var token = MTC.state.currentUser && MTC.state.currentUser.accessToken;
+    var ids = upcoming.map(function(b) { return b.id; });
+    fetch('/api/mobile/court-blocks', {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ids: ids })
+    }).then(function(r) {
+      if (!r.ok) throw new Error('Failed');
+      return r.json();
+    }).then(function(data) {
+      _adminBlocks = _adminBlocks.filter(function(b) { return b.block_date < today; });
+      renderBlocksList();
+      showToast((data.deleted || ids.length) + ' blocks cleared');
+    }).catch(function() { showToast('Failed to clear blocks'); });
   };
 
   // ============================================
