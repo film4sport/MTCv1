@@ -220,13 +220,13 @@ export default function SchedulePage() {
                                 if (!isPM && hour === 12) hour = 0;
                                 const slotDate = new Date(item.date + 'T00:00:00');
                                 slotDate.setHours(hour, minute, 0, 0);
-                                canCancelSlot = (slotDate.getTime() - Date.now()) / (1000 * 60 * 60) >= FEES.cancelWindowHours;
+                                canCancelSlot = slotDate.getTime() > Date.now();
                               }
                               return (
                                 <button
                                   onClick={() => {
                                     if (!canCancelSlot) {
-                                      showToast(`Cannot cancel within ${FEES.cancelWindowHours}h of booking`, 'error');
+                                      showToast('Cannot cancel a booking that has already started', 'error');
                                       return;
                                     }
                                     setCancelTarget({ id: item.id, title: item.title, date: item.date, time: item.time });

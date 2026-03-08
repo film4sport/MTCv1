@@ -29,7 +29,7 @@ export default function BookingSidebar({ myUpcoming, onCancelBooking }: BookingS
             </div>
             <div className="flex items-start gap-2.5">
               <span className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" style={{ background: '#6b7a3d' }} />
-              <p className="text-[0.7rem] leading-relaxed" style={{ color: '#6b7266' }}>Cancel up to <span className="font-medium" style={{ color: '#2a2f1e' }}>{FEES.cancelWindowHours}h</span> before your slot</p>
+              <p className="text-[0.7rem] leading-relaxed" style={{ color: '#6b7266' }}>Cancel anytime <span className="font-medium" style={{ color: '#2a2f1e' }}>before your slot starts</span></p>
             </div>
             <div className="flex items-start gap-2.5">
               <span className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" style={{ background: '#6b7a3d' }} />
@@ -97,7 +97,7 @@ export default function BookingSidebar({ myUpcoming, onCancelBooking }: BookingS
                     <button
                       onClick={() => {
                         if (!canCancel(b.date, b.time)) {
-                          showToast(`Cannot cancel within ${FEES.cancelWindowHours}h of booking`, 'error');
+                          showToast('Cannot cancel a booking that has already started', 'error');
                           return;
                         }
                         onCancelBooking(b.id);

@@ -503,7 +503,7 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'Not authorized' }, { status: 403 });
     }
 
-    // Non-admins must respect the 24-hour cancellation window
+    // Non-admins cannot cancel past bookings
     if (!isAdmin) {
       const timeMatch = (booking.time as string).match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
       let bookingDateTime: Date;
@@ -517,9 +517,8 @@ export async function DELETE(request: Request) {
       } else {
         bookingDateTime = new Date(`${booking.date}T${booking.time}`);
       }
-      const hoursUntil = (bookingDateTime.getTime() - Date.now()) / (1000 * 60 * 60);
-      if (hoursUntil < 24) {
-        return NextResponse.json({ error: 'Cannot cancel within 24 hours of booking time' }, { status: 400 });
+      if (bookingDateTime.getTime() <= Date.now()) {
+        return NextResponse.json({ error: 'Cannot cancel a booking that has already started' }, { status: 400 });
       }
     }
 

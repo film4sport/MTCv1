@@ -171,6 +171,7 @@ export function isCourtInMaintenance(courts: Court[], courtId: number): boolean 
 }
 
 export function canCancel(date: string, time: string): boolean {
+  // Allow cancellation anytime before the booking starts (no 24hr restriction)
   const match = time.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
   if (!match) return true;
   let hour = parseInt(match[1]);
@@ -180,8 +181,7 @@ export function canCancel(date: string, time: string): boolean {
   if (!isPM && hour === 12) hour = 0;
   const slotDate = new Date(date + 'T00:00:00');
   slotDate.setHours(hour, minute, 0, 0);
-  const hoursUntil = (slotDate.getTime() - Date.now()) / (1000 * 60 * 60);
-  return hoursUntil >= FEES.cancelWindowHours;
+  return slotDate.getTime() > Date.now();
 }
 
 export function formatDateShort(d: Date) {
