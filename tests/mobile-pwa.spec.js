@@ -120,8 +120,8 @@ test.describe('Mobile PWA — Page Structure', () => {
     await page.addInitScript(() => {
       localStorage.setItem('mtc-onboarding-complete', 'true');
     });
-    await page.goto(MOBILE_URL, { waitUntil: 'load', timeout: 30000 });
-    await page.waitForTimeout(1000);
+    await page.goto(MOBILE_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForSelector('.screen[aria-label]', { timeout: 5000 });
 
     const screens = page.locator('.screen[aria-label]');
     const count = await screens.count();
