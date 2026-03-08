@@ -700,6 +700,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       participants: booking.participants,
       bookedFor: booking.bookedFor,
       userName: booking.userName,
+    }).then(async (res) => {
+      // Update client-side booking ID with server-generated ID so cancel works
+      const data = await res.json();
+      if (data.booking?.id && data.booking.id !== booking.id) {
+        setBookings(prev => prev.map(b => b.id === booking.id ? { ...b, id: data.booking.id } : b));
+      }
     }).catch((err) => {
       reportError(err, 'DashboardBookingAPI');
       setBookings(prev => prev.filter(b => b.id !== booking.id));
@@ -954,122 +960,42 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const enrollInProgram = useCallback((programId: string, memberId: string, memberName: string) => {
+  const enrollInProgram = useCallback((programId: string, memberId: string, _memberName: string) => {
     const program = programs.find(p => p.id === programId);
     if (!program) return;
-    // Add member to enrolled list
+    // Optimistic: add member to enrolled list
     setPrograms(prev => prev.map(p => p.id === programId ? { ...p, enrolledMembers: [...p.enrolledMembers, memberId] } : p));
-    // Persist to Supabase
-    db.enrollInProgram(programId, memberId).catch((err) => {
-      reportError(err, 'Supabase');
-      setPrograms(prev => prev.map(p => p.id === programId ? { ...p, enrolledMembers: p.enrolledMembers.filter(m => m !== memberId) } : p));
-      showToast('Failed to enroll. Please try again.', 'error');
-    });
-    // Create notification
-    const notif: Notification = {
-      id: generateId('n'),
-      type: 'program',
-      title: `Enrolled in ${program.title}`,
-      body: `${program.sessions.length} sessions starting ${program.sessions[0]?.date}. Fee: $${program.fee}.`,
-      timestamp: new Date().toISOString(),
-      read: false,
-    };
+    // Optimistic notification
     if (shouldNotify('program')) {
+      const notif: Notification = {
+        id: generateId('n'), type: 'program',
+        title: `Enrolled in ${program.title}`,
+        body: `${program.sessions.length} sessions starting ${program.sessions[0]?.date}. Fee: $${program.fee}.`,
+        timestamp: new Date().toISOString(), read: false,
+      };
       addNotification(notif);
-      db.createNotification(memberId, notif).catch((err) => reportError(err, 'Supabase'));
-      firePush(memberId, notif.title, notif.body, 'program', `program-enroll-${program.id}`);
     }
-    // Send enrollment confirmation email (fire and forget)
-    const enrolledMember = members.find(m => m.id === memberId);
-    if (enrolledMember?.email) {
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        if (!session?.access_token) return;
-        const startDate = program.sessions[0]?.date ? new Date(program.sessions[0].date + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric' }) : 'TBD';
-        fetch('/api/notify-email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
-          body: JSON.stringify({
-            recipientEmail: enrolledMember.email, recipientName: enrolledMember.name,
-            recipientUserId: memberId,
-            subject: `Enrollment Confirmed — ${program.title}`,
-            heading: 'Enrollment Confirmed',
-            body: `You're enrolled in ${program.title}! ${program.sessions.length} sessions starting ${startDate}. Fee: $${program.fee}. See you on the court!`,
-            ctaText: 'View Schedule', ctaUrl: 'https://www.monotennisclub.com/dashboard',
-            logType: 'program_enrollment',
-          }),
-        }).catch(() => { /* email is best-effort */ });
-      });
-    }
-    // Send message from coach (persist to Supabase)
-    const coachMsgText = `Welcome to ${program.title}! Your enrollment is confirmed. ${program.sessions.length} sessions starting ${new Date(program.sessions[0]?.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}. See you on the court!`;
-    const coachMsg = {
-      id: generateId('msg'),
-      from: program.coachName,
-      fromId: program.coachId,
-      to: memberName,
-      toId: memberId,
-      text: coachMsgText,
-      timestamp: new Date().toISOString(),
-      read: false,
-    };
-    setConversations(prev => {
-      const existing = prev.find(c => c.memberId === program.coachId);
-      if (existing) {
-        return prev.map(c => c.memberId === program.coachId ? { ...c, messages: [...c.messages, coachMsg], lastMessage: coachMsg.text, lastTimestamp: coachMsg.timestamp, unread: c.unread + 1 } : c);
-      }
-      return [...prev, { memberId: program.coachId, memberName: program.coachName, lastMessage: coachMsg.text, lastTimestamp: coachMsg.timestamp, unread: 1, messages: [coachMsg] }];
+    // Persist via API — handles bell+push+email+coach welcome message server-side
+    apiCall('/api/mobile/programs', 'POST', { programId, action: 'enroll' }).catch((err) => {
+      reportError(err, 'API');
+      setPrograms(prev => prev.map(p => p.id === programId ? { ...p, enrolledMembers: p.enrolledMembers.filter(m => m !== memberId) } : p));
+      showToast(err.message || 'Failed to enroll. Please try again.', 'error');
     });
-    apiCall('/api/mobile/conversations', 'POST', { toId: memberId, text: coachMsgText }).catch((err) => reportError(err, 'API'));
-    // Log enrollment to email_logs for audit trail
-    fetch('/api/log-email', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        type: 'program_enrollment', recipientEmail: currentUser?.email,
-        recipientUserId: memberId, status: 'sent',
-        subject: `Enrolled in ${program.title}`,
-        metadata: { programId, programTitle: program.title, coachName: program.coachName, fee: program.fee },
-      }),
-    }).catch(() => { /* non-critical */ });
-  }, [programs, currentUser]);
+  }, [programs]);
 
   const withdrawFromProgram = useCallback((programId: string, memberId: string) => {
     const program = programs.find(p => p.id === programId);
     if (!program) return;
-    const memberName = currentUser?.name || 'Member';
+    // Optimistic: remove member from enrolled list
     setPrograms(prev => prev.map(p => p.id === programId ? { ...p, enrolledMembers: p.enrolledMembers.filter(m => m !== memberId) } : p));
     showToast(`Withdrawn from ${program.title}`);
-    // Persist to Supabase
-    db.withdrawFromProgram(programId, memberId).catch((err) => {
-      reportError(err, 'Supabase');
+    // Persist via API — handles bell+push+coach message server-side
+    apiCall('/api/mobile/programs', 'POST', { programId, action: 'withdraw' }).catch((err) => {
+      reportError(err, 'API');
       setPrograms(prev => prev.map(p => p.id === programId ? { ...p, enrolledMembers: [...p.enrolledMembers, memberId] } : p));
-      showToast('Failed to withdraw. Please try again.', 'error');
+      showToast(err.message || 'Failed to withdraw. Please try again.', 'error');
     });
-    // Bell + push confirmation to withdrawing member
-    if (currentUser && shouldNotify('program')) {
-      const notif: Notification = {
-        id: generateId('n'), type: 'program',
-        title: `Withdrawn from ${program.title}`,
-        body: `You have been withdrawn from ${program.title}.`,
-        timestamp: new Date().toISOString(), read: false,
-      };
-      addNotification(notif);
-      db.createNotification(currentUser.id, notif).catch(err => reportError(err, 'Supabase'));
-      firePush(currentUser.id, notif.title, notif.body, 'program', `program-withdraw-${programId}`);
-    }
-    // Notify coach about withdrawal
-    const withdrawMsg = `${memberName} has withdrawn from ${program.title}.`;
-    apiCall('/api/mobile/conversations', 'POST', { toId: program.coachId, text: withdrawMsg }).catch((err) => reportError(err, 'API'));
-    // Log withdrawal
-    fetch('/api/log-email', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        type: 'program_withdrawal', recipientEmail: currentUser?.email,
-        recipientUserId: memberId, status: 'sent',
-        subject: `Withdrawn from ${program.title}`,
-        metadata: { programId, programTitle: program.title },
-      }),
-    }).catch(() => { /* non-critical */ });
-  }, [programs, currentUser]);
+  }, [programs]);
 
   const addPartner = useCallback((partner: Partner) => {
     setPartners(prev => [partner, ...prev]);
@@ -1289,9 +1215,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const dismissAnnouncement = useCallback((id: string) => {
     if (!currentUser) return;
     setAnnouncements(prev => prev.map(a => a.id === id ? { ...a, dismissedBy: [...a.dismissedBy, currentUser.id] } : a));
-    // Persist to Supabase
-    db.dismissAnnouncement(id, currentUser.id).catch((err) => {
-      reportError(err, 'Supabase');
+    // Persist via API (admin client, bypasses RLS)
+    apiCall('/api/mobile/announcements', 'PATCH', { announcementId: id, dismiss: true }).catch((err) => {
+      reportError(err, 'API');
       setAnnouncements(prev => prev.map(a => a.id === id ? { ...a, dismissedBy: a.dismissedBy.filter(uid => uid !== currentUser!.id) } : a));
       showToast('Failed to dismiss announcement.', 'error');
     });
@@ -1311,8 +1237,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const deleteReadNotifications = useCallback(() => {
     setNotifications(prev => prev.filter(n => !n.read));
-    if (currentUser) db.deleteReadNotifications(currentUser.id).catch((err) => reportError(err, 'Supabase'));
-  }, [currentUser]);
+    // Persist via API (admin client, bypasses RLS)
+    apiCall('/api/mobile/notifications', 'DELETE', {}).catch((err) => reportError(err, 'API'));
+  }, []);
 
   const refreshData = useCallback(async () => {
     if (!currentUser) return;

@@ -90,7 +90,7 @@ function Sidebar() {
         </div>
 
         {/* Nav Links */}
-        <nav className="flex-1 py-4 px-2 overflow-y-auto">
+        <nav className="flex-1 py-3 px-2 overflow-y-auto scrollbar-hide">
           <ul className="space-y-1 relative">
             {/* Sliding active indicator */}
             {(() => {

@@ -68,3 +68,23 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }
+
+/** Delete read notifications for the authenticated user */
+export async function DELETE(request: Request) {
+  const authResult = await authenticateMobileRequest(request);
+  if (authResult instanceof NextResponse) return authResult;
+
+  try {
+    const supabase = getAdminClient();
+    const { error } = await supabase
+      .from('notifications')
+      .delete()
+      .eq('user_id', authResult.id)
+      .eq('read', true);
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ success: true });
+  } catch {
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+  }
+}
