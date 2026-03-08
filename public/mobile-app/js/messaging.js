@@ -409,6 +409,21 @@
     showAllMembers();
   };
 
+  // Local click delegation for member search results.
+  // The newMessageModal's .modal has onclick="event.stopPropagation()" which blocks
+  // document-level event delegation, so we need a handler directly on the container.
+  var memberResults = document.getElementById('memberSearchResults');
+  if (memberResults) {
+    memberResults.addEventListener('click', function(e) {
+      var item = e.target.closest('[data-action="startConversation"]');
+      if (item && item.dataset.id) {
+        e.preventDefault();
+        e.stopPropagation();
+        window.startConversation(item.dataset.id);
+      }
+    });
+  }
+
   // onclick handler (index.html)
   window.closeNewMessageModal = function() {
     document.getElementById('newMessageModal').classList.remove('active');
