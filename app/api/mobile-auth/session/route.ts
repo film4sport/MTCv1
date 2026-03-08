@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
 
   const { data: profile } = await adminSupabase
     .from('profiles')
-    .select('name, role, membership_type, family_id, interclub_team, interclub_captain')
+    .select('name, role, membership_type, family_id, residence, interclub_team, interclub_captain')
     .eq('id', session.user.id)
     .single();
 
@@ -83,6 +83,7 @@ export async function GET(request: NextRequest) {
       accessToken: session.access_token,
       membershipType: profile.membership_type || 'individual',
       familyId: profile.family_id || null,
+      residence: profile.residence || 'mono',
       interclubTeam: profile.interclub_team || '',
       interclubCaptain: profile.interclub_captain || false,
       familyMembers,

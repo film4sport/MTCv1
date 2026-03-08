@@ -23,6 +23,7 @@ create table if not exists profiles (
   member_since text,
   avatar text,
   preferences jsonb default '{}',
+  residence text default 'mono' check (residence in ('mono', 'other')),
   interclub_team text default 'none' check (interclub_team in ('none', 'a', 'b')),
   interclub_captain boolean default false,
   created_at timestamptz default now()
@@ -354,7 +355,7 @@ create policy "family_members_delete_own" on family_members for delete
 create or replace function public.handle_new_user()
 returns trigger as $$
 begin
-  insert into public.profiles (id, name, email, role, skill_level, skill_level_set, membership_type, avatar, member_since)
+  insert into public.profiles (id, name, email, role, skill_level, skill_level_set, membership_type, residence, avatar, member_since)
   values (
     new.id,
     coalesce(new.raw_user_meta_data->>'name', split_part(new.email, '@', 1)),
@@ -363,6 +364,7 @@ begin
     coalesce(new.raw_user_meta_data->>'skill_level', 'intermediate'),
     coalesce((new.raw_user_meta_data->>'skill_level_set')::boolean, (new.raw_user_meta_data->>'skill_level' is not null)),
     coalesce(new.raw_user_meta_data->>'membership_type', 'adult'),
+    coalesce(new.raw_user_meta_data->>'residence', 'mono'),
     'tennis-male-1',
     to_char(now(), 'YYYY-MM')
   );

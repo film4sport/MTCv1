@@ -30,6 +30,7 @@ export interface ProfileUpdate {
   ntrp?: number;
   skill_level?: string;
   skill_level_set?: boolean;
+  residence?: string;
   preferences?: Record<string, unknown>;
   interclub_team?: string;
   interclub_captain?: boolean;

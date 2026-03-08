@@ -22,7 +22,7 @@ function SignupContent() {
   const ackRef = useRef<HTMLDivElement>(null);
 
   const [signupStep, setSignupStep] = useState(1);
-  const [signupData, setSignupData] = useState({ membershipType: '', name: '', email: '', skillLevel: '' });
+  const [signupData, setSignupData] = useState({ membershipType: '', name: '', email: '', skillLevel: '', residence: 'mono' });
   const [waiverAccepted, setWaiverAccepted] = useState(false);
   const [waiverScrolled, setWaiverScrolled] = useState(false);
   const [ackScrolled, setAckScrolled] = useState(false);
@@ -135,6 +135,7 @@ function SignupContent() {
           membershipType: signupData.membershipType,
           skillLevel: signupData.skillLevel || undefined,
           name: trimmedName || undefined,
+          residence: signupData.residence || 'mono',
         });
         if (profileError) {
           setSignupError(profileError);
@@ -184,7 +185,7 @@ function SignupContent() {
       }
 
       // ── Passwordless signup (user logs in via Google or Magic Link) ──
-      const { user, error, emailConfirmRequired } = await signUp(trimmedEmail, trimmedName, signupData.membershipType, signupData.skillLevel || undefined);
+      const { user, error, emailConfirmRequired } = await signUp(trimmedEmail, trimmedName, signupData.membershipType, signupData.skillLevel || undefined, signupData.residence || 'mono');
       if (error || !user) {
         const msg = error?.toLowerCase() || '';
         if (msg.includes('already registered') || msg.includes('already been registered')) {
@@ -422,8 +423,8 @@ function SignupContent() {
                   style={{ backgroundColor: '#faf8f3', border: '1px solid #e0dcd3', color: '#2a2f1e' }}
                 />
               </div>
-              <p className="text-xs mt-2 px-1" style={{ color: '#999' }}>
-                You&apos;ll sign in with Google or a magic email link — no password needed.
+              <p className="text-sm mt-3 text-center font-medium leading-relaxed rounded-xl" style={{ color: '#6b7a3d', background: 'rgba(107, 122, 61, 0.08)', padding: '10px 14px' }}>
+                You&apos;ll sign in with Google or a magic email link — <strong style={{ color: '#2a2f1e' }}>no password needed</strong>.
               </p>
             </div>
             {signupError && signupStep === 2 && (
@@ -606,6 +607,31 @@ function SignupContent() {
               ))}
             </div>
             <p className="text-xs text-center mt-4" style={{ color: '#999' }}>You can change this anytime in your Profile settings.</p>
+
+            {/* Residence: Mono vs Other */}
+            <div className="mt-8 pt-6" style={{ borderTop: '1px solid #e0dcd3' }}>
+              <p className="text-sm font-semibold mb-3 text-center" style={{ color: '#2a2f1e' }}>Do you live in Mono?</p>
+              <div className="flex gap-3">
+                {[
+                  { value: 'mono', label: 'Yes — Mono', desc: 'Local resident' },
+                  { value: 'other', label: 'Other', desc: 'Out of town' },
+                ].map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setSignupData({ ...signupData, residence: opt.value })}
+                    className="flex-1 p-4 rounded-xl text-center transition-all hover:scale-[1.02]"
+                    style={{
+                      backgroundColor: signupData.residence === opt.value ? 'rgba(107, 122, 61, 0.08)' : '#faf8f3',
+                      border: `2px solid ${signupData.residence === opt.value ? '#6b7a3d' : '#e0dcd3'}`,
+                    }}
+                  >
+                    <span className="font-semibold text-sm block" style={{ color: '#2a2f1e' }}>{opt.label}</span>
+                    <span className="text-xs" style={{ color: '#6b7266' }}>{opt.desc}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="flex items-center gap-4 mt-8">
               <button
                 onClick={() => { setSignupStep(isFamily ? 3 : 2); }}

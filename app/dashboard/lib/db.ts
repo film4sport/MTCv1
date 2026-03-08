@@ -20,6 +20,7 @@ export async function fetchMembers(): Promise<User[]> {
     familyId: p.family_id ?? undefined,
     memberSince: p.member_since ?? undefined,
     avatar: p.avatar ?? undefined,
+    residence: (p.residence as User['residence']) ?? 'mono',
     interclubTeam: (p.interclub_team as User['interclubTeam']) ?? 'none',
     interclubCaptain: p.interclub_captain ?? false,
   }));

@@ -15,6 +15,7 @@ export interface User {
   familyId?: string;
   memberSince?: string;
   avatar?: string;
+  residence?: 'mono' | 'other';
   preferences?: Record<string, unknown>;
   interclubTeam?: 'none' | 'a' | 'b';
   interclubCaptain?: boolean;

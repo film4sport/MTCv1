@@ -13,6 +13,7 @@
 
   // Private state
   let signupAccountType = 'member';
+  let signupResidence = 'mono';
 
   // Inline field error helpers
   function showFieldError(input, message) {
@@ -320,6 +321,7 @@
           isMember: true,
           membershipType: matchedLogin.membershipType || 'adult',
           familyId: matchedLogin.familyId || null,
+          residence: matchedLogin.residence || 'mono',
           interclubTeam: matchedLogin.interclubTeam || 'none',
           interclubCaptain: matchedLogin.interclubCaptain === true
         };
@@ -577,6 +579,25 @@
     }
   };
 
+  // onclick handler (index.html)
+  window.selectResidence = function(val) {
+    signupResidence = val;
+    var monoBtn = document.getElementById('residenceMono');
+    var otherBtn = document.getElementById('residenceOther');
+    if (monoBtn) {
+      monoBtn.style.border = val === 'mono' ? '2px solid var(--accent-primary)' : '2px solid var(--border-primary)';
+      monoBtn.style.background = val === 'mono' ? 'rgba(107, 122, 61, 0.08)' : 'var(--bg-secondary)';
+      monoBtn.style.fontWeight = val === 'mono' ? '600' : '500';
+      monoBtn.style.color = val === 'mono' ? 'var(--text-primary)' : 'var(--text-secondary)';
+    }
+    if (otherBtn) {
+      otherBtn.style.border = val === 'other' ? '2px solid var(--accent-primary)' : '2px solid var(--border-primary)';
+      otherBtn.style.background = val === 'other' ? 'rgba(107, 122, 61, 0.08)' : 'var(--bg-secondary)';
+      otherBtn.style.fontWeight = val === 'other' ? '600' : '500';
+      otherBtn.style.color = val === 'other' ? 'var(--text-primary)' : 'var(--text-secondary)';
+    }
+  };
+
   // ============================================
   // HANDLE SIGN UP
   // ============================================
@@ -612,7 +633,8 @@
       email: email,
       phone: phone,
       role: isMember ? 'member' : 'guest',
-      isMember: isMember
+      isMember: isMember,
+      residence: signupResidence || 'mono'
     };
     MTC.state.currentUser = currentUser;
     window.currentUser = currentUser;
