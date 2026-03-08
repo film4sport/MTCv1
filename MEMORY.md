@@ -535,13 +535,46 @@ Closed ALL notification asymmetries. Every action fires symmetric bell + push + 
 
 **Build:** TypeScript clean. Mobile PWA: cache mtc-court-cc0bf142.
 
+### Cowork Session (2026-03-08j) — Booking Cancel Fix, CI Fix, Sidebar Polish
+
+**Booking cancellation bug (CRITICAL):**
+- Root cause: `addBooking()` in store.tsx adds booking to state with client-generated short ID (e.g. `b-2518d915`), then POST to `/api/dashboard/bookings` generates a NEW server-side ID (full UUID). The server response ID was never written back to React state. When user clicks Cancel, it sends the client ID → API returns "Booking not found".
+- Fix: Added `.then()` after addBooking's apiCall that reads `data.booking.id` from server response and updates the booking ID in state via `setBookings(prev => prev.map(...))`. localStorage auto-updates via useEffect.
+- File: `app/dashboard/lib/store.tsx`
+
+**CI E2E fix — ARIA labels test timeout:**
+- `tests/mobile-pwa.spec.js:124`: `waitForSelector('.screen[aria-label]')` timed out because screens are in DOM but hidden behind login screen (not visible).
+- Fix: Added `{ state: 'attached' }` to not require visibility.
+- File: `tests/mobile-pwa.spec.js`
+
+**Sidebar scrollbar removed:**
+- Sidebar `<nav>` had `overflow-y-auto` which showed a scrollbar when many nav items (admin sees 10+ items).
+- Fix: Added `scrollbar-hide` utility class (hides scrollbar via `-ms-overflow-style: none`, `scrollbar-width: none`, `::-webkit-scrollbar { display: none }`) while keeping overflow-y-auto for functional scrolling.
+- Reduced nav padding from `py-4` to `py-3` for tighter fit.
+- Files: `app/dashboard/components/Sidebar.tsx`, `app/globals.css`
+
+**Alex Thompson RSVP (orphaned data):**
+- No user named "Alex" exists in Supabase `profiles` or `auth.users`.
+- `event_attendees` stores `user_name` as plain text (not FK to profiles), so the RSVP persists after user deletion.
+- Fix: Run `DELETE FROM event_attendees WHERE user_name = 'Alex';` on production Supabase.
+
+**Visual verification completed:**
+- Dashboard home: quick action cards, upcoming bookings (3 confirmed), upcoming events with RSVP + going counts ✓
+- Book Court: week view, 4 courts grid, booking creation works, "You" slots appear ✓
+- Partners: filter tabs, skill levels, post request, cancel request ✓
+- Events: calendar view, event cards, type badges, RSVP buttons ✓
+- Messages: conversation list, avatars, timestamps, new message button ✓
+- Booking cancel: was broken (now fixed), needs redeploy to verify
+
+**Build:** TypeScript clean.
+
 ---
 
 ## TODO / REMINDERS
-- **Run delete policies migration** on production Supabase (`npm run db:push` or run SQL from `20260308_add_delete_policies.sql`)
+- **Deploy to Railway** — booking cancel fix + sidebar scrollbar fix + ARIA test fix
+- **Delete orphaned Alex RSVP** — `DELETE FROM event_attendees WHERE user_name = 'Alex';` on production Supabase
 - **Junior Summer Camp dates**: User is waiting on real dates from Mark Taylor. When received, update the `junior-summer-camp` event across: `supabase/seed.sql`, `app/dashboard/lib/data.ts`, `public/mobile-app/js/events.js`, and run UPDATE SQL on live Supabase. Also update date/time in `app/(landing)/layout.tsx` JSON-LD if camp is featured there.
 - **Run welcome message migration** on production Supabase (`npm run db:push` or SQL manually)
-- **Deploy to Railway** to verify admin panels and bug fixes in production
 
 ## Decisions Made
 - Double-booking prevention: DB-level partial unique index on `(court_id, date, time) WHERE status = 'confirmed'`

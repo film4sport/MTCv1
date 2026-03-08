@@ -291,6 +291,26 @@ export async function POST(request: Request) {
       // RSVP
       const { error } = await supabase.from('event_attendees').insert({ event_id: eventId, user_name: userName });
       if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+      // Bell + push notification on RSVP (fire-and-forget)
+      const { data: evt } = await supabase.from('events').select('title, date').eq('id', eventId).single();
+      if (evt) {
+        const now = new Date().toISOString();
+        const notifId = `notif-rsvp-${eventId}-${authResult.id.slice(0, 8)}`;
+        Promise.all([
+          createNotification(supabase, authResult.id, {
+            id: notifId, type: 'event', title: 'RSVP Confirmed',
+            body: `You're going to "${evt.title}" on ${evt.date}`,
+            timestamp: now,
+          }),
+          sendPushToUser(supabase, authResult.id, {
+            title: 'RSVP Confirmed',
+            body: `You're going to "${evt.title}" on ${evt.date}`,
+            tag: `event-rsvp-${eventId}`,
+          }),
+        ]).catch(() => { /* best-effort */ });
+      }
+
       return NextResponse.json({ success: true, action: 'added' });
     }
   } catch {

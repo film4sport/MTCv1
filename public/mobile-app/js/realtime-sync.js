@@ -92,6 +92,39 @@
     });
   }
 
+  function refetchAnnouncements() {
+    if (!MTC.fn.loadFromAPI) return;
+    MTC.fn.loadFromAPI('/mobile/announcements', 'mtc-api-announcements', null).then(function(announcements) {
+      if (announcements && typeof window.renderAnnouncements === 'function') {
+        window.renderAnnouncements(announcements);
+      }
+      _lastSyncTimestamps.announcements = Date.now();
+      updateStaleIndicators();
+    });
+  }
+
+  function refetchPrograms() {
+    if (!MTC.fn.loadFromAPI) return;
+    MTC.fn.loadFromAPI('/mobile/programs', 'mtc-api-programs', null).then(function(programs) {
+      if (programs) {
+        MTC.state.programs = programs;
+      }
+      _lastSyncTimestamps.programs = Date.now();
+      updateStaleIndicators();
+    });
+  }
+
+  function refetchMembers() {
+    if (!MTC.fn.loadFromAPI) return;
+    MTC.fn.loadFromAPI('/mobile/members', 'mtc-api-members', null).then(function(members) {
+      if (members) {
+        MTC.state.clubMembers = members;
+      }
+      _lastSyncTimestamps.members = Date.now();
+      updateStaleIndicators();
+    });
+  }
+
   /** Refetch all data types (used by heartbeat + pull-to-refresh) */
   function refetchAll() {
     refetchBookings();
@@ -100,6 +133,8 @@
     refetchEvents();
     refetchNotifications();
     refetchCourtBlocks();
+    refetchAnnouncements();
+    refetchPrograms();
   }
 
   // ============================================
@@ -179,6 +214,18 @@
         })
         .on('postgres_changes', { event: '*', schema: 'public', table: 'court_blocks' }, function() {
           debouncedRefetch('courtBlocks', refetchCourtBlocks);
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'announcements' }, function() {
+          debouncedRefetch('announcements', refetchAnnouncements);
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'coaching_programs' }, function() {
+          debouncedRefetch('programs', refetchPrograms);
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'program_enrollments' }, function() {
+          debouncedRefetch('programs', refetchPrograms);
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, function() {
+          debouncedRefetch('members', refetchMembers);
         })
         .subscribe(function(status) {
           if (status === 'SUBSCRIBED') {
