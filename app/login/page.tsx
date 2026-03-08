@@ -183,6 +183,28 @@ function LoginContent() {
                     ))}
                   </div>
 
+                  {/* Calendar section peeking behind nav */}
+                  <div style={{ padding: '4px 14px 60px' }}>
+                    <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 15, letterSpacing: 1.5, color: '#1a1f12', marginBottom: 6 }}>CLUB CALENDAR</p>
+                    <div style={{
+                      background: 'rgba(255,255,255,0.45)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
+                      borderRadius: 16, padding: '12px', border: '1px solid rgba(255,255,255,0.6)',
+                      boxShadow: '0 4px 16px rgba(0,0,0,0.04)',
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 13, color: '#1a1f12' }}>March 2026</span>
+                        <div style={{ display: 'flex', gap: 5 }}>
+                          <div style={{ width: 20, height: 20, background: 'rgba(255,255,255,0.5)', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <svg width="9" height="9" fill="none" stroke="#555" viewBox="0 0 24 24" strokeWidth="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+                          </div>
+                          <div style={{ width: 20, height: 20, background: 'rgba(255,255,255,0.5)', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <svg width="9" height="9" fill="none" stroke="#555" viewBox="0 0 24 24" strokeWidth="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
                   </div>{/* end content */}
 
                   {/* Bottom Nav — liquid glass */}
