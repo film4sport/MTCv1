@@ -568,10 +568,51 @@ Closed ALL notification asymmetries. Every action fires symmetric bell + push + 
 
 **Build:** TypeScript clean.
 
+### Cowork Session (2026-03-08k) — Cross-Platform Migration (Dashboard ↔ Mobile ↔ API)
+
+**Full cross-platform audit completed. 4 gaps fixed:**
+
+**1. Event RSVP notifications added to mobile API:**
+- Mobile API POST `/api/mobile/events` now fires bell + push notification on RSVP (was silent).
+- Matches dashboard behavior (bell + push on RSVP, nothing on un-RSVP).
+- File: `app/api/mobile/events/route.ts`
+
+**2. Program enroll/withdraw routed through API:**
+- `enrollInProgram()` and `withdrawFromProgram()` in store.tsx now use `apiCall('/api/mobile/programs', 'POST', { programId, action })` instead of direct `db.*` calls.
+- API handles all notification layers (bell, push, email, coach welcome message) — dashboard no longer duplicates this logic.
+- Dramatically simplified store functions (from ~80 lines each to ~15 lines).
+- File: `app/dashboard/lib/store.tsx`
+
+**3. Mobile PWA Realtime subscriptions expanded:**
+- Added 4 new table subscriptions: `announcements`, `coaching_programs`, `program_enrollments`, `profiles`.
+- Added 3 new refetch functions: `refetchAnnouncements()`, `refetchPrograms()`, `refetchMembers()`.
+- `refetchAll()` now includes announcements + programs.
+- Mobile now subscribes to 13 tables (was 9), matching dashboard's 14.
+- File: `public/mobile-app/js/realtime-sync.js`
+
+**4. Remaining direct-DB mutations routed through API:**
+- `dismissAnnouncement()` → `apiCall('/api/mobile/announcements', 'PATCH', { announcementId, dismiss: true })`
+- `deleteReadNotifications()` → `apiCall('/api/mobile/notifications', 'DELETE', {})`
+- Added DELETE handler to `/api/mobile/notifications/route.ts` (deletes all read notifications for user).
+- Files: `app/dashboard/lib/store.tsx`, `app/api/mobile/notifications/route.ts`
+
+**Remaining direct-DB calls in store.tsx (all safe):**
+- `addProgram()` / `cancelProgram()` → `db.createProgram()` / `db.cancelProgram()` — coach/admin-only, RLS not an issue
+- `db.createNotification()` — optimistic bell notifications, INSERT policy exists
+- `db.createBooking()` — only used for program session bookings (coach-only)
+- All `db.fetch*()` functions — SELECT only, safe with RLS
+
+**Audit results — no issues found:**
+- Data format consistency: All camelCase field names match between dashboard and API ✓
+- Notification parity: All actions fire symmetric bell + push on both platforms ✓
+- Feature parity: Booking, messaging, partners, events all equivalent ✓
+
+**Build:** 29 JS → 358KB, 23 CSS → 225KB, cache: mtc-court-42a92926. TypeScript clean. 747 tests pass (27 files).
+
 ---
 
 ## TODO / REMINDERS
-- **Deploy to Railway** — booking cancel fix + sidebar scrollbar fix + ARIA test fix
+- **Deploy to Railway** — booking cancel fix + cross-platform migration + sidebar fix + ARIA test fix
 - **Delete orphaned Alex RSVP** — `DELETE FROM event_attendees WHERE user_name = 'Alex';` on production Supabase
 - **Junior Summer Camp dates**: User is waiting on real dates from Mark Taylor. When received, update the `junior-summer-camp` event across: `supabase/seed.sql`, `app/dashboard/lib/data.ts`, `public/mobile-app/js/events.js`, and run UPDATE SQL on live Supabase. Also update date/time in `app/(landing)/layout.tsx` JSON-LD if camp is featured there.
 - **Run welcome message migration** on production Supabase (`npm run db:push` or SQL manually)
