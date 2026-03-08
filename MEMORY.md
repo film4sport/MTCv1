@@ -41,6 +41,47 @@ Before reporting any feature change as "done", verify:
 - **Coaching panel access (Mar 8)**: Sidebar now shows "Book Lessons" link for both coaches AND admins (was coach-only). Sidebar.tsx line 145: `(isCoach || isAdmin)`.
 - **Coaching program bookings**: `db.createBooking` is still used in the coaching program creation flow (line 966 of store.tsx). This is coach-only (coaching panel), not admin. Coaches create program bookings (type: 'program') via the coaching panel.
 
+### Cowork Session (2026-03-08 evening) — Mobile PWA Testing + Bug Fixes
+
+**Bugs fixed:**
+- **Settings screen scroll**: `overflow: hidden` → `overflow-y: auto` in `neumorphic.css` line 1455 (notification toggles, gate code, interclub unreachable)
+- **"No password needed" text invisible**: Enlarged to 13px semibold with olive background on both login and signup screens (`index.html`)
+- **Event attendee count wrong**: `spotsTaken` derived from `event_attendees` list length instead of stale `spots_taken` column (mobile API `events/route.ts` + dashboard `db.ts`)
+- **Menu drawer cut off**: `overflow: hidden` → `overflow: visible` + padding 40→100px in `admin.css`
+- **Court block time 400 error**: Dashboard option values were lowercase ("maintenance") but API expects capitalized ("Maintenance") from `VALID_BLOCK_REASONS`. Fixed option values in `AdminCourtsTab.tsx`. Also added missing "Private Event" option.
+- **Login click-through bug**: Login screen z-index was 50 but `.bottom-nav` was 90 and `.top-header` was 60. Bumped login screen to z-index 200 in `login.css`.
+- **Signup page "no password" text**: Styled to match mobile PWA — green-olive background, semibold, centered in `signup/page.tsx`.
+
+**New feature: Residence (Mono vs Other)**
+- Added `residence TEXT DEFAULT 'mono'` column to profiles table
+- Next.js signup wizard: Mono/Other toggle on skill level step (step 4) — defaults to Mono
+- Mobile PWA signup: Mono/Other buttons between phone input and "no password" text
+- `handle_new_user` trigger reads `residence` from `raw_user_meta_data`
+- Auth endpoints return `residence`: `mobile-auth/route.ts`, `mobile-auth/session/route.ts`
+- API PATCH (`/api/mobile/members`) accepts `residence` as self-updatable field
+- Dashboard admin Members tab: "Residence" column showing "Mono" or "Out of Town", filter buttons with counts
+- `auth.ts`: `signUp()` and `completeOAuthProfile()` both pass `residence` to Supabase
+- Migration: `supabase/migrations/20260308_add_residence_column.sql`
+- **Cross-platform**: Dashboard types (`types.ts`), db mapping (`db.ts`), mobile PWA auth (`auth.js`), both auth API endpoints
+
+**Admin panel testing results (dashboard):**
+- Dashboard tab: Stats, gate code, exports — all correct
+- Courts tab: Close/Reopen court toggle works, Block Court Time form present (but fails due to lowercase reason values — fixed)
+- Members tab: Full list, search, team filters — all correct
+- Announcements tab: New announcement form with type/audience — works
+- Book Court: Calendar grid, booking modal (Singles/Doubles/duration), Add Participants search — all work
+
+**Notification audit:**
+- Booker: Bell + Email (with .ics). Missing: Push (minor)
+- Participants: Bell + Push + Email + In-app message — COMPLETE
+- Court block cancellation: Bell + Push to affected users — works
+- Gaps: booker missing push on create, no post-creation participant add, no booker notif on participant confirm
+
+**Pending:**
+- Run migration on production Supabase: `20260308_add_residence_column.sql`
+- Deploy all changes to Railway
+- Mobile PWA admin "Block Court Time" — mobile version also missing "Club Event" and "Coaching Session" options in reason dropdown
+
 ---
 
 ## Archived Sessions (March 1-4, 2026) — Compressed Summary
