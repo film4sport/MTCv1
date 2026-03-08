@@ -259,9 +259,12 @@
         '</button>' +
       '</div>';
 
-    const firstCard = document.querySelector('#screen-partners .partner-card');
-    if (firstCard) {
-      firstCard.parentElement.insertBefore(card, firstCard);
+    var container = document.getElementById('partnerCardsContainer');
+    if (container) {
+      container.insertBefore(card, container.firstChild);
+      // Hide empty state
+      var emptyState = document.getElementById('noPartners');
+      if (emptyState) emptyState.style.display = 'none';
     }
   }
 

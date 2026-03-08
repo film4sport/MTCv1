@@ -81,6 +81,17 @@ export default function FaqTab() {
                 );
               });
             })()}
+
+            <div className="mt-8 p-5 rounded-xl text-center" style={{ backgroundColor: 'rgba(107, 122, 61, 0.08)', border: '1px solid rgba(107, 122, 61, 0.15)' }}>
+              <p className="text-sm font-medium mb-1" style={{ color: '#2a2f1e' }}>Still have questions?</p>
+              <p className="text-sm" style={{ color: '#555' }}>
+                Drop us a line at{' '}
+                <a href="mailto:monotennisclub1@gmail.com" className="font-semibold hover:underline" style={{ color: '#6b7a3d' }}>
+                  monotennisclub1@gmail.com
+                </a>
+                {' '}and we&apos;ll get back to you.
+              </p>
+            </div>
           </div>
 
           <div className="fade-in-right">

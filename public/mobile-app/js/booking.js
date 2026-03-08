@@ -244,7 +244,7 @@
     const wv=document.getElementById('weekView'), cv=document.getElementById('bookingCalendarView');
     const wb=document.getElementById('weekViewBtn'), cb=document.getElementById('bookingCalendarViewBtn');
     if (view==='week') {
-      wv.style.display='flex'; cv.style.display='none';
+      wv.style.display='block'; cv.style.display='none';
       wb.classList.add('active'); cb.classList.remove('active');
       renderWeeklyGrid();
     } else {
@@ -386,7 +386,7 @@
           sc+=' event-covered';
         } else if (booking) {
           if (booking.user==='You') {
-            sc+=' my-booking'; inner='<span class="slot-label mine-label">\ud83c\udfbe MY COURT</span>';
+            sc+=' my-booking'; inner='<span class="slot-label mine-label"><svg class="mine-icon" viewBox="0 0 16 16" width="12" height="12" fill="currentColor"><circle cx="8" cy="8" r="7"/></svg> MY COURT</span>';
           } else {
             sc+=' booked'; inner='<span class="slot-label booked-label">'+sanitizeHTML(booking.user)+'</span>';
           }
@@ -415,15 +415,17 @@
     });
 
     // Smart scroll to now row (#8)
-    // Scroll gridBody (the overflow-y:auto container) to bring the current-time row into view.
-    // We use getBoundingClientRect to reliably compute position regardless of offsetParent.
+    // The actual scrolling container is #screen-book (overflow-y:auto), not gridBody
+    // (gridBody has no max-height so it expands to fit all content and never scrolls itself).
     if (isToday&&nowRowIdx>=0) {
       var nowEl=gridBody.querySelector('.now-row');
       if (nowEl) setTimeout(function(){
-        var bodyRect = gridBody.getBoundingClientRect();
+        var scrollContainer = document.getElementById('screen-book');
+        if (!scrollContainer) return;
+        var containerRect = scrollContainer.getBoundingClientRect();
         var nowRect = nowEl.getBoundingClientRect();
-        var scrollOffset = nowRect.top - bodyRect.top + gridBody.scrollTop - 60;
-        gridBody.scrollTop = Math.max(0, scrollOffset);
+        var scrollOffset = nowRect.top - containerRect.top + scrollContainer.scrollTop - 60;
+        scrollContainer.scrollTop = Math.max(0, scrollOffset);
       },150);
     }
     } catch(e) {
@@ -551,7 +553,7 @@
       if (dayEv[i].startTime===startTime && dayEv[i].courts.indexOf(court)!==-1) { ev=dayEv[i]; break; }
     }
 
-    const msg = ev && ev.rsvp ? "RSVP confirmed! You're on the list." : "You're registered! See you on the court \ud83c\udfbe";
+    const msg = ev && ev.rsvp ? "RSVP confirmed! You're on the list." : "You're registered! See you on the court.";
     showToast(msg);
 
     // Add to My Bookings
@@ -565,9 +567,9 @@
     }
 
     if (ev && ev.coach) {
-      showPushNotification('Coach Notified', sanitizeHTML(ev.coach) + ' has been notified of your registration for ' + sanitizeHTML(ev.title), '\ud83c\udfbe');
+      showPushNotification('Coach Notified', sanitizeHTML(ev.coach) + ' has been notified of your registration for ' + sanitizeHTML(ev.title), '\u2705');
     } else {
-      showPushNotification('Event Registered', "You're signed up! Check your schedule.", '\ud83c\udfbe');
+      showPushNotification('Event Registered', "You're signed up! Check your schedule.", '\u2705');
     }
 
     if (ev && ev.registered && ev.registered.indexOf('You') === -1) {
@@ -680,7 +682,7 @@
           closeBookingModal();
           document.querySelectorAll('.weekly-slot.selected').forEach(function(s){
             s.classList.remove('selected','available');s.classList.add('my-booking');
-            s.innerHTML='<span class="slot-label mine-label">\ud83c\udfbe MY COURT</span>';
+            s.innerHTML='<span class="slot-label mine-label"><svg class="mine-icon" viewBox="0 0 16 16" width="12" height="12" fill="currentColor"><circle cx="8" cy="8" r="7"/></svg> MY COURT</span>';
           });
           selectedSlot=null;
           resetBtn();
@@ -702,7 +704,7 @@
       closeBookingModal();
       document.querySelectorAll('.weekly-slot.selected').forEach(function(s){
         s.classList.remove('selected','available');s.classList.add('my-booking');
-        s.innerHTML='<span class="slot-label mine-label">\ud83c\udfbe MY COURT</span>';
+        s.innerHTML='<span class="slot-label mine-label"><svg class="mine-icon" viewBox="0 0 16 16" width="12" height="12" fill="currentColor"><circle cx="8" cy="8" r="7"/></svg> MY COURT</span>';
       });
       selectedSlot=null;
       resetBtn();
@@ -829,7 +831,7 @@
           inner='<div class="event-block" style="height:'+bh+';background:'+info.color+';color:'+info.textColor+';" onclick="event.stopPropagation();showEventDetail(\''+dateStr+'\',\''+ev.startTime+'\','+court+')"><span class="ev-title">'+sanitizeHTML(ev.title)+'</span><span class="ev-time">'+formatTimeRange(ev.startTime,ev.endTime)+'</span>'+st+'</div>';
         } else if(covered[ck]){sc+=' event-covered';}
         else if(booking){
-          if(booking.user==='You'){sc+=' my-booking';inner='<span class="slot-label mine-label">\ud83c\udfbe MY COURT</span>';}
+          if(booking.user==='You'){sc+=' my-booking';inner='<span class="slot-label mine-label"><svg class="mine-icon" viewBox="0 0 16 16" width="12" height="12" fill="currentColor"><circle cx="8" cy="8" r="7"/></svg> MY COURT</span>';}
           else{sc+=' booked';inner='<span class="slot-label booked-label">'+sanitizeHTML(booking.user)+'</span>';}
           click=' onclick="selectSlot(this)"';
         } else {

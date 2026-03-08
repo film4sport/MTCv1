@@ -20,7 +20,7 @@
     if ('serviceWorker' in navigator) {
       caches.keys().then(function(names) {
         names.forEach(function(name) {
-          if (name.indexOf('mtc-court-75ec9880') === -1) {
+          if (name.indexOf('mtc-court-cf7f5c09') === -1) {
             caches.delete(name);
             console.log('[CacheBust] Deleted old cache:', name);
           }
@@ -1004,6 +1004,10 @@
         <div class="filter-pill" onclick="filterPartners(this, 'advanced')">Advanced</div>
       </div>
       
+      <div class="partner-cards-container" id="partnerCardsContainer">
+        <!-- Partner cards populated by JavaScript from API data -->
+      </div>
+
       <div class="empty-state" id="noPartners" style="display: block;">
         <div class="empty-state-icon">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>

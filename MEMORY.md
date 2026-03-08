@@ -21,6 +21,47 @@
 - **Desktop login redirect fix**: `signInWithGoogle('/dashboard')` and `signInWithMagicLink(email, '/dashboard')` now pass `?next=/dashboard` through OAuth/magic link flow. Callback goes directly to `/dashboard`, bypassing `/auth/complete` (which had stale `mtc-auth-redirect` localStorage from mobile PWA sessions).
 - **Mobile PWA scroll-to-now-row fix**: Replaced `offsetTop`-based scroll with `getBoundingClientRect()` in `booking.js` for reliable scroll positioning regardless of CSS layout/offsetParent.
 
+### Cowork Session (2026-03-08) — Mobile PWA Messaging, Partners, Emoji Cleanup
+
+**Messaging race condition fix (critical):**
+- Root cause: `clubMembers` and `conversations` loaded in parallel via `loadAppDataFromAPI()`. If conversations arrived first, member name lookups failed (showed UUID instead of name).
+- Fix 1: Added `conversationMetaMap` — stores `otherUserName` and `otherUserAvatar` from API response as fallback when `clubMembers` lookup fails.
+- Fix 2: `updateConversationsFromAPI()` now stores name/avatar from API's `otherUserName`/`otherUserAvatar` fields into `conversationMetaMap`.
+- Fix 3: `renderConversationsList()` uses `conversationMetaMap` fallback for both name and avatar.
+- Fix 4: `openConversation()` no longer hard-returns when member not in `clubMembers` — uses `conversationMetaMap` fallback instead.
+- Fix 5: Serialized load order in `auth.js` — members load first (awaited), then conversations load after. Ensures `clubMembers` is populated before any conversation rendering.
+- Files: `messaging.js`, `auth.js`
+
+**Welcome message template updated:**
+- Removed dynamic gate code from welcome message SQL function. New users now see "Your court gate code will be provided after Opening Day" instead of the raw gate code.
+- Files: `supabase/schema.sql`, `supabase/migrations/20260307_welcome_message_no_gate_code.sql`
+- **Needs:** Run migration on production Supabase (`npm run db:push` or run SQL manually).
+
+**Tennis emoji cleanup (rule #18 — 8 violations fixed):**
+- Replaced all `🎾` (\ud83c\udfbe) instances in `booking.js` (6 occurrences) and `events-registration.js` (1 occurrence).
+- "MY COURT" slot labels now use SVG filled circle icon instead of tennis emoji.
+- Push notification icons changed from tennis emoji to checkmark (\u2705).
+- Toast messages cleaned of trailing tennis emoji.
+- Verified 0 tennis emoji remain in source code (only in CLAUDE.md/MEMORY.md rule references).
+
+**Partners screen — full list rendering (was broken):**
+- Root cause: `#screen-partners` only had filter pills and empty state — no container for cards. `updatePartnersFromAPI()` only populated `homePartnerPool` (2 cards on home), never the dedicated Partners screen.
+- Fix: Added `#partnerCardsContainer` div in `index.html`. New `renderPartnersScreen()` function in `navigation.js` renders all API partners as full cards with avatars, match type badges, skill level, and availability. Called on navigateTo('partners') and after `updatePartnersFromAPI()`.
+- Also fixed `insertPartnerRequestCard()` in `partners.js` to insert into `#partnerCardsContainer` (was looking for `.partner-card` which didn't exist, silently failing).
+- Also stored `matchType` and `availability` in `homePartnerPool` entries (were missing).
+- Files: `index.html`, `navigation.js`, `partners.js`, `partners.css`
+
+**Swipe-to-delete on conversations (new feature):**
+- Touch-based swipe left to reveal red "Delete" action on each conversation in the messages list.
+- Swipe threshold: 80px reveals delete button, 140px auto-deletes.
+- `deleteConversation()` removes from local `conversations` object, `conversationMetaMap`, and localStorage. Animates card collapse.
+- Prevents `onclick` from firing during swipe via `pointerEvents` toggle.
+- CSS in `messaging.css`: `.swipe-container` wraps each `.message-item`, `.swipe-delete-bg` shows red background with trash icon.
+- Client-side only (no API DELETE endpoint for conversations exists). Conversations reappear after re-login from API.
+- Files: `messaging.js`, `messaging.css`
+
+**Build:** Mobile PWA build passes (29 JS → 326KB, 23 CSS → 213KB, cache: mtc-court-183735a0). TypeScript clean.
+
 ### Cowork Session (2026-03-07) — Mobile Admin Parity, Court Blocking, Login Fixes
 
 **Google login first-click fix:**

@@ -109,6 +109,11 @@
       setTimeout(function() { if (typeof initAdminPanel === 'function') initAdminPanel(); }, 100);
     }
 
+    // Render partners screen from API data
+    if (screen === 'partners') {
+      setTimeout(function() { if (typeof renderPartnersScreen === 'function') renderPartnersScreen(); }, 100);
+    }
+
     // Render schedule bookings dynamically
     if (screen === 'schedule') {
       setTimeout(function() {
@@ -752,12 +757,66 @@
         name: p.name,
         time: p.availability || p.date + ' at ' + p.time,
         level: p.skillLevel || 'intermediate',
-        levelClass: levelClass
+        levelClass: levelClass,
+        matchType: p.matchType || 'singles',
+        availability: p.availability || ''
       });
     });
     // Re-populate the home screen partner cards
     repopulateHomePartners();
+    // Also populate the dedicated partners screen if it has been rendered
+    renderPartnersScreen();
   };
+
+  // ============================================
+  // PARTNERS SCREEN — render full list from API
+  // ============================================
+  function renderPartnersScreen() {
+    var container = document.getElementById('partnerCardsContainer');
+    if (!container) return;
+    var emptyState = document.getElementById('noPartners');
+
+    // Merge API partners + user's own local requests
+    var localRequests = MTC.storage.get('mtc-partner-requests', []);
+
+    if (homePartnerPool.length === 0 && localRequests.length === 0) {
+      container.innerHTML = '';
+      if (emptyState) emptyState.style.display = 'flex';
+      return;
+    }
+
+    if (emptyState) emptyState.style.display = 'none';
+
+    // Build cards HTML from API data
+    var html = '';
+    homePartnerPool.forEach(function(p) {
+      var avatar = typeof getAvatar === 'function' ? getAvatar(p.name) : '';
+      var matchType = p.matchType || 'singles';
+      var matchLabel = matchType === 'mixed' ? 'Mixed Doubles' : matchType === 'mens' ? "Men's Doubles" : matchType === 'womens' ? "Women's Doubles" : 'Singles';
+      var levelDisplay = p.level ? (p.level.charAt(0).toUpperCase() + p.level.slice(1)) : 'Intermediate';
+      var isAvailable = p.availability && (p.availability.toLowerCase().indexOf('today') !== -1 || p.availability.toLowerCase().indexOf('now') !== -1);
+
+      html += '<div class="partner-card stagger-item" data-match-type="' + sanitizeHTML(matchType) + '" data-level="' + sanitizeHTML((p.level || 'intermediate').toLowerCase()) + '" data-available="' + isAvailable + '" data-partner-id="' + (p.id || '') + '">' +
+        '<div class="partner-match-type ' + sanitizeHTML(matchType) + '">' + sanitizeHTML(matchLabel) + '</div>' +
+        '<svg class="partner-avatar" viewBox="0 0 100 100">' + (avatar || '').replace(/<\/?svg[^>]*>/g, '') + '</svg>' +
+        '<div class="partner-info">' +
+          '<div class="partner-name">' + sanitizeHTML(p.name) + '</div>' +
+          '<div class="partner-level">' + sanitizeHTML(levelDisplay) + '</div>' +
+          '<div class="partner-availability">' + sanitizeHTML(p.time || 'Anytime') + '</div>' +
+        '</div>' +
+        '<div class="partner-action">' +
+          '<button class="partner-action-btn ripple" data-action="joinPartner" data-id="' + (p.id || '') + '" data-name="' + sanitizeHTML(p.name) + '">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"></path><path d="M22 2l-7 20-4-9-9-4 20-7z"></path></svg>' +
+          '</button>' +
+        '</div>' +
+      '</div>';
+    });
+    container.innerHTML = html;
+
+    // User's own local requests are appended by partners.js DOMContentLoaded handler
+    // and insertPartnerRequestCard, so they'll layer on top naturally
+  }
+  window.renderPartnersScreen = renderPartnersScreen;
 
   // ============================================
   // PULL TO REFRESH — home + events screens
