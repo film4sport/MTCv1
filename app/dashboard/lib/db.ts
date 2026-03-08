@@ -126,7 +126,7 @@ export async function fetchEvents(): Promise<ClubEvent[]> {
     badge: e.badge as ClubEvent['badge'],
     price: e.price,
     spotsTotal: e.spots_total ?? undefined,
-    spotsTaken: e.spots_taken ?? undefined,
+    spotsTaken: (e.event_attendees?.length ?? e.spots_taken) ?? undefined,
     description: e.description,
     attendees: e.event_attendees?.map((a: { user_name: string }) => a.user_name) || [],
     type: e.type as ClubEvent['type'],

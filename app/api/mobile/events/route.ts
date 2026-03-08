@@ -66,20 +66,24 @@ export async function GET(request: Request) {
     });
 
     // Build response matching mobile PWA shape
-    const result = (events || []).map(e => ({
-      id: e.id,
-      title: e.title,
-      date: e.date,
-      time: e.time,
-      location: e.location,
-      badge: e.badge,
-      price: e.price,
-      spotsTotal: e.spots_total,
-      spotsTaken: e.spots_taken ?? 0,
-      description: e.description,
-      type: e.type,
-      attendees: attendeeMap[e.id] || [],
-    }));
+    // Use actual attendee count as the source of truth for spotsTaken
+    const result = (events || []).map(e => {
+      const eventAttendees = attendeeMap[e.id] || [];
+      return {
+        id: e.id,
+        title: e.title,
+        date: e.date,
+        time: e.time,
+        location: e.location,
+        badge: e.badge,
+        price: e.price,
+        spotsTotal: e.spots_total,
+        spotsTaken: eventAttendees.length,
+        description: e.description,
+        type: e.type,
+        attendees: eventAttendees,
+      };
+    });
 
     return NextResponse.json(result);
   } catch {
