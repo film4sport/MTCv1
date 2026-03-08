@@ -17,7 +17,7 @@ export default function MessagesPage() {
 
 function MessagesContent() {
   const searchParams = useSearchParams();
-  const { currentUser, conversations, members, bookings, sendMessage, markConversationRead } = useApp();
+  const { currentUser, conversations, members, bookings, sendMessage, markConversationRead, deleteConversation, deleteMessage } = useApp();
   const { showToast } = useToast();
   const [selectedConvo, setSelectedConvo] = useState<string | null>(null);
   const [confirmedBookings, setConfirmedBookings] = useState<Set<string>>(new Set());
@@ -97,8 +97,7 @@ function MessagesContent() {
 
   const filteredMembers = members.filter(m =>
     m.id !== currentUser?.id &&
-    m.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-    !conversations.some(c => c.memberId === m.id)
+    (!searchQuery || m.name.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   // Reset active index when search changes
@@ -177,26 +176,28 @@ function MessagesContent() {
                     style={{ borderColor: '#e0dcd3', color: '#2a2f1e' }}
                     autoFocus
                   />
-                  {searchQuery && (
-                    <div role="listbox" id="member-search-listbox" className="mt-1 max-h-32 overflow-y-auto rounded-lg border" style={{ borderColor: '#e0dcd3' }}>
-                      {filteredMembers.map((m, i) => (
+                  <div role="listbox" id="member-search-listbox" className="mt-1 max-h-40 overflow-y-auto rounded-lg border" style={{ borderColor: '#e0dcd3' }}>
+                    {filteredMembers.map((m, i) => {
+                      const hasConvo = conversations.some(c => c.memberId === m.id);
+                      return (
                         <button
                           key={m.id}
                           id={`member-option-${i}`}
                           role="option"
                           aria-selected={memberActiveIndex === i}
                           onClick={() => startNewConvo(m.id)}
-                          className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors"
+                          className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors flex items-center justify-between"
                           style={{ color: '#2a2f1e', backgroundColor: memberActiveIndex === i ? 'rgba(107, 122, 61, 0.08)' : undefined }}
                         >
-                          {m.name}
+                          <span>{m.name}</span>
+                          {hasConvo && <span className="text-[0.6rem] px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(107,122,61,0.1)', color: '#6b7a3d' }}>existing</span>}
                         </button>
-                      ))}
-                      {filteredMembers.length === 0 && (
-                        <p className="px-3 py-2 text-xs" style={{ color: '#6b7266' }}>No members found</p>
-                      )}
-                    </div>
-                  )}
+                      );
+                    })}
+                    {filteredMembers.length === 0 && (
+                      <p className="px-3 py-2 text-xs" style={{ color: '#6b7266' }}>No members found</p>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
@@ -216,14 +217,14 @@ function MessagesContent() {
                 [...conversations]
                   .sort((a, b) => new Date(b.lastTimestamp).getTime() - new Date(a.lastTimestamp).getTime())
                   .map(convo => (
-                    <button
+                    <div
                       key={convo.memberId}
-                      onClick={() => setSelectedConvo(convo.memberId)}
-                      className="w-full text-left px-4 py-3 border-b transition-all duration-200"
+                      className="group relative w-full text-left px-4 py-3 border-b transition-all duration-200 cursor-pointer"
                       style={{
                         borderColor: '#f0ede6',
                         background: selectedConvo === convo.memberId ? 'rgba(107, 122, 61, 0.06)' : 'transparent',
                       }}
+                      onClick={() => setSelectedConvo(convo.memberId)}
                     >
                       <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold shrink-0" style={{ background: 'rgba(107, 122, 61, 0.1)', color: '#6b7a3d' }}>
@@ -241,8 +242,17 @@ function MessagesContent() {
                             {convo.unread}
                           </span>
                         )}
+                        <button
+                          onClick={(e) => { e.stopPropagation(); if (selectedConvo === convo.memberId) setSelectedConvo(null); deleteConversation(convo.memberId); showToast('Conversation deleted'); }}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-red-50 transition-all"
+                          title="Delete conversation"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="#e74c3c" viewBox="0 0 24 24" strokeWidth="2">
+                            <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                          </svg>
+                        </button>
                       </div>
-                    </button>
+                    </div>
                   ))
               )}
             </div>
@@ -298,7 +308,18 @@ function MessagesContent() {
                     const bookingMatch = msg.text.match(/\[booking:([^:]+):(\d{4}-\d{2}-\d{2}):([^\]]+)\]/);
                     const displayText = bookingMatch ? msg.text.replace(bookingMatch[0], '').trim() : msg.text;
                     return (
-                      <div key={msg.id} className={`flex ${isMine ? 'justify-end' : 'justify-start'} animate-fadeIn`}>
+                      <div key={msg.id} className={`group/msg flex ${isMine ? 'justify-end' : 'justify-start'} animate-fadeIn`}>
+                        {isMine && (
+                          <button
+                            onClick={() => { deleteMessage(selectedConvo!, msg.id); showToast('Message deleted'); }}
+                            className="self-center p-1 rounded-lg opacity-0 group-hover/msg:opacity-100 hover:bg-red-50 transition-all mr-1"
+                            title="Delete message"
+                          >
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="#ccc" viewBox="0 0 24 24" strokeWidth="2">
+                              <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                            </svg>
+                          </button>
+                        )}
                         <div
                           className="max-w-[80%] sm:max-w-[70%] rounded-2xl px-4 py-2.5 transition-all"
                           style={{

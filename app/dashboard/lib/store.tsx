@@ -38,6 +38,8 @@ interface AppState {
   setConversations: (conversations: Conversation[]) => void;
   sendMessage: (toId: string, text: string) => void;
   markConversationRead: (memberId: string) => void;
+  deleteConversation: (memberId: string) => void;
+  deleteMessage: (memberId: string, messageId: string) => void;
   announcements: Announcement[];
   setAnnouncements: (announcements: Announcement[]) => void;
   dismissAnnouncement: (id: string) => void;
@@ -1235,6 +1237,53 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, [currentUser]);
 
+  const deleteConversation = useCallback((memberId: string) => {
+    if (!currentUser) return;
+    // Optimistic: remove from state
+    const removed = conversations.find(c => c.memberId === memberId);
+    setConversations(prev => prev.filter(c => c.memberId !== memberId));
+
+    // Persist to Supabase — find conversation and delete
+    Promise.resolve(
+      supabase
+        .from('conversations')
+        .select('id')
+        .or(`and(member_a.eq.${currentUser.id},member_b.eq.${memberId}),and(member_a.eq.${memberId},member_b.eq.${currentUser.id})`)
+        .single()
+    ).then(({ data: conv, error: err }) => {
+      if (err || !conv) return;
+      return supabase.from('conversations').delete().eq('id', conv.id);
+    }).then((result) => {
+      if (result?.error) throw result.error;
+    }).catch((e: unknown) => {
+      // Rollback: re-add conversation
+      if (removed) setConversations(prev => [...prev, removed]);
+      reportError(e, 'Supabase');
+      showToast('Failed to delete conversation', 'error');
+    });
+  }, [currentUser, conversations]);
+
+  const deleteMessage = useCallback((memberId: string, messageId: string) => {
+    if (!currentUser) return;
+    // Optimistic: remove message from state
+    setConversations(prev => prev.map(c => {
+      if (c.memberId !== memberId) return c;
+      const filtered = c.messages.filter(m => m.id !== messageId);
+      const last = filtered[filtered.length - 1];
+      return { ...c, messages: filtered, lastMessage: last?.text || '', lastTimestamp: last?.timestamp || c.lastTimestamp };
+    }));
+
+    // Persist to Supabase
+    Promise.resolve(
+      supabase.from('messages').delete().eq('id', messageId).eq('from_id', currentUser.id)
+    ).then(({ error: err }) => {
+      if (err) throw err;
+    }).catch((e: unknown) => {
+      reportError(e, 'Supabase');
+      showToast('Failed to delete message', 'error');
+    });
+  }, [currentUser]);
+
   const dismissAnnouncement = useCallback((id: string) => {
     if (!currentUser) return;
     setAnnouncements(prev => prev.map(a => a.id === id ? { ...a, dismissedBy: [...a.dismissedBy, currentUser.id] } : a));
@@ -1284,7 +1333,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const contextValue = useMemo<AppState>(() => ({
     currentUser, updateCurrentUser, login, logout, members, setMembers, courts, setCourts, bookings, setBookings, addBooking, cancelBooking,
-    events, setEvents, toggleRsvp, partners, setPartners, addPartner, removePartner, conversations, setConversations, sendMessage, markConversationRead,
+    events, setEvents, toggleRsvp, partners, setPartners, addPartner, removePartner, conversations, setConversations, sendMessage, markConversationRead, deleteConversation, deleteMessage,
     announcements, setAnnouncements, dismissAnnouncement, notifications, setNotifications, markNotificationRead,
     clearNotifications, weather, analytics,
     programs, setPrograms, addProgram, cancelProgram, enrollInProgram, withdrawFromProgram,
@@ -1296,7 +1345,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     announcements, notifications, weather, analytics, programs, notificationPreferences, isLoaded,
     familyMembers, activeProfile, activeDisplayName, activeAvatar, activeSkillLevel,
     updateCurrentUser, login, logout, addBooking, cancelBooking, toggleRsvp,
-    addPartner, removePartner, sendMessage, markConversationRead, dismissAnnouncement,
+    addPartner, removePartner, sendMessage, markConversationRead, deleteConversation, deleteMessage, dismissAnnouncement,
     markNotificationRead, clearNotifications, addProgram, cancelProgram,
     enrollInProgram, withdrawFromProgram, switchProfile, refreshData,
   ]);

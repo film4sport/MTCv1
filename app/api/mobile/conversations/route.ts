@@ -217,6 +217,81 @@ export async function POST(request: Request) {
   }
 }
 
+/** Delete a conversation (and all its messages) */
+export async function DELETE(request: Request) {
+  const authResult = await authenticateMobileRequest(request);
+  if (authResult instanceof NextResponse) return authResult;
+
+  try {
+    const { conversationId, messageId } = await request.json();
+    const supabase = getAdminClient();
+    const userId = authResult.id;
+
+    if (messageId) {
+      // Delete a single message — only if user is the sender
+      const { data: msg } = await supabase
+        .from('messages')
+        .select('id, from_id, conversation_id')
+        .eq('id', messageId)
+        .single();
+
+      if (!msg) {
+        return NextResponse.json({ error: 'Message not found' }, { status: 404 });
+      }
+      if (msg.from_id !== userId) {
+        return NextResponse.json({ error: 'Can only delete your own messages' }, { status: 403 });
+      }
+
+      const { error } = await supabase.from('messages').delete().eq('id', messageId);
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+      // Update conversation last_message to the previous message
+      const { data: lastMsg } = await supabase
+        .from('messages')
+        .select('text, timestamp')
+        .eq('conversation_id', msg.conversation_id)
+        .order('timestamp', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (lastMsg) {
+        await supabase.from('conversations').update({
+          last_message: lastMsg.text?.slice(0, 200),
+          last_timestamp: lastMsg.timestamp,
+        }).eq('id', msg.conversation_id);
+      }
+
+      return NextResponse.json({ success: true });
+    }
+
+    if (conversationId) {
+      // Delete entire conversation — only if user is a participant
+      const { data: conv } = await supabase
+        .from('conversations')
+        .select('id, member_a, member_b')
+        .eq('id', conversationId)
+        .single();
+
+      if (!conv) {
+        return NextResponse.json({ error: 'Conversation not found' }, { status: 404 });
+      }
+      if (conv.member_a !== userId && conv.member_b !== userId) {
+        return NextResponse.json({ error: 'Not a participant' }, { status: 403 });
+      }
+
+      // Messages cascade-delete via FK
+      const { error } = await supabase.from('conversations').delete().eq('id', conversationId);
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+      return NextResponse.json({ success: true });
+    }
+
+    return NextResponse.json({ error: 'Missing conversationId or messageId' }, { status: 400 });
+  } catch {
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+  }
+}
+
 /** Mark messages as read in a conversation, or mark all notifications read */
 export async function PATCH(request: Request) {
   const authResult = await authenticateMobileRequest(request);
