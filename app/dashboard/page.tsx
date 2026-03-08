@@ -70,12 +70,7 @@ export default function DashboardHome() {
 
       <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-6 relative z-[1]">
 
-        {/* Welcome Greeting */}
-        <div className="animate-slideUp">
-          <h2 className="headline-font text-xl sm:text-2xl" style={{ color: '#2a2f1e' }}>
-            {new Date().getHours() < 12 ? 'Good morning' : new Date().getHours() < 17 ? 'Good afternoon' : 'Good evening'}, {currentUser?.name.split(' ')[0]}
-          </h2>
-        </div>
+        {/* Greeting removed — takes up space unnecessarily */}
 
         {/* Announcements */}
         {activeAnnouncements.map(a => (
