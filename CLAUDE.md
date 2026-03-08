@@ -172,6 +172,23 @@ The three platforms are:
 - `npm run build` then `npm start` — standard Next.js production server
 - No vercel.json, no @vercel packages, no edge runtime
 
+## #21: DASHBOARD MUTATIONS GO THROUGH API — NOT DIRECT SUPABASE
+**All Dashboard (store.tsx) write operations MUST go through `/api/mobile/*` or `/api/dashboard/*` API routes.**
+- API routes use the admin Supabase client (bypasses RLS) — no more silent failures from missing policies
+- One codepath for both Dashboard and Mobile PWA = bugs fixed once, not twice
+- Use the `apiCall()` helper in store.tsx for authenticated API calls
+- `db.ts` fetch functions (SELECT) are OK to call directly — only mutations need routing
+- `db.createNotification()` is OK — notifications has permissive INSERT policy
+- If an API endpoint doesn't support the operation you need, extend the endpoint (don't bypass with direct Supabase)
+
+## #22: TESTS FOR MAJOR FEATURE CHANGES
+**Every major feature change or new feature MUST include at least one test.**
+- Bug fixes to core features (booking, messaging, partners) → add a regression test
+- New user-facing feature → add at least one happy-path E2E test in `tests/`
+- API route changes → add or update a unit test in `unit-tests/`
+- Suggest tests proactively — don't wait to be asked
+- If you can't write the test (e.g. no Playwright browsers in Cowork), note it in MEMORY.md as pending
+
 ## PROJECT OVERVIEW
 - **Mono Tennis Club** — Next.js 14 + TypeScript (strict mode) + Tailwind CSS monorepo
 - **Deployment**: Railway (standard Node.js server) — NOT Vercel, NOT serverless
