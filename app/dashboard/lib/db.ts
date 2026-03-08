@@ -222,6 +222,22 @@ export async function fetchConversations(userId: string, limit = 20): Promise<Co
 
   if (!data) return [];
 
+  // Collect all other-member IDs so we can batch-check for admins
+  const otherMemberIds = data.map(c => c.member_a === userId ? c.member_b : c.member_a);
+  const uniqueIds = Array.from(new Set(otherMemberIds));
+
+  // Batch fetch roles — admins display as "Mono Tennis Club"
+  const adminIds = new Set<string>();
+  if (uniqueIds.length > 0) {
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id, role')
+      .in('id', uniqueIds);
+    if (profiles) {
+      profiles.forEach(p => { if (p.role === 'admin') adminIds.add(p.id); });
+    }
+  }
+
   return data.map(c => {
     const otherMemberId = c.member_a === userId ? c.member_b : c.member_a;
     const messages: Message[] = (c.messages || []).map((m: Record<string, unknown>) => ({
@@ -236,12 +252,18 @@ export async function fetchConversations(userId: string, limit = 20): Promise<Co
     }));
     const unread = messages.filter(m => m.toId === userId && !m.read).length;
 
+    // Admins always display as "Mono Tennis Club" regardless of profile name
+    let memberName = messages.length > 0
+      ? (messages[0].fromId === userId ? messages[0].to : messages[0].from)
+      : '';
+    if (adminIds.has(otherMemberId)) {
+      memberName = 'Mono Tennis Club';
+    }
+
     return {
       id: c.id,
       memberId: otherMemberId,
-      memberName: messages.length > 0
-        ? (messages[0].fromId === userId ? messages[0].to : messages[0].from)
-        : '',
+      memberName,
       lastMessage: c.last_message || '',
       lastTimestamp: c.last_timestamp || '',
       unread,
