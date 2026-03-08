@@ -664,11 +664,22 @@ Closed ALL notification asymmetries. Every action fires symmetric bell + push + 
 
 ---
 
+## Session 2026-03-08 evening (Cowork)
+### Changes Made
+- **Settings scroll bug fixed**: `#screen-settings` had `overflow: hidden` → changed to `overflow-y: auto` + `padding-bottom: 100px` so notification toggles, gate code, and interclub team are reachable
+- **Login "no password" text made prominent**: Enlarged from 11px muted to 13px semibold with olive-tinted background and bold "no password needed" callout. Added matching note on login screen too.
+- **Event attendee count fix (API)**: `spotsTaken` now derived from actual `event_attendees` rows (not stale `events.spots_taken` column). Fixed in both mobile API (`app/api/mobile/events/route.ts`) and dashboard (`app/dashboard/lib/db.ts`).
+- **Menu drawer scroll fix**: Changed `.menu-drawer` from `overflow: hidden` to `overflow: visible`, increased `.menu-scroll-container` bottom padding from 40px to 100px so Logout and My Team are reachable.
+- **Verified**: Messages work on mobile PWA (conversations show for logged-in user). Admin panel shows in hamburger menu when logged in as admin. Each user only sees their own conversations (API filters by userId). Dark mode, RSVP, notifications, book court, schedule, events all working.
+
+### Known Issues (Not Fixed Yet)
+- **Calendar date tap**: Tapping a date with event dot only highlights it, doesn't show event details below. May be by design.
+- **Login screen click-through**: On mobile viewport, clicks on Google login button can pass through to home elements behind the overlay. Z-index/pointer-events issue.
+
 ## TODO / REMINDERS
-- **Deploy to Railway** — all pending changes (welcome guard, admin name override, booking cancel fix, cross-platform migration, sidebar fix, events calendar, login mockup)
+- **Deploy to Railway** — all pending changes (welcome guard, admin name override, booking cancel fix, cross-platform migration, sidebar fix, events calendar, login mockup, settings scroll fix, login text, attendee count fix, drawer fix)
 - **Delete orphaned Alex RSVP** — `DELETE FROM event_attendees WHERE user_name = 'Alex';` on production Supabase
 - **Junior Summer Camp dates**: User is waiting on real dates from Mark Taylor. When received, update the `junior-summer-camp` event across: `supabase/seed.sql`, `app/dashboard/lib/data.ts`, `public/mobile-app/js/events.js`, and run UPDATE SQL on live Supabase. Also update date/time in `app/(landing)/layout.tsx` JSON-LD if camp is featured there.
-- **Finish visual verification**: Settings, Book Lessons, Admin Panel still need checking (session expired during previous verification)
 
 ## Decisions Made
 - Double-booking prevention: DB-level partial unique index on `(court_id, date, time) WHERE status = 'confirmed'`

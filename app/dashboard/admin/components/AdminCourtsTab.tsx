@@ -246,12 +246,13 @@ export default function AdminCourtsTab({
               style={{ borderColor: '#e0dcd3', color: '#2a2f1e', background: '#faf8f3' }}
             >
               <option value="">Select reason...</option>
-              <option value="maintenance">Maintenance</option>
-              <option value="event">Club Event</option>
-              <option value="weather">Weather</option>
-              <option value="tournament">Tournament</option>
-              <option value="coaching">Coaching Session</option>
-              <option value="other">Other</option>
+              <option value="Maintenance">Maintenance</option>
+              <option value="Club Event">Club Event</option>
+              <option value="Weather">Weather</option>
+              <option value="Tournament">Tournament</option>
+              <option value="Coaching Session">Coaching Session</option>
+              <option value="Private Event">Private Event</option>
+              <option value="Other">Other</option>
             </select>
           </div>
 
