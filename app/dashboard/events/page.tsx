@@ -37,7 +37,13 @@ export default function EventsPage() {
     return t;
   };
   const filtered = events
-    .filter(e => filter === 'all' || normalizeType(e.type) === filter)
+    .filter(e => {
+      // Type filter
+      if (filter !== 'all' && normalizeType(e.type) !== filter) return false;
+      // Month filter — only show events for the displayed calendar month
+      const d = new Date(e.date + 'T00:00:00');
+      return d.getFullYear() === calendarDate.getFullYear() && d.getMonth() === calendarDate.getMonth();
+    })
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   // Events for calendar view filtered by selected day
