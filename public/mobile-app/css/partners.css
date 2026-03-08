@@ -75,6 +75,10 @@
   gap: 14px;
 }
 
+.partner-cards-container {
+  padding-top: 8px;
+}
+
 /* ============================================
    PARTNER CARDS — consolidated from navigation.css, events-screen.css, neumorphic.css
 ============================================ */

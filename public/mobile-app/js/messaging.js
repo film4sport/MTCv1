@@ -110,21 +110,119 @@
 
       var unreadDot = hasUnread ? '<span class="message-unread"></span>' : '';
 
-      html += '<div class="message-item stagger-item' + (hasUnread ? ' has-unread' : '') + '" onclick="openConversation(\'' + sanitizeHTML(memberId) + '\')">' +
-        avatarHtml +
-        '<div class="message-content">' +
-          '<div class="message-header">' +
-            '<div class="message-name">' + sanitizeHTML(name) + '</div>' +
-            '<div class="message-time">' + sanitizeHTML(time) + '</div>' +
+      html += '<div class="swipe-container" data-member-id="' + sanitizeHTML(memberId) + '">' +
+        '<div class="swipe-delete-bg"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> Delete</div>' +
+        '<div class="message-item swipe-content stagger-item' + (hasUnread ? ' has-unread' : '') + '" onclick="openConversation(\'' + sanitizeHTML(memberId) + '\')">' +
+          avatarHtml +
+          '<div class="message-content">' +
+            '<div class="message-header">' +
+              '<div class="message-name">' + sanitizeHTML(name) + '</div>' +
+              '<div class="message-time">' + sanitizeHTML(time) + '</div>' +
+            '</div>' +
+            '<div class="message-preview">' + sanitizeHTML(preview) + '</div>' +
           '</div>' +
-          '<div class="message-preview">' + sanitizeHTML(preview) + '</div>' +
+          unreadDot +
         '</div>' +
-        unreadDot +
       '</div>';
     });
 
     container.innerHTML = html;
+    initSwipeToDelete(container);
   };
+
+  // ============================================
+  // SWIPE TO DELETE — conversation list
+  // ============================================
+  function initSwipeToDelete(container) {
+    var swipeThreshold = 80; // px to trigger delete action
+    var deleteThreshold = 140; // px to auto-delete
+    container.querySelectorAll('.swipe-container').forEach(function(el) {
+      var content = el.querySelector('.swipe-content');
+      if (!content) return;
+      var startX = 0, currentX = 0, isDragging = false;
+
+      content.addEventListener('touchstart', function(e) {
+        startX = e.touches[0].clientX;
+        currentX = 0;
+        isDragging = false;
+        content.style.transition = 'none';
+      }, { passive: true });
+
+      content.addEventListener('touchmove', function(e) {
+        var dx = e.touches[0].clientX - startX;
+        if (dx > 0) dx = 0; // only swipe left
+        currentX = dx;
+        if (Math.abs(dx) > 10) isDragging = true;
+        content.style.transform = 'translateX(' + dx + 'px)';
+        // Show red bg intensity
+        var bg = el.querySelector('.swipe-delete-bg');
+        if (bg) bg.style.opacity = Math.min(1, Math.abs(dx) / swipeThreshold);
+      }, { passive: true });
+
+      content.addEventListener('touchend', function() {
+        content.style.transition = 'transform 0.25s ease';
+        if (isDragging) {
+          // Prevent the onclick from firing
+          content.style.pointerEvents = 'none';
+          setTimeout(function() { content.style.pointerEvents = ''; }, 300);
+        }
+        if (Math.abs(currentX) >= deleteThreshold) {
+          // Auto-delete: slide off screen
+          content.style.transform = 'translateX(-100%)';
+          setTimeout(function() {
+            var memberId = el.getAttribute('data-member-id');
+            deleteConversation(memberId, el);
+          }, 250);
+        } else if (Math.abs(currentX) >= swipeThreshold) {
+          // Show delete button — stay swiped
+          content.style.transform = 'translateX(-' + swipeThreshold + 'px)';
+          // Tap the red area to delete
+          var bg = el.querySelector('.swipe-delete-bg');
+          if (bg) {
+            bg.onclick = function() {
+              content.style.transform = 'translateX(-100%)';
+              content.style.transition = 'transform 0.2s ease';
+              setTimeout(function() {
+                var memberId = el.getAttribute('data-member-id');
+                deleteConversation(memberId, el);
+              }, 200);
+            };
+          }
+        } else {
+          // Snap back
+          content.style.transform = 'translateX(0)';
+        }
+      });
+    });
+  }
+
+  function deleteConversation(memberId, el) {
+    // Remove from local conversations
+    delete conversations[memberId];
+    MTC.storage.set('mtc-conversations', conversations);
+    // Remove from conversationMetaMap
+    delete conversationMetaMap[memberId];
+    // Animate out
+    if (el) {
+      el.style.height = el.offsetHeight + 'px';
+      el.style.overflow = 'hidden';
+      el.style.transition = 'height 0.2s ease, opacity 0.2s ease';
+      setTimeout(function() {
+        el.style.height = '0';
+        el.style.opacity = '0';
+        setTimeout(function() { el.remove(); }, 200);
+      }, 10);
+    }
+    showToast('Conversation deleted');
+    // Check if list is now empty
+    setTimeout(function() {
+      var remaining = document.querySelectorAll('#conversationsList .swipe-container');
+      if (remaining.length === 0) {
+        var emptyState = document.getElementById('noConversations');
+        if (emptyState) emptyState.style.display = 'block';
+      }
+    }, 250);
+  }
 
   function filterConversations(query) {
     const items = document.querySelectorAll('#conversationsList .message-item');
