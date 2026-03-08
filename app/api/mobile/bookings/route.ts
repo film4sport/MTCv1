@@ -550,24 +550,48 @@ export async function DELETE(request: Request) {
 /**
  * PATCH /api/mobile/bookings — Confirm participation in a booking
  *
- * Body: { bookingId }
+ * Body: { bookingId }                         — self-confirm (mobile)
+ * Body: { bookingId, participantId, via }     — confirm another participant (dashboard)
+ *
+ * When participantId is provided, the caller must be the booking owner or an admin.
  */
 export async function PATCH(request: Request) {
   const authResult = await authenticateMobileRequest(request);
   if (authResult instanceof NextResponse) return authResult;
 
   try {
-    const { bookingId } = await request.json();
+    const body = await request.json();
+    const { bookingId, participantId, via } = body;
     if (!bookingId) {
       return NextResponse.json({ error: 'Missing bookingId' }, { status: 400 });
     }
 
     const supabase = getAdminClient();
+
+    // If confirming someone else, verify caller is booking owner or admin
+    const targetId = participantId || authResult.id;
+    const confirmedVia = via || 'mobile';
+
+    if (participantId && participantId !== authResult.id) {
+      const { data: booking } = await supabase
+        .from('bookings')
+        .select('user_id')
+        .eq('id', bookingId)
+        .single();
+
+      const isOwner = booking?.user_id === authResult.id;
+      const isAdmin = authResult.role === 'admin';
+
+      if (!isOwner && !isAdmin) {
+        return NextResponse.json({ error: 'Only the booking owner or an admin can confirm other participants' }, { status: 403 });
+      }
+    }
+
     const { error } = await supabase
       .from('booking_participants')
-      .update({ confirmed_at: new Date().toISOString(), confirmed_via: 'mobile' })
+      .update({ confirmed_at: new Date().toISOString(), confirmed_via: confirmedVia })
       .eq('booking_id', bookingId)
-      .eq('participant_id', authResult.id);
+      .eq('participant_id', targetId);
 
     if (error) {
       return NextResponse.json({ error: 'Failed to confirm' }, { status: 500 });

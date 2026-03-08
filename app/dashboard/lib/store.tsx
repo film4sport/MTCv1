@@ -932,10 +932,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
         ),
       };
     }));
-    // TODO: Extend bookings PATCH API to support confirming other participants (currently only self-confirm)
-    db.confirmParticipant(bookingId, participantId, 'dashboard').catch((err) => {
-      reportError(err, 'Supabase');
+    apiCall('/api/mobile/bookings', {
+      method: 'PATCH',
+      body: JSON.stringify({ bookingId, participantId, via: 'dashboard' }),
+    }).catch((err) => {
+      reportError(err, 'API');
       showToast('Failed to confirm participant', 'error');
+      // Rollback optimistic update
+      setBookings(prev => prev.map(b => {
+        if (b.id !== bookingId) return b;
+        return {
+          ...b,
+          participants: b.participants?.map(p =>
+            p.id === participantId ? { ...p, confirmedAt: null, confirmedVia: null } : p
+          ),
+        };
+      }));
     });
   }, []);
 
