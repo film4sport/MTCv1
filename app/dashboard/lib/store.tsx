@@ -1289,29 +1289,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const removed = conversations.find(c => c.memberId === memberId);
     setConversations(prev => prev.filter(c => c.memberId !== memberId));
 
+    if (!removed?.id) {
+      showToast('Failed to delete conversation', 'error');
+      if (removed) setConversations(prev => [...prev, removed]);
+      return;
+    }
+
     // Delete via API route (uses admin client, bypasses RLS)
-    Promise.resolve(
-      supabase
-        .from('conversations')
-        .select('id')
-        .or(`and(member_a.eq.${currentUser.id},member_b.eq.${memberId}),and(member_a.eq.${memberId},member_b.eq.${currentUser.id})`)
-        .single()
-    ).then(({ data: conv, error: lookupErr }) => {
-      if (lookupErr || !conv) throw new Error('Conversation not found');
-      return supabase.auth.getSession().then(({ data: { session } }) => {
-        if (!session?.access_token) throw new Error('No session');
-        return fetch('/api/mobile/conversations', {
-          method: 'DELETE',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
-          body: JSON.stringify({ conversationId: conv.id }),
-        });
-      });
-    }).then((res) => {
-      if (res && !res.ok) throw new Error('Delete failed');
-    }).catch((e: unknown) => {
+    apiCall('/api/mobile/conversations', 'DELETE', { conversationId: removed.id }).catch((e: unknown) => {
       // Rollback: re-add conversation
       if (removed) setConversations(prev => [...prev, removed]);
-      reportError(e, 'Supabase');
+      reportError(e, 'API');
       showToast('Failed to delete conversation', 'error');
     });
   }, [currentUser, conversations]);
@@ -1328,21 +1316,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }));
 
     // Delete via API route (uses admin client, bypasses RLS)
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session?.access_token) throw new Error('No session');
-      return fetch('/api/mobile/conversations', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
-        body: JSON.stringify({ messageId }),
-      });
-    }).then((res) => {
-      if (!res.ok) throw new Error('Delete failed');
-    }).catch((e: unknown) => {
+    apiCall('/api/mobile/conversations', 'DELETE', { messageId }).catch((e: unknown) => {
       // Rollback: restore original conversation
       if (snapshot) {
         setConversations(prev => prev.map(c => c.memberId === memberId ? snapshot : c));
       }
-      reportError(e, 'Supabase');
+      reportError(e, 'API');
       showToast('Failed to delete message', 'error');
     });
   }, [currentUser, conversations]);

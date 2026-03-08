@@ -116,6 +116,7 @@ export interface Message {
 }
 
 export interface Conversation {
+  id?: number;
   memberId: string;
   memberName: string;
   lastMessage: string;
