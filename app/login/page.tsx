@@ -543,7 +543,7 @@ function LoginContent() {
                       </div>
                       {/* Bookings + Events — glass cards */}
                       <div style={{ display: 'flex', gap: 6, flex: 1, minHeight: 0 }}>
-                        <div style={{ flex: 1, background: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', borderRadius: 12, padding: '7px 8px', border: '1px solid rgba(255,255,255,0.5)', boxShadow: '0 4px 24px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04)' }}>
+                        <div style={{ flex: 1, background: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', borderRadius: 12, padding: '7px 8px', border: '1px solid rgba(255,255,255,0.5)', boxShadow: '0 4px 24px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04)', overflow: 'hidden' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
                             <span style={{ fontSize: 7, fontWeight: 700, color: '#2a2f1e' }}>Upcoming Bookings</span>
                             <span style={{ fontSize: 5, color: '#6b7a3d' }}>View All</span>
@@ -565,7 +565,7 @@ function LoginContent() {
                             </div>
                           ))}
                         </div>
-                        <div style={{ flex: 1, background: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', borderRadius: 12, padding: '7px 8px', border: '1px solid rgba(255,255,255,0.5)', boxShadow: '0 4px 24px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04)' }}>
+                        <div style={{ flex: 1, background: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', borderRadius: 12, padding: '7px 8px', border: '1px solid rgba(255,255,255,0.5)', boxShadow: '0 4px 24px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04)', overflow: 'hidden' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
                             <span style={{ fontSize: 7, fontWeight: 700, color: '#2a2f1e' }}>Upcoming Events</span>
                             <span style={{ fontSize: 5, color: '#6b7a3d' }}>View All</span>
