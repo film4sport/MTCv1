@@ -605,19 +605,7 @@
     timeEl.textContent=hour>12?(hour-12)+':00 PM':(hour===12?'12:00 PM':hour+':00 AM');
     courtEl.textContent='Court '+selectedSlot.court;
 
-    const feeEl=document.getElementById('summaryFee');
-    const paymentBox=document.getElementById('paymentInfoBox');
-    const paymentTitle=document.getElementById('paymentInfoTitle');
-    const paymentText=document.getElementById('paymentInfoText');
-    const paymentNote=document.getElementById('paymentInfoNote');
-
-    if (feeEl) feeEl.textContent='FREE';
-    if (paymentBox){
-      paymentBox.className='booking-modal-payment-info covered';
-      paymentTitle.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="20 6 9 17 4 12"></polyline></svg> Free for Members';
-      paymentText.innerHTML='Court bookings are <strong>free</strong> for all MTC members.';
-      paymentNote.textContent='Cancel 24+ hrs in advance to free up the slot for others.';
-    }
+    // Guest fee note is static in HTML — no dynamic updates needed
     openBookingModal();
   }
 

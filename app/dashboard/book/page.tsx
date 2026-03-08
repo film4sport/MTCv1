@@ -94,7 +94,7 @@ export default function BookCourtPage() {
     const mine = isSlotMine(bookings, courtId, date, time, currentUser?.id);
     if (mine) {
       if (!canCancel(date, time)) {
-        showToast(`Cannot cancel within ${FEES.cancelWindowHours} hours of booking`, 'error');
+        showToast('Cannot cancel a booking that has already started', 'error');
         return;
       }
       setCancelTarget({ id: mine.id, courtName, date, time });
