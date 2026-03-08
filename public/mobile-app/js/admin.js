@@ -431,10 +431,16 @@
 
     var today = new Date().toISOString().split('T')[0];
     var html = '<div class="modal-overlay active" id="blockCourtModal" onclick="closeBlockCourtModal()">' +
-      '<div class="modal" onclick="event.stopPropagation()" style="max-width:400px">' +
+      '<div class="modal modal-scrollable-tall" onclick="event.stopPropagation()" style="max-width:400px">' +
         '<div class="modal-title">BLOCK COURT TIME</div>' +
+        '<label class="admin-label">Court</label>' +
         '<select id="blockCourtSelect" class="admin-select"><option value="">All Courts</option>' + courts + '</select>' +
-        '<input type="date" id="blockDate" class="admin-input" value="' + today + '" min="' + today + '">' +
+        '<label class="admin-label">Date</label>' +
+        '<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">' +
+          '<input type="date" id="blockDate" class="admin-input" style="flex:1;margin-bottom:0" value="' + today + '" min="' + today + '">' +
+          '<span style="color:var(--text-muted);font-size:13px">to</span>' +
+          '<input type="date" id="blockDateEnd" class="admin-input" style="flex:1;margin-bottom:0" value="" min="' + today + '" placeholder="Same day">' +
+        '</div>' +
         '<label style="display:flex;align-items:center;gap:8px;margin-bottom:8px;color:var(--text-primary);font-size:14px">' +
           '<input type="checkbox" id="blockFullDay" onchange="toggleBlockTimeInputs()" checked> Full Day' +
         '</label>' +
@@ -442,6 +448,7 @@
           '<select id="blockTimeStart" class="admin-select" style="flex:1">' + timeOptions + '</select>' +
           '<select id="blockTimeEnd" class="admin-select" style="flex:1"><option value="">End Time</option>' + timeOptions + '</select>' +
         '</div>' +
+        '<label class="admin-label">Reason</label>' +
         '<select id="blockReason" class="admin-select">' +
           '<option value="Maintenance">Maintenance</option><option value="Tournament">Tournament</option>' +
           '<option value="Weather">Weather</option><option value="Private Event">Private Event</option>' +
@@ -467,42 +474,58 @@
   };
 
   window.createCourtBlock = function() {
-    var date = document.getElementById('blockDate');
+    var dateEl = document.getElementById('blockDate');
+    var dateEndEl = document.getElementById('blockDateEnd');
     var reason = document.getElementById('blockReason');
     var courtSelect = document.getElementById('blockCourtSelect');
     var fullDay = document.getElementById('blockFullDay');
     var notes = document.getElementById('blockNotes');
-    if (!date || !date.value) { showToast('Select a date'); return; }
+    if (!dateEl || !dateEl.value) { showToast('Select a date'); return; }
 
-    var body = {
-      court_id: courtSelect && courtSelect.value ? parseInt(courtSelect.value) : null,
-      block_date: date.value,
-      time_start: null,
-      time_end: null,
-      reason: reason ? reason.value : 'Maintenance',
-      notes: notes ? notes.value.trim() : ''
-    };
+    var startDate = dateEl.value;
+    var endDate = (dateEndEl && dateEndEl.value) ? dateEndEl.value : startDate;
+    if (endDate < startDate) { showToast('End date must be on or after start date'); return; }
+
+    var timeStart = null, timeEnd = null;
     if (fullDay && !fullDay.checked) {
-      var start = document.getElementById('blockTimeStart');
-      var end = document.getElementById('blockTimeEnd');
-      if (!start || !start.value || !end || !end.value) { showToast('Select start and end times'); return; }
-      body.time_start = start.value;
-      body.time_end = end.value;
+      var startSel = document.getElementById('blockTimeStart');
+      var endSel = document.getElementById('blockTimeEnd');
+      if (!startSel || !startSel.value || !endSel || !endSel.value) { showToast('Select start and end times'); return; }
+      timeStart = startSel.value;
+      timeEnd = endSel.value;
+    }
+
+    // Generate array of dates from startDate to endDate
+    var dates = [];
+    var cur = new Date(startDate + 'T12:00:00');
+    var end = new Date(endDate + 'T12:00:00');
+    while (cur <= end) {
+      dates.push(cur.toISOString().split('T')[0]);
+      cur.setDate(cur.getDate() + 1);
     }
 
     var token = MTC.state.currentUser && MTC.state.currentUser.accessToken;
-    fetch('/api/mobile/court-blocks', {
-      method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    }).then(function(r) {
-      if (!r.ok) throw new Error('Failed');
-      return r.json();
-    }).then(function(data) {
-      if (data.block) _adminBlocks.push(data.block);
+    var courtId = courtSelect && courtSelect.value ? parseInt(courtSelect.value) : null;
+    var reasonVal = reason ? reason.value : 'Maintenance';
+    var notesVal = notes ? notes.value.trim() : '';
+
+    // Create blocks for each date (in parallel)
+    var promises = dates.map(function(d) {
+      return fetch('/api/mobile/court-blocks', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ court_id: courtId, block_date: d, time_start: timeStart, time_end: timeEnd, reason: reasonVal, notes: notesVal })
+      }).then(function(r) { return r.ok ? r.json() : null; });
+    });
+
+    Promise.all(promises).then(function(results) {
+      results.forEach(function(data) {
+        if (data && data.block) _adminBlocks.push(data.block);
+      });
       renderBlocksList();
       closeBlockCourtModal();
-      showToast('Court blocked');
+      var count = results.filter(function(r) { return r && r.block; }).length;
+      showToast(count > 1 ? count + ' days blocked' : 'Court blocked');
     }).catch(function() { showToast('Failed to create block'); });
   };
 
