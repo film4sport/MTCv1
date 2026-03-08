@@ -20,7 +20,7 @@
     if ('serviceWorker' in navigator) {
       caches.keys().then(function(names) {
         names.forEach(function(name) {
-          if (name.indexOf('mtc-court-cc0bf142') === -1) {
+          if (name.indexOf('mtc-court-c112bb44') === -1) {
             caches.delete(name);
             console.log('[CacheBust] Deleted old cache:', name);
           }
@@ -990,6 +990,12 @@
               </button>
             </div>
             <div class="booking-participants-list" id="participantsList"></div>
+          </div>
+
+          <!-- Cancellation Reminder -->
+          <div class="booking-cancel-reminder">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            <span>Cancel 24+ hrs in advance to free up the slot for others.</span>
           </div>
 
           <div class="booking-modal-actions">
