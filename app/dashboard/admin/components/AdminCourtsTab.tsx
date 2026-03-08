@@ -57,6 +57,14 @@ export default function AdminCourtsTab({
 
   const today = new Date().toISOString().split('T')[0];
 
+  /** Convert 24h "08:00" → 12h "8:00 AM" for API/DB */
+  const to12h = (t: string): string => {
+    const [h, m] = t.split(':').map(Number);
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
+    return `${h12}:${String(m).padStart(2, '0')} ${ampm}`;
+  };
+
   const handleCreate = async () => {
     if (!dateStart) { showToast('Start date is required', 'error'); return; }
     if (!reason.trim()) { showToast('Reason is required', 'error'); return; }
@@ -75,35 +83,43 @@ export default function AdminCourtsTab({
         cur.setDate(cur.getDate() + 1);
       }
 
-      // Create a block for each date
-      const promises = dates.map(d =>
-        supabase.from('court_blocks').insert({
-          court_id: courtId === 'all' ? null : parseInt(courtId),
-          block_date: d,
-          time_start: fullDay ? null : timeStart,
-          time_end: fullDay ? null : timeEnd,
-          reason: reason.trim(),
-          notes: notes.trim() || null,
-        })
-      );
+      // Use the API route (triggers auto-cancel + user notifications)
+      const session = await supabase.auth.getSession();
+      const token = session?.data?.session?.access_token;
+      let totalCancelled = 0;
 
-      const results = await Promise.all(promises);
-      const failed = results.filter(r => r.error);
+      const promises = dates.map(async (d) => {
+        const res = await fetch('/api/mobile/court-blocks', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...(token ? { 'Authorization': `Bearer ${token}` } : {}) },
+          body: JSON.stringify({
+            court_id: courtId === 'all' ? null : parseInt(courtId),
+            block_date: d,
+            time_start: fullDay ? null : to12h(timeStart),
+            time_end: fullDay ? null : to12h(timeEnd),
+            reason: reason.trim(),
+            notes: notes.trim() || null,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed');
+        if (data.cancelledBookings) totalCancelled += data.cancelledBookings;
+        return data;
+      });
 
-      if (failed.length > 0) {
-        showToast(`Failed to create ${failed.length} of ${dates.length} blocks`, 'error');
-      } else {
-        showToast(`Created ${dates.length} court block${dates.length > 1 ? 's' : ''}`);
-        // Reset form
-        setCourtId('all');
-        setDateStart('');
-        setDateEnd('');
-        setFullDay(true);
-        setTimeStart('08:00');
-        setTimeEnd('17:00');
-        setReason('');
-        setNotes('');
-      }
+      await Promise.all(promises);
+      let msg = `Created ${dates.length} court block${dates.length > 1 ? 's' : ''}`;
+      if (totalCancelled > 0) msg += ` — ${totalCancelled} booking${totalCancelled > 1 ? 's' : ''} auto-cancelled & users notified`;
+      showToast(msg);
+      // Reset form
+      setCourtId('all');
+      setDateStart('');
+      setDateEnd('');
+      setFullDay(true);
+      setTimeStart('08:00');
+      setTimeEnd('17:00');
+      setReason('');
+      setNotes('');
       await loadBlocks();
     } catch {
       showToast('Failed to create court block', 'error');
@@ -123,6 +139,30 @@ export default function AdminCourtsTab({
       showToast('Failed to delete court block', 'error');
     } finally {
       setDeleting(null);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (blocks.length === 0) return;
+    if (!confirm(`Delete all ${blocks.length} court blocks?`)) return;
+    setLoading(true);
+    try {
+      const ids = blocks.map(b => b.id);
+      const session = await supabase.auth.getSession();
+      const token = session?.data?.session?.access_token;
+      const res = await fetch('/api/mobile/court-blocks', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json', ...(token ? { 'Authorization': `Bearer ${token}` } : {}) },
+        body: JSON.stringify({ ids }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed');
+      showToast(`Deleted ${data.deleted} court block${data.deleted !== 1 ? 's' : ''}`);
+      await loadBlocks();
+    } catch {
+      showToast('Failed to delete court blocks', 'error');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -319,9 +359,21 @@ export default function AdminCourtsTab({
 
       {/* Existing Blocks List */}
       <div>
-        <h3 className="text-sm font-semibold mb-3" style={{ color: '#2a2f1e' }}>
-          Upcoming Blocks {blocks.length > 0 && <span className="font-normal" style={{ color: '#6b7266' }}>({blocks.length})</span>}
-        </h3>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-semibold" style={{ color: '#2a2f1e' }}>
+            Upcoming Blocks {blocks.length > 0 && <span className="font-normal" style={{ color: '#6b7266' }}>({blocks.length})</span>}
+          </h3>
+          {blocks.length > 1 && (
+            <button
+              onClick={handleBulkDelete}
+              disabled={loading}
+              className="text-xs px-3 py-1 rounded-lg font-medium transition-colors hover:bg-red-50"
+              style={{ color: '#dc2626' }}
+            >
+              Clear All
+            </button>
+          )}
+        </div>
         {blocks.length === 0 ? (
           <p className="text-sm py-4 text-center" style={{ color: '#999' }}>No upcoming court blocks</p>
         ) : (

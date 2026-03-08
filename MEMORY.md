@@ -259,6 +259,27 @@ Closed ALL notification asymmetries. Every action fires symmetric bell + push + 
 - Run welcome message migration on production Supabase
 - Deploy to Railway to verify admin panels and bug fixes in production
 
+### Cowork Session (2026-03-08b) — Messaging 10/10 Overhaul
+
+**Sent messages showing as unread (mobile PWA):** Messages sent on mobile had no `read` field, causing single-check (unread) display. Fixed: now sets `read: true` + `timestamp` on optimistic message push. Dashboard already did this correctly.
+
+**Conversation list sort (mobile PWA):** Was sorting only by "has messages" (empty last). Now sorts by actual last message timestamp, most recent first.
+
+**Server-side message + conversation deletion (NEW — cross-platform):**
+- Added `DELETE` handler to `/api/mobile/conversations/route.ts`: supports `{ conversationId }` (whole conversation, FK cascades messages) and `{ messageId }` (single message, sender-only). Auth checks: must be participant for conversation, must be sender for message.
+- **Mobile PWA**: Swipe-to-delete now calls DELETE API (was local-only — conversations came back on re-login). Long-press on sent message shows delete confirmation modal with haptic feedback, deletes server-side.
+- **Dashboard**: Hover trash icon on conversation list items. Hover trash icon on sent messages in chat. Both call new `deleteConversation()`/`deleteMessage()` store functions with optimistic UI + rollback on failure.
+
+**Dashboard member search (New Message):** Clicking "New" now shows all members immediately (was: required typing a query first). Members with existing conversations show "existing" badge. Removed filter that hid members with existing conversations.
+
+**Files changed:**
+- `public/mobile-app/js/messaging.js` (558→643 lines) — read field, timestamp, sort, server delete, long-press delete
+- `app/api/mobile/conversations/route.ts` (247→322 lines) — DELETE handler
+- `app/dashboard/messages/page.tsx` (395→416 lines) — delete buttons, member list always visible
+- `app/dashboard/lib/store.tsx` — `deleteConversation()`, `deleteMessage()` functions + context exports
+
+**Build:** 29 JS → 329KB, 23 CSS → 213KB, cache: mtc-court-c25e9387. TypeScript clean.
+
 ---
 
 ### Environment Limitations (IMPORTANT)
