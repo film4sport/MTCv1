@@ -31,7 +31,10 @@ Before reporting any feature change as "done", verify:
 - **API route consolidation (Mar 8)**: All Dashboard mutations in store.tsx now route through API endpoints instead of direct Supabase. Added `apiCall()` helper. Eliminates RLS policy gaps. Remaining `db.*` calls: fetches (SELECT, safe), `createNotification` (INSERT policy exists), `confirmParticipant` (needs API enhancement — TODO), programs CRUD (admin-only, safe).
 - **Booking calendar restyled (Mar 8)**: Today = electric blue (was volt), selected = liquid glass with blur+border+lift (was flat black). Cancellation reminder added to booking modal.
 - **CLAUDE.md rules added**: #21 (Dashboard mutations through API), #22 (tests for major changes). Cross-platform checklist added to MEMORY.md.
-- **Pending tests**: Need E2E tests for booking flow, messaging flow, partner matching flow. Noted in CLAUDE.md #22.
+- **Shared constants centralized (Mar 8)**: Created `app/lib/shared-constants.ts` — single source of truth for LIMITS, BOOKING_RULES, all VALID_* enums, SETTINGS_KEY_WHITELIST, and isomorphic validation functions (isValidUUID, isValidEnum, isValidDate, isInRange, isValidEmail, isValidTime, sanitizeInput). `auth-helper.ts` now re-exports from shared-constants (no more duplicate definitions). Zero TypeScript errors.
+- **Integration tests added (Mar 8)**: 8 new test files (203 tests): `api-bookings.test.js`, `api-conversations.test.js`, `api-partners.test.js`, `api-events.test.js`, `api-notifications.test.js`, `api-members.test.js`, `shared-constants.test.js`, `cross-platform-sync.test.js`. Tests verify: route structure, validation rules match shared constants, cross-platform consistency (Dashboard→API, Mobile→API), auth enforcement, Supabase Realtime subscription parity, notification layer completeness, no duplicate definitions in auth-helper. Total: 432 tests passing across 22 files.
+- **Coaching panel access (Mar 8)**: Sidebar now shows "Book Lessons" link for both coaches AND admins (was coach-only). Sidebar.tsx line 145: `(isCoach || isAdmin)`.
+- **Coaching program bookings**: `db.createBooking` is still used in the coaching program creation flow (line 966 of store.tsx). This is coach-only (coaching panel), not admin. Coaches create program bookings (type: 'program') via the coaching panel.
 
 ---
 
