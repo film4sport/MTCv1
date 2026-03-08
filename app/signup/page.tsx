@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useEffect, useRef, useState } from 'react';
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 
 import { signUp, signInWithGoogle, completeOAuthProfile } from '../dashboard/lib/auth';
@@ -22,7 +22,10 @@ function SignupContent() {
   const ackRef = useRef<HTMLDivElement>(null);
 
   const [signupStep, setSignupStep] = useState(1);
+  const [stepDirection, setStepDirection] = useState<'forward' | 'back'>('forward');
+  const [animKey, setAnimKey] = useState(0);
   const [signupData, setSignupData] = useState({ membershipType: '', name: '', email: '', skillLevel: '', residence: 'mono' });
+  const [popCard, setPopCard] = useState<string | null>(null);
   const [waiverAccepted, setWaiverAccepted] = useState(false);
   const [waiverScrolled, setWaiverScrolled] = useState(false);
   const [ackScrolled, setAckScrolled] = useState(false);
@@ -35,6 +38,13 @@ function SignupContent() {
   const [oauthUserId, setOauthUserId] = useState<string | null>(null);
   const isFamily = signupData.membershipType === 'family';
   const totalSteps = 7;
+
+  // Navigate with direction tracking for animations
+  const goToStep = useCallback((target: number) => {
+    setStepDirection(target > signupStep ? 'forward' : 'back');
+    setAnimKey(k => k + 1);
+    setSignupStep(target);
+  }, [signupStep]);
 
   // Load existing profile from localStorage
   useEffect(() => {
@@ -105,6 +115,19 @@ function SignupContent() {
     if (signupStep >= 6) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+  }, [signupStep]);
+
+  // Auto-scroll inputs into view on mobile when keyboard opens (step 2)
+  useEffect(() => {
+    if (signupStep !== 2) return;
+    const handleFocus = (e: FocusEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT') {
+        setTimeout(() => target.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300);
+      }
+    };
+    document.addEventListener('focusin', handleFocus);
+    return () => document.removeEventListener('focusin', handleFocus);
   }, [signupStep]);
 
   const handleWaiverScroll = () => {
@@ -264,6 +287,16 @@ function SignupContent() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#edeae3' }}>
+      {/* Signup UX animation styles */}
+      <style>{`
+        @keyframes stepSlideInRight { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes stepSlideInLeft { from { opacity: 0; transform: translateX(-30px); } to { opacity: 1; transform: translateX(0); } }
+        .step-enter-forward { animation: stepSlideInRight 0.35s ease-out both; }
+        .step-enter-back { animation: stepSlideInLeft 0.35s ease-out both; }
+        .signup-input:focus { box-shadow: 0 0 0 3px rgba(107, 122, 61, 0.18) !important; border-color: #6b7a3d !important; }
+        .card-select-pop { animation: cardPop 0.3s ease-out; }
+        @keyframes cardPop { 0% { transform: scale(1); } 40% { transform: scale(1.04); } 100% { transform: scale(1); } }
+      `}</style>
       {/* Header */}
       <header className="px-6 py-4 flex items-center justify-between" style={{ backgroundColor: '#1a1f12' }}>
         <a href="/" className="flex items-center gap-2 text-sm font-medium" style={{ color: '#e8e4d9' }}>
@@ -307,12 +340,13 @@ function SignupContent() {
               {visibleSteps.map((step, idx) => (
                 <div key={step} className="flex items-center gap-2">
                   <div
-                    className={`${visibleSteps.length > 6 ? 'w-6 h-6 sm:w-7 sm:h-7' : 'w-7 h-7 sm:w-8 sm:h-8'} rounded-full flex items-center justify-center text-xs font-bold transition-colors`}
-                    style={
-                      signupStep >= step
+                    className={`${visibleSteps.length > 6 ? 'w-6 h-6 sm:w-7 sm:h-7' : 'w-7 h-7 sm:w-8 sm:h-8'} rounded-full flex items-center justify-center text-xs font-bold`}
+                    style={{
+                      transition: 'background-color 0.4s ease, color 0.4s ease',
+                      ...(signupStep >= step
                         ? { backgroundColor: '#6b7a3d', color: '#fff' }
-                        : { backgroundColor: '#faf8f3', color: '#999', border: '1px solid #e0dcd3' }
-                    }
+                        : { backgroundColor: '#faf8f3', color: '#999', border: '1px solid #e0dcd3' }),
+                    }}
                   >
                     {signupStep > step ? (
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -323,7 +357,7 @@ function SignupContent() {
                     )}
                   </div>
                   {idx < visibleSteps.length - 1 && (
-                    <div className={`${visibleSteps.length > 6 ? 'w-4 sm:w-6' : 'w-6 sm:w-8'} h-0.5`} style={{ backgroundColor: signupStep > step ? '#6b7a3d' : '#e0dcd3' }} />
+                    <div className={`${visibleSteps.length > 6 ? 'w-4 sm:w-6' : 'w-6 sm:w-8'} h-0.5`} style={{ backgroundColor: signupStep > step ? '#6b7a3d' : '#e0dcd3', transition: 'background-color 0.4s ease' }} />
                   )}
                 </div>
               ))}
@@ -333,15 +367,16 @@ function SignupContent() {
 
         {/* Step 1: Select Membership Type */}
         {signupStep === 1 && (
-          <div>
+          <div key={`step1-${animKey}`} className={stepDirection === 'forward' ? 'step-enter-forward' : 'step-enter-back'}>
             <h3 className="headline-font text-2xl mb-2 text-center" style={{ color: '#2a2f1e' }}>Select Membership Type</h3>
             <p className="text-sm text-center mb-8" style={{ color: '#6b7266' }}>Choose the membership that best fits your needs.</p>
             <div className="grid gap-4">
               {signupMembershipTypes.map((m) => (
                 <button
                   key={m.key}
-                  onClick={() => { setSignupData({ ...signupData, membershipType: m.key }); setSignupStep(2); }}
-                  className="flex items-center justify-between p-5 rounded-xl text-left transition-all hover:scale-[1.02]"
+                  onClick={() => { setSignupData({ ...signupData, membershipType: m.key }); setPopCard(`mem-${m.key}`); setTimeout(() => goToStep(2), 200); }}
+                  className={`flex items-center justify-between p-5 rounded-xl text-left transition-all hover:scale-[1.02]${popCard === `mem-${m.key}` ? ' card-select-pop' : ''}`}
+                  onAnimationEnd={() => setPopCard(null)}
                   style={{ background: '#faf8f3', border: '1px solid #e0dcd3' }}
                 >
                   <div>
@@ -360,7 +395,7 @@ function SignupContent() {
 
         {/* Step 2: Your Information */}
         {signupStep === 2 && (
-          <div>
+          <div key={`step2-${animKey}`} className={stepDirection === 'forward' ? 'step-enter-forward' : 'step-enter-back'}>
             <h3 className="headline-font text-2xl mb-2 text-center" style={{ color: '#2a2f1e' }}>Your Information</h3>
             <p className="text-sm text-center mb-8" style={{ color: '#6b7266' }}>Tell us a bit about yourself.</p>
 
@@ -405,7 +440,7 @@ function SignupContent() {
                   maxLength={80}
                   placeholder="Enter your full name"
                   aria-required="true"
-                  className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors"
+                  className="signup-input w-full px-4 py-3 rounded-xl text-sm outline-none transition-all"
                   style={{ backgroundColor: '#faf8f3', border: '1px solid #e0dcd3', color: '#2a2f1e' }}
                 />
               </div>
@@ -419,7 +454,7 @@ function SignupContent() {
                   maxLength={100}
                   placeholder="your@email.com"
                   aria-required="true"
-                  className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors"
+                  className="signup-input w-full px-4 py-3 rounded-xl text-sm outline-none transition-all"
                   style={{ backgroundColor: '#faf8f3', border: '1px solid #e0dcd3', color: '#2a2f1e' }}
                 />
               </div>
@@ -432,7 +467,7 @@ function SignupContent() {
             )}
             <div className="flex items-center gap-4 mt-8">
               <button
-                onClick={() => { setSignupError(''); setSignupStep(1); }}
+                onClick={() => { setSignupError(''); goToStep(1); }}
                 className="px-6 py-3 rounded-full text-sm font-medium transition-all"
                 style={{ backgroundColor: '#faf8f3', color: '#6b7266', border: '1px solid #e0dcd3' }}
               >
@@ -446,7 +481,7 @@ function SignupContent() {
                     return;
                   }
                   setSignupError('');
-                  setSignupStep(isFamily ? 3 : 4);
+                  goToStep(isFamily ? 3 : 4);
                 }}
                 disabled={!signupData.name.trim() || !signupData.email.trim()}
                 className="flex-1 px-6 py-3 rounded-full text-sm font-semibold transition-all"
@@ -464,7 +499,7 @@ function SignupContent() {
 
         {/* Step 3: Family Members (family only) */}
         {signupStep === 3 && isFamily && (
-          <div>
+          <div key={`step3-${animKey}`} className={stepDirection === 'forward' ? 'step-enter-forward' : 'step-enter-back'}>
             <h3 className="headline-font text-2xl mb-2 text-center" style={{ color: '#2a2f1e' }}>Family Members</h3>
             <p className="text-sm text-center mb-8" style={{ color: '#6b7266' }}>
               Add up to 1 additional adult and 4 juniors (under 18). You can also add members later from your dashboard.
@@ -560,14 +595,14 @@ function SignupContent() {
 
             <div className="flex items-center gap-4 mt-8">
               <button
-                onClick={() => setSignupStep(2)}
+                onClick={() => goToStep(2)}
                 className="px-6 py-3 rounded-full text-sm font-medium transition-all"
                 style={{ backgroundColor: '#faf8f3', color: '#6b7266', border: '1px solid #e0dcd3' }}
               >
                 Back
               </button>
               <button
-                onClick={() => setSignupStep(4)}
+                onClick={() => goToStep(4)}
                 className="flex-1 px-6 py-3 rounded-full text-sm font-semibold transition-all"
                 style={{ backgroundColor: '#6b7a3d', color: '#fff' }}
               >
@@ -579,7 +614,7 @@ function SignupContent() {
 
         {/* Step 4: Skill Level */}
         {signupStep === 4 && (
-          <div>
+          <div key={`step4-${animKey}`} className={stepDirection === 'forward' ? 'step-enter-forward' : 'step-enter-back'}>
             <h3 className="headline-font text-2xl mb-2 text-center" style={{ color: '#2a2f1e' }}>Your Skill Level</h3>
             <p className="text-sm text-center mb-8" style={{ color: '#6b7266' }}>This helps us match you with the right partners and programs.</p>
             <div className="grid grid-cols-2 gap-4">
@@ -591,8 +626,9 @@ function SignupContent() {
               ].map((level) => (
                 <button
                   key={level.value}
-                  onClick={() => setSignupData({ ...signupData, skillLevel: level.value })}
-                  className="p-5 rounded-xl text-left transition-all hover:scale-[1.02]"
+                  onClick={() => { setSignupData({ ...signupData, skillLevel: level.value }); setPopCard(`skill-${level.value}`); }}
+                  className={`p-5 rounded-xl text-left transition-all hover:scale-[1.02]${popCard === `skill-${level.value}` ? ' card-select-pop' : ''}`}
+                  onAnimationEnd={() => setPopCard(null)}
                   style={{
                     backgroundColor: signupData.skillLevel === level.value ? level.bg : '#faf8f3',
                     border: `2px solid ${signupData.skillLevel === level.value ? level.color : '#e0dcd3'}`,
@@ -618,8 +654,9 @@ function SignupContent() {
                 ].map((opt) => (
                   <button
                     key={opt.value}
-                    onClick={() => setSignupData({ ...signupData, residence: opt.value })}
-                    className="flex-1 p-4 rounded-xl text-center transition-all hover:scale-[1.02]"
+                    onClick={() => { setSignupData({ ...signupData, residence: opt.value }); setPopCard(`res-${opt.value}`); }}
+                    className={`flex-1 p-4 rounded-xl text-center transition-all hover:scale-[1.02]${popCard === `res-${opt.value}` ? ' card-select-pop' : ''}`}
+                    onAnimationEnd={() => setPopCard(null)}
                     style={{
                       backgroundColor: signupData.residence === opt.value ? 'rgba(107, 122, 61, 0.08)' : '#faf8f3',
                       border: `2px solid ${signupData.residence === opt.value ? '#6b7a3d' : '#e0dcd3'}`,
@@ -634,14 +671,14 @@ function SignupContent() {
 
             <div className="flex items-center gap-4 mt-8">
               <button
-                onClick={() => { setSignupStep(isFamily ? 3 : 2); }}
+                onClick={() => { goToStep(isFamily ? 3 : 2); }}
                 className="px-6 py-3 rounded-full text-sm font-medium transition-all"
                 style={{ backgroundColor: '#faf8f3', color: '#6b7266', border: '1px solid #e0dcd3' }}
               >
                 Back
               </button>
               <button
-                onClick={() => setSignupStep(5)}
+                onClick={() => goToStep(5)}
                 disabled={!signupData.skillLevel}
                 className="flex-1 px-6 py-3 rounded-full text-sm font-semibold transition-all"
                 style={
@@ -658,7 +695,7 @@ function SignupContent() {
 
         {/* Step 5: Waiver */}
         {signupStep === 5 && (
-          <div>
+          <div key={`step5-${animKey}`} className={stepDirection === 'forward' ? 'step-enter-forward' : 'step-enter-back'}>
             <h3 className="headline-font text-2xl mb-2 text-center" style={{ color: '#2a2f1e' }}>Waiver & Acknowledgement</h3>
             <p className="text-sm text-center mb-8" style={{ color: '#6b7266' }}>Please read both documents carefully. Scroll to the bottom of each to proceed.</p>
 
@@ -716,14 +753,14 @@ function SignupContent() {
 
             <div className="flex items-center gap-4 mt-6">
               <button
-                onClick={() => { setSignupError(''); setSignupStep(4); }}
+                onClick={() => { setSignupError(''); goToStep(4); }}
                 className="px-6 py-3 rounded-full text-sm font-medium transition-all"
                 style={{ backgroundColor: '#faf8f3', color: '#6b7266', border: '1px solid #e0dcd3' }}
               >
                 Back
               </button>
               <button
-                onClick={() => { setWaiverAccepted(true); setSignupStep(6); }}
+                onClick={() => { setWaiverAccepted(true); goToStep(6); }}
                 disabled={!waiverScrolled || !ackScrolled}
                 className="flex-1 px-6 py-3 rounded-full text-sm font-semibold transition-all"
                 style={
@@ -740,7 +777,7 @@ function SignupContent() {
 
         {/* Step 6: E-Transfer Payment */}
         {signupStep === 6 && (
-          <div>
+          <div key={`step6-${animKey}`} className={stepDirection === 'forward' ? 'step-enter-forward' : 'step-enter-back'}>
             <h3 className="headline-font text-2xl mb-2 text-center" style={{ color: '#2a2f1e' }}>Payment via E-Transfer</h3>
             <p className="text-sm text-center mb-8" style={{ color: '#6b7266' }}>Send an Interac e-transfer to complete your registration.</p>
 
@@ -783,7 +820,7 @@ function SignupContent() {
             )}
             <div className="flex items-center gap-4 mt-8">
               <button
-                onClick={() => { setSignupError(''); setSignupStep(5); }}
+                onClick={() => { setSignupError(''); goToStep(5); }}
                 className="px-6 py-3 rounded-full text-sm font-medium transition-all"
                 style={{ backgroundColor: '#faf8f3', color: '#6b7266', border: '1px solid #e0dcd3' }}
               >
@@ -803,7 +840,7 @@ function SignupContent() {
 
         {/* Final Step: Confirmation */}
         {signupStep === totalSteps && (
-          <div className="text-center">
+          <div key={`step7-${animKey}`} className={`text-center ${stepDirection === 'forward' ? 'step-enter-forward' : 'step-enter-back'}`}>
             {emailConfirmPending ? (
               <>
                 <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: 'rgba(59, 175, 218, 0.15)' }}>
