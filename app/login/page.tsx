@@ -91,13 +91,13 @@ function LoginContent() {
                 boxShadow: '0 40px 80px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.08)',
               }}>
                 <div style={{
-                  width: '100%', height: '100%', background: '#f5f2eb', borderRadius: 36,
+                  width: '100%', height: '100%', background: '#0d1208', borderRadius: 36,
                   overflow: 'hidden', position: 'relative', display: 'flex', flexDirection: 'column' as const,
                 }}>
                   {/* Dynamic Island */}
                   <div style={{
                     position: 'absolute', top: 8, left: '50%', transform: 'translateX(-50%)',
-                    width: 100, height: 26, background: '#1a1f12', borderRadius: 20, zIndex: 10,
+                    width: 100, height: 26, background: '#000', borderRadius: 20, zIndex: 10,
                   }} />
 
                   {/* Content */}
@@ -108,43 +108,43 @@ function LoginContent() {
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                     padding: '40px 14px 6px',
                   }}>
-                    <div style={{ display: 'flex', gap: 2, background: '#e8e4d9', borderRadius: 20, padding: 3, boxShadow: '3px 3px 6px rgba(0,0,0,0.08), -3px -3px 6px rgba(255,255,255,0.9)' }}>
-                      <div style={{ width: 24, height: 24, background: '#fff', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-                        <svg width="11" height="11" fill="none" stroke="#f59e0b" viewBox="0 0 24 24" strokeWidth="2.5"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+                    <div style={{ display: 'flex', gap: 2, background: 'rgba(255,255,255,0.08)', borderRadius: 20, padding: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.3)' }}>
+                      <div style={{ width: 24, height: 24, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.06)' }}>
+                        <svg width="11" height="11" fill="none" stroke="#777" viewBox="0 0 24 24" strokeWidth="2.5"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
                       </div>
-                      <div style={{ width: 24, height: 24, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(88,68,150,0.12)' }}>
-                        <svg width="11" height="11" fill="none" stroke="#6b5ba7" viewBox="0 0 24 24" strokeWidth="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+                      <div style={{ width: 24, height: 24, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(107,91,167,0.25)', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }}>
+                        <svg width="11" height="11" fill="none" stroke="#a78bfa" viewBox="0 0 24 24" strokeWidth="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
                       </div>
                     </div>
                     <div style={{ textAlign: 'center' }}>
-                      <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 20, letterSpacing: 3, color: '#1a1f12' }}>MTC COURT</div>
+                      <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 20, letterSpacing: 3, color: '#e8e4d9' }}>MTC COURT</div>
                       <div style={{ height: 2.5, borderRadius: 2, background: 'linear-gradient(90deg, #c8ff00, #00d4ff, #ff5a5f, #c8ff00)', backgroundSize: '200% 100%', animation: 'accentShimmer 8s linear infinite' }} />
                     </div>
                     <div style={{ display: 'flex', gap: 6 }}>
-                      <div style={{ width: 30, height: 30, background: '#e8e4d9', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '3px 3px 6px rgba(0,0,0,0.08), -3px -3px 6px rgba(255,255,255,0.9)', position: 'relative' }}>
-                        <svg width="14" height="14" fill="none" stroke="#555" viewBox="0 0 24 24" strokeWidth="1.8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-                        <span style={{ position: 'absolute', top: -1, right: -1, width: 14, height: 14, background: '#ff5a5f', borderRadius: '50%', fontSize: 8, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, border: '2px solid #f5f2eb' }}>3</span>
+                      <div style={{ width: 30, height: 30, background: 'rgba(255,255,255,0.08)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.3)', position: 'relative' }}>
+                        <svg width="14" height="14" fill="none" stroke="#aaa" viewBox="0 0 24 24" strokeWidth="1.8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                        <span style={{ position: 'absolute', top: -1, right: -1, width: 14, height: 14, background: '#ff5a5f', borderRadius: '50%', fontSize: 8, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, border: '2px solid #0d1208' }}>3</span>
                       </div>
-                      <div style={{ width: 30, height: 30, background: '#e8e4d9', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '3px 3px 6px rgba(0,0,0,0.08), -3px -3px 6px rgba(255,255,255,0.9)' }}>
-                        <svg width="14" height="14" fill="none" stroke="#555" viewBox="0 0 24 24" strokeWidth="1.8"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+                      <div style={{ width: 30, height: 30, background: 'rgba(255,255,255,0.08)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.3)' }}>
+                        <svg width="14" height="14" fill="none" stroke="#aaa" viewBox="0 0 24 24" strokeWidth="1.8"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
                       </div>
                     </div>
                   </div>
 
                   {/* Quick Actions */}
                   <div style={{ padding: '6px 14px 10px' }}>
-                    <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 15, letterSpacing: 1.5, color: '#1a1f12', marginBottom: 8 }}>QUICK ACTIONS</p>
+                    <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 15, letterSpacing: 1.5, color: '#e8e4d9', marginBottom: 8 }}>QUICK ACTIONS</p>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
                       {[
                         { bg: '#c8ff00', label: 'BOOK COURT', fg: '#0a0a0a', icon: <><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></> },
                         { bg: '#ff5a5f', label: 'FIND PARTNER', fg: '#fff', icon: <><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></> },
                         { bg: '#00d4ff', label: 'CLUB EVENTS', fg: '#0a0a0a', icon: <><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></> },
-                        { bg: '#1a1f12', label: 'MY SCHEDULE', fg: '#e8e4d9', icon: <><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></> },
+                        { bg: 'rgba(255,255,255,0.08)', label: 'MY SCHEDULE', fg: '#e8e4d9', icon: <><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></> },
                       ].map(a => (
                         <div key={a.label} style={{
                           background: a.bg, borderRadius: 18, height: 85, padding: '12px 14px',
                           display: 'flex', flexDirection: 'column' as const, justifyContent: 'space-between',
-                          boxShadow: `0 4px 12px ${a.bg === '#1a1f12' ? 'rgba(0,0,0,0.3)' : a.bg + '44'}`,
+                          boxShadow: `0 4px 12px ${a.bg.startsWith('rgba') ? 'rgba(0,0,0,0.3)' : a.bg + '44'}`,
                         }}>
                           <svg width="24" height="24" fill="none" stroke={a.fg} viewBox="0 0 24 24" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{a.icon}</svg>
                           <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 12, letterSpacing: 1, color: a.fg }}>{a.label}</p>
@@ -156,8 +156,8 @@ function LoginContent() {
                   {/* Upcoming Events */}
                   <div style={{ padding: '4px 14px 10px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                      <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 15, letterSpacing: 1.5, color: '#1a1f12' }}>UPCOMING EVENTS</p>
-                      <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 10, color: '#1a1f12', letterSpacing: 1 }}>SEE ALL →</span>
+                      <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 15, letterSpacing: 1.5, color: '#e8e4d9' }}>UPCOMING EVENTS</p>
+                      <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 10, color: '#c8ff00', letterSpacing: 1 }}>SEE ALL →</span>
                     </div>
                     {[
                       { month: 'MAR', day: '14', title: 'Euchre Tournament', details: 'Saturday Evening • Clubhouse' },
@@ -165,18 +165,18 @@ function LoginContent() {
                       { month: 'MAY', day: '12', title: "Men's Round Robin", details: '9:00 AM • All Courts' },
                     ].map((evt) => (
                       <div key={evt.day + evt.month} style={{
-                        background: '#fff', borderRadius: 16, padding: '10px 12px', marginBottom: 8,
+                        background: 'rgba(255,255,255,0.06)', borderRadius: 16, padding: '10px 12px', marginBottom: 8,
                         display: 'flex', alignItems: 'center', gap: 10,
-                        boxShadow: '4px 4px 10px rgba(0,0,0,0.06), -2px -2px 8px rgba(255,255,255,0.8)',
-                        border: '1px solid rgba(0,0,0,0.04)',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                        border: '1px solid rgba(255,255,255,0.06)',
                       }}>
                         <div style={{ background: '#c8ff00', borderRadius: 12, padding: '6px 10px', textAlign: 'center', minWidth: 42 }}>
                           <div style={{ fontSize: 8, color: '#0a0a0a', fontWeight: 700, letterSpacing: 0.5 }}>{evt.month}</div>
                           <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 18, color: '#0a0a0a', lineHeight: 1 }}>{evt.day}</div>
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <p style={{ fontSize: 11, fontWeight: 700, color: '#1a1f12' }}>{evt.title}</p>
-                          <p style={{ fontSize: 9, color: '#888', marginTop: 2 }}>{evt.details}</p>
+                          <p style={{ fontSize: 11, fontWeight: 700, color: '#e8e4d9' }}>{evt.title}</p>
+                          <p style={{ fontSize: 9, color: '#777', marginTop: 2 }}>{evt.details}</p>
                         </div>
                         <span style={{ background: '#c8ff00', borderRadius: 8, padding: '5px 12px', fontSize: 10, fontWeight: 700, color: '#0a0a0a', flexShrink: 0 }}>RSVP</span>
                       </div>
@@ -185,20 +185,20 @@ function LoginContent() {
 
                   {/* Calendar section peeking behind nav */}
                   <div style={{ padding: '4px 14px 60px' }}>
-                    <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 15, letterSpacing: 1.5, color: '#1a1f12', marginBottom: 6 }}>CLUB CALENDAR</p>
+                    <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 15, letterSpacing: 1.5, color: '#e8e4d9', marginBottom: 6 }}>CLUB CALENDAR</p>
                     <div style={{
-                      background: 'rgba(255,255,255,0.45)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
-                      borderRadius: 16, padding: '12px', border: '1px solid rgba(255,255,255,0.6)',
-                      boxShadow: '0 4px 16px rgba(0,0,0,0.04)',
+                      background: 'rgba(255,255,255,0.04)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
+                      borderRadius: 16, padding: '12px', border: '1px solid rgba(255,255,255,0.08)',
+                      boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
                     }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 13, color: '#1a1f12' }}>March 2026</span>
+                        <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 13, color: '#e8e4d9' }}>March 2026</span>
                         <div style={{ display: 'flex', gap: 5 }}>
-                          <div style={{ width: 20, height: 20, background: 'rgba(255,255,255,0.5)', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <svg width="9" height="9" fill="none" stroke="#555" viewBox="0 0 24 24" strokeWidth="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+                          <div style={{ width: 20, height: 20, background: 'rgba(255,255,255,0.08)', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <svg width="9" height="9" fill="none" stroke="#aaa" viewBox="0 0 24 24" strokeWidth="2.5"><polyline points="15 18 9 12 15 6"/></svg>
                           </div>
-                          <div style={{ width: 20, height: 20, background: 'rgba(255,255,255,0.5)', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <svg width="9" height="9" fill="none" stroke="#555" viewBox="0 0 24 24" strokeWidth="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                          <div style={{ width: 20, height: 20, background: 'rgba(255,255,255,0.08)', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <svg width="9" height="9" fill="none" stroke="#aaa" viewBox="0 0 24 24" strokeWidth="2.5"><polyline points="9 18 15 12 9 6"/></svg>
                           </div>
                         </div>
                       </div>
@@ -207,20 +207,20 @@ function LoginContent() {
 
                   </div>{/* end content */}
 
-                  {/* Bottom Nav — liquid glass */}
+                  {/* Bottom Nav — dark glass */}
                   <div style={{
                     position: 'absolute', bottom: 10, left: 10, right: 10, zIndex: 20,
                     display: 'flex', justifyContent: 'space-around', alignItems: 'center', padding: '8px 6px',
-                    background: 'rgba(255,255,255,0.6)',
+                    background: 'rgba(13,18,8,0.75)',
                     backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
-                    border: '1px solid rgba(255,255,255,0.5)', borderRadius: 24,
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+                    border: '1px solid rgba(255,255,255,0.08)', borderRadius: 24,
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
                   }}>
                     {[
                       { label: 'HOME', active: true, d: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
                       { label: 'SCHEDULE', d: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
                     ].map(n => (
-                      <div key={n.label} style={{ display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: 2, color: n.active ? '#1a1f12' : '#999', fontSize: 7, fontWeight: 600, letterSpacing: 0.3 }}>
+                      <div key={n.label} style={{ display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: 2, color: n.active ? '#e8e4d9' : '#666', fontSize: 7, fontWeight: 600, letterSpacing: 0.3 }}>
                         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d={n.d}/></svg>
                         {n.label}
                       </div>
@@ -228,15 +228,15 @@ function LoginContent() {
                     <div style={{
                       width: 44, height: 44, marginTop: -28, background: '#c8ff00', borderRadius: '50%',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      boxShadow: '0 4px 20px rgba(200,255,0,0.5)',
+                      boxShadow: '0 4px 20px rgba(200,255,0,0.4)',
                     }}>
-                      <svg width="18" height="18" fill="none" stroke="#1a1f12" viewBox="0 0 24 24" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                      <svg width="18" height="18" fill="none" stroke="#0d1208" viewBox="0 0 24 24" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                     </div>
                     {[
                       { label: 'PARTNERS', d: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z' },
                       { label: 'MESSAGES', d: 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z' },
                     ].map(n => (
-                      <div key={n.label} style={{ display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: 2, color: '#999', fontSize: 7, fontWeight: 600, letterSpacing: 0.3 }}>
+                      <div key={n.label} style={{ display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: 2, color: '#666', fontSize: 7, fontWeight: 600, letterSpacing: 0.3 }}>
                         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d={n.d}/></svg>
                         {n.label}
                       </div>

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { authenticateMobileRequest, getAdminClient, sanitizeInput, isRateLimited } from '../auth-helper';
+import { authenticateMobileRequest, getAdminClient, sanitizeInput, isRateLimited, isValidUUID, isValidEnum, isInRange, validationError, VALID_FAMILY_TYPES, VALID_SKILL_LEVELS } from '../auth-helper';
 
 /** Fetch family + family members for the authenticated user */
 export async function GET(request: Request) {
@@ -88,6 +88,13 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Missing familyId or name' }, { status: 400 });
       }
 
+      if (!isValidUUID(familyId)) return validationError('familyId', 'invalid UUID format');
+      if (type && !isValidEnum(type, VALID_FAMILY_TYPES)) return validationError('type', 'must be adult or junior');
+      if (birthYear !== undefined && birthYear !== null) {
+        const yr = parseInt(birthYear);
+        if (!isInRange(yr, 1930, new Date().getFullYear())) return validationError('birthYear', 'must be reasonable year');
+      }
+
       // Verify the user owns this family
       const { data: family } = await supabase
         .from('families')
@@ -98,13 +105,17 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Not authorized' }, { status: 403 });
       }
 
+      // Limit family size (max 10 members)
+      const { count } = await supabase.from('family_members').select('id', { count: 'exact', head: true }).eq('family_id', familyId);
+      if ((count ?? 0) >= 10) return NextResponse.json({ error: 'Maximum 10 family members' }, { status: 400 });
+
       const { data: member, error } = await supabase
         .from('family_members')
         .insert({
           family_id: familyId,
           name: sanitizeInput(name, 100),
           type: type === 'junior' ? 'junior' : 'adult',
-          birth_year: birthYear || null,
+          birth_year: birthYear ? parseInt(birthYear) : null,
         })
         .select('*')
         .single();
@@ -136,9 +147,16 @@ export async function PATCH(request: Request) {
 
   try {
     const { memberId, name, skillLevel, skillLevelSet, avatar } = await request.json();
-    if (!memberId) return NextResponse.json({ error: 'Missing memberId' }, { status: 400 });
+    if (!memberId || !isValidUUID(memberId)) return validationError('memberId', 'required, valid UUID');
+    if (skillLevel !== undefined && !isValidEnum(skillLevel, VALID_SKILL_LEVELS)) return validationError('skillLevel', 'invalid skill level');
 
     const supabase = getAdminClient();
+
+    // Verify ownership: member must belong to user's family
+    const { data: fm } = await supabase.from('family_members').select('family_id').eq('id', memberId).single();
+    if (!fm) return NextResponse.json({ error: 'Family member not found' }, { status: 404 });
+    const { data: family } = await supabase.from('families').select('primary_user_id').eq('id', fm.family_id).single();
+    if (!family || family.primary_user_id !== authResult.id) return NextResponse.json({ error: 'Not authorized' }, { status: 403 });
 
     // Build update object — only include provided fields
     const updates: Record<string, unknown> = {};
@@ -167,9 +185,16 @@ export async function DELETE(request: Request) {
 
   try {
     const { memberId } = await request.json();
-    if (!memberId) return NextResponse.json({ error: 'Missing memberId' }, { status: 400 });
+    if (!memberId || !isValidUUID(memberId)) return validationError('memberId', 'required, valid UUID');
 
     const supabase = getAdminClient();
+
+    // Verify ownership: member must belong to user's family
+    const { data: fm } = await supabase.from('family_members').select('family_id').eq('id', memberId).single();
+    if (!fm) return NextResponse.json({ error: 'Family member not found' }, { status: 404 });
+    const { data: family } = await supabase.from('families').select('primary_user_id').eq('id', fm.family_id).single();
+    if (!family || family.primary_user_id !== authResult.id) return NextResponse.json({ error: 'Not authorized' }, { status: 403 });
+
     const { error } = await supabase.from('family_members').delete().eq('id', memberId);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { authenticateMobileRequest, getAdminClient, isRateLimited } from '../auth-helper';
+import { authenticateMobileRequest, getAdminClient, isRateLimited, sanitizeInput, SETTINGS_KEY_WHITELIST } from '../auth-helper';
 
 /** Get club settings */
 export async function GET(request: Request) {
@@ -105,10 +105,20 @@ export async function POST(request: Request) {
 
     const supabase = getAdminClient();
 
-    // Upsert each setting
-    for (const [key, value] of Object.entries(settings)) {
+    // Validate keys against whitelist (allow event_tasks_ prefix for task management)
+    const allowedKeys = Object.keys(settings).filter(k =>
+      (SETTINGS_KEY_WHITELIST as readonly string[]).includes(k) || k.startsWith('event_tasks_')
+    );
+    const rejectedKeys = Object.keys(settings).filter(k => !allowedKeys.includes(k));
+    if (rejectedKeys.length > 0) {
+      return NextResponse.json({ error: `Invalid setting keys: ${rejectedKeys.join(', ')}` }, { status: 400 });
+    }
+
+    // Upsert each setting (with value length limit)
+    for (const key of allowedKeys) {
+      const value = sanitizeInput(String(settings[key]), 5000);
       const { error } = await supabase.from('club_settings').upsert(
-        { key, value: String(value), updated_at: new Date().toISOString(), updated_by: authResult.id },
+        { key, value, updated_at: new Date().toISOString(), updated_by: authResult.id },
         { onConflict: 'key' }
       );
       if (error) return NextResponse.json({ error: error.message }, { status: 500 });

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { authenticateMobileRequest, getAdminClient, sanitizeInput, isRateLimited } from '../auth-helper';
+import { authenticateMobileRequest, getAdminClient, sanitizeInput, isRateLimited, isValidDate, isValidTime, isInRange, validationError } from '../auth-helper';
 import { sendPushToUser } from '../../lib/push';
 import type { EventUpdate } from '../types';
 
@@ -101,6 +101,12 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
+    if (!isValidDate(date)) return validationError('date', 'must be YYYY-MM-DD format in valid range');
+    if (!isValidTime(time)) return validationError('time', 'must be valid time format (e.g. 9:30 AM)');
+
+    const spots = parseInt(spotsTotal) || 16;
+    if (!isInRange(spots, 1, 500)) return validationError('spotsTotal', 'must be 1–500');
+
     if (isRateLimited(authResult.id)) {
       return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
     }
@@ -118,7 +124,7 @@ export async function PUT(request: Request) {
 
     const { error } = await supabase.from('events').insert({
       id, title: sanitizeInput(title), date, time, location: sanitizeInput(location || 'All Courts'),
-      badge, price: sanitizeInput(price || 'Free', 50), spots_total: parseInt(spotsTotal) || 16,
+      badge, price: sanitizeInput(price || 'Free', 50), spots_total: spots,
       spots_taken: 0, description: sanitizeInput(description || '', 2000), type: dbType,
     });
 

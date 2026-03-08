@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { withAuth } from '../auth-helper';
+import { withAuth, isValidDate, isValidTime, isInRange, isValidEnum, sanitizeInput, validationError, VALID_BLOCK_REASONS } from '../auth-helper';
 import { sendPushToUser } from '../../lib/push';
 
 /** Parse "9:30 AM" or "6:00 PM" → minutes since midnight */
@@ -125,6 +125,13 @@ export const POST = withAuth(async (user, request, supabase) => {
     return NextResponse.json({ error: 'reason is required' }, { status: 400 });
   }
 
+  // Validate inputs
+  if (!isValidDate(block_date)) return validationError('block_date', 'must be YYYY-MM-DD');
+  if (court_id !== null && court_id !== undefined && !isInRange(Number(court_id), 1, 4)) return validationError('court_id', 'must be 1–4');
+  if (!isValidEnum(reason, VALID_BLOCK_REASONS)) return validationError('reason', 'must be one of: ' + VALID_BLOCK_REASONS.join(', '));
+  if (time_start && !isValidTime(time_start)) return validationError('time_start', 'invalid time format');
+  if (time_end && !isValidTime(time_end)) return validationError('time_end', 'invalid time format');
+
   const { data, error } = await supabase
     .from('court_blocks')
     .insert({
@@ -132,8 +139,8 @@ export const POST = withAuth(async (user, request, supabase) => {
       block_date,
       time_start: time_start || null,
       time_end: time_end || null,
-      reason,
-      notes: notes || null,
+      reason: sanitizeInput(reason, 100),
+      notes: notes ? sanitizeInput(notes, 500) : null,
       created_by: user.id,
     })
     .select()

@@ -96,6 +96,66 @@ export function isRateLimited(userId: string, max = RATE_MAX, windowMs = RATE_WI
   return entry.count > max;
 }
 
+// ============================================
+// INPUT VALIDATION UTILITIES
+// ============================================
+
+/** Validate UUID v4 format */
+export function isValidUUID(id: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+}
+
+/** Validate a value is one of the allowed enum values */
+export function isValidEnum<T extends string>(value: string, allowed: readonly T[]): value is T {
+  return (allowed as readonly string[]).includes(value);
+}
+
+/** Validate ISO date format (YYYY-MM-DD) and reasonable range */
+export function isValidDate(dateStr: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return false;
+  const d = new Date(dateStr + 'T12:00:00Z');
+  if (isNaN(d.getTime())) return false;
+  const year = d.getUTCFullYear();
+  return year >= 2020 && year <= 2040;
+}
+
+/** Validate a number is within bounds */
+export function isInRange(num: number, min: number, max: number): boolean {
+  return Number.isFinite(num) && num >= min && num <= max;
+}
+
+/** Validate email format (basic but sufficient) */
+export function isValidEmail(email: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && email.length <= 254;
+}
+
+/** Validate time format (12h: "9:30 AM" or 24h: "09:30") */
+export function isValidTime(time: string): boolean {
+  return /^\d{1,2}:\d{2}\s*(AM|PM)$/i.test(time) || /^\d{2}:\d{2}$/.test(time);
+}
+
+/** Return 400 error with validation message */
+export function validationError(field: string, detail: string) {
+  return NextResponse.json({ error: `Invalid ${field}: ${detail}` }, { status: 400 });
+}
+
+// Allowed enum values (shared constants)
+export const VALID_STATUSES = ['active', 'paused', 'inactive'] as const;
+export const VALID_MEMBERSHIP_TYPES = ['adult', 'family', 'junior'] as const;
+export const VALID_SKILL_LEVELS = ['beginner', 'intermediate', 'advanced', 'competitive'] as const;
+export const VALID_MATCH_TYPES = ['singles', 'doubles', 'any'] as const;
+export const VALID_EVENT_TYPES = ['clinic', 'tournament', 'social', 'roundrobin', 'camp', 'interclub'] as const;
+export const VALID_ANNOUNCEMENT_TYPES = ['info', 'warning', 'urgent'] as const;
+export const VALID_COURT_STATUSES = ['available', 'maintenance'] as const;
+export const VALID_BLOCK_REASONS = ['Maintenance', 'Tournament', 'Weather', 'Private Event', 'Club Event', 'Coaching Session', 'Other'] as const;
+export const VALID_AUDIENCES = ['all', 'interclub_a', 'interclub_b', 'interclub_all'] as const;
+export const VALID_FAMILY_TYPES = ['adult', 'junior'] as const;
+export const VALID_INTERCLUB_TEAMS = ['none', 'a', 'b'] as const;
+export const SETTINGS_KEY_WHITELIST = [
+  'gate_code', 'etransfer_email', 'etransfer_auto_deposit', 'etransfer_message',
+  'club_name', 'club_phone', 'club_email', 'season_start', 'season_end',
+] as const;
+
 /**
  * Route handler wrapper — extracts the repetitive auth + try/catch boilerplate.
  * Usage:
