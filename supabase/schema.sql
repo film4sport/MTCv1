@@ -188,7 +188,8 @@ create policy "conversations_insert_own" on conversations for insert
   with check (member_a = auth.uid() or member_b = auth.uid());
 create policy "conversations_update_own" on conversations for update
   using (member_a = auth.uid() or member_b = auth.uid());
--- No delete policy: conversations persist (soft-delete only if needed)
+create policy "conversations_delete_own" on conversations for delete
+  using (member_a = auth.uid() or member_b = auth.uid());
 
 -- ─── Messages RLS ──────────────────────────────────────
 alter table messages enable row level security;
@@ -198,7 +199,8 @@ create policy "messages_insert_own" on messages for insert
   with check (from_id = auth.uid());
 create policy "messages_update_own" on messages for update
   using (to_id = auth.uid()); -- only recipient can update (mark read)
--- No delete policy: messages persist for audit trail
+create policy "messages_delete_own" on messages for delete
+  using (from_id = auth.uid());
 
 -- ─── Announcements ──────────────────────────────────────
 create table if not exists announcements (

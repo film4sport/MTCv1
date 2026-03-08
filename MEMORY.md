@@ -433,7 +433,71 @@ Closed ALL notification asymmetries. Every action fires symmetric bell + push + 
 - **Unit tests (Vitest) DO work in Cowork** — `npm run test:unit` is safe.
 - **`npm run check`** (tsc + mobile build) works in Cowork.
 
+### Cowork Session (2026-03-08g) — Login Dark Mode Mockup + Server-Side Validation Audit
+
+**Login page phone mockup → dark mode:**
+- Converted phone device mockup to dark mode while keeping tablet in light mode
+- Screen bg: `#f5f2eb` → `#0d1208`, Dynamic Island: `#1a1f12` → `#000`
+- Theme toggle: moon highlighted with purple glow (`#a78bfa`), sun dimmed
+- Header buttons: neumorphic light → dark glass (`rgba(255,255,255,0.08)`)
+- Title/labels: `#1a1f12` → `#e8e4d9`, event cards/calendar/nav → dark glass surfaces
+- Accent colors (volt/coral/cyan) unchanged for pop against dark background
+- File: `app/login/page.tsx`
+
+**Comprehensive server-side validation audit — 8 fixes across 7 files:**
+
+1. **Partners POST** (`partners/route.ts`): Added `sanitizeInput`/`isValidEnum` imports, validate `skillLevel` against `VALID_SKILL_LEVELS`, sanitize `availability` (200 chars) and `message` (500 chars)
+2. **Conversations PATCH** (`conversations/route.ts`): Added participant check — verifies user is `member_a` or `member_b` before allowing mark-read
+3. **Conversations POST** (`conversations/route.ts`): Added self-messaging prevention (`toId === authResult.id` → 400)
+4. **Announcements POST** (`announcements/route.ts`): Added type enum validation using `VALID_ANNOUNCEMENT_TYPES`
+5. **Dashboard bookings POST** (`dashboard/bookings/route.ts`): Removed client-controlled `body.id` — always server-generates booking ID (prevents ID injection)
+6. **Notify-message** (`notify-message/route.ts`): Added UUID regex validation on `recipientId`, sanitized `senderName` and `preview` (strip HTML)
+7. **Lineups POST** (`lineups/route.ts`): Added `isValidDate` check on `matchDate`
+8. **Lineups PATCH** (`lineups/route.ts`): Added `isValidUUID` check on `memberId`
+
+**Routes audited and found clean (no changes needed):**
+- `mobile/bookings/route.ts` (581 lines) — already very thorough
+- `mobile/notifications/route.ts` (71 lines) — simple GET/PATCH, fine
+- `mobile/courts/route.ts` (56 lines) — simple GET, fine
+- `mobile/programs/route.ts` (227 lines) — mostly good
+- `mobile-booking/route.ts` — deprecated stub (410)
+
+**Build:** 29 JS → 357KB, 23 CSS → 225KB, cache: mtc-court-cc0bf142. TypeScript clean.
+
+### Cowork Session (2026-03-08h) — Cross-Platform Messaging/Booking/Partners Bug Audit
+
+**CRITICAL BUG FOUND — Dashboard message deletion silently failing:**
+- Root cause: `conversations` and `messages` tables have RLS enabled but NO delete policies
+- Dashboard `deleteConversation()` and `deleteMessage()` in `store.tsx` used direct Supabase client (subject to RLS)
+- Supabase returns 200 OK but deletes 0 rows → optimistic UI removes item, but it reappears on refresh
+- Mobile PWA was NOT affected (uses API route with admin client that bypasses RLS)
+
+**Fix (dual approach):**
+1. **Rerouted dashboard deletes through API** — `deleteConversation()` and `deleteMessage()` in `store.tsx` now call `/api/mobile/conversations` DELETE endpoint (which uses `getAdminClient()`) instead of direct Supabase. Proper rollback on failure.
+2. **Added RLS delete policies** — Migration `20260308_add_delete_policies.sql` + schema.sql updated:
+   - `conversations_delete_own`: participants (member_a or member_b) can delete
+   - `messages_delete_own`: senders (from_id) can delete their own messages
+
+**Other fixes:**
+- Removed stale `body.id` from dashboard booking POST request (server already ignores it since previous session)
+- Notification badges already present on both login mockups (phone: 3, tablet: 2) — confirmed in code
+
+**Full cross-platform audit results:**
+- **Booking**: Both platforms fully wired. Mobile → API → Supabase (admin). Dashboard → API → Supabase (admin). Conflict detection, court block checking, participant notifications, emails all working on both.
+- **Messaging**: Both platforms fully wired. Send, receive, read receipts, typing indicator, reply-to-quote, search, delete all working. Dashboard delete was the one broken piece (now fixed).
+- **Partners**: Both platforms wired. Mobile: POST/PATCH/DELETE via API. Dashboard: creates via direct Supabase (no RLS on partners table), removes via direct Supabase. Join/match only on mobile (dashboard shows "Message" link instead). All notification flows (bell + push + email) symmetric.
+
+**Files changed:**
+- `app/dashboard/lib/store.tsx` — `deleteConversation()`, `deleteMessage()` rerouted through API; removed `body.id` from booking POST
+- `supabase/schema.sql` — Added delete policies for conversations + messages
+- `supabase/migrations/20260308_add_delete_policies.sql` — New migration
+
+**Build:** TypeScript clean. Mobile PWA: 29 JS → 357KB, 23 CSS → 225KB, cache: mtc-court-cc0bf142.
+
+---
+
 ## TODO / REMINDERS
+- **Run delete policies migration** on production Supabase (`npm run db:push` or run SQL from `20260308_add_delete_policies.sql`)
 - **Junior Summer Camp dates**: User is waiting on real dates from Mark Taylor. When received, update the `junior-summer-camp` event across: `supabase/seed.sql`, `app/dashboard/lib/data.ts`, `public/mobile-app/js/events.js`, and run UPDATE SQL on live Supabase. Also update date/time in `app/(landing)/layout.tsx` JSON-LD if camp is featured there.
 - **Run welcome message migration** on production Supabase (`npm run db:push` or SQL manually)
 - **Deploy to Railway** to verify admin panels and bug fixes in production

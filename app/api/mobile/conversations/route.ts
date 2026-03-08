@@ -126,6 +126,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing toId or text' }, { status: 400 });
     }
     if (!isValidUUID(toId)) return validationError('toId', 'invalid UUID format');
+    if (toId === authResult.id) {
+      return NextResponse.json({ error: 'Cannot message yourself' }, { status: 400 });
+    }
 
     if (isRateLimited(authResult.id)) {
       return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
@@ -307,6 +310,17 @@ export async function PATCH(request: Request) {
 
     const supabase = getAdminClient();
     const userId = authResult.id;
+
+    // Verify user is a participant in this conversation
+    const { data: conv } = await supabase
+      .from('conversations')
+      .select('id')
+      .eq('id', conversationId)
+      .or(`member_a.eq.${userId},member_b.eq.${userId}`)
+      .single();
+    if (!conv) {
+      return NextResponse.json({ error: 'Conversation not found' }, { status: 404 });
+    }
 
     // Mark all messages sent TO this user in this conversation as read
     const { error } = await supabase

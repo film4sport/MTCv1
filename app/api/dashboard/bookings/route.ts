@@ -197,7 +197,7 @@ export async function POST(request: Request) {
     // ── Create booking ────────────────────────────────
     const courtName = COURT_NAMES[courtId] || `Court ${courtId}`;
     const bookerName = userName ? sanitizeInput(userName, 200) : authResult.name || 'Member';
-    const bookingId = body.id || generateId('b');
+    const bookingId = generateId('b'); // Always server-generated — never accept client IDs
 
     const { data: newBooking, error: insertError } = await supabase
       .from('bookings')

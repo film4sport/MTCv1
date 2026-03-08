@@ -683,7 +683,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
         body: JSON.stringify({
-          id: booking.id,
           courtId: booking.courtId,
           date: booking.date,
           time: booking.time,
@@ -1313,18 +1312,25 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const removed = conversations.find(c => c.memberId === memberId);
     setConversations(prev => prev.filter(c => c.memberId !== memberId));
 
-    // Persist to Supabase — find conversation and delete
+    // Delete via API route (uses admin client, bypasses RLS)
     Promise.resolve(
       supabase
         .from('conversations')
         .select('id')
         .or(`and(member_a.eq.${currentUser.id},member_b.eq.${memberId}),and(member_a.eq.${memberId},member_b.eq.${currentUser.id})`)
         .single()
-    ).then(({ data: conv, error: err }) => {
-      if (err || !conv) return;
-      return supabase.from('conversations').delete().eq('id', conv.id);
-    }).then((result) => {
-      if (result?.error) throw result.error;
+    ).then(({ data: conv, error: lookupErr }) => {
+      if (lookupErr || !conv) throw new Error('Conversation not found');
+      return supabase.auth.getSession().then(({ data: { session } }) => {
+        if (!session?.access_token) throw new Error('No session');
+        return fetch('/api/mobile/conversations', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+          body: JSON.stringify({ conversationId: conv.id }),
+        });
+      });
+    }).then((res) => {
+      if (res && !res.ok) throw new Error('Delete failed');
     }).catch((e: unknown) => {
       // Rollback: re-add conversation
       if (removed) setConversations(prev => [...prev, removed]);
@@ -1336,6 +1342,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const deleteMessage = useCallback((memberId: string, messageId: string) => {
     if (!currentUser) return;
     // Optimistic: remove message from state
+    const snapshot = conversations.find(c => c.memberId === memberId);
     setConversations(prev => prev.map(c => {
       if (c.memberId !== memberId) return c;
       const filtered = c.messages.filter(m => m.id !== messageId);
@@ -1343,16 +1350,25 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return { ...c, messages: filtered, lastMessage: last?.text || '', lastTimestamp: last?.timestamp || c.lastTimestamp };
     }));
 
-    // Persist to Supabase
-    Promise.resolve(
-      supabase.from('messages').delete().eq('id', messageId).eq('from_id', currentUser.id)
-    ).then(({ error: err }) => {
-      if (err) throw err;
+    // Delete via API route (uses admin client, bypasses RLS)
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session?.access_token) throw new Error('No session');
+      return fetch('/api/mobile/conversations', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+        body: JSON.stringify({ messageId }),
+      });
+    }).then((res) => {
+      if (!res.ok) throw new Error('Delete failed');
     }).catch((e: unknown) => {
+      // Rollback: restore original conversation
+      if (snapshot) {
+        setConversations(prev => prev.map(c => c.memberId === memberId ? snapshot : c));
+      }
       reportError(e, 'Supabase');
       showToast('Failed to delete message', 'error');
     });
-  }, [currentUser]);
+  }, [currentUser, conversations]);
 
   const dismissAnnouncement = useCallback((id: string) => {
     if (!currentUser) return;

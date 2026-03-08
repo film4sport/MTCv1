@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { authenticateMobileRequest, getAdminClient, isRateLimited } from '../auth-helper';
+import { authenticateMobileRequest, getAdminClient, isRateLimited, sanitizeInput, isValidEnum, VALID_SKILL_LEVELS, VALID_MATCH_TYPES } from '../auth-helper';
 import { sendPushToUser } from '../../lib/push';
 import crypto from 'crypto';
 
@@ -63,8 +63,11 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { matchType, skillLevel, availability, message } = body;
 
-    const validTypes = ['singles', 'doubles', 'mixed', 'any'];
-    const type = validTypes.includes(matchType) ? matchType : 'any';
+    const extendedMatchTypes = [...VALID_MATCH_TYPES, 'mixed', 'any'] as const;
+    const type = extendedMatchTypes.includes(matchType) ? matchType : 'any';
+    const cleanSkill = skillLevel && isValidEnum(skillLevel, VALID_SKILL_LEVELS) ? skillLevel : undefined;
+    const cleanAvailability = availability ? sanitizeInput(String(availability), 200) : 'Anytime';
+    const cleanMessage = message ? sanitizeInput(String(message), 500) : null;
 
     const supabase = getAdminClient();
     const partnerId = `pr-${Date.now()}-${userId.slice(0, 8)}`;
@@ -83,13 +86,13 @@ export async function POST(request: Request) {
       user_id: userId,
       name: authResult.name || 'Member',
       ntrp: fullProfile?.ntrp || 3.0,
-      skill_level: skillLevel || fullProfile?.skill_level || 'intermediate',
-      availability: availability || 'Anytime',
+      skill_level: cleanSkill || fullProfile?.skill_level || 'intermediate',
+      availability: cleanAvailability,
       match_type: type,
       date: todayStr,
       time: timeStr,
       avatar: fullProfile?.avatar || 'tennis-male-1',
-      message: message || null,
+      message: cleanMessage,
       status: 'available',
     });
 

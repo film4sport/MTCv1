@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { authenticateMobileRequest, getAdminClient, sanitizeInput, isRateLimited } from '../auth-helper';
+import { authenticateMobileRequest, getAdminClient, sanitizeInput, isRateLimited, isValidEnum, VALID_ANNOUNCEMENT_TYPES } from '../auth-helper';
 import { sendPushToUser } from '../../lib/push';
 
 // sendPushToUser imported from ../../lib/push (shared utility)
@@ -78,7 +78,7 @@ export async function POST(request: Request) {
     const supabase = getAdminClient();
     const id = `ann-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const sanitizedText = sanitizeInput(text, 1000);
-    const announcementType = type || 'info';
+    const announcementType = isValidEnum(type, VALID_ANNOUNCEMENT_TYPES) ? type : 'info';
     const validAudiences = ['all', 'interclub_a', 'interclub_b', 'interclub_all'];
     let announcementAudience = validAudiences.includes(audience) ? audience : 'all';
 
