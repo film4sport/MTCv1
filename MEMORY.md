@@ -7,6 +7,15 @@
 - **User flow testing**: Use BDG (Claude in Chrome) + Guerrilla Mail (guerrillamail.com) to create test accounts and test real user flows (Google login, magic link, signup, booking, etc.) before shipping auth changes. Always verify auth flows end-to-end in the browser — never ship auth changes without testing.
 - **Test mock rule**: Before writing/updating E2E test mocks, ALWAYS grep the real source code for the actual localStorage keys, API endpoints, and DOM IDs. Never guess. Past CI failures from wrong mocks: `mtc-current-user` vs `mtc-user`, missing `mtc-onboarding-complete`, asserting on removed `signupPassword` field.
 
+## Pre-Commit Cross-Platform Checklist
+Before reporting any feature change as "done", verify:
+1. **Grep all three codebases**: `app/dashboard/`, `public/mobile-app/`, `app/api/mobile/`
+2. **Does this change apply to the other platform?** (e.g. fix on dashboard → does mobile have the same bug?)
+3. **Dashboard mutations go through API** — check store.tsx uses `apiCall()`, NOT `db.*` for writes (CLAUDE.md #21)
+4. **Tests**: Did you add/update a test? (CLAUDE.md #22) If not, note what test is needed.
+5. **Build check**: `npx tsc --noEmit` + `npm run build:mobile` both pass
+6. **MEMORY.md updated** with what changed and what's still pending
+
 ## Current Status
 - **SMTP/Supabase email**: DONE. Resend SMTP (smtp.resend.com:465, noreply@monotennisclub.com). Email confirmation and password reset emails are live.
 - **Deployment**: Railway (NOT Vercel). NODE_VERSION=20 env var set. 13 env vars total.
@@ -19,6 +28,10 @@
 - **Login screen**: Email Link button electric-blue/cyan. Phone+tablet mockups show club calendar. 2/3 mockup + 1/3 form layout.
 - **Desktop login redirect**: `signInWithGoogle('/dashboard')` and `signInWithMagicLink(email, '/dashboard')` pass `?next=/dashboard` through OAuth/magic link flow.
 - **Production Readiness**: 10/10. All platforms hardened. Zero remaining findings from code review reports.
+- **API route consolidation (Mar 8)**: All Dashboard mutations in store.tsx now route through API endpoints instead of direct Supabase. Added `apiCall()` helper. Eliminates RLS policy gaps. Remaining `db.*` calls: fetches (SELECT, safe), `createNotification` (INSERT policy exists), `confirmParticipant` (needs API enhancement — TODO), programs CRUD (admin-only, safe).
+- **Booking calendar restyled (Mar 8)**: Today = electric blue (was volt), selected = liquid glass with blur+border+lift (was flat black). Cancellation reminder added to booking modal.
+- **CLAUDE.md rules added**: #21 (Dashboard mutations through API), #22 (tests for major changes). Cross-platform checklist added to MEMORY.md.
+- **Pending tests**: Need E2E tests for booking flow, messaging flow, partner matching flow. Noted in CLAUDE.md #22.
 
 ---
 

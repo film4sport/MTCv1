@@ -129,6 +129,28 @@ function mergeEventsWithDefaults(supabaseEvents: ClubEvent[]): ClubEvent[] {
   return [...arr, ...defaultsNotInSupabase];
 }
 
+/**
+ * Authenticated API call helper.
+ * Routes mutations through Next.js API routes (which use the admin Supabase client)
+ * instead of the browser's Supabase client (which is subject to RLS policies).
+ * This eliminates an entire class of bugs where missing/incorrect RLS policies
+ * cause silent failures (200 OK, 0 rows affected).
+ */
+async function apiCall(path: string, method: string, body?: Record<string, unknown>): Promise<Response> {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session?.access_token) throw new Error('No active session');
+  const res = await fetch(path, {
+    method,
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+    ...(body ? { body: JSON.stringify(body) } : {}),
+  });
+  if (!res.ok) {
+    const errBody = await res.json().catch(() => ({ error: res.statusText }));
+    throw new Error(errBody.error || `API ${method} ${path} failed: ${res.status}`);
+  }
+  return res;
+}
+
 export function AppProvider({ children }: { children: ReactNode }) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -610,7 +632,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (currentUser?.id) {
       const prefActiveProfile = profile.type === 'primary' ? { type: 'primary' } : { type: 'family_member', memberId: (profile as { type: 'family_member'; member: { id: string } }).member.id };
       const prefs = { ...(currentUser.preferences || {}), activeProfile: prefActiveProfile };
-      db.updateProfile(currentUser.id, { preferences: prefs }).catch(() => {});
+      apiCall('/api/mobile/members', 'PATCH', { preferences: prefs }).catch(() => {});
     }
   }, [currentUser?.id, currentUser?.preferences]);
 
@@ -652,16 +674,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  // Helper: fire-and-forget push notification via /api/notify-push
+  // Helper: fire-and-forget push notification via API
   const firePush = useCallback((recipientId: string, title: string, body: string, type: string, tag?: string) => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session?.access_token) return;
-      fetch('/api/notify-push', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
-        body: JSON.stringify({ recipientId, title, body: body.slice(0, 200), type, tag: tag || `${type}-${Date.now()}` }),
-      }).catch(() => { /* push is best-effort */ });
-    });
+    apiCall('/api/notify-push', 'POST', {
+      recipientId, title, body: body.slice(0, 200), type, tag: tag || `${type}-${Date.now()}`,
+    }).catch(() => { /* push is best-effort */ });
   }, []);
 
   // Actions
@@ -670,13 +687,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     // Persist via server-side validated API — rollback booking + its notifications on failure
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session?.access_token) {
-        // Fallback to direct Supabase write if no session (shouldn't happen)
-        db.createBooking(booking).catch((err) => {
-          reportError(err, 'Supabase');
-          setBookings(prev => prev.filter(b => b.id !== booking.id));
-          setNotifications(prev => prev.filter(n => !(n.type === 'booking' && n.body?.includes(booking.date) && n.body?.includes(booking.time))));
-          showToast('Failed to save booking. Please try again.', 'error');
-        });
+        // No session — can't make API call, fail immediately
+        reportError(new Error('No session for booking'), 'API');
+        setBookings(prev => prev.filter(b => b.id !== booking.id));
+        setNotifications(prev => prev.filter(n => !(n.type === 'booking' && n.body?.includes(booking.date) && n.body?.includes(booking.time))));
+        showToast('Session expired. Please log in again.', 'error');
         return;
       }
       fetch('/api/dashboard/bookings', {
@@ -770,9 +785,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
             timestamp: new Date().toISOString(),
             read: false,
           };
-          db.sendMessageByUsers({ id: msg.id, fromId: booking.userId, fromName: booking.userName, toId: participant.id, toName: participant.name, text: msg.text }).catch((err) => {
+          apiCall('/api/mobile/conversations', 'POST', { toId: participant.id, text: msg.text }).catch((err) => {
             console.error(`[booking] Failed to send message to ${participant.name}:`, err);
-            reportError(err, 'Supabase');
+            reportError(err, 'API');
           });
         });
       }
@@ -845,9 +860,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
               timestamp: new Date().toISOString(),
               read: false,
             };
-            db.sendMessageByUsers({ id: msg.id, fromId: booking.userId, fromName: booking.userName, toId: participant.id, toName: participant.name, text: msg.text }).catch((err) => {
-            console.error(`[booking] Failed to send message to ${participant.name}:`, err);
-            reportError(err, 'Supabase');
+            apiCall('/api/mobile/conversations', 'POST', { toId: participant.id, text: msg.text }).catch((err) => {
+            console.error(`[booking] Failed to send cancel message to ${participant.name}:`, err);
+            reportError(err, 'API');
           });
           });
 
@@ -884,11 +899,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     // Persist via server-side validated API — rollback on failure
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session?.access_token) {
-        db.cancelBooking(id).catch((err) => {
-          reportError(err, 'Supabase');
-          setBookings(prev => prev.map(b => b.id === id ? { ...b, status: 'confirmed' as const } : b));
-          showToast('Failed to cancel booking. Please try again.', 'error');
-        });
+        reportError(new Error('No session for cancel'), 'API');
+        setBookings(prev => prev.map(b => b.id === id ? { ...b, status: 'confirmed' as const } : b));
+        showToast('Session expired. Please log in again.', 'error');
         return;
       }
       fetch('/api/dashboard/bookings', {
@@ -919,6 +932,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         ),
       };
     }));
+    // TODO: Extend bookings PATCH API to support confirming other participants (currently only self-confirm)
     db.confirmParticipant(bookingId, participantId, 'dashboard').catch((err) => {
       reportError(err, 'Supabase');
       showToast('Failed to confirm participant', 'error');
@@ -1028,10 +1042,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
       return [...prev, { memberId: program.coachId, memberName: program.coachName, lastMessage: coachMsg.text, lastTimestamp: coachMsg.timestamp, unread: 1, messages: [coachMsg] }];
     });
-    db.sendMessageByUsers({
-      id: coachMsg.id, fromId: program.coachId, fromName: program.coachName,
-      toId: memberId, toName: memberName, text: coachMsgText,
-    }).catch((err) => reportError(err, 'Supabase'));
+    apiCall('/api/mobile/conversations', 'POST', { toId: memberId, text: coachMsgText }).catch((err) => reportError(err, 'API'));
     // Log enrollment to email_logs for audit trail
     fetch('/api/log-email', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -1070,10 +1081,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
     // Notify coach about withdrawal
     const withdrawMsg = `${memberName} has withdrawn from ${program.title}.`;
-    db.sendMessageByUsers({
-      id: generateId('msg'), fromId: memberId, fromName: memberName,
-      toId: program.coachId, toName: program.coachName, text: withdrawMsg,
-    }).catch((err) => reportError(err, 'Supabase'));
+    apiCall('/api/mobile/conversations', 'POST', { toId: program.coachId, text: withdrawMsg }).catch((err) => reportError(err, 'API'));
     // Log withdrawal
     fetch('/api/log-email', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -1088,8 +1096,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const addPartner = useCallback((partner: Partner) => {
     setPartners(prev => [partner, ...prev]);
-    db.createPartner(partner).catch((err) => {
-      reportError(err, 'Supabase');
+    apiCall('/api/mobile/partners', 'POST', {
+      matchType: partner.matchType, skillLevel: partner.skillLevel,
+      availability: partner.availability, message: partner.message,
+    }).catch((err) => {
+      reportError(err, 'API');
       setPartners(prev => prev.filter(p => p.id !== partner.id));
       showToast('Failed to post partner request. Please try again.', 'error');
     });
@@ -1133,19 +1144,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const removePartner = useCallback((partnerId: string) => {
     const removed = partners.find(p => p.id === partnerId);
     setPartners(prev => prev.filter(p => p.id !== partnerId));
-    // If matched, notify the matched person before deleting
-    if (removed?.status === 'matched' && currentUser) {
-      Promise.resolve(supabase.from('partners').select('matched_by').eq('id', partnerId).single()).then(({ data }) => {
-        if (data?.matched_by) {
-          const cancelBody = `${currentUser.name} cancelled their partner request.`;
-          const notif: Notification = { id: generateId('n'), type: 'partner', title: 'Partner Request Cancelled', body: cancelBody, timestamp: new Date().toISOString(), read: false };
-          db.createNotification(data.matched_by, notif).then(() => {}, () => {});
-          firePush(data.matched_by, notif.title, notif.body, 'partner', `partner-cancel-${partnerId}`);
-        }
-      }).catch(() => {});
-    }
-    db.deletePartner(partnerId).catch((err) => {
-      reportError(err, 'Supabase');
+    // API DELETE handles matched-user notification + push + bell (admin client, bypasses RLS)
+    apiCall('/api/mobile/partners', 'DELETE', { partnerId }).catch((err) => {
+      reportError(err, 'API');
       if (removed) setPartners(prev => [...prev, removed]);
       showToast('Failed to remove partner request.', 'error');
     });
@@ -1194,14 +1195,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
           ...(e.spotsTaken != null ? { spotsTaken: attending ? e.spotsTaken - 1 : e.spotsTaken + 1 } : {}),
         };
       });
-      // Persist to Supabase — rollback on failure, re-fetch on success
-      db.toggleEventRsvp(eventId, userName)
+      // Persist via API route (admin client, bypasses RLS) — rollback on failure, re-fetch on success
+      apiCall('/api/mobile/events', 'POST', { eventId })
         .then(() => {
           // Re-fetch to pick up other members' RSVPs (safety net if Realtime is slow)
           db.fetchEvents().then(e => setEvents(mergeEventsWithDefaults(e))).catch(() => {});
         })
         .catch((err) => {
-          reportError(err, 'Supabase');
+          reportError(err, 'API');
           setEvents(snapshot);
           showToast('Failed to update RSVP. Please try again.', 'error');
         })
@@ -1238,42 +1239,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
         memberId: toId, memberName: member?.name || '', lastMessage: text, lastTimestamp: msg.timestamp, unread: 0, messages: [msg],
       }];
     });
-    // Persist message to Supabase — targeted rollback removes only the failed message (not entire snapshot)
-    db.sendMessageByUsers({
-      id: msg.id, fromId: currentUser.id, fromName: currentUser.name,
-      toId, toName, text,
-    }).then(() => {
-      // Success: create bell notification for recipient
-      const notif: Notification = {
-        id: generateId('notif'),
-        type: 'message',
-        title: `New message from ${currentUser.name}`,
-        body: text.length > 80 ? text.slice(0, 80) + '…' : text,
-        timestamp: new Date().toISOString(),
-        read: false,
-      };
-      db.createNotification(toId, notif).catch((err) => {
-        console.error('[sendMessage] Failed to create notification:', err);
-      });
-
-      // Send push notification to recipient's device (fire and forget)
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        if (!session?.access_token) return;
-        fetch('/api/notify-message', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session.access_token}`,
-          },
-          body: JSON.stringify({
-            recipientId: toId,
-            senderName: currentUser.name,
-            preview: text.length > 80 ? text.slice(0, 80) + '…' : text,
-          }),
-        }).catch(() => { /* push is best-effort */ });
-      });
-    }).catch((err) => {
-      reportError(err, 'Supabase');
+    // Persist via API route (admin client — bypasses RLS, also handles push + bell notification)
+    apiCall('/api/mobile/conversations', 'POST', { toId, text }).catch((err) => {
+      reportError(err, 'API');
       setConversations(prev => prev.map(c => {
         if (c.memberId !== toId) return c;
         const filtered = c.messages.filter(m => m.id !== msgId);
@@ -1291,7 +1259,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
       return c;
     }));
-    // Persist read status to Supabase — find conversation and mark messages read
+    // Persist read status via API (admin client — bypasses RLS)
     if (currentUser) {
       Promise.resolve(
         supabase
@@ -1300,8 +1268,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
           .or(`and(member_a.eq.${currentUser.id},member_b.eq.${memberId}),and(member_a.eq.${memberId},member_b.eq.${currentUser.id})`)
           .single()
       ).then(({ data: conv, error: err }) => {
-        if (err || !conv) return; // No conversation yet — skip silently
-        db.markMessagesRead(conv.id, currentUser.id).catch((e) => reportError(e, 'Supabase'));
+        if (err || !conv) return;
+        apiCall('/api/mobile/conversations', 'PATCH', { conversationId: conv.id }).catch((e) => reportError(e, 'API'));
       }).catch(() => { /* conversations table may not exist yet — ignore */ });
     }
   }, [currentUser]);
@@ -1383,14 +1351,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const markNotificationRead = useCallback((id: string) => {
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
-    // Persist to Supabase
-    db.markNotificationRead(id).catch((err) => reportError(err, 'Supabase'));
+    // Persist via API (admin client, bypasses RLS)
+    apiCall('/api/mobile/notifications', 'PATCH', { id }).catch((err) => reportError(err, 'API'));
   }, []);
 
   const clearNotifications = useCallback(() => {
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-    // Persist to Supabase
-    if (currentUser) db.clearNotifications(currentUser.id).catch((err) => reportError(err, 'Supabase'));
+    // Persist via API (admin client, bypasses RLS)
+    if (currentUser) apiCall('/api/mobile/notifications', 'PATCH', { markAll: true }).catch((err) => reportError(err, 'API'));
   }, [currentUser]);
 
   const deleteReadNotifications = useCallback(() => {
