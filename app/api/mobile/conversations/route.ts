@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { authenticateMobileRequest, getAdminClient, sanitizeInput, isRateLimited } from '../auth-helper';
+import { authenticateMobileRequest, getAdminClient, sanitizeInput, isRateLimited, isValidUUID, validationError } from '../auth-helper';
 import { sendPushToUser } from '../../lib/push';
 import crypto from 'crypto';
 
@@ -125,6 +125,7 @@ export async function POST(request: Request) {
     if (!toId || !text?.trim()) {
       return NextResponse.json({ error: 'Missing toId or text' }, { status: 400 });
     }
+    if (!isValidUUID(toId)) return validationError('toId', 'invalid UUID format');
 
     if (isRateLimited(authResult.id)) {
       return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
@@ -135,9 +136,10 @@ export async function POST(request: Request) {
     const fromName = authResult.name;
     const timestamp = new Date().toISOString();
 
-    // Look up recipient name
+    // Look up recipient — verify they exist
     const { data: toProfile } = await supabase.from('profiles').select('name').eq('id', toId).single();
-    const toName = toProfile?.name || 'Unknown';
+    if (!toProfile) return NextResponse.json({ error: 'Recipient not found' }, { status: 404 });
+    const toName = toProfile.name || 'Unknown';
 
     // Find or create conversation
     const { data: existing } = await supabase

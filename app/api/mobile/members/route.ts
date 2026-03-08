@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { authenticateMobileRequest, getAdminClient, sanitizeInput, isRateLimited } from '../auth-helper';
+import { authenticateMobileRequest, getAdminClient, sanitizeInput, isRateLimited, isValidUUID, isValidEmail, isValidEnum, validationError, VALID_STATUSES, VALID_MEMBERSHIP_TYPES, VALID_SKILL_LEVELS, VALID_INTERCLUB_TEAMS } from '../auth-helper';
 import type { ProfileUpdate } from '../types';
 
 export async function GET(request: Request) {
@@ -55,6 +55,18 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Name and email required' }, { status: 400 });
     }
 
+    if (!isValidEmail(email.trim())) {
+      return validationError('email', 'invalid email format');
+    }
+
+    if (membershipType && !isValidEnum(membershipType, VALID_MEMBERSHIP_TYPES)) {
+      return validationError('membershipType', 'must be adult, family, or junior');
+    }
+
+    if (skillLevel && !isValidEnum(skillLevel, VALID_SKILL_LEVELS)) {
+      return validationError('skillLevel', 'must be beginner, intermediate, advanced, or competitive');
+    }
+
     if (isRateLimited(authResult.id, 10)) {
       return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
     }
@@ -97,6 +109,11 @@ export async function PATCH(request: Request) {
   try {
     const body = await request.json();
     const memberId = body.memberId || authResult.id; // default to self
+
+    if (memberId !== authResult.id && !isValidUUID(memberId)) {
+      return validationError('memberId', 'invalid UUID format');
+    }
+
     const isAdmin = authResult.role === 'admin';
     const isSelf = memberId === authResult.id;
 
@@ -144,9 +161,19 @@ export async function PATCH(request: Request) {
     // Fields only admins can update
     if (isAdmin) {
       if (body.name?.trim()) updates.name = sanitizeInput(body.name, 100);
-      if (body.email?.trim()) updates.email = body.email.trim().slice(0, 254);
-      if (body.status?.trim()) updates.status = sanitizeInput(body.status, 20).toLowerCase();
-      if (body.interclub_team !== undefined) updates.interclub_team = body.interclub_team;
+      if (body.email?.trim()) {
+        if (!isValidEmail(body.email.trim())) return validationError('email', 'invalid email format');
+        updates.email = body.email.trim().slice(0, 254);
+      }
+      if (body.status?.trim()) {
+        const status = sanitizeInput(body.status, 20).toLowerCase();
+        if (!isValidEnum(status, VALID_STATUSES)) return validationError('status', 'must be active, paused, or inactive');
+        updates.status = status;
+      }
+      if (body.interclub_team !== undefined) {
+        if (!isValidEnum(body.interclub_team, VALID_INTERCLUB_TEAMS)) return validationError('interclub_team', 'must be none, a, or b');
+        updates.interclub_team = body.interclub_team;
+      }
       if (body.interclub_captain !== undefined) updates.interclub_captain = !!body.interclub_captain;
     }
 
@@ -176,7 +203,7 @@ export async function DELETE(request: Request) {
 
   try {
     const { memberId } = await request.json();
-    if (!memberId) {
+    if (!memberId || !isValidUUID(memberId)) {
       return NextResponse.json({ error: 'Missing memberId' }, { status: 400 });
     }
 
