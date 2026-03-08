@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { authenticateMobileRequest, getAdminClient, sanitizeInput, isRateLimited } from '../auth-helper';
+import { authenticateMobileRequest, getAdminClient, sanitizeInput, isRateLimited, isValidDate, isValidUUID } from '../auth-helper';
 
 /** GET — Fetch upcoming lineups for the user's team */
 export async function GET(request: Request) {
@@ -88,8 +88,8 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    if (!body.matchDate) {
-      return NextResponse.json({ error: 'Match date required' }, { status: 400 });
+    if (!body.matchDate || !isValidDate(body.matchDate)) {
+      return NextResponse.json({ error: 'Valid match date required (YYYY-MM-DD)' }, { status: 400 });
     }
 
     const supabase = getAdminClient();
@@ -134,6 +134,9 @@ export async function PATCH(request: Request) {
 
     if (!lineupId || !memberId) {
       return NextResponse.json({ error: 'lineupId and memberId required' }, { status: 400 });
+    }
+    if (!isValidUUID(memberId)) {
+      return NextResponse.json({ error: 'Invalid memberId format' }, { status: 400 });
     }
 
     const validStatuses = ['available', 'unavailable', 'maybe', 'pending'];

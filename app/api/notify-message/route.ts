@@ -41,6 +41,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing recipientId or senderName' }, { status: 400 });
     }
 
+    // Validate recipientId format
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(recipientId)) {
+      return NextResponse.json({ error: 'Invalid recipientId' }, { status: 400 });
+    }
+
     // Prevent sending push to yourself
     if (recipientId === user.id) {
       return NextResponse.json({ success: true, sent: 0, reason: 'self' });
@@ -85,9 +91,10 @@ export async function POST(request: Request) {
 
       webpush.setVapidDetails(VAPID_EMAIL, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
 
-      const truncatedPreview = (preview || 'New message').slice(0, 100);
+      const cleanName = String(senderName).replace(/<[^>]*>/g, '').trim().slice(0, 200);
+      const truncatedPreview = String(preview || 'New message').replace(/<[^>]*>/g, '').slice(0, 100);
       const payload = JSON.stringify({
-        title: `Message from ${senderName}`,
+        title: `Message from ${cleanName}`,
         body: truncatedPreview,
         icon: '/mobile-app/icons/icon-192x192.png',
         badge: '/mobile-app/icons/icon-72x72.png',
