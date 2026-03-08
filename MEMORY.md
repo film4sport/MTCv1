@@ -1537,3 +1537,29 @@ CREATE TABLE IF NOT EXISTS lineup_entries (
 - **If a command fails once, diagnose and explain — don't retry.** Repeated blind retries waste the user's time.
 - **Unit tests (Vitest) DO work in Cowork** — `npm run test:unit` is safe to run locally.
 - **`npm run check`** (tsc + mobile build) works in Cowork — use this for quick local validation.
+
+### Cowork Session (2026-03-07) — Mobile PWA Sync & Feature Parity
+
+**CRITICAL RULE — Cross-Platform Sync:**
+User explicitly requires ALL features to be synced across desktop PWA and mobile PWA. When making ANY change:
+1. Check if it affects desktop dashboard (`app/dashboard/`)
+2. Check if it affects mobile PWA (`public/mobile-app/`)
+3. Check if it affects mobile API routes (`app/api/mobile/`)
+4. Implement the change on ALL applicable platforms in ONE pass
+5. Verify data consistency (same Supabase tables, same realtime subscriptions)
+
+**Mobile PWA Feature Gaps Identified:**
+- Messages: Desktop conversations visible but mobile may not load them properly due to API field mapping differences
+- Member search: Desktop has full member directory, mobile search depends on `updateMembersFromAPI()` being called successfully
+- Partners screen: API endpoints work but partner list rendering on dedicated screen is incomplete (only home screen shows 2 partner cards)
+- Swipe-to-delete for messages: User requested — swipe reveals red trash button before confirming delete
+- Welcome message template: Currently sends gate code 1234 (invalid). Needs to say "gate code will be provided after Opening Day" instead
+- Event volunteer tasks: Hardcoded in `events-registration.js`, not fetched from DB
+- Captain/Lineup: UI exists but no realtime sync
+
+**Login Page Mockup Updates (this session):**
+- Layout: 2/3 mockups + 1/3 login form (was 50/50)
+- Mockups scaled up: phone 0.52, tablet 0.62, desktop maxWidth 720, container maxWidth 780
+- Moon button: purple tint `rgba(88,68,150,0.12)` + `stroke: #6b5ba7` on both phone and tablet mockups
+- Same purple moon treatment applied to actual mobile PWA (`home.css` .theme-pill-moon)
+- Mobile PWA rebuilt with updated CSS
