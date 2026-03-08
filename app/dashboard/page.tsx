@@ -7,7 +7,7 @@ import Link from 'next/link';
 
 
 export default function DashboardHome() {
-  const { currentUser, bookings, events, announcements, dismissAnnouncement, confirmParticipant } = useApp();
+  const { currentUser, bookings, events, announcements, dismissAnnouncement, confirmParticipant, toggleRsvp } = useApp();
 
   const myBookings = bookings
     .filter(b => b.userId === currentUser?.id && b.status === 'confirmed')
@@ -287,13 +287,22 @@ export default function DashboardHome() {
                             {spotsLeft} spot{spotsLeft !== 1 ? 's' : ''} left
                           </span>
                         )}
-                        {attending && (
-                          <span className="text-[0.65rem] px-2 py-0.5 rounded-full font-medium" style={{ background: 'rgba(245, 158, 11, 0.1)', color: '#d97706' }}>
-                            ✓ Going
-                          </span>
-                        )}
+                        <span className="text-[0.65rem]" style={{ color: '#6b7266' }}>
+                          {ev.spotsTaken ?? ev.attendees.length} going
+                        </span>
                       </div>
                     </div>
+                    <button
+                      onClick={() => toggleRsvp(ev.id, currentUser?.name || '')}
+                      className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all active:scale-95"
+                      style={{
+                        background: attending ? 'rgba(245,158,11,0.1)' : '#6b7a3d',
+                        color: attending ? '#d97706' : '#fff',
+                        border: attending ? '1px solid rgba(245,158,11,0.2)' : 'none',
+                      }}
+                    >
+                      {attending ? '✓ Going' : 'RSVP'}
+                    </button>
                   </div>
                 );
               })}

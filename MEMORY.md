@@ -494,6 +494,26 @@ Closed ALL notification asymmetries. Every action fires symmetric bell + push + 
 
 **Build:** TypeScript clean. Mobile PWA: 29 JS → 357KB, 23 CSS → 225KB, cache: mtc-court-cc0bf142.
 
+### Cowork Session (2026-03-08i) — Desktop Mockup Glassmorphism + Quick RSVP
+
+**Login page desktop mockup — glassmorphism overhaul:**
+- Added player silhouette background (`/tennis-silhouette-1.png`) at 35% opacity with sepia/hue-rotate filter — matches real dashboard
+- Header bar now uses `backdrop-filter: blur(12px)` with semi-transparent bg
+- Quick action cards: increased blur to 12px, stronger border (`rgba(255,255,255,0.35)`)
+- Booking + Events glass cards: `rgba(255,255,255,0.55)` bg with `backdrop-filter: blur(16px)` and subtle shadow
+- Inner cards: `rgba(255,255,255,0.7)` with matching glass borders
+- Added RSVP buttons to event cards in mockup (green pill, matches real dashboard style)
+- File: `app/login/page.tsx`
+
+**Dashboard home — quick RSVP on Upcoming Events:**
+- Added RSVP/Going toggle button to each event card in the home page Upcoming Events section
+- Green "RSVP" button (not attending) → amber "✓ Going" pill (attending)
+- Calls existing `toggleRsvp(ev.id, currentUser.name)` — same flow as Events page
+- Added "X going" count to event cards
+- File: `app/dashboard/page.tsx`
+
+**Build:** TypeScript clean. Mobile PWA: cache mtc-court-cc0bf142.
+
 ---
 
 ## TODO / REMINDERS
