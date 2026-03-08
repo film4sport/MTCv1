@@ -75,7 +75,7 @@ export async function GET(request: Request) {
       badge: e.badge,
       price: e.price,
       spotsTotal: e.spots_total,
-      spotsTaken: e.spots_taken,
+      spotsTaken: e.spots_taken ?? 0,
       description: e.description,
       type: e.type,
       attendees: attendeeMap[e.id] || [],
