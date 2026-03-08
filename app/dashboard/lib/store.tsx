@@ -614,13 +614,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return () => clearInterval(interval);
   }, []);
 
-  // Update current user fields (e.g. NTRP rating) in state + localStorage
+  // Update current user fields (e.g. NTRP rating) in state + localStorage + server
   const updateCurrentUser = useCallback((updates: Partial<User>) => {
     setCurrentUser(prev => {
       if (!prev) return prev;
       const updated = { ...prev, ...updates };
       saveJSON('mtc-current-user', updated);
       return updated;
+    });
+    // Persist profile changes to server (non-blocking)
+    apiCall('/api/mobile/members', 'PATCH', updates as Record<string, unknown>).catch((err) => {
+      reportError(err, 'API');
     });
   }, []);
 
@@ -685,41 +689,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const addBooking = useCallback((booking: Booking) => {
     setBookings(prev => [...prev, booking]);
     // Persist via server-side validated API — rollback booking + its notifications on failure
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session?.access_token) {
-        // No session — can't make API call, fail immediately
-        reportError(new Error('No session for booking'), 'API');
-        setBookings(prev => prev.filter(b => b.id !== booking.id));
-        setNotifications(prev => prev.filter(n => !(n.type === 'booking' && n.body?.includes(booking.date) && n.body?.includes(booking.time))));
-        showToast('Session expired. Please log in again.', 'error');
-        return;
-      }
-      fetch('/api/dashboard/bookings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
-        body: JSON.stringify({
-          courtId: booking.courtId,
-          date: booking.date,
-          time: booking.time,
-          matchType: booking.matchType || 'singles',
-          duration: booking.duration || 2,
-          isGuest: !!booking.guestName,
-          guestName: booking.guestName,
-          participants: booking.participants,
-          bookedFor: booking.bookedFor,
-          userName: booking.userName,
-        }),
-      }).then(async (res) => {
-        if (!res.ok) {
-          const data = await res.json().catch(() => ({ error: 'Server error' }));
-          throw new Error(data.error || `HTTP ${res.status}`);
-        }
-      }).catch((err) => {
-        reportError(err, 'DashboardBookingAPI');
-        setBookings(prev => prev.filter(b => b.id !== booking.id));
-        setNotifications(prev => prev.filter(n => !(n.type === 'booking' && n.body?.includes(booking.date) && n.body?.includes(booking.time))));
-        showToast(err.message || 'Failed to save booking. Please try again.', 'error');
-      });
+    apiCall('/api/dashboard/bookings', 'POST', {
+      courtId: booking.courtId,
+      date: booking.date,
+      time: booking.time,
+      matchType: booking.matchType || 'singles',
+      duration: booking.duration || 2,
+      isGuest: !!booking.guestName,
+      guestName: booking.guestName,
+      participants: booking.participants,
+      bookedFor: booking.bookedFor,
+      userName: booking.userName,
+    }).catch((err) => {
+      reportError(err, 'DashboardBookingAPI');
+      setBookings(prev => prev.filter(b => b.id !== booking.id));
+      setNotifications(prev => prev.filter(n => !(n.type === 'booking' && n.body?.includes(booking.date) && n.body?.includes(booking.time))));
+      showToast(err.message || 'Failed to save booking. Please try again.', 'error');
     });
     // Create notification for booker
     if (booking.type === 'lesson') {
@@ -897,27 +882,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return prev.map(b => b.id === id ? { ...b, status: 'cancelled' as const } : b);
     });
     // Persist via server-side validated API — rollback on failure
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session?.access_token) {
-        reportError(new Error('No session for cancel'), 'API');
-        setBookings(prev => prev.map(b => b.id === id ? { ...b, status: 'confirmed' as const } : b));
-        showToast('Session expired. Please log in again.', 'error');
-        return;
-      }
-      fetch('/api/dashboard/bookings', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
-        body: JSON.stringify({ bookingId: id }),
-      }).then(async (res) => {
-        if (!res.ok) {
-          const data = await res.json().catch(() => ({ error: 'Server error' }));
-          throw new Error(data.error || `HTTP ${res.status}`);
-        }
-      }).catch((err) => {
-        reportError(err, 'DashboardBookingAPI');
-        setBookings(prev => prev.map(b => b.id === id ? { ...b, status: 'confirmed' as const } : b));
-        showToast(err.message || 'Failed to cancel booking. Please try again.', 'error');
-      });
+    apiCall('/api/dashboard/bookings', 'DELETE', { bookingId: id }).catch((err) => {
+      reportError(err, 'DashboardBookingAPI');
+      setBookings(prev => prev.map(b => b.id === id ? { ...b, status: 'confirmed' as const } : b));
+      showToast(err.message || 'Failed to cancel booking. Please try again.', 'error');
     });
   }, [members]);
 
@@ -1262,26 +1230,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [currentUser, members]);
 
   const markConversationRead = useCallback((memberId: string) => {
+    const conv = conversations.find(c => c.memberId === memberId);
     setConversations(prev => prev.map(c => {
       if (c.memberId === memberId && c.unread > 0) {
         return { ...c, unread: 0, messages: c.messages.map(m => m.toId === currentUser?.id ? { ...m, read: true } : m) };
       }
       return c;
     }));
-    // Persist read status via API (admin client — bypasses RLS)
-    if (currentUser) {
-      Promise.resolve(
-        supabase
-          .from('conversations')
-          .select('id')
-          .or(`and(member_a.eq.${currentUser.id},member_b.eq.${memberId}),and(member_a.eq.${memberId},member_b.eq.${currentUser.id})`)
-          .single()
-      ).then(({ data: conv, error: err }) => {
-        if (err || !conv) return;
-        apiCall('/api/mobile/conversations', 'PATCH', { conversationId: conv.id }).catch((e) => reportError(e, 'API'));
-      }).catch(() => { /* conversations table may not exist yet — ignore */ });
+    // Persist read status via API (uses conv.id from state — no extra Supabase lookup)
+    if (currentUser && conv?.id) {
+      apiCall('/api/mobile/conversations', 'PATCH', { conversationId: conv.id }).catch((e) => reportError(e, 'API'));
     }
-  }, [currentUser]);
+  }, [currentUser, conversations]);
 
   const deleteConversation = useCallback((memberId: string) => {
     if (!currentUser) return;
