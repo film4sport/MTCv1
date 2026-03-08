@@ -237,6 +237,7 @@ export async function fetchConversations(userId: string, limit = 20): Promise<Co
     const unread = messages.filter(m => m.toId === userId && !m.read).length;
 
     return {
+      id: c.id,
       memberId: otherMemberId,
       memberName: messages.length > 0
         ? (messages[0].fromId === userId ? messages[0].to : messages[0].from)
