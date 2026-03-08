@@ -141,8 +141,8 @@ function Sidebar() {
               );
             })}
 
-            {/* Coach link */}
-            {isCoach && (
+            {/* Coach link — visible to coaches and admins */}
+            {(isCoach || isAdmin) && (
               <li className="pt-2 mt-2" style={{ borderTop: '1px solid rgba(232, 228, 217, 0.1)' }}>
                 <Link
                   href={coachItem.href}
