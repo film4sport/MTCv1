@@ -56,7 +56,7 @@ function LoginContent() {
       <div className="min-h-screen flex flex-col lg:flex-row" style={{ backgroundColor: '#f5f2eb' }}>
 
         {/* Left Side: App Preview (Desktop) */}
-        <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-6 xl:p-10 relative overflow-y-auto overflow-x-hidden" style={{ background: '#edeae3' }}>
+        <div className="hidden lg:flex lg:w-2/3 items-center justify-center p-6 xl:p-10 relative overflow-y-auto overflow-x-hidden" style={{ background: '#edeae3' }}>
           {/* Subtle grid pattern */}
           <div className="absolute inset-0 opacity-[0.04]">
             <svg width="100%" height="100%">
@@ -68,7 +68,7 @@ function LoginContent() {
           </div>
 
           {/* Content */}
-          <div className="relative z-10 text-center my-auto py-4" style={{ maxWidth: 600, width: '100%' }}>
+          <div className="relative z-10 text-center my-auto py-4" style={{ maxWidth: 780, width: '100%' }}>
             <h2 className="headline-font text-2xl xl:text-3xl mb-2 login-app-title" style={{ color: '#2a2f1e' }}>
               MTC Court App
             </h2>
@@ -84,8 +84,8 @@ function LoginContent() {
 
             {/* ── Phone Mockup ── */}
             <div style={{ textAlign: 'center' }}>
-            <div style={{ width: 140, height: 288, position: 'relative' }}>
-            <div style={{ transform: 'scale(0.45)', transformOrigin: 'top left', position: 'absolute', top: 0, left: 0 }}>
+            <div style={{ width: 162, height: 333, position: 'relative' }}>
+            <div style={{ transform: 'scale(0.52)', transformOrigin: 'top left', position: 'absolute', top: 0, left: 0 }}>
               <div style={{
                 width: 310, height: 640, background: '#1a1f12', borderRadius: 44, padding: 10,
                 boxShadow: '0 40px 80px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.08)',
@@ -112,8 +112,8 @@ function LoginContent() {
                       <div style={{ width: 24, height: 24, background: '#fff', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
                         <svg width="11" height="11" fill="none" stroke="#f59e0b" viewBox="0 0 24 24" strokeWidth="2.5"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
                       </div>
-                      <div style={{ width: 24, height: 24, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <svg width="11" height="11" fill="none" stroke="#aaa" viewBox="0 0 24 24" strokeWidth="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+                      <div style={{ width: 24, height: 24, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(88,68,150,0.12)' }}>
+                        <svg width="11" height="11" fill="none" stroke="#6b5ba7" viewBox="0 0 24 24" strokeWidth="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
                       </div>
                     </div>
                     <div style={{ textAlign: 'center' }}>
@@ -251,8 +251,8 @@ function LoginContent() {
 
             {/* ── Tablet Mockup ── */}
             <div style={{ textAlign: 'center' }}>
-            <div style={{ width: 270, height: 210, position: 'relative' }}>
-            <div style={{ transform: 'scale(0.55)', transformOrigin: 'top left', position: 'absolute', top: 0, left: 0 }}>
+            <div style={{ width: 304, height: 236, position: 'relative' }}>
+            <div style={{ transform: 'scale(0.62)', transformOrigin: 'top left', position: 'absolute', top: 0, left: 0 }}>
               <div style={{
                 width: 490, height: 380, background: '#1a1f12', borderRadius: 28, padding: 10,
                 boxShadow: '0 30px 60px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.06)',
@@ -270,8 +270,8 @@ function LoginContent() {
                       <div style={{ width: 20, height: 20, background: '#fff', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
                         <svg width="9" height="9" fill="none" stroke="#f59e0b" viewBox="0 0 24 24" strokeWidth="2.5"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
                       </div>
-                      <div style={{ width: 20, height: 20, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <svg width="9" height="9" fill="none" stroke="#aaa" viewBox="0 0 24 24" strokeWidth="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+                      <div style={{ width: 20, height: 20, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(88,68,150,0.12)' }}>
+                        <svg width="9" height="9" fill="none" stroke="#6b5ba7" viewBox="0 0 24 24" strokeWidth="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
                       </div>
                     </div>
                     <div style={{ textAlign: 'center' }}>
@@ -438,7 +438,7 @@ function LoginContent() {
             </div>{/* end Row 1 */}
 
             {/* ── Row 2: Desktop Dashboard ── */}
-            <div style={{ textAlign: 'center', width: '100%', maxWidth: 540, margin: '0 auto' }}>
+            <div style={{ textAlign: 'center', width: '100%', maxWidth: 720, margin: '0 auto' }}>
               {/* Desktop screen — clean browser window */}
               <div style={{
                 borderRadius: 12, overflow: 'hidden',
@@ -592,7 +592,7 @@ function LoginContent() {
         </div>
 
         {/* Right Side: Login Form */}
-        <div className="w-full lg:w-1/2 flex flex-col px-6 sm:px-8 md:px-16 lg:px-16 xl:px-24 py-8 lg:py-10 animate-slideUp lg:overflow-y-auto lg:min-h-screen">
+        <div className="w-full lg:w-1/3 flex flex-col px-6 sm:px-8 md:px-12 lg:px-10 xl:px-14 py-8 lg:py-10 animate-slideUp lg:overflow-y-auto lg:min-h-screen">
 
           {/* Back Link */}
           <a href="/" className="inline-flex items-center gap-2 text-sm font-semibold mb-8 lg:mb-10 px-4 py-2 rounded-full transition-all hover:scale-105 self-start" style={{ color: '#2a2f1e', textDecoration: 'none', background: 'rgba(107, 122, 61, 0.1)', border: '1px solid rgba(107, 122, 61, 0.2)' }}>
