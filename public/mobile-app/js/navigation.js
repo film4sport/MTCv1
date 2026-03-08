@@ -764,6 +764,16 @@
         availability: p.availability || ''
       });
     });
+    // Update partners nav badge
+    var partnersBadge = document.getElementById('navPartnersBadge');
+    if (partnersBadge) {
+      if (homePartnerPool.length > 0) {
+        partnersBadge.textContent = homePartnerPool.length > 99 ? '99+' : homePartnerPool.length;
+        partnersBadge.style.display = 'flex';
+      } else {
+        partnersBadge.style.display = 'none';
+      }
+    }
     // Re-populate the home screen partner cards
     repopulateHomePartners();
     // Also populate the dedicated partners screen if it has been rendered

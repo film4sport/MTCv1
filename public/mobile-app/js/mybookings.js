@@ -220,6 +220,27 @@
   }
 
   // ============================================
+  // PARTICIPANT CONFIRMATION
+  // ============================================
+  window.confirmBookingParticipation = function(bookingId, btn) {
+    if (btn) { btn.disabled = true; btn.textContent = 'Confirming...'; }
+    MTC.fn.apiRequest('/mobile/bookings', {
+      method: 'PATCH',
+      body: JSON.stringify({ bookingId: bookingId })
+    }).then(function() {
+      showToast('Booking confirmed!');
+      if (btn) {
+        btn.textContent = 'Confirmed';
+        btn.style.background = 'rgba(34,197,94,0.15)';
+        btn.style.color = '#16a34a';
+      }
+    }).catch(function() {
+      showToast('Failed to confirm', 'error');
+      if (btn) { btn.disabled = false; btn.textContent = 'Confirm'; }
+    });
+  };
+
+  // ============================================
   // EVENT BOOKINGS → MY BOOKINGS CONNECTION
   // ============================================
   // Shared state (read by schedule.js)

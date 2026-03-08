@@ -64,6 +64,9 @@
       renderAnalyticsCards();
       renderPeakTimes();
       renderCourtUsage();
+      renderRevenueBreakdown();
+      renderMemberActivity();
+      renderMonthlyTrends();
 
       // Gate code
       var gateCodeSetting = settings.find(function(s) { return s.key === 'gate_code'; });
@@ -128,6 +131,112 @@
     el = document.getElementById('usageMonth'); if (el) el.textContent = usageMonth;
   }
 
+  // ============================================
+  // REVENUE BREAKDOWN
+  // ============================================
+  function renderRevenueBreakdown() {
+    var barEl = document.getElementById('revenueBarContainer');
+    var legendEl = document.getElementById('revenueLegend');
+    if (!barEl || !legendEl) return;
+
+    var feeMap = { adult: 120, family: 240, junior: 55 };
+    var categories = {};
+    _adminMembers.forEach(function(m) {
+      var type = m.membership_type || 'adult';
+      var fee = feeMap[type] || 120;
+      if (!categories[type]) categories[type] = { count: 0, amount: 0 };
+      categories[type].count++;
+      categories[type].amount += fee;
+    });
+
+    var total = 0;
+    Object.keys(categories).forEach(function(k) { total += categories[k].amount; });
+    if (total === 0) { barEl.innerHTML = ''; legendEl.innerHTML = '<div class="admin-empty-state">No revenue data</div>'; return; }
+
+    var colors = { adult: '#6b7a3d', family: '#d4e157', junior: '#a3b356' };
+    var barHtml = '';
+    var legendHtml = '';
+    Object.keys(categories).forEach(function(type) {
+      var pct = Math.round((categories[type].amount / total) * 100);
+      var color = colors[type] || '#6b7a3d';
+      barHtml += '<div class="admin-rev-segment" style="width:' + pct + '%;background:' + color + '" title="' + type + ': $' + categories[type].amount + '"></div>';
+      legendHtml += '<div class="admin-rev-legend-item"><span class="admin-rev-dot" style="background:' + color + '"></span><span class="admin-rev-label">' + type.charAt(0).toUpperCase() + type.slice(1) + '</span><span class="admin-rev-amount">$' + categories[type].amount + '</span><span class="admin-rev-pct">' + pct + '%</span></div>';
+    });
+    legendHtml += '<div class="admin-rev-legend-item admin-rev-total"><span class="admin-rev-label">Total</span><span class="admin-rev-amount">$' + total + '</span></div>';
+
+    barEl.innerHTML = barHtml;
+    legendEl.innerHTML = legendHtml;
+  }
+
+  // ============================================
+  // MEMBER ACTIVITY
+  // ============================================
+  function renderMemberActivity() {
+    var now = new Date();
+    var monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+
+    // New members this month
+    var newMembers = _adminMembers.filter(function(m) {
+      return m.created_at && m.created_at.split('T')[0] >= monthStart;
+    });
+    var el = document.getElementById('statNewMembers');
+    if (el) el.textContent = newMembers.length;
+
+    // Avg bookings per member
+    var confirmed = _adminBookings.filter(function(b) { return b.status === 'confirmed'; });
+    var avg = _adminMembers.length > 0 ? Math.round((confirmed.length / _adminMembers.length) * 10) / 10 : 0;
+    el = document.getElementById('statAvgBookings');
+    if (el) el.textContent = avg;
+
+    // Most active members (top 5)
+    var container = document.getElementById('mostActiveList');
+    if (!container) return;
+    var memberBookings = {};
+    confirmed.forEach(function(b) {
+      var name = b.booker_name || b.user_id || 'Unknown';
+      memberBookings[name] = (memberBookings[name] || 0) + 1;
+    });
+    var sorted = Object.entries(memberBookings).sort(function(a, b) { return b[1] - a[1]; }).slice(0, 5);
+    if (!sorted.length) { container.innerHTML = '<div class="admin-empty-state">No booking data yet</div>'; return; }
+    var maxCount = sorted[0][1];
+    container.innerHTML = sorted.map(function(entry, i) {
+      var pct = Math.round((entry[1] / maxCount) * 100);
+      return '<div class="peak-row"><span class="peak-rank">' + (i + 1) + '</span><span class="peak-label" style="width:100px">' + entry[0] + '</span><div class="peak-bar"><div class="peak-bar-fill" style="width:' + pct + '%"></div></div><span class="peak-count">' + entry[1] + '</span></div>';
+    }).join('');
+  }
+
+  // ============================================
+  // MONTHLY TRENDS
+  // ============================================
+  function renderMonthlyTrends() {
+    var container = document.getElementById('monthlyTrendsChart');
+    if (!container) return;
+
+    var confirmed = _adminBookings.filter(function(b) { return b.status === 'confirmed'; });
+    var monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var now = new Date();
+    var trends = [];
+    for (var i = 5; i >= 0; i--) {
+      var m = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      var mo = m.getMonth();
+      var yr = m.getFullYear();
+      var count = confirmed.filter(function(b) {
+        if (!b.date) return false;
+        var d = new Date(b.date + 'T12:00:00');
+        return d.getMonth() === mo && d.getFullYear() === yr;
+      }).length;
+      trends.push({ month: monthNames[mo], bookings: count });
+    }
+
+    var maxBookings = Math.max.apply(null, trends.map(function(t) { return t.bookings; }));
+    if (maxBookings === 0) maxBookings = 1;
+
+    container.innerHTML = '<div class="admin-trends-bars">' + trends.map(function(t) {
+      var heightPct = Math.round((t.bookings / maxBookings) * 100);
+      return '<div class="admin-trend-col"><span class="admin-trend-count">' + t.bookings + '</span><div class="admin-trend-bar" style="height:' + Math.max(heightPct, 5) + '%"></div><span class="admin-trend-label">' + t.month + '</span></div>';
+    }).join('') + '</div>';
+  }
+
   // Gate Code
   window.updateGateCodeAndNotify = function() {
     var input = document.getElementById('newGateCodeInput');
@@ -173,42 +282,58 @@
     URL.revokeObjectURL(link.href);
   }
 
+  function _getExportFromDate() {
+    var el = document.getElementById('adminExportFromDate');
+    return el && el.value ? el.value : '';
+  }
+
   window.exportMembersCSV = function() {
     if (!_adminMembers.length) { showToast('No member data loaded'); return; }
+    var fromDate = _getExportFromDate();
     var feeMap = { adult: 120, family: 240, junior: 55 };
+    var filtered = fromDate ? _adminMembers.filter(function(m) {
+      return m.created_at && m.created_at.split('T')[0] >= fromDate;
+    }) : _adminMembers;
     var rows = [['Name','Email','Role','Membership','Fee','Skill Level','Status','Since']];
-    _adminMembers.forEach(function(m) {
+    filtered.forEach(function(m) {
       rows.push([m.name || '', m.email || '', m.role || 'member', m.membership_type || 'adult',
         '$' + (feeMap[m.membership_type] || 120), m.skill_level || '', m.status || 'active', m.created_at ? m.created_at.split('T')[0] : '']);
     });
     downloadCSV('mtc-members-' + new Date().toISOString().split('T')[0] + '.csv', rows.map(function(r) { return r.join(','); }).join('\n'));
-    showToast('Members exported');
+    showToast(filtered.length + ' members exported');
   };
 
   window.exportPaymentsCSV = function() {
     if (!_adminMembers.length) { showToast('No member data loaded'); return; }
+    var fromDate = _getExportFromDate();
     var feeMap = { adult: 120, family: 240, junior: 55 };
+    var filtered = fromDate ? _adminMembers.filter(function(m) {
+      return m.created_at && m.created_at.split('T')[0] >= fromDate;
+    }) : _adminMembers;
     var rows = [['Name','Email','Membership','Annual Fee','Since','Status']];
     var total = 0;
-    _adminMembers.forEach(function(m) {
+    filtered.forEach(function(m) {
       var fee = feeMap[m.membership_type] || 120;
       total += fee;
       rows.push([m.name || '', m.email || '', m.membership_type || 'adult', '$' + fee, m.created_at ? m.created_at.split('T')[0] : '', m.status || 'active']);
     });
     rows.push(['TOTAL','','',('$' + total),'','']);
     downloadCSV('mtc-payments-' + new Date().toISOString().split('T')[0] + '.csv', rows.map(function(r) { return r.join(','); }).join('\n'));
-    showToast('Payments exported');
+    showToast(filtered.length + ' members · $' + total + ' revenue exported');
   };
 
   window.exportCourtUsageCSV = function() {
     if (!_adminBookings.length) { showToast('No booking data loaded'); return; }
-    var confirmed = _adminBookings.filter(function(b) { return b.status === 'confirmed'; });
+    var fromDate = _getExportFromDate();
+    var confirmed = _adminBookings.filter(function(b) {
+      return b.status === 'confirmed' && (!fromDate || b.date >= fromDate);
+    });
     var rows = [['Date','Time','Court','Member','Match Type','Duration','Status']];
     confirmed.forEach(function(b) {
       rows.push([b.date || '', b.time || '', b.court_name || ('Court ' + b.court_id), b.booker_name || '', b.match_type || '', (b.duration || 2) * 30 + ' min', b.status]);
     });
     downloadCSV('mtc-court-usage-' + new Date().toISOString().split('T')[0] + '.csv', rows.map(function(r) { return r.join(','); }).join('\n'));
-    showToast('Court usage exported');
+    showToast(confirmed.length + ' bookings exported');
   };
 
   // ============================================

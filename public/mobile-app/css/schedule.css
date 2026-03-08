@@ -177,6 +177,61 @@
   color: var(--text-muted);
 }
 
+/* ============================================
+   EVENT FILTER TABS
+============================================ */
+.event-filter-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 0 16px;
+  margin-bottom: 16px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.event-filter-tab {
+  padding: 6px 14px;
+  border: 1.5px solid var(--border-color);
+  border-radius: 20px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.event-filter-tab.active {
+  background: var(--volt);
+  border-color: var(--volt);
+  color: var(--color-black);
+}
+
+.event-filter-tab:active {
+  transform: scale(0.95);
+}
+
+/* EVENT SPOTS BADGE — inline in card footer */
+.event-spots-badge {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: rgba(200, 255, 0, 0.08);
+}
+
+.event-spots-badge.low {
+  color: var(--coral);
+  background: rgba(255, 90, 95, 0.08);
+}
+
+.event-spots-badge.full {
+  color: #fff;
+  background: var(--coral);
+}
+
 .event-card-tap {
   font-size: 12px;
   color: #5a8a00;

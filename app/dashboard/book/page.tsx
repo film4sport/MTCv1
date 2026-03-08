@@ -416,7 +416,7 @@ export default function BookCourtPage() {
 
                                       {showTooltipHere && (booked || eventSlot || blocked) && (
                                         <div className="absolute z-30 bottom-full left-1/2 -translate-x-1/2 mb-1 px-2.5 py-1.5 rounded-lg text-[0.65rem] font-medium whitespace-nowrap shadow-lg pointer-events-none animate-fadeIn" style={{ background: '#2a2f1e', color: '#e8e4d9' }}>
-                                          {blocked ? blocked.reason : eventSlot ? eventSlot.title : isLesson ? 'Lesson' : isProgram ? 'Program session' : booked?.userName}
+                                          {blocked ? blocked.reason : eventSlot ? eventSlot.title : isLesson ? 'Lesson' : isProgram ? 'Program session' : 'Booked'}
                                           <span className="block text-[0.55rem] font-normal" style={{ color: '#9ca3a0' }}>{blocked ? (blocked.notes || 'Court unavailable') : eventSlot ? eventSlot.time : getTimeRange(time, booked?.duration)}</span>
                                           <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent" style={{ borderTopColor: '#2a2f1e' }} />
                                         </div>

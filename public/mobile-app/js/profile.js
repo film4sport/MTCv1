@@ -395,15 +395,172 @@
     if (nameEl) nameEl.textContent = getActiveDisplayName().toUpperCase();
   }
 
+  // ── Active profile derived properties ──
+  window.getActiveAvatar = function() {
+    if (MTC.state.activeFamilyMember && MTC.state.activeFamilyMember.avatar) {
+      return MTC.state.activeFamilyMember.avatar;
+    }
+    return MTC.storage.get('mtc-avatar', 'default');
+  };
+  window.getActiveSkillLevel = function() {
+    if (MTC.state.activeFamilyMember && MTC.state.activeFamilyMember.skillLevel) {
+      return MTC.state.activeFamilyMember.skillLevel;
+    }
+    var user = MTC.state.currentUser;
+    return user ? (user.skillLevel || 'intermediate') : 'intermediate';
+  };
+
+  // ── Family Members Management ──
+  var _newFamilyType = 'adult';
+
+  window.selectFamilyType = function(type, btn) {
+    _newFamilyType = type;
+    document.querySelectorAll('.family-type-btn').forEach(function(b) { b.classList.remove('active'); });
+    if (btn) btn.classList.add('active');
+    var byField = document.getElementById('familyBirthYearField');
+    if (byField) byField.style.display = type === 'junior' ? 'block' : 'none';
+  };
+
+  window.showAddFamilyMemberModal = function() {
+    _newFamilyType = 'adult';
+    var modal = document.getElementById('addFamilyMemberModal');
+    if (modal) { modal.style.display = 'flex'; }
+    var nameInput = document.getElementById('familyMemberNameInput');
+    if (nameInput) { nameInput.value = ''; nameInput.focus(); }
+    var byInput = document.getElementById('familyMemberBirthYear');
+    if (byInput) byInput.value = '';
+    document.querySelectorAll('.family-type-btn').forEach(function(b) {
+      b.classList.toggle('active', b.dataset.type === 'adult');
+    });
+    var byField = document.getElementById('familyBirthYearField');
+    if (byField) byField.style.display = 'none';
+  };
+
+  window.closeAddFamilyMemberModal = function() {
+    var modal = document.getElementById('addFamilyMemberModal');
+    if (modal) modal.style.display = 'none';
+  };
+
+  window.addFamilyMember = function() {
+    var name = (document.getElementById('familyMemberNameInput').value || '').trim();
+    if (!name) { showToast('Please enter a name', 'error'); return; }
+    var birthYear = _newFamilyType === 'junior' ? parseInt(document.getElementById('familyMemberBirthYear').value) || null : null;
+
+    // Limits: max 2 adults, max 4 juniors
+    var members = MTC.state.familyMembers || [];
+    var adultCount = members.filter(function(m) { return m.type === 'adult'; }).length;
+    var juniorCount = members.filter(function(m) { return m.type === 'junior'; }).length;
+    if (_newFamilyType === 'adult' && adultCount >= 2) { showToast('Maximum 2 adults per family', 'error'); return; }
+    if (_newFamilyType === 'junior' && juniorCount >= 4) { showToast('Maximum 4 juniors per family', 'error'); return; }
+
+    var newMember = { name: name, type: _newFamilyType, birthYear: birthYear };
+
+    // Get user's familyId (stored in profile or create family first)
+    var user = MTC.state.currentUser;
+    var familyId = user && user.familyId;
+    var addMemberRequest = function(fId) {
+      return MTC.fn.apiRequest('/mobile/families', {
+        method: 'POST',
+        body: JSON.stringify({ action: 'addMember', familyId: fId, name: name, type: _newFamilyType, birthYear: birthYear })
+      });
+    };
+
+    var p;
+    if (familyId) {
+      p = addMemberRequest(familyId);
+    } else {
+      // Create family first, then add member
+      p = MTC.fn.apiRequest('/mobile/families', {
+        method: 'POST',
+        body: JSON.stringify({ action: 'createFamily', name: (user ? user.name : '') + "'s Family" })
+      }).then(function(res) {
+        if (res && res.familyId) {
+          if (user) user.familyId = res.familyId;
+          return addMemberRequest(res.familyId);
+        }
+        throw new Error('Failed to create family');
+      });
+    }
+    p.then(function(res) {
+      if (res && res.member) {
+        MTC.state.familyMembers.push(res.member);
+        MTC.storage.set('mtc-family-members', MTC.state.familyMembers);
+        renderFamilyMembers();
+        renderFamilySwitcher();
+        closeAddFamilyMemberModal();
+        showToast(name + ' added to your family!');
+      }
+    }).catch(function() {
+      showToast('Failed to add family member', 'error');
+    });
+  };
+
+  window.removeFamilyMember = function(memberId) {
+    var member = (MTC.state.familyMembers || []).find(function(m) { return m.id === memberId; });
+    if (!member) return;
+    if (!confirm('Remove ' + member.name + ' from your family?')) return;
+
+    MTC.fn.apiRequest('/mobile/families', {
+      method: 'DELETE',
+      body: JSON.stringify({ memberId: memberId })
+    }).then(function() {
+      MTC.state.familyMembers = MTC.state.familyMembers.filter(function(m) { return m.id !== memberId; });
+      MTC.storage.set('mtc-family-members', MTC.state.familyMembers);
+      // If active profile was this member, switch back to primary
+      if (MTC.state.activeFamilyMember && MTC.state.activeFamilyMember.id === memberId) {
+        switchFamilyProfile('primary');
+      }
+      renderFamilyMembers();
+      renderFamilySwitcher();
+      showToast(member.name + ' removed');
+    }).catch(function() {
+      showToast('Failed to remove family member', 'error');
+    });
+  };
+
+  function renderFamilyMembers() {
+    var section = document.getElementById('familyMembersSection');
+    var list = document.getElementById('familyMembersList');
+    if (!section || !list) return;
+    var members = MTC.state.familyMembers || [];
+    var user = MTC.state.currentUser;
+    if (!user || user.membershipType !== 'family') {
+      section.style.display = 'none';
+      return;
+    }
+    section.style.display = 'block';
+    if (members.length === 0) {
+      list.innerHTML = '<div style="text-align:center;padding:16px 0;color:var(--text-muted);font-size:13px;">No family members added yet</div>';
+      return;
+    }
+    var html = '';
+    members.forEach(function(m) {
+      var typeLabel = m.type === 'junior' ? '<span class="family-member-type junior">Junior</span>' : '<span class="family-member-type adult">Adult</span>';
+      var skillLabel = m.skillLevel ? m.skillLevel.charAt(0).toUpperCase() + m.skillLevel.slice(1) : 'Not set';
+      html += '<div class="family-member-card">' +
+        '<div class="family-member-info">' +
+          '<div class="family-member-name">' + sanitizeHTML(m.name) + ' ' + typeLabel + '</div>' +
+          '<div class="family-member-skill">Skill: ' + sanitizeHTML(skillLabel) + '</div>' +
+        '</div>' +
+        '<button class="family-member-remove" onclick="removeFamilyMember(\'' + m.id + '\')" aria-label="Remove ' + sanitizeHTML(m.name) + '">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>' +
+        '</button>' +
+      '</div>';
+    });
+    list.innerHTML = html;
+  }
+  window.renderFamilyMembers = renderFamilyMembers;
+
   // Expose for other modules
   window.getActiveDisplayName = getActiveDisplayName;
   window.renderFamilySwitcher = renderFamilySwitcher;
 
   // Render on init if family data exists
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', renderFamilySwitcher);
+    document.addEventListener('DOMContentLoaded', function() { renderFamilySwitcher(); renderFamilyMembers(); });
   } else {
     renderFamilySwitcher();
+    renderFamilyMembers();
   }
 
   // ============================================

@@ -48,9 +48,11 @@ export async function fetchBookings(): Promise<Booking[]> {
     userId: b.user_id,
     userName: b.user_name,
     guestName: b.guest_name ?? undefined,
-    participants: b.booking_participants?.map((p: { participant_id: string; participant_name: string }) => ({
+    participants: b.booking_participants?.map((p: { participant_id: string; participant_name: string; confirmed_at: string | null; confirmed_via: string | null }) => ({
       id: p.participant_id,
       name: p.participant_name,
+      confirmedAt: p.confirmed_at ?? undefined,
+      confirmedVia: (p.confirmed_via as 'email' | 'dashboard' | 'mobile') ?? undefined,
     })),
     status: b.status as Booking['status'],
     type: b.type as Booking['type'],
@@ -95,6 +97,15 @@ export async function createBooking(booking: Booking): Promise<void> {
 
 export async function cancelBooking(id: string): Promise<void> {
   const { error } = await supabase.from('bookings').update({ status: 'cancelled' }).eq('id', id);
+  if (error) throw error;
+}
+
+export async function confirmParticipant(bookingId: string, participantId: string, via: 'dashboard' | 'mobile'): Promise<void> {
+  const { error } = await supabase
+    .from('booking_participants')
+    .update({ confirmed_at: new Date().toISOString(), confirmed_via: via })
+    .eq('booking_id', bookingId)
+    .eq('participant_id', participantId);
   if (error) throw error;
 }
 
@@ -143,7 +154,9 @@ export async function toggleEventRsvp(eventId: string, userName: string): Promis
 // ─── Partners ───────────────────────────────────────────
 
 export async function fetchPartners(): Promise<Partner[]> {
-  const { data } = await supabase.from('partners').select('*').order('created_at', { ascending: false });
+  // Auto-expire: only return requests where the requested play date hasn't passed
+  const today = new Date().toISOString().split('T')[0];
+  const { data } = await supabase.from('partners').select('*').gte('date', today).order('created_at', { ascending: false });
   if (!data) return [];
   return data.map(p => ({
     id: p.id,
@@ -413,6 +426,11 @@ export async function markNotificationRead(id: string): Promise<void> {
 
 export async function clearNotifications(userId: string): Promise<void> {
   const { error } = await supabase.from('notifications').update({ read: true }).eq('user_id', userId).eq('read', false);
+  if (error) throw error;
+}
+
+export async function deleteReadNotifications(userId: string): Promise<void> {
+  const { error } = await supabase.from('notifications').delete().eq('user_id', userId).eq('read', true);
   if (error) throw error;
 }
 

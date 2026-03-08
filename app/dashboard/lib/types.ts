@@ -53,7 +53,7 @@ export interface Booking {
   userName: string;
   bookedFor?: string;   // family member name if booked via family profile
   guestName?: string;
-  participants?: { id: string; name: string }[];
+  participants?: { id: string; name: string; confirmedAt?: string; confirmedVia?: 'email' | 'dashboard' | 'mobile' }[];
   status: 'confirmed' | 'cancelled';
   type: 'court' | 'partner' | 'program' | 'lesson';
   programId?: string;

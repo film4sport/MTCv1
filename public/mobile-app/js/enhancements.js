@@ -188,6 +188,51 @@
     }
   }
 
+  // ============================================
+  // EVENTS SCREEN SKELETON
+  // ============================================
+  function showEventsSkeleton() {
+    var container = document.querySelector('#screen-events .screen-content, #screen-events');
+    if (!container) return;
+    if (document.getElementById('eventsSkeleton')) return;
+    var skeleton = document.createElement('div');
+    skeleton.id = 'eventsSkeleton';
+    skeleton.className = 'skeleton-loader';
+    skeleton.style.padding = '16px';
+    skeleton.innerHTML =
+      '<div class="skeleton-bar full" style="height:36px;border-radius:12px;margin-bottom:16px"></div>' +
+      '<div class="skeleton-home-card"><div class="skeleton-bar title"></div><div class="skeleton-bar long"></div><div class="skeleton-bar medium"></div></div>' +
+      '<div class="skeleton-home-card"><div class="skeleton-bar title"></div><div class="skeleton-bar long"></div><div class="skeleton-bar short"></div></div>';
+    container.prepend(skeleton);
+  }
+  function hideEventsSkeleton() {
+    var el = document.getElementById('eventsSkeleton');
+    if (el) { el.style.opacity='0'; el.style.transition='opacity 0.3s ease'; setTimeout(function(){el.remove();},300); }
+  }
+
+  // ============================================
+  // NOTIFICATIONS SCREEN SKELETON
+  // ============================================
+  function showNotificationsSkeleton() {
+    var container = document.querySelector('#screen-notifications .screen-content, #screen-notifications');
+    if (!container) return;
+    if (document.getElementById('notifSkeleton')) return;
+    var skeleton = document.createElement('div');
+    skeleton.id = 'notifSkeleton';
+    skeleton.className = 'skeleton-loader';
+    skeleton.style.padding = '16px';
+    var html = '';
+    for (var i = 0; i < 4; i++) {
+      html += '<div class="skeleton-message-item"><div class="skeleton-bar circle"></div><div style="flex:1"><div class="skeleton-bar medium"></div><div class="skeleton-bar short"></div></div></div>';
+    }
+    skeleton.innerHTML = html;
+    container.prepend(skeleton);
+  }
+  function hideNotificationsSkeleton() {
+    var el = document.getElementById('notifSkeleton');
+    if (el) { el.style.opacity='0'; el.style.transition='opacity 0.3s ease'; setTimeout(function(){el.remove();},300); }
+  }
+
   function setupSkeletonHooks() {
     document.addEventListener('screenchange', function(e) {
       const screen = e.detail && e.detail.screen;
@@ -210,6 +255,14 @@
       if (screen === 'messages') {
         showMessagesSkeleton();
         setTimeout(hideMessagesSkeleton, 150);
+      }
+      if (screen === 'events') {
+        showEventsSkeleton();
+        setTimeout(hideEventsSkeleton, 200);
+      }
+      if (screen === 'notifications') {
+        showNotificationsSkeleton();
+        setTimeout(hideNotificationsSkeleton, 150);
       }
     });
   }

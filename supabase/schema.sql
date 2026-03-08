@@ -83,6 +83,15 @@ create table if not exists bookings (
   created_at timestamptz default now()
 );
 
+-- ─── Bookings RLS ─────────────────────────────────────
+alter table bookings enable row level security;
+create policy "bookings_select" on bookings for select using (true); -- all members can see all bookings (calendar grid)
+create policy "bookings_insert_own" on bookings for insert
+  with check (user_id = auth.uid());
+create policy "bookings_update_own" on bookings for update
+  using (user_id = auth.uid() or is_admin());
+-- No general delete: bookings are cancelled (status update), not deleted
+
 -- ─── Booking Participants ───────────────────────────────
 create table if not exists booking_participants (
   id serial primary key,
@@ -170,6 +179,26 @@ create table if not exists messages (
   timestamp timestamptz not null default now(),
   read boolean not null default false
 );
+
+-- ─── Conversations RLS ─────────────────────────────────
+alter table conversations enable row level security;
+create policy "conversations_select_own" on conversations for select
+  using (member_a = auth.uid() or member_b = auth.uid());
+create policy "conversations_insert_own" on conversations for insert
+  with check (member_a = auth.uid() or member_b = auth.uid());
+create policy "conversations_update_own" on conversations for update
+  using (member_a = auth.uid() or member_b = auth.uid());
+-- No delete policy: conversations persist (soft-delete only if needed)
+
+-- ─── Messages RLS ──────────────────────────────────────
+alter table messages enable row level security;
+create policy "messages_select_own" on messages for select
+  using (from_id = auth.uid() or to_id = auth.uid());
+create policy "messages_insert_own" on messages for insert
+  with check (from_id = auth.uid());
+create policy "messages_update_own" on messages for update
+  using (to_id = auth.uid()); -- only recipient can update (mark read)
+-- No delete policy: messages persist for audit trail
 
 -- ─── Announcements ──────────────────────────────────────
 create table if not exists announcements (

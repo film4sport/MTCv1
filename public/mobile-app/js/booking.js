@@ -388,7 +388,7 @@
           if (booking.user==='You') {
             sc+=' my-booking'; inner='<span class="slot-label mine-label"><svg class="mine-icon" viewBox="0 0 16 16" width="12" height="12" fill="currentColor"><circle cx="8" cy="8" r="7"/></svg> MY COURT</span>';
           } else {
-            sc+=' booked'; inner='<span class="slot-label booked-label">'+sanitizeHTML(booking.user)+'</span>';
+            sc+=' booked'; inner='<span class="slot-label booked-label">Booked</span>';
           }
           click=' onclick="selectSlot(this)" tabindex="0" role="button"';
         } else {
@@ -486,15 +486,32 @@
       coachHtml = '<div class="event-meta-row coach-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg> Coach: <strong>'+sanitizeHTML(ev.coach)+'</strong></div>';
     }
 
-    // Registered members list (publicly visible)
+    // Registered members list with avatar circles (matching dashboard style)
     const regList = ev.registered || [];
     let regHtml = '';
+    var _avatarColors = ['#6b7a3d','#d97706','#2563eb','#7c3aed','#dc2626','#0891b2','#4f46e5','#059669'];
+    function _getAvatarColor(n) {
+      var sum=0; for(var i=0;i<n.length;i++) sum+=n.charCodeAt(i);
+      return _avatarColors[sum % _avatarColors.length];
+    }
+    function _getInitials(n) {
+      return n.split(' ').map(function(w){return w[0]||'';}).join('').slice(0,2).toUpperCase();
+    }
     if (regList.length > 0) {
-      regHtml = '<div class="event-reg-list"><div class="event-reg-title">Registered ('+regList.length+')</div><div class="event-reg-members">';
-      regList.forEach(function(name) {
-        const isYou = name === 'You';
-        regHtml += '<span class="reg-member'+(isYou?' you':'')+'">'+sanitizeHTML(name)+'</span>';
+      regHtml = '<div class="event-reg-list"><div class="event-reg-title">Registered ('+regList.length+')</div><div class="event-reg-avatars">';
+      var showList = regList.slice(0, 8);
+      showList.forEach(function(name) {
+        var isYou = name === 'You';
+        var displayName = isYou ? 'You' : name.split(' ')[0];
+        var initials = isYou ? 'U' : _getInitials(name);
+        var bgColor = isYou ? '#6b7a3d' : _getAvatarColor(name);
+        regHtml += '<div class="reg-avatar-item'+(isYou?' you':'')+'">' +
+          '<div class="reg-avatar-circle" style="background:'+bgColor+'">'+sanitizeHTML(initials)+'</div>' +
+          '<span class="reg-avatar-name">'+sanitizeHTML(displayName)+'</span></div>';
       });
+      if (regList.length > 8) {
+        regHtml += '<div class="reg-avatar-item"><div class="reg-avatar-circle" style="background:#d4e157;color:#2a2f1e">+' + (regList.length - 8) + '</div><span class="reg-avatar-name">more</span></div>';
+      }
       regHtml += '</div></div>';
     }
 
@@ -536,6 +553,9 @@
         '<div class="event-detail-slots '+slotsClass+'"><span class="slots-dot"></span> '+sanitizeHTML(slotsText)+'</div>'+
         regHtml +
         '<button class="event-detail-btn '+btnClass+'" onclick="registerForGridEvent(\''+dateStr+'\',\''+ev.startTime+'\','+court+')">'+sanitizeHTML(btnText)+'</button>'+
+        '<button class="event-detail-cal-btn" onclick="downloadEventICS(\''+dateStr+'\',\''+ev.startTime+'\',\''+ev.endTime+'\',\''+sanitizeHTML(ev.title).replace(/'/g,"\\'")+'\')">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>' +
+          ' Add to Calendar</button>'+
       '</div>';
 
     const app=document.getElementById('app')||document.body;
@@ -620,14 +640,191 @@
     const m=document.getElementById('bookingModal'); if(!m) return;
     m.classList.remove('active'); document.body.style.overflow='';
     document.querySelectorAll('.weekly-slot.selected').forEach(function(s){s.classList.remove('selected');});
+    resetBookingOptions();
   }
 
+
+  // ============================================
+  // BOOKING OPTIONS STATE
+  // ============================================
+  var _selectedMatchType = 'singles';
+  var _selectedDuration = 2; // slots (2=1h, 3=1.5h, 4=2h)
+  var _selectedParticipants = []; // [{id, name}]
+
+  // Match type rules (must match API BOOKING_RULES)
+  var MATCH_RULES = {
+    singles: { durations: [2, 3], maxParticipants: 1 },
+    doubles: { durations: [2, 3, 4], maxParticipants: 3 }
+  };
+
+  function selectMatchType(type) {
+    _selectedMatchType = type;
+    document.querySelectorAll('#matchTypeToggle .match-type-btn').forEach(function(b) {
+      b.classList.toggle('active', b.dataset.type === type);
+    });
+    // Update available durations
+    var rules = MATCH_RULES[type];
+    document.querySelectorAll('#durationToggle .duration-btn').forEach(function(b) {
+      var slots = parseInt(b.dataset.slots, 10);
+      b.style.display = rules.durations.indexOf(slots) !== -1 ? '' : 'none';
+    });
+    // Reset duration if current selection isn't valid for new type
+    if (rules.durations.indexOf(_selectedDuration) === -1) {
+      selectDuration(rules.durations[0]);
+    }
+    // Adjust max participants hint
+    var maxP = rules.maxParticipants;
+    var addBtn = document.getElementById('addPlayerBtn');
+    if (addBtn) addBtn.style.display = _selectedParticipants.length >= maxP ? 'none' : '';
+  }
+
+  function selectDuration(slots) {
+    _selectedDuration = slots;
+    document.querySelectorAll('#durationToggle .duration-btn').forEach(function(b) {
+      b.classList.toggle('active', parseInt(b.dataset.slots, 10) === slots);
+    });
+  }
+
+  function toggleGuestField() {
+    var toggle = document.getElementById('guestToggle');
+    var fields = document.getElementById('guestFields');
+    if (!toggle || !fields) return;
+    var isOn = toggle.classList.toggle('active');
+    toggle.setAttribute('aria-checked', isOn ? 'true' : 'false');
+    fields.style.display = isOn ? 'block' : 'none';
+    if (isOn) {
+      var inp = document.getElementById('guestNameInput');
+      if (inp) setTimeout(function() { inp.focus(); }, 100);
+    }
+  }
+
+  function openPlayerPicker() {
+    // Build member list from cached members data
+    var members = MTC.storage.get('mtc-members', []);
+    var currentUser = MTC.storage.get('mtc-user', null) || MTC.storage.get('mtc-current-user', null);
+    var currentId = currentUser ? currentUser.id : '';
+
+    // Filter out current user and already-added participants
+    var addedIds = _selectedParticipants.map(function(p) { return p.id; });
+    var available = members.filter(function(m) {
+      return m.id !== currentId && addedIds.indexOf(m.id) === -1;
+    });
+
+    var overlay = document.createElement('div');
+    overlay.className = 'player-picker-overlay';
+    overlay.id = 'playerPickerOverlay';
+    overlay.onclick = function(e) { if (e.target === overlay) closePlayerPicker(); };
+
+    var html = '<div class="player-picker">' +
+      '<div class="player-picker-header">' +
+        '<span class="player-picker-title">ADD PLAYER</span>' +
+        '<button onclick="closePlayerPicker()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);padding:4px;">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>' +
+        '</button>' +
+      '</div>' +
+      '<div class="player-picker-search">' +
+        '<input type="text" id="playerSearchInput" placeholder="Search members..." oninput="filterPlayerList(this.value)" autocomplete="off">' +
+      '</div>' +
+      '<div class="player-picker-list" id="playerPickerList">';
+
+    if (available.length === 0) {
+      html += '<div style="text-align:center;padding:24px;color:var(--text-muted);font-size:13px;">No members available</div>';
+    } else {
+      available.forEach(function(m) {
+        var initials = (m.name || '?').split(' ').map(function(w) { return w[0]; }).join('').toUpperCase().slice(0, 2);
+        html += '<div class="player-picker-item" data-name="' + sanitizeHTML(m.name || '') + '" onclick="addParticipant(\'' + sanitizeHTML(m.id) + '\',\'' + sanitizeHTML(m.name || 'Member') + '\')">' +
+          '<div class="player-avatar">' + initials + '</div>' +
+          '<span class="player-name">' + sanitizeHTML(m.name || 'Member') + '</span>' +
+        '</div>';
+      });
+    }
+
+    html += '</div></div>';
+    overlay.innerHTML = html;
+    document.getElementById('app').appendChild(overlay);
+    setTimeout(function() { overlay.classList.add('active'); }, 10);
+  }
+
+  function closePlayerPicker() {
+    var o = document.getElementById('playerPickerOverlay');
+    if (o) { o.classList.remove('active'); setTimeout(function() { o.remove(); }, 300); }
+  }
+
+  function filterPlayerList(query) {
+    var q = (query || '').toLowerCase();
+    document.querySelectorAll('#playerPickerList .player-picker-item').forEach(function(item) {
+      var name = (item.dataset.name || '').toLowerCase();
+      item.style.display = name.indexOf(q) !== -1 ? '' : 'none';
+    });
+  }
+
+  function addParticipant(id, name) {
+    var maxP = _selectedMatchType === 'singles' ? 1 : 3;
+    if (_selectedParticipants.length >= maxP) {
+      showToast('Max ' + (maxP + 1) + ' players for ' + _selectedMatchType);
+      return;
+    }
+    _selectedParticipants.push({ id: id, name: name });
+    renderParticipantChips();
+    closePlayerPicker();
+
+    var addBtn = document.getElementById('addPlayerBtn');
+    if (addBtn) addBtn.style.display = _selectedParticipants.length >= maxP ? 'none' : '';
+  }
+
+  function removeParticipant(id) {
+    _selectedParticipants = _selectedParticipants.filter(function(p) { return p.id !== id; });
+    renderParticipantChips();
+
+    var maxP = _selectedMatchType === 'singles' ? 1 : 3;
+    var addBtn = document.getElementById('addPlayerBtn');
+    if (addBtn) addBtn.style.display = _selectedParticipants.length >= maxP ? 'none' : '';
+  }
+
+  function renderParticipantChips() {
+    var container = document.getElementById('participantsList');
+    if (!container) return;
+    if (_selectedParticipants.length === 0) { container.innerHTML = ''; return; }
+    container.innerHTML = _selectedParticipants.map(function(p) {
+      return '<span class="booking-participant-chip">' +
+        sanitizeHTML(p.name) +
+        ' <button class="booking-participant-remove" onclick="removeParticipant(\'' + sanitizeHTML(p.id) + '\')">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>' +
+        '</button>' +
+      '</span>';
+    }).join('');
+  }
+
+  function resetBookingOptions() {
+    _selectedMatchType = 'singles';
+    _selectedDuration = 2;
+    _selectedParticipants = [];
+    // Reset UI
+    document.querySelectorAll('#matchTypeToggle .match-type-btn').forEach(function(b) {
+      b.classList.toggle('active', b.dataset.type === 'singles');
+    });
+    // Reset duration buttons (singles: show 1h+1.5h, hide 2h)
+    document.querySelectorAll('#durationToggle .duration-btn').forEach(function(b) {
+      var slots = parseInt(b.dataset.slots, 10);
+      b.classList.toggle('active', slots === 2);
+      b.style.display = MATCH_RULES.singles.durations.indexOf(slots) !== -1 ? '' : 'none';
+    });
+    var guestToggle = document.getElementById('guestToggle');
+    var guestFields = document.getElementById('guestFields');
+    var guestInput = document.getElementById('guestNameInput');
+    if (guestToggle) { guestToggle.classList.remove('active'); guestToggle.setAttribute('aria-checked', 'false'); }
+    if (guestFields) guestFields.style.display = 'none';
+    if (guestInput) guestInput.value = '';
+    var pList = document.getElementById('participantsList');
+    if (pList) pList.innerHTML = '';
+    var addBtn = document.getElementById('addPlayerBtn');
+    if (addBtn) addBtn.style.display = '';
+  }
 
   // ============================================
   // CONFIRM BOOKING
   // ============================================
   function confirmBooking() {
-    if (typeof confirmBookingPayment==='function'){confirmBookingPayment();return;}
     if (!selectedSlot||!selectedSlot.date||!selectedSlot.time||!selectedSlot.court){showToast('Please select a time slot first');closeBookingModal();return;}
 
     // Validate date format (YYYY-MM-DD)
@@ -640,11 +837,18 @@
     if (slotDate<now){showToast('Cannot book a past date');return;}
 
     const btn=document.querySelector('.booking-confirm-btn');
-    if (btn){btn.disabled=true;btn.textContent='BOOKING...';btn.style.transform='scale(0.97)';btn.style.opacity='0.7';}
+    if (btn){btn.disabled=true;btn.innerHTML='<span class="booking-spinner"></span> BOOKING...';btn.style.transform='scale(0.97)';btn.style.opacity='0.7';}
 
     var bookedForName = (typeof getActiveDisplayName === 'function') ? getActiveDisplayName() : '';
     var userName = MTC.storage.get('mtc-user-name', '');
     var courtId = parseInt(selectedSlot.court.replace(/\D/g, ''), 10) || 1;
+
+    // Read booking options from UI
+    var matchType = _selectedMatchType || 'singles';
+    var duration = _selectedDuration || 2; // slots (2=1h, 3=1.5h, 4=2h)
+    var isGuest = document.getElementById('guestToggle') && document.getElementById('guestToggle').classList.contains('active');
+    var guestNameEl = document.getElementById('guestNameInput');
+    var guestName = isGuest && guestNameEl ? guestNameEl.value.trim() : undefined;
 
     var bookingData = {
       courtId: courtId,
@@ -653,7 +857,12 @@
       time: selectedSlot.time,
       userName: userName,
       bookedFor: (MTC.state.activeFamilyMember && bookedForName) ? bookedForName : undefined,
-      type: 'court'
+      type: 'court',
+      matchType: matchType,
+      duration: duration,
+      isGuest: isGuest || false,
+      guestName: guestName,
+      participants: _selectedParticipants.length > 0 ? _selectedParticipants : undefined
     };
 
     function resetBtn() {
@@ -820,7 +1029,7 @@
         } else if(covered[ck]){sc+=' event-covered';}
         else if(booking){
           if(booking.user==='You'){sc+=' my-booking';inner='<span class="slot-label mine-label"><svg class="mine-icon" viewBox="0 0 16 16" width="12" height="12" fill="currentColor"><circle cx="8" cy="8" r="7"/></svg> MY COURT</span>';}
-          else{sc+=' booked';inner='<span class="slot-label booked-label">'+sanitizeHTML(booking.user)+'</span>';}
+          else{sc+=' booked';inner='<span class="slot-label booked-label">Booked</span>';}
           click=' onclick="selectSlot(this)"';
         } else {
           sc+=' available';inner='<span class="slot-book-btn">Book</span>';click=' onclick="selectSlot(this)"';
@@ -904,7 +1113,40 @@
     content.setAttribute('aria-hidden',open?'false':'true');
   }
 
+  // ICS calendar file download for events
+  function downloadEventICS(dateStr, startTime, endTime, title) {
+    var TIMEZONE = 'America/Toronto';
+    function parseTime(t) {
+      var m = t.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+      if (!m) return { h: 9, min: 0 };
+      var h = parseInt(m[1]), min = parseInt(m[2]), p = m[3].toUpperCase();
+      if (p === 'PM' && h !== 12) h += 12;
+      if (p === 'AM' && h === 12) h = 0;
+      return { h: h, min: min };
+    }
+    function toICS(d, h, m) {
+      var parts = d.split('-');
+      return parts[0] + parts[1] + parts[2] + 'T' + String(h).padStart(2, '0') + String(m).padStart(2, '0') + '00';
+    }
+    var s = parseTime(startTime), e = parseTime(endTime);
+    var uid = Date.now() + '-' + Math.random().toString(36).slice(2) + '@mtc.ca';
+    var ics = 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Mono Tennis Club//MTC//EN\r\n' +
+      'X-WR-TIMEZONE:' + TIMEZONE + '\r\nBEGIN:VEVENT\r\nUID:' + uid + '\r\n' +
+      'DTSTART;TZID=' + TIMEZONE + ':' + toICS(dateStr, s.h, s.min) + '\r\n' +
+      'DTEND;TZID=' + TIMEZONE + ':' + toICS(dateStr, e.h, e.min) + '\r\n' +
+      'SUMMARY:' + title + '\r\nLOCATION:Mono Tennis Club\\, Mono\\, ON\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n';
+    var blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = title.replace(/\s+/g, '-').toLowerCase() + '.ics';
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('Calendar event downloaded');
+  }
+
   // Window exports for HTML onclick handlers
+  window.downloadEventICS = downloadEventICS;
   window.toggleBookingInfo = toggleBookingInfo;
   window.selectSlot = selectSlot;
   window.selectWeekDay = selectWeekDay;
@@ -915,6 +1157,14 @@
   window.showEventDetail = showEventDetail;
   window.confirmBooking = confirmBooking;
   window.closeBookingModal = closeBookingModal;
+  window.selectMatchType = selectMatchType;
+  window.selectDuration = selectDuration;
+  window.toggleGuestField = toggleGuestField;
+  window.openPlayerPicker = openPlayerPicker;
+  window.closePlayerPicker = closePlayerPicker;
+  window.filterPlayerList = filterPlayerList;
+  window.addParticipant = addParticipant;
+  window.removeParticipant = removeParticipant;
   window.registerForGridEvent = registerForGridEvent;
   window.switchScheduleView = switchScheduleView;
   window.switchScheduleTab = switchScheduleTab;
@@ -956,6 +1206,19 @@
         user: b.userName || 'Booked'
       });
     });
+
+    // Update schedule nav badge (today's bookings count)
+    var today = new Date().toISOString().split('T')[0];
+    var todayCount = (bookingsData[today] || []).length;
+    var scheduleBadge = document.getElementById('navScheduleBadge');
+    if (scheduleBadge) {
+      if (todayCount > 0) {
+        scheduleBadge.textContent = todayCount;
+        scheduleBadge.style.display = 'flex';
+      } else {
+        scheduleBadge.style.display = 'none';
+      }
+    }
 
     // Re-render if booking system is initialized
     if (typeof initBookingSystem === 'function') {

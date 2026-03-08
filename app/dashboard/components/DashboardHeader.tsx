@@ -14,7 +14,7 @@ interface DashboardHeaderProps {
 
 export default function DashboardHeader({ title }: DashboardHeaderProps) {
   const router = useRouter();
-  const { currentUser, logout, notifications, clearNotifications, markNotificationRead, notificationPreferences, refreshData, familyMembers, activeProfile, switchProfile, activeDisplayName } = useApp();
+  const { currentUser, logout, notifications, clearNotifications, deleteReadNotifications, markNotificationRead, notificationPreferences, refreshData, familyMembers, activeProfile, switchProfile, activeDisplayName } = useApp();
   const { showToast } = useToast();
   const [menuOpen, setMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
@@ -159,9 +159,14 @@ export default function DashboardHeader({ title }: DashboardHeaderProps) {
               <div className="dropdown-enter absolute right-0 top-[52px] w-[calc(100vw-24px)] sm:w-80 rounded-2xl shadow-2xl border overflow-hidden z-50" style={{ backgroundColor: '#faf8f3', borderColor: '#e0dcd3' }}>
                 <div className="p-4 border-b flex items-center justify-between" style={{ borderColor: '#e0dcd3' }}>
                   <span className="font-semibold text-sm" style={{ color: '#1a1f12' }}>Notifications</span>
-                  {unreadCount > 0 && (
-                    <button onClick={clearNotifications} className="text-xs font-medium hover:underline" style={{ color: '#6b7a3d' }}>Mark all read</button>
-                  )}
+                  <div className="flex gap-3">
+                    {filteredNotifications.some(n => n.read) && (
+                      <button onClick={deleteReadNotifications} className="text-xs font-medium hover:underline" style={{ color: '#9ca3a0' }}>Clear read</button>
+                    )}
+                    {unreadCount > 0 && (
+                      <button onClick={clearNotifications} className="text-xs font-medium hover:underline" style={{ color: '#6b7a3d' }}>Mark all read</button>
+                    )}
+                  </div>
                 </div>
                 <div className="max-h-80 overflow-y-auto">
                   {filteredNotifications.length === 0 ? (
@@ -187,7 +192,20 @@ export default function DashboardHeader({ title }: DashboardHeaderProps) {
                       return (
                         <button
                           key={n.id}
-                          onClick={() => markNotificationRead(n.id)}
+                          onClick={() => {
+                            markNotificationRead(n.id);
+                            setNotifOpen(false);
+                            // Navigate based on notification type
+                            const typeRoutes: Record<string, string> = {
+                              booking: '/dashboard/book',
+                              message: '/dashboard/messages',
+                              event: '/dashboard',
+                              partner: '/dashboard',
+                              announcement: '/dashboard',
+                            };
+                            const route = typeRoutes[n.type] || '/dashboard';
+                            router.push(route);
+                          }}
                           className={`w-full text-left p-4 border-b transition-colors hover:bg-black/[0.02] ${!n.read ? 'bg-[#d4e157]/10' : ''}`}
                           style={{ borderColor: '#e0dcd3' }}
                         >

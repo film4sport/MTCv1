@@ -14,10 +14,13 @@ export async function GET(request: Request) {
   try {
     const supabase = getAdminClient();
 
+    // Auto-expire: only return requests where the requested play date hasn't passed
+    const today = new Date().toISOString().split('T')[0];
     const { data: partners, error } = await supabase
       .from('partners')
       .select('*')
       .eq('status', 'available')
+      .gte('date', today)
       .order('created_at', { ascending: false });
 
     if (error) {

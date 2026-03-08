@@ -20,7 +20,7 @@
     if ('serviceWorker' in navigator) {
       caches.keys().then(function(names) {
         names.forEach(function(name) {
-          if (name.indexOf('mtc-court-74c66c4f') === -1) {
+          if (name.indexOf('mtc-court-cc0bf142') === -1) {
             caches.delete(name);
             console.log('[CacheBust] Deleted old cache:', name);
           }
@@ -718,6 +718,9 @@
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
         </button>
         <h2 class="screen-title">NOTIFICATIONS</h2>
+        <button class="header-btn clear-read-btn" aria-label="Clear read notifications" onclick="deleteReadNotifications()" id="clearReadBtn" style="display:none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
         <button class="header-btn mark-read-btn" aria-label="Mark all notifications as read" onclick="markAllNotificationsRead()" id="markAllReadBtn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline><polyline points="20 12 9 23 4 18" opacity="0.5"></polyline></svg>
         </button>
@@ -947,15 +950,51 @@
             </div>
           </div>
           
-          <div class="booking-modal-payment-info" id="paymentInfoBox">
-            <div class="booking-modal-payment-text" id="paymentInfoText">
-              Bringing a guest? A <strong>$10 guest fee</strong> applies per non-member and will be added to your tab.
+          <!-- Match Type Toggle -->
+          <div class="booking-modal-option-group">
+            <span class="booking-modal-option-label">Match Type</span>
+            <div class="booking-match-type-toggle" id="matchTypeToggle">
+              <button class="match-type-btn active" data-type="singles" onclick="selectMatchType('singles')">Singles</button>
+              <button class="match-type-btn" data-type="doubles" onclick="selectMatchType('doubles')">Doubles</button>
             </div>
           </div>
-          
+
+          <!-- Duration Picker -->
+          <div class="booking-modal-option-group">
+            <span class="booking-modal-option-label">Duration</span>
+            <div class="booking-duration-toggle" id="durationToggle">
+              <button class="duration-btn active" data-slots="2" onclick="selectDuration(2)">1h</button>
+              <button class="duration-btn" data-slots="3" onclick="selectDuration(3)">1.5h</button>
+              <button class="duration-btn" data-slots="4" onclick="selectDuration(4)" style="display:none;">2h</button>
+            </div>
+          </div>
+
+          <!-- Guest Toggle + Name -->
+          <div class="booking-modal-option-group">
+            <div class="booking-guest-row">
+              <span class="booking-modal-option-label">Bringing a Guest?</span>
+              <div class="toggle" id="guestToggle" role="switch" aria-checked="false" tabindex="0" onclick="toggleGuestField()"></div>
+            </div>
+            <div class="booking-guest-fields" id="guestFields" style="display:none;">
+              <input type="text" id="guestNameInput" class="booking-input" placeholder="Guest name" maxlength="100" autocomplete="off">
+              <div class="booking-guest-fee">$10 guest fee — e-transfer to monotennis.payment@gmail.com</div>
+            </div>
+          </div>
+
+          <!-- Add Players (participants) -->
+          <div class="booking-modal-option-group">
+            <div class="booking-guest-row">
+              <span class="booking-modal-option-label">Add Players</span>
+              <button class="booking-add-player-btn" id="addPlayerBtn" onclick="openPlayerPicker()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              </button>
+            </div>
+            <div class="booking-participants-list" id="participantsList"></div>
+          </div>
+
           <div class="booking-modal-actions">
             <button class="booking-modal-cancel-btn" onclick="closeBookingModal()">CANCEL</button>
-            <button class="booking-confirm-btn" aria-label="Book court" onclick="confirmBookingPayment()">
+            <button class="booking-confirm-btn" aria-label="Book court" onclick="confirmBooking()">
               CONFIRM & BOOK
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
             </button>
@@ -1317,6 +1356,14 @@
               Calendar
             </button>
           </div>
+        </div>
+
+        <!-- Event Type Filter Tabs -->
+        <div class="event-filter-tabs" id="eventFilterTabs">
+          <button class="event-filter-tab active" data-filter="all" onclick="filterEvents('all')">All</button>
+          <button class="event-filter-tab" data-filter="free" onclick="filterEvents('free')">Social</button>
+          <button class="event-filter-tab" data-filter="members" onclick="filterEvents('members')">Weekly</button>
+          <button class="event-filter-tab" data-filter="paid" onclick="filterEvents('paid')">Tournaments</button>
         </div>
 
         <!-- Events List View -->
@@ -1800,6 +1847,43 @@
       <!-- Family Profile Switcher (hidden if not family membership) -->
       <div id="familySwitcher" style="display:none;"></div>
 
+      <!-- Family Members Management (hidden if not family membership) -->
+      <div class="profile-section" id="familyMembersSection" style="display:none;">
+        <h3 class="profile-section-title">FAMILY MEMBERS</h3>
+        <div id="familyMembersList"></div>
+        <button class="family-add-btn" onclick="showAddFamilyMemberModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          Add Family Member
+        </button>
+      </div>
+
+      <!-- Add Family Member Modal -->
+      <div class="modal-overlay" id="addFamilyMemberModal" style="display:none;" onclick="closeAddFamilyMemberModal()">
+        <div class="modal" onclick="event.stopPropagation()">
+          <div class="modal-title">ADD FAMILY MEMBER</div>
+          <div class="modal-desc">Add a family member to book courts and play under your account.</div>
+          <div class="profile-edit-field">
+            <label class="profile-edit-label">Name</label>
+            <input type="text" id="familyMemberNameInput" class="profile-edit-input" placeholder="Full name">
+          </div>
+          <div class="profile-edit-field">
+            <label class="profile-edit-label">Type</label>
+            <div class="family-type-toggle">
+              <button class="family-type-btn active" data-type="adult" onclick="selectFamilyType('adult',this)">Adult</button>
+              <button class="family-type-btn" data-type="junior" onclick="selectFamilyType('junior',this)">Junior</button>
+            </div>
+          </div>
+          <div class="profile-edit-field" id="familyBirthYearField" style="display:none;">
+            <label class="profile-edit-label">Birth Year</label>
+            <input type="number" id="familyMemberBirthYear" class="profile-edit-input" placeholder="e.g. 2015" min="1950" max="2025">
+          </div>
+          <div style="display:flex;gap:10px;margin-top:16px;">
+            <button class="modal-btn" style="flex:1;background:var(--bg-secondary);color:var(--text-primary)" onclick="closeAddFamilyMemberModal()">Cancel</button>
+            <button class="modal-btn" style="flex:1;" onclick="addFamilyMember()">Add</button>
+          </div>
+        </div>
+      </div>
+
       <!-- Personal Info Section -->
       <div class="profile-section">
         <h3 class="profile-section-title">PERSONAL INFO</h3>
@@ -1869,6 +1953,14 @@
           <div class="toggle active" role="switch" aria-checked="true" tabindex="0" onclick="this.classList.toggle('active'); this.setAttribute('aria-checked', this.classList.contains('active')); saveSettingsToggles(); showToast('Notification setting updated')"></div>
         </div>
         <div class="profile-field">
+          <span class="profile-field-label">Messages</span>
+          <div class="toggle active" role="switch" aria-checked="true" tabindex="0" onclick="this.classList.toggle('active'); this.setAttribute('aria-checked', this.classList.contains('active')); saveSettingsToggles(); showToast('Notification setting updated')"></div>
+        </div>
+        <div class="profile-field">
+          <span class="profile-field-label">Event Reminders</span>
+          <div class="toggle active" role="switch" aria-checked="true" tabindex="0" onclick="this.classList.toggle('active'); this.setAttribute('aria-checked', this.classList.contains('active')); saveSettingsToggles(); showToast('Notification setting updated')"></div>
+        </div>
+        <div class="profile-field">
           <span class="profile-field-label">Push Notifications</span>
           <div class="toggle active" id="pushNotifToggle" role="switch" aria-checked="true" tabindex="0" onclick="togglePushNotifications(this)"></div>
         </div>
@@ -1880,10 +1972,6 @@
         <div class="profile-field">
           <span class="profile-field-label">Dark Mode</span>
           <div class="toggle" id="darkModeToggle" onclick="toggleTheme()"></div>
-        </div>
-        <div class="profile-field">
-          <span class="profile-field-label">Location Services</span>
-          <div class="toggle active" role="switch" aria-checked="true" tabindex="0" onclick="this.classList.toggle('active'); this.setAttribute('aria-checked', this.classList.contains('active')); saveSettingsToggles(); showToast('Location services ' + (this.classList.contains('active') ? 'enabled' : 'disabled'))"></div>
         </div>
       </div>
 
@@ -2062,6 +2150,10 @@
         <!-- CSV Exports -->
         <div class="admin-card">
           <div class="admin-card-title">Export Data</div>
+          <div class="admin-export-date-filter">
+            <label class="admin-label" for="adminExportFromDate">Export from date</label>
+            <input type="date" id="adminExportFromDate" class="admin-input" style="margin-bottom:8px">
+          </div>
           <div class="admin-export-btns">
             <button class="admin-btn admin-btn-secondary" onclick="exportMembersCSV()">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
@@ -2103,6 +2195,35 @@
               <div class="admin-usage-value" id="usageMonth">--</div>
             </div>
           </div>
+        </div>
+        <!-- Revenue Breakdown -->
+        <div class="admin-card">
+          <div class="admin-card-title">Revenue Breakdown</div>
+          <div id="revenueBarContainer" class="admin-revenue-bar"></div>
+          <div id="revenueLegend" class="admin-revenue-legend"></div>
+        </div>
+
+        <!-- Member Activity -->
+        <div class="admin-card">
+          <div class="admin-card-title">Member Activity</div>
+          <div class="admin-usage-grid" id="memberActivityStats">
+            <div class="admin-usage-item">
+              <div class="admin-usage-label">New This Month</div>
+              <div class="admin-usage-value" id="statNewMembers">--</div>
+            </div>
+            <div class="admin-usage-item">
+              <div class="admin-usage-label">Avg Bookings</div>
+              <div class="admin-usage-value" id="statAvgBookings">--</div>
+            </div>
+          </div>
+          <div class="admin-card-subtitle">Most Active Members</div>
+          <div id="mostActiveList" class="admin-peak-times"></div>
+        </div>
+
+        <!-- Monthly Trends -->
+        <div class="admin-card">
+          <div class="admin-card-title">Monthly Trends</div>
+          <div id="monthlyTrendsChart" class="admin-monthly-chart"></div>
         </div>
       </div>
 
@@ -2221,6 +2342,13 @@
           <div class="conversation-avatar" id="conversationAvatar"></div>
           <div class="conversation-name" id="conversationName">—</div>
         </div>
+        <button class="header-btn convo-search-toggle" id="convoSearchToggle" aria-label="Search messages" onclick="toggleConvoSearch()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </button>
+      </div>
+      <div class="convo-search-bar" id="convoSearchBar" style="display:none;">
+        <input type="text" id="convoSearchInput" placeholder="Search messages..." oninput="filterChatMessages(this.value)">
+        <span class="convo-search-count" id="convoSearchCount"></span>
       </div>
       
       <div class="chat-messages" id="chatMessages">
@@ -2268,16 +2396,18 @@
           <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
           <span class="nav-label">Home</span>
         </button>
-        <button class="nav-item" id="nav-schedule" onclick="navigateTo('schedule');" aria-label="Schedule">
+        <button class="nav-item" id="nav-schedule" onclick="navigateTo('schedule');" style="position:relative;" aria-label="Schedule">
           <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
           <span class="nav-label">Schedule</span>
+          <span class="message-badge" id="navScheduleBadge" aria-hidden="true" style="display:none">0</span>
         </button>
         <button class="nav-item book-btn pulse-animate ripple" id="nav-book" onclick="navigateTo('book');" aria-label="Book a court">
           <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
         </button>
-        <button class="nav-item" id="nav-partners" onclick="navigateTo('partners');" aria-label="Find partners">
+        <button class="nav-item" id="nav-partners" onclick="navigateTo('partners');" style="position:relative;" aria-label="Find partners">
           <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
           <span class="nav-label">Partners</span>
+          <span class="message-badge" id="navPartnersBadge" aria-hidden="true" style="display:none">0</span>
         </button>
         <button class="nav-item" id="nav-messages" onclick="navigateTo('messages');" style="position: relative;" aria-label="Messages">
           <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
