@@ -19,6 +19,7 @@
   // Private state
   let conversations = JSON.parse(JSON.stringify(defaultConversations));
   let conversationIdMap = {}; // memberId → server conversationId
+  let conversationMetaMap = {}; // memberId → { name, avatar } from API (fallback for clubMembers timing)
   let currentConversation = null;
 
   // Cross-file function (called from enhancements.js)
@@ -84,7 +85,9 @@
     keys.forEach(function(memberId) {
       var msgs = conversations[memberId] || [];
       var member = MTC.state.clubMembers.find(function(m) { return m.id === memberId; });
-      var name = member ? member.name : memberId;
+      // Fallback: use API-provided name/avatar from conversationMetaMap if clubMembers lookup fails
+      var meta = conversationMetaMap[memberId];
+      var name = member ? member.name : (meta ? meta.name : memberId);
       var lastMsg = msgs.length > 0 ? msgs[msgs.length - 1] : null;
       var preview = lastMsg ? lastMsg.text : 'No messages yet';
       var time = lastMsg ? (lastMsg.time || '') : '';
@@ -97,7 +100,7 @@
       if (isClub) {
         avatarHtml = '<div class="message-avatar-wrap club-avatar">' + clubIcon + '</div>';
       } else {
-        var avatarKey = member ? member.avatar : 'default';
+        var avatarKey = member ? member.avatar : (meta ? meta.avatar : 'default');
         var svg = avatars[avatarKey] || avatars['default'] || '';
         avatarHtml = '<div class="message-avatar-wrap">' + svg + '</div>';
       }
@@ -150,15 +153,17 @@
     try {
     currentConversation = memberId;
     const member = MTC.state.clubMembers.find(function(m) { return m.id === memberId; });
-
-    if (!member) return;
+    // Fallback: use API-provided name/avatar from conversationMetaMap
+    var meta = conversationMetaMap[memberId];
+    var displayName = member ? member.name : (meta ? meta.name : 'Member');
+    var displayAvatar = member ? member.avatar : (meta ? meta.avatar : 'default');
 
     // Update header
-    document.getElementById('conversationName').textContent = member.name;
+    document.getElementById('conversationName').textContent = displayName;
     const avatarEl = document.getElementById('conversationAvatar');
     var avatars = (typeof MTC !== 'undefined' && MTC.state && MTC.state.avatarSVGs) || (typeof avatarSVGs !== 'undefined' ? avatarSVGs : {});
-    if (avatarEl && avatars[member.avatar]) {
-      avatarEl.innerHTML = avatars[member.avatar];
+    if (avatarEl && (avatars[displayAvatar] || avatars['default'])) {
+      avatarEl.innerHTML = avatars[displayAvatar] || avatars['default'];
     }
 
     // Load messages
@@ -414,6 +419,13 @@
     apiConvos.forEach(function(conv) {
       var key = conv.otherUserId || conv.id;
       if (conv.id) conversationIdMap[key] = conv.id;
+      // Cache name + avatar from API response (fallback when clubMembers hasn't loaded yet)
+      if (conv.otherUserName) {
+        conversationMetaMap[key] = {
+          name: conv.otherUserName,
+          avatar: conv.otherUserAvatar || 'man-1'
+        };
+      }
       conversations[key] = (conv.messages || []).map(function(m) {
         return {
           id: m.id || null,

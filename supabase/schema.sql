@@ -437,7 +437,6 @@ create or replace function send_welcome_message(new_user_id uuid, new_user_name 
 returns void as $$
 declare
   v_admin_id uuid;
-  v_gate_code text;
   v_conv_id integer;
   v_msg text;
 begin
@@ -445,15 +444,10 @@ begin
   select id into v_admin_id from public.profiles where role = 'admin' limit 1;
   if v_admin_id is null then return; end if;
 
-  -- Get gate code
-  select value into v_gate_code from public.club_settings where key = 'gate_code';
-
-  -- Build message
-  v_msg := 'Welcome to Mono Tennis Club, ' || split_part(new_user_name, ' ', 1) || '!';
-  if v_gate_code is not null then
-    v_msg := v_msg || E'\n\nYour court gate code is: ' || v_gate_code || E'\n\nPlease keep this code confidential.';
-  end if;
-  v_msg := v_msg || ' See you on the court!';
+  -- Build message (gate code provided separately after Opening Day)
+  v_msg := 'Welcome to Mono Tennis Club, ' || split_part(new_user_name, ' ', 1) || '!' ||
+    E'\n\nYour court gate code will be provided after Opening Day.' ||
+    E'\n\nIn the meantime, explore the app — book courts, find partners, and check out upcoming events. See you on the court!';
 
   -- Create conversation
   insert into public.conversations (member_a, member_b, last_message, last_timestamp)

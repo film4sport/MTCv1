@@ -642,11 +642,25 @@
       }
     });
 
-    // Load members
+    // Load members FIRST, then conversations (conversations need member names for display)
     MTC.fn.loadFromAPI('/mobile/members', 'mtc-api-members', null).then(function(members) {
       if (members && members.length > 0 && typeof window.updateMembersFromAPI === 'function') {
         window.updateMembersFromAPI(members);
       }
+      // Load conversations AFTER members are populated (prevents name lookup race condition)
+      return MTC.fn.loadFromAPI('/mobile/conversations', 'mtc-api-conversations', null);
+    }).then(function(conversations) {
+      if (conversations && typeof window.updateConversationsFromAPI === 'function') {
+        window.updateConversationsFromAPI(conversations);
+      }
+    }).catch(function(err) {
+      MTC.warn('[MTC] Members/conversations load error:', err);
+      // Still try to load conversations even if members failed (API fallback names will work)
+      MTC.fn.loadFromAPI('/mobile/conversations', 'mtc-api-conversations', null).then(function(conversations) {
+        if (conversations && typeof window.updateConversationsFromAPI === 'function') {
+          window.updateConversationsFromAPI(conversations);
+        }
+      });
     });
 
     // Load partners
@@ -667,13 +681,6 @@
     MTC.fn.loadFromAPI('/mobile/bookings', 'mtc-api-bookings', null).then(function(bookings) {
       if (bookings && typeof window.updateBookingsFromAPI === 'function') {
         window.updateBookingsFromAPI(bookings);
-      }
-    });
-
-    // Load conversations
-    MTC.fn.loadFromAPI('/mobile/conversations', 'mtc-api-conversations', null).then(function(conversations) {
-      if (conversations && typeof window.updateConversationsFromAPI === 'function') {
-        window.updateConversationsFromAPI(conversations);
       }
     });
 
