@@ -636,6 +636,94 @@
   }
 
   // ============================================
+  // EVENT FILTER TABS
+  // ============================================
+  var _activeFilter = 'all';
+
+  function filterEvents(filter) {
+    _activeFilter = filter;
+    // Update tab UI
+    document.querySelectorAll('#eventFilterTabs .event-filter-tab').forEach(function(tab) {
+      tab.classList.toggle('active', tab.dataset.filter === filter);
+    });
+
+    // Filter event cards by badge type
+    document.querySelectorAll('#eventsListView .event-card').forEach(function(card) {
+      var onclick = card.getAttribute('onclick') || '';
+      var match = onclick.match(/showEventModal\(['"]([^'"]+)['"]\)/);
+      if (!match) return;
+      var eventId = match[1];
+      var ev = clubEventsData[eventId];
+      if (!ev) { card.style.display = ''; return; }
+
+      if (filter === 'all') {
+        card.style.display = '';
+      } else {
+        card.style.display = ev.badge === filter ? '' : 'none';
+      }
+    });
+
+    // Also hide section headers if all their cards are hidden
+    document.querySelectorAll('#eventsListView .section-header').forEach(function(header) {
+      var next = header.nextElementSibling;
+      var hasVisible = false;
+      while (next && !next.classList.contains('section-header')) {
+        if (next.classList.contains('event-card') && next.style.display !== 'none') {
+          hasVisible = true;
+          break;
+        }
+        next = next.nextElementSibling;
+      }
+      header.style.display = hasVisible ? '' : 'none';
+    });
+  }
+
+  // ============================================
+  // SPOTS REMAINING — inject into event cards
+  // ============================================
+  function updateEventCardSpots() {
+    document.querySelectorAll('#eventsListView .event-card, #scheduleEventsView .event-card').forEach(function(card) {
+      var onclick = card.getAttribute('onclick') || '';
+      var match = onclick.match(/showEventModal\(['"]([^'"]+)['"]\)/);
+      if (!match) return;
+      var eventId = match[1];
+      var ev = clubEventsData[eventId];
+      if (!ev) return;
+
+      // Remove any existing spots badge
+      var existing = card.querySelector('.event-spots-badge');
+      if (existing) existing.remove();
+
+      var footer = card.querySelector('.event-card-footer');
+      if (!footer) return;
+
+      var spotsLeft = ev.spotsTotal - ev.spotsTaken;
+      var badgeHtml = '';
+      if (ev.badge === 'paid') {
+        // Paid events: show spots remaining
+        if (spotsLeft <= 0) {
+          badgeHtml = '<span class="event-spots-badge full">FULL</span>';
+        } else if (spotsLeft <= 5) {
+          badgeHtml = '<span class="event-spots-badge low">' + spotsLeft + ' spots left</span>';
+        } else {
+          badgeHtml = '<span class="event-spots-badge">' + spotsLeft + '/' + ev.spotsTotal + ' spots</span>';
+        }
+      } else {
+        // Free/members: show going count
+        badgeHtml = '<span class="event-spots-badge">' + ev.spotsTaken + ' going</span>';
+      }
+      footer.insertAdjacentHTML('afterbegin', badgeHtml);
+    });
+  }
+
+  // Run after DOM ready + after API data loads
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() { setTimeout(updateEventCardSpots, 100); });
+  } else {
+    setTimeout(updateEventCardSpots, 100);
+  }
+
+  // ============================================
   // EXPORTS — expose to MTC namespace + window
   // ============================================
 
@@ -673,6 +761,8 @@
   window.showEventModal = showEventModal;
   window.closeEventModal = closeEventModal;
   window.toggleEventRsvp = toggleEventRsvp;
+  window.filterEvents = filterEvents;
+  window.updateEventCardSpots = updateEventCardSpots;
   window.showRsvpListModal = showRsvpListModal;
   window.closeRsvpListModal = closeRsvpListModal;
   window.rsvpFromModal = rsvpFromModal;
@@ -748,5 +838,6 @@
 
     // Re-sync the UI
     if (typeof syncEventCardDates === 'function') syncEventCardDates();
+    if (typeof updateEventCardSpots === 'function') updateEventCardSpots();
   };
 })();

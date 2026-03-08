@@ -79,12 +79,7 @@ export default function SuccessModal({ courtName, date, time, duration, matchTyp
         <p className="text-sm mb-2" style={{ color: '#2a2f1e', fontWeight: 500 }}>
           {getTimeRange(time, duration)} {matchType && duration ? `· ${matchType === 'singles' ? 'Singles' : 'Doubles'} · ${formatDuration(duration)}` : ''}
         </p>
-        {participants && participants.length > 0 && (
-          <p className="text-xs mb-4" style={{ color: '#6b7a3d' }}>
-            With: {participants.map(p => p.name).join(', ')}
-          </p>
-        )}
-        {!(participants && participants.length > 0) && <div className="mb-4" />}
+        <div className="mb-4" />
         <div className="flex gap-3">
           <button
             onClick={() => {

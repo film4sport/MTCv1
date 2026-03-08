@@ -27,6 +27,7 @@ interface AppState {
   setBookings: (bookings: Booking[]) => void;
   addBooking: (booking: Booking) => void;
   cancelBooking: (id: string) => void;
+  confirmParticipant: (bookingId: string, participantId: string) => void;
   events: ClubEvent[];
   setEvents: (events: ClubEvent[]) => void;
   toggleRsvp: (eventId: string, userName: string) => void;
@@ -47,6 +48,7 @@ interface AppState {
   setNotifications: (notifications: Notification[]) => void;
   markNotificationRead: (id: string) => void;
   clearNotifications: () => void;
+  deleteReadNotifications: () => void;
   weather: WeatherData;
   analytics: AdminAnalytics;
   programs: CoachingProgram[];
@@ -665,13 +667,45 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // Actions
   const addBooking = useCallback((booking: Booking) => {
     setBookings(prev => [...prev, booking]);
-    // Persist to Supabase — rollback booking + its notifications on failure
-    db.createBooking(booking).catch((err) => {
-      reportError(err, 'Supabase');
-      setBookings(prev => prev.filter(b => b.id !== booking.id));
-      // Also remove any notifications created for this booking (by matching the booking ID in body text)
-      setNotifications(prev => prev.filter(n => !(n.type === 'booking' && n.body?.includes(booking.date) && n.body?.includes(booking.time))));
-      showToast('Failed to save booking. Please try again.', 'error');
+    // Persist via server-side validated API — rollback booking + its notifications on failure
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session?.access_token) {
+        // Fallback to direct Supabase write if no session (shouldn't happen)
+        db.createBooking(booking).catch((err) => {
+          reportError(err, 'Supabase');
+          setBookings(prev => prev.filter(b => b.id !== booking.id));
+          setNotifications(prev => prev.filter(n => !(n.type === 'booking' && n.body?.includes(booking.date) && n.body?.includes(booking.time))));
+          showToast('Failed to save booking. Please try again.', 'error');
+        });
+        return;
+      }
+      fetch('/api/dashboard/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+        body: JSON.stringify({
+          id: booking.id,
+          courtId: booking.courtId,
+          date: booking.date,
+          time: booking.time,
+          matchType: booking.matchType || 'singles',
+          duration: booking.duration || 2,
+          isGuest: !!booking.guestName,
+          guestName: booking.guestName,
+          participants: booking.participants,
+          bookedFor: booking.bookedFor,
+          userName: booking.userName,
+        }),
+      }).then(async (res) => {
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({ error: 'Server error' }));
+          throw new Error(data.error || `HTTP ${res.status}`);
+        }
+      }).catch((err) => {
+        reportError(err, 'DashboardBookingAPI');
+        setBookings(prev => prev.filter(b => b.id !== booking.id));
+        setNotifications(prev => prev.filter(n => !(n.type === 'booking' && n.body?.includes(booking.date) && n.body?.includes(booking.time))));
+        showToast(err.message || 'Failed to save booking. Please try again.', 'error');
+      });
     });
     // Create notification for booker
     if (booking.type === 'lesson') {
@@ -848,13 +882,49 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
       return prev.map(b => b.id === id ? { ...b, status: 'cancelled' as const } : b);
     });
-    // Persist to Supabase — rollback on failure
-    db.cancelBooking(id).catch((err) => {
-      reportError(err, 'Supabase');
-      setBookings(prev => prev.map(b => b.id === id ? { ...b, status: 'confirmed' as const } : b));
-      showToast('Failed to cancel booking. Please try again.', 'error');
+    // Persist via server-side validated API — rollback on failure
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session?.access_token) {
+        db.cancelBooking(id).catch((err) => {
+          reportError(err, 'Supabase');
+          setBookings(prev => prev.map(b => b.id === id ? { ...b, status: 'confirmed' as const } : b));
+          showToast('Failed to cancel booking. Please try again.', 'error');
+        });
+        return;
+      }
+      fetch('/api/dashboard/bookings', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+        body: JSON.stringify({ bookingId: id }),
+      }).then(async (res) => {
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({ error: 'Server error' }));
+          throw new Error(data.error || `HTTP ${res.status}`);
+        }
+      }).catch((err) => {
+        reportError(err, 'DashboardBookingAPI');
+        setBookings(prev => prev.map(b => b.id === id ? { ...b, status: 'confirmed' as const } : b));
+        showToast(err.message || 'Failed to cancel booking. Please try again.', 'error');
+      });
     });
   }, [members]);
+
+  // Participant confirmation — marks a participant as confirmed on a booking
+  const confirmParticipant = useCallback((bookingId: string, participantId: string) => {
+    setBookings(prev => prev.map(b => {
+      if (b.id !== bookingId) return b;
+      return {
+        ...b,
+        participants: b.participants?.map(p =>
+          p.id === participantId ? { ...p, confirmedAt: new Date().toISOString(), confirmedVia: 'dashboard' as const } : p
+        ),
+      };
+    }));
+    db.confirmParticipant(bookingId, participantId, 'dashboard').catch((err) => {
+      reportError(err, 'Supabase');
+      showToast('Failed to confirm participant', 'error');
+    });
+  }, []);
 
   // Program CRUD
   const addProgram = useCallback((program: CoachingProgram) => {
@@ -1307,6 +1377,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (currentUser) db.clearNotifications(currentUser.id).catch((err) => reportError(err, 'Supabase'));
   }, [currentUser]);
 
+  const deleteReadNotifications = useCallback(() => {
+    setNotifications(prev => prev.filter(n => !n.read));
+    if (currentUser) db.deleteReadNotifications(currentUser.id).catch((err) => reportError(err, 'Supabase'));
+  }, [currentUser]);
+
   const refreshData = useCallback(async () => {
     if (!currentUser) return;
     try {
@@ -1332,10 +1407,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [currentUser]);
 
   const contextValue = useMemo<AppState>(() => ({
-    currentUser, updateCurrentUser, login, logout, members, setMembers, courts, setCourts, bookings, setBookings, addBooking, cancelBooking,
+    currentUser, updateCurrentUser, login, logout, members, setMembers, courts, setCourts, bookings, setBookings, addBooking, cancelBooking, confirmParticipant,
     events, setEvents, toggleRsvp, partners, setPartners, addPartner, removePartner, conversations, setConversations, sendMessage, markConversationRead, deleteConversation, deleteMessage,
     announcements, setAnnouncements, dismissAnnouncement, notifications, setNotifications, markNotificationRead,
-    clearNotifications, weather, analytics,
+    clearNotifications, deleteReadNotifications, weather, analytics,
     programs, setPrograms, addProgram, cancelProgram, enrollInProgram, withdrawFromProgram,
     familyMembers, setFamilyMembers, activeProfile, switchProfile, activeDisplayName, activeAvatar, activeSkillLevel,
     notificationPreferences, setNotificationPreferences,
@@ -1344,9 +1419,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     currentUser, members, courts, bookings, events, partners, conversations,
     announcements, notifications, weather, analytics, programs, notificationPreferences, isLoaded,
     familyMembers, activeProfile, activeDisplayName, activeAvatar, activeSkillLevel,
-    updateCurrentUser, login, logout, addBooking, cancelBooking, toggleRsvp,
+    updateCurrentUser, login, logout, addBooking, cancelBooking, confirmParticipant, toggleRsvp,
     addPartner, removePartner, sendMessage, markConversationRead, deleteConversation, deleteMessage, dismissAnnouncement,
-    markNotificationRead, clearNotifications, addProgram, cancelProgram,
+    markNotificationRead, clearNotifications, deleteReadNotifications, addProgram, cancelProgram,
     enrollInProgram, withdrawFromProgram, switchProfile, refreshData,
   ]);
 

@@ -258,13 +258,13 @@ export async function GET(request: Request) {
     const bookingIds = (bookings || []).map(b => b.id);
     const { data: participants } = await supabase
       .from('booking_participants')
-      .select('booking_id, participant_name')
+      .select('booking_id, participant_id, participant_name, confirmed_at, confirmed_via')
       .in('booking_id', bookingIds.length > 0 ? bookingIds : ['__none__']);
 
-    const participantMap: Record<string, string[]> = {};
+    const participantMap: Record<string, { name: string; id: string; confirmedAt: string | null; confirmedVia: string | null }[]> = {};
     (participants || []).forEach(p => {
       if (!participantMap[p.booking_id]) participantMap[p.booking_id] = [];
-      participantMap[p.booking_id].push(p.participant_name);
+      participantMap[p.booking_id].push({ name: p.participant_name, id: p.participant_id, confirmedAt: p.confirmed_at, confirmedVia: p.confirmed_via });
     });
 
     const result = (bookings || []).map(b => ({
@@ -539,6 +539,38 @@ export async function DELETE(request: Request) {
     if (participants && participants.length > 0) {
       fireCancellationNotifications(supabase, booking, participants)
         .catch(err => console.error('[mobile-booking] Cancel notification error:', err));
+    }
+
+    return NextResponse.json({ success: true });
+  } catch {
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+  }
+}
+
+/**
+ * PATCH /api/mobile/bookings — Confirm participation in a booking
+ *
+ * Body: { bookingId }
+ */
+export async function PATCH(request: Request) {
+  const authResult = await authenticateMobileRequest(request);
+  if (authResult instanceof NextResponse) return authResult;
+
+  try {
+    const { bookingId } = await request.json();
+    if (!bookingId) {
+      return NextResponse.json({ error: 'Missing bookingId' }, { status: 400 });
+    }
+
+    const supabase = getAdminClient();
+    const { error } = await supabase
+      .from('booking_participants')
+      .update({ confirmed_at: new Date().toISOString(), confirmed_via: 'mobile' })
+      .eq('booking_id', bookingId)
+      .eq('participant_id', authResult.id);
+
+    if (error) {
+      return NextResponse.json({ error: 'Failed to confirm' }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });

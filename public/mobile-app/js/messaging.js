@@ -261,6 +261,36 @@
     noResults.style.display = found === 0 ? 'block' : 'none';
   }
 
+  // ── In-conversation message search ──
+  window.toggleConvoSearch = function() {
+    var bar = document.getElementById('convoSearchBar');
+    var input = document.getElementById('convoSearchInput');
+    if (!bar) return;
+    var isOpen = bar.style.display !== 'none';
+    bar.style.display = isOpen ? 'none' : 'flex';
+    if (!isOpen && input) { input.value = ''; input.focus(); }
+    if (isOpen) filterChatMessages(''); // clear filter
+  };
+
+  window.filterChatMessages = function(query) {
+    var bubbles = document.querySelectorAll('#chatMessages .chat-bubble');
+    var count = 0;
+    query = (query || '').toLowerCase();
+    bubbles.forEach(function(b) {
+      var text = b.textContent.toLowerCase();
+      if (!query) {
+        b.style.opacity = '1';
+      } else if (text.includes(query)) {
+        b.style.opacity = '1';
+        count++;
+      } else {
+        b.style.opacity = '0.2';
+      }
+    });
+    var countEl = document.getElementById('convoSearchCount');
+    if (countEl) countEl.textContent = query ? count + ' found' : '';
+  };
+
   // onclick handler (index.html)
   window.openConversation = function(memberId) {
     try {
@@ -323,11 +353,18 @@
 
   // Private helper
   function updateMessageBadge() {
-    const unreadCount = document.querySelectorAll('.message-unread').length;
-    const badge = document.getElementById('navMessageBadge');
+    // Count from data (works even when messages screen isn't rendered)
+    var unreadCount = 0;
+    Object.keys(conversations).forEach(function(key) {
+      var msgs = conversations[key];
+      if (Array.isArray(msgs) && msgs.some(function(m) { return !m.sent && m.read === false; })) {
+        unreadCount++;
+      }
+    });
+    var badge = document.getElementById('navMessageBadge');
     if (badge) {
       if (unreadCount > 0) {
-        badge.textContent = unreadCount;
+        badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
         badge.style.display = 'flex';
       } else {
         badge.style.display = 'none';

@@ -7,12 +7,18 @@ import Link from 'next/link';
 
 
 export default function DashboardHome() {
-  const { currentUser, bookings, events, announcements, dismissAnnouncement } = useApp();
+  const { currentUser, bookings, events, announcements, dismissAnnouncement, confirmParticipant } = useApp();
 
   const myBookings = bookings
     .filter(b => b.userId === currentUser?.id && b.status === 'confirmed')
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
     .slice(0, 3);
+
+  // Bookings where current user is invited as participant but hasn't confirmed
+  const pendingConfirmations = bookings.filter(b =>
+    b.status === 'confirmed' &&
+    b.participants?.some(p => p.id === currentUser?.id && !p.confirmedAt)
+  );
 
   const upcomingEvents = events
     .filter(e => new Date(e.date) >= new Date())
@@ -163,6 +169,34 @@ export default function DashboardHome() {
             </Link>
           ))}
         </div>
+
+        {/* Pending Confirmations — bookings you're invited to */}
+        {pendingConfirmations.length > 0 && (
+          <div className="glass-card rounded-2xl border p-5 section-card mb-6" style={{ background: 'rgba(234, 179, 8, 0.04)', borderColor: 'rgba(234, 179, 8, 0.2)' }}>
+            <h3 className="font-semibold text-sm mb-3 flex items-center gap-2" style={{ color: '#ca8a04' }}>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              Pending Confirmations
+            </h3>
+            <div className="space-y-2">
+              {pendingConfirmations.map(b => (
+                <div key={b.id} className="flex items-center gap-3 rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.7)' }}>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm" style={{ color: '#2a2f1e' }}>{b.courtName} &bull; {b.matchType === 'doubles' ? 'Doubles' : 'Singles'}</p>
+                    <p className="text-xs" style={{ color: '#6b7266' }}>{new Date(b.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} &bull; {b.time}</p>
+                    <p className="text-xs mt-0.5" style={{ color: '#6b7a3d' }}>Booked by {b.userName}</p>
+                  </div>
+                  <button
+                    onClick={() => { confirmParticipant(b.id, currentUser!.id); }}
+                    className="px-3 py-1.5 rounded-lg text-xs font-medium text-white btn-press shrink-0"
+                    style={{ background: '#6b7a3d' }}
+                  >
+                    Confirm
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Two Column: Bookings + Events */}
         <div className="grid lg:grid-cols-2 gap-6">

@@ -296,6 +296,26 @@
     showToast('All notifications marked as read');
   }
 
+  function deleteReadNotifications() {
+    var readItems = document.querySelectorAll('.notification-item:not(.unread)');
+    if (readItems.length === 0) { showToast('No read notifications to clear'); return; }
+    readItems.forEach(function(item) { item.remove(); });
+    // Also remove from API data cache
+    apiNotifications = apiNotifications.filter(function(n) { return !n.read; });
+    // Delete from server
+    if (typeof MTC !== 'undefined' && MTC.fn && MTC.fn.apiRequest) {
+      MTC.fn.apiRequest('/mobile/notifications', {
+        method: 'DELETE',
+        body: JSON.stringify({ readOnly: true })
+      }).catch(function() { /* non-critical */ });
+    }
+    updateUnreadCount();
+    // Hide clear button if no read items left
+    var clearBtn = document.getElementById('clearReadBtn');
+    if (clearBtn) clearBtn.style.display = 'none';
+    showToast('Read notifications cleared');
+  }
+
   function updateUnreadCount() {
     const unreadItems = document.querySelectorAll('.notification-item.unread');
     const count = unreadItems.length;
@@ -534,7 +554,8 @@
       const settings = {};
       // All toggles now in merged settings screen
       // Order: 0=Booking Reminders, 1=Partner Requests, 2=Club Announcements,
-      //        3=Push Notifications, 4=Dark Mode, 5=Location Services
+      //        3=Messages, 4=Event Reminders, 5=Push Notifications,
+      //        6=Dark Mode
       const allToggles = document.querySelectorAll('#screen-settings .toggle');
       allToggles.forEach(function(t, i) {
         settings['settings-toggle-' + i] = t.classList.contains('active');
@@ -547,8 +568,9 @@
         var prefs = {
           bookings: settings['settings-toggle-0'] !== false,
           partners: settings['settings-toggle-1'] !== false,
-          events: settings['settings-toggle-2'] !== false,
-          messages: true,
+          announcements: settings['settings-toggle-2'] !== false,
+          messages: settings['settings-toggle-3'] !== false,
+          events: settings['settings-toggle-4'] !== false,
         };
         MTC.fn.apiRequest('/mobile/settings', {
           method: 'PATCH',
@@ -564,12 +586,13 @@
       if (!settings) return;
 
       // All toggles now in merged settings screen
+      // Order: 0=Booking Reminders, 1=Partner Requests, 2=Club Announcements,
+      //        3=Messages, 4=Event Reminders, 5=Push Notifications, 6=Dark Mode
       const allToggles = document.querySelectorAll('#screen-settings .toggle');
       allToggles.forEach(function(t, i) {
         const key = 'settings-toggle-' + i;
         if (key in settings) {
-          // Skip dark mode toggle (index 4) - handled by theme.js
-          if (i === 4) return;
+          if (i === 6) return; // Dark mode — handled by theme.js
           if (settings[key]) t.classList.add('active');
           else t.classList.remove('active');
           t.setAttribute('aria-checked', settings[key] ? 'true' : 'false');
@@ -624,6 +647,10 @@
             body: JSON.stringify({ id: n.id })
           }).catch(function() { /* non-critical */ });
         }
+        // Navigate based on notification type
+        var typeRoutes = { booking: 'mybookings', message: 'messages', event: 'events', partner: 'partners' };
+        var target = typeRoutes[n.type];
+        if (target && typeof navigateTo === 'function') navigateTo(target);
       };
       var iconSvg = {
         booking: '<path d="M19 4H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2z"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
@@ -647,6 +674,12 @@
 
       container.appendChild(el);
     });
+    // Show/hide clear read button based on whether any read notifications exist
+    var clearBtn = document.getElementById('clearReadBtn');
+    if (clearBtn) {
+      var hasRead = apiNotifications.some(function(n) { return n.read; });
+      clearBtn.style.display = hasRead ? '' : 'none';
+    }
   };
 
   function formatRelativeTime(timestamp) {
@@ -694,6 +727,7 @@
   window.markNotificationRead = markNotificationRead;
   window.dismissNotification = dismissNotification;
   window.markAllNotificationsRead = markAllNotificationsRead;
+  window.deleteReadNotifications = deleteReadNotifications;
   window.updateUnreadCount = updateUnreadCount;
   window.showSendAnnouncementModal = showSendAnnouncementModal;
   window.selectAnnouncementRecipient = selectAnnouncementRecipient;

@@ -303,6 +303,128 @@ Closed ALL notification asymmetries. Every action fires symmetric bell + push + 
 
 **Build:** 29 JS → 329KB, 23 CSS → 213KB, cache: mtc-court-0dbe4763. TypeScript clean.
 
+### Cowork Session (2026-03-08d) — Messaging UX Enhancements (Cross-Platform)
+
+**Swipe-to-delete on individual messages (mobile PWA):**
+- Sent messages wrapped in `.msg-swipe-container` with swipe-left-to-delete gesture
+- Same UX pattern as conversation list swipe (60px reveal, 120px auto-delete)
+- First-time swipe hint: "Swipe left on your messages to delete" (localStorage flag)
+
+**Typing indicator (cross-platform, Supabase Realtime broadcast):**
+- Both platforms join `typing-indicators` broadcast channel (ephemeral, no DB writes)
+- Sender broadcasts `{ fromId, toId }` throttled to max once per 2s
+- Receiver shows animated bouncing dots for 3s after last event
+- Mobile: `MTC.fn.startTypingIndicator()` called after login in `auth.js`
+- Dashboard: useEffect in messages page, separate channel from main Realtime
+
+**Reply-to-quote (cross-platform):**
+- Format: `[reply:Name:quoted text]\nactual message` stored in message text
+- Dashboard: hover reply icon on any message, reply preview bar above input, quoted block in bubble
+- Mobile: long-press received message to set reply context, reply bar above chat input
+- Both platforms parse and render quoted blocks with left-border accent
+
+**Tap-to-show-timestamp (mobile PWA):**
+- Messages store full `timestamp` from API (ISO string)
+- Tap any message bubble → tooltip shows "Mar 8, 2:30 PM" for 3s
+- Dashboard: hover timestamp toggles between time and full date
+
+**E2E test fix:**
+- `mobile-pwa-flows.spec.js:157` settings navigation test was flaky (fixed timeout race condition)
+- Changed from `waitForTimeout(1000)` → `expect(locator).toBeAttached({ timeout: 5000 })` (auto-retry)
+
+**Files changed:**
+- `public/mobile-app/js/messaging.js` — swipe-to-delete messages, typing indicator, reply-to-quote, timestamp
+- `public/mobile-app/css/messaging.css` — typing indicator, reply bar, quote bubble, timestamp tooltip styles
+- `public/mobile-app/js/auth.js` — `startTypingIndicator()` call after login
+- `app/dashboard/messages/page.tsx` — typing indicator, reply-to UI, hover timestamp, reply icon
+- `tests/mobile-pwa-flows.spec.js` — flaky settings test fix
+
+**Build:** 29 JS → 336KB, 23 CSS → 215KB, cache: mtc-court-74c66c4f. TypeScript clean.
+
+### Cowork Session (2026-03-08e) — Cross-Platform UX Audit (9 Features)
+
+**#4: Remove booking participant names from all platforms:**
+- Desktop: tooltip on booked slots now shows "Booked" instead of `booked?.userName`
+- Desktop: BookingSidebar removed guest name + participants display (kept matchType label)
+- Desktop: SuccessModal removed "With: [participant names]" display
+- Mobile: booking grid shows "Booked" instead of member names for other people's bookings
+- RSVP attendee names for events remain visible (unchanged)
+
+**#1-3: Mobile booking modal enhancements:**
+- Match type toggle (Singles/Doubles) — defaults to Singles, affects max duration and participants
+- Guest tracking: toggle + name input + $10 fee note (sends `isGuest`, `guestName` to API)
+- Player picker: bottom sheet with member search, add/remove chips, respects singles (1) vs doubles (3) max
+- `confirmBooking()` now sends `matchType`, `duration`, `isGuest`, `guestName`, `participants` to API
+- Booking options reset on modal close
+
+**#5: Partner "Message Opponent" pre-fills recipient:**
+- Match detail modal reads `data-partner-id` from partner card
+- Button now calls `startConversation(partnerId)` which opens conversation directly with that user
+- Falls back to generic `navigateTo('messages')` if no ID available
+
+**#6-8: Mobile events enhancements:**
+- Filter tabs: All / Social (free) / Weekly (members) / Tournaments (paid) — pill-style buttons above event list
+- `filterEvents()` hides/shows cards + section headers based on badge type
+- Spots remaining: `updateEventCardSpots()` injects badge into event card footers
+- Paid events: "X/Y spots" or "FULL" (red); Free/members: "X going"
+- Low spots (<= 5): coral warning badge
+- Spots refresh after API data loads
+
+**#9: Notification preferences UI:**
+- Added "Messages" toggle (index 3) and "Event Reminders" toggle (index 4)
+- `saveSettingsToggles()` now syncs all 5 notification categories to Supabase API
+- `restoreSettingsToggles()` updated for new toggle ordering
+- Removed "Location Services" toggle (was never approved, snuck in from a previous session)
+
+**Cleanup:**
+- Removed Location Services toggle from settings (was added without approval)
+- Fixed booking modal HTML button: `confirmBookingPayment()` → `confirmBooking()` (function didn't exist)
+- Removed tennis emoji from partners.js match detail modal
+
+**Files changed:**
+- `public/mobile-app/js/booking.js` (1067→1184 lines) — match type, guest, participants, player picker
+- `public/mobile-app/js/events.js` (752→843 lines) — filter tabs, spots remaining
+- `public/mobile-app/js/partners.js` (526→529 lines) — message pre-fill, emoji removal
+- `public/mobile-app/js/notifications.js` — toggle indices updated for Messages + Event Reminders
+- `public/mobile-app/index.html` — booking modal options, filter tabs, notification toggles, Location Services removed
+- `public/mobile-app/css/home.css` — booking modal option styles (match type, guest, player picker)
+- `public/mobile-app/css/schedule.css` — event filter tabs, spots badge styles
+- `app/dashboard/book/page.tsx` — tooltip "Booked" instead of userName
+- `app/dashboard/book/components/BookingSidebar.tsx` — removed guest/participant names, kept matchType
+- `app/dashboard/book/components/SuccessModal.tsx` — removed participant names display
+
+**Build:** 29 JS → 343KB, 23 CSS → 220KB, cache: mtc-court-5dbc14e8. TypeScript clean.
+
+### Cowork Session (2026-03-08f) — Cross-Platform UX Batch (17 Items)
+
+**Completed items from user-approved UX improvement list:**
+
+**#10 Attendee avatars on events:** Replaced plain text `<span class="reg-member">` with colored initial circles (matching dashboard style). Shows up to 8 avatars + "+N more" overflow. "You" highlighted with volt ring. Files: `booking.js`, `home.css`.
+
+**#12 Partner request auto-expiration:** Filter at query level where `date >= today`. Applied on mobile API (`partners/route.ts` `.gte('date', today)`), dashboard (`db.ts`), and mobile localStorage cleanup (`partners.js`).
+
+**#14 Message search within conversations:** In-thread search that dims non-matching messages (opacity 0.2). Dashboard: React state `msgSearchQuery`/`msgSearchOpen`. Mobile: `toggleConvoSearch()`/`filterChatMessages()` in `messaging.js`. CSS in `chat.css`.
+
+**#22 Booking participant confirmation:** Uses existing `confirmed_at`/`confirmed_via` columns. Dashboard: pending confirmations card on home + green/yellow status in BookingSidebar. Mobile: PATCH endpoint + `confirmBookingParticipation()` in `mybookings.js`. Updated `types.ts`, `db.ts`, `store.tsx`.
+
+**#18 Skeleton loaders:** Added events + notifications screen skeletons in `enhancements.js`.
+
+**#20 Badge counters on nav tabs:** Schedule badge (today's bookings) in `booking.js`, partners badge (available count) in `navigation.js`. HTML badges in `index.html`.
+
+**#11 Family profile switching full UI:** Mobile now has full family management UI: member cards, add button, add modal (name/type/birth year). Functions: `renderFamilyMembers()`, `addFamilyMember()`, `removeFamilyMember()` in `profile.js`. CSS in `profile.css`. Creates family via API if needed first.
+
+**Tennis emoji cleanup:** Removed from `avatar.js` toast (rule #18).
+
+**#17 Mobile admin panel — final parity with desktop:**
+- Revenue breakdown (stacked bar + legend by membership type)
+- Member activity (new members this month, avg bookings/member, top 5 most active)
+- Monthly trends (6-month bar chart)
+- Date filter on CSV exports (Members/Payments/Court Usage now filter by "from date")
+- All 3 render functions added to `admin.js`, called from `loadAdminDashboard()`
+- CSS for all new sections in `admin.css`
+
+**Build:** 29 JS → 357KB, 23 CSS → 225KB, cache: mtc-court-cc0bf142. TypeScript clean.
+
 ---
 
 ### Environment Limitations (IMPORTANT)

@@ -117,6 +117,38 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.convo-search-toggle {
+  margin-left: auto;
+}
+
+.convo-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--color-light-border);
+}
+
+.convo-search-bar input {
+  flex: 1;
+  background: var(--bg-secondary, #f5f5f5);
+  border: 1px solid var(--color-light-border);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 13px;
+  color: var(--text-primary);
+  outline: none;
+}
+
+.convo-search-count {
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
 }
 
 .conversation-avatar {

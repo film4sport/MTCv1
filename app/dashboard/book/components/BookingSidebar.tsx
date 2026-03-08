@@ -81,17 +81,24 @@ export default function BookingSidebar({ myUpcoming, onCancelBooking }: BookingS
                       <p className="text-xs mt-0.5" style={{ color: '#6b7266' }}>
                         {new Date(b.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} &bull; {getTimeRange(b.time, b.duration)}
                       </p>
-                      {b.guestName && (
-                        <p className="text-xs mt-1 flex items-center gap-1" style={{ color: '#d97706' }}>
-                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-                          {b.guestName}
+                      {b.matchType && (
+                        <p className="text-xs mt-1 flex items-center gap-1" style={{ color: '#6b7a3d' }}>
+                          {b.matchType === 'singles' ? 'Singles' : 'Doubles'}
                         </p>
                       )}
                       {b.participants && b.participants.length > 0 && (
-                        <p className="text-xs mt-1 flex items-center gap-1" style={{ color: '#6b7a3d' }}>
-                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                          {b.participants.map(p => p.name).join(', ')}
-                        </p>
+                        <div className="flex flex-wrap gap-1 mt-1.5">
+                          {b.participants.map(p => (
+                            <span key={p.id} className="inline-flex items-center gap-1 text-[0.6rem] px-1.5 py-0.5 rounded-md" style={{ background: p.confirmedAt ? 'rgba(34,197,94,0.1)' : 'rgba(234,179,8,0.1)', color: p.confirmedAt ? '#16a34a' : '#ca8a04' }}>
+                              {p.confirmedAt ? (
+                                <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
+                              ) : (
+                                <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3"/></svg>
+                              )}
+                              {p.name.split(' ')[0]}
+                            </span>
+                          ))}
+                        </div>
                       )}
                     </div>
                     <button

@@ -1527,3 +1527,83 @@
   margin-bottom: 8px;
 }
 .admin-ann-options .admin-select { flex: 1; }
+
+/* Revenue Breakdown */
+.admin-revenue-bar {
+  display: flex;
+  height: 24px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(200,255,0,0.08);
+  margin-bottom: 12px;
+}
+.admin-rev-segment { height: 100%; transition: width 0.3s ease; }
+.admin-revenue-legend { display: flex; flex-direction: column; gap: 8px; }
+.admin-rev-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-primary, #e8e4d9);
+}
+.admin-rev-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.admin-rev-label { flex: 1; }
+.admin-rev-amount { font-weight: 600; min-width: 60px; text-align: right; }
+.admin-rev-pct { font-size: 11px; color: var(--text-muted, #8a8a7a); min-width: 32px; text-align: right; }
+.admin-rev-total { border-top: 1px solid var(--border-color, rgba(200,255,0,0.15)); padding-top: 8px; margin-top: 4px; font-weight: 600; }
+
+/* Card subtitle */
+.admin-card-subtitle {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted, #8a8a7a);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 12px 0 8px;
+}
+
+/* Peak rank number */
+.peak-row .peak-rank {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted, #8a8a7a);
+  min-width: 16px;
+  text-align: right;
+}
+
+/* Monthly Trends chart */
+.admin-monthly-chart { min-height: 180px; }
+.admin-trends-bars {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px;
+  height: 160px;
+}
+.admin-trend-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  height: 100%;
+  justify-content: flex-end;
+}
+.admin-trend-count { font-size: 11px; font-weight: 600; color: var(--text-primary, #e8e4d9); }
+.admin-trend-bar {
+  width: 100%;
+  border-radius: 6px 6px 0 0;
+  background: var(--volt, #c8ff00);
+  opacity: 0.85;
+  transition: height 0.3s ease;
+}
+.admin-trend-label { font-size: 11px; color: var(--text-muted, #8a8a7a); }
+
+/* Export date filter */
+.admin-export-date-filter { margin-bottom: 8px; }
+.admin-export-date-filter .admin-label {
+  font-size: 11px;
+  color: var(--text-muted, #8a8a7a);
+  margin-bottom: 4px;
+  display: block;
+}

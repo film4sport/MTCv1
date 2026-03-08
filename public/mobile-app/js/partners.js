@@ -294,10 +294,15 @@
     }
   };
 
-  // Restore saved partner requests on page load
+  // Restore saved partner requests on page load (filter out expired — past date)
   document.addEventListener('DOMContentLoaded', function() {
-    const requests = MTC.storage.get('mtc-partner-requests', []);
-    requests.forEach(function(req) { insertPartnerRequestCard(req); });
+    var requests = MTC.storage.get('mtc-partner-requests', []);
+    var today = new Date().toISOString().split('T')[0];
+    var active = requests.filter(function(req) { return !req.date || req.date >= today; });
+    if (active.length !== requests.length) {
+      MTC.storage.set('mtc-partner-requests', active);
+    }
+    active.forEach(function(req) { insertPartnerRequestCard(req); });
   });
 
   // ============================================
@@ -402,21 +407,26 @@
       const players = card.querySelectorAll('.match-player span');
       const details = card.querySelectorAll('.match-detail-item span');
       const matchType = type ? type.textContent : 'SINGLES';
+      const partnerId = card.getAttribute('data-partner-id') || '';
 
       const modal2 = document.createElement('div');
       modal2.className = 'modal-overlay active';
       modal2.id = 'matchDetailModal';
       modal2.onclick = function(e) { if (e.target === this) this.remove(); };
+
+      var msgBtnAction = partnerId
+        ? 'document.getElementById(\'matchDetailModal\').remove(); if(typeof startConversation===\'function\') startConversation(\'' + sanitizeHTML(partnerId) + '\'); else navigateTo(\'messages\');'
+        : 'document.getElementById(\'matchDetailModal\').remove(); navigateTo(\'messages\');';
+
       modal2.innerHTML =
         '<div class="modal" onclick="event.stopPropagation()" style="max-width: 380px;">' +
-          '<div style="font-size: 40px; margin-bottom: 8px;">\uD83C\uDFBE</div>' +
-          '<div class="modal-title">UPCOMING ' + sanitizeHTML(matchType) + '</div>' +
+          '<div class="modal-title" style="margin-top: 12px;">UPCOMING ' + sanitizeHTML(matchType) + '</div>' +
           '<div class="modal-desc">' +
             (players[0] ? sanitizeHTML(players[0].textContent) : '') + ' vs ' + (players[1] ? sanitizeHTML(players[1].textContent) : '') + '<br><br>' +
-            (details[0] ? '\uD83D\uDCC5 ' + sanitizeHTML(details[0].textContent) + '<br>' : '') +
-            (details[1] ? '\uD83D\uDCCD ' + sanitizeHTML(details[1].textContent) : '') +
+            (details[0] ? sanitizeHTML(details[0].textContent) + '<br>' : '') +
+            (details[1] ? sanitizeHTML(details[1].textContent) : '') +
           '</div>' +
-          '<button class="modal-btn ripple" onclick="document.getElementById(\'matchDetailModal\').remove(); navigateTo(\'messages\')">MESSAGE OPPONENT</button>' +
+          '<button class="modal-btn ripple" onclick="' + msgBtnAction + '">MESSAGE OPPONENT</button>' +
           '<button class="modal-btn ripple" style="background: transparent; color: var(--text-secondary); margin-top: 8px;" onclick="document.getElementById(\'matchDetailModal\').remove()">CLOSE</button>' +
         '</div>';
       document.getElementById('app').appendChild(modal2);

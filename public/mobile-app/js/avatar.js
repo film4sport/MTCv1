@@ -192,7 +192,7 @@
     });
 
     closeAvatarPicker();
-    showToast('Avatar updated! Looking great! \uD83C\uDFBE');
+    showToast('Avatar updated! Looking great!');
   };
 
   // Cross-file function (called from interactive.js)
