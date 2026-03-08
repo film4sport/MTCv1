@@ -67,14 +67,20 @@
     }
     if (emptyState) emptyState.style.display = 'none';
 
-    // Sort: most recent message first
+    // Sort: most recent message first (by last message timestamp)
     keys.sort(function(a, b) {
       var msgsA = conversations[a] || [];
       var msgsB = conversations[b] || [];
-      // Put conversations with messages first, empty ones last
+      // Empty conversations go last
       if (msgsA.length === 0 && msgsB.length > 0) return 1;
       if (msgsB.length === 0 && msgsA.length > 0) return -1;
-      return 0; // preserve insertion order otherwise
+      if (msgsA.length === 0 && msgsB.length === 0) return 0;
+      // Compare by last message timestamp (most recent first)
+      var lastA = msgsA[msgsA.length - 1];
+      var lastB = msgsB[msgsB.length - 1];
+      var timeA = lastA.timestamp ? new Date(lastA.timestamp).getTime() : 0;
+      var timeB = lastB.timestamp ? new Date(lastB.timestamp).getTime() : 0;
+      return timeB - timeA;
     });
 
     var avatars = MTC.state.avatarSVGs || {};
@@ -197,11 +203,19 @@
   }
 
   function deleteConversation(memberId, el) {
+    // Server-side delete (if we have a conversation ID)
+    var convId = conversationIdMap[memberId];
+    if (convId && typeof MTC.fn.apiRequest === 'function') {
+      MTC.fn.apiRequest('/mobile/conversations', {
+        method: 'DELETE',
+        body: JSON.stringify({ conversationId: convId })
+      }).catch(function() { /* best-effort — local delete already done */ });
+    }
     // Remove from local conversations
     delete conversations[memberId];
-    MTC.storage.set('mtc-conversations', conversations);
-    // Remove from conversationMetaMap
+    delete conversationIdMap[memberId];
     delete conversationMetaMap[memberId];
+    MTC.storage.set('mtc-conversations', conversations);
     // Animate out
     if (el) {
       el.style.height = el.offsetHeight + 'px';
@@ -214,6 +228,7 @@
       }, 10);
     }
     showToast('Conversation deleted');
+    updateMessageBadge();
     // Check if list is now empty
     setTimeout(function() {
       var remaining = document.querySelectorAll('#conversationsList .swipe-container');
@@ -347,12 +362,80 @@
           '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">' +
           '<polyline points="20 6 9 17 4 12"/>' + doubleCheck + '</svg></span>';
       }
-      html += '<div class="chat-bubble ' + (msg.sent ? 'sent' : 'received') + '">' + sanitizeHTML(msg.text) + readReceipt + '</div>';
+      var msgIdAttr = msg.id ? ' data-msg-id="' + sanitizeHTML(msg.id) + '"' : '';
+      html += '<div class="chat-bubble ' + (msg.sent ? 'sent' : 'received') + '"' + msgIdAttr + '>' + sanitizeHTML(msg.text) + readReceipt + '</div>';
     });
 
     container.innerHTML = html;
     container.scrollTop = container.scrollHeight;
+
+    // Long-press to delete own messages
+    container.querySelectorAll('.chat-bubble.sent').forEach(function(bubble) {
+      var timer = null;
+      bubble.addEventListener('touchstart', function(e) {
+        timer = setTimeout(function() {
+          var msgId = bubble.getAttribute('data-msg-id');
+          if (msgId) showDeleteMessageConfirm(memberId, msgId, bubble);
+        }, 600);
+      }, { passive: true });
+      bubble.addEventListener('touchend', function() { clearTimeout(timer); });
+      bubble.addEventListener('touchmove', function() { clearTimeout(timer); });
+    });
     } catch(e) { MTC.warn('renderMessages error:', e); }
+  }
+
+  function showDeleteMessageConfirm(memberId, msgId, bubble) {
+    // Haptic feedback if available
+    if (navigator.vibrate) navigator.vibrate(30);
+
+    var overlay = document.createElement('div');
+    overlay.className = 'modal-overlay active';
+    overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+    overlay.innerHTML =
+      '<div class="modal" onclick="event.stopPropagation()" style="max-width: 300px; text-align: center;">' +
+        '<div class="modal-title">DELETE MESSAGE</div>' +
+        '<p style="color: var(--text-secondary); font-size: 13px; margin: 12px 0 20px;">This will delete the message for everyone.</p>' +
+        '<div style="display: flex; gap: 10px;">' +
+          '<button id="cancelDeleteMsg" style="flex: 1; padding: 12px; border-radius: 10px; border: 1px solid var(--border-color); background: transparent; color: var(--text-secondary); font-size: 14px; cursor: pointer;">Cancel</button>' +
+          '<button id="confirmDeleteMsg" style="flex: 1; padding: 12px; border-radius: 10px; border: none; background: var(--coral, #e74c3c); color: #fff; font-size: 14px; font-weight: 600; cursor: pointer;">Delete</button>' +
+        '</div>' +
+      '</div>';
+    document.getElementById('app').appendChild(overlay);
+
+    overlay.querySelector('#cancelDeleteMsg').onclick = function() { overlay.remove(); };
+    overlay.querySelector('#confirmDeleteMsg').onclick = function() {
+      overlay.remove();
+      deleteMessage(memberId, msgId, bubble);
+    };
+  }
+
+  function deleteMessage(memberId, msgId, bubble) {
+    // Animate out
+    bubble.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+    bubble.style.opacity = '0';
+    bubble.style.transform = 'scale(0.8)';
+    setTimeout(function() { bubble.remove(); }, 200);
+
+    // Remove from local state
+    var msgs = conversations[memberId] || [];
+    conversations[memberId] = msgs.filter(function(m) { return m.id !== msgId; });
+    MTC.fn.saveConversations();
+
+    // Server-side delete
+    if (typeof MTC.fn.apiRequest === 'function') {
+      MTC.fn.apiRequest('/mobile/conversations', {
+        method: 'DELETE',
+        body: JSON.stringify({ messageId: msgId })
+      }).then(function(res) {
+        if (!res.ok) showToast('Failed to delete on server', 'warning');
+      }).catch(function() {
+        showToast('Failed to delete on server', 'warning');
+      });
+    }
+
+    showToast('Message deleted');
+    // Update conversation list preview
+    renderConversationsList();
   }
 
   // onclick handler (index.html)
@@ -374,7 +457,9 @@
     conversations[currentConversation].push({
       text: text,
       sent: true,
-      time: time
+      read: true,
+      time: time,
+      timestamp: now.toISOString()
     });
 
     MTC.fn.saveConversations();
