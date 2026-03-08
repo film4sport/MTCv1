@@ -932,10 +932,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         ),
       };
     }));
-    apiCall('/api/mobile/bookings', {
-      method: 'PATCH',
-      body: JSON.stringify({ bookingId, participantId, via: 'dashboard' }),
-    }).catch((err) => {
+    apiCall('/api/mobile/bookings', 'PATCH', { bookingId, participantId, via: 'dashboard' }).catch((err) => {
       reportError(err, 'API');
       showToast('Failed to confirm participant', 'error');
       // Rollback optimistic update
@@ -944,7 +941,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         return {
           ...b,
           participants: b.participants?.map(p =>
-            p.id === participantId ? { ...p, confirmedAt: null, confirmedVia: null } : p
+            p.id === participantId ? { ...p, confirmedAt: undefined, confirmedVia: undefined } : p
           ),
         };
       }));
