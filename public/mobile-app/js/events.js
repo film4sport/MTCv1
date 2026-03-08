@@ -789,7 +789,7 @@
         badge: ev.badge,
         price: ev.price,
         spotsTotal: ev.spotsTotal,
-        spotsTaken: ev.spotsTaken,
+        spotsTaken: ev.spotsTaken || 0,
         description: ev.description,
         type: ev.type,
         attendees: ev.attendees || [],

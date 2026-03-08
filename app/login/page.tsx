@@ -208,14 +208,14 @@ function LoginContent() {
 
                   </div>{/* end content */}
 
-                  {/* Bottom Nav — dark glass */}
+                  {/* Bottom Nav — liquid glass iOS style */}
                   <div style={{
                     position: 'absolute', bottom: 10, left: 10, right: 10, zIndex: 20,
                     display: 'flex', justifyContent: 'space-around', alignItems: 'center', padding: '8px 6px',
-                    background: 'rgba(13,18,8,0.75)',
-                    backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
-                    border: '1px solid rgba(255,255,255,0.08)', borderRadius: 24,
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+                    background: 'rgba(13,18,8,0.45)',
+                    backdropFilter: 'blur(24px) saturate(1.4)', WebkitBackdropFilter: 'blur(24px) saturate(1.4)',
+                    border: '1px solid rgba(255,255,255,0.12)', borderRadius: 24,
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06)',
                   }}>
                     {[
                       { label: 'HOME', active: true, d: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
@@ -574,17 +574,17 @@ function LoginContent() {
                             { mo: 'MAR', d: '14', title: 'Euchre Tournament', time: 'Evening • Clubhouse', going: 12 },
                             { mo: 'MAY', d: '9', title: 'Opening Day BBQ', time: '1 PM • All Courts', going: 34 },
                             { mo: 'MAY', d: '12', title: "Men's Round Robin", time: '9 AM • Courts 1-2', going: 8 },
-                          ].map(e => (
-                            <div key={e.d + e.mo} style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 5, padding: '4px 5px', background: 'rgba(255,255,255,0.7)', borderRadius: 7, border: '1px solid rgba(255,255,255,0.6)' }}>
-                              <div style={{ background: '#f5f2eb', borderRadius: 6, padding: '2px 5px', textAlign: 'center', minWidth: 26 }}>
+                          ].map((e, i) => (
+                            <div key={e.d + e.mo} style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: i < 2 ? 3 : 0, padding: '3px 5px', background: 'rgba(255,255,255,0.7)', borderRadius: 7, border: '1px solid rgba(255,255,255,0.6)' }}>
+                              <div style={{ background: '#f5f2eb', borderRadius: 5, padding: '1px 4px', textAlign: 'center', minWidth: 24 }}>
                                 <div style={{ fontSize: 4, color: '#999', fontWeight: 700 }}>{e.mo}</div>
-                                <div style={{ fontSize: 10, fontWeight: 700, color: '#2a2f1e', lineHeight: 1 }}>{e.d}</div>
+                                <div style={{ fontSize: 9, fontWeight: 700, color: '#2a2f1e', lineHeight: 1 }}>{e.d}</div>
                               </div>
                               <div style={{ flex: 1, minWidth: 0 }}>
-                                <span style={{ fontSize: 6, fontWeight: 600, color: '#2a2f1e', display: 'block', whiteSpace: 'nowrap' as const, overflow: 'hidden', textOverflow: 'ellipsis' }}>{e.title}</span>
-                                <span style={{ fontSize: 5, color: '#999' }}>{e.time}</span>
+                                <span style={{ fontSize: 5.5, fontWeight: 600, color: '#2a2f1e', display: 'block', whiteSpace: 'nowrap' as const, overflow: 'hidden', textOverflow: 'ellipsis' }}>{e.title}</span>
+                                <span style={{ fontSize: 4.5, color: '#999' }}>{e.time}</span>
                               </div>
-                              <span style={{ fontSize: 5, background: '#6b7a3d', color: '#fff', padding: '2px 6px', borderRadius: 5, fontWeight: 600, flexShrink: 0 }}>RSVP</span>
+                              <span style={{ fontSize: 4.5, background: '#6b7a3d', color: '#fff', padding: '2px 5px', borderRadius: 5, fontWeight: 600, flexShrink: 0 }}>RSVP</span>
                             </div>
                           ))}
                         </div>

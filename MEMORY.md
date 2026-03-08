@@ -648,7 +648,19 @@ Closed ALL notification asymmetries. Every action fires symmetric bell + push + 
 
 **Welcome message migration:** Run on production Supabase (via SQL editor in browser). `send_welcome_message` function now says "gate code will be provided after Opening Day."
 
-**Build:** 29 JS → 358KB, 23 CSS → 225KB, cache: mtc-court-7444603e. TypeScript clean.
+**Login mockup fixes:**
+- Desktop mockup: Upcoming Events card — tightened padding/gaps/font sizes so all 3 events fit without overflow (was: 3rd event cut off)
+- Mobile (phone) mockup: Nav bar made translucent iOS liquid glass — `rgba(13,18,8,0.45)` (was 0.75), added `saturate(1.4)` and subtle inset highlight. Calendar content behind nav now visible through glass.
+
+**"null going" bug fixed (mobile events):**
+- API route (`events/route.ts`): `spots_taken ?? 0` (was: raw null from DB)
+- Client (`events.js`): `ev.spotsTaken || 0` (defensive fallback for cached data)
+
+**Mobile PWA bugs noted during verification:**
+- **Settings scroll bug**: Settings screen doesn't scroll on small viewports — notification toggles, gate code, interclub team hidden below fold. Content exists in DOM but users can't reach it by scrolling. Needs investigation (likely `overflow: hidden` on parent container).
+- **Admin panel not in menu**: Admin Panel button exists in DOM but not rendered in the hamburger menu drawer. Can be reached via `navigateTo('admin')` JS call. Structure works but analytics show dashes.
+
+**Build:** 29 JS → 358KB, 23 CSS → 225KB, cache: mtc-court-55d40d7e. TypeScript clean.
 
 ---
 
