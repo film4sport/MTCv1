@@ -1448,11 +1448,12 @@
 
 
 /* ============================================
-   SETTINGS SCREEN - Compact (no scroll)
+   SETTINGS SCREEN
 ============================================ */
 #screen-settings {
-  padding-bottom: 0;
-  overflow: hidden;
+  padding-bottom: 100px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 #screen-settings .section-header {
