@@ -89,6 +89,17 @@
     }
   };
 
+  // Private helper — re-trigger CSS entrance animations on the active slide
+  function reAnimateSlide(slide) {
+    var animEls = slide.querySelectorAll('.onboarding-title, .onboarding-text, .onboarding-preview, .onboarding-icon');
+    animEls.forEach(function(el) {
+      el.style.animation = 'none';
+      // Force reflow so the browser restarts the animation
+      void el.offsetHeight;
+      el.style.animation = '';
+    });
+  }
+
   // Private helper
   function updateOnboardingUI() {
     const slides = document.querySelectorAll('.onboarding-slide');
@@ -97,6 +108,10 @@
 
     slides.forEach(function(slide, i) {
       slide.style.transform = 'translateX(' + ((i - currentOnboardingSlide) * 100) + '%)';
+      // Re-trigger entrance animations on the newly active slide
+      if (i === currentOnboardingSlide) {
+        reAnimateSlide(slide);
+      }
     });
 
     dots.forEach(function(dot, i) {
