@@ -7,7 +7,7 @@ declare
   v_msg text;
 begin
   -- Find first admin
-  select id into v_admin_id from public.profiles where role = 'admin' limit 1;
+  select id into v_admin_id from public.profiles where role = 'admin' order by created_at asc limit 1;
   if v_admin_id is null then return; end if;
 
   -- Don't send welcome to the admin themselves
