@@ -140,6 +140,15 @@ export default function PartnersPage() {
                   </div>
 
                   <div className="space-y-2 mb-4">
+                    {p.date && (
+                      <div className="flex items-center gap-2 text-xs" style={{ color: '#6b7266' }}>
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/>
+                        </svg>
+                        {new Date(p.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                        {p.time ? ` at ${p.time}` : ''}
+                      </div>
+                    )}
                     <div className="flex items-center gap-2 text-xs" style={{ color: '#6b7266' }}>
                       <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -175,13 +184,25 @@ export default function PartnersPage() {
                       Cancel Request
                     </button>
                   ) : (
-                    <Link
-                      href={`/dashboard/messages?to=${p.userId}`}
-                      className="block w-full text-center py-2.5 rounded-xl text-sm font-medium transition-all duration-200 hover:shadow-md btn-press"
-                      style={{ background: '#6b7a3d', color: '#fff' }}
-                    >
-                      Message
-                    </Link>
+                    <div className="flex gap-2">
+                      <Link
+                        href={`/dashboard/messages?to=${p.userId}`}
+                        className="flex-1 text-center py-2.5 rounded-xl text-sm font-medium transition-all duration-200 hover:shadow-md btn-press"
+                        style={{ background: '#6b7a3d', color: '#fff' }}
+                      >
+                        Message
+                      </Link>
+                      <Link
+                        href={`/dashboard/book?partner=${p.userId}&partnerName=${encodeURIComponent(p.name)}`}
+                        className="flex-1 text-center py-2.5 rounded-xl text-sm font-medium transition-all duration-200 hover:shadow-md btn-press flex items-center justify-center gap-1"
+                        style={{ background: 'rgba(107, 122, 61, 0.1)', color: '#6b7a3d', border: '1px solid rgba(107, 122, 61, 0.2)' }}
+                      >
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                          <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
+                        </svg>
+                        Book
+                      </Link>
+                    </div>
                   )}
                 </div>
               );

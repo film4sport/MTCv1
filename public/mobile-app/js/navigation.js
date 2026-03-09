@@ -250,12 +250,29 @@
   // ============================================
   // WINDOW: Show Celebration Modal (called from partners.js, events-registration.js, booking.js)
   // ============================================
-  window.showCelebrationModal = function(title, desc) {
+  // Store last booking details for Add to Calendar
+  var _lastBookingDetails = null;
+
+  window.showCelebrationModal = function(title, desc, bookingDetails) {
     document.getElementById('modalTitle').textContent = title;
     document.getElementById('modalDesc').textContent = desc;
     const modalEl = document.getElementById('modal');
     modalEl.classList.add('active');
     if (MTC.fn.manageFocus) MTC.fn.manageFocus(modalEl);
+    // Show/hide Add to Calendar button
+    var calBtn = document.getElementById('modalAddCalBtn');
+    if (calBtn) {
+      if (bookingDetails && bookingDetails.date && bookingDetails.time) {
+        _lastBookingDetails = bookingDetails;
+        calBtn.style.display = '';
+      } else {
+        _lastBookingDetails = null;
+        calBtn.style.display = 'none';
+      }
+    }
+    // Hide "Book Together" button by default (joinPartner shows it explicitly)
+    var bookTogetherBtn = document.getElementById('modalBookTogetherBtn');
+    if (bookTogetherBtn) bookTogetherBtn.style.display = 'none';
     // Force icon pop animation replay
     const iconEl = modalEl.querySelector('.modal-icon');
     if (iconEl) {
@@ -264,6 +281,72 @@
       iconEl.style.animation = '';
     }
     launchConfetti();
+  };
+
+  // Generate and download .ics file for last booking
+  window.addBookingToCalendar = function() {
+    if (!_lastBookingDetails) return;
+    var d = _lastBookingDetails;
+    var title = 'Tennis — ' + (d.courtName || 'Court');
+    var loc = (d.courtName || 'Court') + ' — Mono Tennis Club';
+
+    // Parse time (e.g. "10:00 AM")
+    var match = (d.time || '').match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+    var hour = 9, min = 0;
+    if (match) {
+      hour = parseInt(match[1]);
+      min = parseInt(match[2]);
+      if (match[3].toUpperCase() === 'PM' && hour !== 12) hour += 12;
+      if (match[3].toUpperCase() === 'AM' && hour === 12) hour = 0;
+    }
+
+    var duration = (d.duration || 1) * 30; // slots × 30min
+    var endMin = hour * 60 + min + duration;
+    var endH = Math.floor(endMin / 60);
+    var endM = endMin % 60;
+
+    function pad(n) { return n < 10 ? '0' + n : '' + n; }
+    var dateParts = (d.date || '').split('-');
+    var ds = dateParts.join('');
+    var dtStart = ds + 'T' + pad(hour) + pad(min) + '00';
+    var dtEnd = ds + 'T' + pad(endH) + pad(endM) + '00';
+    var tz = 'America/Toronto';
+
+    var ics = 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Mono Tennis Club//MTC//EN\r\nBEGIN:VEVENT\r\n' +
+      'UID:' + Date.now() + '-' + Math.random().toString(36).slice(2) + '@mtc.ca\r\n' +
+      'DTSTART;TZID=' + tz + ':' + dtStart + '\r\n' +
+      'DTEND;TZID=' + tz + ':' + dtEnd + '\r\n' +
+      'SUMMARY:' + title + '\r\n' +
+      'LOCATION:' + loc + '\r\n' +
+      'END:VEVENT\r\nEND:VCALENDAR\r\n';
+
+    var blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'mtc-booking.ics';
+    a.click();
+    URL.revokeObjectURL(url);
+    if (typeof showToast === 'function') showToast('Calendar file downloaded');
+  };
+
+  // ============================================
+  // WINDOW: Book a Court with Matched Partner
+  // ============================================
+  window.bookWithPartner = function() {
+    closeModal();
+    var partner = _matchedPartner;
+    _matchedPartner = null;
+    // Navigate to booking screen
+    MTC.fn.navigateTo('book');
+    // After navigation renders, pre-add the matched partner
+    if (partner && partner.id && partner.name) {
+      setTimeout(function() {
+        if (typeof addParticipant === 'function') {
+          addParticipant(partner.id, partner.name);
+        }
+      }, 300);
+    }
   };
 
   // ============================================
@@ -342,8 +425,15 @@
   // ============================================
   // WINDOW: Join Partner (onclick from index.html)
   // ============================================
+  // Store matched partner for "Book Together" flow
+  var _matchedPartner = null;
+
   window.joinPartner = function(name, time, btnEl, partnerId) {
+    _matchedPartner = { id: partnerId, name: name };
     showCelebrationModal('YOU\'RE IN!', 'Matched with ' + name + '. See you ' + time + '!');
+    // Show "Book a Court Together" button
+    var bookBtn = document.getElementById('modalBookTogetherBtn');
+    if (bookBtn) bookBtn.style.display = '';
     showPushNotification(
       'Partner Matched!',
       'You\'re playing with ' + name + ' \u2014 ' + time,
@@ -870,12 +960,22 @@
           '</button>';
       }
 
+      // Format date for display
+      var dateDisplay = '';
+      if (p.date) {
+        try {
+          var d = new Date(p.date + 'T00:00:00');
+          dateDisplay = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+        } catch(e) { dateDisplay = p.date; }
+      }
+
       html += '<div class="partner-card stagger-item" data-match-type="' + sanitizeHTML(matchType) + '" data-level="' + sanitizeHTML((p.level || 'intermediate').toLowerCase()) + '" data-available="' + isAvailable + '" data-partner-id="' + (p.id || '') + '">' +
         '<div class="partner-match-type ' + sanitizeHTML(matchType) + '">' + sanitizeHTML(matchLabel) + '</div>' +
         '<svg class="partner-avatar" viewBox="0 0 100 100">' + (avatar || '').replace(/<\/?svg[^>]*>/g, '') + '</svg>' +
         '<div class="partner-info">' +
           '<div class="partner-name">' + sanitizeHTML(p.name) + (isOwnRequest ? ' <span style="font-size: 11px; color: var(--volt); font-weight: 600;">(You)</span>' : '') + '</div>' +
           '<div class="partner-level">' + sanitizeHTML(levelDisplay) + '</div>' +
+          (dateDisplay ? '<div class="partner-availability" style="font-size:11px;color:var(--text-muted);">' + sanitizeHTML(dateDisplay) + '</div>' : '') +
           '<div class="partner-availability">' + sanitizeHTML(p.time || 'Anytime') + '</div>' +
         '</div>' +
         '<div class="partner-action">' + actionBtn + '</div>' +

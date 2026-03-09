@@ -881,9 +881,11 @@
             s.classList.remove('selected','available');s.classList.add('my-booking');
             s.innerHTML='<span class="slot-label mine-label"><svg class="mine-icon" viewBox="0 0 16 16" width="12" height="12" fill="currentColor"><circle cx="8" cy="8" r="7"/></svg> MY COURT</span>';
           });
+          var _bd = { courtName: bookingData.courtName, date: bookingData.date, time: bookingData.time, duration: bookingData.duration };
           selectedSlot=null;
           resetBtn();
-          showModal(); triggerBookingNotification();
+          showCelebrationModal('BOOKING CONFIRMED!', _bd.courtName + ' booked for ' + _bd.time + '. See you on the court!', _bd);
+          triggerBookingNotification();
         },
         function onError(err) {
           resetBtn();
@@ -903,9 +905,11 @@
         s.classList.remove('selected','available');s.classList.add('my-booking');
         s.innerHTML='<span class="slot-label mine-label"><svg class="mine-icon" viewBox="0 0 16 16" width="12" height="12" fill="currentColor"><circle cx="8" cy="8" r="7"/></svg> MY COURT</span>';
       });
+      var _bd = { courtName: bookingData.courtName, date: bookingData.date, time: bookingData.time, duration: bookingData.duration };
       selectedSlot=null;
       resetBtn();
-      showModal(); triggerBookingNotification();
+      showCelebrationModal('BOOKING CONFIRMED!', _bd.courtName + ' booked for ' + _bd.time + '. See you on the court!', _bd);
+      triggerBookingNotification();
     }
   }
 
