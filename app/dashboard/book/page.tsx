@@ -41,6 +41,7 @@ export default function BookCourtPage() {
   const [cancelTarget, setCancelTarget] = useState<{ id: string; courtName: string; date: string; time: string } | null>(null);
   const [contentKey, setContentKey] = useState(0);
   const tooltipTimeout = useRef<NodeJS.Timeout | null>(null);
+  const nowLineRef = useRef<HTMLTableRowElement | null>(null);
   const [mobileDayIdx, setMobileDayIdx] = useState(0); // Today is always first in rolling view
   const [courtBlocks, setCourtBlocks] = useState<CourtBlockSlot[]>([]);
 
@@ -240,6 +241,16 @@ export default function BookCourtPage() {
     return nowMinutes >= slotMins && nowMinutes < nextMins;
   };
 
+  // Auto-scroll to the now-line (red line) when the grid renders for today
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (nowLineRef.current) {
+        nowLineRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 150);
+    return () => clearTimeout(timer);
+  }, [mobileDayIdx, contentKey, view]);
+
   return (
     <div className="min-h-screen dashboard-gradient-bg">
       <DashboardHeader title="Book Court" />
@@ -357,7 +368,7 @@ export default function BookCourtPage() {
                             {TIME_SLOTS.map((time, tIdx) => {
                               const nowRow = isNowSlot(selectedDate, time, TIME_SLOTS[tIdx + 1]);
                               return (
-                              <tr key={time} className="relative">
+                              <tr key={time} ref={nowRow ? nowLineRef : undefined} className="relative">
                                 {nowRow && <td colSpan={5} className="absolute top-0 left-0 right-0 h-0 z-20 pointer-events-none" style={{ borderTop: '2px solid #ff5a5f', boxShadow: '0 0 6px rgba(255, 90, 95, 0.4)' }} />}
                                 <td className="sticky left-0 z-10 px-3 py-0 text-[0.7rem] font-medium border-b" style={{ borderColor: '#f7f5f0', background: '#faf8f3', color: nowRow ? '#ff5a5f' : '#9ca3a0', fontWeight: nowRow ? 700 : 500 }}>{time}</td>
                                 {COURTS_CONFIG.map(c => {

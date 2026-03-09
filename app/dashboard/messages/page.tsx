@@ -99,6 +99,9 @@ function MessagesContent() {
   }, [currentUser]);
 
   const activeConvo = conversations.find(c => c.memberId === selectedConvo);
+  // For new conversations with no messages yet, look up the member name
+  const selectedMember = selectedConvo ? members.find(m => m.id === selectedConvo) : null;
+  const activeName = activeConvo?.memberName || selectedMember?.name || '';
 
   // Mark conversation as read when selected
   useEffect(() => {
@@ -333,10 +336,10 @@ function MessagesContent() {
                     </svg>
                   </button>
                   <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: 'rgba(107, 122, 61, 0.1)', color: '#6b7a3d' }}>
-                    {(activeConvo?.memberName || '').split(' ').map(n => n[0]).join('')}
+                    {activeName.split(' ').map(n => n[0]).join('')}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm" style={{ color: '#2a2f1e' }}>{activeConvo?.memberName}</p>
+                    <p className="font-medium text-sm" style={{ color: '#2a2f1e' }}>{activeName}</p>
                     <p className="text-xs" style={{ color: '#6b7266' }}>Member</p>
                   </div>
                   <button
@@ -370,6 +373,19 @@ function MessagesContent() {
 
                 {/* Messages */}
                 <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3">
+                  {!activeConvo && selectedConvo && (
+                    <div className="flex-1 flex items-center justify-center h-full">
+                      <div className="text-center py-12 animate-fadeIn">
+                        <div className="w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center" style={{ background: 'rgba(107, 122, 61, 0.08)' }}>
+                          <svg className="w-6 h-6" fill="none" stroke="#6b7a3d" viewBox="0 0 24 24" strokeWidth="1.5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                          </svg>
+                        </div>
+                        <p className="text-sm font-medium" style={{ color: '#2a2f1e' }}>Start a conversation with {activeName.split(' ')[0]}</p>
+                        <p className="text-xs mt-1" style={{ color: '#6b7266' }}>Type a message below</p>
+                      </div>
+                    </div>
+                  )}
                   {activeConvo?.messages.map(msg => {
                     const isMine = msg.fromId === currentUser?.id;
                     const msgSearchMatch = !msgSearchQuery || msg.text.toLowerCase().includes(msgSearchQuery.toLowerCase());
