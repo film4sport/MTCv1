@@ -222,6 +222,28 @@ function SignupContent() {
         return;
       }
 
+      // Create family group and add family members BEFORE email confirm check
+      // so family members exist in DB regardless of confirmation flow
+      if (isFamily && familyMemberInputs.length > 0) {
+        try {
+          const familyName = `The ${trimmedName.split(' ').pop() || trimmedName} Family`;
+          const familyId = await createFamily(user.id, familyName);
+          if (familyId) {
+            const validMembers = familyMemberInputs.filter(fm => fm.name.trim());
+            await Promise.all(validMembers.map(fm =>
+              addFamilyMember(familyId, {
+                name: fm.name.trim(),
+                type: fm.type,
+                birthYear: fm.birthYear ? parseInt(fm.birthYear) : undefined,
+              })
+            ));
+          }
+        } catch (err) {
+          console.error('[MTC] family creation:', err);
+          // Don't block signup — family members can be added later
+        }
+      }
+
       if (emailConfirmRequired) {
         // Log the Supabase-sent confirmation email
         fetch('/api/log-email', {
@@ -243,27 +265,6 @@ function SignupContent() {
       }
 
       sendWelcomeMessage(user.id, user.name).catch(err => console.error('[MTC] welcome message:', err));
-
-      // Create family group and add family members if this is a family membership
-      if (isFamily && familyMemberInputs.length > 0) {
-        try {
-          const familyName = `The ${trimmedName.split(' ').pop() || trimmedName} Family`;
-          const familyId = await createFamily(user.id, familyName);
-          if (familyId) {
-            const validMembers = familyMemberInputs.filter(fm => fm.name.trim());
-            await Promise.all(validMembers.map(fm =>
-              addFamilyMember(familyId, {
-                name: fm.name.trim(),
-                type: fm.type,
-                birthYear: fm.birthYear ? parseInt(fm.birthYear) : undefined,
-              })
-            ));
-          }
-        } catch (err) {
-          console.error('[MTC] family creation:', err);
-          // Don't block signup — family members can be added later
-        }
-      }
 
       localStorage.setItem('mtc-current-user', JSON.stringify(user));
 
