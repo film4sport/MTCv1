@@ -135,7 +135,10 @@
 
     // Render conversations list dynamically when navigating to messages
     if (screen === 'messages') {
-      setTimeout(function() { if (typeof renderConversationsList === 'function') renderConversationsList(); }, 100);
+      setTimeout(function() {
+        if (typeof initMsgFilterTabs === 'function') initMsgFilterTabs();
+        if (typeof renderConversationsList === 'function') renderConversationsList();
+      }, 100);
     }
 
     // Initialize captain/team screen (lazy-loaded bundle)

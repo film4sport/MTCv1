@@ -101,10 +101,12 @@ export async function GET(request: NextRequest) {
     const user = data.session.user;
     const userName = user.user_metadata?.name || user.email?.split('@')[0] || 'Member';
 
-    // Primary guard: if account is older than 5 minutes, this is a returning user — skip welcome
+    // Primary guard: if account is older than 24 hours, this is a returning user — skip welcome
+    // (Was 5 minutes — too strict, users who took >5 min to confirm email got no welcome message)
+    // The secondary guard below (welcome-{userId} message check) handles true dedup
     const userCreatedAt = new Date(user.created_at);
-    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
-    if (userCreatedAt < fiveMinutesAgo) {
+    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    if (userCreatedAt < oneDayAgo) {
       return response;
     }
 

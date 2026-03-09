@@ -66,6 +66,7 @@ function MessagesContent() {
   const [replyTo, setReplyTo] = useState<{ id: string; text: string; fromName: string } | null>(null);
   const [msgSearchQuery, setMsgSearchQuery] = useState('');
   const [msgSearchOpen, setMsgSearchOpen] = useState(false);
+  const [convoFilter, setConvoFilter] = useState<'all' | 'needs-reply' | 'welcome'>('all');
   const [typingUsers, setTypingUsers] = useState<Record<string, number>>({}); // memberId → timeout id
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
@@ -146,6 +147,21 @@ function MessagesContent() {
     m.id !== currentUser?.id &&
     (!searchQuery || m.name.toLowerCase().includes(searchQuery.toLowerCase()))
   );
+
+  // Admin conversation filters
+  const isAdmin = currentUser?.role === 'admin';
+  const filteredConversations = conversations.filter(convo => {
+    if (convoFilter === 'all') return true;
+    const hasWelcome = convo.messages.some(m => m.id.startsWith('welcome-'));
+    const hasOnlyWelcome = convo.messages.length === 1 && hasWelcome;
+    if (convoFilter === 'welcome') return hasOnlyWelcome;
+    if (convoFilter === 'needs-reply') {
+      // Last message is FROM the member (not from admin) — needs admin reply
+      const lastMsg = convo.messages[convo.messages.length - 1];
+      return lastMsg && lastMsg.fromId !== currentUser?.id;
+    }
+    return true;
+  });
 
   // Reset active index when search changes
   useEffect(() => { setMemberActiveIndex(-1); }, [searchQuery]);
@@ -247,21 +263,48 @@ function MessagesContent() {
                   </div>
                 </div>
               )}
+              {/* Admin filter tabs */}
+              {isAdmin && conversations.length > 0 && (
+                <div className="flex gap-1 px-4 pb-3">
+                  {([['all', 'All'], ['needs-reply', 'Needs Reply'], ['welcome', 'Welcome']] as const).map(([key, label]) => {
+                    const count = key === 'all' ? conversations.length
+                      : key === 'needs-reply' ? conversations.filter(c => { const last = c.messages[c.messages.length - 1]; return last && last.fromId !== currentUser?.id; }).length
+                      : conversations.filter(c => c.messages.length === 1 && c.messages[0].id.startsWith('welcome-')).length;
+                    return (
+                      <button
+                        key={key}
+                        onClick={() => setConvoFilter(key)}
+                        className="px-3 py-1.5 rounded-full text-xs font-medium transition-all"
+                        style={{
+                          background: convoFilter === key ? '#6b7a3d' : 'rgba(107, 122, 61, 0.06)',
+                          color: convoFilter === key ? '#fff' : '#6b7266',
+                        }}
+                      >
+                        {label}{count > 0 ? ` (${count})` : ''}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             <div className="flex-1 overflow-y-auto">
-              {conversations.length === 0 ? (
+              {filteredConversations.length === 0 ? (
                 <div className="p-8 text-center animate-fadeIn">
                   <div className="w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center" style={{ background: 'rgba(107, 122, 61, 0.08)' }}>
                     <svg className="w-6 h-6" fill="none" stroke="#6b7a3d" viewBox="0 0 24 24" strokeWidth="1.5">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                     </svg>
                   </div>
-                  <p className="font-medium text-sm mb-1" style={{ color: '#2a2f1e' }}>No conversations yet</p>
-                  <p className="text-xs" style={{ color: '#6b7266' }}>Start a chat with a member</p>
+                  <p className="font-medium text-sm mb-1" style={{ color: '#2a2f1e' }}>
+                    {convoFilter === 'all' ? 'No conversations yet' : convoFilter === 'needs-reply' ? 'All caught up!' : 'No welcome-only conversations'}
+                  </p>
+                  <p className="text-xs" style={{ color: '#6b7266' }}>
+                    {convoFilter === 'all' ? 'Start a chat with a member' : convoFilter === 'needs-reply' ? 'No conversations need a reply right now' : 'All members have been personally messaged'}
+                  </p>
                 </div>
               ) : (
-                [...conversations]
+                [...filteredConversations]
                   .sort((a, b) => new Date(b.lastTimestamp).getTime() - new Date(a.lastTimestamp).getTime())
                   .map(convo => (
                     <div
