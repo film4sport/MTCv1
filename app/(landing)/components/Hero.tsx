@@ -147,11 +147,16 @@ export default function Hero() {
           className="flex items-center justify-center sm:justify-between text-sm font-medium pt-6"
           style={{ color: 'rgba(255, 255, 255, 0.6)', borderTop: '1px solid rgba(255, 255, 255, 0.15)' }}
         >
-          <span className="flex items-center gap-2">
+          <span className="flex items-center gap-3 cursor-pointer group" onClick={() => document.getElementById('events')?.scrollIntoView({ behavior: 'smooth' })}>
             // Scroll Down
-            <svg className="w-4 h-4 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-            </svg>
+            <span className="relative flex items-center justify-center">
+              <svg className="w-6 h-6 animate-bounce" fill="none" stroke="rgba(255, 255, 255, 0.6)" viewBox="0 0 24 24" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+              </svg>
+              <svg className="w-6 h-6 absolute animate-ping opacity-40" fill="none" stroke="rgba(255, 255, 255, 0.6)" viewBox="0 0 24 24" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+              </svg>
+            </span>
           </span>
           <span className="hidden sm:inline">// 2026</span>
           <span className="hidden sm:inline">// Tennis</span>
