@@ -39,7 +39,8 @@ Before reporting any feature change as "done", verify:
 - **Fuzz tests added (Mar 8)**: 3 files (147 tests): `fuzz-validation.test.js` (direct-import chaos testing of all 7 validation functions — XSS, SQL injection, Unicode, null bytes, 100k strings, ReDoS), `fuzz-api-routes.test.js` (source inspection of all 13 API routes for input guards), `fuzz-mobile-pwa.test.js` (function extraction + fuzz testing of mobile PWA sanitizers, parsers, error handlers). Known gaps documented: JS Date rolls Feb 30, isValidTime is format-only, single quotes in emails are RFC-valid.
 - **Feature regression tests added (Mar 8)**: `feature-regression.test.js` (125 tests) covering all 12 API-backed features: Court Booking, Messaging, Partner Matching, Events & RSVP, Notifications, Member Profiles, Announcements, Court Management, Settings, Programs, Families, Lineups. Each feature tested for: complete CRUD flow, validation, Dashboard integration, notification layers, validation constant values.
 - **Bug-specific regression tests (Mar 8)**: `regression.test.js` (43 tests) for known fixed bugs (silent Supabase writes, RLS bypass, duplicate constants, missing columns, demo data leak, XSS, SW caching, rate limiting, coaching panel).
-- **Total test count (Mar 8→9)**: Started at 747 (27 files) → 798 (31) → 814 (32) → **1024 tests across 34 files**, all passing.
+- **Total test count (Mar 8→9)**: Started at 747 (27 files) → 798 (31) → 814 (32) → 1024 (34 files) → **1079 tests across 35 files**, all passing.
+- **Messaging features tests (Mar 9)**: `messaging-features.test.js` (55 tests) — admin filter tabs (Dashboard + Mobile PWA), welcome message guards (admin self-skip, idempotency, conversation dedup), welcome cleanup RPC, cleanup API endpoint, cleanup button, admin pinned in member search (both platforms), admin name override, auth callback 24h guard.
 - **Coaching panel access (Mar 8)**: Sidebar now shows "Book Lessons" link for both coaches AND admins (was coach-only). Sidebar.tsx line 145: `(isCoach || isAdmin)`.
 - **Coaching program bookings**: `db.createBooking` is still used in the coaching program creation flow (line 966 of store.tsx). This is coach-only (coaching panel), not admin. Coaches create program bookings (type: 'program') via the coaching panel.
 
@@ -85,6 +86,20 @@ Before reporting any feature change as "done", verify:
 - Counts displayed on each tab. Context-aware empty states.
 - Dashboard: `messages/page.tsx` — `convoFilter` state, `filteredConversations` computed, pill tabs above conversation list.
 - Mobile PWA: `messaging.js` — `activeMsgFilter`, `setMsgFilter()`, `filterKeysByMsgFilter()`, `updateFilterCounts()`, `initMsgFilterTabs()`. HTML tabs in `index.html`. CSS in `messaging.css`. Navigation init in `navigation.js`.
+
+**Welcome message auto-cleanup (Mar 9):**
+- `cleanup_stale_welcomes(older_than_days)` RPC — deletes conversations with ONLY the auto-welcome message that are older than N days (member never replied). Returns count of deleted conversations.
+- API endpoint: `DELETE /api/mobile/conversations` with `{ action: 'cleanup-welcomes', olderThanDays: 7 }`. Admin-only. Days clamped to 1-90.
+- Dashboard: "Cleanup 7d+" button appears in filter tab row when welcome-only conversations exist. Red text, loading state, success toast with count.
+- Migration: `20260309_cleanup_stale_welcomes_rpc.sql`
+
+**Admin pinned in member search (Mar 9):**
+- Dashboard: Admin members sort to top of "New Message" search, display as "Mono Tennis Club" with verified shield icon. Searching "mono tennis club" matches admin.
+- Mobile PWA: `sortMembersAdminFirst()` + `renderMemberItem()` in `messaging.js` — same behavior. Admin shows "Club Admin" skill label + shield badge SVG.
+
+**Welcome message text updated (Mar 9):**
+- Removed "Your court gate code will be provided after Opening Day" — gate code now delivered via settings notification automatically.
+- New text: "Welcome to Mono Tennis Club, {FirstName}! Explore the app — book courts, find partners, and check out upcoming events. See you on the court!"
 
 **CSS build pipeline fix (Mar 9):**
 - **Critical bug**: Hamburger menu and notification panel CSS was in lazy-loaded `admin.css` bundle (only fetched when admin panel opened). All users affected — menu/notifications completely unstyled.
