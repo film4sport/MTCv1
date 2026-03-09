@@ -228,3 +228,26 @@
   opacity: 0.7;
 }
 
+/* "Book Your First Court" CTA on final onboarding slide */
+.onboarding-cta-book {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 12px 24px;
+  background: var(--electric-blue, #00d4ff);
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 212, 255, 0.35);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.onboarding-cta-book:active {
+  transform: scale(0.95);
+  box-shadow: 0 2px 8px rgba(0, 212, 255, 0.2);
+}
+

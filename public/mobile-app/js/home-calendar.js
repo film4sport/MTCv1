@@ -109,21 +109,59 @@
 
     var html = '';
     evts.forEach(function(ev) {
-      var timeStr = ev.time ? ev.time.split(' - ')[0] : '';
+      var timeStr = ev.time || '';
       var going = ev.spotsTaken || 0;
-      var dotCls = ev.badge === 'paid' ? 'gold' : ev.badge === 'free' ? 'blue' : '';
-      var safeTitle = typeof sanitizeHTML === 'function' ? sanitizeHTML(ev.title) : ev.title;
-      var safeLoc = typeof sanitizeHTML === 'function' ? sanitizeHTML(ev.location || '') : (ev.location || '');
-      var safeTime = typeof sanitizeHTML === 'function' ? sanitizeHTML(timeStr) : timeStr;
+      var badgeCls = ev.badge === 'paid' ? 'paid' : ev.badge === 'free' ? 'free' : 'members';
+      var safe = function(s) { return typeof sanitizeHTML === 'function' ? sanitizeHTML(s || '') : (s || ''); };
+      var safeTitle = safe(ev.title);
+      var safeLoc = safe(ev.location);
+      var safeTime = safe(timeStr);
+      var safeDesc = safe(ev.description);
+      var safePrice = safe(ev.price || 'Free');
 
-      html += '<div class="calendar-event-item" onclick="if(typeof showEventModal===\'function\')showEventModal(\'' + ev.id + '\')">' +
-        '  <div class="calendar-event-time">' + safeTime + '</div>' +
-        '  <div class="calendar-event-info">' +
-        '    <div class="calendar-event-title">' + safeTitle + '</div>' +
-        '    <div class="calendar-event-location">' + safeLoc + ' \u2022 ' + going + ' going</div>' +
-        '  </div>' +
-        '  <div class="calendar-event-dot ' + dotCls + '"></div>' +
-        '</div>';
+      // Check RSVP state
+      var isRegistered = (typeof userRsvps !== 'undefined') && userRsvps.indexOf(ev.id) !== -1;
+
+      // Attendee avatar preview (first 4 + overflow)
+      var attendees = ev.attendees || [];
+      var attendeeHtml = '';
+      if (attendees.length > 0) {
+        var shown = attendees.slice(0, 4);
+        shown.forEach(function(name) {
+          var initials = name.split(' ').map(function(w) { return w[0]; }).join('').toUpperCase().slice(0, 2);
+          attendeeHtml += '<div class="hce-avatar" title="' + safe(name) + '">' + initials + '</div>';
+        });
+        if (attendees.length > 4) {
+          attendeeHtml += '<div class="hce-avatar hce-avatar-more">+' + (attendees.length - 4) + '</div>';
+        }
+      }
+
+      // Rich event card with RSVP inline + tap to open full modal
+      html += '<div class="home-cal-event-card">' +
+        '<div class="hce-top" onclick="if(typeof showEventModal===\'function\')showEventModal(\'' + ev.id + '\')">' +
+          '<div class="hce-header">' +
+            '<div class="hce-badge ' + badgeCls + '">' + safePrice + '</div>' +
+          '</div>' +
+          '<div class="hce-title">' + safeTitle + '</div>' +
+          '<div class="hce-meta">' +
+            '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ' +
+            safeTime + ' &bull; ' + safeLoc +
+          '</div>' +
+          (safeDesc ? '<div class="hce-desc">' + safeDesc.slice(0, 100) + (safeDesc.length > 100 ? '...' : '') + '</div>' : '') +
+        '</div>' +
+        '<div class="hce-bottom">' +
+          '<div class="hce-attendees">' +
+            (attendeeHtml || '<span class="hce-no-attendees">Be the first!</span>') +
+            '<span class="hce-going-count">' + going + ' going</span>' +
+          '</div>' +
+          '<div class="hce-actions">' +
+            '<button class="hce-rsvp-btn ' + (isRegistered ? 'registered' : '') + '" onclick="event.stopPropagation();if(typeof toggleEventRsvp===\'function\'){toggleEventRsvp(\'' + ev.id + '\');setTimeout(function(){var sel=document.querySelector(\'#homeCalendarGrid .selected\');if(sel)showHomeCalendarDate(sel.getAttribute(\'data-date\'),sel);},300);}">' +
+              (isRegistered ? '\u2713 Going' : 'RSVP') +
+            '</button>' +
+            '<button class="hce-details-btn" onclick="event.stopPropagation();if(typeof showEventModal===\'function\')showEventModal(\'' + ev.id + '\')">Details</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
     });
     container.innerHTML = html;
   }
@@ -156,7 +194,8 @@
     setTimeout(init, 100);
   }
 
-  // Expose for nav refresh and month navigation
+  // Expose for nav refresh, month navigation, and RSVP refresh
   MTC.fn.renderHomeCalendar = renderHomeCalendar;
   MTC.fn.changeHomeMonth = changeHomeMonth;
+  window.showHomeCalendarDate = showHomeCalendarDate;
 })();

@@ -111,9 +111,10 @@
     completeOnboarding();
   };
 
-  // Private helper
+  // Exposed globally so the CTA button on the final slide can call it
   function completeOnboarding() {
     MTC.storage.set('mtc-onboarding-complete', true);
     document.getElementById('onboardingOverlay').classList.remove('active');
   }
+  window.completeOnboarding = completeOnboarding;
 })();

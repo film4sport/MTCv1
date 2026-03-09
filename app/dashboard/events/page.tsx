@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useApp } from '../lib/store';
 import { useToast } from '../lib/toast';
 import DashboardHeader from '../components/DashboardHeader';
@@ -14,9 +15,10 @@ type PageView = 'events' | 'programs';
 export default function EventsPage() {
   const { currentUser, events, toggleRsvp, programs, enrollInProgram, withdrawFromProgram, members } = useApp();
   const { showToast } = useToast();
+  const searchParams = useSearchParams();
   const [pageView, setPageView] = useState<PageView>('events');
   const [filter, setFilter] = useState<EventFilter>('all');
-  const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<string | null>(searchParams.get('event'));
   const [viewMode, setViewMode] = useState<ViewMode>('calendar');
   const [calendarDate, setCalendarDate] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState<string | null>(null);

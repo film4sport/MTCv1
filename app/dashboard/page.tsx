@@ -269,7 +269,7 @@ export default function DashboardHome() {
                 const spotsLeft = ev.spotsTotal != null && ev.spotsTaken != null ? ev.spotsTotal - ev.spotsTaken : null;
                 const attending = ev.attendees.includes(currentUser?.name || '');
                 return (
-                  <div key={ev.id} className="flex items-start gap-4 rounded-xl p-3 border card-hover" style={{ borderColor: '#f0ede6' }}>
+                  <Link key={ev.id} href={`/dashboard/events?event=${ev.id}`} className="flex items-start gap-4 rounded-xl p-3 border card-hover cursor-pointer transition-all hover:shadow-sm" style={{ borderColor: '#f0ede6', textDecoration: 'none' }}>
                     <div className="w-12 h-12 rounded-xl flex flex-col items-center justify-center" style={{ background: '#f5f2eb' }}>
                       <span className="text-[0.6rem] font-semibold uppercase" style={{ color: '#6b7266' }}>
                         {new Date(ev.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short' })}
@@ -293,7 +293,7 @@ export default function DashboardHome() {
                       </div>
                     </div>
                     <button
-                      onClick={() => toggleRsvp(ev.id, currentUser?.name || '')}
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleRsvp(ev.id, currentUser?.name || ''); }}
                       className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all active:scale-95"
                       style={{
                         background: attending ? 'rgba(245,158,11,0.1)' : '#6b7a3d',
@@ -303,7 +303,7 @@ export default function DashboardHome() {
                     >
                       {attending ? '✓ Going' : 'RSVP'}
                     </button>
-                  </div>
+                  </Link>
                 );
               })}
             </div>
