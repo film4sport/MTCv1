@@ -6,6 +6,11 @@ import crypto from 'crypto';
 // Shared utilities
 import { createNotification } from '../../lib/notifications';
 
+/** Race a promise against a timeout — returns undefined on timeout (never throws) */
+function withTimeout<T>(promise: Promise<T>, ms = 5000): Promise<T | undefined> {
+  return Promise.race([promise, new Promise<undefined>(r => setTimeout(() => r(undefined), ms))]);
+}
+
 export async function GET(request: Request) {
   const authResult = await authenticateMobileRequest(request);
   if (authResult instanceof NextResponse) return authResult;
@@ -187,8 +192,8 @@ export async function POST(request: Request) {
     const truncatedPreview = sanitizedText.slice(0, 100);
     const notifId = `notif-msg-${crypto.randomUUID().slice(0, 8)}`;
 
-    // Fire and forget — don't block the response
-    Promise.all([
+    // Fire and forget — don't block the response (timeout prevents hung connections)
+    withTimeout(Promise.allSettled([
       sendPushToUser(supabase, toId, {
         title: `Message from ${fromName}`,
         body: truncatedPreview,
@@ -202,7 +207,7 @@ export async function POST(request: Request) {
         body: truncatedPreview,
         timestamp,
       }),
-    ]).catch(() => { /* best-effort */ });
+    ])).catch(() => { /* best-effort */ });
 
     return NextResponse.json({ success: true, messageId: msgId, conversationId });
   } catch {

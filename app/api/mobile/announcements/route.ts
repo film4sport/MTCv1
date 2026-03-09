@@ -2,7 +2,10 @@ import { NextResponse } from 'next/server';
 import { authenticateMobileRequest, getAdminClient, sanitizeInput, isRateLimited, isValidEnum, cachedJson, VALID_ANNOUNCEMENT_TYPES } from '../auth-helper';
 import { sendPushToUser } from '../../lib/push';
 
-// sendPushToUser imported from ../../lib/push (shared utility)
+/** Race a promise against a timeout — returns undefined on timeout (never throws) */
+function withTimeout<T>(promise: Promise<T>, ms = 5000): Promise<T | undefined> {
+  return Promise.race([promise, new Promise<undefined>(r => setTimeout(() => r(undefined), ms))]);
+}
 
 export async function GET(request: Request) {
   const authResult = await authenticateMobileRequest(request);
@@ -129,8 +132,8 @@ export async function POST(request: Request) {
         console.error('Failed to create announcement notifications:', notifErr.message);
       }
 
-      // Send push notifications to all targeted members (fire-and-forget)
-      Promise.all(
+      // Send push notifications to all targeted members (fire-and-forget, with timeout)
+      withTimeout(Promise.allSettled(
         targetMembers.map(member =>
           sendPushToUser(supabase, member.id, {
             title: notifTitle,
@@ -139,7 +142,7 @@ export async function POST(request: Request) {
             url: '/mobile-app/index.html#home',
           })
         )
-      ).catch(() => { /* best-effort */ });
+      )).catch(() => { /* best-effort */ });
     }
 
     return NextResponse.json({ success: true, id });

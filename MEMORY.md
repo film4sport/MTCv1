@@ -57,6 +57,12 @@ Before reporting any feature change as "done", verify:
 **Performance:**
 - **Store.tsx context splitting**: Single `AppContext` (46 values) → 7 focused contexts. See Current Status section above.
 
+**Resilience (opening day prep — 40 concurrent users):**
+- **Email retry with exponential backoff**: Added `sendWithRetry()` to `booking-email/route.ts` — retries on 429 rate limits and ECONNRESET with 1s/2s backoff. Applied to both confirmation and cancellation email sections.
+- **Timeout wrappers on notification chains**: Added `withTimeout(5000)` to all fire-and-forget notification Promise chains across 4 API routes: `events/route.ts`, `conversations/route.ts`, `announcements/route.ts`, `booking-email/route.ts`. Changed `Promise.all` → `Promise.allSettled` so one failed notification doesn't block others.
+- **Dashboard court block single delete**: Fixed `AdminCourtsTab.tsx` — was using direct Supabase delete (bypassing API), now routes through `DELETE /api/mobile/court-blocks` with auth header so auto-cancel + notifications fire correctly.
+- **PgBouncer (connection pooling)**: User to enable in Supabase dashboard under **Project Settings → Database → Connection Pooling** (Transaction mode). Critical for 40+ concurrent users — without it, each API request opens a fresh DB connection.
+
 **Pending migration SQL (paste into Supabase SQL Editor):**
 ```sql
 ALTER TABLE notifications DROP CONSTRAINT IF EXISTS notifications_type_check;

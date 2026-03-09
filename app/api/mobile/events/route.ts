@@ -6,6 +6,11 @@ import type { EventUpdate } from '../types';
 // Shared utilities
 import { createNotification } from '../../lib/notifications';
 
+/** Race a promise against a timeout — returns undefined on timeout (never throws) */
+function withTimeout<T>(promise: Promise<T>, ms = 5000): Promise<T | undefined> {
+  return Promise.race([promise, new Promise<undefined>(r => setTimeout(() => r(undefined), ms))]);
+}
+
 /** Get user IDs from attendee names (for push notifications) */
 async function getAttendeeUserIds(
   supabase: ReturnType<typeof getAdminClient>,
@@ -173,8 +178,8 @@ export async function PATCH(request: Request) {
       if (evt && attendeeIds.length > 0) {
         const now = new Date().toISOString();
         const changeDetail = `Now: ${evt.date} at ${evt.time}`;
-        Promise.all(
-          attendeeIds.map(uid => Promise.all([
+        withTimeout(Promise.allSettled(
+          attendeeIds.map(uid => Promise.allSettled([
             createNotification(supabase, uid, {
               id: `notif-evt-edit-${id}-${uid.slice(0, 8)}`,
               type: 'event', title: 'Event Updated',
@@ -187,7 +192,7 @@ export async function PATCH(request: Request) {
               tag: `event-edit-${id}`,
             }),
           ]))
-        ).catch(() => { /* best-effort */ });
+        )).catch(() => { /* best-effort */ });
       }
     }
 
@@ -224,8 +229,8 @@ export async function DELETE(request: Request) {
     // Notify all attendees that the event was cancelled (fire-and-forget)
     if (event && attendeeIds.length > 0) {
       const now = new Date().toISOString();
-      Promise.all(
-        attendeeIds.map(uid => Promise.all([
+      withTimeout(Promise.allSettled(
+        attendeeIds.map(uid => Promise.allSettled([
           createNotification(supabase, uid, {
             id: `notif-evt-cancel-${id}-${uid.slice(0, 8)}`,
             type: 'event', title: 'Event Cancelled',
@@ -238,7 +243,7 @@ export async function DELETE(request: Request) {
             tag: `event-cancel-${id}`,
           }),
         ]))
-      ).catch(() => { /* best-effort */ });
+      )).catch(() => { /* best-effort */ });
     }
 
     return NextResponse.json({ success: true });
