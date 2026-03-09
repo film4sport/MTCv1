@@ -819,21 +819,37 @@
     document.getElementById('newMessageModal').classList.remove('active');
   };
 
+  // Render a member item for the search results — admins show as "Mono Tennis Club"
+  function renderMemberItem(member) {
+    var displayName = member.role === 'admin' ? 'Mono Tennis Club' : member.name;
+    var displaySkill = member.role === 'admin' ? 'Club Admin' : member.skill;
+    var badge = member.role === 'admin'
+      ? ' <svg style="display:inline;vertical-align:middle;opacity:0.5;margin-left:4px" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>'
+      : '';
+    return '<div class="member-result-item" data-action="startConversation" data-id="' + sanitizeHTML(member.id) + '">' +
+      '<div class="member-result-avatar">' +
+        (avatarSVGs[member.avatar] || avatarSVGs['default']) +
+      '</div>' +
+      '<div class="member-result-info">' +
+        '<div class="member-result-name">' + sanitizeHTML(displayName) + badge + '</div>' +
+        '<div class="member-result-skill">' + sanitizeHTML(displaySkill) + '</div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  // Sort members: admins first, then alphabetical
+  function sortMembersAdminFirst(list) {
+    return list.slice().sort(function(a, b) {
+      if (a.role === 'admin' && b.role !== 'admin') return -1;
+      if (b.role === 'admin' && a.role !== 'admin') return 1;
+      return (a.name || '').localeCompare(b.name || '');
+    });
+  }
+
   function showAllMembers() {
     const container = document.getElementById('memberSearchResults');
-    container.innerHTML = MTC.state.clubMembers
-      .filter(function(m) { return m.id !== 'club'; })
-      .map(function(member) {
-        return '<div class="member-result-item" data-action="startConversation" data-id="' + sanitizeHTML(member.id) + '">' +
-          '<div class="member-result-avatar">' +
-            (avatarSVGs[member.avatar] || avatarSVGs['default']) +
-          '</div>' +
-          '<div class="member-result-info">' +
-            '<div class="member-result-name">' + sanitizeHTML(member.name) + '</div>' +
-            '<div class="member-result-skill">' + sanitizeHTML(member.skill) + '</div>' +
-          '</div>' +
-        '</div>';
-      }).join('');
+    var sorted = sortMembersAdminFirst(MTC.state.clubMembers.filter(function(m) { return m.id !== 'club'; }));
+    container.innerHTML = sorted.map(renderMemberItem).join('');
   }
 
   function searchMembers(query) {
@@ -845,9 +861,11 @@
       return;
     }
 
-    const results = MTC.state.clubMembers.filter(function(m) {
-      return m.id !== 'club' &&
-        (m.name.toLowerCase().includes(query) || m.skill.toLowerCase().includes(query));
+    var results = MTC.state.clubMembers.filter(function(m) {
+      if (m.id === 'club') return false;
+      // Match admin by "mono tennis club" too
+      if (m.role === 'admin' && 'mono tennis club'.includes(query)) return true;
+      return m.name.toLowerCase().includes(query) || m.skill.toLowerCase().includes(query);
     });
 
     if (results.length === 0) {
@@ -855,17 +873,7 @@
       return;
     }
 
-    container.innerHTML = results.map(function(member) {
-      return '<div class="member-result-item" data-action="startConversation" data-id="' + sanitizeHTML(member.id) + '">' +
-        '<div class="member-result-avatar">' +
-          (avatarSVGs[member.avatar] || avatarSVGs['default']) +
-        '</div>' +
-        '<div class="member-result-info">' +
-          '<div class="member-result-name">' + sanitizeHTML(member.name) + '</div>' +
-          '<div class="member-result-skill">' + sanitizeHTML(member.skill) + '</div>' +
-        '</div>' +
-      '</div>';
-    }).join('');
+    container.innerHTML = sortMembersAdminFirst(results).map(renderMemberItem).join('');
   }
 
   // onclick handler (generated HTML)

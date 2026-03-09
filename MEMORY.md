@@ -72,8 +72,24 @@ Before reporting any feature change as "done", verify:
 - **deleteMessage stale closure**: `deleteMessage`, `deleteConversation`, `markConversationRead` all read from stale `conversations` state via closure. Refactored to capture snapshots inside `setConversations(prev => ...)` functional updater, removing `conversations` from useCallback deps.
 - **Second message not persisting**: Supabase Realtime fires on messages table INSERT, triggering `fetchConversations()` which replaces entire conversations state — wiping optimistic messages not yet persisted. Added 1.5s debounce to messages Realtime handler so rapid sends complete before state is overwritten.
 
-**Welcome message bug fix (Mar 9):**
-- **Welcome msg sent on every login**: OAuth callback `auth/callback/route.ts` sent welcome tasks (message + notifications) for ALL OAuth logins, not just first signup. The DB guard (checking if `welcome-{userId}` message exists) was fragile — failed if message was deleted or RLS blocked the query. Added robust primary guard: if `user.created_at` is older than 5 minutes, skip all welcome tasks immediately. The DB check remains as a secondary guard for rapid re-auth scenarios.
+**Welcome message bug fixes (Mar 9, updated):**
+- **Admin self-welcome**: `send_welcome_message` RPC didn't check if new_user_id = admin_id. Admin got a welcome message to themselves that showed up in their conversation list on every page load. Fixed: added `if v_admin_id = new_user_id then return; end if;` guard.
+- **Idempotency guard**: RPC now checks `perform 1 from messages where id = 'welcome-' || new_user_id::text; if found then return;` before inserting. Prevents duplicate welcome messages from race conditions between signup page and auth callback.
+- **Conversation dedup**: RPC now checks for existing conversation between admin and new user before creating a new one. If admin already manually messaged the member, the welcome goes into the existing conversation.
+- **5-minute guard too strict**: `auth/callback/route.ts` had a 5-minute window — users who took >5 min to confirm their email got NO welcome message. Changed to 24-hour window. The message-ID dedup guard handles true dedup.
+- **Migration**: `20260309_fix_welcome_message_guards.sql`
+
+**Admin message filter tabs (Mar 9):**
+- Added conversation filter tabs for admin users on both Dashboard and Mobile PWA messages screens.
+- Three filters: "All" (default), "Needs Reply" (last message is from member, not admin), "Welcome" (conversations with only the auto-welcome message).
+- Counts displayed on each tab. Context-aware empty states.
+- Dashboard: `messages/page.tsx` — `convoFilter` state, `filteredConversations` computed, pill tabs above conversation list.
+- Mobile PWA: `messaging.js` — `activeMsgFilter`, `setMsgFilter()`, `filterKeysByMsgFilter()`, `updateFilterCounts()`, `initMsgFilterTabs()`. HTML tabs in `index.html`. CSS in `messaging.css`. Navigation init in `navigation.js`.
+
+**CSS build pipeline fix (Mar 9):**
+- **Critical bug**: Hamburger menu and notification panel CSS was in lazy-loaded `admin.css` bundle (only fetched when admin panel opened). All users affected — menu/notifications completely unstyled.
+- **Fix**: Extracted 618 lines of global CSS (menu drawer, notifications, skeleton, pull-to-refresh) into new `menu-notifications.css`, added to main `CSS_FILES` array in `build-mobile.js`. `admin.css` trimmed from 1609→991 lines (admin-only styles remain).
+- Audited all lazy bundles: `captain.css`, `admin.js`, `captain.js` — all clean, properly scoped to their features.
 
 **Mark Taylor (coach@mtc.ca) deletion:**
 - Cannot delete via Supabase dashboard because `delete_member` RPC explicitly blocks deletion when user has coaching programs (`coaching_programs.coach_id` FK). Must DELETE from `coaching_programs` WHERE `coach_id` = Mark's ID first, then call `delete_member`. The coaching_programs table column is `title` (not `name`).

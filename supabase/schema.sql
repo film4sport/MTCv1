@@ -487,10 +487,9 @@ begin
   perform 1 from public.messages where id = 'welcome-' || new_user_id::text;
   if found then return; end if;
 
-  -- Build message (gate code provided separately after Opening Day)
+  -- Build welcome message
   v_msg := 'Welcome to Mono Tennis Club, ' || split_part(new_user_name, ' ', 1) || '!' ||
-    E'\n\nYour court gate code will be provided after Opening Day.' ||
-    E'\n\nIn the meantime, explore the app — book courts, find partners, and check out upcoming events. See you on the court!';
+    E'\n\nExplore the app — book courts, find partners, and check out upcoming events. See you on the court!';
 
   -- Reuse existing conversation if one exists (e.g. admin already messaged this member)
   select id into v_conv_id from public.conversations
@@ -521,6 +520,31 @@ begin
     now(),
     false
   );
+end;
+$$ language plpgsql security definer set search_path = '';
+
+-- ─── Cleanup Stale Welcome Conversations ─────────────────
+-- Deletes welcome-only conversations older than N days where the member never replied
+create or replace function cleanup_stale_welcomes(older_than_days integer default 7)
+returns integer as $$
+declare
+  v_deleted integer := 0;
+  v_conv record;
+begin
+  for v_conv in
+    select c.id from public.conversations c
+    where c.last_timestamp < now() - (older_than_days || ' days')::interval
+      and (select count(*) from public.messages m where m.conversation_id = c.id) = 1
+      and exists (
+        select 1 from public.messages m
+        where m.conversation_id = c.id and m.id like 'welcome-%'
+      )
+  loop
+    delete from public.messages where conversation_id = v_conv.id;
+    delete from public.conversations where id = v_conv.id;
+    v_deleted := v_deleted + 1;
+  end loop;
+  return v_deleted;
 end;
 $$ language plpgsql security definer set search_path = '';
 

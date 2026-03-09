@@ -143,13 +143,44 @@ function MessagesContent() {
     setSearchQuery('');
   };
 
-  const filteredMembers = members.filter(m =>
-    m.id !== currentUser?.id &&
-    (!searchQuery || m.name.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  const filteredMembers = members
+    .filter(m =>
+      m.id !== currentUser?.id &&
+      (!searchQuery || m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (m.role === 'admin' && 'mono tennis club'.includes(searchQuery.toLowerCase())))
+    )
+    .sort((a, b) => {
+      // Pin admins (Mono Tennis Club) to the top
+      if (a.role === 'admin' && b.role !== 'admin') return -1;
+      if (b.role === 'admin' && a.role !== 'admin') return 1;
+      return a.name.localeCompare(b.name);
+    });
 
   // Admin conversation filters
   const isAdmin = currentUser?.role === 'admin';
+  const [cleaningUp, setCleaningUp] = useState(false);
+  const handleCleanupWelcomes = useCallback(async () => {
+    if (cleaningUp) return;
+    setCleaningUp(true);
+    try {
+      const token = (await supabase.auth.getSession()).data.session?.access_token;
+      const res = await fetch('/api/mobile/conversations', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ action: 'cleanup-welcomes', olderThanDays: 7 }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        showToast(`Cleaned up ${data.deleted} stale welcome conversation${data.deleted !== 1 ? 's' : ''}`);
+        // Refresh conversations
+        window.location.reload();
+      } else {
+        showToast(data.error || 'Cleanup failed', 'error');
+      }
+    } catch { showToast('Cleanup failed', 'error'); }
+    setCleaningUp(false);
+  }, [cleaningUp, showToast]);
+
   const filteredConversations = conversations.filter(convo => {
     if (convoFilter === 'all') return true;
     const hasWelcome = convo.messages.some(m => m.id.startsWith('welcome-'));
@@ -242,6 +273,7 @@ function MessagesContent() {
                   <div role="listbox" id="member-search-listbox" className="mt-1 max-h-40 overflow-y-auto rounded-lg border" style={{ borderColor: '#e0dcd3' }}>
                     {filteredMembers.map((m, i) => {
                       const hasConvo = conversations.some(c => c.memberId === m.id);
+                      const displayName = m.role === 'admin' ? 'Mono Tennis Club' : m.name;
                       return (
                         <button
                           key={m.id}
@@ -252,7 +284,10 @@ function MessagesContent() {
                           className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors flex items-center justify-between"
                           style={{ color: '#2a2f1e', backgroundColor: memberActiveIndex === i ? 'rgba(107, 122, 61, 0.08)' : undefined }}
                         >
-                          <span>{m.name}</span>
+                          <span className="flex items-center gap-2">
+                            {displayName}
+                            {m.role === 'admin' && <svg className="w-3.5 h-3.5 opacity-50" fill="none" stroke="#6b7a3d" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>}
+                          </span>
                           {hasConvo && <span className="text-[0.6rem] px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(107,122,61,0.1)', color: '#6b7a3d' }}>existing</span>}
                         </button>
                       );
@@ -284,6 +319,18 @@ function MessagesContent() {
                       </button>
                     );
                   })}
+                  {/* Cleanup button — only when Welcome filter has items */}
+                  {conversations.some(c => c.messages.length === 1 && c.messages[0].id.startsWith('welcome-')) && (
+                    <button
+                      onClick={handleCleanupWelcomes}
+                      disabled={cleaningUp}
+                      className="ml-auto px-3 py-1.5 rounded-full text-xs font-medium transition-all hover:opacity-80 disabled:opacity-50"
+                      style={{ background: 'rgba(231, 76, 60, 0.08)', color: '#e74c3c' }}
+                      title="Delete welcome-only conversations older than 7 days"
+                    >
+                      {cleaningUp ? 'Cleaning...' : 'Cleanup 7d+'}
+                    </button>
+                  )}
                 </div>
               )}
             </div>

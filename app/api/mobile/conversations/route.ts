@@ -221,9 +221,20 @@ export async function DELETE(request: Request) {
   if (authResult instanceof NextResponse) return authResult;
 
   try {
-    const { conversationId, messageId } = await request.json();
+    const { conversationId, messageId, action, olderThanDays } = await request.json();
     const supabase = getAdminClient();
     const userId = authResult.id;
+
+    // Admin-only: cleanup stale welcome-only conversations
+    if (action === 'cleanup-welcomes') {
+      if (authResult.role !== 'admin') {
+        return NextResponse.json({ error: 'Admin only' }, { status: 403 });
+      }
+      const days = Math.max(1, Math.min(90, olderThanDays || 7));
+      const { data, error } = await supabase.rpc('cleanup_stale_welcomes', { older_than_days: days });
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ success: true, deleted: data || 0 });
+    }
 
     if (messageId) {
       // Delete a single message — only if user is the sender
