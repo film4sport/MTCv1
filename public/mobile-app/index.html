@@ -20,7 +20,7 @@
     if ('serviceWorker' in navigator) {
       caches.keys().then(function(names) {
         names.forEach(function(name) {
-          if (name.indexOf('mtc-court-9649dfb4') === -1) {
+          if (name.indexOf('mtc-court-d7577171') === -1) {
             caches.delete(name);
             console.log('[CacheBust] Deleted old cache:', name);
           }
@@ -2305,13 +2305,6 @@
       <div class="search-bar search-bar-messages">
         <svg class="icon-muted" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
         <input type="text" placeholder="Search conversations..." id="messageSearchInput" aria-label="Search conversations" oninput="debouncedFilterConversations(this.value)">
-      </div>
-
-      <!-- Admin filter tabs (shown only for admins) -->
-      <div class="msg-filter-tabs" id="msgFilterTabs" style="display:none">
-        <button class="msg-filter-tab active" data-filter="all" onclick="setMsgFilter('all')">All</button>
-        <button class="msg-filter-tab" data-filter="needs-reply" onclick="setMsgFilter('needs-reply')">Needs Reply</button>
-        <button class="msg-filter-tab" data-filter="welcome" onclick="setMsgFilter('welcome')">Welcome</button>
       </div>
 
       <!-- Conversations rendered dynamically by renderConversationsList() -->

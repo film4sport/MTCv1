@@ -51,71 +51,6 @@
   window.debouncedSearchMembers = MTC.debounce(searchMembers, 250);
 
   // ============================================
-  // ADMIN MESSAGE FILTER
-  // ============================================
-  var activeMsgFilter = 'all'; // 'all' | 'needs-reply' | 'welcome'
-
-  // Show filter tabs for admins
-  window.initMsgFilterTabs = function() {
-    var tabs = document.getElementById('msgFilterTabs');
-    if (!tabs) return;
-    var user = MTC.state.currentUser;
-    if (user && user.role === 'admin') {
-      tabs.style.display = 'flex';
-      updateFilterCounts();
-    } else {
-      tabs.style.display = 'none';
-    }
-  };
-
-  window.setMsgFilter = function(filter) {
-    activeMsgFilter = filter;
-    var tabs = document.querySelectorAll('.msg-filter-tab');
-    tabs.forEach(function(tab) {
-      tab.classList.toggle('active', tab.getAttribute('data-filter') === filter);
-    });
-    renderConversationsList();
-  };
-
-  function updateFilterCounts() {
-    var userId = MTC.state.currentUser ? MTC.state.currentUser.id : null;
-    var keys = Object.keys(conversations);
-    var needsReply = 0, welcome = 0;
-    keys.forEach(function(memberId) {
-      var msgs = conversations[memberId] || [];
-      if (msgs.length === 0) return;
-      var hasWelcomeOnly = msgs.length === 1 && msgs[0].id && msgs[0].id.indexOf('welcome-') === 0;
-      if (hasWelcomeOnly) { welcome++; return; }
-      var lastMsg = msgs[msgs.length - 1];
-      if (lastMsg && !lastMsg.sent && lastMsg.fromId !== userId) needsReply++;
-    });
-    var tabs = document.querySelectorAll('.msg-filter-tab');
-    tabs.forEach(function(tab) {
-      var filter = tab.getAttribute('data-filter');
-      var count = filter === 'all' ? keys.length : (filter === 'needs-reply' ? needsReply : welcome);
-      // Update button text with count
-      var label = filter === 'all' ? 'All' : (filter === 'needs-reply' ? 'Needs Reply' : 'Welcome');
-      tab.innerHTML = label + (count > 0 ? ' <span class="filter-count">' + count + '</span>' : '');
-    });
-  }
-
-  function filterKeysByMsgFilter(keys) {
-    if (activeMsgFilter === 'all') return keys;
-    var userId = MTC.state.currentUser ? MTC.state.currentUser.id : null;
-    return keys.filter(function(memberId) {
-      var msgs = conversations[memberId] || [];
-      if (msgs.length === 0) return false;
-      var hasWelcomeOnly = msgs.length === 1 && msgs[0].id && msgs[0].id.indexOf('welcome-') === 0;
-      if (activeMsgFilter === 'welcome') return hasWelcomeOnly;
-      if (activeMsgFilter === 'needs-reply') {
-        var lastMsg = msgs[msgs.length - 1];
-        return lastMsg && !lastMsg.sent && lastMsg.fromId !== userId;
-      }
-      return true;
-    });
-  }
-
-  // ============================================
   // DYNAMIC CONVERSATION LIST RENDERER
   // ============================================
   /** Renders the conversation list from actual data (no hardcoded items) */
@@ -124,31 +59,15 @@
     var emptyState = document.getElementById('noConversations');
     if (!container) return;
 
-    // Update filter counts for admin
-    if (MTC.state.currentUser && MTC.state.currentUser.role === 'admin') {
-      updateFilterCounts();
-    }
-
     var keys = Object.keys(conversations);
-    // Apply admin filter
-    keys = filterKeysByMsgFilter(keys);
 
     if (keys.length === 0) {
       container.innerHTML = '';
       if (emptyState) {
         emptyState.style.display = 'block';
-        // Context-aware empty state text
         var titleEl = emptyState.querySelector('.empty-state-title');
         var textEl = emptyState.querySelector('.empty-state-text');
-        if (titleEl && textEl && activeMsgFilter !== 'all') {
-          if (activeMsgFilter === 'needs-reply') {
-            titleEl.textContent = 'ALL CAUGHT UP';
-            textEl.textContent = 'No conversations need a reply right now.';
-          } else if (activeMsgFilter === 'welcome') {
-            titleEl.textContent = 'NO WELCOME-ONLY CHATS';
-            textEl.textContent = 'All members have been personally messaged.';
-          }
-        } else if (titleEl && textEl) {
+        if (titleEl && textEl) {
           titleEl.textContent = 'NO CONVERSATIONS FOUND';
           textEl.textContent = 'Try a different search term or start a new conversation with a club member.';
         }
