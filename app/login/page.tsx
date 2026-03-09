@@ -36,6 +36,14 @@ function LoginContent() {
 
   const [loginError, setLoginError] = useState('');
   const [magicLinkSent, setMagicLinkSent] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
+
+  // Countdown timer for magic link cooldown
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = setTimeout(() => setCooldown(cooldown - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [cooldown]);
 
   return (
     <>
@@ -735,16 +743,18 @@ function LoginContent() {
                 }
                 setLoginError('');
                 setLoading(true);
-                const { error } = await signInWithMagicLink(email.trim().toLowerCase(), '/dashboard');
+                const result = await signInWithMagicLink(email.trim().toLowerCase(), '/dashboard');
                 setLoading(false);
-                if (error) {
-                  setLoginError(error);
+                if (result.error) {
+                  setLoginError(result.error);
+                  if (result.cooldownSeconds) setCooldown(result.cooldownSeconds);
                 } else {
                   setLoginError('');
+                  setCooldown(60);
                   setMagicLinkSent(true);
                 }
               }}
-              disabled={loading}
+              disabled={loading || cooldown > 0}
               className="w-full py-5 rounded-full font-semibold text-base transition-all hover:-translate-y-0.5 active:scale-[0.97] flex items-center justify-center gap-2 disabled:opacity-60"
               style={{ background: '#6b7a3d', color: '#fff', minHeight: 56 }}
               onMouseEnter={(e) => { if (!loading) { e.currentTarget.style.background = '#5a6832'; e.currentTarget.style.boxShadow = '0 10px 30px rgba(107, 122, 61, 0.25)'; } }}
@@ -755,7 +765,7 @@ function LoginContent() {
                   <span className="inline-block w-[18px] h-[18px] border-2 border-white/30 border-t-white rounded-full" style={{ animation: 'spin 0.8s linear infinite' }} />
                   Sending link...
                 </span>
-              ) : 'Sign in with Email Link'}
+              ) : cooldown > 0 ? `Resend in ${cooldown}s` : 'Sign in with Email Link'}
             </button>
           </div>
 
@@ -811,15 +821,38 @@ function LoginContent() {
                   We sent a sign-in link to
                 </p>
                 <p className="text-sm sm:text-base font-semibold mb-5" style={{ color: '#2a2f1e' }}>{email}</p>
-                <p className="text-xs" style={{ color: '#999' }}>Click the link in your email to sign in. Check your spam folder if you don&apos;t see it.</p>
-                <button
-                  type="button"
-                  onClick={() => setMagicLinkSent(false)}
-                  className="mt-6 text-sm font-medium hover:underline"
-                  style={{ color: '#6b7a3d' }}
-                >
-                  Back to sign in
-                </button>
+                <p className="text-xs mb-1" style={{ color: '#999' }}>Click the link in your email to sign in.</p>
+                <p className="text-xs" style={{ color: '#999' }}>It may take a minute to arrive. Check your spam folder if needed.</p>
+                <div className="flex flex-col items-center gap-2 mt-6">
+                  <button
+                    type="button"
+                    disabled={cooldown > 0 || loading}
+                    onClick={async () => {
+                      setLoading(true);
+                      const result = await signInWithMagicLink(email.trim().toLowerCase(), '/dashboard');
+                      setLoading(false);
+                      if (result.error) {
+                        setLoginError(result.error);
+                        if (result.cooldownSeconds) setCooldown(result.cooldownSeconds);
+                        setMagicLinkSent(false);
+                      } else {
+                        setCooldown(60);
+                      }
+                    }}
+                    className="text-sm font-medium transition-all"
+                    style={{ color: cooldown > 0 ? '#999' : '#6b7a3d', cursor: cooldown > 0 ? 'default' : 'pointer' }}
+                  >
+                    {loading ? 'Sending...' : cooldown > 0 ? `Resend in ${cooldown}s` : 'Resend email'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setMagicLinkSent(false)}
+                    className="text-xs hover:underline"
+                    style={{ color: '#999' }}
+                  >
+                    Back to sign in
+                  </button>
+                </div>
               </div>
             </div>
           )}

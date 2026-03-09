@@ -3,7 +3,7 @@
 import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 
-import { signUp, signInWithGoogle, completeOAuthProfile } from '../dashboard/lib/auth';
+import { signUp, signInWithGoogle, completeOAuthProfile, resendConfirmation } from '../dashboard/lib/auth';
 import { supabase } from '../lib/supabase';
 import { sendWelcomeMessage, createFamily, addFamilyMember } from '../dashboard/lib/db';
 import { membershipTypes, signupMembershipTypes, waiverText, acknowledgementText } from '../info/data';
@@ -36,8 +36,17 @@ function SignupContent() {
   const [familyMemberInputs, setFamilyMemberInputs] = useState<{ name: string; type: 'adult' | 'junior'; birthYear: string }[]>([]);
   const [isOAuthUser, setIsOAuthUser] = useState(false);
   const [oauthUserId, setOauthUserId] = useState<string | null>(null);
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [resendStatus, setResendStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
   const isFamily = signupData.membershipType === 'family';
   const totalSteps = 7;
+
+  // Countdown timer for resend cooldown
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [resendCooldown]);
 
   // Navigate with direction tracking for animations
   const goToStep = useCallback((target: number) => {
@@ -259,6 +268,7 @@ function SignupContent() {
           }),
         }).catch(() => { /* non-critical */ });
         setEmailConfirmPending(true);
+        setResendCooldown(60);
         setSignupLoading(false);
         setSignupStep(totalSteps);
         return;
@@ -876,7 +886,38 @@ function SignupContent() {
                   <a href="/login" className="inline-block px-8 py-3 rounded-full text-sm font-semibold transition-all hover:opacity-90" style={{ backgroundColor: '#6b7a3d', color: '#fff' }}>Go to Login</a>
                   <a href="/" className="inline-block px-8 py-3 rounded-full text-sm font-semibold transition-all hover:opacity-90" style={{ backgroundColor: '#faf8f3', color: '#6b7a3d', border: '1px solid #e0dcd3' }}>Back to Home</a>
                 </div>
-                <p className="text-xs mt-4" style={{ color: '#6b7266' }}>Didn&apos;t receive it? Check your spam folder.</p>
+                <div className="mt-6 text-center">
+                  <p className="text-xs mb-2" style={{ color: '#6b7266' }}>Didn&apos;t receive it? Check your spam folder, or</p>
+                  <button
+                    type="button"
+                    disabled={resendCooldown > 0 || resendStatus === 'sending'}
+                    onClick={async () => {
+                      setResendStatus('sending');
+                      const { error: resendErr } = await resendConfirmation(signupData.email);
+                      if (resendErr) {
+                        setResendStatus('error');
+                        setSignupError(resendErr);
+                      } else {
+                        setResendStatus('sent');
+                        setResendCooldown(60);
+                        // Log the resend
+                        fetch('/api/log-email', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ type: 'signup_confirmation', recipientEmail: signupData.email, status: 'requested', subject: 'Confirm Your Email — Mono Tennis Club (resend)', metadata: { source: 'resend_button' } }),
+                        }).catch(() => {});
+                      }
+                      setTimeout(() => setResendStatus('idle'), 3000);
+                    }}
+                    className="text-sm font-medium transition-all"
+                    style={{ color: resendCooldown > 0 ? '#999' : '#6b7a3d', cursor: resendCooldown > 0 ? 'default' : 'pointer' }}
+                  >
+                    {resendStatus === 'sending' ? 'Sending...' :
+                     resendStatus === 'sent' ? 'Email sent!' :
+                     resendCooldown > 0 ? `Resend in ${resendCooldown}s` :
+                     'Resend verification email'}
+                  </button>
+                </div>
               </>
             ) : (
               <>
