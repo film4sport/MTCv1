@@ -164,6 +164,7 @@ export default function AboutTab() {
             {[
               { name: 'Patti Powell', role: 'President' },
               { name: 'Peter Gibson', role: 'Past President' },
+              { name: 'Lynn Brophy', role: 'Secretary' },
               { name: 'Lisa Conrad', role: 'Treasurer' },
               { name: 'Kelly Kamstra-Lloyd', role: 'Member at Large' },
               { name: 'Patrick Minshall', role: 'Member at Large' },
@@ -180,7 +181,7 @@ export default function AboutTab() {
             ))}
           </div>
           <p className="text-center text-xs mt-4" style={{ color: '#999' }}>
-            Vice-President and Secretary positions are currently open.
+            Vice-President position is currently open.
           </p>
         </div>
       </section>
