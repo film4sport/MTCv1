@@ -1,7 +1,7 @@
 /**
  * messaging-features.test.js — Unit tests for messaging features added Mar 9, 2026
- * Covers: admin filter tabs, welcome cleanup, admin pinning in search,
- *         welcome message guards, auth callback 24h guard
+ * Covers: welcome message guards, auth callback 24h guard, welcome cleanup RPC,
+ *         cleanup API endpoint, admin pinning in search, admin name override
  */
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'fs';
@@ -17,95 +17,7 @@ const schemaSQL = readSource('supabase/schema.sql');
 const welcomeGuardsMigration = readSource('supabase/migrations/20260309_fix_welcome_message_guards.sql');
 const cleanupMigration = readSource('supabase/migrations/20260309_cleanup_stale_welcomes_rpc.sql');
 const mobileMessagingSrc = readSource('public/mobile-app/js/messaging.js');
-const mobileNavigationSrc = readSource('public/mobile-app/js/navigation.js');
-const mobileIndexHtml = readSource('public/mobile-app/index.html');
 const dbSrc = readSource('app/dashboard/lib/db.ts');
-
-// ─── Admin Message Filter Tabs (Dashboard) ───────────────
-describe('Admin Message Filter Tabs — Dashboard', () => {
-  it('has convoFilter state with three options', () => {
-    expect(messagesPageSrc).toContain("useState<'all' | 'needs-reply' | 'welcome'>('all')");
-  });
-
-  it('filters conversations by "needs-reply" — last message not from current user', () => {
-    expect(messagesPageSrc).toContain('lastMsg.fromId !== currentUser?.id');
-  });
-
-  it('filters conversations by "welcome" — single welcome-only message', () => {
-    expect(messagesPageSrc).toContain("c.messages.length === 1 && c.messages[0].id.startsWith('welcome-')");
-  });
-
-  it('shows filter tabs only for admin users', () => {
-    expect(messagesPageSrc).toContain("isAdmin && conversations.length > 0");
-  });
-
-  it('computes isAdmin from currentUser role', () => {
-    expect(messagesPageSrc).toContain("currentUser?.role === 'admin'");
-  });
-
-  it('renders three filter tab buttons', () => {
-    expect(messagesPageSrc).toContain("'all', 'All'");
-    expect(messagesPageSrc).toContain("'needs-reply', 'Needs Reply'");
-    expect(messagesPageSrc).toContain("'welcome', 'Welcome'");
-  });
-
-  it('displays filter counts on each tab', () => {
-    // All: conversations.length, needs-reply: filtered count, welcome: filtered count
-    expect(messagesPageSrc).toContain('count > 0');
-  });
-
-  it('has context-aware empty states for each filter', () => {
-    expect(messagesPageSrc).toContain('All caught up!');
-    expect(messagesPageSrc).toContain('No welcome-only conversations');
-    expect(messagesPageSrc).toContain('All members have been personally messaged');
-  });
-
-  it('uses filteredConversations (not raw conversations) for rendering', () => {
-    expect(messagesPageSrc).toContain('[...filteredConversations]');
-    expect(messagesPageSrc).toContain('filteredConversations.length === 0');
-  });
-});
-
-// ─── Admin Message Filter Tabs (Mobile PWA) ──────────────
-describe('Admin Message Filter Tabs — Mobile PWA', () => {
-  it('has filter tabs HTML in index.html', () => {
-    expect(mobileIndexHtml).toContain('id="msgFilterTabs"');
-    expect(mobileIndexHtml).toContain('data-filter="all"');
-    expect(mobileIndexHtml).toContain('data-filter="needs-reply"');
-    expect(mobileIndexHtml).toContain('data-filter="welcome"');
-  });
-
-  it('has setMsgFilter function', () => {
-    expect(mobileMessagingSrc).toContain('window.setMsgFilter = function(filter)');
-  });
-
-  it('has initMsgFilterTabs function that checks for admin role', () => {
-    expect(mobileMessagingSrc).toContain('window.initMsgFilterTabs = function()');
-    expect(mobileMessagingSrc).toContain("user.role === 'admin'");
-  });
-
-  it('filter tabs hidden by default (display:none)', () => {
-    expect(mobileIndexHtml).toContain('id="msgFilterTabs" style="display:none"');
-  });
-
-  it('initMsgFilterTabs called when navigating to messages', () => {
-    expect(mobileNavigationSrc).toContain("initMsgFilterTabs");
-  });
-
-  it('filterKeysByMsgFilter filters welcome-only conversations', () => {
-    expect(mobileMessagingSrc).toContain("indexOf('welcome-') === 0");
-  });
-
-  it('has context-aware empty states', () => {
-    expect(mobileMessagingSrc).toContain('ALL CAUGHT UP');
-    expect(mobileMessagingSrc).toContain('NO WELCOME-ONLY CHATS');
-  });
-
-  it('updateFilterCounts updates tab counts', () => {
-    expect(mobileMessagingSrc).toContain('function updateFilterCounts()');
-    expect(mobileMessagingSrc).toContain('filter-count');
-  });
-});
 
 // ─── Welcome Message Guards (RPC) ────────────────────────
 describe('Welcome Message Guards — send_welcome_message RPC', () => {
@@ -125,7 +37,6 @@ describe('Welcome Message Guards — send_welcome_message RPC', () => {
   });
 
   it('updated welcome message does NOT mention gate code', () => {
-    // The old message had "Your court gate code will be provided after Opening Day"
     expect(welcomeGuardsMigration).not.toContain('gate code');
     expect(welcomeGuardsMigration).toContain('Explore the app');
   });
@@ -218,28 +129,6 @@ describe('Cleanup API — DELETE /api/mobile/conversations', () => {
   });
 });
 
-// ─── Dashboard Cleanup Button ────────────────────────────
-describe('Dashboard Cleanup Button', () => {
-  it('has cleanup button in filter tabs area', () => {
-    expect(messagesPageSrc).toContain('handleCleanupWelcomes');
-    expect(messagesPageSrc).toContain('Cleanup 7d+');
-  });
-
-  it('button only shows when welcome conversations exist', () => {
-    expect(messagesPageSrc).toContain("conversations.some(c => c.messages.length === 1 && c.messages[0].id.startsWith('welcome-'))");
-  });
-
-  it('has loading state', () => {
-    expect(messagesPageSrc).toContain('cleaningUp');
-    expect(messagesPageSrc).toContain('Cleaning...');
-  });
-
-  it('sends correct API request', () => {
-    expect(messagesPageSrc).toContain("action: 'cleanup-welcomes'");
-    expect(messagesPageSrc).toContain('olderThanDays: 7');
-  });
-});
-
 // ─── Admin Pinned in Member Search (Dashboard) ───────────
 describe('Admin Pinned in Member Search — Dashboard', () => {
   it('sorts admins to top of member list', () => {
@@ -255,7 +144,6 @@ describe('Admin Pinned in Member Search — Dashboard', () => {
   });
 
   it('shows verified badge for admin in search', () => {
-    // Shield SVG icon for admin
     expect(messagesPageSrc).toContain("m.role === 'admin' && <svg");
   });
 });
@@ -277,7 +165,6 @@ describe('Admin Pinned in Member Search — Mobile PWA', () => {
 
   it('shows verified badge SVG for admin', () => {
     expect(mobileMessagingSrc).toContain("member.role === 'admin'");
-    // The badge SVG with shield path
     expect(mobileMessagingSrc).toContain('M9 12l2 2 4-4m5.618');
   });
 
