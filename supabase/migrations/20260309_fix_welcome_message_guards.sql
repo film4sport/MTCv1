@@ -17,10 +17,9 @@ begin
   perform 1 from public.messages where id = 'welcome-' || new_user_id::text;
   if found then return; end if;
 
-  -- Build message (gate code provided separately after Opening Day)
+  -- Build welcome message
   v_msg := 'Welcome to Mono Tennis Club, ' || split_part(new_user_name, ' ', 1) || '!' ||
-    E'\n\nYour court gate code will be provided after Opening Day.' ||
-    E'\n\nIn the meantime, explore the app — book courts, find partners, and check out upcoming events. See you on the court!';
+    E'\n\nExplore the app — book courts, find partners, and check out upcoming events. See you on the court!';
 
   -- Reuse existing conversation if one exists (e.g. admin already messaged this member)
   select id into v_conv_id from public.conversations
