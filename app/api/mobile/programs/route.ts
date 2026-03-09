@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { authenticateMobileRequest, getAdminClient, cachedJson } from '../auth-helper';
+import { authenticateMobileRequest, getAdminClient, cachedJson, withAuth } from '../auth-helper';
 import { sendPushToUser } from '../../lib/push';
 import crypto from 'crypto';
 
@@ -224,3 +224,98 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }
+
+/** Update a coaching program (admin/coach only) */
+export const PATCH = withAuth(async (_user, request, supabase) => {
+  const body = await request.json();
+  const { id, ...updates } = body;
+
+  if (!id) {
+    return NextResponse.json({ error: 'Missing program id' }, { status: 400 });
+  }
+
+  // Map camelCase fields to snake_case DB columns
+  const dbUpdates: Record<string, unknown> = {};
+  if (updates.title !== undefined) dbUpdates.title = updates.title;
+  if (updates.description !== undefined) dbUpdates.description = updates.description;
+  if (updates.coach !== undefined) dbUpdates.coach_name = updates.coach;
+  if (updates.coachId !== undefined) dbUpdates.coach_id = updates.coachId;
+  if (updates.spotsTotal !== undefined) dbUpdates.spots_total = parseInt(updates.spotsTotal);
+  if (updates.price !== undefined) dbUpdates.fee = parseFloat(updates.price);
+  if (updates.status !== undefined) dbUpdates.status = updates.status;
+  if (updates.courtId !== undefined) dbUpdates.court_id = parseInt(updates.courtId);
+  if (updates.courtName !== undefined) dbUpdates.court_name = updates.courtName;
+  if (updates.type !== undefined) dbUpdates.type = updates.type;
+
+  if (Object.keys(dbUpdates).length === 0) {
+    return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 });
+  }
+
+  const { error } = await supabase
+    .from('coaching_programs')
+    .update(dbUpdates)
+    .eq('id', id);
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ success: true });
+}, { role: 'admin|coach' });
+
+/** Delete a coaching program (admin only) */
+export const DELETE = withAuth(async (_user, request, supabase) => {
+  const { id } = await request.json();
+
+  if (!id) {
+    return NextResponse.json({ error: 'Missing program id' }, { status: 400 });
+  }
+
+  // Check for active enrollments and notify before deletion
+  const { data: enrollments } = await supabase
+    .from('program_enrollments')
+    .select('member_id')
+    .eq('program_id', id);
+
+  const { data: program } = await supabase
+    .from('coaching_programs')
+    .select('title')
+    .eq('id', id)
+    .single();
+
+  if (enrollments && enrollments.length > 0 && program) {
+    const timestamp = new Date().toISOString();
+    const notifications = enrollments.map((e: { member_id: string }) => ({
+      id: `n-${crypto.randomUUID().slice(0, 8)}`,
+      user_id: e.member_id,
+      type: 'program',
+      title: `${program.title} Cancelled`,
+      body: `The program "${program.title}" has been cancelled. If you were charged, a refund will be processed.`,
+      timestamp,
+      read: false,
+    }));
+    await supabase.from('notifications').insert(notifications);
+
+    // Push notifications (fire and forget)
+    for (const e of enrollments) {
+      sendPushToUser(supabase, e.member_id, {
+        title: `${program.title} Cancelled`,
+        body: 'The program has been cancelled.',
+        type: 'program',
+        tag: `program-cancel-${id}`,
+      }).catch(() => {});
+    }
+  }
+
+  // CASCADE will clean up program_sessions and program_enrollments
+  const { error } = await supabase
+    .from('coaching_programs')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ success: true });
+}, { role: 'admin' });

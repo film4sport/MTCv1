@@ -148,13 +148,43 @@ export async function PATCH(request: Request) {
   const userId = authResult.id;
 
   try {
-    const { partnerId } = await request.json();
+    const body = await request.json();
+    const { partnerId, action } = body;
     if (!partnerId) {
       return NextResponse.json({ error: 'Missing partnerId' }, { status: 400 });
     }
 
     const supabase = getAdminClient();
 
+    // Edit own partner request
+    if (action === 'edit') {
+      const updates: Record<string, unknown> = {};
+      if (body.date) updates.date = sanitizeInput(String(body.date), 20);
+      if (body.time) updates.time = sanitizeInput(String(body.time), 20);
+      if (body.message !== undefined) updates.message = body.message ? sanitizeInput(String(body.message), 500) : null;
+      if (body.matchType && isValidEnum(body.matchType, [...VALID_MATCH_TYPES, 'mixed', 'any'])) {
+        updates.match_type = body.matchType;
+      }
+      if (body.availability) updates.availability = sanitizeInput(String(body.availability), 200);
+
+      if (Object.keys(updates).length === 0) {
+        return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 });
+      }
+
+      const { error } = await supabase
+        .from('partners')
+        .update(updates)
+        .eq('id', partnerId)
+        .eq('user_id', userId);
+
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
+
+      return NextResponse.json({ success: true, action: 'edited' });
+    }
+
+    // Default action: join/match
     // Can't join your own request
     const { data: partner } = await supabase
       .from('partners')

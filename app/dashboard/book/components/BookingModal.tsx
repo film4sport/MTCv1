@@ -19,16 +19,17 @@ interface BookingModalProps {
   onConfirm: (isGuest: boolean, guestName: string, participants: { id: string; name: string }[], matchType: 'singles' | 'doubles', duration: number) => void;
   onCancel: () => void;
   loading: boolean;
+  initialParticipants?: { id: string; name: string }[];
 }
 
 const DURATION_LABELS: Record<number, string> = { 2: '1 hr', 3: '1.5 hrs', 4: '2 hrs' };
 
-export default function BookingModal({ modalData, members, currentUser, bookings, onConfirm, onCancel, loading }: BookingModalProps) {
+export default function BookingModal({ modalData, members, currentUser, bookings, onConfirm, onCancel, loading, initialParticipants }: BookingModalProps) {
   const [matchType, setMatchType] = useState<'singles' | 'doubles'>('singles');
   const [duration, setDuration] = useState(2); // slots (2=1h default)
   const [isGuest, setIsGuest] = useState(false);
   const [guestName, setGuestName] = useState('');
-  const [selectedParticipants, setSelectedParticipants] = useState<{ id: string; name: string }[]>([]);
+  const [selectedParticipants, setSelectedParticipants] = useState<{ id: string; name: string }[]>(initialParticipants || []);
   const [participantSearch, setParticipantSearch] = useState('');
   const [activeIndex, setActiveIndex] = useState(-1);
   const trapRef = useRef<HTMLDivElement>(null);

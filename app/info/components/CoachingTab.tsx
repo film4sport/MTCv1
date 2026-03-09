@@ -1,6 +1,19 @@
 export default function CoachingTab() {
   return (
     <>
+      {/* Dashboard CTA for logged-in members */}
+      <div className="px-8 lg:px-16 pt-8" style={{ backgroundColor: '#edeae3' }}>
+        <div className="max-w-4xl mx-auto">
+          <a
+            href="/dashboard/lessons"
+            className="block rounded-xl p-4 text-center transition-all duration-200 hover:shadow-md"
+            style={{ background: 'rgba(107, 122, 61, 0.1)', border: '1px solid rgba(107, 122, 61, 0.2)', color: '#6b7a3d', fontSize: 14, fontWeight: 600, textDecoration: 'none' }}
+          >
+            Already a member? View lessons, enroll in programs, and book coaching sessions in your Dashboard &rarr;
+          </a>
+        </div>
+      </div>
+
       <section className="py-16 lg:py-20 px-8 lg:px-16" style={{ backgroundColor: '#edeae3' }}>
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12 fade-in">

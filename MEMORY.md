@@ -139,12 +139,56 @@ Before reporting any feature change as "done", verify:
   - Family profile switcher: MTC.state auto-restore, switcher visibility, profile switching, persistence after reload
   - Messages: search input, new message modal
 
+### Cowork Session (2026-03-08 continued) — Feature Flow Improvements (Batch Implementation)
+
+**13 approved feature improvements implemented across Mobile PWA + Dashboard:**
+
+**Batch 1 (Completed in prior session):**
+- #1: New Message button made more visible — volt pill with "New" label on mobile, larger "New Message" button on dashboard
+- #13: Onboarding final slide replaced with "Book Your First Court" CTA on both platforms
+- #5: Verified all screens already have empty states — no work needed
+
+**Batch 2 (Completed in prior session):**
+- #4: Calendar restructure — Home = Club Events (interactive calendar with rich event cards, RSVP, details), Schedule = Personal bookings only. Removed Club Events sub-view from Schedule. "Club Events" quick action smooth-scrolls to home calendar.
+- Dashboard home events now tappable → navigates to events page with auto-open detail modal via `?event=<id>` query param
+- #8: Event attendee names shown before RSVP (already done on both platforms)
+- #9: Cancel booking modal shows participant names on both platforms
+
+**Batch 3 (This session):**
+- #7: "Add to Calendar" (.ics download) on mobile PWA booking confirmation. `addBookingToCalendar()` in navigation.js generates ICS file. booking.js now calls `showCelebrationModal()` directly with booking details (bypasses `showModal()`). Dashboard already had this.
+- #3: Partner match → booking flow. Mobile: "Book a Court Together" button on celebration modal after partner match → navigates to booking with partner auto-added via `addParticipant()`. Dashboard: "Book" button on partner cards → links to `/dashboard/book?partner=<id>&partnerName=<name>`. BookingModal accepts `initialParticipants` prop.
+- #6: Loading states + retry. Cancel booking button now has spinner + disabled state + error callback. Generic `.btn-spinner` CSS class added. Booking already had spinners. Optimistic actions (RSVP, message send) don't need spinners.
+
+**Batch 4 (This session):**
+- #10: Programs PATCH/DELETE API endpoints. `app/api/mobile/programs/route.ts` — PATCH (admin/coach, updates program fields), DELETE (admin only, notifies enrolled members via bell + push before deletion). Uses `withAuth` wrapper.
+- #12: Partner request edit + auto-expiry. API PATCH supports `action: 'edit'` to update own request fields. Date now displayed on partner cards (both platforms). Auto-expiry already handled by API `gte('date', today)` filter. Fixed `p.userName` → `p.name` bug on dashboard Book link.
+- #14: Coaching consolidation. Added "Already a member? View lessons..." CTA banner linking to `/dashboard/lessons` at top of `/info?tab=coaching`. Pages kept separate (different audiences: visitors vs members).
+- #15: Dashboard event CRUD for admins. `store.tsx`: Added `createEvent`, `updateEvent`, `deleteEvent` functions using `apiCall()`. Events page: "Add Event" button (admin/coach only), Edit/Delete buttons on event detail modal, Add/Edit modal form with all event fields. API already had PUT/PATCH/DELETE routes.
+
+**Files modified (this session):**
+- `public/mobile-app/js/booking.js` — Replaced `showModal()` calls with `showCelebrationModal()` + booking details
+- `public/mobile-app/js/navigation.js` — `_matchedPartner`, `bookWithPartner()`, date display on partner cards, "Book Together" button hide/show logic
+- `public/mobile-app/js/mybookings.js` — Cancel button loading spinner + error callback
+- `public/mobile-app/css/home.css` — `.btn-spinner` generic spinner class
+- `public/mobile-app/index.html` — "Book a Court Together" button in celebration modal
+- `app/dashboard/partners/page.tsx` — "Book" button next to "Message", date display on cards, fixed `p.userName` → `p.name`
+- `app/dashboard/book/page.tsx` — `initialParticipants` from `?partner=` query param
+- `app/dashboard/book/components/BookingModal.tsx` — `initialParticipants` prop
+- `app/dashboard/events/page.tsx` — Admin CRUD: Add/Edit/Delete event modals + buttons
+- `app/dashboard/lib/store.tsx` — `createEvent`, `updateEvent`, `deleteEvent` in AppState + context
+- `app/api/mobile/programs/route.ts` — PATCH + DELETE handlers
+- `app/api/mobile/partners/route.ts` — `action: 'edit'` support in PATCH
+- `app/info/components/CoachingTab.tsx` — Dashboard CTA banner
+
+**Build verified:** TypeScript clean (`tsc --noEmit` passes), mobile build passes (`npm run build:mobile`).
+
 **Pending:**
 - Run migration on production Supabase: `20260308_add_residence_column.sql`
-- Deploy all changes to Railway (includes family creation fix + MTC.state auto-restore fix)
+- Deploy all changes to Railway (includes family creation fix + MTC.state auto-restore fix + all feature flow improvements)
 - Clean up `nicholas617@10minutes.email` test account from Supabase auth
 - Mobile PWA admin "Block Court Time" — mobile version also missing "Club Event" and "Coaching Session" options in reason dropdown
 - New tests need to run in CI (can't run Playwright in Cowork per CLAUDE.md #16)
+- Visual verification of all new features in browser (interactive calendar cards, partner→book flow, event CRUD modal)
 
 ---
 

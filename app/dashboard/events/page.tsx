@@ -13,8 +13,9 @@ type ViewMode = 'calendar' | 'list';
 type PageView = 'events' | 'programs';
 
 export default function EventsPage() {
-  const { currentUser, events, toggleRsvp, programs, enrollInProgram, withdrawFromProgram, members } = useApp();
+  const { currentUser, events, toggleRsvp, createEvent, updateEvent, deleteEvent, programs, enrollInProgram, withdrawFromProgram, members } = useApp();
   const { showToast } = useToast();
+  const isAdmin = currentUser?.role === 'admin' || currentUser?.role === 'coach';
   const searchParams = useSearchParams();
   const [pageView, setPageView] = useState<PageView>('events');
   const [filter, setFilter] = useState<EventFilter>('all');
@@ -25,6 +26,10 @@ export default function EventsPage() {
   const [selectedProgram, setSelectedProgram] = useState<string | null>(null);
   const [enrollConfirm, setEnrollConfirm] = useState<string | null>(null);
   const [justEnrolled, setJustEnrolled] = useState<string | null>(null);
+  const [showAddEvent, setShowAddEvent] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<string | null>(null);
+  const [eventForm, setEventForm] = useState({ title: '', type: 'social', date: '', time: '', location: 'Mono Tennis Club', spotsTotal: '16', price: 'Free', description: '' });
+  const [eventFormLoading, setEventFormLoading] = useState(false);
   const enrollModalRef = useRef<HTMLDivElement>(null);
   const programModalRef = useRef<HTMLDivElement>(null);
   const eventModalRef = useRef<HTMLDivElement>(null);
@@ -189,20 +194,36 @@ export default function EventsPage() {
           </div>
         </div>
 
-        {/* Filter pills */}
-        <div className="flex flex-wrap gap-2 mb-6">
-          {(['all', 'social', 'match', 'tournament', 'camp', 'programs'] as EventFilter[]).map(f => (
+        {/* Filter pills + Admin Add button */}
+        <div className="flex items-center justify-between gap-4 mb-6">
+          <div className="flex flex-wrap gap-2">
+            {(['all', 'social', 'match', 'tournament', 'camp', 'programs'] as EventFilter[]).map(f => (
+              <button
+                key={f}
+                onClick={() => setFilter(f)}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors event-filter-pill ${filter === f ? 'event-filter-pill-active' : ''}`}
+                style={{
+                  '--pill-color': typeColors[f] || '#6b7a3d',
+                } as React.CSSProperties}
+              >
+                {f === 'all' ? 'All Events' : typeLabels[f] || f}
+              </button>
+            ))}
+          </div>
+          {isAdmin && (
             <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors event-filter-pill ${filter === f ? 'event-filter-pill-active' : ''}`}
-              style={{
-                '--pill-color': typeColors[f] || '#6b7a3d',
-              } as React.CSSProperties}
+              onClick={() => {
+                setEditingEvent(null);
+                setEventForm({ title: '', type: 'social', date: '', time: '', location: 'Mono Tennis Club', spotsTotal: '16', price: 'Free', description: '' });
+                setShowAddEvent(true);
+              }}
+              className="shrink-0 px-3 py-1.5 rounded-xl text-xs font-medium transition-all hover:shadow-md flex items-center gap-1.5"
+              style={{ background: '#6b7a3d', color: '#fff' }}
             >
-              {f === 'all' ? 'All Events' : typeLabels[f] || f}
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add Event
             </button>
-          ))}
+          )}
         </div>
 
         {/* Calendar View */}
@@ -808,6 +829,46 @@ export default function EventsPage() {
                 </div>
               </div>
 
+              {/* Admin actions */}
+              {isAdmin && (
+                <div className="flex gap-2 mb-4">
+                  <button
+                    onClick={() => {
+                      setEventForm({
+                        title: detail.title, type: detail.type, date: detail.date, time: detail.time,
+                        location: detail.location || 'Mono Tennis Club', spotsTotal: String(detail.spotsTotal || 16),
+                        price: detail.price || 'Free', description: detail.description || '',
+                      });
+                      setEditingEvent(detail.id);
+                      setShowAddEvent(true);
+                      setSelectedEvent(null);
+                    }}
+                    className="flex-1 py-2 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 transition-colors"
+                    style={{ background: 'rgba(107, 122, 61, 0.1)', color: '#6b7a3d' }}
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                    Edit
+                  </button>
+                  <button
+                    onClick={async () => {
+                      if (!confirm(`Delete "${detail.title}"? This cannot be undone.`)) return;
+                      try {
+                        await deleteEvent(detail.id);
+                        showToast('Event deleted');
+                        setSelectedEvent(null);
+                      } catch (err) {
+                        showToast(`Failed to delete: ${err instanceof Error ? err.message : 'Unknown error'}`, 'error');
+                      }
+                    }}
+                    className="py-2 px-4 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 transition-colors"
+                    style={{ background: 'rgba(239, 68, 68, 0.08)', color: '#ef4444' }}
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                    Delete
+                  </button>
+                </div>
+              )}
+
               {/* RSVP buttons — dual for interclub, single for others */}
               {isInterclub ? (
                 <div className="flex gap-3">
@@ -869,6 +930,90 @@ export default function EventsPage() {
         </div>
         );
       })()}
+
+      {/* Add/Edit Event Modal (admin only) */}
+      {showAddEvent && isAdmin && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.4)' }} onClick={() => setShowAddEvent(false)}>
+          <div className="rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto" style={{ background: '#fff' }} onClick={e => e.stopPropagation()}>
+            <h3 className="font-semibold text-lg mb-4" style={{ color: '#2a2f1e' }}>
+              {editingEvent ? 'Edit Event' : 'Add New Event'}
+            </h3>
+            <div className="space-y-4 mb-6">
+              <div>
+                <label className="block text-sm mb-1" style={{ color: '#2a2f1e' }}>Title</label>
+                <input value={eventForm.title} onChange={e => setEventForm(f => ({...f, title: e.target.value}))} className="w-full px-3 py-2 rounded-lg text-sm border" style={{ borderColor: '#e0dcd3', color: '#2a2f1e' }} />
+              </div>
+              <div>
+                <label className="block text-sm mb-1" style={{ color: '#2a2f1e' }}>Type</label>
+                <div className="flex flex-wrap gap-2">
+                  {['social', 'match', 'tournament', 'camp', 'lesson'].map(t => (
+                    <button key={t} type="button" onClick={() => setEventForm(f => ({...f, type: t}))}
+                      className="px-3 py-1.5 rounded-lg text-xs font-medium"
+                      style={{ background: eventForm.type === t ? '#6b7a3d' : '#f5f2eb', color: eventForm.type === t ? '#fff' : '#6b7266' }}>
+                      {t.charAt(0).toUpperCase() + t.slice(1)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm mb-1" style={{ color: '#2a2f1e' }}>Date</label>
+                  <input type="date" value={eventForm.date} onChange={e => setEventForm(f => ({...f, date: e.target.value}))} className="w-full px-3 py-2 rounded-lg text-sm border" style={{ borderColor: '#e0dcd3', color: '#2a2f1e' }} />
+                </div>
+                <div>
+                  <label className="block text-sm mb-1" style={{ color: '#2a2f1e' }}>Time</label>
+                  <input value={eventForm.time} onChange={e => setEventForm(f => ({...f, time: e.target.value}))} placeholder="e.g. 6:00 PM" className="w-full px-3 py-2 rounded-lg text-sm border" style={{ borderColor: '#e0dcd3', color: '#2a2f1e' }} />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm mb-1" style={{ color: '#2a2f1e' }}>Location</label>
+                <input value={eventForm.location} onChange={e => setEventForm(f => ({...f, location: e.target.value}))} className="w-full px-3 py-2 rounded-lg text-sm border" style={{ borderColor: '#e0dcd3', color: '#2a2f1e' }} />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm mb-1" style={{ color: '#2a2f1e' }}>Max Spots</label>
+                  <input type="number" value={eventForm.spotsTotal} onChange={e => setEventForm(f => ({...f, spotsTotal: e.target.value}))} className="w-full px-3 py-2 rounded-lg text-sm border" style={{ borderColor: '#e0dcd3', color: '#2a2f1e' }} />
+                </div>
+                <div>
+                  <label className="block text-sm mb-1" style={{ color: '#2a2f1e' }}>Price</label>
+                  <input value={eventForm.price} onChange={e => setEventForm(f => ({...f, price: e.target.value}))} placeholder="Free or $25" className="w-full px-3 py-2 rounded-lg text-sm border" style={{ borderColor: '#e0dcd3', color: '#2a2f1e' }} />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm mb-1" style={{ color: '#2a2f1e' }}>Description</label>
+                <textarea value={eventForm.description} onChange={e => setEventForm(f => ({...f, description: e.target.value}))} rows={3} className="w-full px-3 py-2 rounded-lg text-sm border resize-none" style={{ borderColor: '#e0dcd3', color: '#2a2f1e' }} />
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <button onClick={() => setShowAddEvent(false)} className="flex-1 py-3 rounded-xl text-sm font-medium" style={{ background: '#f5f2eb', color: '#2a2f1e' }}>Cancel</button>
+              <button
+                disabled={eventFormLoading || !eventForm.title.trim() || !eventForm.date || !eventForm.time.trim()}
+                onClick={async () => {
+                  setEventFormLoading(true);
+                  try {
+                    if (editingEvent) {
+                      await updateEvent(editingEvent, eventForm);
+                      showToast('Event updated');
+                    } else {
+                      await createEvent({ ...eventForm, spotsTotal: parseInt(eventForm.spotsTotal) || 16 });
+                      showToast('Event created');
+                    }
+                    setShowAddEvent(false);
+                  } catch (err) {
+                    showToast(`Failed: ${err instanceof Error ? err.message : 'Unknown error'}`, 'error');
+                  } finally {
+                    setEventFormLoading(false);
+                  }
+                }}
+                className="flex-1 py-3 rounded-xl text-sm font-medium transition-opacity disabled:opacity-50"
+                style={{ background: '#6b7a3d', color: '#fff' }}
+              >
+                {eventFormLoading ? 'Saving...' : editingEvent ? 'Save Changes' : 'Create Event'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -38,12 +38,22 @@ export default function BookCourtPage() {
   const [calMonth, setCalMonth] = useState(() => new Date());
   const [calSelectedDate, setCalSelectedDate] = useState<string | null>(null);
   const [hoveredSlot, setHoveredSlot] = useState<string | null>(null);
-  const [cancelTarget, setCancelTarget] = useState<{ id: string; courtName: string; date: string; time: string } | null>(null);
+  const [cancelTarget, setCancelTarget] = useState<{ id: string; courtName: string; date: string; time: string; participants?: string[] } | null>(null);
   const [contentKey, setContentKey] = useState(0);
   const tooltipTimeout = useRef<NodeJS.Timeout | null>(null);
   const nowLineRef = useRef<HTMLTableRowElement | null>(null);
   const [mobileDayIdx, setMobileDayIdx] = useState(0); // Today is always first in rolling view
   const [courtBlocks, setCourtBlocks] = useState<CourtBlockSlot[]>([]);
+
+  // Pre-fill partner from query param (e.g. from Find Partner → Book)
+  const partnerParam = searchParams.get('partner');
+  const partnerNameParam = searchParams.get('partnerName');
+  const initialParticipants = useMemo(() => {
+    if (partnerParam && partnerNameParam) {
+      return [{ id: partnerParam, name: partnerNameParam }];
+    }
+    return undefined;
+  }, [partnerParam, partnerNameParam]);
 
   // Fetch court blocks from Supabase
   useEffect(() => {
@@ -98,7 +108,7 @@ export default function BookCourtPage() {
         showToast('Cannot cancel a booking that has already started', 'error');
         return;
       }
-      setCancelTarget({ id: mine.id, courtName, date, time });
+      setCancelTarget({ id: mine.id, courtName, date, time, participants: mine.participants?.map(p => p.name) });
       return;
     }
     if (isCourtInMaintenance(courts, courtId)) { showToast('This court is currently closed', 'error'); return; }
@@ -603,6 +613,7 @@ export default function BookCourtPage() {
           onConfirm={confirmBooking}
           onCancel={() => setShowModal(false)}
           loading={bookingLoading}
+          initialParticipants={initialParticipants}
         />
       )}
 
@@ -629,9 +640,15 @@ export default function BookCourtPage() {
               </svg>
             </div>
             <h3 id="cancel-modal-title" className="text-center font-semibold text-lg mb-1" style={{ color: '#2a2f1e' }}>Cancel Booking?</h3>
-            <p className="text-center text-sm mb-5" style={{ color: '#6b7266' }}>
+            <p className="text-center text-sm mb-2" style={{ color: '#6b7266' }}>
               {cancelTarget.courtName} on {new Date(cancelTarget.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} at {cancelTarget.time}
             </p>
+            {cancelTarget.participants && cancelTarget.participants.length > 0 && (
+              <p className="text-center text-xs mb-4" style={{ color: '#ef4444' }}>
+                {cancelTarget.participants.join(', ')} will be notified
+              </p>
+            )}
+            {(!cancelTarget.participants || cancelTarget.participants.length === 0) && <div className="mb-3" />}
             <div className="flex gap-3">
               <button
                 onClick={() => setCancelTarget(null)}

@@ -34,6 +34,57 @@
   // ============================================
   // CANCEL MODAL
   // ============================================
+  var cancelBookingTarget = null;
+
+  // onclick handler (generated HTML + event-delegation)
+  window.showCancelModal = function(bookingId) {
+    cancelBookingTarget = bookingId;
+    var subtitle = document.querySelector('#cancelModalContent .action-modal-subtitle');
+    if (subtitle) {
+      // Find booking in eventBookings to show details + participant names
+      var booking = (typeof eventBookings !== 'undefined') ? eventBookings.find(function(b) { return b.id === bookingId; }) : null;
+      if (booking) {
+        var dateStr = booking.date ? new Date(booking.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : '';
+        var details = (booking.courtName || 'Court') + (dateStr ? ' on ' + dateStr : '') + (booking.time ? ' at ' + booking.time : '');
+        var participants = booking.participants || [];
+        var participantNames = participants.map(function(p) { return typeof p === 'string' ? p : (p.name || ''); }).filter(Boolean);
+        if (participantNames.length > 0) {
+          subtitle.innerHTML = details + '<br><span style="color:var(--coral,#ef4444);font-size:12px;margin-top:4px;display:inline-block;">' +
+            (typeof sanitizeHTML === 'function' ? sanitizeHTML(participantNames.join(', ')) : participantNames.join(', ')) + ' will be notified</span>';
+        } else {
+          subtitle.textContent = details || 'This action cannot be undone. Are you sure you want to cancel this booking?';
+        }
+      }
+    }
+    document.getElementById('cancelModal').classList.add('active');
+    setTimeout(function() {
+      document.getElementById('cancelModalContent').classList.add('active');
+    }, 50);
+  };
+
+  // onclick handler (index.html cancel modal confirm button)
+  window.confirmCancelBooking = function() {
+    var btn = document.querySelector('#cancelModalContent .confirm-modal-btn.primary');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="btn-spinner"></span> CANCELLING...'; }
+    if (cancelBookingTarget && typeof cancelBooking === 'function') {
+      cancelBooking(cancelBookingTarget, function() {
+        if (typeof showToast === 'function') showToast('Booking cancelled');
+        if (typeof MTC !== 'undefined' && MTC.fn && MTC.fn.renderScheduleBookings) {
+          MTC.fn.renderScheduleBookings();
+        }
+        closeCancelModal();
+        cancelBookingTarget = null;
+        if (btn) { btn.disabled = false; btn.innerHTML = 'YES, CANCEL'; }
+      }, function(err) {
+        if (typeof showToast === 'function') showToast(err || 'Cancel failed — try again', 'error');
+        if (btn) { btn.disabled = false; btn.innerHTML = 'YES, CANCEL'; }
+      });
+    } else {
+      closeCancelModal();
+      cancelBookingTarget = null;
+    }
+  };
+
   // onclick handler (generated HTML)
   window.closeCancelModal = function() {
     document.getElementById('cancelModalContent').classList.remove('active');

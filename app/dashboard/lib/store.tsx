@@ -31,6 +31,9 @@ interface AppState {
   events: ClubEvent[];
   setEvents: (events: ClubEvent[]) => void;
   toggleRsvp: (eventId: string, userName: string) => void;
+  createEvent: (eventData: { title: string; type: string; date: string; time: string; location?: string; spotsTotal?: number; price?: string; description?: string }) => Promise<void>;
+  updateEvent: (id: string, updates: Record<string, unknown>) => Promise<void>;
+  deleteEvent: (id: string) => Promise<void>;
   partners: Partner[];
   setPartners: (partners: Partner[]) => void;
   addPartner: (partner: Partner) => void;
@@ -1116,6 +1119,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
   }, [currentUser]);
 
+  // Admin event CRUD
+  const createEvent = useCallback(async (eventData: { title: string; type: string; date: string; time: string; location?: string; spotsTotal?: number; price?: string; description?: string }) => {
+    await apiCall('/api/mobile/events', 'PUT', eventData);
+    const e = await db.fetchEvents();
+    setEvents(mergeEventsWithDefaults(e));
+  }, []);
+
+  const updateEvent = useCallback(async (id: string, updates: Record<string, unknown>) => {
+    await apiCall('/api/mobile/events', 'PATCH', { id, ...updates });
+    const e = await db.fetchEvents();
+    setEvents(mergeEventsWithDefaults(e));
+  }, []);
+
+  const deleteEvent = useCallback(async (id: string) => {
+    await apiCall('/api/mobile/events', 'DELETE', { id });
+    setEvents(prev => prev.filter(e => e.id !== id));
+  }, []);
+
   const sendMessage = useCallback((toId: string, text: string) => {
     if (!currentUser) return;
     const toName = members.find(m => m.id === toId)?.name || '';
@@ -1267,7 +1288,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const contextValue = useMemo<AppState>(() => ({
     currentUser, updateCurrentUser, login, logout, members, setMembers, courts, setCourts, bookings, setBookings, addBooking, cancelBooking, confirmParticipant,
-    events, setEvents, toggleRsvp, partners, setPartners, addPartner, removePartner, conversations, setConversations, sendMessage, markConversationRead, deleteConversation, deleteMessage,
+    events, setEvents, toggleRsvp, createEvent, updateEvent, deleteEvent, partners, setPartners, addPartner, removePartner, conversations, setConversations, sendMessage, markConversationRead, deleteConversation, deleteMessage,
     announcements, setAnnouncements, dismissAnnouncement, notifications, setNotifications, markNotificationRead,
     clearNotifications, deleteReadNotifications, weather, analytics,
     programs, setPrograms, addProgram, cancelProgram, enrollInProgram, withdrawFromProgram,
@@ -1278,7 +1299,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     currentUser, members, courts, bookings, events, partners, conversations,
     announcements, notifications, weather, analytics, programs, notificationPreferences, isLoaded,
     familyMembers, activeProfile, activeDisplayName, activeAvatar, activeSkillLevel,
-    updateCurrentUser, login, logout, addBooking, cancelBooking, confirmParticipant, toggleRsvp,
+    updateCurrentUser, login, logout, addBooking, cancelBooking, confirmParticipant, toggleRsvp, createEvent, updateEvent, deleteEvent,
     addPartner, removePartner, sendMessage, markConversationRead, deleteConversation, deleteMessage, dismissAnnouncement,
     markNotificationRead, clearNotifications, deleteReadNotifications, addProgram, cancelProgram,
     enrollInProgram, withdrawFromProgram, switchProfile, refreshData,
