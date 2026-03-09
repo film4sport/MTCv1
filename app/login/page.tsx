@@ -78,7 +78,7 @@ function LoginContent() {
           border: 1.5px solid rgba(255, 255, 255, 0.7);
           border-radius: 28px;
           padding: 40px 36px;
-          box-shadow: 0 8px 40px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8);
+          box-shadow: 0 16px 56px rgba(0, 0, 0, 0.10), 0 4px 16px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8);
           animation: loginFadeUp 0.6s ease-out 0.15s both, subtleGlow 4s ease-in-out infinite 0.8s;
         }
         @media (max-width: 1023px) {
@@ -726,18 +726,21 @@ function LoginContent() {
             </div>
           </div>
 
-          {/* Welcome */}
-          <div className="mb-8 lg:mb-10">
-            <h1 className="headline-font text-2xl sm:text-3xl lg:text-[2rem] leading-none tracking-tight mb-3" style={{ color: '#2a2f1e', whiteSpace: 'nowrap' }}>
-              Mono Tennis Club
-            </h1>
-            <p className="login-title-breathe text-sm" style={{ color: '#8a8578', transformOrigin: 'left center' }}>
+          {/* Logo + Welcome */}
+          <div className="mb-8 lg:mb-10 text-center">
+            <img
+              src="/mono-logo-black.png"
+              alt="Mono Tennis Club"
+              className="mx-auto"
+              style={{ height: 72, width: 'auto', marginBottom: 14, opacity: 0.88 }}
+            />
+            <p className="login-title-breathe text-sm" style={{ color: '#8a8578', transformOrigin: 'center center' }}>
               Your courts, your community.
             </p>
           </div>
 
           {/* Sign-In Options */}
-          <div className="space-y-4 max-w-lg">
+          <div className="space-y-0 max-w-lg rounded-2xl overflow-hidden" style={{ border: '1px solid #e0dcd3', background: '#fff' }}>
             {/* Google Sign-In (primary) */}
             <button
               type="button"
@@ -746,8 +749,8 @@ function LoginContent() {
                 const { error } = await signInWithGoogle('/dashboard');
                 if (error) setLoginError(error);
               }}
-              className="login-btn-google w-full py-4 rounded-2xl font-semibold text-base transition-all active:scale-[0.97] flex items-center justify-center gap-3"
-              style={{ background: '#fff', border: '1px solid #e0dcd3', color: '#2a2f1e', minHeight: 52 }}
+              className="login-btn-google w-full py-4 font-medium text-base transition-all active:scale-[0.97] flex items-center justify-center gap-3"
+              style={{ background: '#fff', border: 'none', color: '#5a5f4a', minHeight: 52 }}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
@@ -758,8 +761,14 @@ function LoginContent() {
               Continue with Google
             </button>
 
+            {/* Divider */}
+            <div className="flex items-center px-5" style={{ background: '#fff' }}>
+              <div style={{ flex: 1, height: 1, background: '#e0dcd3' }} />
+              <span className="px-3 text-xs" style={{ color: '#b0ab9f' }}>or</span>
+              <div style={{ flex: 1, height: 1, background: '#e0dcd3' }} />
+            </div>
             {/* Magic Link: email input + button grouped */}
-            <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid #e0dcd3', background: '#fff' }}>
+            <div>
               <div className="relative">
                 <input
                   id="login-email"
