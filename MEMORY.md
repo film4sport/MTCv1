@@ -95,9 +95,30 @@ Before reporting any feature change as "done", verify:
 - `DEFAULT_EVENTS` in dashboard data.ts = same real club events, merged with Supabase via `mergeEventsWithDefaults()`. Kept.
 - Avatar SVGs with board member names (Kelly K., Phil P., etc.) = real people. Kept.
 
+### Cowork Session (2026-03-09) — Family Signup Testing & Bug Fixes
+
+**Bug found & fixed: Family members not created for passwordless signups**
+- `app/signup/page.tsx`: `createFamily()` + `addFamilyMember()` were AFTER the `emailConfirmRequired` early return (line 225). All passwordless signups (non-Google) return early when email confirmation is pending, so family members were NEVER created.
+- **Fix**: Moved family creation block BEFORE the `emailConfirmRequired` check. User ID already exists in Supabase at that point.
+- OAuth path was fine (family creation runs before its return).
+
+**Family signup test results (end-to-end on production):**
+- 7-step wizard: Membership type → Your info → Family members → Skill/Residence → Waiver → Payment → Email confirm — all working
+- Family profile switcher: Works perfectly. Hamburger menu shows SWITCH PROFILE with all family members, badges (Adult/Jr), checkmarks on active profile, "Family profile" label
+- Tested switching between primary account, adult family member, and junior family member — all switch correctly
+
+**Other bugs found during testing:**
+- Supabase confirmation emails don't deliver to disposable email domains (guerrillamail.com, 10minutes.email) — works eventually but unreliable. Not a code bug, just Supabase's email service limitation.
+- Magic link verification redirects to `/#access_token=...` (hash fragment on landing page) — landing page has no Supabase client to capture the token from the hash. Session is lost. Workaround: users must use `/auth/callback` route. This affects users who click magic links that don't go through the PKCE code exchange flow.
+
+**Test accounts cleaned up:**
+- `testfamily2026@guerrillamail.com` — deleted from auth + profiles
+- `nicholas617@10minutes.email` — needs manual cleanup (active session blocked deletion)
+
 **Pending:**
 - Run migration on production Supabase: `20260308_add_residence_column.sql`
-- Deploy all changes to Railway
+- Deploy all changes to Railway (includes family creation fix)
+- Clean up `nicholas617@10minutes.email` test account from Supabase auth
 - Mobile PWA admin "Block Court Time" — mobile version also missing "Club Event" and "Coaching Session" options in reason dropdown
 
 ---
