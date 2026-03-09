@@ -9,10 +9,11 @@
 
 ## #2: ONLY CHANGE WHAT IS ASKED — ZERO EXTRAS
 - **Before EVERY edit, ask yourself: "Did the user ask for this specific change?"** If NO → don't do it.
+- **NEVER add features, functionality, UI elements, API endpoints, RPC functions, or logic the user didn't ask for.** Even if it "makes sense." Suggest it in text, let the user decide. Unrequested code = more to test, more to break, and wasted user time removing it.
 - If asked to fix 2 things, fix exactly those 2 things. Not 2 + 5 "improvements" you noticed.
 - Necessary dependencies of the asked change are OK (e.g. bumping SW cache version when adding a new cached file). Refactors, cleanups, style tweaks, "while I'm here" changes are NOT OK.
 - **DO proactively suggest** improvements — but ONLY as text suggestions. Never silently implement them.
-- This rule exists because it has been violated repeatedly. When in doubt, DON'T touch it.
+- This rule exists because it has been violated repeatedly. Incident: Mar 9, 2026 — unrequested filter tabs + cleanup button added to messages UI, broke 21 CI tests when removed. When in doubt, DON'T touch it.
 
 ## #3: GREP BEFORE TOUCHING ANYTHING
 - Find ALL locations first
