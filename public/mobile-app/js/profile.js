@@ -90,7 +90,7 @@
         { value: 'Beginner', label: 'Beginner', cls: 'beginner', level: 'BEGINNER' },
         { value: 'Intermediate', label: 'Intermediate', cls: 'intermediate', level: 'INTERMEDIATE' },
         { value: 'Advanced', label: 'Advanced', cls: 'advanced', level: 'ADVANCED' },
-        { value: 'Competitive', label: 'Competitive', cls: 'advanced', level: 'COMPETITIVE' }
+        { value: 'Competitive', label: 'Competitive', cls: 'competitive', level: 'COMPETITIVE' }
       ],
       getValue: function() { return MTC.state.profileData.skill; },
       save: function(val) {
