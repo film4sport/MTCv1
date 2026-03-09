@@ -14,7 +14,8 @@ Before reporting any feature change as "done", verify:
 3. **Dashboard mutations go through API** — check store.tsx uses `apiCall()`, NOT `db.*` for writes (CLAUDE.md #21)
 4. **Tests**: Did you add/update a test? (CLAUDE.md #22) If not, note what test is needed.
 5. **Build check**: `npx tsc --noEmit` + `npm run build:mobile` both pass
-6. **MEMORY.md updated** with what changed and what's still pending
+6. **VISUAL VERIFICATION (MANDATORY — CANNOT SKIP)**: Open the app in BDG (Chrome) and take a screenshot. If BDG is unavailable, say "I HAVE NOT VISUALLY VERIFIED" — never say "done" without this step. This exists because skipping it caused a broken production deploy (Mar 9, 2026: extra `</div>` broke #app container, entire mobile UI squished).
+7. **MEMORY.md updated** with what changed and what's still pending
 
 ## Current Status
 - **SMTP/Supabase email**: DONE. Resend SMTP (smtp.resend.com:465, noreply@monotennisclub.com). Email confirmation and password reset emails are live.
