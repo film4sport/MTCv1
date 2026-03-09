@@ -438,3 +438,56 @@
   border: none;
   cursor: pointer;
 }
+
+/* ============================================
+   ADMIN MESSAGE FILTER TABS
+============================================ */
+.msg-filter-tabs {
+  display: flex;
+  gap: 6px;
+  padding: 8px 16px 4px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.msg-filter-tab {
+  flex-shrink: 0;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: none;
+  background: var(--bg-secondary);
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  letter-spacing: 0.3px;
+}
+
+.msg-filter-tab.active {
+  background: var(--volt);
+  color: var(--bg-primary);
+}
+
+.msg-filter-tab .filter-count {
+  display: inline-block;
+  min-width: 16px;
+  height: 16px;
+  line-height: 16px;
+  text-align: center;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  margin-left: 4px;
+  padding: 0 4px;
+}
+
+.msg-filter-tab.active .filter-count {
+  background: rgba(0,0,0,0.15);
+  color: var(--bg-primary);
+}
+
+.msg-filter-tab:not(.active) .filter-count {
+  background: rgba(196, 255, 0, 0.15);
+  color: var(--volt);
+}
