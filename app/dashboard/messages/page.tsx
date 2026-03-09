@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { useApp } from '../lib/store';
+import { useAuth, useSocial, useBookings, useDerived } from '../lib/store';
 import { useToast } from '../lib/toast';
 import DashboardHeader from '../components/DashboardHeader';
 import { downloadICS } from '../lib/calendar';
@@ -18,7 +18,10 @@ export default function MessagesPage() {
 
 function MessagesContent() {
   const searchParams = useSearchParams();
-  const { currentUser, conversations, members, bookings, sendMessage, markConversationRead, deleteConversation, deleteMessage } = useApp();
+  const { currentUser } = useAuth();
+  const { conversations, sendMessage, markConversationRead, deleteConversation, deleteMessage } = useSocial();
+  const { bookings } = useBookings();
+  const { members } = useDerived();
   const { showToast } = useToast();
   const [selectedConvo, setSelectedConvo] = useState<string | null>(null);
   const [confirmedBookings, setConfirmedBookings] = useState<Set<string>>(new Set());

@@ -29,6 +29,7 @@ Before reporting any feature change as "done", verify:
 - **Login screen**: Email Link button electric-blue/cyan. Phone+tablet mockups show club calendar. 2/3 mockup + 1/3 form layout.
 - **Desktop login redirect**: `signInWithGoogle('/dashboard')` and `signInWithMagicLink(email, '/dashboard')` pass `?next=/dashboard` through OAuth/magic link flow.
 - **Production Readiness**: 10/10. All platforms hardened. Zero remaining findings from code review reports.
+- **Store.tsx context splitting (Mar 9)**: Split single `AppContext` (46 values) into 7 focused contexts: `AuthContext`, `BookingContext`, `EventsContext`, `SocialContext`, `NotificationContext`, `FamilyContext`, `DerivedContext`. Each has its own `useMemo` so unrelated state changes don't re-render all 16 consumers. Hooks: `useAuth()`, `useBookings()`, `useEvents()`, `useSocial()`, `useNotifications()`, `useFamily()`, `useDerived()`. Legacy `useApp()` kept as deprecated compatibility shim. All 16 consumer files migrated. tsc clean, 1024 tests pass.
 - **API route consolidation (Mar 8)**: All Dashboard mutations in store.tsx now route through API endpoints instead of direct Supabase. Added `apiCall()` helper. Eliminates RLS policy gaps. Remaining `db.*` calls: fetches (SELECT, safe), `createNotification` (INSERT policy exists), programs CRUD (admin-only, safe). `confirmParticipant` now routes through API (DONE).
 - **confirmParticipant API enhancement (Mar 8)**: Bookings PATCH endpoint now supports both self-confirm (`{ bookingId }`) and confirming other participants (`{ bookingId, participantId, via }`). When confirming others, caller must be booking owner or admin (403 otherwise). Dashboard store.tsx rerouted from direct `db.confirmParticipant()` to `apiCall('/api/mobile/bookings', 'PATCH', ...)` with rollback on failure.
 - **Booking calendar restyled (Mar 8)**: Today = electric blue (was volt), selected = liquid glass with blur+border+lift (was flat black). Cancellation reminder added to booking modal.
@@ -41,6 +42,31 @@ Before reporting any feature change as "done", verify:
 - **Total test count (Mar 8→9)**: Started at 747 (27 files) → 798 (31) → 814 (32) → **1024 tests across 34 files**, all passing.
 - **Coaching panel access (Mar 8)**: Sidebar now shows "Book Lessons" link for both coaches AND admins (was coach-only). Sidebar.tsx line 145: `(isCoach || isAdmin)`.
 - **Coaching program bookings**: `db.createBooking` is still used in the coaching program creation flow (line 966 of store.tsx). This is coach-only (coaching panel), not admin. Coaches create program bookings (type: 'program') via the coaching panel.
+
+### Cowork Session (2026-03-09) — Bug Fixes + Context Splitting
+
+**Bugs fixed:**
+- **Demo credentials removed from test files** (GitGuardian alert): Replaced `member123`/`coach123`/`admin123` with `not-a-real-password` in 4 test files (`qa-full-flow.spec.js`, `dashboard.spec.js`, `comprehensive.spec.js`, `untested-flows.spec.js`)
+- **3 CI visual regression test failures**: Fixed hero section selector (`#hero` → `section.texture-overlay`), signup selector (`form` → `div.min-h-screen`) in `visual-regression.spec.js`
+- **Welcome message race condition**: New OAuth users (e.g. Melodie Lucescu) didn't get welcome message because `handle_new_user` trigger fires async. Added polling loop (10×300ms) for profile existence before calling `send_welcome_message` RPC in `auth/callback/route.ts`
+- **Notification type 'info' invalid**: Changed `type: 'info'` → `type: 'announcement'` for beta-notice notification. Created migration `20260309_fix_notification_type_and_family_fk.sql`
+- **Dashboard Settings/Profile click did nothing**: Added `onClick={() => setMenuOpen(false)}` to Settings Link in `DashboardHeader.tsx`
+- **Mobile admin panel security gap**: `navigateTo('admin')` had no role check — added explicit guard in `navigation.js`
+- **Block Court Time dropdown**: Added missing "Club Event" and "Coaching Session" options to `admin.js`
+
+**Performance:**
+- **Store.tsx context splitting**: Single `AppContext` (46 values) → 7 focused contexts. See Current Status section above.
+
+**Pending migration SQL (paste into Supabase SQL Editor):**
+```sql
+ALTER TABLE notifications DROP CONSTRAINT IF EXISTS notifications_type_check;
+ALTER TABLE notifications ADD CONSTRAINT notifications_type_check
+  CHECK (type IN ('booking', 'event', 'partner', 'message', 'program', 'announcement'));
+
+ALTER TABLE profiles DROP CONSTRAINT IF EXISTS profiles_family_id_fkey;
+ALTER TABLE profiles ADD CONSTRAINT profiles_family_id_fkey
+  FOREIGN KEY (family_id) REFERENCES families(id) ON DELETE SET NULL;
+```
 
 ### Cowork Session (2026-03-08 evening) — Mobile PWA Testing + Bug Fixes
 

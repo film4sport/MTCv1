@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { AppProvider, useApp } from './lib/store';
+import { AppProvider, useAuth } from './lib/store';
 import { ToastProvider } from './lib/toast';
 import { UIProvider, useUI } from './lib/ui';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -12,7 +12,7 @@ import TabletNagBanner from './components/TabletNagBanner';
 import Toast from './components/Toast';
 
 function DashboardGuard({ children }: { children: React.ReactNode }) {
-  const { currentUser, isLoaded, logout } = useApp();
+  const { currentUser, isLoaded, logout } = useAuth();
   const { sidebarCollapsed, setMobileSidebarOpen } = useUI();
   const router = useRouter();
 

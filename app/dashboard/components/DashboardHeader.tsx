@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useApp } from '../lib/store';
+import { useAuth, useNotifications, useFamily } from '../lib/store';
 import { useToast } from '../lib/toast';
 import WeatherWidget from './WeatherWidget';
 
@@ -14,7 +14,9 @@ interface DashboardHeaderProps {
 
 export default function DashboardHeader({ title }: DashboardHeaderProps) {
   const router = useRouter();
-  const { currentUser, logout, notifications, clearNotifications, deleteReadNotifications, markNotificationRead, notificationPreferences, refreshData, familyMembers, activeProfile, switchProfile, activeDisplayName } = useApp();
+  const { currentUser, logout, refreshData } = useAuth();
+  const { notifications, clearNotifications, deleteReadNotifications, markNotificationRead, notificationPreferences } = useNotifications();
+  const { familyMembers, activeProfile, switchProfile, activeDisplayName } = useFamily();
   const { showToast } = useToast();
   const [menuOpen, setMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);

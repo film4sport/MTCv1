@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useApp } from '../lib/store';
+import { useAuth } from '../lib/store';
 import * as db from '../lib/db';
 
 interface TourStep {
@@ -119,7 +119,7 @@ const STEPS: TourStep[] = [
 ];
 
 export default function OnboardingTour() {
-  const { currentUser, isLoaded } = useApp();
+  const { currentUser, isLoaded } = useAuth();
   const [step, setStep] = useState(0);
   const [visible, setVisible] = useState(false);
   const [tooltipPos, setTooltipPos] = useState<{ top: number; left: number } | null>(null);

@@ -1,6 +1,6 @@
 'use client';
 
-import { useApp } from '../lib/store';
+import { useDerived } from '../lib/store';
 
 const WEATHER_ICONS: Record<string, string> = {
   sunny: '☀️',
@@ -11,7 +11,7 @@ const WEATHER_ICONS: Record<string, string> = {
 };
 
 export default function WeatherWidget({ compact = false }: { compact?: boolean }) {
-  const { weather } = useApp();
+  const { weather } = useDerived();
 
   if (compact) {
     return (

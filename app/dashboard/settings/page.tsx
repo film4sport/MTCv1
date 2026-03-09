@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useApp } from '../lib/store';
+import { useAuth, useBookings, useSocial, useNotifications, useFamily } from '../lib/store';
 import { useToast } from '../lib/toast';
 import DashboardHeader from '../components/DashboardHeader';
 import { AvatarDisplay, AVATAR_OPTIONS, AVATAR_SVGS } from '../lib/avatars';
@@ -25,7 +25,11 @@ const SKILL_LEVELS: { value: SkillLevel; label: string; color: string; bg: strin
 ];
 
 export default function SettingsPage() {
-  const { currentUser, updateCurrentUser, bookings, conversations, logout, notificationPreferences, setNotificationPreferences, familyMembers, setFamilyMembers } = useApp();
+  const { currentUser, updateCurrentUser, logout } = useAuth();
+  const { bookings } = useBookings();
+  const { conversations } = useSocial();
+  const { notificationPreferences, setNotificationPreferences } = useNotifications();
+  const { familyMembers, setFamilyMembers } = useFamily();
   const router = useRouter();
   const { showToast } = useToast();
   const [downloading, setDownloading] = useState(false);

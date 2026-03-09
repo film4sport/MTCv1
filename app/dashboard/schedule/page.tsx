@@ -1,14 +1,16 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { useApp } from '../lib/store';
+import { useAuth, useBookings, useEvents } from '../lib/store';
 import { useToast } from '../lib/toast';
 import DashboardHeader from '../components/DashboardHeader';
 import { FEES } from '../lib/types';
 import Link from 'next/link';
 
 export default function SchedulePage() {
-  const { currentUser, bookings, events, cancelBooking, programs } = useApp();
+  const { currentUser } = useAuth();
+  const { bookings, cancelBooking } = useBookings();
+  const { events, programs } = useEvents();
   const { showToast } = useToast();
   const [view, setView] = useState<'list' | 'calendar'>('list');
   const [timeFilter, setTimeFilter] = useState<'upcoming' | 'past'>('upcoming');

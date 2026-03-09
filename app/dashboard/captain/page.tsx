@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useCallback } from 'react';
-import { useApp } from '../lib/store';
+import { useAuth, useNotifications, useDerived } from '../lib/store';
 import DashboardHeader from '../components/DashboardHeader';
 import * as db from '../lib/db';
 import type { AnnouncementAudience } from '../lib/types';
@@ -15,7 +15,9 @@ const SKILL_COLORS: Record<string, { bg: string; text: string }> = {
 };
 
 export default function CaptainPage() {
-  const { currentUser, members, announcements, setAnnouncements } = useApp();
+  const { currentUser } = useAuth();
+  const { announcements, setAnnouncements } = useNotifications();
+  const { members } = useDerived();
   const [activeTab, setActiveTab] = useState<'roster' | 'announcements'>('roster');
 
   // Captain state
