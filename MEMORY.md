@@ -77,6 +77,24 @@ Before reporting any feature change as "done", verify:
 - Court block cancellation: Bell + Push to affected users — works
 - Gaps: booker missing push on create, no post-creation participant add, no booker notif on participant confirm
 
+### Cowork Session (2026-03-08 late) — Demo Data Removal & Production Audit
+
+**Full audit completed across all 3 platforms. Findings:**
+- Dashboard: store.tsx mergeEventsWithDefaults() correctly overrides defaults with Supabase data. No demo credentials, no fake users. Login page clean. API routes all fetch from Supabase. ✅
+- Mobile PWA: Found and fixed 4 demo data issues ↓
+
+**Demo data removed (Mobile PWA):**
+1. `events.js` line 12: Default RSVPs changed from `['mens-round-robin', 'friday-mixed']` → `[]` (ROOT CAUSE of fake events on "My Schedule")
+2. `events.js`: All fake `spotsTaken` values zeroed (were 8-38, now all 0 — real counts come from API)
+3. `api-client.js` lines 97, 154: `'demo-user'` fallback replaced with null check + "Please log in" toast (was silently failing with fake userId)
+4. `events-registration.js` line 137: Hardcoded RSVP fallback list `['Kelly K.', ...]` → `[]`
+
+**Architecture note (kept as-is, not demo data):**
+- `clubEventsData` in events.js = real club event definitions (titles, dates, times, descriptions). These match landing page Schedule.tsx. `updateEventsFromAPI()` overwrites them when API loads. This is legitimate bootstrap/fallback config.
+- `eventTasksData` in events-registration.js = real volunteer assignments (board members). Kept.
+- `DEFAULT_EVENTS` in dashboard data.ts = same real club events, merged with Supabase via `mergeEventsWithDefaults()`. Kept.
+- Avatar SVGs with board member names (Kelly K., Phil P., etc.) = real people. Kept.
+
 **Pending:**
 - Run migration on production Supabase: `20260308_add_residence_column.sql`
 - Deploy all changes to Railway

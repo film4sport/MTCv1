@@ -756,6 +756,7 @@
       else if (p.skillLevel === 'beginner') levelClass = 'beginner';
       homePartnerPool.push({
         id: p.id,
+        userId: p.userId || '',
         name: p.name,
         time: p.availability || p.date + ' at ' + p.time,
         level: p.skillLevel || 'intermediate',
@@ -799,28 +800,44 @@
 
     if (emptyState) emptyState.style.display = 'none';
 
+    // Get current user ID to filter own requests
+    var currentUserObj = MTC.storage.get('mtc-user', null) || MTC.storage.get('mtc-current-user', null);
+    var currentUserId = currentUserObj ? (currentUserObj.id || currentUserObj.email || '') : '';
+
     // Build cards HTML from API data
     var html = '';
     homePartnerPool.forEach(function(p) {
+      var isOwnRequest = currentUserId && p.userId && p.userId === currentUserId;
       var avatar = typeof getAvatar === 'function' ? getAvatar(p.name) : '';
       var matchType = p.matchType || 'singles';
       var matchLabel = matchType === 'mixed' ? 'Mixed Doubles' : matchType === 'mens' ? "Men's Doubles" : matchType === 'womens' ? "Women's Doubles" : 'Singles';
       var levelDisplay = p.level ? (p.level.charAt(0).toUpperCase() + p.level.slice(1)) : 'Intermediate';
       var isAvailable = p.availability && (p.availability.toLowerCase().indexOf('today') !== -1 || p.availability.toLowerCase().indexOf('now') !== -1);
 
+      var actionBtn;
+      if (isOwnRequest) {
+        // Own request: show cancel button (red X) instead of join
+        actionBtn =
+          '<button class="partner-action-btn ripple" data-action="cancelApiPartner" data-id="' + (p.id || '') + '" style="background: var(--coral);">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>' +
+          '</button>';
+      } else {
+        // Other member's request: show message/join button
+        actionBtn =
+          '<button class="partner-action-btn ripple" data-action="joinPartner" data-id="' + (p.id || '') + '" data-name="' + sanitizeHTML(p.name) + '">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"></path><path d="M22 2l-7 20-4-9-9-4 20-7z"></path></svg>' +
+          '</button>';
+      }
+
       html += '<div class="partner-card stagger-item" data-match-type="' + sanitizeHTML(matchType) + '" data-level="' + sanitizeHTML((p.level || 'intermediate').toLowerCase()) + '" data-available="' + isAvailable + '" data-partner-id="' + (p.id || '') + '">' +
         '<div class="partner-match-type ' + sanitizeHTML(matchType) + '">' + sanitizeHTML(matchLabel) + '</div>' +
         '<svg class="partner-avatar" viewBox="0 0 100 100">' + (avatar || '').replace(/<\/?svg[^>]*>/g, '') + '</svg>' +
         '<div class="partner-info">' +
-          '<div class="partner-name">' + sanitizeHTML(p.name) + '</div>' +
+          '<div class="partner-name">' + sanitizeHTML(p.name) + (isOwnRequest ? ' <span style="font-size: 11px; color: var(--volt); font-weight: 600;">(You)</span>' : '') + '</div>' +
           '<div class="partner-level">' + sanitizeHTML(levelDisplay) + '</div>' +
           '<div class="partner-availability">' + sanitizeHTML(p.time || 'Anytime') + '</div>' +
         '</div>' +
-        '<div class="partner-action">' +
-          '<button class="partner-action-btn ripple" data-action="joinPartner" data-id="' + (p.id || '') + '" data-name="' + sanitizeHTML(p.name) + '">' +
-            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"></path><path d="M22 2l-7 20-4-9-9-4 20-7z"></path></svg>' +
-          '</button>' +
-        '</div>' +
+        '<div class="partner-action">' + actionBtn + '</div>' +
       '</div>';
     });
     container.innerHTML = html;
