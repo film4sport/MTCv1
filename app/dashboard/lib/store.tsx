@@ -580,14 +580,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (!isLoaded || !currentUser) return;
     const userId = currentUser.id;
 
+    // Debounce messages Realtime to avoid stomping optimistic sends
+    let msgDebounce: ReturnType<typeof setTimeout> | null = null;
+    const debouncedFetchConversations = () => {
+      if (msgDebounce) clearTimeout(msgDebounce);
+      msgDebounce = setTimeout(() => {
+        db.fetchConversations(userId).then(c => {
+          setConversations(safeArray(c));
+        }).catch(err => reportError(err, 'Realtime messages'));
+      }, 1500);
+    };
+
     const channel = supabase.channel('dashboard-realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, () => {
         db.fetchBookings().then(b => setBookings(Array.isArray(b) ? b : [])).catch(err => reportError(err, 'Realtime bookings'));
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, () => {
-        db.fetchConversations(userId).then(c => {
-          setConversations(safeArray(c));
-        }).catch(err => reportError(err, 'Realtime messages'));
+        debouncedFetchConversations();
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications' }, () => {
         db.fetchNotifications(userId).then(n => {
@@ -639,7 +648,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       db.fetchBookings().then(b => setBookings(Array.isArray(b) ? b : [])).catch(() => {});
     }, HEARTBEAT_MS);
 
-    return () => { supabase.removeChannel(channel); clearInterval(heartbeat); };
+    return () => { supabase.removeChannel(channel); clearInterval(heartbeat); if (msgDebounce) clearTimeout(msgDebounce); };
     // Only re-subscribe when user logs in/out — not on every profile update
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoaded, currentUser?.id]);
@@ -1120,61 +1129,74 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [currentUser, members]);
 
   const markConversationRead = useCallback((memberId: string) => {
-    const conv = conversations.find(c => c.memberId === memberId);
-    setConversations(prev => prev.map(c => {
-      if (c.memberId === memberId && c.unread > 0) {
-        return { ...c, unread: 0, messages: c.messages.map(m => m.toId === currentUser?.id ? { ...m, read: true } : m) };
-      }
-      return c;
-    }));
-    // Persist read status via API (uses conv.id from state — no extra Supabase lookup)
-    if (currentUser && conv?.id) {
-      apiCall('/api/mobile/conversations', 'PATCH', { conversationId: conv.id }).catch((e) => reportError(e, 'API'));
+    let convId: number | undefined;
+    setConversations(prev => {
+      const conv = prev.find(c => c.memberId === memberId);
+      convId = conv?.id;
+      return prev.map(c => {
+        if (c.memberId === memberId && c.unread > 0) {
+          return { ...c, unread: 0, messages: c.messages.map(m => m.toId === currentUser?.id ? { ...m, read: true } : m) };
+        }
+        return c;
+      });
+    });
+    // Persist read status via API
+    if (currentUser && convId) {
+      apiCall('/api/mobile/conversations', 'PATCH', { conversationId: convId }).catch((e) => reportError(e, 'API'));
     }
-  }, [currentUser, conversations]);
+  }, [currentUser]);
 
   const deleteConversation = useCallback((memberId: string) => {
     if (!currentUser) return;
-    // Optimistic: remove from state
-    const removed = conversations.find(c => c.memberId === memberId);
-    setConversations(prev => prev.filter(c => c.memberId !== memberId));
-
-    if (!removed?.id) {
-      showToast('Failed to delete conversation', 'error');
-      if (removed) setConversations(prev => [...prev, removed]);
-      return;
-    }
-
-    // Delete via API route (uses admin client, bypasses RLS)
-    apiCall('/api/mobile/conversations', 'DELETE', { conversationId: removed.id }).catch((e: unknown) => {
-      // Rollback: re-add conversation
-      if (removed) setConversations(prev => [...prev, removed]);
-      reportError(e, 'API');
-      showToast('Failed to delete conversation', 'error');
+    // Capture removed inside updater to avoid stale closure
+    let removed: Conversation | undefined;
+    setConversations(prev => {
+      removed = prev.find(c => c.memberId === memberId);
+      return prev.filter(c => c.memberId !== memberId);
     });
-  }, [currentUser, conversations]);
+
+    // Check after state update — removed was captured in updater
+    setTimeout(() => {
+      if (!removed?.id) {
+        showToast('Failed to delete conversation', 'error');
+        if (removed) setConversations(prev => [...prev, removed!]);
+        return;
+      }
+
+      // Delete via API route (uses admin client, bypasses RLS)
+      apiCall('/api/mobile/conversations', 'DELETE', { conversationId: removed.id }).catch((e: unknown) => {
+        // Rollback: re-add conversation
+        if (removed) setConversations(prev => [...prev, removed!]);
+        reportError(e, 'API');
+        showToast('Failed to delete conversation', 'error');
+      });
+    }, 0);
+  }, [currentUser]);
 
   const deleteMessage = useCallback((memberId: string, messageId: string) => {
     if (!currentUser) return;
-    // Optimistic: remove message from state
-    const snapshot = conversations.find(c => c.memberId === memberId);
-    setConversations(prev => prev.map(c => {
-      if (c.memberId !== memberId) return c;
-      const filtered = c.messages.filter(m => m.id !== messageId);
-      const last = filtered[filtered.length - 1];
-      return { ...c, messages: filtered, lastMessage: last?.text || '', lastTimestamp: last?.timestamp || c.lastTimestamp };
-    }));
+    // Capture snapshot INSIDE the updater to avoid stale closure
+    let snapshot: Conversation | undefined;
+    setConversations(prev => {
+      snapshot = prev.find(c => c.memberId === memberId);
+      return prev.map(c => {
+        if (c.memberId !== memberId) return c;
+        const filtered = c.messages.filter(m => m.id !== messageId);
+        const last = filtered[filtered.length - 1];
+        return { ...c, messages: filtered, lastMessage: last?.text || '', lastTimestamp: last?.timestamp || c.lastTimestamp };
+      });
+    });
 
     // Delete via API route (uses admin client, bypasses RLS)
     apiCall('/api/mobile/conversations', 'DELETE', { messageId }).catch((e: unknown) => {
       // Rollback: restore original conversation
       if (snapshot) {
-        setConversations(prev => prev.map(c => c.memberId === memberId ? snapshot : c));
+        setConversations(prev => prev.map(c => c.memberId === memberId ? snapshot! : c));
       }
       reportError(e, 'API');
       showToast('Failed to delete message', 'error');
     });
-  }, [currentUser, conversations]);
+  }, [currentUser]);
 
   const dismissAnnouncement = useCallback((id: string) => {
     if (!currentUser) return;
@@ -1208,22 +1230,39 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const refreshData = useCallback(async () => {
     if (!currentUser) return;
     try {
-      const [m, b, ev, ct, p, c, a, n, pr, np] = await Promise.all([
+      const results = await Promise.allSettled([
         db.fetchMembers(), db.fetchBookings(), db.fetchEvents(), db.fetchCourts(), db.fetchPartners(),
         db.fetchConversations(currentUser.id), db.fetchAnnouncements(currentUser.id),
         db.fetchNotifications(currentUser.id), db.fetchPrograms(),
         db.fetchNotificationPreferences(currentUser.id),
       ]);
-      setMembers(safeArray(m));
-      setBookings(safeArray(b));
-      setEvents(mergeEventsWithDefaults(ev));
-      if (ct.length > 0) setCourts(ct);
-      setPartners(safeArray(p));
-      setConversations(safeArray(c));
-      if (safeArray(a).length > 0) setAnnouncements(safeArray(a));
-      setNotifications(safeArray(n));
-      if (safeArray(pr).length > 0) setPrograms(safeArray(pr));
-      if (np) setNotificationPreferences(np);
+      // Helper: extract value from settled result, or return fallback
+      const val = <T,>(r: PromiseSettledResult<T>, fallback: T): T =>
+        r.status === 'fulfilled' ? r.value : fallback;
+      const [m, b, ev, ct, p, c, a, n, pr, np] = results;
+
+      setMembers(safeArray(val(m, [])));
+      setBookings(safeArray(val(b, [])));
+      setEvents(mergeEventsWithDefaults(val(ev, [])));
+      const courts_ = val(ct, []);
+      if (courts_.length > 0) setCourts(courts_);
+      setPartners(safeArray(val(p, [])));
+      setConversations(safeArray(val(c, [])));
+      const ann_ = safeArray(val(a, []));
+      if (ann_.length > 0) setAnnouncements(ann_);
+      setNotifications(safeArray(val(n, [])));
+      const prog_ = safeArray(val(pr, []));
+      if (prog_.length > 0) setPrograms(prog_);
+      const np_ = val(np, null);
+      if (np_) setNotificationPreferences(np_);
+
+      // Log any failed fetches (but don't block UI)
+      results.forEach((r, i) => {
+        if (r.status === 'rejected') {
+          const labels = ['members','bookings','events','courts','partners','conversations','announcements','notifications','programs','notifPrefs'];
+          console.error(`[refreshData] Failed to fetch ${labels[i]}:`, r.reason);
+        }
+      });
     } catch (err) {
       reportError(err, 'Refresh');
     }

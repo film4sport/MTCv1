@@ -57,6 +57,17 @@ Before reporting any feature change as "done", verify:
 **Performance:**
 - **Store.tsx context splitting**: Single `AppContext` (46 values) → 7 focused contexts. See Current Status section above.
 
+**Dashboard messaging bug fixes (Mar 9):**
+- **Nav freeze after refresh**: `refreshData()` used `Promise.all` — if ANY of 10 fetches failed, ALL state updates were skipped, making nav/sidebar appear frozen. Changed to `Promise.allSettled` with per-result extraction + error logging. Individual fetch failures no longer block other state updates.
+- **deleteMessage stale closure**: `deleteMessage`, `deleteConversation`, `markConversationRead` all read from stale `conversations` state via closure. Refactored to capture snapshots inside `setConversations(prev => ...)` functional updater, removing `conversations` from useCallback deps.
+- **Second message not persisting**: Supabase Realtime fires on messages table INSERT, triggering `fetchConversations()` which replaces entire conversations state — wiping optimistic messages not yet persisted. Added 1.5s debounce to messages Realtime handler so rapid sends complete before state is overwritten.
+
+**Profile differences between Dashboard and Mobile PWA (known, NOT YET FIXED):**
+- Dashboard has: Avatar picker, Member Since date, Role badge — Mobile PWA missing these
+- Mobile PWA has: Availability prefs, Play Style prefs — Dashboard missing these
+- Both have: Name, Email, Skill Level, Interclub Team, Gate Code, Family Members
+- User requested "choose the best and most relevant info for both" — TODO: unify profile fields
+
 **Resilience (opening day prep — 40 concurrent users):**
 - **Email retry with exponential backoff**: Added `sendWithRetry()` to `booking-email/route.ts` — retries on 429 rate limits and ECONNRESET with 1s/2s backoff. Applied to both confirmation and cancellation email sections.
 - **Timeout wrappers on notification chains**: Added `withTimeout(5000)` to all fire-and-forget notification Promise chains across 4 API routes: `events/route.ts`, `conversations/route.ts`, `announcements/route.ts`, `booking-email/route.ts`. Changed `Promise.all` → `Promise.allSettled` so one failed notification doesn't block others.
