@@ -131,8 +131,13 @@ export default function AdminCourtsTab({
   const handleDelete = async (id: string) => {
     setDeleting(id);
     try {
-      const { error } = await supabase.from('court_blocks').delete().eq('id', id);
-      if (error) throw error;
+      const session = await supabase.auth.getSession();
+      const token = session?.data?.session?.access_token;
+      const res = await fetch(`/api/mobile/court-blocks?id=${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+        headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      });
+      if (!res.ok) throw new Error('Delete failed');
       showToast('Court block removed');
       await loadBlocks();
     } catch {
