@@ -510,69 +510,6 @@
   transform: scale(0.98);
 }
 
-/* ============================================
-   LOADING & SKELETON STATES
-============================================ */
-
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-
-.skeleton {
-  background: linear-gradient(90deg,
-    rgba(0,0,0,0.06) 25%,
-    rgba(0,0,0,0.1) 50%,
-    rgba(0,0,0,0.06) 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-  border-radius: 8px;
-}
-
-[data-theme="dark"] .skeleton {
-  background: linear-gradient(90deg,
-    rgba(255,255,255,0.05) 25%,
-    rgba(255,255,255,0.1) 50%,
-    rgba(255,255,255,0.05) 75%);
-  background-size: 200% 100%;
-}
-
-.skeleton-text { height: 14px; margin-bottom: 8px; }
-.skeleton-text.short { width: 60%; }
-.skeleton-title { height: 24px; width: 50%; margin-bottom: 12px; }
-.skeleton-avatar { width: 48px; height: 48px; border-radius: 50%; }
-.skeleton-card { height: 80px; margin-bottom: 12px; }
-.skeleton-button { height: 44px; width: 100px; border-radius: 12px; }
-
-/* Pull to Refresh */
-.pull-indicator {
-  position: absolute;
-  top: -50px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: var(--volt);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: all 0.3s ease;
-}
-
-.pull-indicator.visible {
-  opacity: 1;
-  top: 10px;
-}
-
-.pull-indicator.refreshing {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  100% { transform: translateX(-50%) rotate(360deg); }
-}
 
 /* ============================================
    ADMIN PANEL — Tabs & Components
