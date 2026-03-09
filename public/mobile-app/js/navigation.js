@@ -136,7 +136,6 @@
     // Render conversations list dynamically when navigating to messages
     if (screen === 'messages') {
       setTimeout(function() {
-        if (typeof initMsgFilterTabs === 'function') initMsgFilterTabs();
         if (typeof renderConversationsList === 'function') renderConversationsList();
       }, 100);
     }
