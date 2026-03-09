@@ -131,7 +131,10 @@ export async function PATCH(request: Request) {
 
     // Fields members can update on themselves
     if (body.avatar !== undefined) updates.avatar = sanitizeInput(body.avatar, 50);
-    if (body.ntrp !== undefined) updates.ntrp = Number(body.ntrp) || 3.0;
+    if (body.ntrp !== undefined) {
+      const ntrp = Number(body.ntrp);
+      if (!isNaN(ntrp) && ntrp >= 1.0 && ntrp <= 7.0) updates.ntrp = ntrp;
+    }
     if (body.skillLevel !== undefined) updates.skill_level = sanitizeInput(body.skillLevel, 20);
     if (body.skillLevelSet !== undefined) updates.skill_level_set = !!body.skillLevelSet;
     if (body.residence !== undefined) {

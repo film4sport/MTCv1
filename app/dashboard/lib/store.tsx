@@ -177,9 +177,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // ── Debounce refs (prevent rapid duplicate calls) ──────────
   const pendingRsvps = useRef<Set<string>>(new Set());
 
-  /** Deduplicate notifications: skip if same title+type exists within last 30 seconds */
+  /** Deduplicate notifications: skip if same id OR same type+title within last 30s */
   const addNotification = useCallback((notif: Notification) => {
     setNotifications(prev => {
+      // Exact ID match = definite duplicate
+      if (notif.id && prev.some(n => n.id === notif.id)) return prev;
+      // Same type+title within 30s = likely duplicate from Realtime echo
       const thirtySecsAgo = new Date(Date.now() - 30_000).toISOString();
       const isDupe = prev.some(n =>
         n.title === notif.title && n.type === notif.type && n.timestamp > thirtySecsAgo
@@ -383,9 +386,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setCurrentUser(user);
         saveJSON('mtc-current-user', user);
 
-        // Fetch all data from Supabase in parallel
+        // Fetch all data from Supabase in parallel (allSettled so one failure doesn't block others)
         try {
-          const [members, bookings, events, courtsData, partners, conversations, announcements, notifications, programs, notifPrefs] = await Promise.all([
+          const results = await Promise.allSettled([
             db.fetchMembers(),
             db.fetchBookings(),
             db.fetchEvents(),
@@ -398,20 +401,34 @@ export function AppProvider({ children }: { children: ReactNode }) {
             db.fetchNotificationPreferences(user.id),
           ]);
 
-          // Overwrite state with Supabase data (source of truth)
-          setMembers(safeArray(members));
-          setBookings(safeArray(bookings));
-          setEvents(mergeEventsWithDefaults(events));
-          if (courtsData.length > 0) setCourts(courtsData); // Keep defaults if DB has no courts yet
-          setPartners(safeArray(partners));
-          setConversations(safeArray(conversations));
-          if (safeArray(announcements).length > 0) setAnnouncements(safeArray(announcements)); // Keep defaults if DB has none
-          setNotifications(safeArray(notifications));
-          if (safeArray(programs).length > 0) setPrograms(safeArray(programs)); // Keep defaults if DB has none
+          const val = <T,>(r: PromiseSettledResult<T>, fallback: T): T =>
+            r.status === 'fulfilled' ? r.value : fallback;
+
+          // Overwrite state with Supabase data (source of truth), keep defaults on failure
+          setMembers(safeArray(val(results[0], [])));
+          setBookings(safeArray(val(results[1], [])));
+          setEvents(mergeEventsWithDefaults(val(results[2], [])));
+          const courtsData = safeArray(val(results[3], []));
+          if (courtsData.length > 0) setCourts(courtsData);
+          setPartners(safeArray(val(results[4], [])));
+          setConversations(safeArray(val(results[5], [])));
+          const anns = safeArray(val(results[6], []));
+          if (anns.length > 0) setAnnouncements(anns);
+          setNotifications(safeArray(val(results[7], [])));
+          const progs = safeArray(val(results[8], []));
+          if (progs.length > 0) setPrograms(progs);
+          const notifPrefs = val(results[9], null);
           if (notifPrefs) setNotificationPreferences(notifPrefs);
+
+          // Log any failures for debugging
+          results.forEach((r, i) => {
+            if (r.status === 'rejected') {
+              const names = ['members','bookings','events','courts','partners','conversations','announcements','notifications','programs','notifPrefs'];
+              reportError(r.reason instanceof Error ? r.reason : new Error(String(r.reason)), `Fetch ${names[i]}`);
+            }
+          });
         } catch (err) {
           reportError(err instanceof Error ? err : new Error(String(err)), 'Supabase init');
-          // State falls back to localStorage cache — user can still interact
         }
 
         // ── One-time notifications for existing users (beta notice + opening day) ──

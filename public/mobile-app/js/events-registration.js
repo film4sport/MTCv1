@@ -262,7 +262,7 @@
         body: JSON.stringify({ eventId: eventId })
       });
       if (!res.ok) {
-        MTC.warn('Interclub RSVP persist failed:', (await res.json()).error);
+        MTC.warn('Interclub RSVP persist failed:', res.data && res.data.error);
       }
     } catch(apiErr) {
       MTC.warn('Interclub RSVP API error:', apiErr);
@@ -335,7 +335,7 @@
             price: document.getElementById('editEvPrice').value
           })
         });
-        if (!res.ok) throw new Error((await res.json()).error || 'Failed to update');
+        if (!res.ok) throw new Error((res.data && res.data.error) || 'Failed to update');
         // Update local state
         if (ev) {
           ev.title = document.getElementById('editEvTitle').value;
@@ -371,7 +371,7 @@
             method: 'DELETE',
             body: JSON.stringify({ id: id })
           });
-          if (!res.ok) throw new Error((await res.json()).error || 'Failed');
+          if (!res.ok) throw new Error((res.data && res.data.error) || 'Failed');
           // Remove from local state
           if (MTC.state && MTC.state.events) {
             MTC.state.events = MTC.state.events.filter(function(e) { return e.id !== id; });
@@ -438,7 +438,7 @@
           method: 'POST',
           body: JSON.stringify({ settings: { operating_hours: JSON.stringify(hoursObj) } })
         });
-        if (!res.ok) throw new Error((await res.json()).error || 'Failed');
+        if (!res.ok) throw new Error((res.data && res.data.error) || 'Failed');
         document.getElementById('editHoursModal').remove();
         showToast('Hours saved');
       } catch(err) {
@@ -510,7 +510,7 @@
     try {
       var res = await MTC.fn.apiRequest('/mobile/settings');
       if (res.ok) {
-        var settings = await res.json();
+        var settings = res.data;
         if (settings.maintenance_mode === 'true') {
           maintenanceMode = true;
           document.body.classList.add('maintenance-mode');
@@ -590,7 +590,7 @@
             priority: 'normal'
           })
         });
-        if (!res.ok) throw new Error((await res.json()).error || 'Failed');
+        if (!res.ok) throw new Error((res.data && res.data.error) || 'Failed');
         document.getElementById('broadcastModal').remove();
         showToast('\u2705 Broadcast sent!');
       } catch(err) {
@@ -609,10 +609,10 @@
     try {
       // Fetch members, bookings, events in parallel
       var results = await Promise.all([
-        MTC.fn.apiRequest('/mobile/members').then(function(r) { return r.ok ? r.json() : []; }),
-        MTC.fn.apiRequest('/mobile/bookings').then(function(r) { return r.ok ? r.json() : []; }),
-        MTC.fn.apiRequest('/mobile/events').then(function(r) { return r.ok ? r.json() : []; })
-      ]);
+        MTC.fn.apiRequest('/mobile/members').then(function(r) { return r.ok ? r.data : []; }),
+        MTC.fn.apiRequest('/mobile/bookings').then(function(r) { return r.ok ? r.data : []; }),
+        MTC.fn.apiRequest('/mobile/events').then(function(r) { return r.ok ? r.data : []; })
+      ]).catch(function(e) { MTC.warn('Admin data load error:', e); return [[], [], []]; });
       var members = results[0], bookings = results[1], events = results[2];
 
       // Build multi-section CSV

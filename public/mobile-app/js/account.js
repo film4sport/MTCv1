@@ -148,6 +148,8 @@
         } else {
           showToast('Notifications blocked. Enable in browser settings.');
         }
+      }).catch(function() {
+        showToast('Could not request notification permission');
       });
     } else {
       showToast('Push notifications not supported');

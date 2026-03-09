@@ -95,6 +95,12 @@ export function isRateLimited(userId: string, max = RATE_MAX, windowMs = RATE_WI
   const entry = rateLimitMap.get(userId);
   if (!entry || now - entry.firstAttempt > windowMs) {
     rateLimitMap.set(userId, { count: 1, firstAttempt: now });
+    // Prune expired entries to prevent memory leak (every 100th unique user)
+    if (rateLimitMap.size > 100) {
+      rateLimitMap.forEach((val, key) => {
+        if (now - val.firstAttempt > windowMs) rateLimitMap.delete(key);
+      });
+    }
     return false;
   }
   entry.count++;
