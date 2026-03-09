@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { authenticateMobileRequest, getAdminClient, sanitizeInput, isRateLimited, isValidEnum, VALID_ANNOUNCEMENT_TYPES } from '../auth-helper';
+import { authenticateMobileRequest, getAdminClient, sanitizeInput, isRateLimited, isValidEnum, cachedJson, VALID_ANNOUNCEMENT_TYPES } from '../auth-helper';
 import { sendPushToUser } from '../../lib/push';
 
 // sendPushToUser imported from ../../lib/push (shared utility)
@@ -48,7 +48,7 @@ export async function GET(request: Request) {
         dismissed: dismissedIds.has(a.id),
       }));
 
-    return NextResponse.json(result);
+    return cachedJson(result, 120, { swr: 60 });
   } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }

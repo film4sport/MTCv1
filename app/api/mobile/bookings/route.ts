@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { authenticateMobileRequest, getAdminClient, sanitizeInput, isRateLimited } from '../auth-helper';
+import { authenticateMobileRequest, getAdminClient, sanitizeInput, isRateLimited, cachedJson } from '../auth-helper';
 import { sendPushToUser } from '../../lib/push';
 import type { BookingRules } from '../types';
 import crypto from 'crypto';
@@ -282,7 +282,7 @@ export async function GET(request: Request) {
       participants: participantMap[b.id] || [],
     }));
 
-    return NextResponse.json(result);
+    return cachedJson(result, 30);
   } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }

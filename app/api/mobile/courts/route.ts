@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { authenticateMobileRequest, getAdminClient } from '../auth-helper';
+import { authenticateMobileRequest, getAdminClient, cachedJson } from '../auth-helper';
 
 /** Fetch all courts with current status (available/maintenance) */
 export async function GET(request: Request) {
@@ -24,7 +24,7 @@ export async function GET(request: Request) {
       status: c.status,
     }));
 
-    return NextResponse.json(result);
+    return cachedJson(result, 300, { isPublic: true, swr: 60 });
   } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }

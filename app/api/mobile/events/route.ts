@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { authenticateMobileRequest, getAdminClient, sanitizeInput, isRateLimited, isValidDate, isValidTime, isInRange, validationError } from '../auth-helper';
+import { authenticateMobileRequest, getAdminClient, sanitizeInput, isRateLimited, isValidDate, isValidTime, isInRange, validationError, cachedJson } from '../auth-helper';
 import { sendPushToUser } from '../../lib/push';
 import type { EventUpdate } from '../types';
 
@@ -85,7 +85,7 @@ export async function GET(request: Request) {
       };
     });
 
-    return NextResponse.json(result);
+    return cachedJson(result, 300, { isPublic: true, swr: 60 });
   } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }

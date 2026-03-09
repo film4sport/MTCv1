@@ -319,6 +319,9 @@ create unique index if not exists idx_bookings_no_double_booking
 -- Additional indexes for common queries
 create index if not exists idx_events_date on events(date);
 create index if not exists idx_conversations_members on conversations(member_a, member_b);
+-- Individual indexes for OR queries in RLS policies (composite index only helps leading column)
+create index if not exists idx_conversations_member_a on conversations(member_a);
+create index if not exists idx_conversations_member_b on conversations(member_b);
 create index if not exists idx_messages_to_read on messages(to_id, read);
 create index if not exists idx_booking_participants_user on booking_participants(participant_id);
 create index if not exists idx_bookings_status on bookings(status);

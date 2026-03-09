@@ -140,11 +140,9 @@ test.describe('Mobile PWA — Authenticated Navigation', () => {
   test('navigating to profile redirects to settings screen', async ({ page }) => {
     await mockAuthenticatedState(page);
 
-    await page.evaluate(() => {
-      if (typeof MTC !== 'undefined' && MTC.fn && MTC.fn.navigateTo) {
-        MTC.fn.navigateTo('profile');
-      }
-    });
+    // Wait for MTC navigation to be ready before calling it
+    await page.waitForFunction(() => typeof MTC !== 'undefined' && MTC.fn && MTC.fn.navigateTo, null, { timeout: 5000 });
+    await page.evaluate(() => { MTC.fn.navigateTo('profile'); });
     await page.waitForTimeout(500);
 
     const active = await page.evaluate(() => {
@@ -157,11 +155,9 @@ test.describe('Mobile PWA — Authenticated Navigation', () => {
   test('can navigate to settings screen', async ({ page }) => {
     await mockAuthenticatedState(page);
 
-    await page.evaluate(() => {
-      if (typeof MTC !== 'undefined' && MTC.fn && MTC.fn.navigateTo) {
-        MTC.fn.navigateTo('settings');
-      }
-    });
+    // Wait for MTC navigation to be ready before calling it
+    await page.waitForFunction(() => typeof MTC !== 'undefined' && MTC.fn && MTC.fn.navigateTo, null, { timeout: 5000 });
+    await page.evaluate(() => { MTC.fn.navigateTo('settings'); });
     // Use Playwright's built-in locator assertion (auto-retries, avoids flaky fixed timeout)
     await expect(page.locator('#screen-settings.active')).toBeAttached({ timeout: 5000 });
   });

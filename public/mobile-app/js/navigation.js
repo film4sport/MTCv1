@@ -12,6 +12,39 @@
   const _scrollPositions = {};
   let _skipNextPop = false; // Flag to ignore popstate we triggered ourselves
 
+  // Lazy-load tracking for code-split bundles
+  const _lazyLoaded = {};
+
+  /**
+   * Load a code-split bundle (JS + CSS) on demand.
+   * @param {string} name - Bundle name (e.g. 'admin', 'captain')
+   * @param {function} callback - Called after bundle JS has executed
+   */
+  function loadLazyBundle(name, callback) {
+    if (_lazyLoaded[name]) {
+      if (callback) callback();
+      return;
+    }
+    _lazyLoaded[name] = true;
+
+    // Load CSS (non-blocking)
+    var link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = '/mobile-app/dist/' + name + '.bundle.css';
+    document.head.appendChild(link);
+
+    // Load JS (blocks callback until executed)
+    var script = document.createElement('script');
+    script.src = '/mobile-app/dist/' + name + '.bundle.js';
+    script.onload = function() { if (callback) callback(); };
+    script.onerror = function() {
+      _lazyLoaded[name] = false; // Allow retry
+      MTC.warn('Failed to load ' + name + ' bundle');
+      if (callback) callback();
+    };
+    document.body.appendChild(script);
+  }
+
   // ============================================
   // MTC.fn + WINDOW: Navigate To (called from EVERYWHERE - onclick, cross-file)
   // ============================================
@@ -101,14 +134,18 @@
       setTimeout(function() { if (typeof renderConversationsList === 'function') renderConversationsList(); }, 100);
     }
 
-    // Initialize captain/team screen
+    // Initialize captain/team screen (lazy-loaded bundle)
     if (screen === 'captain') {
-      setTimeout(function() { if (typeof initCaptainScreen === 'function') initCaptainScreen(); }, 100);
+      loadLazyBundle('captain', function() {
+        if (typeof initCaptainScreen === 'function') initCaptainScreen();
+      });
     }
 
-    // Initialize admin panel
+    // Initialize admin panel (lazy-loaded bundle)
     if (screen === 'admin') {
-      setTimeout(function() { if (typeof initAdminPanel === 'function') initAdminPanel(); }, 100);
+      loadLazyBundle('admin', function() {
+        if (typeof initAdminPanel === 'function') initAdminPanel();
+      });
     }
 
     // Render partners screen from API data

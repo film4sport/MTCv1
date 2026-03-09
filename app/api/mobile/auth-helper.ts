@@ -107,6 +107,30 @@ export function validationError(field: string, detail: string) {
 }
 
 /**
+ * Return JSON response with Cache-Control headers.
+ * @param data - Response body
+ * @param maxAge - max-age in seconds (0 = no-cache)
+ * @param options - { public?: boolean, swr?: number (stale-while-revalidate seconds) }
+ */
+export function cachedJson(
+  data: unknown,
+  maxAge: number,
+  options: { isPublic?: boolean; swr?: number } = {}
+) {
+  const parts: string[] = [];
+  parts.push(options.isPublic ? 'public' : 'private');
+  if (maxAge === 0) {
+    parts.push('no-cache');
+  } else {
+    parts.push(`max-age=${maxAge}`);
+    if (options.swr) parts.push(`stale-while-revalidate=${options.swr}`);
+  }
+  return NextResponse.json(data, {
+    headers: { 'Cache-Control': parts.join(', ') },
+  });
+}
+
+/**
  * Route handler wrapper — extracts the repetitive auth + try/catch boilerplate.
  * Usage:
  *   export const GET = withAuth(async (user, request, supabase) => { ... });

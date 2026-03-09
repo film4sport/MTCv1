@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { authenticateMobileRequest, getAdminClient, isRateLimited, sanitizeInput, SETTINGS_KEY_WHITELIST } from '../auth-helper';
+import { authenticateMobileRequest, getAdminClient, isRateLimited, sanitizeInput, cachedJson, SETTINGS_KEY_WHITELIST } from '../auth-helper';
 
 /** Get club settings */
 export async function GET(request: Request) {
@@ -14,7 +14,7 @@ export async function GET(request: Request) {
     // Convert to key-value object
     const settings: Record<string, string> = {};
     (data || []).forEach(s => { settings[s.key] = s.value; });
-    return NextResponse.json(settings);
+    return cachedJson(settings, 300, { swr: 60 });
   } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }

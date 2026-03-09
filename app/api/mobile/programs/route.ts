@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { authenticateMobileRequest, getAdminClient } from '../auth-helper';
+import { authenticateMobileRequest, getAdminClient, cachedJson } from '../auth-helper';
 import { sendPushToUser } from '../../lib/push';
 import crypto from 'crypto';
 
@@ -44,7 +44,7 @@ export async function GET(request: Request) {
       enrolled: (enrollmentsByProgram[p.id] || []).includes(userId),
     }));
 
-    return NextResponse.json(result);
+    return cachedJson(result, 300, { swr: 60 });
   } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
