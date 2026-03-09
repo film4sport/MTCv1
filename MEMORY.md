@@ -43,7 +43,17 @@ Before reporting any feature change as "done", verify:
 - **Coaching panel access (Mar 8)**: Sidebar now shows "Book Lessons" link for both coaches AND admins (was coach-only). Sidebar.tsx line 145: `(isCoach || isAdmin)`.
 - **Coaching program bookings**: `db.createBooking` is still used in the coaching program creation flow (line 966 of store.tsx). This is coach-only (coaching panel), not admin. Coaches create program bookings (type: 'program') via the coaching panel.
 
-### Cowork Session (2026-03-09) — Bug Fixes + Context Splitting
+### Cowork Session (2026-03-09) — Onboarding Upgrade + Bug Fixes + Context Splitting
+
+**Onboarding upgrade (both platforms):**
+- **Desktop `OnboardingTour.tsx`**: Full rewrite — tooltip-based tour → full-screen centered modal with glass morphism (`rgba(250,248,243,0.85)`, `backdrop-filter: blur(30px) saturate(1.4)`). 6 steps with visual previews (quick action cards, time slot picker, partner cards, chat bubbles, install steps, CTA). Staggered entrance animations per step. Back/Next navigation. Uses `useAuth()` from split contexts. Gotham Rounded for titles. `animKey` state re-triggers animations on step change.
+- **Mobile PWA `events.css`**: Onboarding overlay now uses `rgba(10,12,6,0.85)` + `backdrop-filter: blur(12px)`. Added `.onboarding-card` glass class, entrance animation keyframes (`obSlideTitle`, `obSlideText`, `obSlidePreview`, `onboardIconPop`). Refined dots (28px active, cubic-bezier), buttons (14px radius, volt glow), skip (more subtle).
+- **Mobile PWA `index.html`**: All 6 slides wrapped in `.onboarding-card` divs. Added visual preview mockups: Welcome (Book/Partners/Chat action chips), Book Courts (time slot picker with OPEN/BOOKED status), Schedule (calendar entries with color-coded left borders), Partners (member cards with avatars + skill levels), Install (numbered step circles), All Set (CTA button).
+- **Mobile PWA `onboarding.js`**: Added `reAnimateSlide()` function — resets CSS animation on `.onboarding-title`, `.onboarding-text`, `.onboarding-preview`, `.onboarding-icon` via `animation: none` + reflow trick. Called in `updateOnboardingUI()` for the active slide.
+- **No confetti** (per user request).
+- To test: clear `mtc-onboarding-complete` (mobile) or `mtc-onboarding-done-{userId}` (desktop) from localStorage.
+
+
 
 **Bugs fixed:**
 - **Demo credentials removed from test files** (GitGuardian alert): Replaced `member123`/`coach123`/`admin123` with `not-a-real-password` in 4 test files (`qa-full-flow.spec.js`, `dashboard.spec.js`, `comprehensive.spec.js`, `untested-flows.spec.js`)
