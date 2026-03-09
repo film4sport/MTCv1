@@ -5,10 +5,11 @@ const BASE = 'http://localhost:3000';
 
 // Helper: login as a specific role via the actual login form (sets Supabase session cookie)
 async function loginAs(page, role = 'member') {
+  // Auth uses magic link (passwordless) — these are test-only placeholders for form fill
   const creds = {
-    member: { email: 'member@mtc.ca', pass: 'member123' },
-    coach: { email: 'coach@mtc.ca', pass: 'coach123' },
-    admin: { email: 'admin@mtc.ca', pass: 'admin123' },
+    member: { email: 'testmember@mtc.ca', pass: 'not-a-real-password' },
+    coach: { email: 'testcoach@mtc.ca', pass: 'not-a-real-password' },
+    admin: { email: 'testadmin@mtc.ca', pass: 'not-a-real-password' },
   };
   const { email, pass } = creds[role];
 

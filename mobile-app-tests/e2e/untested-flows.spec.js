@@ -35,7 +35,7 @@ async function loginAsAdmin(page) {
   await page.evaluate(() => {
     localStorage.setItem('mtc-onboarding-complete', 'true');
     document.getElementById('loginEmail').value = 'admin@mtc.ca';
-    document.getElementById('loginPassword').value = 'admin123';
+    document.getElementById('loginPassword').value = 'not-a-real-password';
     handleLogin();
   });
   await page.waitForFunction(() => document.getElementById('screen-home')?.classList.contains('active'), { timeout: 10000 });
