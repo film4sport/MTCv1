@@ -115,11 +115,36 @@ Before reporting any feature change as "done", verify:
 - `testfamily2026@guerrillamail.com` — deleted from auth + profiles
 - `nicholas617@10minutes.email` — needs manual cleanup (active session blocked deletion)
 
+### Cowork Session (2026-03-09 continued) — Cross-Platform Testing & MTC.state Fix
+
+**Bug found & fixed: MTC.state not populated on page reload (Mobile PWA)**
+- `interactive.js` DOMContentLoaded handler (line 70) read `mtc-user` from localStorage and set local `currentUser` variable, but did NOT populate `MTC.state.currentUser` or `MTC.state.familyMembers`.
+- This meant the family profile switcher (which reads `MTC.state.familyMembers`) never rendered after a page reload — it only worked during the same session that logged in.
+- **Fix**: Added `MTC.state.currentUser`, `MTC.state.familyMembers`, and `MTC.state.activeFamilyMember` population from localStorage in the auto-restore block of `interactive.js`.
+- Mobile bundle rebuilt with `npm run build:mobile` (new cache hash: `mtc-court-91a0d9ed`).
+
+**Cross-platform testing results (Booking, Messages, Partners):**
+- **Mobile PWA (375x812)**: All 3 flows verified ✅
+  - Booking: Week view, calendar toggle, date picker, court grid, BOOK buttons, confirm modal (match type toggle, duration toggle, guest toggle + name input, add players, confirm/cancel)
+  - Messages: Search input, New Message button, member search modal, cancel, empty states
+  - Partners: Filter tabs (All, Available Now, Singles, etc.), Post Partner Request modal (match type pills, skill level pills, when pills, message textarea, POST REQUEST button)
+- **Tablet viewport (768x1024)**: All 3 flows verified ✅
+  - Dashboard: Sidebar visible, two-panel messages layout, booking grid, partner filters + post request CTA
+  - Mobile PWA: Phone-frame CSS renders identically at any viewport (by design)
+
+**New test file created:**
+- `mobile-app-tests/e2e/booking-partners-family.spec.js` (492 lines)
+  - Booking modal input interactions: match type toggle, duration toggle, guest toggle + name input, cancel button
+  - Partner request form: filter tabs, form fields (match type, skill, when, message, submit)
+  - Family profile switcher: MTC.state auto-restore, switcher visibility, profile switching, persistence after reload
+  - Messages: search input, new message modal
+
 **Pending:**
 - Run migration on production Supabase: `20260308_add_residence_column.sql`
-- Deploy all changes to Railway (includes family creation fix)
+- Deploy all changes to Railway (includes family creation fix + MTC.state auto-restore fix)
 - Clean up `nicholas617@10minutes.email` test account from Supabase auth
 - Mobile PWA admin "Block Court Time" — mobile version also missing "Club Event" and "Coaching Session" options in reason dropdown
+- New tests need to run in CI (can't run Playwright in Cowork per CLAUDE.md #16)
 
 ---
 

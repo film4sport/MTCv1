@@ -69,6 +69,20 @@
     // Check for saved login
     currentUser = MTC.storage.get('mtc-user', null);
     if (currentUser) {
+      // Populate MTC.state so all modules (profile switcher, booking, etc.) have user data
+      MTC.state.currentUser = currentUser;
+      window.currentUser = currentUser;
+
+      // Restore family members for family membership profiles
+      var storedFamily = MTC.storage.get('mtc-family-members', []);
+      if (storedFamily && storedFamily.length > 0) {
+        MTC.state.familyMembers = storedFamily;
+      }
+      var storedActiveMember = MTC.storage.get('mtc-active-family-member', null);
+      if (storedActiveMember) {
+        MTC.state.activeFamilyMember = storedActiveMember;
+      }
+
       document.getElementById('login-screen').classList.remove('active');
       document.getElementById('bottomNav').style.display = 'block';
 
