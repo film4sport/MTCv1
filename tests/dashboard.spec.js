@@ -43,7 +43,7 @@ test.describe('Dashboard — Login Flow', () => {
     await page.getByText('Member', { exact: true }).click();
     await page.waitForTimeout(300);
     await expect(page.locator('input[type="email"]')).toHaveValue('member@mtc.ca');
-    await expect(page.locator('input[type="password"]')).toHaveValue('member123');
+    await expect(page.locator('input[type="password"]')).toHaveValue('not-a-real-password');
   });
 
   test('forgot password button opens modal', async ({ page }) => {
@@ -95,7 +95,7 @@ test.describe('Dashboard — Structure', () => {
     await page.locator('input[type="email"]').click();
     await page.keyboard.type('member@mtc.ca', { delay: 20 });
     await page.locator('input[type="password"]').click();
-    await page.keyboard.type('member123', { delay: 20 });
+    await page.keyboard.type('not-a-real-password', { delay: 20 });
     await page.locator('button[type="submit"]').click();
     await page.waitForURL('**/dashboard**', { timeout: 30000, waitUntil: 'commit' });
     await page.waitForTimeout(1000);
@@ -134,7 +134,7 @@ test.describe('Dashboard — Profile Page', () => {
     await page.locator('input[type="email"]').click();
     await page.keyboard.type('member@mtc.ca', { delay: 20 });
     await page.locator('input[type="password"]').click();
-    await page.keyboard.type('member123', { delay: 20 });
+    await page.keyboard.type('not-a-real-password', { delay: 20 });
     await page.locator('button[type="submit"]').click();
     await page.waitForURL('**/dashboard**', { timeout: 30000, waitUntil: 'commit' });
     await page.waitForTimeout(500);

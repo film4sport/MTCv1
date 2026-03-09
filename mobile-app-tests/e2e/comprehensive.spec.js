@@ -69,7 +69,7 @@ test.describe('Login Screen', () => {
   test('Admin email sets admin role', async ({ page }) => {
     await page.evaluate(() => {
       document.getElementById('loginEmail').value = 'admin@mtc.ca';
-      document.getElementById('loginPassword').value = 'admin123';
+      document.getElementById('loginPassword').value = 'not-a-real-password';
       handleLogin();
     });
     await page.waitForFunction(() => document.getElementById('screen-home')?.classList.contains('active'), { timeout: 5000 });

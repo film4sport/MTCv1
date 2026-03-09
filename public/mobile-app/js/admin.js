@@ -576,8 +576,9 @@
         '</div>' +
         '<label class="admin-label">Reason</label>' +
         '<select id="blockReason" class="admin-select">' +
-          '<option value="Maintenance">Maintenance</option><option value="Tournament">Tournament</option>' +
-          '<option value="Weather">Weather</option><option value="Private Event">Private Event</option>' +
+          '<option value="Maintenance">Maintenance</option><option value="Club Event">Club Event</option>' +
+          '<option value="Weather">Weather</option><option value="Tournament">Tournament</option>' +
+          '<option value="Coaching Session">Coaching Session</option><option value="Private Event">Private Event</option>' +
           '<option value="Other">Other</option></select>' +
         '<input type="text" id="blockNotes" class="admin-input" placeholder="Notes (optional)">' +
         '<div style="display:flex;gap:8px;margin-top:8px">' +

@@ -45,12 +45,12 @@ test.describe('Visual Regression — Landing Page', () => {
     await page.goto(LANDING_URL, { waitUntil: 'load', timeout: 30000 });
     await cleanPage(page);
 
-    // Hero section exists and is visible
-    const hero = page.locator('#hero, [data-section="hero"], .hero-section').first();
+    // Hero section exists — it's the first <section> with texture-overlay class
+    const hero = page.locator('section.texture-overlay, section.overflow-hidden').first();
     await expect(hero).toBeAttached();
 
     // Hero has CTA buttons
-    const buttons = page.locator('#hero a, .hero-section a, .hero-buttons a');
+    const buttons = page.locator('section.texture-overlay a, section.overflow-hidden a');
     expect(await buttons.count()).toBeGreaterThanOrEqual(1);
 
     // Take screenshot to force full render
@@ -113,8 +113,8 @@ test.describe('Visual Regression — Landing Page (Mobile)', () => {
     const scrollWidth = await page.evaluate(() => document.body.scrollWidth);
     expect(scrollWidth).toBeLessThanOrEqual(376);
 
-    // Hero visible
-    const hero = page.locator('#hero, [data-section="hero"], .hero-section').first();
+    // Hero visible — first section with texture-overlay class
+    const hero = page.locator('section.texture-overlay, section.overflow-hidden').first();
     await expect(hero).toBeAttached();
 
     await page.screenshot({ path: 'test-results/landing-hero-mobile.png' });
@@ -187,8 +187,8 @@ test.describe('Visual Regression — Auth Pages', () => {
     await page.goto(SIGNUP_URL, { waitUntil: 'load', timeout: 30000 });
     await cleanPage(page);
 
-    // Signup content exists
-    const signupContent = page.locator('form, [class*="signup"], main').first();
+    // Signup page renders — outermost div has min-h-screen
+    const signupContent = page.locator('div.min-h-screen, [class*="min-h-screen"]').first();
     await expect(signupContent).toBeAttached();
 
     await page.screenshot({ path: 'test-results/signup-desktop.png' });

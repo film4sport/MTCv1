@@ -121,6 +121,24 @@ export async function GET(request: NextRequest) {
 
     const now = new Date().toISOString();
 
+    // Wait for profile to exist (handle_new_user trigger fires asynchronously on auth.users INSERT)
+    // Without this, send_welcome_message RPC fails with FK constraint violation on conversations.member_b
+    let profileReady = false;
+    for (let attempt = 0; attempt < 10; attempt++) {
+      const { data: profile } = await adminSupabase
+        .from('profiles')
+        .select('id')
+        .eq('id', user.id)
+        .maybeSingle();
+      if (profile) { profileReady = true; break; }
+      await new Promise(resolve => setTimeout(resolve, 300));
+    }
+
+    if (!profileReady) {
+      console.error(`[MTC] Profile not created after 3s for user ${user.id} — welcome tasks skipped`);
+      return response;
+    }
+
     // Run all post-confirmation tasks in parallel — one failure shouldn't block others
     const results = await Promise.allSettled([
       // Send welcome message (gate code + greeting via admin conversation)
@@ -152,7 +170,7 @@ export async function GET(request: NextRequest) {
       adminSupabase.from('notifications').insert({
         id: `beta-notice-${user.id}`,
         user_id: user.id,
-        type: 'info',
+        type: 'announcement',
         title: 'App Under Construction',
         body: 'Our app and website are still in development. If you find any bugs or have feedback, please email monotennisclub1@gmail.com — we appreciate your help!',
         timestamp: new Date(Date.parse(now) + 2000).toISOString(),

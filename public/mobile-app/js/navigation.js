@@ -145,8 +145,13 @@
       });
     }
 
-    // Initialize admin panel (lazy-loaded bundle)
+    // Initialize admin panel (lazy-loaded bundle) — admin/coach only
     if (screen === 'admin') {
+      if (!MTC.state.currentUser || (MTC.state.currentUser.role !== 'admin' && MTC.state.currentUser.role !== 'coach')) {
+        MTC.fn.showToast('Admin access required', 'error');
+        navigateTo('home');
+        return;
+      }
       loadLazyBundle('admin', function() {
         if (typeof initAdminPanel === 'function') initAdminPanel();
       });
