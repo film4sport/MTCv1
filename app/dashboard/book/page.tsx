@@ -3,7 +3,7 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { useApp } from '../lib/store';
+import { useAuth, useBookings, useEvents, useFamily, useDerived } from '../lib/store';
 import { useToast } from '../lib/toast';
 import DashboardHeader from '../components/DashboardHeader';
 import { TIME_SLOTS, COURTS_CONFIG, FEES, BOOKING_RULES } from '../lib/types';
@@ -22,7 +22,11 @@ const SuccessModal = dynamic(() => import('./components/SuccessModal'), { ssr: f
 
 export default function BookCourtPage() {
   const searchParams = useSearchParams();
-  const { currentUser, members, bookings, courts, events, addBooking, cancelBooking, activeProfile, activeDisplayName } = useApp();
+  const { currentUser } = useAuth();
+  const { bookings, courts, addBooking, cancelBooking } = useBookings();
+  const { events } = useEvents();
+  const { activeProfile, activeDisplayName } = useFamily();
+  const { members } = useDerived();
   const { showToast } = useToast();
   const [bookingSuccess, setBookingSuccess] = useState<{ courtName: string; date: string; time: string; participants?: { id: string; name: string }[]; duration?: number; matchType?: 'singles' | 'doubles' } | null>(null);
   const [view, setView] = useState<ViewMode>('week');

@@ -1,13 +1,16 @@
 'use client';
 
-import { useApp } from './lib/store';
+import { useAuth, useBookings, useEvents, useNotifications } from './lib/store';
 import DashboardHeader from './components/DashboardHeader';
 import OnboardingTour from './components/OnboardingTour';
 import Link from 'next/link';
 
 
 export default function DashboardHome() {
-  const { currentUser, bookings, events, announcements, dismissAnnouncement, confirmParticipant, toggleRsvp } = useApp();
+  const { currentUser } = useAuth();
+  const { bookings, confirmParticipant } = useBookings();
+  const { events, toggleRsvp } = useEvents();
+  const { announcements, dismissAnnouncement } = useNotifications();
 
   const myBookings = bookings
     .filter(b => b.userId === currentUser?.id && b.status === 'confirmed')

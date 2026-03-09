@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useApp } from '../lib/store';
+import { useAuth, useBookings } from '../lib/store';
 import { useToast } from '../lib/toast';
 import DashboardHeader from '../components/DashboardHeader';
 import { TIME_SLOTS, COURTS_CONFIG, COURT_HOURS } from '../lib/types';
@@ -11,7 +11,8 @@ import { generateId } from '../lib/utils';
 type Tab = 'book' | 'lessons';
 
 export default function CoachingPanelPage() {
-  const { currentUser, bookings, addBooking, cancelBooking } = useApp();
+  const { currentUser } = useAuth();
+  const { bookings, addBooking, cancelBooking } = useBookings();
   const { showToast } = useToast();
   const [tab, setTab] = useState<Tab>('book');
 

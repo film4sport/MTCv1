@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useApp } from '../lib/store';
+import { useAuth } from '../lib/store';
 import * as db from '../lib/db';
 
 export default function MobileAppBanner() {
-  const { currentUser } = useApp();
+  const { currentUser } = useAuth();
   const [dismissed, setDismissed] = useState(true); // default hidden until we check
 
   useEffect(() => {

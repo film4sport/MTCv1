@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useApp } from '../lib/store';
+import { useAuth, useSocial } from '../lib/store';
 import { useToast } from '../lib/toast';
 import DashboardHeader from '../components/DashboardHeader';
 import { AvatarDisplay } from '../lib/avatars';
@@ -20,7 +20,8 @@ const SKILL_BADGES: Record<SkillLevel, { bg: string; color: string; label: strin
 };
 
 export default function PartnersPage() {
-  const { partners, currentUser, addPartner, removePartner } = useApp();
+  const { currentUser } = useAuth();
+  const { partners, addPartner, removePartner } = useSocial();
   const { showToast } = useToast();
   const [filter, setFilter] = useState<FilterType>('all');
   const [skillFilter, setSkillFilter] = useState<SkillFilter>('all');

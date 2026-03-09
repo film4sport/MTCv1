@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useApp } from '../lib/store';
+import { useAuth, useBookings, useNotifications, useDerived } from '../lib/store';
 import { useToast } from '../lib/toast';
 import DashboardHeader from '../components/DashboardHeader';
 import { generateId, useFocusTrap } from '../lib/utils';
@@ -15,7 +15,10 @@ import AdminAnnouncementsTab from './components/AdminAnnouncementsTab';
 type AdminTab = 'dashboard' | 'members' | 'courts' | 'announcements';
 
 export default function AdminPage() {
-  const { currentUser, members, setMembers, bookings, courts, setCourts, analytics, announcements, setAnnouncements } = useApp();
+  const { currentUser } = useAuth();
+  const { bookings, courts, setCourts } = useBookings();
+  const { announcements, setAnnouncements } = useNotifications();
+  const { analytics, members, setMembers } = useDerived();
   const { showToast } = useToast();
   const [tab, setTab] = useState<AdminTab>('dashboard');
   const [memberSearch, setMemberSearch] = useState('');

@@ -11,29 +11,43 @@ import { reportError } from '../../lib/errorReporter';
 import { supabase } from '../../lib/supabase';
 import * as db from './db';
 
-interface AppState {
-  // Auth
+// ── Context interfaces (split for targeted re-renders) ──────────────
+
+interface AuthState {
   currentUser: User | null;
   updateCurrentUser: (updates: Partial<User>) => void;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
+  isLoaded: boolean;
+  refreshData: () => Promise<void>;
+}
 
-  // Data
-  members: User[];
-  setMembers: (members: User[]) => void;
-  courts: Court[];
-  setCourts: (courts: Court[]) => void;
+interface BookingState {
   bookings: Booking[];
   setBookings: (bookings: Booking[]) => void;
   addBooking: (booking: Booking) => void;
   cancelBooking: (id: string) => void;
   confirmParticipant: (bookingId: string, participantId: string) => void;
+  courts: Court[];
+  setCourts: (courts: Court[]) => void;
+}
+
+interface EventsState {
   events: ClubEvent[];
   setEvents: (events: ClubEvent[]) => void;
   toggleRsvp: (eventId: string, userName: string) => void;
   createEvent: (eventData: { title: string; type: string; date: string; time: string; location?: string; spotsTotal?: number; price?: string; description?: string }) => Promise<void>;
   updateEvent: (id: string, updates: Record<string, unknown>) => Promise<void>;
   deleteEvent: (id: string) => Promise<void>;
+  programs: CoachingProgram[];
+  setPrograms: (programs: CoachingProgram[]) => void;
+  addProgram: (program: CoachingProgram) => void;
+  cancelProgram: (programId: string) => void;
+  enrollInProgram: (programId: string, memberId: string, memberName: string) => void;
+  withdrawFromProgram: (programId: string, memberId: string) => void;
+}
+
+interface SocialState {
   partners: Partner[];
   setPartners: (partners: Partner[]) => void;
   addPartner: (partner: Partner) => void;
@@ -44,24 +58,22 @@ interface AppState {
   markConversationRead: (memberId: string) => void;
   deleteConversation: (memberId: string) => void;
   deleteMessage: (memberId: string, messageId: string) => void;
-  announcements: Announcement[];
-  setAnnouncements: (announcements: Announcement[]) => void;
-  dismissAnnouncement: (id: string) => void;
+}
+
+interface NotificationState {
   notifications: Notification[];
   setNotifications: (notifications: Notification[]) => void;
   markNotificationRead: (id: string) => void;
   clearNotifications: () => void;
   deleteReadNotifications: () => void;
-  weather: WeatherData;
-  analytics: AdminAnalytics;
-  programs: CoachingProgram[];
-  setPrograms: (programs: CoachingProgram[]) => void;
-  addProgram: (program: CoachingProgram) => void;
-  cancelProgram: (programId: string) => void;
-  enrollInProgram: (programId: string, memberId: string, memberName: string) => void;
-  withdrawFromProgram: (programId: string, memberId: string) => void;
+  announcements: Announcement[];
+  setAnnouncements: (announcements: Announcement[]) => void;
+  dismissAnnouncement: (id: string) => void;
+  notificationPreferences: NotificationPreferences;
+  setNotificationPreferences: (prefs: NotificationPreferences) => void;
+}
 
-  // Family
+interface FamilyState {
   familyMembers: FamilyMember[];
   setFamilyMembers: (members: FamilyMember[]) => void;
   activeProfile: ActiveProfile;
@@ -69,24 +81,72 @@ interface AppState {
   activeDisplayName: string;
   activeAvatar: string;
   activeSkillLevel: string;
-
-  // Notification preferences
-  notificationPreferences: NotificationPreferences;
-  setNotificationPreferences: (prefs: NotificationPreferences) => void;
-
-  // UI
-  isLoaded: boolean;
-
-  // Refresh
-  refreshData: () => Promise<void>;
 }
 
-const AppContext = createContext<AppState | null>(null);
+interface DerivedState {
+  weather: WeatherData;
+  analytics: AdminAnalytics;
+  members: User[];
+  setMembers: (members: User[]) => void;
+}
 
-export function useApp() {
-  const ctx = useContext(AppContext);
-  if (!ctx) throw new Error('useApp must be used within AppProvider');
+// ── Contexts ──────────────────────────────────────────────────────
+
+const AuthContext = createContext<AuthState | null>(null);
+const BookingContext = createContext<BookingState | null>(null);
+const EventsContext = createContext<EventsState | null>(null);
+const SocialContext = createContext<SocialState | null>(null);
+const NotificationContext = createContext<NotificationState | null>(null);
+const FamilyContext = createContext<FamilyState | null>(null);
+const DerivedContext = createContext<DerivedState | null>(null);
+
+// ── Focused hooks (components subscribe to only what they need) ──
+
+export function useAuth() {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error('useAuth must be used within AppProvider');
   return ctx;
+}
+
+export function useBookings() {
+  const ctx = useContext(BookingContext);
+  if (!ctx) throw new Error('useBookings must be used within AppProvider');
+  return ctx;
+}
+
+export function useEvents() {
+  const ctx = useContext(EventsContext);
+  if (!ctx) throw new Error('useEvents must be used within AppProvider');
+  return ctx;
+}
+
+export function useSocial() {
+  const ctx = useContext(SocialContext);
+  if (!ctx) throw new Error('useSocial must be used within AppProvider');
+  return ctx;
+}
+
+export function useNotifications() {
+  const ctx = useContext(NotificationContext);
+  if (!ctx) throw new Error('useNotifications must be used within AppProvider');
+  return ctx;
+}
+
+export function useFamily() {
+  const ctx = useContext(FamilyContext);
+  if (!ctx) throw new Error('useFamily must be used within AppProvider');
+  return ctx;
+}
+
+export function useDerived() {
+  const ctx = useContext(DerivedContext);
+  if (!ctx) throw new Error('useDerived must be used within AppProvider');
+  return ctx;
+}
+
+/** @deprecated Use focused hooks (useAuth, useBookings, etc.) instead. */
+export function useApp() {
+  return { ...useAuth(), ...useBookings(), ...useEvents(), ...useSocial(), ...useNotifications(), ...useFamily(), ...useDerived() };
 }
 
 // localStorage helpers
@@ -1169,28 +1229,55 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, [currentUser]);
 
-  const contextValue = useMemo<AppState>(() => ({
-    currentUser, updateCurrentUser, login, logout, members, setMembers, courts, setCourts, bookings, setBookings, addBooking, cancelBooking, confirmParticipant,
-    events, setEvents, toggleRsvp, createEvent, updateEvent, deleteEvent, partners, setPartners, addPartner, removePartner, conversations, setConversations, sendMessage, markConversationRead, deleteConversation, deleteMessage,
-    announcements, setAnnouncements, dismissAnnouncement, notifications, setNotifications, markNotificationRead,
-    clearNotifications, deleteReadNotifications, weather, analytics,
+  // ── Split context values (each useMemo triggers re-renders only for its consumers) ──
+
+  const authValue = useMemo<AuthState>(() => ({
+    currentUser, updateCurrentUser, login, logout, isLoaded, refreshData,
+  }), [currentUser, updateCurrentUser, login, logout, isLoaded, refreshData]);
+
+  const bookingValue = useMemo<BookingState>(() => ({
+    bookings, setBookings, addBooking, cancelBooking, confirmParticipant, courts, setCourts,
+  }), [bookings, addBooking, cancelBooking, confirmParticipant, courts]);
+
+  const eventsValue = useMemo<EventsState>(() => ({
+    events, setEvents, toggleRsvp, createEvent, updateEvent, deleteEvent,
     programs, setPrograms, addProgram, cancelProgram, enrollInProgram, withdrawFromProgram,
-    familyMembers, setFamilyMembers, activeProfile, switchProfile, activeDisplayName, activeAvatar, activeSkillLevel,
+  }), [events, toggleRsvp, createEvent, updateEvent, deleteEvent, programs, addProgram, cancelProgram, enrollInProgram, withdrawFromProgram]);
+
+  const socialValue = useMemo<SocialState>(() => ({
+    partners, setPartners, addPartner, removePartner,
+    conversations, setConversations, sendMessage, markConversationRead, deleteConversation, deleteMessage,
+  }), [partners, addPartner, removePartner, conversations, sendMessage, markConversationRead, deleteConversation, deleteMessage]);
+
+  const notificationValue = useMemo<NotificationState>(() => ({
+    notifications, setNotifications, markNotificationRead, clearNotifications, deleteReadNotifications,
+    announcements, setAnnouncements, dismissAnnouncement,
     notificationPreferences, setNotificationPreferences,
-    isLoaded, refreshData,
-  }), [
-    currentUser, members, courts, bookings, events, partners, conversations,
-    announcements, notifications, weather, analytics, programs, notificationPreferences, isLoaded,
-    familyMembers, activeProfile, activeDisplayName, activeAvatar, activeSkillLevel,
-    updateCurrentUser, login, logout, addBooking, cancelBooking, confirmParticipant, toggleRsvp, createEvent, updateEvent, deleteEvent,
-    addPartner, removePartner, sendMessage, markConversationRead, deleteConversation, deleteMessage, dismissAnnouncement,
-    markNotificationRead, clearNotifications, deleteReadNotifications, addProgram, cancelProgram,
-    enrollInProgram, withdrawFromProgram, switchProfile, refreshData,
-  ]);
+  }), [notifications, markNotificationRead, clearNotifications, deleteReadNotifications, announcements, dismissAnnouncement, notificationPreferences]);
+
+  const familyValue = useMemo<FamilyState>(() => ({
+    familyMembers, setFamilyMembers, activeProfile, switchProfile, activeDisplayName, activeAvatar, activeSkillLevel,
+  }), [familyMembers, activeProfile, switchProfile, activeDisplayName, activeAvatar, activeSkillLevel]);
+
+  const derivedValue = useMemo<DerivedState>(() => ({
+    weather, analytics, members, setMembers,
+  }), [weather, analytics, members]);
 
   return (
-    <AppContext.Provider value={contextValue}>
-      {children}
-    </AppContext.Provider>
+    <AuthContext.Provider value={authValue}>
+      <BookingContext.Provider value={bookingValue}>
+        <EventsContext.Provider value={eventsValue}>
+          <SocialContext.Provider value={socialValue}>
+            <NotificationContext.Provider value={notificationValue}>
+              <FamilyContext.Provider value={familyValue}>
+                <DerivedContext.Provider value={derivedValue}>
+                  {children}
+                </DerivedContext.Provider>
+              </FamilyContext.Provider>
+            </NotificationContext.Provider>
+          </SocialContext.Provider>
+        </EventsContext.Provider>
+      </BookingContext.Provider>
+    </AuthContext.Provider>
   );
 }

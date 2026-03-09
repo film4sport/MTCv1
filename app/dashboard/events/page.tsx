@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { useApp } from '../lib/store';
+import { useAuth, useEvents, useDerived } from '../lib/store';
 import { useToast } from '../lib/toast';
 import DashboardHeader from '../components/DashboardHeader';
 import { downloadICS } from '../lib/calendar';
@@ -13,7 +13,9 @@ type ViewMode = 'calendar' | 'list';
 type PageView = 'events' | 'programs';
 
 export default function EventsPage() {
-  const { currentUser, events, toggleRsvp, createEvent, updateEvent, deleteEvent, programs, enrollInProgram, withdrawFromProgram, members } = useApp();
+  const { currentUser } = useAuth();
+  const { events, toggleRsvp, createEvent, updateEvent, deleteEvent, programs, enrollInProgram, withdrawFromProgram } = useEvents();
+  const { members } = useDerived();
   const { showToast } = useToast();
   const isAdmin = currentUser?.role === 'admin' || currentUser?.role === 'coach';
   const searchParams = useSearchParams();

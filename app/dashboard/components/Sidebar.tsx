@@ -3,7 +3,7 @@
 import { useMemo, memo, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useApp } from '../lib/store';
+import { useAuth, useSocial } from '../lib/store';
 import { useUI } from '../lib/ui';
 
 const navItems = [
@@ -22,7 +22,8 @@ const coachItem = { href: '/dashboard/coaching', label: 'Book Lessons', icon: 'M
 
 function Sidebar() {
   const pathname = usePathname();
-  const { currentUser, conversations } = useApp();
+  const { currentUser } = useAuth();
+  const { conversations } = useSocial();
   const { sidebarCollapsed, setSidebarCollapsed, mobileSidebarOpen, setMobileSidebarOpen } = useUI();
   const isAdmin = currentUser?.role === 'admin';
   const isCoach = currentUser?.role === 'coach';
