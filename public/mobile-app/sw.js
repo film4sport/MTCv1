@@ -1,5 +1,5 @@
 // MTC Court Service Worker v48 (monorepo edition — served from /mobile-app/)
-const CACHE_NAME = 'mtc-court-91a0d9ed';
+const CACHE_NAME = 'mtc-court-5e56d7bf';
 const OFFLINE_URL = '/mobile-app/offline.html';
 
 // Assets to cache immediately on install (bundles built by scripts/build-mobile.js)
@@ -18,7 +18,7 @@ const PRECACHE_ASSETS = [
 
 // Install event - cache core assets
 self.addEventListener('install', (event) => {
-  // [ServiceWorker] Installing mtc-court-91a0d9ed...
+  // [ServiceWorker] Installing mtc-court-5e56d7bf...
 
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -35,7 +35,7 @@ self.addEventListener('install', (event) => {
 
 // Activate event - clean up ALL old caches
 self.addEventListener('activate', (event) => {
-  // [ServiceWorker] Activating mtc-court-91a0d9ed...
+  // [ServiceWorker] Activating mtc-court-5e56d7bf...
 
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -81,7 +81,29 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Network-first for ALL assets (prevents stale cache bugs)
+  // Stale-while-revalidate for API GET requests
+  // Returns cached response immediately (fast), then updates cache in background
+  const url = event.request.url;
+  if (url.includes('/api/mobile/') && !url.includes('/api/mobile-auth')) {
+    event.respondWith(
+      caches.open(CACHE_NAME).then((cache) => {
+        return cache.match(event.request).then((cachedResponse) => {
+          const fetchPromise = fetch(event.request).then((networkResponse) => {
+            if (networkResponse && networkResponse.status === 200) {
+              cache.put(event.request, networkResponse.clone());
+            }
+            return networkResponse;
+          }).catch(() => cachedResponse); // Offline fallback
+
+          // Return cached immediately if available, otherwise wait for network
+          return cachedResponse || fetchPromise;
+        });
+      })
+    );
+    return;
+  }
+
+  // Network-first for ALL other assets (prevents stale cache bugs)
   event.respondWith(
     fetch(event.request)
       .then((response) => {

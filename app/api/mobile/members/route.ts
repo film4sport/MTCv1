@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { authenticateMobileRequest, getAdminClient, sanitizeInput, isRateLimited, isValidUUID, isValidEmail, isValidEnum, validationError, VALID_STATUSES, VALID_MEMBERSHIP_TYPES, VALID_SKILL_LEVELS, VALID_INTERCLUB_TEAMS } from '../auth-helper';
+import { authenticateMobileRequest, getAdminClient, sanitizeInput, isRateLimited, isValidUUID, isValidEmail, isValidEnum, validationError, cachedJson, VALID_STATUSES, VALID_MEMBERSHIP_TYPES, VALID_SKILL_LEVELS, VALID_INTERCLUB_TEAMS } from '../auth-helper';
 import type { ProfileUpdate } from '../types';
 
 export async function GET(request: Request) {
@@ -35,7 +35,7 @@ export async function GET(request: Request) {
       preferences: m.preferences || {},
     }));
 
-    return NextResponse.json(result);
+    return cachedJson(result, 60, { swr: 30 });
   } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }

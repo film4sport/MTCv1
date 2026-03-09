@@ -1,6 +1,8 @@
 'use client';
 
-export default function PageSkeleton() {
+import { memo } from 'react';
+
+export default memo(function PageSkeleton() {
   return (
     <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-6 animate-fadeIn">
       {/* Title skeleton */}
@@ -36,4 +38,4 @@ export default function PageSkeleton() {
       </div>
     </div>
   );
-}
+});

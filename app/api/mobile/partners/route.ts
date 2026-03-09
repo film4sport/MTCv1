@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { authenticateMobileRequest, getAdminClient, isRateLimited, sanitizeInput, isValidEnum, VALID_SKILL_LEVELS, VALID_MATCH_TYPES } from '../auth-helper';
+import { authenticateMobileRequest, getAdminClient, isRateLimited, sanitizeInput, isValidEnum, cachedJson, VALID_SKILL_LEVELS, VALID_MATCH_TYPES } from '../auth-helper';
 import { sendPushToUser } from '../../lib/push';
 import crypto from 'crypto';
 
@@ -43,7 +43,7 @@ export async function GET(request: Request) {
       status: p.status,
     }));
 
-    return NextResponse.json(result);
+    return cachedJson(result, 60, { swr: 30 });
   } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }

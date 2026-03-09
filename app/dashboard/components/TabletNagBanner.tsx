@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo } from 'react';
 
 /**
  * Persistent nag banner for iPad/tablet users accessing the desktop dashboard.
  * Unlike MobileAppBanner, this cannot be permanently dismissed — it returns
  * every session to remind tablet users to use the dedicated tablet PWA.
  */
-export default function TabletNagBanner() {
+export default memo(function TabletNagBanner() {
   const [visible, setVisible] = useState(false);
   const [closedThisSession, setClosedThisSession] = useState(false);
 
@@ -74,4 +74,4 @@ export default function TabletNagBanner() {
       </button>
     </div>
   );
-}
+});
