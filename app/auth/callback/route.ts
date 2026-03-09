@@ -101,13 +101,20 @@ export async function GET(request: NextRequest) {
     const user = data.session.user;
     const userName = user.user_metadata?.name || user.email?.split('@')[0] || 'Member';
 
+    // Primary guard: if account is older than 5 minutes, this is a returning user — skip welcome
+    const userCreatedAt = new Date(user.created_at);
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+    if (userCreatedAt < fiveMinutesAgo) {
+      return response;
+    }
+
     // Use service role to bypass RLS for server-side operations
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     const adminSupabase = serviceKey
       ? createClient(supabaseUrl, serviceKey)
       : createClient(supabaseUrl, supabaseAnonKey);
 
-    // Guard: only send welcome tasks if this user hasn't received them yet
+    // Secondary guard: check if welcome message already exists (in case of rapid re-auth)
     const { data: existingWelcome } = await adminSupabase
       .from('messages')
       .select('id')
@@ -115,7 +122,6 @@ export async function GET(request: NextRequest) {
       .maybeSingle();
 
     if (existingWelcome) {
-      // Returning user — skip welcome tasks
       return response;
     }
 
