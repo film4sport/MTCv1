@@ -90,7 +90,29 @@ const STEPS: TourStep[] = [
   },
   {
     title: 'You\'re All Set!',
-    body: 'That\'s the essentials. Explore at your own pace — check Events for upcoming socials and tournaments.',
+    body: '',
+    richBody: (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <p style={{ color: '#6b7a3d', fontSize: 14, lineHeight: 1.6, margin: 0 }}>
+          Ready to hit the courts? Book your first session now, or explore at your own pace.
+        </p>
+        <a
+          href="/dashboard/book"
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: 8,
+            padding: '10px 20px', background: '#6b7a3d', color: '#faf8f3',
+            borderRadius: 10, fontSize: 14, fontWeight: 600, textDecoration: 'none',
+            boxShadow: '0 2px 8px rgba(107, 122, 61, 0.3)',
+            transition: 'background-color 0.2s', alignSelf: 'flex-start',
+          }}
+        >
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+            <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+          Book Your First Court
+        </a>
+      </div>
+    ),
     target: 'center',
     position: 'center',
   },

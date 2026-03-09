@@ -193,13 +193,13 @@ function MessagesContent() {
                 <h3 className="font-semibold text-sm" style={{ color: '#2a2f1e' }}>Conversations</h3>
                 <button
                   onClick={() => setShowNewConvo(!showNewConvo)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition-all hover:opacity-90 active:scale-95"
-                  style={{ background: showNewConvo ? '#4a5528' : '#6b7a3d' }}
+                  className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold text-white transition-all hover:shadow-md active:scale-95"
+                  style={{ background: showNewConvo ? '#4a5528' : '#6b7a3d', boxShadow: '0 2px 8px rgba(107, 122, 61, 0.3)' }}
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
                     <path strokeLinecap="round" strokeLinejoin="round" d={showNewConvo ? "M6 18L18 6M6 6l12 12" : "M12 4v16m8-8H4"}/>
                   </svg>
-                  {showNewConvo ? 'Close' : 'New'}
+                  {showNewConvo ? 'Close' : 'New Message'}
                 </button>
               </div>
               {showNewConvo && (

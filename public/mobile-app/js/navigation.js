@@ -53,12 +53,16 @@
   MTC.fn.navigateTo = function(screen, direction) {
     // Redirects - merged/removed screens
     if (screen === 'mybookings') screen = 'schedule';
-    if (screen === 'programs' || screen === 'events') {
-      const showEvents = (screen === 'events');
+    if (screen === 'programs') {
       screen = 'schedule';
-      if (showEvents) {
-        setTimeout(function() { if (typeof switchSchedulePill === 'function') switchSchedulePill('events'); }, 50);
-      }
+    }
+    if (screen === 'events') {
+      // Club events live on the home calendar — smooth-scroll to it
+      screen = 'home';
+      setTimeout(function() {
+        var cal = document.getElementById('homeCalendarSection');
+        if (cal) cal.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
     }
     if (screen === 'matches') screen = 'home';
     if (screen === 'coach') screen = 'lessons';
