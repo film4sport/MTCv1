@@ -270,7 +270,22 @@ export async function POST(request: Request) {
           auth: { user: smtpUser, pass: smtpPass },
         });
 
-        // Send to each recipient with personalized content
+        // Send to each recipient with retry + exponential backoff
+        const sendWithRetry = async (mailOptions: Parameters<typeof transporter.sendMail>[0], maxRetries = 2) => {
+          for (let attempt = 0; attempt <= maxRetries; attempt++) {
+            try {
+              return await transporter.sendMail(mailOptions);
+            } catch (err: unknown) {
+              const isRateLimit = err instanceof Error && ('responseCode' in err && (err as { responseCode?: number }).responseCode === 429);
+              if (attempt < maxRetries && (isRateLimit || (err instanceof Error && err.message?.includes('ECONNRESET')))) {
+                await new Promise(r => setTimeout(r, 1000 * Math.pow(2, attempt))); // 1s, 2s backoff
+                continue;
+              }
+              throw err;
+            }
+          }
+        };
+
         const results = await Promise.allSettled(
           recipientList.map(recipient => {
             const isBooker = recipient.role === 'booker';
@@ -283,7 +298,7 @@ export async function POST(request: Request) {
               ? `booking=${encodeURIComponent(bookingId)}&email=${encodeURIComponent(recipient.email)}&redirect=${encodeURIComponent('/dashboard/schedule')}`
               : '';
 
-            return transporter.sendMail({
+            return sendWithRetry({
               from: `"Mono Tennis Club" <${SMTP_FROM}>`,
               to: recipient.email,
               subject,
@@ -495,9 +510,25 @@ export async function DELETE(request: Request) {
           auth: { user: smtpUser, pass: smtpPass },
         });
 
+        // Retry wrapper for cancellation emails
+        const sendWithRetry = async (mailOptions: Parameters<typeof transporter.sendMail>[0], maxRetries = 2) => {
+          for (let attempt = 0; attempt <= maxRetries; attempt++) {
+            try {
+              return await transporter.sendMail(mailOptions);
+            } catch (err: unknown) {
+              const isRateLimit = err instanceof Error && ('responseCode' in err && (err as { responseCode?: number }).responseCode === 429);
+              if (attempt < maxRetries && (isRateLimit || (err instanceof Error && err.message?.includes('ECONNRESET')))) {
+                await new Promise(r => setTimeout(r, 1000 * Math.pow(2, attempt)));
+                continue;
+              }
+              throw err;
+            }
+          }
+        };
+
         const results = await Promise.allSettled(
           recipientList.map(recipient =>
-            transporter.sendMail({
+            sendWithRetry({
               from: `"Mono Tennis Club" <${SMTP_FROM}>`,
               to: recipient.email,
               subject: `Booking Cancelled — ${courtName}, ${formattedDate}`,
