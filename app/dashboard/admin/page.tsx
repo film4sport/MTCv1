@@ -46,17 +46,27 @@ export default function AdminPage() {
     try {
       await db.updateGateCode(newGateCode.trim(), currentUser.id);
       setGateCode(newGateCode.trim());
+      setNewGateCode('');
+    } catch (err) {
+      reportError(err instanceof Error ? err : new Error(String(err)), 'Supabase gate code update');
+      showToast('Failed to update gate code', 'error');
+      setGateCodeLoading(false);
+      return;
+    }
 
-      // Send message + notification to all active non-admin members
-      const activeMembers = members.filter(m => m.id !== currentUser.id && m.role !== 'admin' && (m.status || 'active') === 'active');
-      for (const member of activeMembers) {
+    // Notify members separately — don't let notification failures show "failed to update"
+    const code = newGateCode.trim() || gateCode;
+    const activeMembers = members.filter(m => m.id !== currentUser.id && m.role !== 'admin' && (m.status || 'active') === 'active');
+    let notified = 0;
+    for (const member of activeMembers) {
+      try {
         await db.sendMessageByUsers({
           id: generateId('msg'),
           fromId: currentUser.id,
           fromName: 'Mono Tennis Club',
           toId: member.id,
           toName: member.name,
-          text: `The court gate code has been updated. Your new gate code is: ${newGateCode.trim()}\n\nPlease keep this code confidential and do not share it with non-members.`,
+          text: `The court gate code has been updated. Your new gate code is: ${code}\n\nPlease keep this code confidential and do not share it with non-members.`,
         });
         await db.createNotification(member.id, {
           id: generateId('n'),
@@ -65,13 +75,16 @@ export default function AdminPage() {
           body: 'The court gate code has been changed. Check your messages for the new code.',
           timestamp: new Date().toISOString(),
         });
+        notified++;
+      } catch (err) {
+        console.error(`[MTC] Failed to notify ${member.name}:`, err);
       }
+    }
 
-      setNewGateCode('');
-      showToast(`Gate code updated. ${activeMembers.length} member${activeMembers.length !== 1 ? 's' : ''} notified.`);
-    } catch (err) {
-      reportError(err instanceof Error ? err : new Error(String(err)), 'Supabase gate code update');
-      showToast('Failed to update gate code', 'error');
+    if (notified === activeMembers.length) {
+      showToast(`Gate code updated. ${notified} member${notified !== 1 ? 's' : ''} notified.`);
+    } else {
+      showToast(`Gate code updated, but only ${notified}/${activeMembers.length} members notified. Some notifications failed.`, 'error');
     }
     setGateCodeLoading(false);
   };
