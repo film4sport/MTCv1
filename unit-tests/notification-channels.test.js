@@ -18,7 +18,7 @@ describe('Notification Channels — Bookings', () => {
   const content = readRoute('bookings');
 
   it('sends bell notification on booking create', () => {
-    expect(content).toContain("from('notifications').insert");
+    expect(content).toMatch(/notifications.*insert|createNotification/);
   });
 
   it('sends push notification on booking create', () => {
@@ -30,7 +30,7 @@ describe('Notification Channels — Bookings', () => {
   });
 
   it('sends in-app message to participants', () => {
-    expect(content).toContain("from('messages').insert");
+    expect(content).toMatch(/messages.*insert|sendMessage/);
   });
 });
 

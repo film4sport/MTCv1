@@ -3,21 +3,8 @@ import { authenticateMobileRequest, getAdminClient, sanitizeInput, isRateLimited
 import { sendPushToUser } from '../../lib/push';
 import type { EventUpdate } from '../types';
 
-// sendPushToUser imported from ../../lib/push (shared utility)
-
-/** Helper: create a bell notification */
-async function createNotification(
-  supabase: ReturnType<typeof getAdminClient>,
-  userId: string,
-  notif: { id: string; type: string; title: string; body: string; timestamp: string }
-) {
-  await supabase.from('notifications').insert({
-    id: notif.id, user_id: userId, type: notif.type,
-    title: notif.title, body: notif.body, timestamp: notif.timestamp, read: false,
-  }).then(({ error }) => {
-    if (error) console.error(`[events] Failed to create notification for ${userId}:`, error.message);
-  });
-}
+// Shared utilities
+import { createNotification } from '../../lib/notifications';
 
 /** Get user IDs from attendee names (for push notifications) */
 async function getAttendeeUserIds(

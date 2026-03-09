@@ -42,8 +42,8 @@ function readRoute(name) {
 
 describe('Feature: Court Booking', () => {
   const route = readRoute('bookings');
-  const dashRoute = existsSync(resolve(root, 'app/api/dashboard/bookings/route.ts'))
-    ? readFileSync(resolve(root, 'app/api/dashboard/bookings/route.ts'), 'utf-8') : '';
+  // Dashboard bookings route was consolidated into /api/mobile/bookings (no separate route)
+  const dashRoute = '';
   const store = readFileSync(resolve(root, 'app/dashboard/lib/store.tsx'), 'utf-8');
 
   describe('Create booking', () => {
@@ -113,8 +113,8 @@ describe('Feature: Court Booking', () => {
   });
 
   describe('Dashboard → API path', () => {
-    it('Dashboard addBooking calls /api/dashboard/bookings', () => {
-      expect(store).toContain('/api/dashboard/bookings');
+    it('Dashboard addBooking calls /api/mobile/bookings (unified route)', () => {
+      expect(store).toContain('/api/mobile/bookings');
     });
 
     it('Dashboard has optimistic update with rollback on failure', () => {

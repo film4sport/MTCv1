@@ -113,6 +113,14 @@ export function validationError(field: string, detail: string) {
 }
 
 /**
+ * Cache policy tiers:
+ *   Public/static  (300s + 60s SWR): events, courts, programs, settings
+ *   Semi-static    (60s  + 30s SWR): members, partners, announcements
+ *   Personal       (30s,  private):  bookings
+ *   Real-time      (no cache):       conversations, notifications
+ */
+
+/**
  * Return JSON response with Cache-Control headers.
  * @param data - Response body
  * @param maxAge - max-age in seconds (0 = no-cache)

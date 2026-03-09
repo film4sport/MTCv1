@@ -19,19 +19,8 @@ function generateId(prefix: string): string {
   return `${prefix}-${crypto.randomUUID().slice(0, 8)}`;
 }
 
-/** Helper: create a bell notification in Supabase */
-async function createNotification(
-  supabase: ReturnType<typeof getAdminClient>,
-  userId: string,
-  notif: { id: string; type: string; title: string; body: string; timestamp: string }
-) {
-  await supabase.from('notifications').insert({
-    id: notif.id, user_id: userId, type: notif.type,
-    title: notif.title, body: notif.body, timestamp: notif.timestamp, read: false,
-  }).then(({ error }) => {
-    if (error) console.error(`[mobile-booking] Failed to create notification for ${userId}:`, error.message);
-  });
-}
+// createNotification imported from shared utility
+import { createNotification } from '../../lib/notifications';
 
 // sendPushToUser imported from ../../lib/push (shared utility)
 
