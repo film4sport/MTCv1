@@ -1,6 +1,26 @@
 import type { User, SkillLevel } from './types';
 import { supabase } from '../../lib/supabase';
 
+// ── Client-side rate limiting (60s cooldown per email) ──────────────
+const EMAIL_COOLDOWN_MS = 60_000;
+
+function checkEmailCooldown(key: string, email: string): { blocked: boolean; secondsLeft: number } {
+  if (typeof window === 'undefined') return { blocked: false, secondsLeft: 0 };
+  const storageKey = `${key}:${email.toLowerCase().trim()}`;
+  const lastSent = parseInt(localStorage.getItem(storageKey) || '0', 10);
+  const elapsed = Date.now() - lastSent;
+  if (elapsed < EMAIL_COOLDOWN_MS) {
+    return { blocked: true, secondsLeft: Math.ceil((EMAIL_COOLDOWN_MS - elapsed) / 1000) };
+  }
+  return { blocked: false, secondsLeft: 0 };
+}
+
+function setEmailCooldown(key: string, email: string): void {
+  if (typeof window === 'undefined') return;
+  const storageKey = `${key}:${email.toLowerCase().trim()}`;
+  localStorage.setItem(storageKey, Date.now().toString());
+}
+
 /**
  * Sign in with Supabase Auth.
  * Returns a User object from the profiles table if successful, null if rejected.
@@ -46,7 +66,13 @@ export async function signUp(
   membershipType?: string,
   skillLevel?: string,
   residence?: string,
-): Promise<{ user: User | null; error: string | null; emailConfirmRequired?: boolean }> {
+): Promise<{ user: User | null; error: string | null; emailConfirmRequired?: boolean; cooldownSeconds?: number }> {
+  // Rate limit: 1 signup email per 60 seconds per address
+  const cooldown = checkEmailCooldown('mtc-signup', email);
+  if (cooldown.blocked) {
+    return { user: null, error: `Please wait ${cooldown.secondsLeft} seconds before trying again.`, cooldownSeconds: cooldown.secondsLeft };
+  }
+
   // Generate a strong random password the user never sees (Supabase requires one)
   const randomPassword = crypto.randomUUID() + '-Aa1!';
 
@@ -61,6 +87,8 @@ export async function signUp(
 
   if (error) return { user: null, error: error.message };
   if (!data.user) return { user: null, error: 'Signup failed' };
+
+  setEmailCooldown('mtc-signup', email);
 
   // Supabase returns identities=[] when email confirmation is required and
   // the email is already registered but unconfirmed. It also sets
@@ -108,7 +136,13 @@ export async function signInWithGoogle(nextPath?: string): Promise<{ error: stri
  * Send a magic link (passwordless email login).
  * Only works for existing users — new users should go through the signup wizard.
  */
-export async function signInWithMagicLink(email: string, nextPath?: string): Promise<{ error: string | null }> {
+export async function signInWithMagicLink(email: string, nextPath?: string): Promise<{ error: string | null; cooldownSeconds?: number }> {
+  // Rate limit: 1 email per 60 seconds per address
+  const cooldown = checkEmailCooldown('mtc-magic-link', email);
+  if (cooldown.blocked) {
+    return { error: `Please wait ${cooldown.secondsLeft} seconds before requesting another link.`, cooldownSeconds: cooldown.secondsLeft };
+  }
+
   const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.monotennisclub.com';
   const redirectTo = nextPath
     ? `${origin}/auth/callback?next=${encodeURIComponent(nextPath)}`
@@ -130,6 +164,32 @@ export async function signInWithMagicLink(email: string, nextPath?: string): Pro
     return { error: error.message };
   }
 
+  setEmailCooldown('mtc-magic-link', email);
+  return { error: null };
+}
+
+/**
+ * Resend the signup confirmation email. Rate-limited to 1 per 60 seconds.
+ */
+export async function resendConfirmation(email: string): Promise<{ error: string | null; cooldownSeconds?: number }> {
+  const cooldown = checkEmailCooldown('mtc-signup', email);
+  if (cooldown.blocked) {
+    return { error: `Please wait ${cooldown.secondsLeft} seconds before resending.`, cooldownSeconds: cooldown.secondsLeft };
+  }
+
+  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.monotennisclub.com';
+
+  const { error } = await supabase.auth.resend({
+    type: 'signup',
+    email,
+    options: {
+      emailRedirectTo: `${origin}/auth/callback`,
+    },
+  });
+
+  if (error) return { error: error.message };
+
+  setEmailCooldown('mtc-signup', email);
   return { error: null };
 }
 
