@@ -182,13 +182,16 @@ The three platforms are:
 - `db.createNotification()` is OK — notifications has permissive INSERT policy
 - If an API endpoint doesn't support the operation you need, extend the endpoint (don't bypass with direct Supabase)
 
-## #22: TESTS FOR MAJOR FEATURE CHANGES
-**Every major feature change or new feature MUST include at least one test.**
-- Bug fixes to core features (booking, messaging, partners) → add a regression test
-- New user-facing feature → add at least one happy-path E2E test in `tests/`
-- API route changes → add or update a unit test in `unit-tests/`
-- Suggest tests proactively — don't wait to be asked
-- If you can't write the test (e.g. no Playwright browsers in Cowork), note it in MEMORY.md as pending
+## #22: ZERO TEST COVERAGE GAPS — UNIT, REGRESSION & FUZZING
+**Every new feature, bug fix, or functionality change MUST include tests. No exceptions, no coverage gaps.**
+- **Unit tests** (`unit-tests/`): Every new feature, API route change, or RPC function gets unit tests covering happy path + edge cases
+- **Regression tests**: Every bug fix gets a regression test proving the bug stays fixed
+- **Fuzzing tests**: For input-handling code (API routes, form validation, sanitization), add fuzz-style tests with malformed/boundary inputs
+- **E2E tests** (`tests/`): New user-facing features get at least one Playwright happy-path test
+- Suggest and write tests proactively — don't wait to be asked
+- Tests run on **GitHub Actions CI** (not Claude tokens) — cost is zero, so write as many as needed
+- If you can't run the test (e.g. no Playwright browsers in Cowork), still write the test file and note in MEMORY.md
+- Current baseline: **1079 tests across 35 files** — never let this number go down
 
 ## #23: MIGRATIONS — ALWAYS PRINT THE SQL
 **When creating a DB migration, ALWAYS print the full SQL in the chat so the user can paste it into the Supabase SQL Editor.**

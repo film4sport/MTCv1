@@ -380,7 +380,12 @@
 }
 
 .program-badge.advanced {
-  background: var(--coral);
+  background: #d97706;
+  color: var(--color-white);
+}
+
+.program-badge.competitive {
+  background: #dc2626;
   color: var(--color-white);
 }
 

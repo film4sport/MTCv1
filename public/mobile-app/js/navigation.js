@@ -891,7 +891,8 @@
     homePartnerPool.length = 0;
     apiPartners.forEach(function(p) {
       var levelClass = '';
-      if (p.skillLevel === 'advanced' || p.skillLevel === 'competitive') levelClass = 'advanced';
+      if (p.skillLevel === 'competitive') levelClass = 'competitive';
+      else if (p.skillLevel === 'advanced') levelClass = 'advanced';
       else if (p.skillLevel === 'beginner') levelClass = 'beginner';
       homePartnerPool.push({
         id: p.id,
