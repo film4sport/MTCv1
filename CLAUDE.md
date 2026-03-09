@@ -50,13 +50,14 @@ When new project rules or conventions are established, add them to this file AND
 - For event/booking slot indicators: use SVG icons, styled text labels, or colored dots — never emoji.
 - This rule exists because it was violated repeatedly. The emoji looks cheap and unprofessional.
 
-## #17: ALWAYS VERIFY CHANGES BEFORE REPORTING DONE
+## #17: ALWAYS VERIFY CHANGES BEFORE REPORTING DONE — MANDATORY, NO EXCEPTIONS
 **Never tell the user "it's done" or ship code without verifying it actually works.**
-- After making changes: rebuild (`npm run build:mobile` for PWA), then visually verify in the browser (BDG/Playwright/Cowork)
-- After CSS/layout changes: take a screenshot and confirm the change looks correct
-- After JS logic changes: test the actual behavior in the browser, don't just assume it works
-- If you can't verify (e.g. no dev server running): explicitly tell the user "I haven't been able to verify this yet"
-- This rule exists because unverified changes were shipped to the user, wasting their time on bugs Claude should have caught.
+**GATE: The word "done" (or equivalent) CANNOT appear in a response unless a BDG screenshot was taken in that same response. No screenshot = not done. Period.**
+- After making changes: rebuild (`npm run build:mobile` for PWA), then visually verify in BDG (Chrome) by taking a screenshot
+- After CSS/layout/HTML changes: take a screenshot AND run HTML nesting validation (`python3 -c` div count check)
+- After JS logic changes: test the actual behavior in BDG, don't just assume it works
+- If BDG is unavailable: say **"I HAVE NOT VISUALLY VERIFIED — you need to check before deploying"** — NEVER say "done"
+- **Incident log**: Skipping this rule caused a broken production deploy on Mar 9, 2026 (extra `</div>` closed `#app` early, entire mobile UI broke). User had to discover it themselves on their phone.
 
 ## #16: CHECK PREREQUISITES BEFORE RUNNING — NEVER RETRY BLIND
 **Before running ANY tool/command, verify prerequisites exist first. If a command fails, STOP and tell the user WHY — don't retry.**
