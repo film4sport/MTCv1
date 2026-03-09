@@ -505,7 +505,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       // Debounce Supabase write — user may toggle multiple switches quickly
       if (notifPrefTimerRef.current) clearTimeout(notifPrefTimerRef.current);
       notifPrefTimerRef.current = setTimeout(() => {
-        if (currentUser) db.updateNotificationPreferences(currentUser.id, notificationPreferences).catch((err) => reportError(err, 'Supabase'));
+        if (currentUser) apiCall('/api/mobile/settings', 'PATCH', { action: 'setNotifPrefs', prefs: notificationPreferences }).catch((err) => reportError(err, 'API'));
       }, 500);
     }
     return () => { if (notifPrefTimerRef.current) clearTimeout(notifPrefTimerRef.current); };
@@ -811,13 +811,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // Program CRUD
   const addProgram = useCallback((program: CoachingProgram) => {
     setPrograms(prev => [...prev, program]);
-    // Persist to Supabase
-    db.createProgram(program).catch((err) => {
-      reportError(err, 'Supabase');
-      setPrograms(prev => prev.filter(p => p.id !== program.id));
-      showToast('Failed to create program. Please try again.', 'error');
-    });
-    // Auto-generate blocked bookings for each session
+    // Auto-generate blocked bookings for each session (optimistic)
     const newBookings: Booking[] = program.sessions.map((s, i) => ({
       id: `bp-${program.id}-${i}`,
       courtId: program.courtId,
@@ -831,17 +825,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
       programId: program.id,
     }));
     setBookings(prev => [...prev, ...newBookings]);
-    // Persist program bookings to Supabase
-    newBookings.forEach(b => db.createBooking(b).catch((err) => reportError(err, 'Supabase')));
+    // Persist via API — server creates program + sessions + court bookings
+    apiCall('/api/mobile/programs', 'POST', { action: 'create', program }).catch((err) => {
+      reportError(err, 'API');
+      setPrograms(prev => prev.filter(p => p.id !== program.id));
+      setBookings(prev => prev.filter(b => b.programId !== program.id));
+      showToast('Failed to create program. Please try again.', 'error');
+    });
   }, []);
 
   const cancelProgram = useCallback((programId: string) => {
     setPrograms(prev => prev.map(p => p.id === programId ? { ...p, status: 'cancelled' as const } : p));
     setBookings(prev => prev.map(b => b.programId === programId ? { ...b, status: 'cancelled' as const } : b));
-    // Persist to Supabase
-    db.cancelProgram(programId).catch((err) => {
-      reportError(err, 'Supabase');
+    // Persist via API — server cancels + notifies enrolled members
+    apiCall('/api/mobile/programs', 'DELETE', { id: programId }).catch((err) => {
+      reportError(err, 'API');
       setPrograms(prev => prev.map(p => p.id === programId ? { ...p, status: 'active' as const } : p));
+      setBookings(prev => prev.map(b => b.programId === programId ? { ...b, status: 'confirmed' as const } : b));
       showToast('Failed to cancel program. Please try again.', 'error');
     });
   }, []);

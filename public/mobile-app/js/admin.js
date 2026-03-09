@@ -1115,8 +1115,9 @@
     };
 
     closeCreateEventModal();
+    showToast('Creating event...');
 
-    // Persist to Supabase
+    // Persist to Supabase with rollback
     MTC.fn.apiRequest('/mobile/events', {
       method: 'PUT',
       body: JSON.stringify({
@@ -1124,16 +1125,19 @@
         location: location, spotsTotal: spots, price: price, description: desc
       })
     }).then(function(res) {
-      if (res && res.id) {
+      if (!res.ok) throw new Error((res.data && res.data.error) || 'Failed to create event');
+      if (res.data && res.data.id) {
         // Update local ID to match server
-        clubEventsData[res.id] = clubEventsData[eventId];
-        clubEventsData[res.id].id = res.id;
-        if (res.id !== eventId) delete clubEventsData[eventId];
+        clubEventsData[res.data.id] = clubEventsData[eventId];
+        clubEventsData[res.data.id].id = res.data.id;
+        if (res.data.id !== eventId) delete clubEventsData[eventId];
       }
-      showToast('Event created successfully!');
+      showToast('Event created!');
     }).catch(function(err) {
-      MTC.warn(' createEvent API error:', err);
-      showToast('Event saved locally — sync may be delayed', 'warning');
+      // Rollback: remove optimistic event
+      delete clubEventsData[eventId];
+      MTC.warn('[MTC] createEvent API error:', err);
+      showToast('Failed to create event. Please try again.', 'error');
     });
     } catch(e) { MTC.warn('createEvent error:', e); }
   };

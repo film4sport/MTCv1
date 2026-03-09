@@ -56,13 +56,81 @@ export async function POST(request: Request) {
   if (authResult instanceof NextResponse) return authResult;
 
   try {
-    const { programId, action } = await request.json();
+    const body = await request.json();
+    const { action } = body;
+    const supabase = getAdminClient();
+    const memberId = authResult.id;
+
+    // --- Admin/coach: create a new coaching program + session bookings ---
+    if (action === 'create') {
+      if (authResult.role !== 'admin' && authResult.role !== 'coach') {
+        return NextResponse.json({ error: 'Admin or coach only' }, { status: 403 });
+      }
+      const { program } = body;
+      if (!program?.id || !program?.title || !program?.coachId) {
+        return NextResponse.json({ error: 'Missing required program fields (id, title, coachId)' }, { status: 400 });
+      }
+
+      // Insert coaching program
+      const { error: pErr } = await supabase.from('coaching_programs').insert({
+        id: program.id,
+        title: program.title,
+        type: program.type || 'group',
+        coach_id: program.coachId,
+        coach_name: program.coachName || '',
+        description: program.description || '',
+        court_id: program.courtId ? parseInt(program.courtId) : null,
+        court_name: program.courtName || '',
+        fee: program.fee ? parseFloat(program.fee) : 0,
+        spots_total: program.spotsTotal ? parseInt(program.spotsTotal) : null,
+        status: program.status || 'active',
+      });
+      if (pErr) return NextResponse.json({ error: pErr.message }, { status: 500 });
+
+      // Insert program sessions
+      if (program.sessions?.length) {
+        const { error: sErr } = await supabase.from('program_sessions').insert(
+          program.sessions.map((s: { date: string; time: string; duration?: number }) => ({
+            program_id: program.id,
+            date: s.date,
+            time: s.time,
+            duration: s.duration || 60,
+          }))
+        );
+        if (sErr) {
+          console.error('[programs] Failed to insert sessions:', sErr.message);
+          // Don't fail the whole request — program was created
+        }
+      }
+
+      // Auto-generate blocked court bookings for each session
+      if (program.sessions?.length && program.courtId) {
+        const bookings = program.sessions.map((s: { date: string; time: string }, i: number) => ({
+          id: `bp-${program.id}-${i}`,
+          court_id: parseInt(program.courtId),
+          court_name: program.courtName || '',
+          date: s.date,
+          time: s.time,
+          user_id: program.coachId,
+          user_name: program.coachName || 'Coach',
+          status: 'confirmed',
+          type: 'program',
+          program_id: program.id,
+        }));
+        const { error: bErr } = await supabase.from('bookings').insert(bookings);
+        if (bErr) {
+          console.error('[programs] Failed to create session bookings:', bErr.message);
+        }
+      }
+
+      return NextResponse.json({ success: true, programId: program.id });
+    }
+
+    // --- Member: enroll/withdraw ---
+    const { programId } = body;
     if (!programId || !['enroll', 'withdraw'].includes(action)) {
       return NextResponse.json({ error: 'Missing programId or invalid action' }, { status: 400 });
     }
-
-    const supabase = getAdminClient();
-    const memberId = authResult.id;
 
     if (action === 'enroll') {
       // Check if already enrolled

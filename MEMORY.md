@@ -38,7 +38,7 @@ Before reporting any feature change as "done", verify:
 - **Fuzz tests added (Mar 8)**: 3 files (147 tests): `fuzz-validation.test.js` (direct-import chaos testing of all 7 validation functions — XSS, SQL injection, Unicode, null bytes, 100k strings, ReDoS), `fuzz-api-routes.test.js` (source inspection of all 13 API routes for input guards), `fuzz-mobile-pwa.test.js` (function extraction + fuzz testing of mobile PWA sanitizers, parsers, error handlers). Known gaps documented: JS Date rolls Feb 30, isValidTime is format-only, single quotes in emails are RFC-valid.
 - **Feature regression tests added (Mar 8)**: `feature-regression.test.js` (125 tests) covering all 12 API-backed features: Court Booking, Messaging, Partner Matching, Events & RSVP, Notifications, Member Profiles, Announcements, Court Management, Settings, Programs, Families, Lineups. Each feature tested for: complete CRUD flow, validation, Dashboard integration, notification layers, validation constant values.
 - **Bug-specific regression tests (Mar 8)**: `regression.test.js` (43 tests) for known fixed bugs (silent Supabase writes, RLS bypass, duplicate constants, missing columns, demo data leak, XSS, SW caching, rate limiting, coaching panel).
-- **Total test count (Mar 8)**: **747 tests across 27 files**, all passing.
+- **Total test count (Mar 8→9)**: Started at 747 (27 files) → 798 (31) → 814 (32) → **1024 tests across 34 files**, all passing.
 - **Coaching panel access (Mar 8)**: Sidebar now shows "Book Lessons" link for both coaches AND admins (was coach-only). Sidebar.tsx line 145: `(isCoach || isAdmin)`.
 - **Coaching program bookings**: `db.createBooking` is still used in the coaching program creation flow (line 966 of store.tsx). This is coach-only (coaching panel), not admin. Coaches create program bookings (type: 'program') via the coaching panel.
 
@@ -246,13 +246,79 @@ Before reporting any feature change as "done", verify:
 **Build verified:** `tsc --noEmit` clean, `npm run build:mobile` passes (cache: `mtc-court-7b04e3d5`).
 **Visual verified:** BDG screenshot — mobile app renders correctly.
 
+### Cowork Session (2026-03-09 continued) — Production Resilience: Rollback + API Routing
+
+**7 changes: all user actions now persist to server with rollback on failure.**
+
+1. `cancelEventRsvp` (mybookings.js) — was ZERO API call, now wired to POST /mobile/events with rollback
+2. RSVP create (events-registration.js) — added rollback on API failure (restores rsvpList, counters, avatars)
+3. Partner request delete (partners.js) — saves card + localStorage, restores on failure
+4. Program enroll/withdraw (partners.js) — full button state rollback on failure
+5. Conversation delete (messaging.js) — saves conversation data, restores on failure
+6. Admin createEvent (admin.js) — removes optimistic event on failure (deleteCourtBlock verified as already API-first)
+7. store.tsx: `updateNotificationPreferences` → settings API, `addProgram` → programs API (server-side program+sessions+bookings), `cancelProgram` → programs DELETE API
+
+**Extended programs POST endpoint** to accept `action: 'create'` (admin/coach only) — inserts coaching_programs + program_sessions + blocked court bookings server-side.
+
+**Total test count: 814 tests across 32 files, all passing.**
+**Build verified:** `tsc --noEmit` clean, `npm run build:mobile` passes (cache: `mtc-court-ee2fc763`).
+**Visual verified:** BDG screenshot — mobile app renders correctly.
+
+### Cowork Session (2026-03-09 continued) — Comprehensive Test Suite Expansion
+
+**4 new test files created (210 new tests):**
+
+1. **`unit-tests/api-integration.test.js`** (148 tests) — API route static analysis:
+   - Response shape consistency (NextResponse.json, error format, success format)
+   - Auth enforcement (auth before DB access on all 12 routes)
+   - Request body field validation (bookings, events, programs, conversations, settings)
+   - Client↔Server field name consistency (store.tsx ↔ API routes, mobile PWA ↔ API routes)
+   - Supabase table/column name schema verification (routes reference real tables + columns)
+   - HTTP method coverage (all expected exports: GET/POST/PATCH/PUT/DELETE per route)
+   - Rate limiting on mutation routes
+   - Notification layer completeness (bell + push + email + message per action)
+   - Program creation server-side completeness (coaching_programs + sessions + blocked bookings)
+   - Shared utility imports (no inline duplication of createNotification/sendPushToUser)
+
+2. **`unit-tests/error-paths.test.js`** (62 tests) — Error handling coverage:
+   - Dashboard store.tsx: every mutation has .catch() with rollback + showToast
+   - Mobile PWA: no silent .catch() in user-facing mutation functions (fire-and-forget for notifications OK)
+   - Rollback patterns verified for all 7 resilience-fixed functions
+   - All mobile mutations persist to server (apiRequest calls verified)
+   - API routes: proper error status codes (400, 500, 401/403) on all routes
+
+3. **`tests/mobile-pwa-rollback.spec.js`** (6 Playwright E2E tests) — Rollback behavior:
+   - cancelEventRsvp rollback on API 500
+   - Partner request delete rollback on API 500
+   - Program enrollment button state rollback on API 500
+   - Conversation delete rollback on API 500
+   - Booking creation queue-for-sync on network failure
+   - Page stability with ALL API endpoints returning 500 simultaneously
+
+4. **`tests/visual-regression.spec.js`** — Screenshot comparison tests:
+   - Landing page: hero, events, footer (desktop 1280x720 + mobile 375x812)
+   - Info page: 5 tabs (about, membership, coaching, faq, rules)
+   - Auth pages: login + signup
+   - Mobile PWA: login screen, home screen (authenticated with mocked auth)
+   - Full page layout: horizontal overflow checks on landing + info
+
+**Test fixes during session:**
+- Schema column regex: used uppercase `CREATE TABLE` but schema uses lowercase → added `.toLowerCase()`
+- Table name: `interclub_lineups` → `match_lineups` (matched actual schema)
+- Silent catch false positives: messaging.js/admin.js have legitimate fire-and-forget catches for notification delivery — made tests target only user-facing mutation functions
+
+**Updated `playwright.config.js`:** Added `mobile-pwa-rollback.spec.js` and `visual-regression.spec.js` to DESKTOP_ONLY_TESTS.
+
+**Total test count: 1024 tests across 34 files, all passing.**
+**Build verified:** `tsc --noEmit` clean, `npm run build:mobile` passes (cache: `mtc-court-ee2fc763`).
+
 **Pending:**
 - Run migration on production Supabase: `20260308_add_residence_column.sql`, `20260309_add_conversation_individual_indexes.sql`
-- Deploy all changes to Railway (includes all bug fixes from this audit + feature flow improvements from earlier + API consolidation)
+- Deploy all changes to Railway (includes all bug fixes, feature improvements, API consolidation, resilience changes, + new tests)
 - Clean up `nicholas617@10minutes.email` test account from Supabase auth
 - Delete orphaned Alex RSVP: `DELETE FROM event_attendees WHERE user_name = 'Alex';`
 - Mobile PWA admin "Block Court Time" — mobile version also missing "Club Event" and "Coaching Session" options in reason dropdown
-- New tests need to run in CI (can't run Playwright in Cowork per CLAUDE.md #16)
+- New Playwright E2E tests need to run in CI (can't run Playwright in Cowork per CLAUDE.md #16)
 - Visual verification of all new features in browser (interactive calendar cards, partner→book flow, event CRUD modal)
 - Store.tsx context splitting (research documented above, needs dedicated session)
 

@@ -424,18 +424,51 @@
       cancelText: 'KEEP',
       confirmClass: 'danger',
       onConfirm: function() {
+        // Save state for rollback
+        var prevEventBookings = MTC.state.eventBookings.slice();
+        var prevRsvps = typeof userRsvps !== 'undefined' ? userRsvps.slice() : [];
+        var prevSpotsTaken = (typeof clubEventsData !== 'undefined' && clubEventsData[eventId]) ? clubEventsData[eventId].spotsTaken : 0;
+        var prevAttendees = (typeof clubEventsData !== 'undefined' && clubEventsData[eventId]) ? clubEventsData[eventId].attendees.slice() : [];
+
+        // Optimistic update
         MTC.fn.removeEventFromMyBookings(eventId);
         if (typeof userRsvps !== 'undefined') {
-          const rIdx = userRsvps.indexOf(eventId);
+          var rIdx = userRsvps.indexOf(eventId);
           if (rIdx !== -1) userRsvps.splice(rIdx, 1);
           if (typeof saveUserRsvps === 'function') saveUserRsvps();
         }
         if (typeof clubEventsData !== 'undefined' && clubEventsData[eventId]) {
           clubEventsData[eventId].spotsTaken--;
-          const aIdx = clubEventsData[eventId].attendees.indexOf('You');
+          var aIdx = clubEventsData[eventId].attendees.indexOf('You');
           if (aIdx !== -1) clubEventsData[eventId].attendees.splice(aIdx, 1);
         }
-        showToast('RSVP cancelled');
+        showToast('Cancelling RSVP...');
+
+        // Persist to server (POST is a toggle — removes existing RSVP)
+        MTC.fn.apiRequest('/mobile/events', {
+          method: 'POST',
+          body: JSON.stringify({ eventId: eventId })
+        }).then(function(res) {
+          if (!res.ok) throw new Error((res.data && res.data.error) || 'Failed to cancel RSVP');
+          showToast('RSVP cancelled');
+        }).catch(function(err) {
+          // Rollback
+          MTC.state.eventBookings = prevEventBookings;
+          window.eventBookings = prevEventBookings;
+          if (typeof userRsvps !== 'undefined') {
+            userRsvps.length = 0;
+            prevRsvps.forEach(function(r) { userRsvps.push(r); });
+            if (typeof saveUserRsvps === 'function') saveUserRsvps();
+          }
+          if (typeof clubEventsData !== 'undefined' && clubEventsData[eventId]) {
+            clubEventsData[eventId].spotsTaken = prevSpotsTaken;
+            clubEventsData[eventId].attendees = prevAttendees;
+          }
+          if (typeof saveEventBookings === 'function') saveEventBookings();
+          MTC.fn.renderEventBookings();
+          showToast('Failed to cancel RSVP. Please try again.', 'error');
+          MTC.warn('[MTC] cancelEventRsvp failed:', err);
+        });
       }
     });
   };
