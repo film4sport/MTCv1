@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { authenticateMobileRequest, getAdminClient, sanitizeInput, isRateLimited, cachedJson } from '../auth-helper';
+import { authenticateMobileRequest, getAdminClient, sanitizeInput, isRateLimited, cachedJson, isValidUUID } from '../auth-helper';
 import { sendPushToUser } from '../../lib/push';
 import type { BookingRules } from '../types';
 import crypto from 'crypto';
@@ -445,7 +445,8 @@ export async function POST(request: Request) {
     // ── Insert participants into booking_participants ──
     const participantRows: { participant_id: string; participant_name: string }[] = [];
     if (participants && Array.isArray(participants) && participants.length > 0) {
-      const rows = participants.map((p: { id: string; name: string }) => ({
+      const validParticipants = participants.filter((p: { id: string; name: string }) => isValidUUID(p.id));
+      const rows = validParticipants.map((p: { id: string; name: string }) => ({
         booking_id: newBooking.id,
         participant_id: p.id,
         participant_name: sanitizeInput(p.name, 200),
