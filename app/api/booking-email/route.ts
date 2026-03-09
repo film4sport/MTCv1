@@ -251,6 +251,7 @@ export async function POST(request: Request) {
 
     let sentCount = 0;
     let failedCount = 0;
+    let results: PromiseSettledResult<void | undefined>[] | undefined;
 
     try {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -286,7 +287,7 @@ export async function POST(request: Request) {
           }
         };
 
-        const results = await Promise.allSettled(
+        results = await Promise.allSettled(
           recipientList.map(recipient => {
             const isBooker = recipient.role === 'booker';
             const subject = isBooker
@@ -326,10 +327,10 @@ export async function POST(request: Request) {
           recipientList.map((recipient, i) => ({
             type: 'booking_confirmation' as const,
             recipientEmail: recipient.email,
-            status: results[i].status === 'fulfilled' ? 'sent' as const : 'failed' as const,
+            status: results![i].status === 'fulfilled' ? 'sent' as const : 'failed' as const,
             subject: `Booking Confirmed — ${courtName}, ${formattedDate}`,
             metadata: { bookingId, courtName, date, time, matchType, role: recipient.role },
-            error: results[i].status === 'rejected' ? String((results[i] as PromiseRejectedResult).reason) : undefined,
+            error: results![i].status === 'rejected' ? String((results![i] as PromiseRejectedResult).reason) : undefined,
           }))
         );
       } else {
@@ -339,6 +340,39 @@ export async function POST(request: Request) {
       console.error('[booking-email] SMTP/nodemailer error:', err);
       // Don't swallow — record the error so it surfaces in the response
       failedCount = recipientList.length;
+    }
+
+    // --- EMAIL FALLBACK: if emails failed, notify via in-app notification ---
+    if (failedCount > 0 && supabaseUrl && (supabaseServiceKey || supabaseAnonKey)) {
+      try {
+        const supabase = createClient(supabaseUrl, supabaseServiceKey || supabaseAnonKey);
+        // Look up user IDs from failed recipients' emails
+        const failedEmails = recipientList
+          .filter((_, i) => !results?.[i] || results[i]?.status === 'rejected')
+          .map(r => r.email.toLowerCase());
+        if (failedEmails.length > 0) {
+          const { data: profiles } = await supabase
+            .from('profiles')
+            .select('id, email')
+            .in('email', failedEmails);
+          if (profiles && profiles.length > 0) {
+            const now = new Date().toISOString();
+            const notifications = profiles.map(p => ({
+              id: `notif-emailfail-${bookingId}-${p.id.slice(0, 8)}-${Date.now()}`,
+              user_id: p.id,
+              type: 'booking' as const,
+              title: 'Booking Confirmed (email unavailable)',
+              body: `Your booking on ${courtName} (${formattedDate}, ${time}) is confirmed. Email couldn't be sent due to service limits — check your bookings in the app.`,
+              timestamp: now,
+              read: false,
+            }));
+            await supabase.from('notifications').insert(notifications);
+            console.log(`[booking-email] Sent ${notifications.length} fallback notification(s) for failed emails`);
+          }
+        }
+      } catch (fallbackErr) {
+        console.error('[booking-email] Fallback notification error:', fallbackErr);
+      }
     }
 
     // Stamp email_sent_at on the booking row if at least one email was sent
@@ -558,6 +592,34 @@ export async function DELETE(request: Request) {
       }
     } catch (err) {
       console.error('[booking-email] Cancellation SMTP error:', err);
+    }
+
+    // --- EMAIL FALLBACK: if cancellation emails failed, notify via in-app ---
+    if (sentCount === 0 && recipientList.length > 0 && supabaseUrl && (supabaseServiceKey || supabaseAnonKey)) {
+      try {
+        const supabase = createClient(supabaseUrl, supabaseServiceKey || supabaseAnonKey);
+        const failedEmails = recipientList.map(r => r.email.toLowerCase());
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, email')
+          .in('email', failedEmails);
+        if (profiles && profiles.length > 0) {
+          const now = new Date().toISOString();
+          const notifications = profiles.map(p => ({
+            id: `notif-cancelfail-${p.id.slice(0, 8)}-${Date.now()}`,
+            user_id: p.id,
+            type: 'booking' as const,
+            title: 'Booking Cancelled (email unavailable)',
+            body: `A booking on ${courtName} (${formattedDate}, ${time}) was cancelled by ${cancelledBy || 'a member'}. Cancellation email couldn't be sent — check your bookings in the app.`,
+            timestamp: now,
+            read: false,
+          }));
+          await supabase.from('notifications').insert(notifications);
+          console.log(`[booking-email] Sent ${notifications.length} fallback cancel notification(s)`);
+        }
+      } catch (fallbackErr) {
+        console.error('[booking-email] Cancel fallback notification error:', fallbackErr);
+      }
     }
 
     return NextResponse.json({ success: sentCount > 0, sent: sentCount });
