@@ -88,8 +88,8 @@ function LoginContent() {
           }
         }
         @keyframes titleBreathe {
-          0%, 100% { opacity: 0.85; transform: scale(1); }
-          50% { opacity: 1; transform: scale(1.015); }
+          0%, 100% { opacity: 0.55; transform: scale(1); }
+          50% { opacity: 1; transform: scale(1.03); }
         }
         .login-title-breathe {
           animation: loginFadeUp 0.5s ease-out 0.15s both, titleBreathe 4s ease-in-out infinite 0.7s;
