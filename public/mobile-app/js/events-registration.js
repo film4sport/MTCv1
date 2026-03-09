@@ -134,7 +134,7 @@
         'Arrive by 12:30 PM for warm-up',
         'Post-match social at clubhouse'
       ],
-      rsvpList: ['Kelly K.', 'Patrick M.', 'Michael H.', 'Phil P.', 'Peter G.', 'Jan H.']
+      rsvpList: []
     };
 
     const userRsvpd = event.rsvpList.includes('You');

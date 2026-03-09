@@ -130,11 +130,28 @@
     }
   });
 
-  // Remove partner request
+  // Remove partner request (local)
   registerAction('removePartnerRequest', function(el, data) {
     if (typeof window.removePartnerRequest === 'function') {
       window.removePartnerRequest(data.reqId);
     }
+  });
+
+  // Cancel own partner request from API list
+  registerAction('cancelApiPartner', function(el, data) {
+    var card = el.closest('.partner-card');
+    if (card) card.remove();
+    showToast('Request removed');
+    // Delete from Supabase
+    if (data.id && MTC.fn.apiRequest && MTC.getToken()) {
+      MTC.fn.apiRequest('/mobile/partners', {
+        method: 'DELETE',
+        body: JSON.stringify({ partnerId: data.id })
+      }).catch(function() { /* best effort */ });
+    }
+    // Also remove from local storage if exists
+    var reqs = MTC.storage.get('mtc-partner-requests', []);
+    MTC.storage.set('mtc-partner-requests', reqs.filter(function(r) { return r.serverId !== data.id; }));
   });
 
   // Show/cancel/modify booking modals

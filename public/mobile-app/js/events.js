@@ -9,7 +9,7 @@
 
   // Load persisted RSVPs or use defaults
   const userRsvps = (function() {
-    return MTC.storage.get('mtc-user-rsvps', ['mens-round-robin', 'friday-mixed']);
+    return MTC.storage.get('mtc-user-rsvps', []);
   })();
 
   function saveUserRsvps() {
@@ -93,7 +93,7 @@
       badge: 'free',
       price: 'Free',
       spotsTotal: 60,
-      spotsTaken: 38,
+      spotsTaken: 0,
       description: 'Kick off the 2026 season! BBQ, music, and meet our coaching staff including Mark Taylor. All members, families, and guests welcome.',
       attendees: []
     },
@@ -132,7 +132,7 @@
       badge: 'members',
       price: 'Members',
       spotsTotal: 16,
-      spotsTaken: 10,
+      spotsTaken: 0,
       description: 'Weekly men\'s round robin every Tuesday morning. All skill levels welcome. Drop in and play!',
       attendees: []
     },
@@ -145,7 +145,7 @@
       badge: 'members',
       price: 'Members',
       spotsTotal: 16,
-      spotsTaken: 12,
+      spotsTaken: 0,
       description: 'Thursday morning league for the 55+ crowd. Fun and social tennis with a great group of players.',
       attendees: []
     },
@@ -158,7 +158,7 @@
       badge: 'members',
       price: 'Team',
       spotsTotal: 12,
-      spotsTaken: 10,
+      spotsTaken: 0,
       description: 'Thursday night competitive interclub league. A & B teams compete against clubs in the region. RSVP required for team selection.',
       attendees: []
     },
@@ -171,7 +171,7 @@
       badge: 'members',
       price: 'Members',
       spotsTotal: 16,
-      spotsTaken: 8,
+      spotsTaken: 0,
       description: 'Weekly ladies round robin every Friday morning. All skill levels welcome. A fun way to start the weekend!',
       attendees: []
     },
@@ -184,7 +184,7 @@
       badge: 'members',
       price: 'Members',
       spotsTotal: 24,
-      spotsTaken: 16,
+      spotsTaken: 0,
       description: 'Friday night mixed doubles round robin under the lights! Bring a partner or get matched. The most popular weekly event at MTC.',
       attendees: []
     },
@@ -197,7 +197,7 @@
       badge: 'paid',
       price: '$180/Team',
       spotsTotal: 32,
-      spotsTaken: 16,
+      spotsTaken: 0,
       description: '95+ combined age mixed doubles tournament. A+B Draw. Includes lunches at Mono Cliffs Inn and great prizes! Day 1 of 2.',
       attendees: []
     },
@@ -210,7 +210,7 @@
       badge: 'paid',
       price: '$180/Team',
       spotsTotal: 32,
-      spotsTaken: 16,
+      spotsTaken: 0,
       description: '95+ combined age mixed doubles tournament. A+B Draw. Includes lunches at Mono Cliffs Inn and great prizes! Day 2 of 2.',
       attendees: []
     },

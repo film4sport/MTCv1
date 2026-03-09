@@ -94,7 +94,12 @@
    * @param {Function} onError - Called on failure
    */
   function createBooking(bookingData, onSuccess, onError) {
-    var userId = MTC.storage.get('mtc-user-email', 'demo-user');
+    var userId = MTC.storage.get('mtc-user-email', null);
+    if (!userId) {
+      if (onError) onError(new Error('Not logged in'));
+      if (typeof showToast === 'function') showToast('Please log in to book a court');
+      return;
+    }
     var payload = Object.assign({ userId: userId }, bookingData);
 
     // If offline, queue immediately instead of attempting the request
@@ -151,7 +156,12 @@
    * @param {Function} onError
    */
   function cancelBooking(bookingId, onSuccess, onError) {
-    var userId = MTC.storage.get('mtc-user-email', 'demo-user');
+    var userId = MTC.storage.get('mtc-user-email', null);
+    if (!userId) {
+      if (onError) onError(new Error('Not logged in'));
+      if (typeof showToast === 'function') showToast('Please log in to cancel a booking');
+      return;
+    }
     var payload = { bookingId: bookingId, userId: userId };
 
     // If offline, queue the cancellation

@@ -92,8 +92,19 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Social Icons */}
-          <div className="flex items-center gap-4">
+          {/* Social Icons + F4S Credit */}
+          <div className="flex items-center gap-6">
+            <div className="flex flex-col items-center gap-0.5">
+              <span className="text-xs tracking-wide" style={{ color: 'rgba(232, 228, 217, 0.35)' }}>
+                Made with <span style={{ color: '#dc2626' }}>&hearts;</span>
+              </span>
+              <span className="text-xs" style={{ color: 'rgba(232, 228, 217, 0.35)' }}>
+                by{' '}
+                <span style={{ fontWeight: 900, fontStyle: 'italic', letterSpacing: '0.02em', color: 'rgba(232, 228, 217, 0.5)' }}>
+                  F4S
+                </span>
+              </span>
+            </div>
             <a
               href="https://facebook.com/monotennisclub"
               target="_blank"
