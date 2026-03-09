@@ -204,19 +204,21 @@
   }
 
   function deleteConversation(memberId, el) {
-    // Server-side delete (if we have a conversation ID)
     var convId = conversationIdMap[memberId];
-    if (convId && typeof MTC.fn.apiRequest === 'function') {
-      MTC.fn.apiRequest('/mobile/conversations', {
-        method: 'DELETE',
-        body: JSON.stringify({ conversationId: convId })
-      }).catch(function() { /* best-effort — local delete already done */ });
-    }
-    // Remove from local conversations
+
+    // Save state for rollback
+    var prevConv = conversations[memberId] ? conversations[memberId].slice() : null;
+    var prevConvId = convId;
+    var prevMeta = conversationMetaMap[memberId] || null;
+    var elParent = el ? el.parentNode : null;
+    var elNextSibling = el ? el.nextSibling : null;
+
+    // Optimistic removal from local state
     delete conversations[memberId];
     delete conversationIdMap[memberId];
     delete conversationMetaMap[memberId];
     MTC.storage.set('mtc-conversations', conversations);
+
     // Animate out
     if (el) {
       el.style.height = el.offsetHeight + 'px';
@@ -228,8 +230,9 @@
         setTimeout(function() { el.remove(); }, 200);
       }, 10);
     }
-    showToast('Conversation deleted');
+    showToast('Deleting conversation...');
     updateMessageBadge();
+
     // Check if list is now empty
     setTimeout(function() {
       var remaining = document.querySelectorAll('#conversationsList .swipe-container');
@@ -238,6 +241,37 @@
         if (emptyState) emptyState.style.display = 'block';
       }
     }, 250);
+
+    // Server-side delete with rollback
+    if (convId && typeof MTC.fn.apiRequest === 'function') {
+      MTC.fn.apiRequest('/mobile/conversations', {
+        method: 'DELETE',
+        body: JSON.stringify({ conversationId: convId })
+      }).then(function(res) {
+        if (!res.ok) throw new Error((res.data && res.data.error) || 'Delete failed');
+        showToast('Conversation deleted');
+      }).catch(function(err) {
+        // Rollback local state
+        if (prevConv) conversations[memberId] = prevConv;
+        if (prevConvId) conversationIdMap[memberId] = prevConvId;
+        if (prevMeta) conversationMetaMap[memberId] = prevMeta;
+        MTC.storage.set('mtc-conversations', conversations);
+        // Restore DOM element
+        if (el && elParent) {
+          el.style.height = '';
+          el.style.opacity = '';
+          el.style.overflow = '';
+          el.style.transition = '';
+          if (elNextSibling) elParent.insertBefore(el, elNextSibling);
+          else elParent.appendChild(el);
+        }
+        updateMessageBadge();
+        showToast('Failed to delete conversation. Please try again.', 'error');
+        MTC.warn('[MTC] deleteConversation failed:', err);
+      });
+    } else {
+      showToast('Conversation deleted');
+    }
   }
 
   function filterConversations(query) {

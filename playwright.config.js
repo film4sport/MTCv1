@@ -13,6 +13,8 @@ const DESKTOP_ONLY_TESTS = [
   'mobile-pwa.spec.js',      // mobile PWA tests (390x844 viewport)
   'mobile-pwa-flows.spec.js',   // authenticated flow tests (mocked auth, 390x844)
   'mobile-pwa-offline.spec.js', // offline resilience tests (mocked network, 390x844)
+  'mobile-pwa-rollback.spec.js', // rollback behavior tests (mocked API failures, 390x844)
+  'visual-regression.spec.js',    // screenshot comparison tests
 ];
 
 // All other tests run on all 3 viewports for responsive coverage

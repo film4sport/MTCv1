@@ -280,17 +280,39 @@
         if (reqs[i].id === requestId && reqs[i].serverId) { serverId = reqs[i].serverId; break; }
       }
     }
-    if (card) card.remove();
-    const requests = MTC.storage.get('mtc-partner-requests', []).filter(function(r) { return r.id !== requestId; });
-    MTC.storage.set('mtc-partner-requests', requests);
-    showToast('Request removed');
 
-    // Delete from Supabase
+    // Save state for rollback
+    var prevRequests = MTC.storage.get('mtc-partner-requests', []);
+    var cardParent = card ? card.parentNode : null;
+    var cardNextSibling = card ? card.nextSibling : null;
+
+    // Optimistic removal
+    if (card) card.remove();
+    var filtered = prevRequests.filter(function(r) { return r.id !== requestId; });
+    MTC.storage.set('mtc-partner-requests', filtered);
+    showToast('Removing request...');
+
+    // Delete from Supabase with rollback
     if (serverId && MTC.fn.apiRequest && MTC.getToken()) {
       MTC.fn.apiRequest('/mobile/partners', {
         method: 'DELETE',
         body: JSON.stringify({ partnerId: serverId })
-      }).catch(function() { /* best effort */ });
+      }).then(function(res) {
+        if (!res.ok) throw new Error((res.data && res.data.error) || 'Delete failed');
+        showToast('Request removed');
+      }).catch(function(err) {
+        // Rollback: restore card + localStorage
+        MTC.storage.set('mtc-partner-requests', prevRequests);
+        if (card && cardParent) {
+          if (cardNextSibling) cardParent.insertBefore(card, cardNextSibling);
+          else cardParent.appendChild(card);
+        }
+        showToast('Failed to remove request. Please try again.', 'error');
+        MTC.warn('[MTC] removePartnerRequest failed:', err);
+      });
+    } else {
+      // No server ID (local-only) — keep removal, no API needed
+      showToast('Request removed');
     }
   };
 
@@ -322,21 +344,37 @@
     const programId = card.dataset.programId || ('program-' + name.replace(/\s/g, '-').toLowerCase());
 
     if (btn.classList.contains('enrolled')) {
+      // Save state for rollback
+      var prevText = btn.textContent;
       btn.classList.remove('enrolled');
       btn.textContent = btn.dataset.originalText || 'Enroll Now';
       btn.style.background = '';
       btn.style.color = '';
-      showToast('Enrollment cancelled for ' + name);
+      showToast('Withdrawing from ' + name + '...');
       if (typeof removeEventFromMyBookings === 'function') {
         removeEventFromMyBookings('program-' + name.replace(/\s/g, '-'));
       }
-      // Persist withdrawal to Supabase
+      // Persist withdrawal to Supabase with rollback
       var token1 = MTC.getToken();
       if (token1 && typeof MTC.fn.apiRequest === 'function') {
         MTC.fn.apiRequest('/mobile/programs', {
           method: 'POST',
           body: JSON.stringify({ programId: programId, action: 'withdraw' })
-        }).catch(function() { MTC.warn('[MTC] Withdrawal sync failed'); });
+        }).then(function(res) {
+          if (!res.ok) throw new Error((res.data && res.data.error) || 'Withdrawal failed');
+          showToast('Withdrawn from ' + name);
+        }).catch(function(err) {
+          // Rollback
+          btn.classList.add('enrolled');
+          btn.textContent = prevText;
+          btn.style.background = 'var(--volt)';
+          btn.style.color = '#000';
+          if (typeof addEventToMyBookings === 'function') {
+            addEventToMyBookings('program-' + name.replace(/\s/g, '-'), 'program');
+          }
+          showToast('Failed to withdraw. Please try again.', 'error');
+          MTC.warn('[MTC] Withdrawal failed:', err);
+        });
       }
     } else {
       btn.dataset.originalText = btn.textContent;
@@ -345,24 +383,32 @@
       btn.style.background = 'var(--volt)';
       btn.style.color = '#000';
 
-      let celebMsg = name + ' \u2014 ' + cost + '. Check My Bookings for details.';
+      var celebMsg = name + ' \u2014 ' + cost + '. Check My Bookings for details.';
       showCelebrationModal('ENROLLED!', celebMsg);
 
       if (typeof addEventToMyBookings === 'function') {
         addEventToMyBookings('program-' + name.replace(/\s/g, '-'), 'program');
       }
-      // Persist enrollment to Supabase
+      // Persist enrollment to Supabase with rollback
       var token2 = MTC.getToken();
       if (token2 && typeof MTC.fn.apiRequest === 'function') {
         MTC.fn.apiRequest('/mobile/programs', {
           method: 'POST',
           body: JSON.stringify({ programId: programId, action: 'enroll' })
         }).then(function(res) {
-          if (!res.ok) {
-            MTC.warn('[MTC] Enrollment sync failed:', res.data);
-            showToast('Enrollment may not have been saved');
+          if (!res.ok) throw new Error((res.data && res.data.error) || 'Enrollment failed');
+        }).catch(function(err) {
+          // Rollback
+          btn.classList.remove('enrolled');
+          btn.textContent = btn.dataset.originalText || 'Enroll Now';
+          btn.style.background = '';
+          btn.style.color = '';
+          if (typeof removeEventFromMyBookings === 'function') {
+            removeEventFromMyBookings('program-' + name.replace(/\s/g, '-'));
           }
-        }).catch(function() { showToast('Enrollment may not have been saved'); });
+          showToast('Enrollment failed. Please try again.', 'error');
+          MTC.warn('[MTC] Enrollment failed:', err);
+        });
       }
     }
   };

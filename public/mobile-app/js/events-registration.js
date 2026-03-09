@@ -215,6 +215,9 @@
     var countEl = document.getElementById('interclubRsvpCount');
     var spotEl = document.getElementById('interclubSpotCount');
 
+    // Save state for rollback
+    var prevRsvpList = event.rsvpList.slice();
+
     // Optimistic UI update
     if (response === 'going') {
       if (!event.rsvpList.includes('You')) {
@@ -262,10 +265,26 @@
         body: JSON.stringify({ eventId: eventId })
       });
       if (!res.ok) {
-        MTC.warn('Interclub RSVP persist failed:', res.data && res.data.error);
+        throw new Error((res.data && res.data.error) || 'RSVP failed');
       }
     } catch(apiErr) {
       MTC.warn('Interclub RSVP API error:', apiErr);
+      // Rollback
+      event.rsvpList = prevRsvpList;
+      if (avatarContainer) avatarContainer.innerHTML = buildAvatarList(prevRsvpList);
+      if (countEl) countEl.textContent = prevRsvpList.length + ' confirmed';
+      if (spotEl) spotEl.textContent = prevRsvpList.length + ' confirmed';
+      if (response === 'going') {
+        goingBtn.classList.remove('active');
+        goingBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Count Me In';
+        if (typeof removeEventFromMyBookings === 'function') removeEventFromMyBookings(eventId);
+      } else {
+        notGoingBtn.classList.remove('active');
+        if (typeof addEventToMyBookings === 'function') {
+          addEventToMyBookings(eventId, 'interclub', { title: event.name || 'Inter-Club Match', date: event.date || 'Upcoming', time: event.time || 'See details', location: 'MTC Home Courts' });
+        }
+      }
+      showToast('RSVP failed. Please try again.', 'error');
     }
 
     // Don't auto-close - let user see the updated list and close manually
