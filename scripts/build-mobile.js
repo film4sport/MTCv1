@@ -24,6 +24,7 @@ const CSS_FILES = [
   'home.css',
   'booking.css',
   'navigation.css',
+  'menu-notifications.css',
   'social.css',
   'search.css',
   'profile.css',
