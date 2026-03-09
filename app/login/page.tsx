@@ -59,12 +59,60 @@ function LoginContent() {
         @keyframes spin {
           to { transform: rotate(360deg); }
         }
+        @keyframes loginFadeUp {
+          from { opacity: 0; transform: translateY(18px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes accentLineGrow {
+          from { width: 0; opacity: 0; }
+          to { width: 48px; opacity: 1; }
+        }
+        @keyframes subtleGlow {
+          0%, 100% { box-shadow: 0 8px 40px rgba(107, 122, 61, 0.08), 0 1px 3px rgba(0,0,0,0.04); }
+          50% { box-shadow: 0 12px 50px rgba(107, 122, 61, 0.14), 0 2px 6px rgba(0,0,0,0.06); }
+        }
+        .login-glass-card {
+          background: rgba(255, 255, 255, 0.45);
+          backdrop-filter: blur(30px) saturate(1.4);
+          -webkit-backdrop-filter: blur(30px) saturate(1.4);
+          border: 1.5px solid rgba(255, 255, 255, 0.7);
+          border-radius: 28px;
+          padding: 40px 36px;
+          box-shadow: 0 8px 40px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8);
+          animation: loginFadeUp 0.6s ease-out 0.15s both, subtleGlow 4s ease-in-out infinite 0.8s;
+        }
+        @media (max-width: 1023px) {
+          .login-glass-card {
+            padding: 28px 24px;
+            border-radius: 24px;
+          }
+        }
+        @keyframes titleBreathe {
+          0%, 100% { opacity: 0.85; transform: scale(1); }
+          50% { opacity: 1; transform: scale(1.015); }
+        }
+        .login-title-breathe {
+          animation: loginFadeUp 0.5s ease-out 0.15s both, titleBreathe 4s ease-in-out infinite 0.7s;
+        }
+        .login-btn-google:hover {
+          border-color: #6b7a3d !important;
+          box-shadow: 0 10px 30px rgba(0,0,0,0.08), 0 0 0 3px rgba(107, 122, 61, 0.08) !important;
+          transform: translateY(-2px);
+        }
+        .login-right-panel::-webkit-scrollbar {
+          display: none;
+        }
+        .login-btn-magic:hover:not(:disabled) {
+          background: #5a6832 !important;
+          box-shadow: 0 10px 30px rgba(107, 122, 61, 0.3), 0 0 0 3px rgba(107, 122, 61, 0.12) !important;
+          transform: translateY(-2px);
+        }
       ` }} />
 
-      <div className="min-h-screen flex flex-col lg:flex-row" style={{ backgroundColor: '#f5f2eb' }}>
+      <div className="min-h-screen flex flex-col lg:flex-row" style={{ background: 'linear-gradient(160deg, #ede9e0 0%, #e2dfd6 30%, #d8d5cb 60%, #e5e2d8 100%)' }}>
 
         {/* Left Side: App Preview (Desktop) */}
-        <div className="hidden lg:flex lg:w-2/3 items-center justify-center p-6 xl:p-10 relative overflow-y-auto overflow-x-hidden" style={{ background: '#edeae3' }}>
+        <div className="hidden lg:flex lg:w-2/3 items-center justify-center p-6 xl:p-10 relative overflow-y-auto overflow-x-hidden" style={{ background: 'transparent' }}>
           {/* Subtle grid pattern */}
           <div className="absolute inset-0 opacity-[0.04]">
             <svg width="100%" height="100%">
@@ -620,15 +668,22 @@ function LoginContent() {
         </div>
 
         {/* Right Side: Login Form */}
-        <div className="w-full lg:w-1/3 flex flex-col px-6 sm:px-8 md:px-12 lg:px-10 xl:px-14 py-8 lg:py-10 animate-slideUp lg:overflow-y-auto lg:min-h-screen">
+        <div className="login-right-panel w-full lg:w-1/3 flex flex-col px-5 sm:px-8 md:px-10 lg:px-8 xl:px-12 py-8 lg:py-10 lg:min-h-screen relative" style={{ overflowY: 'auto', scrollbarWidth: 'none' }}>
+          {/* Subtle radial accent glow behind card */}
+          <div className="absolute pointer-events-none" style={{ top: '20%', right: '-10%', width: '70%', height: '50%', background: 'radial-gradient(ellipse at center, rgba(107, 122, 61, 0.08) 0%, transparent 70%)', filter: 'blur(40px)' }} />
+          {/* Noise texture overlay */}
+          <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noise\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noise)\' opacity=\'0.04\'/%3E%3C/svg%3E")', backgroundRepeat: 'repeat', backgroundSize: '200px 200px' }} />
 
-          {/* Back Link */}
-          <a href="/" className="inline-flex items-center gap-2 text-sm font-semibold mb-8 lg:mb-10 px-4 py-2 rounded-full transition-all hover:scale-105 self-start" style={{ color: '#2a2f1e', textDecoration: 'none', background: 'rgba(107, 122, 61, 0.1)', border: '1px solid rgba(107, 122, 61, 0.2)' }}>
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          {/* Back Link — outside card */}
+          <a href="/" className="relative z-10 inline-flex items-center gap-2 text-sm font-medium mb-5 transition-all hover:gap-3 self-start group" style={{ color: '#6b7a3d', textDecoration: 'none' }}>
+            <svg className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
             </svg>
             Back to Home
           </a>
+
+          {/* Glass morphism card */}
+          <div className="login-glass-card relative z-10">
 
           {/* Mobile App Preview (mobile/tablet only) */}
           <div className="lg:hidden mb-6 rounded-2xl p-4 border overflow-hidden" style={{ background: '#f0f0f0', borderColor: '#e0dcd3' }}>
@@ -672,12 +727,17 @@ function LoginContent() {
           </div>
 
           {/* Welcome */}
-          <div className="mb-8 lg:mb-12">
-            <h1 className="headline-font text-3xl sm:text-4xl lg:text-[2.75rem] leading-tight tracking-tight" style={{ color: '#2a2f1e' }}>Sign in to your<br />Mono Tennis Club account</h1>
+          <div className="mb-8 lg:mb-10">
+            <h1 className="headline-font text-2xl sm:text-3xl lg:text-[2rem] leading-none tracking-tight mb-3" style={{ color: '#2a2f1e', whiteSpace: 'nowrap' }}>
+              Mono Tennis Club
+            </h1>
+            <p className="login-title-breathe text-sm" style={{ color: '#8a8578', transformOrigin: 'left center' }}>
+              Your courts, your community.
+            </p>
           </div>
 
-          {/* Sign-In Options: Google + Magic Link */}
-          <div className="space-y-5 max-w-lg">
+          {/* Sign-In Options */}
+          <div className="space-y-4 max-w-lg">
             {/* Google Sign-In (primary) */}
             <button
               type="button"
@@ -686,10 +746,8 @@ function LoginContent() {
                 const { error } = await signInWithGoogle('/dashboard');
                 if (error) setLoginError(error);
               }}
-              className="w-full py-5 rounded-full font-semibold text-base transition-all hover:-translate-y-0.5 active:scale-[0.97] flex items-center justify-center gap-3"
-              style={{ background: '#fff', border: '1px solid #e0dcd3', color: '#2a2f1e', minHeight: 56 }}
-              onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#6b7a3d'; e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.08)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e0dcd3'; e.currentTarget.style.boxShadow = 'none'; }}
+              className="login-btn-google w-full py-4 rounded-2xl font-semibold text-base transition-all active:scale-[0.97] flex items-center justify-center gap-3"
+              style={{ background: '#fff', border: '1px solid #e0dcd3', color: '#2a2f1e', minHeight: 52 }}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
@@ -700,18 +758,9 @@ function LoginContent() {
               Continue with Google
             </button>
 
-            <div className="flex items-center gap-3">
-              <div className="flex-1 h-px" style={{ backgroundColor: '#e0dcd3' }} />
-              <span className="text-xs font-medium" style={{ color: '#999' }}>or</span>
-              <div className="flex-1 h-px" style={{ backgroundColor: '#e0dcd3' }} />
-            </div>
-
-            {/* Magic Link: email input + button */}
-            <div>
+            {/* Magic Link: email input + button grouped */}
+            <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid #e0dcd3', background: '#fff' }}>
               <div className="relative">
-                <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none" style={{ color: '#6b7266' }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
-                </svg>
                 <input
                   id="login-email"
                   type="email"
@@ -720,53 +769,59 @@ function LoginContent() {
                   placeholder="your@email.com"
                   autoComplete="email"
                   maxLength={100}
-                  className="w-full pl-12 pr-5 py-5 rounded-xl text-base transition-all focus:outline-none"
+                  className="w-full px-5 py-4 text-base text-center transition-all focus:outline-none"
                   style={{
-                    background: '#fff',
-                    border: emailError ? '1px solid #ef4444' : '1px solid #e0dcd3',
+                    background: 'transparent',
+                    border: 'none',
+                    borderBottom: '1px solid #e0dcd3',
                     color: '#2a2f1e',
-                    boxShadow: emailError ? '0 0 0 3px rgba(239, 68, 68, 0.1)' : 'none',
+                    borderRadius: 0,
                   }}
-                  onFocus={(e) => { if (!emailError) e.currentTarget.style.borderColor = '#6b7a3d'; e.currentTarget.style.boxShadow = emailError ? '0 0 0 3px rgba(239,68,68,0.1)' : '0 0 0 3px rgba(107,122,61,0.15)'; }}
-                  onBlur={(e) => { if (!emailError) { e.currentTarget.style.borderColor = '#e0dcd3'; e.currentTarget.style.boxShadow = 'none'; } }}
+                  onFocus={(e) => { e.currentTarget.style.borderBottomColor = '#6b7a3d'; }}
+                  onBlur={(e) => { e.currentTarget.style.borderBottomColor = '#e0dcd3'; }}
                 />
               </div>
-              {emailError && <p className="text-xs mt-2" style={{ color: '#ef4444' }}>Please enter a valid email address</p>}
-            </div>
-            <button
-              type="button"
-              onClick={async () => {
-                if (!email || !emailRegex.test(email)) {
-                  setLoginError('Enter your email to receive a sign-in link.');
-                  setEmailError(true);
-                  return;
-                }
-                setLoginError('');
-                setLoading(true);
-                const result = await signInWithMagicLink(email.trim().toLowerCase(), '/dashboard');
-                setLoading(false);
-                if (result.error) {
-                  setLoginError(result.error);
-                  if (result.cooldownSeconds) setCooldown(result.cooldownSeconds);
-                } else {
+              {emailError && <p className="text-xs px-5 pt-2" style={{ color: '#ef4444' }}>Please enter a valid email address</p>}
+              <button
+                type="button"
+                onClick={async () => {
+                  if (!email || !emailRegex.test(email)) {
+                    setLoginError('Enter your email to receive a sign-in link.');
+                    setEmailError(true);
+                    return;
+                  }
                   setLoginError('');
-                  setCooldown(60);
-                  setMagicLinkSent(true);
-                }
-              }}
-              disabled={loading || cooldown > 0}
-              className="w-full py-5 rounded-full font-semibold text-base transition-all hover:-translate-y-0.5 active:scale-[0.97] flex items-center justify-center gap-2 disabled:opacity-60"
-              style={{ background: '#6b7a3d', color: '#fff', minHeight: 56 }}
-              onMouseEnter={(e) => { if (!loading) { e.currentTarget.style.background = '#5a6832'; e.currentTarget.style.boxShadow = '0 10px 30px rgba(107, 122, 61, 0.25)'; } }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = '#6b7a3d'; e.currentTarget.style.boxShadow = 'none'; }}
-            >
-              {loading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <span className="inline-block w-[18px] h-[18px] border-2 border-white/30 border-t-white rounded-full" style={{ animation: 'spin 0.8s linear infinite' }} />
-                  Sending link...
-                </span>
-              ) : cooldown > 0 ? `Resend in ${cooldown}s` : 'Sign in with Email Link'}
-            </button>
+                  setLoading(true);
+                  const result = await signInWithMagicLink(email.trim().toLowerCase(), '/dashboard');
+                  setLoading(false);
+                  if (result.error) {
+                    setLoginError(result.error);
+                    if (result.cooldownSeconds) setCooldown(result.cooldownSeconds);
+                  } else {
+                    setLoginError('');
+                    setCooldown(60);
+                    setMagicLinkSent(true);
+                  }
+                }}
+                disabled={loading || cooldown > 0}
+                className="w-full py-4 font-semibold text-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-60"
+                style={{ background: 'rgba(107,122,61,0.03)', color: '#6b7a3d', border: 'none', cursor: 'pointer' }}
+                onMouseEnter={(e) => { if (!loading) e.currentTarget.style.background = 'rgba(107,122,61,0.08)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(107,122,61,0.03)'; }}
+              >
+                {loading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="inline-block w-[16px] h-[16px] border-2 border-[#6b7a3d]/30 border-t-[#6b7a3d] rounded-full" style={{ animation: 'spin 0.8s linear infinite' }} />
+                    Sending...
+                  </span>
+                ) : cooldown > 0 ? `Resend in ${cooldown}s` : (
+                  <>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.582a.5.5 0 0 1 0 .962L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/></svg>
+                    Send magic link
+                  </>
+                )}
+              </button>
+            </div>
           </div>
 
           {/* Error Display */}
@@ -776,27 +831,23 @@ function LoginContent() {
             </p>
           )}
 
-          {/* Register Link */}
-          <p className="mt-8 lg:mt-10 text-center text-sm sm:text-base max-w-lg" style={{ color: '#6b7266' }}>
-            Don&apos;t have an account?{' '}
-            <a href="/signup" className="font-medium hover:underline" style={{ color: '#6b7a3d' }}>
-              Become a Member
-            </a>
-          </p>
-
-          {/* Under Construction Notice */}
-          <div className="mt-6 max-w-lg text-center" style={{
-            padding: '14px 20px', background: 'rgba(255, 200, 0, 0.06)',
-            border: '1px solid rgba(255, 200, 0, 0.18)', borderRadius: 14,
-            fontSize: 12, color: '#6b7266', lineHeight: 1.6,
-          }}>
-            <span style={{ fontSize: 18 }}>&#x1F6A7;</span>{' '}
-            <span style={{ fontWeight: 700, color: '#2a2f1e' }}>Under Construction</span><br/>
-            Our desktop and mobile/tablet apps are still in development. Bugs or feedback? Email{' '}
-            <a href="mailto:monotennisclub1@gmail.com" style={{ color: '#6b7a3d', textDecoration: 'none', fontWeight: 600 }}>
-              monotennisclub1@gmail.com
-            </a>
+          {/* Register + Under Construction — compact footer */}
+          <div className="mt-8 max-w-lg text-center">
+            <p className="text-xs" style={{ color: '#8a8578' }}>
+              Don&apos;t have an account?{' '}
+              <a href="/signup" className="font-semibold hover:underline" style={{ color: '#6b7a3d' }}>
+                Become a Member
+              </a>
+            </p>
+            <p className="text-xs mt-3" style={{ color: '#b0ab9f', lineHeight: 1.5 }}>
+              &#x1F6A7; Still in development. Bugs? Email{' '}
+              <a href="mailto:monotennisclub1@gmail.com" style={{ color: '#6b7a3d', textDecoration: 'none', fontWeight: 600 }}>
+                monotennisclub1@gmail.com
+              </a>
+            </p>
           </div>
+
+          </div>{/* end login-glass-card */}
 
           {/* Magic Link Sent — Full overlay */}
           {magicLinkSent && (
