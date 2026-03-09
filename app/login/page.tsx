@@ -103,9 +103,8 @@ function LoginContent() {
           display: none;
         }
         .login-btn-magic:hover:not(:disabled) {
-          background: #5a6832 !important;
-          box-shadow: 0 10px 30px rgba(107, 122, 61, 0.3), 0 0 0 3px rgba(107, 122, 61, 0.12) !important;
-          transform: translateY(-2px);
+          background: rgba(107,122,61,0.12) !important;
+          transform: translateY(-1px);
         }
       ` }} />
 
@@ -750,7 +749,7 @@ function LoginContent() {
                 if (error) setLoginError(error);
               }}
               className="login-btn-google w-full py-4 font-medium text-base transition-all active:scale-[0.97] flex items-center justify-center gap-3"
-              style={{ background: '#fff', border: 'none', color: '#5a5f4a', minHeight: 52 }}
+              style={{ background: 'rgba(107,122,61,0.025)', border: 'none', color: '#5a5f4a', minHeight: 52 }}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
@@ -813,10 +812,10 @@ function LoginContent() {
                   }
                 }}
                 disabled={loading || cooldown > 0}
-                className="w-full py-4 font-semibold text-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-60"
-                style={{ background: 'rgba(107,122,61,0.03)', color: '#6b7a3d', border: 'none', cursor: 'pointer' }}
-                onMouseEnter={(e) => { if (!loading) e.currentTarget.style.background = 'rgba(107,122,61,0.08)'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(107,122,61,0.03)'; }}
+                className="login-btn-magic w-full py-4 font-semibold text-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-60"
+                style={{ background: 'rgba(107,122,61,0.06)', color: '#6b7a3d', border: 'none', cursor: 'pointer' }}
+                onMouseEnter={(e) => { if (!loading) e.currentTarget.style.background = 'rgba(107,122,61,0.12)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(107,122,61,0.06)'; }}
               >
                 {loading ? (
                   <span className="flex items-center justify-center gap-2">
