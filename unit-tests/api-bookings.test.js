@@ -119,8 +119,8 @@ describe('Bookings API — Cross-Platform Consistency', () => {
   const storeContent = readFileSync(resolve(root, 'app/dashboard/lib/store.tsx'), 'utf-8');
 
   it('Dashboard routes bookings through an API endpoint', () => {
-    // addBooking calls /api/dashboard/bookings (server-validated, bypasses RLS)
-    expect(storeContent).toContain('/api/dashboard/bookings');
+    // addBooking calls /api/mobile/bookings (unified route — no separate dashboard route)
+    expect(storeContent).toContain('/api/mobile/bookings');
   });
 
   it('API returns camelCase fields matching Dashboard expectations', () => {

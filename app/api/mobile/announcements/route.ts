@@ -48,7 +48,7 @@ export async function GET(request: Request) {
         dismissed: dismissedIds.has(a.id),
       }));
 
-    return cachedJson(result, 120, { swr: 60 });
+    return cachedJson(result, 60, { swr: 30 });
   } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }

@@ -183,13 +183,78 @@ Before reporting any feature change as "done", verify:
 
 **Build verified:** TypeScript clean (`tsc --noEmit` passes), mobile build passes (`npm run build:mobile`).
 
+### Cowork Session (2026-03-09 continued) — Codebase Audit & Bug Fix Pass
+
+**Full codebase audit** across all 3 platforms (3 parallel agents + 1 verification agent). 8 issues reported, 7 were FALSE positives — only the `.json()` bug was real. Always verify agent findings before acting.
+
+**Bugs fixed (Phase 1 — 7 confirmed bugs):**
+1. `events-registration.js`: 9x incorrect `.json()` calls → `.data` (lines 265, 338, 374, 441, 513, 593, 612-614). `MTC.fn.apiRequest()` returns `{ ok, data, status }`, not a raw Response.
+2. `events-registration.js`: Added `.catch()` on Promise.all for admin data loading
+3. `account.js`: Added `.catch()` on `Notification.requestPermission()` promise
+4. `auth-helper.ts`: Rate limiter memory leak — added cleanup of expired entries when Map > 100 users (uses `forEach` not `for...of` to avoid TS downlevelIteration issue)
+5. `members/route.ts`: NTRP range validation (1.0–7.0) — field exists in DB but isn't actively used, guard is defensive
+6. `store.tsx`: Improved notification deduplication — id-first check, then title+type+30s window fallback
+7. `store.tsx`: Changed `Promise.all` → `Promise.allSettled` for initial data fetch — one failed fetch no longer blocks all others. Added `val()` helper + per-fetch error logging via `reportError`.
+
+**Cross-platform fix (Phase 2):**
+8. `bookings/route.ts`: Added participant UUID validation — `isValidUUID()` check before creating booking_participants
+
+**New test files (Phase 4 — 4 files, 51 tests):**
+- `unit-tests/court-blocks.test.js` — Route structure, auth (withAuth), validation, auto-cancel logic, bulk delete
+- `unit-tests/lineups.test.js` — Route structure, auth, input validation (zero prior coverage)
+- `unit-tests/families.test.js` — CRUD operations, delete ownership checks, cross-platform state tracking
+- `unit-tests/notification-channels.test.js` — Each action triggers expected channels (bell, push, email) + Realtime subscription parity
+
+**Total test count: 798 tests across 31 files, all passing.**
+
+**Build verified:** `tsc --noEmit` clean, `npm run build:mobile` passes (cache: `mtc-court-7b04e3d5`), all 798 unit tests pass.
+**Visual verified:** BDG screenshots — mobile app renders correctly (full-width, bottom nav properly positioned inside #app). HTML validation: 830 balanced divs, nav inside #app at line 2384 (closes line 2622).
+
+**Performance optimization noted (NOT implemented):**
+- `store.tsx` context splitting — 40+ values in one React context causing unnecessary re-renders. Too risky for a single pass; needs dedicated session. Strategy: split into AuthContext, BookingContext, MessagingContext, NotificationContext, etc.
+
+### Cowork Session (2026-03-09 continued) — Cross-Platform API Consolidation
+
+**5 changes implemented to improve API consistency across Dashboard, Mobile PWA, and API routes:**
+
+**Change 1: Killed `/api/dashboard/bookings/` — rerouted to `/api/mobile/bookings`**
+- Dashboard `addBooking()` and `cancelBooking()` now route through `/api/mobile/bookings` (was separate `/api/dashboard/bookings`)
+- Removed ~140 lines of client-side participant notification code from store.tsx — server route handles bell, push, email, in-app messages
+- Deleted `app/api/dashboard/bookings/route.ts` entirely (320 lines of dead duplicate code)
+- Deleted empty `app/api/dashboard/` directory
+
+**Change 2: Shared `createNotification()` in `app/api/lib/notifications.ts`**
+- Created shared bell notification utility (was copy-pasted in 3 route files)
+- Accepts `context` param for log prefix (e.g. 'bookings', 'events', 'conversations')
+- Replaced inline definitions in `bookings/route.ts`, `events/route.ts`, `conversations/route.ts`
+
+**Change 3: Typed `apiCall()` wrapper**
+- `apiCall<T>()` now returns `Promise<T>` (parsed JSON) instead of `Promise<Response>`
+- Internal JSON parsing + error handling — callers no longer need `.json()` calls
+- Updated `addBooking().then()` handler to use typed data directly
+
+**Change 4: Consistent caching policy**
+- Standardized to 4 tiers: Public/static (300s), Semi-static (60s), Personal (30s), Real-time (none)
+- Changed announcements from 120s→60s + 60s→30s SWR
+- Added cache policy documentation comment to auth-helper.ts
+
+**Change 5: New unit tests**
+- Created `unit-tests/api-consolidation.test.js` (16 tests) verifying all changes
+- Updated 5 existing test files to match new patterns
+
+**Total test count: 814 tests across 32 files, all passing.**
+**Build verified:** `tsc --noEmit` clean, `npm run build:mobile` passes (cache: `mtc-court-7b04e3d5`).
+**Visual verified:** BDG screenshot — mobile app renders correctly.
+
 **Pending:**
-- Run migration on production Supabase: `20260308_add_residence_column.sql`
-- Deploy all changes to Railway (includes family creation fix + MTC.state auto-restore fix + all feature flow improvements)
+- Run migration on production Supabase: `20260308_add_residence_column.sql`, `20260309_add_conversation_individual_indexes.sql`
+- Deploy all changes to Railway (includes all bug fixes from this audit + feature flow improvements from earlier + API consolidation)
 - Clean up `nicholas617@10minutes.email` test account from Supabase auth
+- Delete orphaned Alex RSVP: `DELETE FROM event_attendees WHERE user_name = 'Alex';`
 - Mobile PWA admin "Block Court Time" — mobile version also missing "Club Event" and "Coaching Session" options in reason dropdown
 - New tests need to run in CI (can't run Playwright in Cowork per CLAUDE.md #16)
 - Visual verification of all new features in browser (interactive calendar cards, partner→book flow, event CRUD modal)
+- Store.tsx context splitting (research documented above, needs dedicated session)
 
 ---
 

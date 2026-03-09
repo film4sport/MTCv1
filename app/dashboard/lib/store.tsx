@@ -139,7 +139,8 @@ function mergeEventsWithDefaults(supabaseEvents: ClubEvent[]): ClubEvent[] {
  * This eliminates an entire class of bugs where missing/incorrect RLS policies
  * cause silent failures (200 OK, 0 rows affected).
  */
-async function apiCall(path: string, method: string, body?: Record<string, unknown>): Promise<Response> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function apiCall<T = any>(path: string, method: string, body?: Record<string, unknown>): Promise<T> {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session?.access_token) throw new Error('No active session');
   const res = await fetch(path, {
@@ -151,7 +152,9 @@ async function apiCall(path: string, method: string, body?: Record<string, unkno
     const errBody = await res.json().catch(() => ({ error: res.statusText }));
     throw new Error(errBody.error || `API ${method} ${path} failed: ${res.status}`);
   }
-  return res;
+  // Parse and return JSON body (or empty object for 204)
+  if (res.status === 204) return {} as T;
+  return res.json() as Promise<T>;
 }
 
 export function AppProvider({ children }: { children: ReactNode }) {
@@ -709,7 +712,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const addBooking = useCallback((booking: Booking) => {
     setBookings(prev => [...prev, booking]);
     // Persist via server-side validated API — rollback booking + its notifications on failure
-    apiCall('/api/dashboard/bookings', 'POST', {
+    apiCall('/api/mobile/bookings', 'POST', {
       courtId: booking.courtId,
       date: booking.date,
       time: booking.time,
@@ -720,14 +723,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
       participants: booking.participants,
       bookedFor: booking.bookedFor,
       userName: booking.userName,
-    }).then(async (res) => {
+    }).then((data: { booking?: { id: string } }) => {
       // Update client-side booking ID with server-generated ID so cancel works
-      const data = await res.json();
-      if (data.booking?.id && data.booking.id !== booking.id) {
-        setBookings(prev => prev.map(b => b.id === booking.id ? { ...b, id: data.booking.id } : b));
+      const serverId = data.booking?.id;
+      if (serverId && serverId !== booking.id) {
+        setBookings(prev => prev.map(b => b.id === booking.id ? { ...b, id: serverId } : b));
       }
     }).catch((err) => {
-      reportError(err, 'DashboardBookingAPI');
+      reportError(err, 'API');
       setBookings(prev => prev.filter(b => b.id !== booking.id));
       setNotifications(prev => prev.filter(n => !(n.type === 'booking' && n.body?.includes(booking.date) && n.body?.includes(booking.time))));
       showToast(err.message || 'Failed to save booking. Please try again.', 'error');
@@ -761,159 +764,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
         db.createNotification(booking.userId, notif).catch((err) => reportError(err, 'Supabase'));
       }
 
-      // Notify each participant with a notification + message
-      if (booking.participants && booking.participants.length > 0) {
-        const participantNotifs: Notification[] = booking.participants.map((p) => ({
-          id: generateId('n'),
-          type: 'booking' as const,
-          title: 'Added to Booking',
-          body: `${booking.userName} added you to a booking: ${booking.courtName} on ${booking.date} at ${booking.time}.`,
-          timestamp: new Date().toISOString(),
-          read: false,
-        }));
-        setNotifications(prev => [...participantNotifs, ...prev]);
-        // Persist participant notifications to Supabase + send push
-        booking.participants.forEach((p, i) => {
-          db.createNotification(p.id, participantNotifs[i]).catch((err) => reportError(err, 'Supabase'));
-          firePush(p.id, 'Added to Booking', participantNotifs[i].body, 'booking', `booking-add-${booking.id}`);
-        });
-
-        // Send message to each participant with full calendar invite details
-        const formattedDate = new Date(booking.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-        const durationText = booking.duration ? `${booking.duration * 30} min` : '60 min';
-        const matchLabel = booking.matchType ? booking.matchType.charAt(0).toUpperCase() + booking.matchType.slice(1) : 'Singles';
-        const allPlayerNames = [booking.userName, ...booking.participants.map(p => p.name)];
-
-        booking.participants.forEach((participant) => {
-          const otherPlayers = allPlayerNames.filter(n => n !== participant.name).join(', ');
-          const msg = {
-            id: generateId('msg'),
-            from: booking.userName,
-            fromId: booking.userId,
-            to: participant.name,
-            toId: participant.id,
-            text: `You've been added to a court booking!\n\n📅 ${formattedDate}\n⏰ ${booking.time} (${durationText})\n📍 ${booking.courtName} — Mono Tennis Club\nMatch: ${matchLabel}\n👥 Playing with: ${otherPlayers}\n\nA confirmation email with a calendar invite has been sent to your email. You can also add this to your calendar from Dashboard → Schedule.\n[booking:${booking.courtName}:${booking.date}:${booking.time}]`,
-            timestamp: new Date().toISOString(),
-            read: false,
-          };
-          apiCall('/api/mobile/conversations', 'POST', { toId: participant.id, text: msg.text }).catch((err) => {
-            console.error(`[booking] Failed to send message to ${participant.name}:`, err);
-            reportError(err, 'API');
-          });
-        });
-      }
+      // Participant notifications (bell, push, email, in-app message) are handled
+      // server-side by /api/mobile/bookings POST — no client-side duplication needed
     }
-    // Send booking confirmation emails to booker + all participants (fire and forget)
-    if (currentUser?.email && booking.type === 'court') {
-      const recipients: { email: string; name: string; role: 'booker' | 'participant' }[] = [
-        { email: currentUser.email, name: currentUser.name, role: 'booker' },
-      ];
-      // Look up participant emails from members list
-      if (booking.participants && booking.participants.length > 0) {
-        booking.participants.forEach((p) => {
-          const member = members.find(m => m.id === p.id);
-          if (member?.email) {
-            recipients.push({ email: member.email, name: member.name, role: 'participant' });
-          }
-        });
-      }
-      fetchWithRetry('/api/booking-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          bookingId: booking.id,
-          recipients,
-          bookerName: currentUser.name,
-          bookedFor: booking.bookedFor || undefined,
-          courtName: booking.courtName,
-          date: booking.date,
-          time: booking.time,
-          duration: booking.duration,
-          matchType: booking.matchType,
-        }),
-      }, 'Confirmation');
-    }
-  }, [currentUser, members]);
+  }, [currentUser]);
 
   const cancelBooking = useCallback((id: string) => {
-    // Read current booking before state update to avoid setState-inside-setState
-    setBookings(prev => {
-      const booking = prev.find(b => b.id === id);
-
-      // Schedule participant notifications outside setBookings (avoids React violation)
-      if (booking && booking.participants && booking.participants.length > 0) {
-        queueMicrotask(() => {
-          const cancelNotifs: Notification[] = booking.participants!.map((p) => ({
-            id: generateId('n'),
-            type: 'booking' as const,
-            title: 'Booking Cancelled',
-            body: `${booking.userName} cancelled the booking: ${booking.courtName} on ${booking.date} at ${booking.time}.`,
-            timestamp: new Date().toISOString(),
-            read: false,
-          }));
-          setNotifications(prev => [...cancelNotifs, ...prev]);
-          // Persist participant notifications to Supabase (1:1 mapping) + send push
-          booking.participants!.forEach((p, i) => {
-            db.createNotification(p.id, cancelNotifs[i]).catch((err) => reportError(err, 'Supabase'));
-            firePush(p.id, 'Booking Cancelled', cancelNotifs[i].body, 'booking', `booking-cancel-${booking.id}`);
-          });
-
-          // Send cancellation message to each participant with full details
-          const cancelDate = new Date(booking.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-          booking.participants!.forEach((participant) => {
-            const msg = {
-              id: generateId('msg'),
-              from: booking.userName,
-              fromId: booking.userId,
-              to: participant.name,
-              toId: participant.id,
-              text: `A court booking has been cancelled.\n\n❌ CANCELLED\n📅 ${cancelDate}\n⏰ ${booking.time}\n📍 ${booking.courtName} — Mono Tennis Club\n\nThe calendar invite has been removed. You can rebook from Dashboard → Book Court.`,
-              timestamp: new Date().toISOString(),
-              read: false,
-            };
-            apiCall('/api/mobile/conversations', 'POST', { toId: participant.id, text: msg.text }).catch((err) => {
-            console.error(`[booking] Failed to send cancel message to ${participant.name}:`, err);
-            reportError(err, 'API');
-          });
-          });
-
-          // Send cancellation emails to booker + all participants (fire and forget)
-          const cancelRecipients: { email: string; name: string }[] = [];
-          const bookerMember = members.find(m => m.id === booking.userId);
-          if (bookerMember?.email) {
-            cancelRecipients.push({ email: bookerMember.email, name: bookerMember.name });
-          }
-          booking.participants!.forEach((p) => {
-            const member = members.find(m => m.id === p.id);
-            if (member?.email) {
-              cancelRecipients.push({ email: member.email, name: member.name });
-            }
-          });
-          if (cancelRecipients.length > 0) {
-            fetchWithRetry('/api/booking-email', {
-              method: 'DELETE',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                recipients: cancelRecipients,
-                cancelledBy: booking.userName,
-                courtName: booking.courtName,
-                date: booking.date,
-                time: booking.time,
-              }),
-            }, 'Cancellation');
-          }
-        });
-      }
-
-      return prev.map(b => b.id === id ? { ...b, status: 'cancelled' as const } : b);
-    });
-    // Persist via server-side validated API — rollback on failure
-    apiCall('/api/dashboard/bookings', 'DELETE', { bookingId: id }).catch((err) => {
-      reportError(err, 'DashboardBookingAPI');
+    // Optimistic UI: mark booking as cancelled immediately
+    setBookings(prev => prev.map(b => b.id === id ? { ...b, status: 'cancelled' as const } : b));
+    // Persist via server-side API — cancellation notifications (bell, push, email, message)
+    // are handled server-side by /api/mobile/bookings DELETE
+    apiCall('/api/mobile/bookings', 'DELETE', { bookingId: id }).catch((err) => {
+      reportError(err, 'API');
       setBookings(prev => prev.map(b => b.id === id ? { ...b, status: 'confirmed' as const } : b));
       showToast(err.message || 'Failed to cancel booking. Please try again.', 'error');
     });
-  }, [members]);
+  }, []);
 
   // Participant confirmation — marks a participant as confirmed on a booking
   const confirmParticipant = useCallback((bookingId: string, participantId: string) => {

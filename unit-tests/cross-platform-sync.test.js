@@ -85,8 +85,10 @@ describe('Dashboard → API Route Consistency', () => {
     expect(storeContent).toMatch(/apiCall\('\/api\/notify-push'.*'POST'/);
   });
 
-  it('Bookings: Dashboard → /api/dashboard/bookings POST', () => {
-    expect(storeContent).toContain('/api/dashboard/bookings');
+  it('Bookings: Dashboard → /api/mobile/bookings (unified route)', () => {
+    expect(storeContent).toContain('/api/mobile/bookings');
+    // No separate /api/dashboard/bookings — all booking mutations go through one route
+    expect(storeContent).not.toContain('/api/dashboard/bookings');
   });
 });
 

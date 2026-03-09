@@ -3,21 +3,8 @@ import { authenticateMobileRequest, getAdminClient, sanitizeInput, isRateLimited
 import { sendPushToUser } from '../../lib/push';
 import crypto from 'crypto';
 
-// sendPushToUser imported from ../../lib/push (shared utility)
-
-/** Helper: create a bell notification in Supabase */
-async function createNotification(
-  supabase: ReturnType<typeof getAdminClient>,
-  userId: string,
-  notif: { id: string; type: string; title: string; body: string; timestamp: string }
-) {
-  await supabase.from('notifications').insert({
-    id: notif.id, user_id: userId, type: notif.type,
-    title: notif.title, body: notif.body, timestamp: notif.timestamp, read: false,
-  }).then(({ error }) => {
-    if (error) console.error(`[conversations] Failed to create notification for ${userId}:`, error.message);
-  });
-}
+// Shared utilities
+import { createNotification } from '../../lib/notifications';
 
 export async function GET(request: Request) {
   const authResult = await authenticateMobileRequest(request);
