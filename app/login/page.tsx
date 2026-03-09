@@ -739,7 +739,7 @@ function LoginContent() {
           </div>
 
           {/* Sign-In Options */}
-          <div className="space-y-0 max-w-lg rounded-2xl overflow-hidden" style={{ border: '1px solid #e0dcd3', background: '#fff' }}>
+          <div className="space-y-4 max-w-lg">
             {/* Google Sign-In (primary) */}
             <button
               type="button"
@@ -748,8 +748,8 @@ function LoginContent() {
                 const { error } = await signInWithGoogle('/dashboard');
                 if (error) setLoginError(error);
               }}
-              className="login-btn-google w-full py-4 font-medium text-base transition-all active:scale-[0.97] flex items-center justify-center gap-3"
-              style={{ background: 'rgba(107,122,61,0.025)', border: 'none', color: '#5a5f4a', minHeight: 52 }}
+              className="login-btn-google w-full py-4 rounded-2xl font-medium text-base transition-all active:scale-[0.97] flex items-center justify-center gap-3"
+              style={{ background: '#fff', border: '1px solid #e0dcd3', color: '#5a5f4a', minHeight: 52 }}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
@@ -760,14 +760,8 @@ function LoginContent() {
               Continue with Google
             </button>
 
-            {/* Divider */}
-            <div className="flex items-center px-5" style={{ background: '#fff' }}>
-              <div style={{ flex: 1, height: 1, background: '#e0dcd3' }} />
-              <span className="px-3 text-xs" style={{ color: '#b0ab9f' }}>or</span>
-              <div style={{ flex: 1, height: 1, background: '#e0dcd3' }} />
-            </div>
             {/* Magic Link: email input + button grouped */}
-            <div>
+            <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid #e0dcd3', background: '#fff' }}>
               <div className="relative">
                 <input
                   id="login-email"
