@@ -189,6 +189,12 @@ The three platforms are:
 - Suggest tests proactively — don't wait to be asked
 - If you can't write the test (e.g. no Playwright browsers in Cowork), note it in MEMORY.md as pending
 
+## #23: MIGRATIONS — ALWAYS PRINT THE SQL
+**When creating a DB migration, ALWAYS print the full SQL in the chat so the user can paste it into the Supabase SQL Editor.**
+- Don't just say "run the migration" or "use `npm run db:push`" — the user pastes SQL manually.
+- Print the SQL as a code block right in the response.
+- Still create the migration file in `supabase/migrations/` for version control.
+
 ## PROJECT OVERVIEW
 - **Mono Tennis Club** — Next.js 14 + TypeScript (strict mode) + Tailwind CSS monorepo
 - **Deployment**: Railway (standard Node.js server) — NOT Vercel, NOT serverless

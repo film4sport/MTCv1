@@ -781,6 +781,34 @@ Closed ALL notification asymmetries. Every action fires symmetric bell + push + 
 - **Calendar date tap**: Tapping a date with event dot only highlights it, doesn't show event details below. May be by design.
 - **Login screen click-through**: On mobile viewport, clicks on Google login button can pass through to home elements behind the overlay. Z-index/pointer-events issue.
 
+## Cowork Session 2026-03-08 (Optimizations)
+
+### E2E Fix
+- Fixed flaky test `mobile-pwa-flows.spec.js:157` ("can navigate to settings screen") — added `waitForFunction` before calling `MTC.fn.navigateTo('settings')` to match the pattern used by all other passing navigation tests. Also hardened the "profile redirects to settings" test (line 140) with the same pattern.
+
+### Optimizations Implemented
+1. **Admin code splitting** — `admin.js` (1,819 lines, 67KB) and `captain.js` (372 lines, 10KB) split out of main bundle into lazy-loaded `admin.bundle.js/css` and `captain.bundle.js/css`. Main bundle dropped from ~360KB to ~283KB JS (21% smaller). Loaded on demand via `loadLazyBundle()` in `navigation.js`. Non-admin users never download admin code.
+2. **API cache headers** — Added `cachedJson()` helper in `auth-helper.ts`. Applied to 8 GET endpoints:
+   - Events, courts, programs, settings: `public, max-age=300, stale-while-revalidate=60`
+   - Members, partners: `private, max-age=60, stale-while-revalidate=30`
+   - Bookings: `private, max-age=30`
+   - Announcements: `private, max-age=120, stale-while-revalidate=60`
+3. **React.memo** — Wrapped `PageSkeleton` and `TabletNagBanner` (the only components that don't use `useApp()` context). Other components use `useApp()` so memo won't help until context is split.
+4. **Service worker runtime caching** — Added stale-while-revalidate strategy for `/api/mobile/*` GET requests in `sw.js`. API responses now return cached data immediately while refreshing in background. Auth endpoint excluded.
+5. **Conversations DB indexes** — Added individual indexes on `member_a` and `member_b` columns. The existing composite index `(member_a, member_b)` doesn't help OR queries in RLS policies. Migration: `20260309_add_conversation_individual_indexes.sql`.
+
+### Optimizations Analyzed But Deferred
+- **Window.* overwrites**: Analyzed — they're decorator/wrapper patterns (guest guard, skeleton events), not conflicting definitions. No action needed.
+- **Dynamic imports**: App Router already code-splits each `page.tsx` route. Only booking page needs `next/dynamic` for heavy modals (already done).
+- **Skeleton setTimeout chains**: Most are legitimate UI timing (100ms DOM-ready delays). Admin/captain init improved via lazy-load callbacks.
+- **Supabase vendor lib (160KB)**: Deeply integrated (auth + realtime + channels). Risk too high for minimal gain. Already cached by SW.
+- **Store.tsx context split**: 40+ values in one context = every change re-renders all consumers. This is the highest-impact remaining optimization but requires a major refactor (touches every dashboard page). Should be a dedicated session.
+
+### Pending
+- Run migration `20260309_add_conversation_individual_indexes.sql` on production Supabase
+- Deploy to Railway with all optimization changes
+- Store.tsx context split (separate session)
+
 ## TODO / REMINDERS
 - **Deploy to Railway** — all pending changes (welcome guard, admin name override, booking cancel fix, cross-platform migration, sidebar fix, events calendar, login mockup, settings scroll fix, login text, attendee count fix, drawer fix)
 - **Delete orphaned Alex RSVP** — `DELETE FROM event_attendees WHERE user_name = 'Alex';` on production Supabase
