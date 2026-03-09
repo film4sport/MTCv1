@@ -62,6 +62,24 @@ Before reporting any feature change as "done", verify:
 - **deleteMessage stale closure**: `deleteMessage`, `deleteConversation`, `markConversationRead` all read from stale `conversations` state via closure. Refactored to capture snapshots inside `setConversations(prev => ...)` functional updater, removing `conversations` from useCallback deps.
 - **Second message not persisting**: Supabase Realtime fires on messages table INSERT, triggering `fetchConversations()` which replaces entire conversations state — wiping optimistic messages not yet persisted. Added 1.5s debounce to messages Realtime handler so rapid sends complete before state is overwritten.
 
+**Welcome message bug fix (Mar 9):**
+- **Welcome msg sent on every login**: OAuth callback `auth/callback/route.ts` sent welcome tasks (message + notifications) for ALL OAuth logins, not just first signup. The DB guard (checking if `welcome-{userId}` message exists) was fragile — failed if message was deleted or RLS blocked the query. Added robust primary guard: if `user.created_at` is older than 5 minutes, skip all welcome tasks immediately. The DB check remains as a secondary guard for rapid re-auth scenarios.
+
+**Mark Taylor (coach@mtc.ca) deletion:**
+- Cannot delete via Supabase dashboard because `delete_member` RPC explicitly blocks deletion when user has coaching programs (`coaching_programs.coach_id` FK). Must DELETE from `coaching_programs` WHERE `coach_id` = Mark's ID first, then call `delete_member`. The coaching_programs table column is `title` (not `name`).
+
+**Dashboard testing results (Mar 9, production @ monotennisclub.com):**
+- All 10 sidebar nav links load correctly (Home, Book Court, My Schedule, Partners, Events, Messages, Settings, Book Lessons, My Team, Admin Panel)
+- Hamburger menu Settings/Profile works (session expiry causes expected redirect to login)
+- Page refresh on any page — nav stays functional
+- Notification bell opens panel with real notifications
+- Events: Calendar view shows dots for May events, List view renders correctly
+- Admin Panel: Members table (12 members), Courts tab (4 courts), Announcements tab (compose form)
+- Book Court: Week view, all 4 courts with lighting info, date selector, booking rules sidebar
+- Partners: Filter tabs (type + skill level), empty state with CTA
+- Messages: Conversation list, message view with bubbles/timestamps/read receipts, search icon
+- Settings: Profile header (avatar, role badge, member since), Personal Info (editable name), skill level selector, notification prefs toggles, Mobile App link, Your Data export, Legal links
+
 **Profile differences between Dashboard and Mobile PWA (known, NOT YET FIXED):**
 - Dashboard has: Avatar picker, Member Since date, Role badge — Mobile PWA missing these
 - Mobile PWA has: Availability prefs, Play Style prefs — Dashboard missing these
