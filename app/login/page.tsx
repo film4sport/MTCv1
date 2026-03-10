@@ -129,10 +129,10 @@ function LoginContent() {
                 Book courts and lessons, find partners, and message members
               </p>
               <p className="text-base" style={{ whiteSpace: 'nowrap' as const, paddingLeft: '83%' }}>
-                all in one place,
+                all in one place
               </p>
               <p className="text-base" style={{ whiteSpace: 'nowrap' as const, paddingLeft: '97%' }}>
-                on any device.
+                on any device
               </p>
             </div>
 
