@@ -73,8 +73,31 @@ Before reporting any feature change as "done", verify:
 - `nslookup www.monotennisclub.com` → resolves to `66.33.22.1` (Railway via CNAME)
 - User needs to add A record for `@` pointing to Weebly IPs (if keeping Weebly redirect) or Railway IPs
 
+**Mobile PWA admin panel visual redesign (`admin.css` + `index.html`):**
+- Complete CSS overhaul for light theme compatibility — was entirely dark-theme hardcoded
+- **Key fixes**: Replaced all `rgba(30,36,20,0.6)` card bgs with `var(--bg-card)`, `rgba(0,0,0,0.3)` input bgs with `var(--bg-primary)`, `rgba(200,255,0,...)` borders with `var(--border-color)`, unreadable volt-on-white text with `var(--text-primary)`. Removed duplicate `.admin-stat-card` definition that was overriding gradient version.
+- **Stat cards**: Added colored gradient classes (volt, coral, blue, dark) + SVG icons to the 4 dashboard stat cards in `index.html`
+- **Tab bar**: Light bg with subtle border, active tab has `var(--bg-primary)` bg + shadow (light) or volt tint (dark)
+- **Filter buttons**: Active = inverted (dark fill on light, volt tint on dark)
+- **Badges**: Colors slightly darkened for light-theme readability (e.g. `#dc2626` instead of `#ef4444`)
+- **Dark theme**: Added `[data-theme="dark"]` overrides throughout for proper dark mode support
+- **Both themes verified** in BDG — light and dark look polished
+- admin.css: 989→1048 lines, mobile PWA rebuilt, cache: `mtc-court-e51e27a1`
+
+**8 polish improvements (KISS approach):**
+1. **Sticky tab bar**: `position: sticky; top: 0; z-index: 10; flex-shrink: 0` — stays visible when scrolling long tab content
+2. **Shimmer loading**: `@keyframes adminShimmer` pulse on `.admin-stat-value.loading` — stat values show subtle pulse until data loads, then `el.classList.remove('loading')` in JS
+3. **Card title SVG icons**: Lock (Gate Code), Download (Export), Clock (Peak Times), Bar Chart (Court Usage), Dollar (Revenue), People (Member Activity), Pulse (Monthly Trends), X-Square (Court Blocks), Send (Announcements)
+4. **Refresh button**: Replaced header spacer with rotate-on-tap refresh button. Calls `refreshAdminTab()` which invalidates current tab's cache and reloads
+5. **Stat card tap feedback**: `:active { transform: scale(0.96) }` with 0.15s transition
+6. **Member count badge**: `<span class="admin-tab-badge" id="adminMemberCountBadge">` on Members tab, updated in both `renderAnalyticsCards()` and `loadMembersList()`
+7. **Better empty states**: SVG icons + clearer messages for empty peak times and revenue sections
+8. **Unique export icons**: Members=person, Payments=dollar, Court Usage=bar chart (was all identical download icons)
+- admin.css: 1048→~1110 lines, admin.js updated, index.html updated
+- All 4 admin tabs verified in BDG (light theme): Dashboard, Members, Courts, Announcements
+
 **Still pending:**
-- Visual verification of admin member list (can't auth into dashboard from Cowork — no demo login visible)
+- Visual verification of admin member list on desktop dashboard (can't auth into dashboard from Cowork — no demo login visible)
 - Tests for the member list redesign (no new functionality, just UI rearrangement — existing tests should still pass)
 
 ### Cowork Session (2026-03-09 evening) — Login Page Visual Polish
