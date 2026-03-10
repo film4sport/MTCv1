@@ -124,21 +124,14 @@ function LoginContent() {
 
           {/* Content */}
           <div className="relative z-10 text-center my-auto py-4" style={{ maxWidth: 780, width: '100%' }}>
-            <h2 className="headline-font text-2xl xl:text-3xl mb-2 login-app-title" style={{ color: '#2a2f1e' }}>
-              MTC Court App
-            </h2>
-            <p className="text-sm mb-5 max-w-md mx-auto" style={{ color: '#6b7266' }}>
-              Book courts and lessons, find partners, and message members — all in one place.
-            </p>
-
             {/* ── Device mockups — perspective showcase ── */}
             <div style={{ perspective: 1200, display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: 20 }}>
 
             {/* Row 1: Phone + Tablet */}
-            <div style={{ display: 'flex', gap: 24, justifyContent: 'center', alignItems: 'flex-end' }}>
+            <div style={{ display: 'flex', gap: 24, justifyContent: 'center', alignItems: 'stretch' }}>
 
             {/* ── Phone Mockup ── */}
-            <div style={{ textAlign: 'center' }}>
+            <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column' as const, justifyContent: 'flex-start' }}>
             <div style={{ width: 162, height: 333, position: 'relative' }}>
             <div style={{ transform: 'scale(0.52)', transformOrigin: 'top left', position: 'absolute', top: 0, left: 0 }}>
               <div style={{
@@ -305,11 +298,14 @@ function LoginContent() {
               </div>
             </div>{/* end phone scale */}
             </div>{/* end phone wrapper */}
-            <p className="text-xs font-medium mt-1.5" style={{ color: '#8a8578' }}>Mobile</p>
+            <p className="text-xs mt-auto pt-1.5" style={{ color: '#8a8578', letterSpacing: '0.1em', textTransform: 'uppercase' as const, fontWeight: 400 }}>Mobile</p>
             </div>{/* end phone col */}
 
             {/* ── Tablet Mockup ── */}
-            <div style={{ textAlign: 'center' }}>
+            <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column' as const }}>
+            <p className="text-base" style={{ color: '#6b7266', fontWeight: 500, maxWidth: 304, lineHeight: 1.5, flex: 1, display: 'flex', alignItems: 'flex-start' }}>
+              Book courts and lessons, find partners, and message members — all in one.
+            </p>
             <div style={{ width: 304, height: 236, position: 'relative' }}>
             <div style={{ transform: 'scale(0.62)', transformOrigin: 'top left', position: 'absolute', top: 0, left: 0 }}>
               <div style={{
@@ -497,7 +493,7 @@ function LoginContent() {
               </div>
             </div>{/* end tablet scale */}
             </div>{/* end tablet wrapper */}
-            <p className="text-xs font-medium mt-1.5" style={{ color: '#8a8578' }}>Tablet</p>
+            <p className="text-xs mt-auto pt-1.5" style={{ color: '#8a8578', letterSpacing: '0.1em', textTransform: 'uppercase' as const, fontWeight: 400 }}>Tablet</p>
             </div>{/* end tablet col */}
 
             </div>{/* end Row 1 */}
@@ -658,7 +654,7 @@ function LoginContent() {
                 </div>
               </div>
               {/* No laptop base — clean screen view */}
-              <p className="text-xs font-medium mt-2" style={{ color: '#8a8578' }}>Desktop</p>
+              <p className="text-xs mt-2" style={{ color: '#8a8578', letterSpacing: '0.1em', textTransform: 'uppercase' as const, fontWeight: 400 }}>Desktop</p>
             </div>
 
             </div>{/* end perspective wrapper */}
@@ -733,7 +729,7 @@ function LoginContent() {
               className="mx-auto"
               style={{ height: 72, width: 'auto', marginBottom: 14, opacity: 0.88 }}
             />
-            <p className="login-title-breathe text-sm" style={{ color: '#8a8578', transformOrigin: 'center center' }}>
+            <p className="login-title-breathe text-sm" style={{ color: '#6b7266', transformOrigin: 'center center' }}>
               Your courts, your community.
             </p>
           </div>
