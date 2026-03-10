@@ -86,10 +86,14 @@
     var openCourts = _adminCourts.filter(function(c) { return c.status !== 'maintenance'; });
 
     var el;
-    el = document.getElementById('statBookingsMonth'); if (el) el.textContent = thisMonth.length;
-    el = document.getElementById('statBookingsTotal'); if (el) el.textContent = confirmed.length;
-    el = document.getElementById('statActiveMembers'); if (el) el.textContent = activeMembers.length;
-    el = document.getElementById('statCourtsOpen'); if (el) el.textContent = openCourts.length + '/' + _adminCourts.length;
+    el = document.getElementById('statBookingsMonth'); if (el) { el.textContent = thisMonth.length; el.classList.remove('loading'); }
+    el = document.getElementById('statBookingsTotal'); if (el) { el.textContent = confirmed.length; el.classList.remove('loading'); }
+    el = document.getElementById('statActiveMembers'); if (el) { el.textContent = activeMembers.length; el.classList.remove('loading'); }
+    el = document.getElementById('statCourtsOpen'); if (el) { el.textContent = openCourts.length + '/' + _adminCourts.length; el.classList.remove('loading'); }
+
+    // Update member count badge on Members tab
+    var memberBadge = document.getElementById('adminMemberCountBadge');
+    if (memberBadge) memberBadge.textContent = _adminMembers.length;
   }
 
   function renderPeakTimes() {
@@ -105,7 +109,7 @@
       counts[key] = (counts[key] || 0) + 1;
     });
     var sorted = Object.entries(counts).sort(function(a, b) { return b[1] - a[1]; }).slice(0, 5);
-    if (!sorted.length) { container.innerHTML = '<div class="admin-empty-state">No booking data yet</div>'; return; }
+    if (!sorted.length) { container.innerHTML = '<div class="admin-empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>No bookings yet this season</div>'; return; }
     var maxCount = sorted[0][1];
     container.innerHTML = sorted.map(function(entry) {
       var pct = Math.round((entry[1] / maxCount) * 100);
@@ -151,7 +155,7 @@
 
     var total = 0;
     Object.keys(categories).forEach(function(k) { total += categories[k].amount; });
-    if (total === 0) { barEl.innerHTML = ''; legendEl.innerHTML = '<div class="admin-empty-state">No revenue data</div>'; return; }
+    if (total === 0) { barEl.innerHTML = ''; legendEl.innerHTML = '<div class="admin-empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>No revenue data yet</div>'; return; }
 
     var colors = { adult: '#6b7a3d', family: '#d4e157', junior: '#a3b356' };
     var barHtml = '';
@@ -197,7 +201,7 @@
       memberBookings[name] = (memberBookings[name] || 0) + 1;
     });
     var sorted = Object.entries(memberBookings).sort(function(a, b) { return b[1] - a[1]; }).slice(0, 5);
-    if (!sorted.length) { container.innerHTML = '<div class="admin-empty-state">No booking data yet</div>'; return; }
+    if (!sorted.length) { container.innerHTML = '<div class="admin-empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>No bookings yet this season</div>'; return; }
     var maxCount = sorted[0][1];
     container.innerHTML = sorted.map(function(entry, i) {
       var pct = Math.round((entry[1] / maxCount) * 100);
@@ -348,6 +352,8 @@
       .then(function(data) {
         _adminMembers = data.members || [];
         renderMembersList();
+        var badge = document.getElementById('adminMemberCountBadge');
+        if (badge) badge.textContent = _adminMembers.length;
       })
       .catch(function() { showToast('Failed to load members'); });
   }
@@ -771,6 +777,15 @@
   window.initAdminPanel = function() {
     _adminDataLoaded = {};
     switchAdminTab('dashboard');
+  };
+
+  // Refresh current tab data
+  window.refreshAdminTab = function() {
+    var activeTab = document.querySelector('.admin-tabs-bar .admin-tab.active');
+    var tab = activeTab ? activeTab.getAttribute('data-tab') : 'dashboard';
+    _adminDataLoaded[tab] = false;
+    switchAdminTab(tab);
+    if (typeof showToast === 'function') showToast('Refreshing...');
   };
 
   window.postAnnouncement = function() {
