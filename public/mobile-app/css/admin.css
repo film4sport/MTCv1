@@ -41,10 +41,7 @@
   margin-right: 6px;
 }
 
-/* Admin menu item visibility */
-.menu-item.admin-hidden {
-  display: none;
-}
+/* NOTE: .menu-item.admin-hidden rule moved to menu-notifications.css (always loaded) */
 
 /* ============================================
    ADMIN DASHBOARD CHARTS

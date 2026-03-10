@@ -46,6 +46,37 @@ Before reporting any feature change as "done", verify:
 - **Coaching panel access (Mar 8)**: Sidebar now shows "Book Lessons" link for both coaches AND admins (was coach-only). Sidebar.tsx line 145: `(isCoach || isAdmin)`.
 - **Coaching program bookings**: `db.createBooking` is still used in the coaching program creation flow (line 966 of store.tsx). This is coach-only (coaching panel), not admin. Coaches create program bookings (type: 'program') via the coaching panel.
 
+### Cowork Session (2026-03-10) — Admin Bug Fix + Member List Redesign + Login Tablet Fix
+
+**Mobile PWA admin access bug fix:**
+- **Root cause**: Two issues combined: (1) `.menu-item.admin-hidden { display: none }` was in lazy-loaded `admin.css` — not loaded on page load, so the class was a no-op and the admin menu item was visible to ALL users. (2) `interactive.js` loaded users from localStorage on reload but didn't toggle admin menu visibility.
+- **Fix 1**: Moved `.admin-hidden` rule from `css/admin.css` to `css/menu-notifications.css` (always loaded)
+- **Fix 2**: Added admin/captain menu visibility logic to `interactive.js` (lines 90-105) after localStorage user load, mirroring `completeLogin()` in auth.js
+- Mobile PWA rebuilt (`npm run build:mobile`), cache: `mtc-court-e51e27a1`
+
+**Dashboard admin member list redesign (`AdminMembersTab.tsx`):**
+- Replaced 10-column wide table (required horizontal scroll) with condensed expandable card rows
+- **Summary stats bar**: Total, Active, Paused, Mono, Out of Town counts at top
+- **Enhanced filters**: Status (All/Active/Paused), Role (All/Members/Coaches/Admins), Team (All/A/B), Residence (All/Mono/Out of Town), Skill (All/Beginner/Intermediate/Advanced/Competitive) — all as compact filter chips
+- **Sortable**: Name, Role, Skill, Status, Since — with ascending/descending toggle
+- **Card rows**: Primary line = avatar + name + role badge + status dot + captain badge. Secondary line = email + membership + skill + team badges. Click to expand: residence, member since, status details, and action buttons (Captain, Pause/Reactivate, Cancel)
+- **Search**: Added search icon + clear button to search input
+- Same props interface — no changes needed to parent `page.tsx`
+- tsc clean, 409 lines (was 215)
+
+**Login page tablet-view calendar fix (`app/login/page.tsx`):**
+- Tablet-view mockup container height reduced from 380→360px (wrapper 236→224px) to match desktop's inner screen area (380 - 20px bezel padding = 360)
+- Nav bar now overlaps the calendar's bottom row (blue "today" day partially behind glass nav) — matches the desktop tablet mockup's liquid glass iOS effect
+
+**DNS diagnosis (monotennisclub.com):**
+- `nslookup monotennisclub.com` → NXDOMAIN (no A record for root domain)
+- `nslookup www.monotennisclub.com` → resolves to `66.33.22.1` (Railway via CNAME)
+- User needs to add A record for `@` pointing to Weebly IPs (if keeping Weebly redirect) or Railway IPs
+
+**Still pending:**
+- Visual verification of admin member list (can't auth into dashboard from Cowork — no demo login visible)
+- Tests for the member list redesign (no new functionality, just UI rearrangement — existing tests should still pass)
+
 ### Cowork Session (2026-03-09 evening) — Login Page Visual Polish
 
 **Login page (`app/login/page.tsx`) changes:**

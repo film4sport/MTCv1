@@ -777,10 +777,10 @@ function LoginContent() {
 
           {/* Tablet version (640px - 1024px) — same as desktop mockup, no bezel */}
           <div className="hidden sm:flex lg:hidden mb-6 flex-col items-center">
-            <div style={{ width: 304, height: 236, position: 'relative' }}>
+            <div style={{ width: 304, height: 224, position: 'relative' }}>
             <div style={{ transform: 'scale(0.62)', transformOrigin: 'top left', position: 'absolute', top: 0, left: 0 }}>
               <div style={{
-                width: 490, height: 380, background: 'rgba(245,242,235,0.85)', borderRadius: 20,
+                width: 490, height: 360, background: 'rgba(245,242,235,0.85)', borderRadius: 20,
                 overflow: 'hidden', position: 'relative', display: 'flex', flexDirection: 'column' as const,
                 backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
                 boxShadow: '0 8px 32px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.6)',
