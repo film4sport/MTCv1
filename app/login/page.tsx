@@ -672,7 +672,7 @@ function LoginContent() {
         </div>
 
         {/* Right Side: Login Form */}
-        <div className="login-right-panel w-full lg:w-1/3 flex flex-col px-5 sm:px-8 md:px-10 lg:px-8 xl:px-12 py-8 lg:py-10 lg:min-h-screen relative" style={{ overflowY: 'auto', scrollbarWidth: 'none' }}>
+        <div className="login-right-panel w-full lg:w-1/3 flex flex-col px-5 sm:px-8 md:px-10 lg:px-8 xl:px-12 py-8 lg:py-10 lg:min-h-screen relative max-w-lg mx-auto lg:max-w-none lg:mx-0" style={{ overflowY: 'auto', scrollbarWidth: 'none' }}>
           {/* Subtle radial accent glow behind card */}
           <div className="absolute pointer-events-none" style={{ top: '20%', right: '-10%', width: '70%', height: '50%', background: 'radial-gradient(ellipse at center, rgba(107, 122, 61, 0.08) 0%, transparent 70%)', filter: 'blur(40px)' }} />
           {/* Noise texture overlay */}
@@ -689,45 +689,275 @@ function LoginContent() {
           {/* Glass morphism card */}
           <div className="login-glass-card relative z-10">
 
-          {/* Mobile App Preview (mobile/tablet only) */}
-          <div className="lg:hidden mb-6 rounded-2xl p-4 border overflow-hidden" style={{ background: '#f0f0f0', borderColor: '#e0dcd3' }}>
-            <p className="text-xs uppercase tracking-wider font-semibold mb-3" style={{ color: '#999' }}>App Preview</p>
-            {/* Quick Actions mini grid */}
-            <p style={{ fontFamily: "'Bebas Neue', 'Inter', sans-serif", fontSize: 15, letterSpacing: 1, color: '#0a0a0a', marginBottom: 6 }}>QUICK ACTIONS</p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 6, marginBottom: 10 }}>
-              <div style={{ background: '#c8ff00', borderRadius: 12, padding: '8px 10px', height: 56, display: 'flex', flexDirection: 'column' as const, justifyContent: 'space-between' }}>
-                <svg width="16" height="16" fill="none" stroke="#0a0a0a" viewBox="0 0 24 24" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 13, letterSpacing: 0.8, color: '#0a0a0a' }}>BOOK COURT</p>
-              </div>
-              <div style={{ background: '#ff5a5f', borderRadius: 12, padding: '8px 10px', height: 56, display: 'flex', flexDirection: 'column' as const, justifyContent: 'space-between' }}>
-                <svg width="16" height="16" fill="none" stroke="#fff" viewBox="0 0 24 24" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 13, letterSpacing: 0.8, color: '#fff' }}>FIND PARTNER</p>
-              </div>
-              <div style={{ background: '#00d4ff', borderRadius: 12, padding: '8px 10px', height: 56, display: 'flex', flexDirection: 'column' as const, justifyContent: 'space-between' }}>
-                <svg width="16" height="16" fill="none" stroke="#0a0a0a" viewBox="0 0 24 24" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 13, letterSpacing: 0.8, color: '#0a0a0a' }}>CLUB EVENTS</p>
-              </div>
-              <div style={{ background: '#0a0a0a', borderRadius: 12, padding: '8px 10px', height: 56, display: 'flex', flexDirection: 'column' as const, justifyContent: 'space-between' }}>
-                <svg width="16" height="16" fill="none" stroke="#fff" viewBox="0 0 24 24" strokeWidth="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 13, letterSpacing: 0.8, color: '#fff' }}>MY SCHEDULE</p>
+          {/* Mobile App Preview — phone mockup on phone, tablet mockup on tablet */}
+          {/* Phone version (< 640px) */}
+          <div className="sm:hidden mb-6 flex flex-col items-center">
+            <p className="text-xs mb-3" style={{ color: '#8a8578', letterSpacing: '0.1em', textTransform: 'uppercase' as const, fontWeight: 400 }}>App Preview</p>
+            <div style={{ width: 200, background: '#1a1f12', borderRadius: 28, padding: 6, boxShadow: '0 20px 50px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.06)' }}>
+              <div style={{ width: '100%', background: '#0d1208', borderRadius: 22, overflow: 'hidden', position: 'relative' }}>
+                {/* Dynamic Island */}
+                <div style={{ position: 'absolute', top: 6, left: '50%', transform: 'translateX(-50%)', width: 60, height: 16, background: '#000', borderRadius: 10, zIndex: 10 }} />
+                {/* Screen content */}
+                <div style={{ padding: '28px 10px 8px' }}>
+                  {/* Header */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <div style={{ width: 14, height: 14, borderRadius: '50%', background: 'linear-gradient(135deg, #c8ff00, #6b7a3d)', border: '1px solid rgba(200,255,0,0.3)' }} />
+                      <div style={{ width: 14, height: 14, borderRadius: '50%', background: 'rgba(88,68,150,0.25)', border: '1px solid rgba(88,68,150,0.2)' }} />
+                    </div>
+                    <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 11, letterSpacing: 1.5, color: '#e8e4d9' }}>MTC COURT</p>
+                    <div style={{ display: 'flex', gap: 4 }}>
+                      <div style={{ width: 14, height: 14, borderRadius: '50%', background: 'rgba(232,228,217,0.08)' }} />
+                      <div style={{ width: 14, height: 14, borderRadius: '50%', background: 'rgba(232,228,217,0.08)' }} />
+                    </div>
+                  </div>
+                  {/* Quick Actions */}
+                  <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 9, letterSpacing: 1.2, color: '#e8e4d9', marginBottom: 5 }}>QUICK ACTIONS</p>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4, marginBottom: 8 }}>
+                    <div style={{ background: '#c8ff00', borderRadius: 8, padding: '6px 6px 5px', height: 38 }}>
+                      <svg width="10" height="10" fill="none" stroke="#0a0a0a" viewBox="0 0 24 24" strokeWidth="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                      <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 7.5, letterSpacing: 0.5, color: '#0a0a0a', marginTop: 2 }}>BOOK COURT</p>
+                    </div>
+                    <div style={{ background: '#ff5a5f', borderRadius: 8, padding: '6px 6px 5px', height: 38 }}>
+                      <svg width="10" height="10" fill="none" stroke="#fff" viewBox="0 0 24 24" strokeWidth="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                      <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 7.5, letterSpacing: 0.5, color: '#fff', marginTop: 2 }}>FIND PARTNER</p>
+                    </div>
+                    <div style={{ background: '#00d4ff', borderRadius: 8, padding: '6px 6px 5px', height: 38 }}>
+                      <svg width="10" height="10" fill="none" stroke="#0a0a0a" viewBox="0 0 24 24" strokeWidth="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                      <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 7.5, letterSpacing: 0.5, color: '#0a0a0a', marginTop: 2 }}>CLUB EVENTS</p>
+                    </div>
+                    <div style={{ background: '#0a0a0a', borderRadius: 8, padding: '6px 6px 5px', height: 38 }}>
+                      <svg width="10" height="10" fill="none" stroke="#fff" viewBox="0 0 24 24" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                      <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 7.5, letterSpacing: 0.5, color: '#fff', marginTop: 2 }}>MY SCHEDULE</p>
+                    </div>
+                  </div>
+                  {/* Event preview */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                    <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 9, letterSpacing: 1, color: '#e8e4d9' }}>UPCOMING EVENTS</p>
+                    <span style={{ fontSize: 7, color: '#8a8578' }}>SEE ALL →</span>
+                  </div>
+                  <div style={{ background: 'rgba(232,228,217,0.06)', border: '1px solid rgba(232,228,217,0.08)', borderRadius: 8, padding: '5px 6px', display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <div style={{ background: '#c8ff00', borderRadius: 5, padding: '2px 4px', textAlign: 'center', minWidth: 22 }}>
+                      <div style={{ fontSize: 6, color: '#0a0a0a', fontWeight: 700 }}>MAY</div>
+                      <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 10, color: '#0a0a0a', lineHeight: 1 }}>9</div>
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <p style={{ fontSize: 8, fontWeight: 600, color: '#e8e4d9' }}>Opening Day BBQ</p>
+                      <p style={{ fontSize: 6, color: '#8a8578' }}>1:00 PM • All Courts</p>
+                    </div>
+                    <div style={{ background: '#c8ff00', borderRadius: 4, padding: '2px 6px', fontSize: 6.5, fontWeight: 700, color: '#0a0a0a' }}>RSVP</div>
+                  </div>
+                </div>
+                {/* Bottom nav */}
+                <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', padding: '6px 0 8px', borderTop: '1px solid rgba(232,228,217,0.06)' }}>
+                  <div style={{ textAlign: 'center' }}>
+                    <svg width="10" height="10" fill="none" stroke="#e8e4d9" viewBox="0 0 24 24" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+                    <p style={{ fontSize: 5, color: '#e8e4d9', marginTop: 1 }}>HOME</p>
+                  </div>
+                  <div style={{ textAlign: 'center' }}>
+                    <svg width="10" height="10" fill="none" stroke="#8a8578" viewBox="0 0 24 24" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <p style={{ fontSize: 5, color: '#8a8578', marginTop: 1 }}>SCHEDULE</p>
+                  </div>
+                  <div style={{ width: 22, height: 22, borderRadius: '50%', background: '#c8ff00', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <svg width="12" height="12" fill="none" stroke="#0a0a0a" viewBox="0 0 24 24" strokeWidth="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  </div>
+                  <div style={{ textAlign: 'center' }}>
+                    <svg width="10" height="10" fill="none" stroke="#8a8578" viewBox="0 0 24 24" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                    <p style={{ fontSize: 5, color: '#8a8578', marginTop: 1 }}>PARTNERS</p>
+                  </div>
+                  <div style={{ textAlign: 'center', position: 'relative' }}>
+                    <svg width="10" height="10" fill="none" stroke="#8a8578" viewBox="0 0 24 24" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    <div style={{ position: 'absolute', top: -2, right: -2, width: 7, height: 7, borderRadius: '50%', background: '#ff5a5f', border: '1px solid #0d1208' }} />
+                    <p style={{ fontSize: 5, color: '#8a8578', marginTop: 1 }}>MESSAGES</p>
+                  </div>
+                </div>
               </div>
             </div>
-            {/* One event preview */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-              <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 15, letterSpacing: 1, color: '#0a0a0a' }}>UPCOMING EVENTS</p>
-              <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 10, color: '#0a0a0a', letterSpacing: 0.8 }}>SEE ALL →</span>
-            </div>
-            <div style={{ background: 'rgba(255,255,255,0.75)', border: '1.5px solid rgba(0,0,0,0.08)', borderRadius: 12, padding: '8px 10px', display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div style={{ background: '#c8ff00', borderRadius: 8, padding: '4px 6px', textAlign: 'center', minWidth: 34 }}>
-                <div style={{ fontSize: 9, color: '#0a0a0a', fontWeight: 700 }}>MAY</div>
-                <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 15, color: '#0a0a0a', lineHeight: 1 }}>9</div>
-              </div>
-              <div style={{ flex: 1 }}>
-                <p style={{ fontSize: 11, fontWeight: 600, color: '#0a0a0a' }}>Opening Day BBQ</p>
-                <p style={{ fontSize: 9, color: '#666' }}>1:00 PM • All Courts • Free</p>
-              </div>
-              <div style={{ background: '#c8ff00', borderRadius: 6, padding: '4px 10px', fontSize: 10, fontWeight: 700, color: '#0a0a0a' }}>RSVP</div>
-            </div>
+          </div>
+
+          {/* Tablet version (640px - 1024px) — same as desktop mockup, no bezel */}
+          <div className="hidden sm:flex lg:hidden mb-6 flex-col items-center">
+            <div style={{ width: 304, height: 236, position: 'relative' }}>
+            <div style={{ transform: 'scale(0.62)', transformOrigin: 'top left', position: 'absolute', top: 0, left: 0 }}>
+              <div style={{
+                width: 490, height: 380, background: 'rgba(245,242,235,0.85)', borderRadius: 20,
+                overflow: 'hidden', position: 'relative', display: 'flex', flexDirection: 'column' as const,
+                backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.6)',
+                border: '1px solid rgba(255,255,255,0.4)',
+              }}>
+                  {/* Camera dot */}
+                  <div style={{ position: 'absolute', top: 8, left: '50%', transform: 'translateX(-50%)', width: 7, height: 7, background: '#333', borderRadius: '50%', zIndex: 10 }} />
+
+                  {/* Header */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 18px 8px' }}>
+                    <div style={{ display: 'flex', gap: 2, background: '#e8e4d9', borderRadius: 16, padding: 2, boxShadow: '2px 2px 5px rgba(0,0,0,0.06), -2px -2px 5px rgba(255,255,255,0.8)' }}>
+                      <div style={{ width: 20, height: 20, background: '#fff', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+                        <svg width="9" height="9" fill="none" stroke="#f59e0b" viewBox="0 0 24 24" strokeWidth="2.5"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+                      </div>
+                      <div style={{ width: 20, height: 20, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(88,68,150,0.12)' }}>
+                        <svg width="9" height="9" fill="none" stroke="#6b5ba7" viewBox="0 0 24 24" strokeWidth="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'center' }}>
+                      <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 17, letterSpacing: 3, color: '#1a1f12' }}>MTC COURT</div>
+                      <div style={{ height: 2, borderRadius: 2, background: 'linear-gradient(90deg, #c8ff00, #00d4ff, #ff5a5f, #c8ff00)', backgroundSize: '200% 100%', animation: 'accentShimmer 8s linear infinite' }} />
+                    </div>
+                    <div style={{ display: 'flex', gap: 5 }}>
+                      <div style={{ width: 26, height: 26, background: '#e8e4d9', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '2px 2px 5px rgba(0,0,0,0.06), -2px -2px 5px rgba(255,255,255,0.8)', position: 'relative' }}>
+                        <svg width="12" height="12" fill="none" stroke="#555" viewBox="0 0 24 24" strokeWidth="1.8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                        <span style={{ position: 'absolute', top: -3, right: -3, width: 12, height: 12, background: '#ff3b30', borderRadius: '50%', fontSize: 7, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, border: '1.5px solid #f5f2eb' }}>2</span>
+                      </div>
+                      <div style={{ width: 26, height: 26, background: '#e8e4d9', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '2px 2px 5px rgba(0,0,0,0.06), -2px -2px 5px rgba(255,255,255,0.8)' }}>
+                        <svg width="12" height="12" fill="none" stroke="#555" viewBox="0 0 24 24" strokeWidth="1.8"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Tablet content: Quick Actions + Events on top, Calendar below */}
+                  <div style={{ flex: 1, overflow: 'hidden', padding: '2px 16px 0', display: 'flex', flexDirection: 'column' as const, gap: 8 }}>
+                    {/* Top row: Quick Actions (left) + Events (right) */}
+                    <div style={{ display: 'flex', gap: 12 }}>
+                      {/* Left: Quick Actions 2x2 */}
+                      <div style={{ flex: 1 }}>
+                        <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 11, letterSpacing: 1.5, color: '#1a1f12', marginBottom: 6, textAlign: 'left' }}>QUICK ACTIONS</p>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 6 }}>
+                          {[
+                            { bg: '#c8ff00', label: 'BOOK', fg: '#0a0a0a', icon: <><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></> },
+                            { bg: '#ff5a5f', label: 'PARTNER', fg: '#fff', icon: <><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></> },
+                            { bg: '#00d4ff', label: 'EVENTS', fg: '#0a0a0a', icon: <><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></> },
+                            { bg: '#1a1f12', label: 'SCHEDULE', fg: '#e8e4d9', icon: <><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></> },
+                          ].map(a => (
+                            <div key={a.label} style={{
+                              background: a.bg, borderRadius: 14, height: 62, padding: '8px 10px',
+                              display: 'flex', flexDirection: 'column' as const, justifyContent: 'space-between', alignItems: 'flex-start',
+                              boxShadow: a.bg === '#1a1f12'
+                                ? '3px 3px 8px rgba(0,0,0,0.3), -1px -1px 4px rgba(255,255,255,0.05)'
+                                : `3px 3px 8px ${a.bg}33, -2px -2px 6px rgba(255,255,255,0.7)`,
+                            }}>
+                              <svg width="18" height="18" fill="none" stroke={a.fg} viewBox="0 0 24 24" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{a.icon}</svg>
+                              <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 10, letterSpacing: 0.8, color: a.fg }}>{a.label}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      {/* Right: Events */}
+                      <div style={{ flex: 1.2 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                          <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 11, letterSpacing: 1.5, color: '#1a1f12' }}>UPCOMING EVENTS</p>
+                          <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 8, color: '#1a1f12', letterSpacing: 0.5 }}>SEE ALL →</span>
+                        </div>
+                        {[
+                          { month: 'MAR', day: '14', title: 'Euchre Tournament', time: 'Sat Evening' },
+                          { month: 'MAY', day: '9', title: 'Opening Day BBQ', time: '1:00 PM' },
+                          { month: 'MAY', day: '12', title: "Men's Round Robin", time: '9:00 AM' },
+                        ].map(evt => (
+                          <div key={evt.day + evt.month} style={{
+                            background: '#fff', borderRadius: 10, padding: '5px 8px', marginBottom: 4,
+                            display: 'flex', alignItems: 'center', gap: 7,
+                            boxShadow: '3px 3px 6px rgba(0,0,0,0.06), -2px -2px 5px rgba(255,255,255,0.8)',
+                            border: '1px solid rgba(0,0,0,0.03)',
+                          }}>
+                            <div style={{ background: '#c8ff00', borderRadius: 7, padding: '3px 6px', textAlign: 'center', minWidth: 28 }}>
+                              <div style={{ fontSize: 5, color: '#0a0a0a', fontWeight: 700 }}>{evt.month}</div>
+                              <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 13, color: '#0a0a0a', lineHeight: 1 }}>{evt.day}</div>
+                            </div>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <p style={{ fontSize: 8, fontWeight: 700, color: '#1a1f12', whiteSpace: 'nowrap' as const, overflow: 'hidden', textOverflow: 'ellipsis' }}>{evt.title}</p>
+                              <p style={{ fontSize: 6, color: '#888' }}>{evt.time}</p>
+                            </div>
+                            <span style={{ background: '#c8ff00', borderRadius: 6, padding: '3px 8px', fontSize: 7, fontWeight: 700, color: '#0a0a0a', flexShrink: 0 }}>RSVP</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    {/* Bottom: Club Calendar — glassmorphic container */}
+                    <div style={{
+                      background: 'rgba(255,255,255,0.45)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
+                      borderRadius: 14, padding: '10px 10px 8px',
+                      border: '1px solid rgba(255,255,255,0.6)',
+                      boxShadow: '0 4px 16px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.7)',
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                        <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 13, color: '#1a1f12' }}>March 2026</span>
+                        <div style={{ display: 'flex', gap: 4 }}>
+                          <div style={{ width: 18, height: 18, background: 'rgba(255,255,255,0.5)', borderRadius: 5, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <svg width="8" height="8" fill="none" stroke="#555" viewBox="0 0 24 24" strokeWidth="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+                          </div>
+                          <div style={{ width: 18, height: 18, background: 'rgba(255,255,255,0.5)', borderRadius: 5, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <svg width="8" height="8" fill="none" stroke="#555" viewBox="0 0 24 24" strokeWidth="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                          </div>
+                        </div>
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2, marginBottom: 3 }}>
+                        {['S','M','T','W','T','F','S'].map((d, i) => (
+                          <div key={d + i} style={{ fontSize: 6, fontWeight: 700, color: '#999', textAlign: 'center' }}>{d}</div>
+                        ))}
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2 }}>
+                        {Array.from({ length: 31 }, (_, i) => i + 1).map(day => {
+                          const isToday = day === 7;
+                          const hasEvent = [9, 14, 21, 28].includes(day);
+                          const isPast = day < 7;
+                          return (
+                            <div key={day} style={{
+                              aspectRatio: '1', display: 'flex', flexDirection: 'column' as const, alignItems: 'center', justifyContent: 'center',
+                              fontSize: 7, borderRadius: 5, fontWeight: isToday ? 700 : 500,
+                              background: isToday ? '#00d4ff' : '#fff',
+                              color: isToday ? '#0a0a0a' : isPast ? '#ccc' : '#333',
+                              boxShadow: isToday
+                                ? 'inset 2px 2px 4px rgba(0,180,220,0.3), inset -2px -2px 4px rgba(255,255,255,0.5)'
+                                : '2px 2px 4px rgba(0,0,0,0.06), -2px -2px 4px rgba(255,255,255,0.9)',
+                              position: 'relative' as const,
+                            }}>
+                              {day}
+                              {hasEvent && !isToday && (
+                                <div style={{ position: 'absolute', bottom: 2, left: '50%', transform: 'translateX(-50%)', width: 3, height: 3, borderRadius: '50%', background: '#ff5a5f', boxShadow: '0 0 3px rgba(255,90,95,0.5)' }} />
+                              )}
+                            </div>
+                          );
+                        })}
+                        {Array.from({ length: 4 }, (_, i) => (
+                          <div key={`empty-${i}`} style={{ aspectRatio: '1', borderRadius: 5 }} />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Bottom Nav — liquid glass (matching desktop) */}
+                  <div style={{
+                    position: 'absolute', bottom: 8, left: 10, right: 10, zIndex: 20,
+                    display: 'flex', justifyContent: 'space-around', alignItems: 'center', padding: '8px 6px',
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.7), rgba(255,255,255,0.5))',
+                    backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
+                    border: '1px solid rgba(255,255,255,0.6)', borderRadius: 24,
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.8)',
+                  }}>
+                    {['HOME', 'SCHEDULE'].map((l, i) => (
+                      <div key={l} style={{ display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: 2, color: i === 0 ? '#1a1f12' : '#999', fontSize: 6, fontWeight: 600, letterSpacing: 0.3 }}>
+                        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d={i === 0 ? 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' : 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'} /></svg>
+                        {l}
+                      </div>
+                    ))}
+                    <div style={{ width: 38, height: 38, marginTop: -22, background: '#c8ff00', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 16px rgba(200,255,0,0.5)', border: '2px solid rgba(255,255,255,0.6)' }}>
+                      <svg width="14" height="14" fill="none" stroke="#1a1f12" viewBox="0 0 24 24" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    </div>
+                    {[
+                      { label: 'PARTNERS', d: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z', badge: 0 },
+                      { label: 'MESSAGES', d: 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z', badge: 1 },
+                    ].map(n => (
+                      <div key={n.label} style={{ display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: 2, color: '#999', fontSize: 6, fontWeight: 600, letterSpacing: 0.3 }}>
+                        <div style={{ position: 'relative' }}>
+                          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d={n.d} /></svg>
+                          {n.badge > 0 && <span style={{ position: 'absolute', top: -3, right: -5, minWidth: 10, height: 10, background: '#ef4444', borderRadius: 5, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 6, fontWeight: 700, color: '#fff', padding: '0 2px', lineHeight: 1, boxShadow: '0 1px 3px rgba(0,0,0,0.3)' }}>{n.badge}</span>}
+                        </div>
+                        {n.label}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+            </div>{/* end tablet scale */}
+            </div>{/* end tablet wrapper */}
           </div>
 
           {/* Logo + Welcome */}
