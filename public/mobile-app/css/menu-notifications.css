@@ -92,6 +92,11 @@
   /* No flex, just flow naturally */
 }
 
+/* Admin/captain menu item visibility — MUST be in always-loaded CSS (not lazy admin.css) */
+.menu-item.admin-hidden {
+  display: none;
+}
+
 .menu-item {
   display: flex;
   align-items: center;

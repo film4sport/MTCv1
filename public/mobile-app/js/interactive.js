@@ -86,6 +86,24 @@
       document.getElementById('login-screen').classList.remove('active');
       document.getElementById('bottomNav').style.display = 'block';
 
+      // Show/hide admin & captain menu items based on role (mirrors completeLogin() in auth.js)
+      var adminMenuItem = document.getElementById('menuAdminItem');
+      if (adminMenuItem) {
+        if (currentUser.role === 'admin' || currentUser.role === 'coach') {
+          adminMenuItem.classList.remove('admin-hidden');
+        } else {
+          adminMenuItem.classList.add('admin-hidden');
+        }
+      }
+      var captainMenuItem = document.getElementById('menuCaptainItem');
+      if (captainMenuItem) {
+        if (currentUser.interclubTeam && currentUser.interclubTeam !== 'none') {
+          captainMenuItem.classList.remove('admin-hidden');
+        } else {
+          captainMenuItem.classList.add('admin-hidden');
+        }
+      }
+
       // Apply guest restrictions and route to correct screen
       if (typeof applyGuestRestrictions === 'function') applyGuestRestrictions();
 
