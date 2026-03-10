@@ -46,6 +46,19 @@ Before reporting any feature change as "done", verify:
 - **Coaching panel access (Mar 8)**: Sidebar now shows "Book Lessons" link for both coaches AND admins (was coach-only). Sidebar.tsx line 145: `(isCoach || isAdmin)`.
 - **Coaching program bookings**: `db.createBooking` is still used in the coaching program creation flow (line 966 of store.tsx). This is coach-only (coaching panel), not admin. Coaches create program bookings (type: 'program') via the coaching panel.
 
+### Cowork Session (2026-03-09 evening) — Login Page Visual Polish
+
+**Login page (`app/login/page.tsx`) changes:**
+- **Breathing tagline animation**: Removed opacity shift from `titleBreathe` keyframe — now scale-only (`scale(1)` → `scale(1.03)`)
+- **Tagline color**: Changed from `#8a8578` to `#6b7266` (consistent with mobile app)
+- **Removed "MTC COURT" h2**: Was redundant with logo on card and mockup headers
+- **Tagline bumped**: `text-sm` → `text-base`, `fontWeight: 500`
+- **Mockup labels**: MOBILE, TABLET, DESKTOP all styled with `letterSpacing: '0.1em'`, `textTransform: 'uppercase'`, `fontWeight: 400`
+- **Staggered tagline text**: Three lines with cascading `paddingLeft` (0% / 83% / 97%): "Book courts and lessons, find partners, and message members" / "all in one place" / "on any device". No punctuation.
+- **Tablet-view mockup (640-1024px)**: Shows glassmorphic iPad mockup (`rgba(245,242,235,0.85)`, `backdrop-blur(16px)`) with same content as desktop tablet mockup (header with animated shimmer bar, quick actions, events, full 31-day calendar with electric blue today, liquid glass nav bar) — no dark bezel, no "TABLET" label, no "APP PREVIEW" label
+- **Desktop tablet mockup**: Kept dark `#1a1f12` bezel (user approved)
+- **Login section centered on tablet**: `max-w-lg mx-auto lg:max-w-none lg:mx-0`
+
 ### Cowork Session (2026-03-09) — Onboarding Upgrade + Bug Fixes + Context Splitting
 
 **Onboarding upgrade (both platforms):**
