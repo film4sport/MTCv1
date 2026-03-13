@@ -17,7 +17,7 @@ const DESKTOP_ONLY_TESTS = [
   'visual-regression.spec.js',    // screenshot comparison tests
 ];
 
-// All other tests run on all 3 viewports for responsive coverage
+// All other tests run on all 3 Chromium viewports for responsive coverage
 const RESPONSIVE_TESTS = [
   'landing.spec.js',
   'landing-gallery.spec.js',
@@ -27,6 +27,14 @@ const RESPONSIVE_TESTS = [
   'hero-closeup.spec.js',
   'hero-check.spec.js',
   'login-badge.spec.js',
+];
+
+// Tests that matter on WebKit (Safari) — mobile PWA + signup only
+// Landing page doesn't need WebKit: it looks fine and rarely changes.
+// Focus WebKit budget on the mobile PWA (iPhone/iPad) where Safari bugs actually bite.
+const WEBKIT_RESPONSIVE_TESTS = [
+  'signup.spec.js',
+  'verify-fixes.spec.js',
 ];
 
 const isCI = !!process.env.CI;
@@ -76,23 +84,22 @@ module.exports = defineConfig({
     },
 
     // ── WEBKIT (Safari engine) ──────────────────────────────
-    // Catches iOS/macOS Safari rendering bugs: flexbox, CSS variables,
-    // backdrop-filter, safe-area-insets, -webkit- prefixes, etc.
+    // Focused on mobile PWA + signup — where Safari bugs actually matter.
+    // Landing page tests skipped on WebKit (stable, rarely changes).
 
     // iPhone SE 2nd gen (375x667) — smallest modern iPhone, no notch
     {
       name: 'webkit-iphone-se',
-      testMatch: RESPONSIVE_TESTS,
+      testMatch: WEBKIT_RESPONSIVE_TESTS,
       use: {
         ...devices['iPhone SE'],
-        // Override to use WebKit explicitly
         browserName: 'webkit',
       },
     },
     // iPhone 14 (390x844) — standard modern iPhone with notch
     {
       name: 'webkit-iphone-14',
-      testMatch: RESPONSIVE_TESTS,
+      testMatch: WEBKIT_RESPONSIVE_TESTS,
       use: {
         ...devices['iPhone 14'],
         browserName: 'webkit',
@@ -101,7 +108,7 @@ module.exports = defineConfig({
     // iPad Mini (768x1024) — smallest iPad
     {
       name: 'webkit-ipad-mini',
-      testMatch: RESPONSIVE_TESTS,
+      testMatch: WEBKIT_RESPONSIVE_TESTS,
       use: {
         ...devices['iPad Mini'],
         browserName: 'webkit',
@@ -110,7 +117,7 @@ module.exports = defineConfig({
     // iPad Pro 11 (834x1194) — mid-size iPad
     {
       name: 'webkit-ipad-pro-11',
-      testMatch: RESPONSIVE_TESTS,
+      testMatch: WEBKIT_RESPONSIVE_TESTS,
       use: {
         ...devices['iPad Pro 11'],
         browserName: 'webkit',

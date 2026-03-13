@@ -53,6 +53,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'PIN must be exactly 4 digits' }, { status: 400 });
     }
 
+    if (!supabaseUrl || !supabaseServiceKey) {
+      // Don't reveal whether email exists — same 401 as "not found"
+      return NextResponse.json({ error: 'Invalid email or PIN' }, { status: 401 });
+    }
+
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Find user by email
