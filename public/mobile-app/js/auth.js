@@ -260,6 +260,8 @@
         return;
       }
       var origin = window.location.origin;
+      // Set redirect hint so /auth/complete knows to return to mobile PWA
+      try { localStorage.setItem('mtc-auth-redirect', '/mobile-app/index.html'); } catch(e) {}
       sb.auth.signInWithOtp({
         email: email,
         options: {

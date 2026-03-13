@@ -1,12 +1,12 @@
-/* tablet.css - iPad/Tablet overrides (768px+) */
+/* tablet.css - iPad/Tablet overrides (744px+) */
 /* ============================================
    TABLET LAYOUT ENHANCEMENTS
-   Target: iPad (768px-1024px) and wider tablets
+   Target: iPad Mini (744px) through iPad Pro 12.9" (1024px)
    Strategy: More breathing room, wider grids,
    larger touch targets, centered content
 ============================================ */
 
-@media (min-width: 768px) {
+@media (min-width: 744px) {
 
   /* ── Global Spacing ── */
   .screen {
@@ -256,8 +256,48 @@
   }
 }
 
+/* ── iPad Pro 12.9" (1024px+) — wider content ── */
+@media (min-width: 1024px) {
+  .court-status-grid,
+  .quick-actions,
+  .events-list,
+  .event-cards,
+  .chat-messages,
+  .chat-input-area,
+  .partner-cards,
+  .social-feed,
+  .message-item,
+  .notifications-list,
+  .schedule-container,
+  .time-slots-container,
+  .skeleton-slot-grid,
+  .partner-requests,
+  .admin-tabs-bar,
+  .admin-tab-content {
+    max-width: 900px;
+  }
+
+  .profile-section,
+  .settings-section {
+    max-width: 720px;
+  }
+
+  .nav-bar {
+    max-width: 720px;
+  }
+
+  .modal-content,
+  .action-sheet {
+    max-width: 600px;
+  }
+
+  .login-card {
+    max-width: 480px;
+  }
+}
+
 /* ── Landscape-specific (wider iPads) ── */
-@media (min-width: 768px) and (orientation: landscape) {
+@media (min-width: 744px) and (orientation: landscape) {
   .court-status-grid {
     grid-template-columns: repeat(4, 1fr);
     max-width: 900px;

@@ -329,8 +329,8 @@ body {
   }
 }
 
-/* Also catch iPad specifically via pointer media query */
-@media (pointer: coarse) and (min-width: 768px) {
+/* Also catch iPad specifically via pointer media query (744px = iPad Mini) */
+@media (pointer: coarse) and (min-width: 744px) {
   #app {
     background-image: none;
     background-color: var(--bg-primary);
