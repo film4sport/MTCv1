@@ -148,7 +148,7 @@ export async function POST(request: NextRequest) {
       metadata: { source: 'pin-signup', membershipType: memType },
     });
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       token: session?.token,
       user: {
@@ -170,6 +170,17 @@ export async function POST(request: NextRequest) {
         familyMembers: [],
       },
     });
+    // Set session cookie for middleware auth check
+    if (session?.token) {
+      response.cookies.set('mtc-session', session.token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 30 * 24 * 60 * 60, // 30 days
+      });
+    }
+    return response;
   } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }

@@ -237,6 +237,39 @@
           familyMembers: result.data.user.familyMembers || []
         });
         try { localStorage.setItem('mtc-remembered-email', _pinSetupEmail); } catch(e) {}
+      } else {
+        // PIN was set but no session returned — auto-login with the new PIN
+        fetch('/api/auth/pin-login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: _pinSetupEmail, pin: pin })
+        })
+        .then(function(r2) { return r2.json().then(function(d2) { return { ok: r2.ok, data: d2 }; }); })
+        .then(function(loginResult) {
+          if (loginResult.ok && loginResult.data.token && loginResult.data.user) {
+            finishLogin(_pinSetupEmail, {
+              name: loginResult.data.user.name,
+              email: loginResult.data.user.email,
+              role: loginResult.data.user.role,
+              userId: loginResult.data.user.id,
+              accessToken: loginResult.data.token,
+              membershipType: loginResult.data.user.membershipType || 'adult',
+              familyId: loginResult.data.user.familyId || null,
+              residence: loginResult.data.user.residence || 'mono',
+              interclubTeam: loginResult.data.user.interclubTeam || 'none',
+              interclubCaptain: loginResult.data.user.interclubCaptain === true,
+              familyMembers: loginResult.data.user.familyMembers || []
+            });
+            try { localStorage.setItem('mtc-remembered-email', _pinSetupEmail); } catch(e) {}
+          } else {
+            showToast('PIN set. Please sign in with your new PIN.');
+            backFromPinSetup();
+          }
+        })
+        .catch(function() {
+          showToast('PIN set. Please sign in with your new PIN.');
+          backFromPinSetup();
+        });
       }
     })
     .catch(function() {

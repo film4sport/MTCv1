@@ -54,7 +54,6 @@ export async function POST(request: NextRequest) {
     }
 
     if (!supabaseUrl || !supabaseServiceKey) {
-      // Don't reveal whether email exists — same 401 as "not found"
       return NextResponse.json({ error: 'Invalid email or PIN' }, { status: 401 });
     }
 
@@ -162,7 +161,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({
+    const res = NextResponse.json({
       success: true,
       token: session.token,
       user: {
@@ -184,6 +183,15 @@ export async function POST(request: NextRequest) {
         familyMembers,
       },
     });
+    // Set session cookie for middleware auth check
+    res.cookies.set('mtc-session', session.token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 30 * 24 * 60 * 60, // 30 days
+    });
+    return res;
   } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
