@@ -44,6 +44,9 @@ jobs:
       - name: Build Next.js
         run: npm run build
 
+      - name: Build Mobile PWA
+        run: npm run build:mobile
+
       - name: Run unit tests
         run: npm run test:unit
 
@@ -51,7 +54,9 @@ jobs:
       - name: Cache Next.js build
         uses: actions/cache/save@v4
         with:
-          path: .next
+          path: |
+            .next
+            public/mobile-app/dist
           key: nextjs-build-${{ github.sha }}
 
   # ── E2E Tests (Playwright) — sharded across 2 parallel jobs ──
@@ -73,10 +78,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Restore Next.js build
+      - name: Restore Next.js + Mobile PWA build
         uses: actions/cache/restore@v4
         with:
-          path: .next
+          path: |
+            .next
+            public/mobile-app/dist
           key: nextjs-build-${{ github.sha }}
 
       - name: Install Playwright browsers
