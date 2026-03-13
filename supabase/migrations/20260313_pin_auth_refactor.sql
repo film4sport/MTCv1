@@ -10,6 +10,10 @@
 --   - Update delete_member RPC
 -- ============================================================
 
+-- ─── 0. Drop FK to auth.users ─────────────────────────────
+-- profiles.id previously referenced auth.users(id) — remove that dependency
+ALTER TABLE profiles DROP CONSTRAINT IF EXISTS profiles_id_fkey;
+
 -- ─── 1. Add PIN columns to profiles ─────────────────────
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS pin_hash text;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS pin_reset_code text;

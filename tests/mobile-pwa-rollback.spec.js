@@ -140,6 +140,9 @@ test.describe('Mobile PWA — Rollback Behavior', () => {
     await page.goto(MOBILE_URL, { waitUntil: 'load', timeout: 30000 });
     await dismissOnboarding(page);
 
+    // Wait for bottom nav to be visible (interactive.js shows it after reading mtc-user from localStorage)
+    await page.waitForSelector('#bottomNav', { state: 'visible', timeout: 5000 });
+
     // Navigate to My Bookings (schedule tab)
     const scheduleTab = page.locator('.bottom-nav .nav-item').nth(1);
     await scheduleTab.click({ force: true });
@@ -201,6 +204,9 @@ test.describe('Mobile PWA — Rollback Behavior', () => {
 
     await page.goto(MOBILE_URL, { waitUntil: 'load', timeout: 30000 });
     await dismissOnboarding(page);
+
+    // Wait for bottom nav to be visible (interactive.js shows it after reading mtc-user from localStorage)
+    await page.waitForSelector('#bottomNav', { state: 'visible', timeout: 5000 });
 
     // Navigate to partners tab
     const partnersTab = page.locator('.bottom-nav .nav-item').nth(3);
@@ -302,6 +308,9 @@ test.describe('Mobile PWA — Rollback Behavior', () => {
 
     await page.goto(MOBILE_URL, { waitUntil: 'load', timeout: 30000 });
     await dismissOnboarding(page);
+
+    // Wait for bottom nav to be visible (interactive.js shows it after reading mtc-user from localStorage)
+    await page.waitForSelector('#bottomNav', { state: 'visible', timeout: 5000 });
 
     // Navigate to messages tab
     const messagesTab = page.locator('.bottom-nav .nav-item').nth(4);

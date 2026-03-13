@@ -40,27 +40,25 @@ test.describe('Mobile PWA — Login Screen', () => {
   test('login screen renders with all elements', async ({ page }) => {
     await expect(page.locator('#login-screen')).toBeVisible();
     await expect(page.locator('#loginEmail')).toBeVisible();
-    // Auth uses Google + Magic Link (no password field)
-    await expect(page.locator('.login-btn-google')).toBeVisible();
-    await expect(page.locator('.login-btn-magic')).toBeVisible();
+    // Auth uses email + 4-digit PIN (no Google, no magic link)
+    await expect(page.locator('#loginPin')).toBeVisible();
+    await expect(page.locator('#pinLoginBtn')).toBeVisible();
   });
 
-  test('magic link validates empty email', async ({ page }) => {
-    // Click magic link with empty email — should show error
-    await page.locator('.login-btn-magic').click();
+  test('PIN login validates empty email', async ({ page }) => {
+    // Click sign in with empty email — should show error
+    await page.locator('#pinLoginBtn').click();
     await page.waitForTimeout(500);
     const errors = page.locator('.field-error');
     await expect(errors.first()).toBeAttached();
   });
 
-  test('magic link validates invalid email format', async ({ page }) => {
-    await page.fill('#loginEmail', 'not-an-email');
-    await page.locator('.login-btn-magic').click();
+  test('PIN login validates empty PIN', async ({ page }) => {
+    await page.fill('#loginEmail', 'test@example.com');
+    await page.locator('#pinLoginBtn').click();
     await page.waitForTimeout(500);
-    const emailError = page.locator('#loginEmail ~ .field-error, #loginEmail + .field-error').or(
-      page.locator('.field-error').filter({ hasText: /email/i })
-    );
-    await expect(emailError.first()).toBeAttached();
+    const pinError = page.locator('.field-error');
+    await expect(pinError.first()).toBeAttached();
   });
 
   test('signup card toggle works', async ({ page }) => {
@@ -72,7 +70,7 @@ test.describe('Mobile PWA — Login Screen', () => {
     await expect(signupCard).toBeVisible();
     await expect(page.locator('#signupName')).toBeVisible();
     await expect(page.locator('#signupEmail')).toBeVisible();
-    // Password field was removed (passwordless auth — Google + Magic Link only)
+    await expect(page.locator('#signupEmailConfirm')).toBeVisible();
   });
 
   test('signup form validates empty fields', async ({ page }) => {
@@ -175,8 +173,8 @@ test.describe('Mobile PWA — Booking UI', () => {
 });
 
 test.describe('Mobile PWA — API Endpoint', () => {
-  test('mobile auth endpoint rejects empty credentials', async ({ request }) => {
-    const response = await request.post('/api/mobile-auth', {
+  test('PIN login endpoint rejects empty credentials', async ({ request }) => {
+    const response = await request.post('/api/auth/pin-login', {
       data: {},
     });
     expect(response.status()).toBe(400);
@@ -184,11 +182,11 @@ test.describe('Mobile PWA — API Endpoint', () => {
     expect(body.error).toBeTruthy();
   });
 
-  test('mobile auth endpoint rejects invalid credentials', async ({ request }) => {
-    const response = await request.post('/api/mobile-auth', {
-      data: { email: 'nonexistent@test.com', password: 'wrongpassword' },
+  test('PIN login endpoint rejects invalid credentials', async ({ request }) => {
+    const response = await request.post('/api/auth/pin-login', {
+      data: { email: 'nonexistent@test.com', pin: '0000' },
     });
-    // Should be 401 (unauthorized) not 500 (server error)
+    // Should be 401 (unauthorized) or 429 (rate limited)
     expect([401, 429]).toContain(response.status());
   });
 

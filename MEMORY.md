@@ -38,7 +38,15 @@
 - **Kept**: `app/api/mobile-auth/config/route.ts` (returns Supabase URL + anon key for Realtime).
 - **New routes**: `/api/auth/pin-login`, `/api/auth/pin-setup`, `/api/auth/forgot-pin`, `/api/auth/verify-code`, `/api/auth/signup`, `/api/auth/session`.
 - **New tests**: `unit-tests/pin-auth.test.js` (132 tests) — covers all 6 routes, auth helper, cross-platform no-supabase.auth checks, deleted files, client functions, DOM elements, weak PIN fuzzing.
-- **Supabase dashboard cleanup after deploy**: Disable Google OAuth provider, disable email/magic link, remove redirect URLs. Don't delete `auth.users` table (Supabase manages it internally).
+- **Supabase dashboard cleanup after deploy**: Disable all auth providers (Google OAuth, email/magic link, signup toggle). Don't delete `auth.users` table (Supabase manages it internally).
+- **Confirm email**: Landing page wizard + mobile PWA both require typing email twice (Option A — no email verification). 3 layers: real-time red label/border, disabled Continue button, onClick validation. Case-insensitive comparison.
+- **Client-side weak PIN check**: Both landing page and mobile PWA reject `1234`, `4321`, repeated digits (`/^(\d)\1{3}$/`) at Step 2 (before server round-trip).
+- **Signup rate limit**: 5 attempts per 15 minutes (was 3). In-memory Map, resets on server restart.
+- **Confirmation page redesign**: Step 7 is a contained card (rounded-3xl) with dark gradient top (#1a1f12→#2a2f1e→#3a4028) and white bottom. Animated checkmark, staggered fade-up, avatar initial overlapping dark section, gate code info, apps-in-development note with tester feedback email.
+- **Profiles table = member list**: `auth.users` is no longer the member list. `profiles` table (with `gen_random_uuid()` default on `id`) is the single source of truth for members.
+- **Migration fix**: `profiles_id_fkey` (FK to `auth.users`) must be explicitly dropped — CASCADE from dropping `profiles_pkey` doesn't catch it. Added to migration file.
+- **Resend still needed for**: Forgot PIN reset codes + booking confirmation emails. General member communications use Gmail mailing list, NOT app emails.
+- **Email providers in Supabase**: Can disable ALL (Google OAuth, email/magic link, signup toggle). Auth is 100% custom via API routes now.
 
 ## Pre-Commit Cross-Platform Checklist
 Before reporting any feature change as "done", verify:
@@ -75,7 +83,7 @@ Before reporting any feature change as "done", verify:
 - **Total test count (Mar 8→9)**: Started at 747 (27 files) → 798 (31) → 814 (32) → 1024 (34 files) → **1079 tests across 35 files**, all passing.
 - **Messaging features tests (Mar 9)**: `messaging-features.test.js` (34 tests) — welcome message guards (admin self-skip, idempotency, conversation dedup), welcome cleanup RPC, cleanup API endpoint, admin pinned in member search (both platforms), admin name override, auth callback 24h guard. Filter tab tests removed after UI was removed.
 - **Total test count (Mar 9 updated)**: **1058 tests across 35 files**, all passing. (21 filter tab tests removed with the UI.)
-- **PIN auth refactor (Mar 13)**: Changed 6-digit PIN to 4-digit PIN across all files. Removed welcome messaging from signup flows. Added security warning to all signup/PIN-setup forms. `tsc --noEmit` clean, `npm run build:mobile` clean, **1209 tests across 36 files** all passing. Visual verification done via BDG (signup page + login page).
+- **PIN auth refactor (Mar 13)**: Changed 6-digit PIN to 4-digit PIN across all files. Removed welcome messaging from signup flows. Added security warning to all signup/PIN-setup forms. Confirm email (type twice) on both platforms. Client-side weak PIN check. Rate limit bumped to 5/15min. Confirmation page redesigned as contained card. `tsc --noEmit` clean, `npm run build:mobile` clean, **1209 tests across 36 files**, 610 passing in CI (2 pre-existing failures unrelated to PIN auth).
 - **Rule #2 incident (Mar 9)**: Added filter tabs + cleanup button to messages UI without user asking → had to remove them → broke 21 CI tests. CLAUDE.md #2 strengthened: NEVER add features, functionality, UI elements, API endpoints, RPC functions, or logic the user didn't ask for. Suggest in text only.
 - **Coaching panel access (Mar 8)**: Sidebar now shows "Book Lessons" link for both coaches AND admins (was coach-only). Sidebar.tsx line 145: `(isCoach || isAdmin)`.
 - **Coaching program bookings**: `db.createBooking` is still used in the coaching program creation flow (line 966 of store.tsx). This is coach-only (coaching panel), not admin. Coaches create program bookings (type: 'program') via the coaching panel.
@@ -133,6 +141,47 @@ Before reporting any feature change as "done", verify:
 **Still pending:**
 - Visual verification of admin member list on desktop dashboard (can't auth into dashboard from Cowork — no demo login visible)
 - Tests for the member list redesign (no new functionality, just UI rearrangement — existing tests should still pass)
+
+### Cowork Session (2026-03-13 evening) — PIN Auth Polish + Signup UX
+
+**Confirm email added (both platforms):**
+- Landing page (`app/signup/page.tsx`): Added `emailConfirm` state, "Confirm Email" input with real-time red label/border on mismatch, disabled Continue button when emails don't match, onClick validation guard
+- Mobile PWA (`public/mobile-app/index.html` + `js/auth.js`): Added confirm email input + matching validation in `handleSignUp()`
+
+**Client-side weak PIN check added (both platforms):**
+- Landing page + mobile PWA: Regex `/^(\d)\1{3}$/` + literal `1234`/`4321` check at Step 2 (before API call)
+
+**Signup rate limit bumped:**
+- `app/api/auth/signup/route.ts`: `RATE_MAX` changed from 3 to 5
+
+**Signup confirmation page redesigned (Step 7):**
+- Contained card layout (rounded-3xl) with dark gradient top + white bottom
+- Animated checkmark (check-pop), staggered fade-up animations
+- Avatar initial overlapping dark section
+- Info items: gate code in profile/settings (changes monthly), apps in development (appreciate testers, feedback to monotennisclub1@gmail.com)
+- Removed "payment will be activated" text
+- Gradient CTA buttons (Go to Login, Learn More)
+
+**Migration file updated:**
+- Added `ALTER TABLE profiles DROP CONSTRAINT IF EXISTS profiles_id_fkey;` at top (was printed to user but missing from file)
+
+**Supabase Auth confirmed disabled:**
+- All providers can be disabled (Google OAuth, email/magic link, signup toggle)
+- `profiles` table is now the member list (not `auth.users`)
+- Resend still needed for: Forgot PIN codes + booking confirmation emails
+- General comms via Gmail mailing list, NOT app
+
+**CI results (from user's commit):**
+- 610 passed, 2 failed (pre-existing, not from PIN auth changes):
+  1. `mobile-pwa-rollback.spec.js:173` — partner request delete rolls back (Element not visible — `.bottom-nav .nav-item` nth(3))
+  2. `mobile-pwa.spec.js:48` — magic link validates empty email on WebKit (onboarding overlay intercepts pointer events)
+
+**Files modified:**
+- `app/signup/page.tsx` — confirm email, weak PIN, confirmation page redesign
+- `public/mobile-app/index.html` — confirm email input
+- `public/mobile-app/js/auth.js` — confirm email + weak PIN validation
+- `app/api/auth/signup/route.ts` — rate limit 3→5
+- `supabase/migrations/20260313_pin_auth_refactor.sql` — added profiles_id_fkey drop
 
 ### Cowork Session (2026-03-13) — iOS/iPad Auth Fix + Apple Device Testing
 
