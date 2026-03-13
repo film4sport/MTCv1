@@ -9,6 +9,12 @@ export default function MobileAppBanner() {
   const [dismissed, setDismissed] = useState(true); // default hidden until we check
 
   useEffect(() => {
+    // Don't show on tablets — TabletNagBanner handles those
+    const ua = navigator.userAgent || '';
+    const isIPad = /iPad/.test(ua) || (/Macintosh/.test(ua) && 'ontouchend' in document);
+    const isAndroidTablet = /Android/.test(ua) && !/Mobile/.test(ua);
+    if (isIPad || isAndroidTablet) { setDismissed(true); return; }
+
     const wasDismissed = localStorage.getItem('mtc-mobile-app-dismissed') === 'true';
     if (wasDismissed) { setDismissed(true); return; }
     // Also check Supabase preferences (synced across devices)

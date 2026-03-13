@@ -980,7 +980,8 @@ function LoginContent() {
               type="button"
               onClick={async () => {
                 setLoginError('');
-                const { error } = await signInWithGoogle('/dashboard');
+                // Don't pass nextPath — let /auth/complete auto-detect device
+                const { error } = await signInWithGoogle();
                 if (error) setLoginError(error);
               }}
               className="login-btn-google w-full py-4 rounded-2xl font-medium text-base transition-all active:scale-[0.97] flex items-center justify-center gap-3"
@@ -1029,7 +1030,9 @@ function LoginContent() {
                   }
                   setLoginError('');
                   setLoading(true);
-                  const result = await signInWithMagicLink(email.trim().toLowerCase(), '/dashboard');
+                  // Don't pass nextPath — let /auth/complete auto-detect device
+                  // (iPad/iPhone → mobile PWA, desktop → dashboard)
+                  const result = await signInWithMagicLink(email.trim().toLowerCase());
                   setLoading(false);
                   if (result.error) {
                     setLoginError(result.error);
@@ -1117,7 +1120,7 @@ function LoginContent() {
                     disabled={cooldown > 0 || loading}
                     onClick={async () => {
                       setLoading(true);
-                      const result = await signInWithMagicLink(email.trim().toLowerCase(), '/dashboard');
+                      const result = await signInWithMagicLink(email.trim().toLowerCase());
                       setLoading(false);
                       if (result.error) {
                         setLoginError(result.error);

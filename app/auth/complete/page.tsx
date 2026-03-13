@@ -12,19 +12,31 @@ import { useEffect } from 'react';
  */
 export default function AuthCompletePage() {
   useEffect(() => {
+    // 1. Check explicit redirect hint (set by mobile PWA before magic link)
     try {
       const redirect = localStorage.getItem('mtc-auth-redirect');
       if (redirect) {
         localStorage.removeItem('mtc-auth-redirect');
-        // Append auth hint so the target page knows to check for a session
         const separator = redirect.includes('?') ? '&' : '?';
         window.location.replace(redirect + separator + 'auth=callback');
         return;
       }
     } catch {
-      // localStorage unavailable — fall through to dashboard
+      // localStorage unavailable — fall through
     }
-    // Default: desktop dashboard
+
+    // 2. Auto-detect mobile/tablet: send to mobile PWA instead of dashboard
+    const ua = navigator.userAgent || '';
+    const isIPhone = /iPhone/.test(ua);
+    const isIPad = /iPad/.test(ua) || (/Macintosh/.test(ua) && 'ontouchend' in document);
+    const isAndroidMobile = /Android/.test(ua) && /Mobile/.test(ua);
+    const isAndroidTablet = /Android/.test(ua) && !/Mobile/.test(ua);
+    if (isIPhone || isIPad || isAndroidMobile || isAndroidTablet) {
+      window.location.replace('/mobile-app/index.html?auth=callback');
+      return;
+    }
+
+    // 3. Default: desktop dashboard
     window.location.replace('/dashboard');
   }, []);
 

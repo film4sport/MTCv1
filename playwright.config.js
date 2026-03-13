@@ -1,4 +1,4 @@
-const { defineConfig } = require('@playwright/test');
+const { defineConfig, devices } = require('@playwright/test');
 
 // Tests requiring Supabase auth — only run locally (no env vars in CI)
 const AUTH_TESTS = [
@@ -44,6 +44,8 @@ module.exports = defineConfig({
     navigationTimeout: 30000,
   },
   projects: [
+    // ── CHROMIUM (default) ──────────────────────────────────
+
     // Auth tests — local only (need Supabase credentials)
     ...(!isCI ? [{
       name: 'auth',
@@ -71,6 +73,60 @@ module.exports = defineConfig({
       name: 'mobile',
       testMatch: RESPONSIVE_TESTS,
       use: { viewport: { width: 375, height: 812 } },
+    },
+
+    // ── WEBKIT (Safari engine) ──────────────────────────────
+    // Catches iOS/macOS Safari rendering bugs: flexbox, CSS variables,
+    // backdrop-filter, safe-area-insets, -webkit- prefixes, etc.
+
+    // iPhone SE 2nd gen (375x667) — smallest modern iPhone, no notch
+    {
+      name: 'webkit-iphone-se',
+      testMatch: RESPONSIVE_TESTS,
+      use: {
+        ...devices['iPhone SE'],
+        // Override to use WebKit explicitly
+        browserName: 'webkit',
+      },
+    },
+    // iPhone 14 (390x844) — standard modern iPhone with notch
+    {
+      name: 'webkit-iphone-14',
+      testMatch: RESPONSIVE_TESTS,
+      use: {
+        ...devices['iPhone 14'],
+        browserName: 'webkit',
+      },
+    },
+    // iPad Mini (768x1024) — smallest iPad
+    {
+      name: 'webkit-ipad-mini',
+      testMatch: RESPONSIVE_TESTS,
+      use: {
+        ...devices['iPad Mini'],
+        browserName: 'webkit',
+      },
+    },
+    // iPad Pro 11 (834x1194) — mid-size iPad
+    {
+      name: 'webkit-ipad-pro-11',
+      testMatch: RESPONSIVE_TESTS,
+      use: {
+        ...devices['iPad Pro 11'],
+        browserName: 'webkit',
+      },
+    },
+    // Mobile PWA tests on WebKit (catches Safari-specific JS/layout bugs)
+    {
+      name: 'webkit-mobile-pwa',
+      testMatch: [
+        'mobile-pwa.spec.js',
+        'mobile-pwa-flows.spec.js',
+      ],
+      use: {
+        ...devices['iPhone 14'],
+        browserName: 'webkit',
+      },
     },
   ],
   webServer: {

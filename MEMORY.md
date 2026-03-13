@@ -7,6 +7,14 @@
 - **User flow testing**: Use BDG (Claude in Chrome) + Guerrilla Mail (guerrillamail.com) to create test accounts and test real user flows (Google login, magic link, signup, booking, etc.) before shipping auth changes. Always verify auth flows end-to-end in the browser — never ship auth changes without testing.
 - **Test mock rule**: Before writing/updating E2E test mocks, ALWAYS grep the real source code for the actual localStorage keys, API endpoints, and DOM IDs. Never guess. Past CI failures from wrong mocks: `mtc-current-user` vs `mtc-user`, missing `mtc-onboarding-complete`, asserting on removed `signupPassword` field.
 
+## Apple/Safari Testing Strategy
+- **Playwright WebKit**: Primary automated testing. CI runs 5 WebKit projects alongside Chromium: iPhone SE (375x667), iPhone 14 (390x844), iPad Mini (744x1133), iPad Pro 11" (834x1194), mobile PWA on WebKit. Catches ~80% of Safari CSS/layout bugs.
+- **BDG (Claude in Chrome)**: Live spot-checks on desktop Chromium.
+- **Real devices (user-owned)**: Mac Mini M1 (2020) with Xcode Simulator for all iPhone/iPad models. iPad Mini 6th gen (2021) and iPhone SE 2nd gen (2020) for physical testing.
+- **Device breakpoints**: Tablet CSS starts at `744px` (iPad Mini), iPad Pro 12.9" gets wider content at `1024px`. All iPhones covered by `≤500px` mobile breakpoint.
+- **Auth flow for iOS**: All login methods (magic link, Google OAuth) route through `/auth/complete` which auto-detects device → mobile PWA or dashboard. Never hardcode `/dashboard` as redirect.
+- **CI**: Both `ci.yml` and `pr-check.yml` install `chromium` and `webkit` browsers.
+
 ## Pre-Commit Cross-Platform Checklist
 Before reporting any feature change as "done", verify:
 1. **Grep all three codebases**: `app/dashboard/`, `public/mobile-app/`, `app/api/mobile/`
@@ -99,6 +107,51 @@ Before reporting any feature change as "done", verify:
 **Still pending:**
 - Visual verification of admin member list on desktop dashboard (can't auth into dashboard from Cowork — no demo login visible)
 - Tests for the member list redesign (no new functionality, just UI rearrangement — existing tests should still pass)
+
+### Cowork Session (2026-03-13) — iOS/iPad Auth Fix + Apple Device Testing
+
+**Magic link auth flow — BROKEN, NOW FIXED:**
+- **Root cause**: Multiple issues combined:
+  1. Desktop login page passed `nextPath='/dashboard'` to `signInWithMagicLink()`, so auth callback always redirected to `/dashboard` — even on iPads
+  2. Mobile PWA set `emailRedirectTo` with `?next=/mobile-app/index.html` but never set `mtc-auth-redirect` in localStorage, so `/auth/complete` fell through to `/dashboard`
+  3. Google OAuth from login page also hardcoded `/dashboard`
+- **Fix 1**: Mobile PWA `auth.js` now sets `localStorage.setItem('mtc-auth-redirect', '/mobile-app/index.html')` before sending OTP
+- **Fix 2**: `/auth/complete` page now auto-detects iPhone/iPad/Android via user agent and redirects to `/mobile-app/index.html?auth=callback` instead of `/dashboard`
+- **Fix 3**: Desktop login page (`app/login/page.tsx`) no longer passes `'/dashboard'` to `signInWithMagicLink()` or `signInWithGoogle()` — lets `/auth/complete` handle device detection
+- **Flow now**: Magic link click → `/auth/callback` (exchanges code, sets cookies) → `/auth/complete` (detects device) → mobile PWA or dashboard
+
+**Duplicate banners on iPad dashboard — FIXED:**
+- Both `MobileAppBanner` (green, permanent dismiss) and `TabletNagBanner` (blue, session dismiss) showed on iPads
+- Fix: `MobileAppBanner.tsx` now detects iPad/Android tablet via user agent and hides itself, letting `TabletNagBanner` handle tablets exclusively
+
+**WebKit (Safari) added to Playwright test matrix:**
+- `playwright.config.js` now has 5 WebKit projects: iPhone SE, iPhone 14, iPad Mini, iPad Pro 11", plus mobile PWA on WebKit
+- CI workflows (`ci.yml`, `pr-check.yml`) updated to install both `chromium` and `webkit` browsers
+- Playwright's WebKit engine = Safari's rendering engine — catches ~80% of Safari CSS/layout bugs
+
+**iPad CSS coverage improved:**
+- `tablet.css` breakpoint lowered from `768px` to `744px` — now catches iPad Mini 6th gen (744px width)
+- Added `@media (min-width: 1024px)` block for iPad Pro 12.9" — wider content containers (900px max-width instead of 720px)
+- Landscape breakpoint also updated from `768px` to `744px`
+- `base.css` pointer media query updated from `768px` to `744px`
+- Safe-area-insets already covered in: `#app` (top/left/right), nav bar (bottom/left/right), screen content (bottom), headers (top), login (top/bottom), chat input (bottom)
+- CSS audit confirmed: no Safari-incompatible features in use (no `:has()`, `:is()`, container queries, `overflow: clip`)
+
+**Files modified:**
+- `app/auth/complete/page.tsx` — Added iOS/iPad/Android auto-detection
+- `app/login/page.tsx` — Removed hardcoded `/dashboard` from magic link and Google OAuth
+- `app/dashboard/components/MobileAppBanner.tsx` — Hide on tablets
+- `public/mobile-app/js/auth.js` — Set `mtc-auth-redirect` before OTP
+- `public/mobile-app/css/tablet.css` — 744px breakpoint + iPad Pro 12.9" support
+- `public/mobile-app/css/base.css` — 744px pointer media query
+- `playwright.config.js` — 5 WebKit projects added
+- `.github/workflows/ci.yml` — Install webkit browser
+- `.github/workflows/pr-check.yml` — Install webkit browser
+- Mobile PWA rebuilt, cache: `mtc-court-6142cace`
+
+**Still pending from user iPad feedback:**
+- Calendar too big on iPad, missing quick actions, general layout issues (user hasn't given full details yet)
+- Testing on real iPad Mini + iPhone SE (user acquiring devices)
 
 ### Cowork Session (2026-03-09 evening) — Login Page Visual Polish
 
