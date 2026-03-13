@@ -205,9 +205,9 @@ The three platforms are:
 - **Playwright WebKit** is the primary tool for catching Safari bugs. CI runs 5 WebKit projects: iPhone SE, iPhone 14, iPad Mini, iPad Pro 11", mobile PWA on WebKit.
 - **Device matrix**: iPhone SE (375x667), iPhone 14 (390x844), iPad Mini (744x1133), iPad Pro 11" (834x1194), iPad Pro 12.9" (1024x1366)
 - **CSS rules**: Always use `-webkit-backdrop-filter` alongside `backdrop-filter`. Always provide `dvh` fallback chain (`100%` → `-webkit-fill-available` → `100dvh`). Tablet breakpoint starts at `744px` (iPad Mini), not `768px`.
-- **Auth flow**: Magic link and Google OAuth must route through `/auth/complete` which auto-detects iOS/iPad/Android → mobile PWA. NEVER hardcode `/dashboard` as redirect target from login page.
+- **Auth**: Email + 6-digit PIN. No Google OAuth, no magic link, no Supabase Auth. See MEMORY.md "Auth System — PIN-Based" for full plan.
 - **Safe-area-insets**: All screens must respect `env(safe-area-inset-*)` for notch, Dynamic Island, and home indicator.
-- **User tests on real devices**: Mac Mini M1 (Xcode Simulator), iPad Mini 6th gen, iPhone SE 2nd gen.
+- **User tests on real devices**: iPad Mini 5th gen (2019), iPhone SE 2nd gen (2020).
 
 ## PROJECT OVERVIEW
 - **Mono Tennis Club** — Next.js 14 + TypeScript (strict mode) + Tailwind CSS monorepo

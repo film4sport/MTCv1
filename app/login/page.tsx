@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
-import { signInWithGoogle, signInWithMagicLink } from '../dashboard/lib/auth';
+import { pinLogin, pinSetup, forgotPin, verifyResetCode } from '../dashboard/lib/auth';
 
 export default function LoginPage() {
   return (
@@ -13,37 +13,24 @@ export default function LoginPage() {
 
 function LoginContent() {
   const [email, setEmail] = useState('');
+  const [pin, setPin] = useState('');
   const [emailError, setEmailError] = useState(false);
   const [loading, setLoading] = useState(false);
-
-  // Bebas Neue font is preloaded in login/layout.tsx — no client-side injection needed
-
-  // Warm up Supabase on page load so login doesn't wait for cold start.
-  // Hits both the server-side keep-alive (warms DB + Auth via API route)
-  // and Supabase Auth directly from the client (warms GoTrue connection).
-  useEffect(() => {
-    fetch('/api/keep-alive').catch(() => {});
-    // Direct client-side auth warm-up — getSession is lightweight and
-    // establishes the connection to Supabase Auth so signInWithPassword is fast
-    import('../lib/supabase').then(({ supabase }) => {
-      supabase.auth.getSession().catch(() => {});
-    }).catch(() => {});
-  }, []);
-
-  // No auto-redirect — always show login page so users can see it
+  const [loginError, setLoginError] = useState('');
+  // Screen: 'login' | 'pinSetup' | 'forgotPin' | 'verifyCode'
+  const [screen, setScreen] = useState<'login' | 'pinSetup' | 'forgotPin' | 'verifyCode'>('login');
+  const [setupPin, setSetupPin] = useState('');
+  const [setupPinConfirm, setSetupPinConfirm] = useState('');
+  const [resetCode, setResetCode] = useState('');
+  const [newPin, setNewPin] = useState('');
+  const [newPinConfirm, setNewPinConfirm] = useState('');
 
   const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/;
 
-  const [loginError, setLoginError] = useState('');
-  const [magicLinkSent, setMagicLinkSent] = useState(false);
-  const [cooldown, setCooldown] = useState(0);
-
-  // Countdown timer for magic link cooldown
+  // Warm up DB on page load
   useEffect(() => {
-    if (cooldown <= 0) return;
-    const timer = setTimeout(() => setCooldown(cooldown - 1), 1000);
-    return () => clearTimeout(timer);
-  }, [cooldown]);
+    fetch('/api/keep-alive').catch(() => {});
+  }, []);
 
   return (
     <>
@@ -973,95 +960,252 @@ function LoginContent() {
             </p>
           </div>
 
-          {/* Sign-In Options */}
-          <div className="space-y-4 max-w-lg">
-            {/* Google Sign-In (primary) */}
-            <button
-              type="button"
-              onClick={async () => {
-                setLoginError('');
-                // Don't pass nextPath — let /auth/complete auto-detect device
-                const { error } = await signInWithGoogle();
-                if (error) setLoginError(error);
-              }}
-              className="login-btn-google w-full py-4 rounded-2xl font-medium text-base transition-all active:scale-[0.97] flex items-center justify-center gap-3"
-              style={{ background: '#fff', border: '1px solid #e0dcd3', color: '#5a5f4a', minHeight: 52 }}
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
-                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A10.96 10.96 0 001 12c0 1.77.42 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
-                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-              </svg>
-              Continue with Google
-            </button>
+          {/* Sign-In Forms */}
+          <div className="space-y-4 max-w-lg w-full">
 
-            {/* Magic Link: email input + button grouped */}
-            <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid #e0dcd3', background: '#fff' }}>
-              <div className="relative">
-                <input
-                  id="login-email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => { setEmail(e.target.value); setEmailError(false); }}
-                  placeholder="your@email.com"
-                  autoComplete="email"
-                  maxLength={100}
-                  className="w-full px-5 py-4 text-base text-center transition-all focus:outline-none"
-                  style={{
-                    background: 'transparent',
-                    border: 'none',
-                    borderBottom: '1px solid #e0dcd3',
-                    color: '#2a2f1e',
-                    borderRadius: 0,
-                  }}
-                  onFocus={(e) => { e.currentTarget.style.borderBottomColor = '#6b7a3d'; }}
-                  onBlur={(e) => { e.currentTarget.style.borderBottomColor = '#e0dcd3'; }}
-                />
-              </div>
-              {emailError && <p className="text-xs px-5 pt-2" style={{ color: '#ef4444' }}>Please enter a valid email address</p>}
-              <button
-                type="button"
-                onClick={async () => {
-                  if (!email || !emailRegex.test(email)) {
-                    setLoginError('Enter your email to receive a sign-in link.');
-                    setEmailError(true);
-                    return;
-                  }
-                  setLoginError('');
-                  setLoading(true);
-                  // Don't pass nextPath — let /auth/complete auto-detect device
-                  // (iPad/iPhone → mobile PWA, desktop → dashboard)
-                  const result = await signInWithMagicLink(email.trim().toLowerCase());
-                  setLoading(false);
-                  if (result.error) {
-                    setLoginError(result.error);
-                    if (result.cooldownSeconds) setCooldown(result.cooldownSeconds);
-                  } else {
-                    setLoginError('');
-                    setCooldown(60);
-                    setMagicLinkSent(true);
-                  }
-                }}
-                disabled={loading || cooldown > 0}
-                className="login-btn-magic w-full py-4 font-semibold text-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-60"
-                style={{ background: 'rgba(107,122,61,0.06)', color: '#6b7a3d', border: 'none', cursor: 'pointer' }}
-                onMouseEnter={(e) => { if (!loading) e.currentTarget.style.background = 'rgba(107,122,61,0.12)'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(107,122,61,0.06)'; }}
-              >
-                {loading ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <span className="inline-block w-[16px] h-[16px] border-2 border-[#6b7a3d]/30 border-t-[#6b7a3d] rounded-full" style={{ animation: 'spin 0.8s linear infinite' }} />
-                    Sending...
-                  </span>
-                ) : cooldown > 0 ? `Resend in ${cooldown}s` : (
-                  <>
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.582a.5.5 0 0 1 0 .962L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/></svg>
-                    Send magic link
-                  </>
-                )}
-              </button>
-            </div>
+            {/* PIN Login Screen */}
+            {screen === 'login' && (
+              <>
+                <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid #e0dcd3', background: '#fff' }}>
+                  <input
+                    id="login-email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => { setEmail(e.target.value); setEmailError(false); }}
+                    placeholder="your@email.com"
+                    autoComplete="email"
+                    maxLength={100}
+                    className="w-full px-5 py-4 text-base text-center transition-all focus:outline-none"
+                    style={{ background: 'transparent', border: 'none', borderBottom: '1px solid #e0dcd3', color: '#2a2f1e', borderRadius: 0 }}
+                    onFocus={(e) => { e.currentTarget.style.borderBottomColor = '#6b7a3d'; }}
+                    onBlur={(e) => { e.currentTarget.style.borderBottomColor = '#e0dcd3'; }}
+                  />
+                  {emailError && <p className="text-xs px-5 pt-2" style={{ color: '#ef4444' }}>Please enter a valid email address</p>}
+                  <input
+                    id="login-pin"
+                    type="password"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    maxLength={4}
+                    value={pin}
+                    onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                    placeholder="4-digit PIN"
+                    autoComplete="off"
+                    className="w-full px-5 py-4 text-base text-center transition-all focus:outline-none"
+                    style={{ background: 'transparent', border: 'none', borderBottom: '1px solid #e0dcd3', color: '#2a2f1e', borderRadius: 0, letterSpacing: '6px', fontWeight: 600 }}
+                    onFocus={(e) => { e.currentTarget.style.borderBottomColor = '#6b7a3d'; }}
+                    onBlur={(e) => { e.currentTarget.style.borderBottomColor = '#e0dcd3'; }}
+                  />
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      if (!email || !emailRegex.test(email)) {
+                        setLoginError('Please enter a valid email address.');
+                        setEmailError(true);
+                        return;
+                      }
+                      if (!/^\d{4}$/.test(pin)) {
+                        setLoginError('Please enter your 4-digit PIN.');
+                        return;
+                      }
+                      setLoginError('');
+                      setLoading(true);
+                      const result = await pinLogin(email.trim().toLowerCase(), pin);
+                      setLoading(false);
+                      if (result.needsPinSetup) {
+                        setScreen('pinSetup');
+                        return;
+                      }
+                      if (result.error) {
+                        setLoginError(result.error);
+                        return;
+                      }
+                      if (result.user) {
+                        localStorage.setItem('mtc-current-user', JSON.stringify(result.user));
+                        window.location.href = '/dashboard';
+                      }
+                    }}
+                    disabled={loading}
+                    className="w-full py-4 font-semibold text-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-60"
+                    style={{ background: 'rgba(107,122,61,0.06)', color: '#6b7a3d', border: 'none', cursor: 'pointer' }}
+                    onMouseEnter={(e) => { if (!loading) e.currentTarget.style.background = 'rgba(107,122,61,0.12)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(107,122,61,0.06)'; }}
+                  >
+                    {loading ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <span className="inline-block w-[16px] h-[16px] border-2 border-[#6b7a3d]/30 border-t-[#6b7a3d] rounded-full" style={{ animation: 'spin 0.8s linear infinite' }} />
+                        Signing in...
+                      </span>
+                    ) : 'Sign In'}
+                  </button>
+                </div>
+                <div className="text-center">
+                  <button type="button" onClick={() => { setLoginError(''); setScreen('forgotPin'); }} className="text-xs font-medium hover:underline" style={{ color: '#6b7a3d' }}>Forgot PIN?</button>
+                </div>
+              </>
+            )}
+
+            {/* PIN Setup Screen — for migrating users with no PIN */}
+            {screen === 'pinSetup' && (
+              <>
+                <p className="text-sm text-center mb-1" style={{ color: '#6b7266' }}>Choose a 4-digit PIN to secure your account.</p>
+                <p className="text-xs text-center mb-3 mx-4 leading-relaxed rounded-lg" style={{ color: '#b45309', background: 'rgba(180, 83, 9, 0.06)', padding: '6px 10px', border: '1px solid rgba(180, 83, 9, 0.12)' }}>Avoid easy PINs like 1234. Anyone who knows your email and PIN can access your profile and messages.</p>
+                <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid #e0dcd3', background: '#fff' }}>
+                  <input
+                    type="password"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    maxLength={4}
+                    value={setupPin}
+                    onChange={(e) => setSetupPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                    placeholder="New 4-digit PIN"
+                    className="w-full px-5 py-4 text-base text-center transition-all focus:outline-none"
+                    style={{ background: 'transparent', border: 'none', borderBottom: '1px solid #e0dcd3', color: '#2a2f1e', borderRadius: 0, letterSpacing: '6px', fontWeight: 600 }}
+                  />
+                  <input
+                    type="password"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    maxLength={4}
+                    value={setupPinConfirm}
+                    onChange={(e) => setSetupPinConfirm(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                    placeholder="Confirm PIN"
+                    className="w-full px-5 py-4 text-base text-center transition-all focus:outline-none"
+                    style={{ background: 'transparent', border: 'none', borderBottom: '1px solid #e0dcd3', color: '#2a2f1e', borderRadius: 0, letterSpacing: '6px', fontWeight: 600 }}
+                  />
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      if (!/^\d{4}$/.test(setupPin)) { setLoginError('PIN must be exactly 4 digits.'); return; }
+                      if (setupPin !== setupPinConfirm) { setLoginError('PINs do not match.'); return; }
+                      setLoginError('');
+                      setLoading(true);
+                      const result = await pinSetup(email.trim().toLowerCase(), setupPin);
+                      setLoading(false);
+                      if (result.error) { setLoginError(result.error); return; }
+                      if (result.user) {
+                        localStorage.setItem('mtc-current-user', JSON.stringify(result.user));
+                        window.location.href = '/dashboard';
+                      }
+                    }}
+                    disabled={loading}
+                    className="w-full py-4 font-semibold text-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-60"
+                    style={{ background: 'rgba(107,122,61,0.06)', color: '#6b7a3d', border: 'none', cursor: 'pointer' }}
+                  >
+                    {loading ? 'Setting PIN...' : 'Set PIN & Sign In'}
+                  </button>
+                </div>
+                <div className="text-center">
+                  <button type="button" onClick={() => { setLoginError(''); setScreen('login'); }} className="text-xs hover:underline" style={{ color: '#999' }}>Back to sign in</button>
+                </div>
+              </>
+            )}
+
+            {/* Forgot PIN Screen */}
+            {screen === 'forgotPin' && (
+              <>
+                <p className="text-sm text-center mb-2" style={{ color: '#6b7266' }}>Enter your email and we&apos;ll send a 4-digit code to reset your PIN.</p>
+                <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid #e0dcd3', background: '#fff' }}>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="your@email.com"
+                    autoComplete="email"
+                    className="w-full px-5 py-4 text-base text-center transition-all focus:outline-none"
+                    style={{ background: 'transparent', border: 'none', borderBottom: '1px solid #e0dcd3', color: '#2a2f1e', borderRadius: 0 }}
+                  />
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      if (!email || !emailRegex.test(email)) { setLoginError('Please enter a valid email.'); return; }
+                      setLoginError('');
+                      setLoading(true);
+                      const result = await forgotPin(email.trim().toLowerCase());
+                      setLoading(false);
+                      if (result.error) { setLoginError(result.error); return; }
+                      setScreen('verifyCode');
+                    }}
+                    disabled={loading}
+                    className="w-full py-4 font-semibold text-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-60"
+                    style={{ background: 'rgba(107,122,61,0.06)', color: '#6b7a3d', border: 'none', cursor: 'pointer' }}
+                  >
+                    {loading ? 'Sending...' : 'Send Reset Code'}
+                  </button>
+                </div>
+                <div className="text-center">
+                  <button type="button" onClick={() => { setLoginError(''); setScreen('login'); }} className="text-xs hover:underline" style={{ color: '#999' }}>Back to sign in</button>
+                </div>
+              </>
+            )}
+
+            {/* Verify Code Screen */}
+            {screen === 'verifyCode' && (
+              <>
+                <p className="text-sm text-center mb-2" style={{ color: '#6b7266' }}>Check your email for a 4-digit code, then choose a new PIN.</p>
+                <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid #e0dcd3', background: '#fff' }}>
+                  <input
+                    type="tel"
+                    inputMode="numeric"
+                    maxLength={4}
+                    value={resetCode}
+                    onChange={(e) => setResetCode(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                    placeholder="4-digit code"
+                    className="w-full px-5 py-4 text-base text-center transition-all focus:outline-none"
+                    style={{ background: 'transparent', border: 'none', borderBottom: '1px solid #e0dcd3', color: '#2a2f1e', borderRadius: 0, letterSpacing: '6px', fontWeight: 600 }}
+                  />
+                  <input
+                    type="password"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    maxLength={4}
+                    value={newPin}
+                    onChange={(e) => setNewPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                    placeholder="New 4-digit PIN"
+                    className="w-full px-5 py-4 text-base text-center transition-all focus:outline-none"
+                    style={{ background: 'transparent', border: 'none', borderBottom: '1px solid #e0dcd3', color: '#2a2f1e', borderRadius: 0, letterSpacing: '6px', fontWeight: 600 }}
+                  />
+                  <input
+                    type="password"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    maxLength={4}
+                    value={newPinConfirm}
+                    onChange={(e) => setNewPinConfirm(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                    placeholder="Confirm PIN"
+                    className="w-full px-5 py-4 text-base text-center transition-all focus:outline-none"
+                    style={{ background: 'transparent', border: 'none', borderBottom: '1px solid #e0dcd3', color: '#2a2f1e', borderRadius: 0, letterSpacing: '6px', fontWeight: 600 }}
+                  />
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      if (!/^\d{4}$/.test(resetCode)) { setLoginError('Enter the 4-digit code from your email.'); return; }
+                      if (!/^\d{4}$/.test(newPin)) { setLoginError('PIN must be exactly 4 digits.'); return; }
+                      if (newPin !== newPinConfirm) { setLoginError('PINs do not match.'); return; }
+                      setLoginError('');
+                      setLoading(true);
+                      const result = await verifyResetCode(email.trim().toLowerCase(), resetCode, newPin);
+                      setLoading(false);
+                      if (result.error) { setLoginError(result.error); return; }
+                      if (result.user) {
+                        localStorage.setItem('mtc-current-user', JSON.stringify(result.user));
+                        window.location.href = '/dashboard';
+                      }
+                    }}
+                    disabled={loading}
+                    className="w-full py-4 font-semibold text-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-60"
+                    style={{ background: 'rgba(107,122,61,0.06)', color: '#6b7a3d', border: 'none', cursor: 'pointer' }}
+                  >
+                    {loading ? 'Resetting...' : 'Reset PIN & Sign In'}
+                  </button>
+                </div>
+                <div className="text-center space-x-3">
+                  <button type="button" onClick={() => { setLoginError(''); setScreen('forgotPin'); }} className="text-xs hover:underline" style={{ color: '#6b7a3d' }}>Resend code</button>
+                  <button type="button" onClick={() => { setLoginError(''); setScreen('login'); }} className="text-xs hover:underline" style={{ color: '#999' }}>Back to sign in</button>
+                </div>
+              </>
+            )}
+
           </div>
 
           {/* Error Display */}
@@ -1088,65 +1232,6 @@ function LoginContent() {
           </div>
 
           </div>{/* end login-glass-card */}
-
-          {/* Magic Link Sent — Full overlay */}
-          {magicLinkSent && (
-            <div
-              className="fixed inset-0 z-50 flex items-center justify-center"
-              style={{ background: 'rgba(26, 31, 18, 0.6)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)' }}
-              onClick={() => setMagicLinkSent(false)}
-            >
-              <div
-                className="rounded-2xl p-8 sm:p-10 text-center max-w-sm w-full mx-4 animate-slideUp"
-                style={{ background: '#fff', boxShadow: '0 25px 60px rgba(0,0,0,0.2)' }}
-                onClick={(e) => e.stopPropagation()}
-              >
-                {/* Email icon */}
-                <div className="mx-auto mb-5 flex items-center justify-center" style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(107, 122, 61, 0.12)' }}>
-                  <svg width="32" height="32" fill="none" stroke="#6b7a3d" viewBox="0 0 24 24" strokeWidth="1.5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
-                  </svg>
-                </div>
-                <h2 className="headline-font text-xl sm:text-2xl mb-2" style={{ color: '#2a2f1e' }}>Check Your Email</h2>
-                <p className="text-sm sm:text-base mb-1" style={{ color: '#6b7266' }}>
-                  We sent a sign-in link to
-                </p>
-                <p className="text-sm sm:text-base font-semibold mb-5" style={{ color: '#2a2f1e' }}>{email}</p>
-                <p className="text-xs mb-1" style={{ color: '#999' }}>Click the link in your email to sign in.</p>
-                <p className="text-xs" style={{ color: '#999' }}>It may take a minute to arrive. Check your spam folder if needed.</p>
-                <div className="flex flex-col items-center gap-2 mt-6">
-                  <button
-                    type="button"
-                    disabled={cooldown > 0 || loading}
-                    onClick={async () => {
-                      setLoading(true);
-                      const result = await signInWithMagicLink(email.trim().toLowerCase());
-                      setLoading(false);
-                      if (result.error) {
-                        setLoginError(result.error);
-                        if (result.cooldownSeconds) setCooldown(result.cooldownSeconds);
-                        setMagicLinkSent(false);
-                      } else {
-                        setCooldown(60);
-                      }
-                    }}
-                    className="text-sm font-medium transition-all"
-                    style={{ color: cooldown > 0 ? '#999' : '#6b7a3d', cursor: cooldown > 0 ? 'default' : 'pointer' }}
-                  >
-                    {loading ? 'Sending...' : cooldown > 0 ? `Resend in ${cooldown}s` : 'Resend email'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setMagicLinkSent(false)}
-                    className="text-xs hover:underline"
-                    style={{ color: '#999' }}
-                  >
-                    Back to sign in
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
 
         </div>
       </div>

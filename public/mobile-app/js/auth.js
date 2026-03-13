@@ -1,6 +1,6 @@
-/* auth.js - MTC Court */
+/* auth.js - MTC Court — PIN-Based Auth */
 // ============================================
-// LOGIN / LOGOUT / SIGN UP
+// LOGIN / LOGOUT / SIGN UP (email + 4-digit PIN)
 // ============================================
 (function() {
   'use strict';
@@ -32,7 +32,7 @@
   }
 
   // ============================================
-  // SUPABASE CLIENT (initialized on DOMContentLoaded)
+  // SUPABASE CLIENT (for Realtime only — NOT for auth)
   // ============================================
   var _supabaseClient = null;
 
@@ -68,11 +68,9 @@
 
   // Track eager init state
   var _supabaseInitPromise = null;
-  var _supabaseReady = false;
 
   function initSupabase() {
     if (_supabaseClient) return Promise.resolve(_supabaseClient);
-    // Cache the init promise so multiple callers don't create duplicate clients
     if (_supabaseInitPromise) return _supabaseInitPromise;
     _supabaseInitPromise = fetchWithRetry('/api/mobile-auth/config', 2, 1000)
       .then(function(r) { return r.json(); })
@@ -81,216 +79,303 @@
           _supabaseInitPromise = null;
           return null;
         }
-        // Wait up to 8s for supabase lib (CDN or local fallback)
         return waitForSupabaseLib(8000).then(function(loaded) {
           if (loaded && window.supabase) {
             _supabaseClient = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
             MTC.state._supabaseClient = _supabaseClient; // Expose for realtime-sync.js
-            _supabaseReady = true;
-            enableAuthButtons();
           } else {
-            _supabaseInitPromise = null; // Allow retry
+            _supabaseInitPromise = null;
           }
           return _supabaseClient;
         });
       })
       .catch(function() {
-        _supabaseInitPromise = null; // Allow retry
+        _supabaseInitPromise = null;
         return null;
       });
     return _supabaseInitPromise;
   }
 
-  /** Enable Google + Magic Link buttons once Supabase is ready */
-  function enableAuthButtons() {
-    var googleBtn = document.querySelector('.login-btn-google');
-    var magicBtn = document.querySelector('.login-btn-magic');
-    if (googleBtn) {
-      googleBtn.disabled = false;
-      googleBtn.style.opacity = '';
-      // Remove "Loading..." text if set
-      var label = googleBtn.querySelector('.google-btn-label');
-      if (label && label.textContent === 'Loading...') label.textContent = 'Continue with Google';
-    }
-    if (magicBtn) {
-      magicBtn.disabled = false;
-      magicBtn.style.opacity = '';
-    }
-  }
-
   // ============================================
-  // CHECK FOR AUTH CALLBACK (after OAuth / Magic Link redirect)
+  // PIN LOGIN
   // ============================================
-  function checkAuthCallback() {
-    // Supabase PKCE flow: after redirect, the URL has ?code=... that the
-    // Supabase client auto-detects. We also check the session endpoint for
-    // server-side cookie sessions (set by /auth/callback).
-    initSupabase().then(function(sb) {
-      if (!sb) return;
-      // Let Supabase client process any auth params in the URL
-      sb.auth.getSession().then(function(result) {
-        if (result.data && result.data.session) {
-          finishOAuthLogin(result.data.session);
-          // Clean URL and wipe OAuth history entries (Google consent, Supabase redirect)
-          // so back gesture stays inside the PWA instead of going to external OAuth pages
-          if (window.history && window.history.replaceState) {
-            window.history.replaceState({ screen: 'home' }, '', window.location.pathname);
-          }
-          return;
-        }
-        // No client-side session — try server-side session cookies
-        // (set by /auth/callback for Google OAuth)
-        fetch('/api/mobile-auth/session')
-          .then(function(r) { return r.ok ? r.json() : null; })
-          .then(function(data) {
-            if (data && data.data) {
-              finishLogin(data.data.email, data.data);
-            }
-          })
-          .catch(function() { /* no session, show login */ });
-      });
-    });
-  }
-
-  // Process a Supabase session (from OAuth or Magic Link)
-  function finishOAuthLogin(session) {
-    var user = session.user;
-    var email = user.email || '';
-    // Fetch full profile from server (uses cookie session set by Supabase)
-    fetch('/api/mobile-auth/session')
-      .then(function(r) { return r.ok ? r.json() : null; })
-      .then(function(data) {
-        if (data && data.data) {
-          finishLogin(email, data.data);
-        } else {
-          // Fallback: build minimal user from session
-          finishLogin(email, {
-            name: user.user_metadata && user.user_metadata.name || email.split('@')[0],
-            email: email,
-            role: 'member',
-            userId: user.id,
-            accessToken: session.access_token,
-            membershipType: 'individual',
-            familyId: null,
-            interclubTeam: '',
-            interclubCaptain: false,
-            familyMembers: []
-          });
-        }
-      })
-      .catch(function() {
-        // Fallback
-        finishLogin(email, {
-          name: user.user_metadata && user.user_metadata.name || email.split('@')[0],
-          email: email,
-          role: 'member',
-          userId: user.id,
-          accessToken: session.access_token,
-          membershipType: 'individual',
-          familyId: null,
-          interclubTeam: '',
-          interclubCaptain: false,
-          familyMembers: []
-        });
-      });
-  }
-
-  // ============================================
-  // GOOGLE SIGN-IN
-  // ============================================
-  window.handleGoogleSignIn = function() {
-    var btn = document.querySelector('.login-btn-google');
-    if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; }
-
-    // Store redirect target BEFORE leaving for OAuth (survives the redirect chain)
-    try { localStorage.setItem('mtc-auth-redirect', '/mobile-app/index.html'); } catch(e) {}
-
-    initSupabase().then(function(sb) {
-      if (!sb) {
-        if (btn) { btn.disabled = false; btn.style.opacity = ''; }
-        showToast('Cannot reach the server. Check your connection and try again.');
-        return;
-      }
-      var origin = window.location.origin;
-      sb.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: origin + '/mobile-app/index.html',
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'consent'
-          }
-        }
-      }).then(function(result) {
-        if (result.error) {
-          if (btn) { btn.disabled = false; btn.style.opacity = ''; }
-          showToast('Google sign-in failed: ' + result.error.message);
-        }
-        // Browser will redirect to Google...
-      });
-    }).catch(function() {
-      if (btn) { btn.disabled = false; btn.style.opacity = ''; }
-      showToast('Something went wrong. Please try again.');
-    });
-  };
-
-  // ============================================
-  // MAGIC LINK SIGN-IN
-  // ============================================
-  window.handleMagicLink = function() {
+  window.handlePinLogin = function() {
     var emailInput = document.getElementById('loginEmail');
+    var pinInput = document.getElementById('loginPin');
     var email = emailInput ? emailInput.value.trim().toLowerCase() : '';
+    var pin = pinInput ? pinInput.value.trim() : '';
 
-    emailInput.classList.remove('input-error');
-    clearFieldErrors(emailInput);
+    if (emailInput) { emailInput.classList.remove('input-error'); clearFieldErrors(emailInput); }
+    if (pinInput) { pinInput.classList.remove('input-error'); clearFieldErrors(pinInput); }
 
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       showFieldError(emailInput, 'Enter a valid email address');
-      showToast('Enter your email to receive a sign-in link.');
+      return;
+    }
+    if (!pin || !/^\d{4}$/.test(pin)) {
+      showFieldError(pinInput, 'Enter your 4-digit PIN');
       return;
     }
 
-    var btn = document.getElementById('magicLinkBtn');
-    if (btn) { btn.disabled = true; btn.textContent = 'Sending link...'; }
+    var btn = document.getElementById('pinLoginBtn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Signing in...'; }
 
-    initSupabase().then(function(sb) {
-      if (!sb) {
-        if (btn) { btn.disabled = false; btn.textContent = 'Sign in with Email Link'; }
-        showToast('Cannot reach the server. Check your connection and try again.');
-        return;
-      }
-      var origin = window.location.origin;
-      // Set redirect hint so /auth/complete knows to return to mobile PWA
-      try { localStorage.setItem('mtc-auth-redirect', '/mobile-app/index.html'); } catch(e) {}
-      sb.auth.signInWithOtp({
-        email: email,
-        options: {
-          shouldCreateUser: false,
-          emailRedirectTo: origin + '/auth/callback?next=' + encodeURIComponent('/mobile-app/index.html')
-        }
-      }).then(function(result) {
-        if (btn) { btn.disabled = false; btn.textContent = 'Sign in with Email Link'; }
-        if (result.error) {
-          var msg = result.error.message || '';
-          if (msg.toLowerCase().includes('not allowed') || msg.toLowerCase().includes('not found')) {
-            showToast('No account found with this email.');
-          } else {
-            showToast('Failed to send link: ' + msg);
-          }
+    fetch('/api/auth/pin-login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, pin: pin })
+    })
+    .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+    .then(function(result) {
+      if (btn) { btn.disabled = false; btn.textContent = 'Sign In'; }
+
+      if (!result.ok) {
+        if (result.data.needsPinSetup) {
+          // Existing member without PIN — show PIN setup screen
+          showPinSetupScreen(email, result.data.name || '');
           return;
         }
-        // Show magic link sent overlay
-        var overlay = document.getElementById('magicLinkOverlay');
-        var emailEl = document.getElementById('magicLinkEmail');
-        if (emailEl) emailEl.textContent = email;
-        if (overlay) overlay.style.display = 'flex';
+        var msg = result.data.error || 'Login failed';
+        if (result.data.attemptsRemaining !== undefined) {
+          msg += ' (' + result.data.attemptsRemaining + ' attempts left)';
+        }
+        showToast(msg);
+        if (pinInput) pinInput.value = '';
+        return;
+      }
+
+      // Success — store token and finish login
+      finishLogin(email, {
+        name: result.data.user.name,
+        email: result.data.user.email,
+        role: result.data.user.role,
+        userId: result.data.user.id,
+        accessToken: result.data.token,
+        membershipType: result.data.user.membershipType || 'adult',
+        familyId: result.data.user.familyId || null,
+        residence: result.data.user.residence || 'mono',
+        interclubTeam: result.data.user.interclubTeam || 'none',
+        interclubCaptain: result.data.user.interclubCaptain === true,
+        familyMembers: result.data.user.familyMembers || []
       });
+
+      // Remember email for next login
+      try { localStorage.setItem('mtc-remembered-email', email); } catch(e) {}
+    })
+    .catch(function() {
+      if (btn) { btn.disabled = false; btn.textContent = 'Sign In'; }
+      showToast('Network error. Please try again.');
     });
   };
 
-  window.closeMagicLinkOverlay = function() {
-    var overlay = document.getElementById('magicLinkOverlay');
-    if (overlay) overlay.style.display = 'none';
+  // ============================================
+  // PIN SETUP (migration from old auth)
+  // ============================================
+  var _pinSetupEmail = '';
+
+  function showPinSetupScreen(email, name) {
+    _pinSetupEmail = email;
+    var loginCard = document.querySelector('.login-card:not(.signup-card)');
+    var setupCard = document.getElementById('pinSetupCard');
+    if (loginCard) loginCard.style.display = 'none';
+    if (setupCard) {
+      setupCard.style.display = '';
+      var nameEl = setupCard.querySelector('.pin-setup-name');
+      if (nameEl) nameEl.textContent = name ? ('Welcome back, ' + name.split(' ')[0] + '!') : 'Welcome back!';
+    }
+  }
+
+  window.handlePinSetup = function() {
+    var pinInput = document.getElementById('setupPin');
+    var confirmInput = document.getElementById('setupPinConfirm');
+    var pin = pinInput ? pinInput.value.trim() : '';
+    var confirm = confirmInput ? confirmInput.value.trim() : '';
+
+    if (pinInput) { pinInput.classList.remove('input-error'); clearFieldErrors(pinInput); }
+    if (confirmInput) { confirmInput.classList.remove('input-error'); clearFieldErrors(confirmInput); }
+
+    if (!pin || !/^\d{4}$/.test(pin)) {
+      showFieldError(pinInput, 'Enter a 4-digit PIN');
+      return;
+    }
+    if (pin !== confirm) {
+      showFieldError(confirmInput, 'PINs do not match');
+      return;
+    }
+
+    var btn = document.getElementById('pinSetupBtn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Setting up...'; }
+
+    fetch('/api/auth/pin-setup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: _pinSetupEmail, pin: pin })
+    })
+    .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+    .then(function(result) {
+      if (btn) { btn.disabled = false; btn.textContent = 'Set PIN & Sign In'; }
+
+      if (!result.ok) {
+        showToast(result.data.error || 'Failed to set PIN');
+        return;
+      }
+
+      if (result.data.token && result.data.user) {
+        finishLogin(_pinSetupEmail, {
+          name: result.data.user.name,
+          email: result.data.user.email,
+          role: result.data.user.role,
+          userId: result.data.user.id,
+          accessToken: result.data.token,
+          membershipType: result.data.user.membershipType || 'adult',
+          familyId: result.data.user.familyId || null,
+          residence: result.data.user.residence || 'mono',
+          interclubTeam: result.data.user.interclubTeam || 'none',
+          interclubCaptain: result.data.user.interclubCaptain === true,
+          familyMembers: result.data.user.familyMembers || []
+        });
+        try { localStorage.setItem('mtc-remembered-email', _pinSetupEmail); } catch(e) {}
+      }
+    })
+    .catch(function() {
+      if (btn) { btn.disabled = false; btn.textContent = 'Set PIN & Sign In'; }
+      showToast('Network error. Please try again.');
+    });
+  };
+
+  window.backFromPinSetup = function() {
+    var loginCard = document.querySelector('.login-card:not(.signup-card)');
+    var setupCard = document.getElementById('pinSetupCard');
+    if (loginCard) loginCard.style.display = '';
+    if (setupCard) setupCard.style.display = 'none';
+  };
+
+  // ============================================
+  // FORGOT PIN
+  // ============================================
+  window.showForgotPinScreen = function() {
+    var loginCard = document.querySelector('.login-card:not(.signup-card)');
+    var forgotCard = document.getElementById('forgotPinCard');
+    if (loginCard) loginCard.style.display = 'none';
+    if (forgotCard) forgotCard.style.display = '';
+    // Pre-fill email if remembered
+    var emailInput = document.getElementById('forgotPinEmail');
+    var remembered = null;
+    try { remembered = localStorage.getItem('mtc-remembered-email'); } catch(e) {}
+    if (emailInput && remembered) emailInput.value = remembered;
+  };
+
+  window.handleForgotPin = function() {
+    var emailInput = document.getElementById('forgotPinEmail');
+    var email = emailInput ? emailInput.value.trim().toLowerCase() : '';
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      showFieldError(emailInput, 'Enter your email address');
+      return;
+    }
+
+    var btn = document.getElementById('forgotPinBtn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Sending code...'; }
+
+    fetch('/api/auth/forgot-pin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function() {
+      if (btn) { btn.disabled = false; btn.textContent = 'Send Reset Code'; }
+      showToast('If an account exists, a reset code has been sent to your email.');
+      // Show verify code form
+      showVerifyCodeScreen(email);
+    })
+    .catch(function() {
+      if (btn) { btn.disabled = false; btn.textContent = 'Send Reset Code'; }
+      showToast('Network error. Please try again.');
+    });
+  };
+
+  function showVerifyCodeScreen(email) {
+    var forgotCard = document.getElementById('forgotPinCard');
+    var verifyCard = document.getElementById('verifyCodeCard');
+    if (forgotCard) forgotCard.style.display = 'none';
+    if (verifyCard) {
+      verifyCard.style.display = '';
+      verifyCard.dataset.email = email;
+    }
+  }
+
+  window.handleVerifyCode = function() {
+    var verifyCard = document.getElementById('verifyCodeCard');
+    var email = verifyCard ? verifyCard.dataset.email : '';
+    var codeInput = document.getElementById('resetCode');
+    var newPinInput = document.getElementById('newPin');
+    var confirmInput = document.getElementById('newPinConfirm');
+
+    var code = codeInput ? codeInput.value.trim() : '';
+    var newPin = newPinInput ? newPinInput.value.trim() : '';
+    var confirm = confirmInput ? confirmInput.value.trim() : '';
+
+    if (!code || !/^\d{4}$/.test(code)) {
+      showFieldError(codeInput, 'Enter the 4-digit code from your email');
+      return;
+    }
+    if (!newPin || !/^\d{4}$/.test(newPin)) {
+      showFieldError(newPinInput, 'Enter a new 4-digit PIN');
+      return;
+    }
+    if (newPin !== confirm) {
+      showFieldError(confirmInput, 'PINs do not match');
+      return;
+    }
+
+    var btn = document.getElementById('verifyCodeBtn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Verifying...'; }
+
+    fetch('/api/auth/verify-code', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, code: code, newPin: newPin })
+    })
+    .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+    .then(function(result) {
+      if (btn) { btn.disabled = false; btn.textContent = 'Reset PIN & Sign In'; }
+
+      if (!result.ok) {
+        showToast(result.data.error || 'Invalid code');
+        return;
+      }
+
+      if (result.data.token && result.data.user) {
+        finishLogin(email, {
+          name: result.data.user.name,
+          email: result.data.user.email,
+          role: result.data.user.role,
+          userId: result.data.user.id,
+          accessToken: result.data.token,
+          membershipType: result.data.user.membershipType || 'adult',
+          familyId: result.data.user.familyId || null,
+          residence: result.data.user.residence || 'mono',
+          interclubTeam: result.data.user.interclubTeam || 'none',
+          interclubCaptain: result.data.user.interclubCaptain === true,
+          familyMembers: []
+        });
+        try { localStorage.setItem('mtc-remembered-email', email); } catch(e) {}
+        showToast('PIN reset successful!');
+      }
+    })
+    .catch(function() {
+      if (btn) { btn.disabled = false; btn.textContent = 'Reset PIN & Sign In'; }
+      showToast('Network error. Please try again.');
+    });
+  };
+
+  window.backFromForgotPin = function() {
+    var loginCard = document.querySelector('.login-card:not(.signup-card)');
+    var forgotCard = document.getElementById('forgotPinCard');
+    var verifyCard = document.getElementById('verifyCodeCard');
+    if (loginCard) loginCard.style.display = '';
+    if (forgotCard) forgotCard.style.display = 'none';
+    if (verifyCard) verifyCard.style.display = 'none';
   };
 
   // ============================================
@@ -350,9 +435,9 @@
     }
   }
 
-  // Legacy handler kept for backward compat (signup flow still uses it)
+  // Legacy handler
   window.handleLogin = function() {
-    showToast('Please use Google or Email Link to sign in.');
+    showToast('Please enter your email and PIN to sign in.');
   };
 
   function completeLogin() {
@@ -399,72 +484,74 @@
     // Load data from Supabase API (non-blocking, falls back to cached data)
     loadAppDataFromAPI();
 
-    // Start realtime sync (Supabase Realtime + heartbeat fallback)
-    if (typeof MTC.fn.startRealtimeSync === 'function') {
-      MTC.fn.startRealtimeSync();
-    }
-
-    // Start typing indicator (Supabase Realtime broadcast)
-    if (typeof MTC.fn.startTypingIndicator === 'function') {
-      MTC.fn.startTypingIndicator();
-    }
+    // Initialize Supabase client for Realtime (not for auth)
+    initSupabase().then(function() {
+      // Start realtime sync (Supabase Realtime + heartbeat fallback)
+      if (typeof MTC.fn.startRealtimeSync === 'function') {
+        MTC.fn.startRealtimeSync();
+      }
+      // Start typing indicator (Supabase Realtime broadcast)
+      if (typeof MTC.fn.startTypingIndicator === 'function') {
+        MTC.fn.startTypingIndicator();
+      }
+    });
 
     // Register push notifications (best-effort, non-blocking)
     registerPushNotifications();
 
     // ── One-time beta + opening day notifications for existing users ──
-    // New users get these from /auth/callback; this catches users who signed up before they were added.
     if (currentUser && currentUser.id && new Date() < new Date('2026-05-09T00:00:00')) {
       var betaKey = 'mtc-beta-notice-sent-' + currentUser.id;
       if (!MTC.storage.get(betaKey, null)) {
         MTC.storage.set(betaKey, true);
-        // Insert via Supabase client (already initialized after login)
-        initSupabase().then(function(sb) {
-          if (!sb) return;
+        // Insert via API call (authenticated with session token)
+        var token = MTC.getToken();
+        if (token) {
           var userId = currentUser.id;
-          sb.from('notifications').select('id').in('id', ['opening-day-' + userId, 'beta-notice-' + userId])
-            .then(function(res) {
-              var existing = ((res.data || []).map(function(n) { return n.id; }));
-              var inserts = [];
-              if (existing.indexOf('opening-day-' + userId) === -1) {
-                inserts.push({
+          fetch('/api/mobile/notifications', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+            body: JSON.stringify({
+              notifications: [
+                {
                   id: 'opening-day-' + userId,
-                  user_id: userId, type: 'event',
+                  type: 'event',
                   title: 'Opening Day \u2014 May 9th!',
-                  body: 'Mark your calendar! Mono Tennis Club opens for the 2026 season on May 9th. See you on the courts!',
-                  timestamp: new Date().toISOString(), read: false
-                });
-              }
-              if (existing.indexOf('beta-notice-' + userId) === -1) {
-                inserts.push({
+                  body: 'Mark your calendar! Mono Tennis Club opens for the 2026 season on May 9th. See you on the courts!'
+                },
+                {
                   id: 'beta-notice-' + userId,
-                  user_id: userId, type: 'info',
+                  type: 'info',
                   title: 'App Under Construction',
-                  body: 'Our app and website are still in development. If you find any bugs or have feedback, please email monotennisclub1@gmail.com \u2014 we appreciate your help!',
-                  timestamp: new Date(Date.now() + 1000).toISOString(), read: false
-                });
-              }
-              if (inserts.length > 0) {
-                sb.from('notifications').insert(inserts).then(function() {
-                  // Refresh notification badge
-                  if (typeof MTC.fn.updateUnreadCount === 'function') MTC.fn.updateUnreadCount();
-                }, function() {});
-              }
-            });
-        });
+                  body: 'Our app and website are still in development. If you find any bugs or have feedback, please email monotennisclub1@gmail.com \u2014 we appreciate your help!'
+                }
+              ]
+            })
+          }).then(function() {
+            if (typeof MTC.fn.updateUnreadCount === 'function') MTC.fn.updateUnreadCount();
+          }).catch(function() {});
+        }
       }
     }
   }
 
   // onclick handler (index.html)
   window.handleLogout = function() {
+    // Delete session on server
+    var token = MTC.getToken();
+    if (token) {
+      fetch('/api/auth/session', {
+        method: 'DELETE',
+        headers: { 'Authorization': 'Bearer ' + token }
+      }).catch(function() {});
+    }
+
     currentUser = null;
     MTC.state.currentUser = null;
     window.currentUser = null;
-    // Clear all app-related data on logout (prevents data leaks on shared devices)
-    MTC.clearToken(); // Clear memory-cached token first
-    MTC.clearAllTimers(); // Clear any tracked timers
-    if (typeof MTC.fn.stopRealtimeSync === 'function') MTC.fn.stopRealtimeSync(); // Stop realtime subscriptions
+    MTC.clearToken();
+    MTC.clearAllTimers();
+    if (typeof MTC.fn.stopRealtimeSync === 'function') MTC.fn.stopRealtimeSync();
     ['mtc-user', 'mtc-session-time', 'mtc-session-hash',
      'mtc-bookings', 'mtc-conversations', 'mtc-notifications',
      'mtc-rsvps', 'mtc-profile', 'mtc-partner-joins', 'mtc-settings',
@@ -506,7 +593,6 @@
       }
     });
   }
-  // Backward-compat alias
   window.applyGuestRestrictions = applyGuestRestrictions;
 
   function removeGuestRestrictions() {
@@ -535,7 +621,6 @@
     };
   }
 
-  // Install guard once DOM is ready
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function() {
       setTimeout(installGuestNavigationGuard, 100);
@@ -547,7 +632,6 @@
   // ============================================
   // SIGN UP SCREEN TOGGLE
   // ============================================
-  // onclick handler (index.html)
   window.showSignUpScreen = function() {
     const loginCard = document.querySelector('.login-card:not(.signup-card)');
     const signupCard = document.getElementById('signupCard');
@@ -556,15 +640,19 @@
     selectSignupType('member');
   };
 
-  // onclick handler (index.html)
   window.showLoginScreen = function() {
     const loginCard = document.querySelector('.login-card:not(.signup-card)');
     const signupCard = document.getElementById('signupCard');
+    const pinSetupCard = document.getElementById('pinSetupCard');
+    const forgotPinCard = document.getElementById('forgotPinCard');
+    const verifyCodeCard = document.getElementById('verifyCodeCard');
     if (loginCard) loginCard.style.display = '';
     if (signupCard) signupCard.style.display = 'none';
+    if (pinSetupCard) pinSetupCard.style.display = 'none';
+    if (forgotPinCard) forgotPinCard.style.display = 'none';
+    if (verifyCodeCard) verifyCodeCard.style.display = 'none';
   };
 
-  // onclick handler (index.html)
   window.selectSignupType = function(type) {
     signupAccountType = type;
     const memberBtn = document.getElementById('signupTypeMember');
@@ -581,7 +669,6 @@
     }
   };
 
-  // onclick handler (index.html)
   window.selectResidence = function(val) {
     signupResidence = val;
     var monoBtn = document.getElementById('residenceMono');
@@ -601,59 +688,84 @@
   };
 
   // ============================================
-  // HANDLE SIGN UP
+  // HANDLE SIGN UP (with PIN)
   // ============================================
-  // onclick handler (index.html)
   window.handleSignUp = function() {
     const nameInput = document.getElementById('signupName');
     const emailInput = document.getElementById('signupEmail');
-    const phoneInput = document.getElementById('signupPhone');
+    const emailConfirmInput = document.getElementById('signupEmailConfirm');
+    const pinInput = document.getElementById('signupPin');
+    const pinConfirmInput = document.getElementById('signupPinConfirm');
 
-    const name = nameInput.value.trim();
-    const email = emailInput.value.trim();
-    const phone = phoneInput.value.trim();
+    const name = nameInput ? nameInput.value.trim() : '';
+    const email = emailInput ? emailInput.value.trim() : '';
+    const emailConfirm = emailConfirmInput ? emailConfirmInput.value.trim() : '';
+    const pin = pinInput ? pinInput.value.trim() : '';
+    const pinConfirm = pinConfirmInput ? pinConfirmInput.value.trim() : '';
 
-    [nameInput, emailInput, phoneInput].forEach(function(el) { el.classList.remove('input-error'); clearFieldErrors(el); });
+    [nameInput, emailInput, emailConfirmInput, pinInput, pinConfirmInput].forEach(function(el) {
+      if (el) { el.classList.remove('input-error'); clearFieldErrors(el); }
+    });
 
     const errors = [];
-    if (!name || name.length < 2) { showFieldError(nameInput, 'Name must be at least 2 characters'); errors.push('name (min 2 chars)'); }
-    if (!email) { showFieldError(emailInput, 'Email is required'); errors.push('valid email'); }
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showFieldError(emailInput, 'Enter a valid email address'); errors.push('valid email'); }
-    if (phone && !/^[\d\s\-\+\(\)]{7,15}$/.test(phone)) { showFieldError(phoneInput, 'Enter a valid phone number'); errors.push('valid phone number'); }
+    if (!name || name.length < 2) { showFieldError(nameInput, 'Name must be at least 2 characters'); errors.push('name'); }
+    if (!email) { showFieldError(emailInput, 'Email is required'); errors.push('email'); }
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showFieldError(emailInput, 'Enter a valid email address'); errors.push('email'); }
+    if (email.toLowerCase() !== emailConfirm.toLowerCase()) { showFieldError(emailConfirmInput, 'Email addresses do not match'); errors.push('email confirm'); }
+    if (!pin || !/^\d{4}$/.test(pin)) { showFieldError(pinInput, 'Enter a 4-digit PIN'); errors.push('pin'); }
+    else if (/^(\d)\1{3}$/.test(pin) || pin === '1234' || pin === '4321') { showFieldError(pinInput, 'That PIN is too easy to guess'); errors.push('pin'); }
+    if (pin !== pinConfirm) { showFieldError(pinConfirmInput, 'PINs do not match'); errors.push('pin confirm'); }
 
     if (errors.length > 0) {
       const signupCard = document.getElementById('signupCard');
       if (signupCard) { signupCard.style.animation='none'; signupCard.offsetHeight; signupCard.style.animation='shakeX 0.4s ease'; }
-      showToast('Please enter a valid ' + errors[0]);
       return;
     }
 
     const isMember = signupAccountType === 'member';
+    const btn = document.getElementById('signupBtn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Creating account...'; }
 
-    currentUser = {
-      name: name,
-      email: email,
-      phone: phone,
-      role: isMember ? 'member' : 'guest',
-      isMember: isMember,
-      residence: signupResidence || 'mono'
-    };
-    MTC.state.currentUser = currentUser;
-    window.currentUser = currentUser;
+    fetch('/api/auth/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: name,
+        email: email.toLowerCase(),
+        pin: pin,
+        membershipType: isMember ? 'adult' : 'guest',
+        residence: signupResidence || 'mono'
+      })
+    })
+    .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+    .then(function(result) {
+      if (btn) { btn.disabled = false; btn.textContent = 'Create Account'; }
 
-    MTC.storage.set('mtc-user', currentUser);
+      if (!result.ok) {
+        showToast(result.data.error || 'Signup failed');
+        return;
+      }
 
-    completeLogin();
+      finishLogin(email.toLowerCase(), {
+        name: result.data.user.name,
+        email: result.data.user.email,
+        role: result.data.user.role,
+        userId: result.data.user.id,
+        accessToken: result.data.token,
+        membershipType: result.data.user.membershipType || 'adult',
+        familyId: null,
+        residence: result.data.user.residence || 'mono',
+        interclubTeam: 'none',
+        interclubCaptain: false,
+        familyMembers: []
+      });
 
-    if (!isMember) {
-      setTimeout(function() {
-        showPushNotification(
-          'Guest Account Created',
-          'You can book courts ($10/hr) and register for programs. Welcome!',
-          '\uD83C\uDFBE'
-        );
-      }, 2000);
-    }
+      try { localStorage.setItem('mtc-remembered-email', email.toLowerCase()); } catch(e) {}
+    })
+    .catch(function() {
+      if (btn) { btn.disabled = false; btn.textContent = 'Create Account'; }
+      showToast('Network error. Please try again.');
+    });
   };
 
   // ============================================
@@ -662,21 +774,18 @@
   function loadAppDataFromAPI() {
     if (!MTC.fn.loadFromAPI) return;
     var token = MTC.getToken();
-    if (!token) return; // No token = not authenticated, skip API calls
+    if (!token) return;
 
-    // Load events
     MTC.fn.loadFromAPI('/mobile/events', 'mtc-api-events', null).then(function(events) {
       if (events && events.length > 0 && typeof window.updateEventsFromAPI === 'function') {
         window.updateEventsFromAPI(events);
       }
     });
 
-    // Load members FIRST, then conversations (conversations need member names for display)
     MTC.fn.loadFromAPI('/mobile/members', 'mtc-api-members', null).then(function(members) {
       if (members && members.length > 0 && typeof window.updateMembersFromAPI === 'function') {
         window.updateMembersFromAPI(members);
       }
-      // Load conversations AFTER members are populated (prevents name lookup race condition)
       return MTC.fn.loadFromAPI('/mobile/conversations', 'mtc-api-conversations', null);
     }).then(function(conversations) {
       if (conversations && typeof window.updateConversationsFromAPI === 'function') {
@@ -684,7 +793,6 @@
       }
     }).catch(function(err) {
       MTC.warn('[MTC] Members/conversations load error:', err);
-      // Still try to load conversations even if members failed (API fallback names will work)
       MTC.fn.loadFromAPI('/mobile/conversations', 'mtc-api-conversations', null).then(function(conversations) {
         if (conversations && typeof window.updateConversationsFromAPI === 'function') {
           window.updateConversationsFromAPI(conversations);
@@ -692,59 +800,50 @@
       });
     });
 
-    // Load partners
     MTC.fn.loadFromAPI('/mobile/partners', 'mtc-api-partners', null).then(function(partners) {
       if (partners && typeof window.updatePartnersFromAPI === 'function') {
         window.updatePartnersFromAPI(partners);
       }
     });
 
-    // Load announcements
     MTC.fn.loadFromAPI('/mobile/announcements', 'mtc-api-announcements', null).then(function(announcements) {
       if (announcements && typeof window.updateAnnouncementsFromAPI === 'function') {
         window.updateAnnouncementsFromAPI(announcements);
       }
     });
 
-    // Load bookings
     MTC.fn.loadFromAPI('/mobile/bookings', 'mtc-api-bookings', null).then(function(bookings) {
       if (bookings && typeof window.updateBookingsFromAPI === 'function') {
         window.updateBookingsFromAPI(bookings);
       }
     });
 
-    // Load court status (maintenance/available)
     MTC.fn.loadFromAPI('/mobile/courts', 'mtc-api-courts', null).then(function(courts) {
       if (courts && typeof window.updateCourtsFromAPI === 'function') {
         window.updateCourtsFromAPI(courts);
       }
     });
 
-    // Load court blocks (admin-created blocks for specific dates/times)
     MTC.fn.loadFromAPI('/mobile/court-blocks', 'mtc-api-court-blocks', null).then(function(blocks) {
       if (blocks && typeof window.updateCourtBlocksFromAPI === 'function') {
         window.updateCourtBlocksFromAPI(blocks);
       }
     });
 
-    // Load notifications from Supabase
     MTC.fn.loadFromAPI('/mobile/notifications', 'mtc-api-notifications', null).then(function(notifications) {
       if (notifications && typeof window.updateNotificationsFromAPI === 'function') {
         window.updateNotificationsFromAPI(notifications);
       }
     });
 
-    // Load family members
     MTC.fn.loadFromAPI('/mobile/families', 'mtc-api-families', null).then(function(familyData) {
       if (familyData && typeof window.updateFamiliesFromAPI === 'function') {
         window.updateFamiliesFromAPI(familyData);
       }
     });
 
-    // Load club settings (gate code, etc.)
     MTC.fn.loadFromAPI('/mobile/settings', 'mtc-club-settings', null);
 
-    // Load notification preferences from Supabase
     MTC.fn.apiRequest('/mobile/settings', {
       method: 'PATCH',
       body: JSON.stringify({ action: 'getNotifPrefs' })
@@ -752,31 +851,25 @@
       if (prefs && typeof window.updateNotifPrefsFromAPI === 'function') {
         window.updateNotifPrefsFromAPI(prefs);
       }
-    }).catch(function() { /* non-critical */ });
+    }).catch(function() {});
 
-    // Load coaching programs
     MTC.fn.loadFromAPI('/mobile/programs', 'mtc-api-programs', null).then(function(programs) {
       if (programs && typeof window.updateProgramsFromAPI === 'function') {
         window.updateProgramsFromAPI(programs);
       }
     });
 
-    // Load user preferences (privacy, court prefs, active profile, etc.) from own profile
     MTC.fn.loadFromAPI('/mobile/members', 'mtc-api-members', null).then(function(members) {
       if (!members || !Array.isArray(members)) return;
-      // Find own profile
       var userId = MTC.storage.get('mtc-user-id');
       var me = members.find(function(m) { return m.id === userId; });
       if (me && me.preferences) {
-        // Restore privacy settings
         if (me.preferences.privacy) {
           MTC.storage.set('mtc-privacy', me.preferences.privacy);
         }
-        // Restore court preferences
         if (me.preferences.courtPrefs) {
           MTC.storage.set('mtc-court-prefs', me.preferences.courtPrefs);
         }
-        // Restore availability + playstyle into profile
         if (me.preferences.availability || me.preferences.playstyle) {
           var profile = MTC.storage.get('mtc-profile', {});
           if (me.preferences.availability) profile.availability = me.preferences.availability;
@@ -784,15 +877,12 @@
           MTC.storage.set('mtc-profile', profile);
           Object.assign(MTC.state.profileData || {}, profile);
         }
-        // Restore active family profile
         if (me.preferences.activeProfile && me.preferences.activeProfile.type === 'family_member') {
           var memberId = me.preferences.activeProfile.memberId;
           if (memberId && typeof window.switchFamilyProfile === 'function') {
-            // Delay to let family data load first
             setTimeout(function() { window.switchFamilyProfile(memberId); }, 500);
           }
         }
-        // Restore avatar from profile
         if (me.avatar) {
           MTC.storage.set('mtc-avatar', me.avatar);
           if (typeof window.loadSavedAvatar === 'function') window.loadSavedAvatar();
@@ -801,10 +891,6 @@
     });
   }
 
-  /**
-   * Update family data from Supabase API.
-   * Called after login to sync family members across platforms.
-   */
   window.updateFamiliesFromAPI = function(data) {
     if (!data) return;
     if (data.family) {
@@ -818,19 +904,14 @@
   };
 
   // ============================================
-  // ROLE (set via login credentials, no FAB)
   // Push notification registration
   // ============================================
   function registerPushNotifications() {
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
     if (!currentUser || !currentUser.id) return;
-
-    // Don't re-prompt if already denied
     if (Notification.permission === 'denied') return;
 
-    // Ask permission if not granted yet
     if (Notification.permission === 'default') {
-      // Delay prompt slightly so it doesn't fire during login animation
       setTimeout(function() {
         Notification.requestPermission().then(function(permission) {
           if (permission === 'granted') subscribeToPush();
@@ -849,7 +930,6 @@
         return;
       }
 
-      // Convert base64 VAPID key to Uint8Array
       var padding = '='.repeat((4 - vapidPublicKey.length % 4) % 4);
       var base64 = (vapidPublicKey + padding).replace(/-/g, '+').replace(/_/g, '/');
       var rawData = atob(base64);
@@ -860,15 +940,18 @@
         userVisibleOnly: true,
         applicationServerKey: outputArray
       }).then(function(subscription) {
-        // Send subscription to server
+        var token = MTC.getToken();
         fetch('/api/push-subscribe', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': token ? 'Bearer ' + token : ''
+          },
           body: JSON.stringify({
             userId: currentUser.id,
             subscription: subscription.toJSON()
           })
-        }).catch(function() { /* push registration is best-effort */ });
+        }).catch(function() {});
       }).catch(function(err) {
         MTC.warn('[Push] Subscribe failed:', err.message);
       });
@@ -879,28 +962,21 @@
 
   // ============================================
   MTC.state.currentRole = 'member';
-  window.currentRole = 'member'; // Backward-compat alias
+  window.currentRole = 'member';
 
-  // Hide admin + captain menu items on initial load (member by default)
+  // Hide admin + captain menu items on initial load
   document.addEventListener('DOMContentLoaded', function() {
     const adminMenuItem = document.getElementById('menuAdminItem');
     if (adminMenuItem) adminMenuItem.classList.add('admin-hidden');
     const captainMenuItem = document.getElementById('menuCaptainItem');
     if (captainMenuItem) captainMenuItem.classList.add('admin-hidden');
 
-    // Disable auth buttons until Supabase is ready (prevents first-click failure)
-    var googleBtn = document.querySelector('.login-btn-google');
-    var magicBtn = document.querySelector('.login-btn-magic');
-    if (googleBtn) { googleBtn.disabled = true; googleBtn.style.opacity = '0.6'; }
-    if (magicBtn) { magicBtn.disabled = true; magicBtn.style.opacity = '0.6'; }
-
-    // Eagerly initialize Supabase client on page load (not on first click)
-    initSupabase().then(function(sb) {
-      if (!sb) {
-        // Still enable buttons — initSupabase will retry on click
-        enableAuthButtons();
-      }
-    });
+    // Pre-fill remembered email
+    var emailInput = document.getElementById('loginEmail');
+    try {
+      var remembered = localStorage.getItem('mtc-remembered-email');
+      if (emailInput && remembered) emailInput.value = remembered;
+    } catch(e) {}
 
     // Clear validation error styling when user focuses an input
     document.addEventListener('focusin', function(e) {
@@ -909,16 +985,5 @@
         clearFieldErrors(e.target);
       }
     });
-
-    // Check if returning from Google OAuth or Magic Link redirect
-    var url = new URL(window.location.href);
-    if (url.searchParams.has('code') || url.hash.includes('access_token') || url.searchParams.has('auth')) {
-      checkAuthCallback();
-      // Clean the ?auth=callback param from URL
-      if (url.searchParams.has('auth') && window.history && window.history.replaceState) {
-        url.searchParams.delete('auth');
-        window.history.replaceState({}, '', url.pathname + (url.search || ''));
-      }
-    }
   });
 })();

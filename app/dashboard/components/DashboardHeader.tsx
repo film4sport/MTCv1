@@ -73,12 +73,12 @@ export default function DashboardHeader({ title }: DashboardHeaderProps) {
         });
 
         // Register subscription with the server
-        const { data: { session } } = await (await import('../../lib/supabase')).supabase.auth.getSession();
-        if (!session?.access_token) return;
+        const sessionToken = localStorage.getItem('mtc-session-token');
+        if (!sessionToken) return;
 
         await fetch('/api/push-subscribe', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${sessionToken}` },
           body: JSON.stringify({ userId: currentUser.id, subscription: subscription.toJSON() }),
         });
       } catch {

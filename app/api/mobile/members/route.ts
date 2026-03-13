@@ -50,7 +50,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { name, email, membershipType, skillLevel, sendWelcome } = await request.json();
+    const { name, email, membershipType, skillLevel } = await request.json();
     if (!name?.trim() || !email?.trim()) {
       return NextResponse.json({ error: 'Name and email required' }, { status: 400 });
     }
@@ -75,27 +75,44 @@ export async function POST(request: Request) {
     const cleanName = sanitizeInput(name, 100);
     const cleanEmail = email.trim().slice(0, 254);
 
-    // Create auth user with a temporary password (they'll reset via email)
-    const tempPassword = `MTC-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-      email: cleanEmail,
-      password: tempPassword,
-      email_confirm: true, // auto-confirm since admin is adding them
-      user_metadata: {
-        name: cleanName,
-        skill_level: skillLevel || 'intermediate',
-        membership_type: membershipType || 'adult',
-      },
-    });
-
-    if (authError) return NextResponse.json({ error: authError.message }, { status: 500 });
-
-    // Send password reset so they can set their own password
-    if (sendWelcome && authData?.user) {
-      await supabase.auth.admin.generateLink({ type: 'recovery', email: email.trim() });
+    // Check email uniqueness
+    const { data: existing } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('email', cleanEmail)
+      .single();
+    if (existing) {
+      return NextResponse.json({ error: 'An account with this email already exists' }, { status: 409 });
     }
 
-    return NextResponse.json({ success: true, userId: authData?.user?.id });
+    // Create profile directly (no Supabase Auth — PIN auth)
+    // User will set their own PIN on first login via the migration flow
+    const { data: profile, error: insertError } = await supabase
+      .from('profiles')
+      .insert({
+        name: cleanName,
+        email: cleanEmail,
+        role: 'member',
+        status: 'active',
+        skill_level: skillLevel || 'intermediate',
+        skill_level_set: !!skillLevel,
+        membership_type: membershipType || 'adult',
+        residence: 'mono',
+        avatar: 'tennis-male-1',
+        member_since: new Date().toISOString().slice(0, 7),
+        pin_attempts: 0,
+      })
+      .select('id')
+      .single();
+
+    if (insertError || !profile) {
+      return NextResponse.json({ error: insertError?.message || 'Failed to create member' }, { status: 500 });
+    }
+
+    // Create default notification preferences
+    await supabase.from('notification_preferences').insert({ user_id: profile.id });
+
+    return NextResponse.json({ success: true, userId: profile.id });
   } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
@@ -130,6 +147,7 @@ export async function PATCH(request: Request) {
     const updates: ProfileUpdate = {};
 
     // Fields members can update on themselves
+    if (isSelf && body.name?.trim()) updates.name = sanitizeInput(body.name, 100);
     if (body.avatar !== undefined) updates.avatar = sanitizeInput(body.avatar, 50);
     if (body.ntrp !== undefined) {
       const ntrp = Number(body.ntrp);
@@ -194,6 +212,19 @@ export async function PATCH(request: Request) {
       .eq('id', memberId);
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+    // Propagate name change to denormalized columns (fire-and-forget)
+    if (updates.name) {
+      const newName = updates.name;
+      Promise.all([
+        supabase.from('bookings').update({ user_name: newName }).eq('user_id', memberId),
+        supabase.from('messages').update({ from_name: newName }).eq('from_id', memberId),
+        supabase.from('messages').update({ to_name: newName }).eq('to_id', memberId),
+        supabase.from('partners').update({ name: newName }).eq('user_id', memberId),
+        supabase.from('event_attendees').update({ user_name: newName }).eq('user_id', memberId),
+      ]).catch(err => console.error('[members PATCH] name propagation error:', err));
+    }
+
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });

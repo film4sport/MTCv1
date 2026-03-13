@@ -755,12 +755,5 @@ export async function deleteLineup(lineupId: string): Promise<void> {
   if (error) throw error;
 }
 
-// ─── Welcome Message (Signup) ───────────────────────────
-
-export async function sendWelcomeMessage(userId: string, userName: string): Promise<void> {
-  const { error } = await supabase.rpc('send_welcome_message', {
-    new_user_id: userId,
-    new_user_name: userName,
-  });
-  if (error) throw error;
-}
+// ─── Welcome Message — REMOVED ──────────────────────────
+// send_welcome_message RPC removed. New members get a welcome notification instead.

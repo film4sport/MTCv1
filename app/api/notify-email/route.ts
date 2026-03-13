@@ -25,11 +25,16 @@ export async function POST(request: Request) {
     }
 
     const token = authHeader.slice(7);
-    const supabase = createClient(supabaseUrl, supabaseAnonKey);
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-    if (authError || !user) {
+    const supabase = createClient(supabaseUrl, process.env.SUPABASE_SERVICE_ROLE_KEY || supabaseAnonKey);
+    const { data: session } = await supabase
+      .from('sessions')
+      .select('user_id')
+      .eq('token', token)
+      .single();
+    if (!session) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
+    const user = { id: session.user_id };
 
     const reqBody = await request.json();
     const { recipientEmail, recipientName, recipientUserId, subject, heading, body: emailBody, ctaText, ctaUrl, logType } = reqBody;

@@ -10,10 +10,35 @@
 ## Apple/Safari Testing Strategy
 - **Playwright WebKit**: Primary automated testing. CI runs 5 WebKit projects alongside Chromium: iPhone SE (375x667), iPhone 14 (390x844), iPad Mini (744x1133), iPad Pro 11" (834x1194), mobile PWA on WebKit. Catches ~80% of Safari CSS/layout bugs.
 - **BDG (Claude in Chrome)**: Live spot-checks on desktop Chromium.
-- **Real devices (user-owned)**: Mac Mini M1 (2020) with Xcode Simulator for all iPhone/iPad models. iPad Mini 6th gen (2021) and iPhone SE 2nd gen (2020) for physical testing.
+- **Real devices (user-owned)**: iPad Mini 5th gen (2019) and iPhone SE 2nd gen (2020) for physical testing.
 - **Device breakpoints**: Tablet CSS starts at `744px` (iPad Mini), iPad Pro 12.9" gets wider content at `1024px`. All iPhones covered by `≤500px` mobile breakpoint.
 - **Auth flow for iOS**: All login methods (magic link, Google OAuth) route through `/auth/complete` which auto-detects device → mobile PWA or dashboard. Never hardcode `/dashboard` as redirect.
 - **CI**: Both `ci.yml` and `pr-check.yml` install `chromium` and `webkit` browsers.
+
+## Auth System — PIN-Based (IMPLEMENTED: Mar 13, 2026)
+**Replaced ALL existing auth (Google OAuth, magic link, Supabase Auth) with email + 4-digit PIN.**
+- **Why**: Magic link UX is broken on iOS (Safari/PWA context switching). Google OAuth has same issue. Apple Sign-In requires Apple Developer account. Passwords are overkill for a tennis club. PIN is simple, works inside the app, no browser redirects.
+- **PIN length**: 4 digits (changed from 6 on Mar 13 — 6 was too many for a tennis club app).
+- **Signup** (landing page wizard): name + email + 4-digit PIN → account created. No confirmation email — if someone types a fake email, they can't recover their PIN. Their problem.
+- **Login**: email + 4-digit PIN. App remembers email in localStorage after first login, so returning users just enter PIN.
+- **New device**: enter email + PIN. App remembers on that device too.
+- **Forgot PIN**: tap "Forgot PIN" → 4-digit code emailed → user types code in app (no link to click, never leaves app) → set new PIN.
+- **No admin PIN reset** — forgot PIN flow handles it.
+- **No Google OAuth, no magic link, no Supabase Auth, no passwords.**
+- **Brute force protection**: 5 wrong PIN attempts → 15 min lockout. Counter in DB.
+- **Weak PIN rejection**: Server rejects `1234`, `4321`, and all repeated digits (e.g. `1111`).
+- **Security warning**: All signup/PIN-setup forms show amber warning: "Avoid easy PINs like 1234. Anyone who knows your email and PIN can access your profile and messages."
+- **Existing member migration**: Members who signed up via Google/magic link have profiles but no PIN. On first login with new system: enter email → app finds profile → "Set your 4-digit PIN" → done.
+- **Session**: localStorage remembers user + session token. Dashboard: `mtc-session-token`. Mobile PWA: `mtc-access-token` via `MTC.setToken()`.
+- **Supabase stays as database** — just not for auth. Supabase Realtime stays, client filters by user ID.
+- **RLS**: All Supabase Row Level Security policies dropped (commented out with `-- [RLS DISABLED]`). API routes handle all access control.
+- **Welcome messaging**: REMOVED (Mar 13). `send_welcome_message` RPC no longer called from signup or member creation. New members get welcome via notifications/toast instead.
+- **Name propagation**: When a user edits their name via settings, the API route (`/api/mobile/members PATCH`) propagates to 5 denormalized tables (bookings, messages from/to, partners, event_attendees).
+- **Deleted files**: `app/auth/callback/route.ts`, `app/auth/complete/page.tsx`, `app/api/mobile-auth/route.ts`, `app/api/mobile-auth/session/route.ts`, `app/api/mobile-signup/route.ts`, `app/api/reset-password/route.ts`, `unit-tests/auth.test.js`, `unit-tests/apple-auth-flow.test.js`.
+- **Kept**: `app/api/mobile-auth/config/route.ts` (returns Supabase URL + anon key for Realtime).
+- **New routes**: `/api/auth/pin-login`, `/api/auth/pin-setup`, `/api/auth/forgot-pin`, `/api/auth/verify-code`, `/api/auth/signup`, `/api/auth/session`.
+- **New tests**: `unit-tests/pin-auth.test.js` (132 tests) — covers all 6 routes, auth helper, cross-platform no-supabase.auth checks, deleted files, client functions, DOM elements, weak PIN fuzzing.
+- **Supabase dashboard cleanup after deploy**: Disable Google OAuth provider, disable email/magic link, remove redirect URLs. Don't delete `auth.users` table (Supabase manages it internally).
 
 ## Pre-Commit Cross-Platform Checklist
 Before reporting any feature change as "done", verify:
@@ -28,7 +53,7 @@ Before reporting any feature change as "done", verify:
 ## Current Status
 - **SMTP/Supabase email**: DONE. Resend SMTP (smtp.resend.com:465, noreply@monotennisclub.com). Email confirmation and password reset emails are live.
 - **Deployment**: Railway (NOT Vercel). NODE_VERSION=20 env var set. 13 env vars total.
-- **Google OAuth**: LIVE. Users log in with Google on both Dashboard and Mobile PWA.
+- **Auth**: PIN-based (email + 4-digit PIN). Google OAuth and magic link REMOVED. See "Auth System — PIN-Based" section above.
 - **GSC**: Verified (HTML file method). Sitemap (`/sitemap.xml`) already submitted. No meta tag needed.
 - **Booking emails**: Fixed `from` address bug. Now uses `SMTP_FROM=noreply@monotennisclub.com`. Domain verified on Resend.
 - **Message notifications**: Bell + push notifications trigger on message send. `/api/notify-message` route for push.
@@ -50,6 +75,7 @@ Before reporting any feature change as "done", verify:
 - **Total test count (Mar 8→9)**: Started at 747 (27 files) → 798 (31) → 814 (32) → 1024 (34 files) → **1079 tests across 35 files**, all passing.
 - **Messaging features tests (Mar 9)**: `messaging-features.test.js` (34 tests) — welcome message guards (admin self-skip, idempotency, conversation dedup), welcome cleanup RPC, cleanup API endpoint, admin pinned in member search (both platforms), admin name override, auth callback 24h guard. Filter tab tests removed after UI was removed.
 - **Total test count (Mar 9 updated)**: **1058 tests across 35 files**, all passing. (21 filter tab tests removed with the UI.)
+- **PIN auth refactor (Mar 13)**: Changed 6-digit PIN to 4-digit PIN across all files. Removed welcome messaging from signup flows. Added security warning to all signup/PIN-setup forms. `tsc --noEmit` clean, `npm run build:mobile` clean, **1209 tests across 36 files** all passing. Visual verification done via BDG (signup page + login page).
 - **Rule #2 incident (Mar 9)**: Added filter tabs + cleanup button to messages UI without user asking → had to remove them → broke 21 CI tests. CLAUDE.md #2 strengthened: NEVER add features, functionality, UI elements, API endpoints, RPC functions, or logic the user didn't ask for. Suggest in text only.
 - **Coaching panel access (Mar 8)**: Sidebar now shows "Book Lessons" link for both coaches AND admins (was coach-only). Sidebar.tsx line 145: `(isCoach || isAdmin)`.
 - **Coaching program bookings**: `db.createBooking` is still used in the coaching program creation flow (line 966 of store.tsx). This is coach-only (coaching panel), not admin. Coaches create program bookings (type: 'program') via the coaching panel.

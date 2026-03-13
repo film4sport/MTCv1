@@ -11,7 +11,7 @@ import path from 'path';
 const readSource = (filePath) => readFileSync(path.resolve(filePath), 'utf8');
 
 const messagesPageSrc = readSource('app/dashboard/messages/page.tsx');
-const authCallbackSrc = readSource('app/auth/callback/route.ts');
+// authCallbackSrc removed — auth/callback deleted in PIN auth refactor
 const convRouteSrc = readSource('app/api/mobile/conversations/route.ts');
 const schemaSQL = readSource('supabase/schema.sql');
 const welcomeGuardsMigration = readSource('supabase/migrations/20260309_fix_welcome_message_guards.sql');
@@ -50,31 +50,7 @@ describe('Welcome Message Guards — send_welcome_message RPC', () => {
   });
 });
 
-// ─── Auth Callback 24h Guard ─────────────────────────────
-describe('Auth Callback — Welcome Guard', () => {
-  it('uses 24-hour window (not 5 minutes)', () => {
-    expect(authCallbackSrc).toContain('24 * 60 * 60 * 1000');
-    expect(authCallbackSrc).not.toContain('5 * 60 * 1000');
-  });
-
-  it('has secondary guard checking welcome-{userId} message', () => {
-    expect(authCallbackSrc).toContain('existingWelcome');
-    expect(authCallbackSrc).toContain("`welcome-${user.id}`");
-  });
-
-  it('waits for profile to exist before sending welcome', () => {
-    expect(authCallbackSrc).toContain('profileReady');
-    expect(authCallbackSrc).toContain('attempt < 10');
-  });
-
-  it('skips recovery type (not for new signups)', () => {
-    expect(authCallbackSrc).toContain("type !== 'recovery'");
-  });
-
-  it('uses service role client for server-side operations', () => {
-    expect(authCallbackSrc).toContain('SUPABASE_SERVICE_ROLE_KEY');
-  });
-});
+// Auth Callback tests removed — auth/callback deleted in PIN auth refactor
 
 // ─── Welcome Cleanup RPC ─────────────────────────────────
 describe('Cleanup Stale Welcomes RPC', () => {

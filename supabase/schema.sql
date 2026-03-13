@@ -8,9 +8,9 @@
 -- ============================================================
 
 -- ─── Profiles ───────────────────────────────────────────
--- Extends Supabase auth.users with app-specific fields
+-- User profiles — PIN-based auth (no Supabase Auth dependency)
 create table if not exists profiles (
-  id uuid primary key references auth.users(id) on delete cascade,
+  id uuid default gen_random_uuid() primary key,
   name text not null,
   email text not null unique,
   role text not null default 'member' check (role in ('member', 'coach', 'admin')),
@@ -26,8 +26,26 @@ create table if not exists profiles (
   residence text default 'mono' check (residence in ('mono', 'other')),
   interclub_team text default 'none' check (interclub_team in ('none', 'a', 'b')),
   interclub_captain boolean default false,
+  pin_hash text,
+  pin_reset_code text,
+  pin_reset_expires timestamptz,
+  pin_attempts integer default 0,
+  pin_locked_until timestamptz,
   created_at timestamptz default now()
 );
+
+-- ─── Sessions ───────────────────────────────────────────
+-- Session tokens for PIN-based auth (replaces Supabase Auth JWT)
+create table if not exists sessions (
+  token text default ('sess-' || gen_random_uuid()::text) primary key,
+  user_id uuid not null references profiles(id) on delete cascade,
+  created_at timestamptz default now(),
+  last_used timestamptz default now(),
+  user_agent text,
+  ip_address text
+);
+create index if not exists idx_sessions_user_id on sessions(user_id);
+create index if not exists idx_sessions_last_used on sessions(last_used);
 
 -- ─── Families ─────────────────────────────────────────────
 -- Groups family membership members under one account
@@ -85,11 +103,11 @@ create table if not exists bookings (
 );
 
 -- ─── Bookings RLS ─────────────────────────────────────
-alter table bookings enable row level security;
-create policy "bookings_select" on bookings for select using (true); -- all members can see all bookings (calendar grid)
-create policy "bookings_insert_own" on bookings for insert
+-- [RLS DISABLED] alter table bookings enable row level security;
+-- [RLS DISABLED] create policy "bookings_select" on bookings for select using (true); -- all members can see all bookings (calendar grid)
+-- [RLS DISABLED] create policy "bookings_insert_own" on bookings for insert
   with check (user_id = auth.uid());
-create policy "bookings_update_own" on bookings for update
+-- [RLS DISABLED] create policy "bookings_update_own" on bookings for update
   using (user_id = auth.uid() or is_admin());
 -- No general delete: bookings are cancelled (status update), not deleted
 
@@ -128,11 +146,11 @@ create table if not exists event_attendees (
 );
 
 -- RLS: authenticated users can read all, but only manage their own RSVPs
-alter table event_attendees enable row level security;
-create policy "event_attendees_select" on event_attendees for select using (true);
-create policy "event_attendees_insert" on event_attendees for insert
+-- [RLS DISABLED] alter table event_attendees enable row level security;
+-- [RLS DISABLED] create policy "event_attendees_select" on event_attendees for select using (true);
+-- [RLS DISABLED] create policy "event_attendees_insert" on event_attendees for insert
   with check (user_name = (select name from public.profiles where id = auth.uid()));
-create policy "event_attendees_delete" on event_attendees for delete
+-- [RLS DISABLED] create policy "event_attendees_delete" on event_attendees for delete
   using (user_name = (select name from public.profiles where id = auth.uid()) or is_admin());
 
 -- Enable Realtime so changes broadcast to all connected clients
@@ -182,25 +200,25 @@ create table if not exists messages (
 );
 
 -- ─── Conversations RLS ─────────────────────────────────
-alter table conversations enable row level security;
-create policy "conversations_select_own" on conversations for select
+-- [RLS DISABLED] alter table conversations enable row level security;
+-- [RLS DISABLED] create policy "conversations_select_own" on conversations for select
   using (member_a = auth.uid() or member_b = auth.uid());
-create policy "conversations_insert_own" on conversations for insert
+-- [RLS DISABLED] create policy "conversations_insert_own" on conversations for insert
   with check (member_a = auth.uid() or member_b = auth.uid());
-create policy "conversations_update_own" on conversations for update
+-- [RLS DISABLED] create policy "conversations_update_own" on conversations for update
   using (member_a = auth.uid() or member_b = auth.uid());
-create policy "conversations_delete_own" on conversations for delete
+-- [RLS DISABLED] create policy "conversations_delete_own" on conversations for delete
   using (member_a = auth.uid() or member_b = auth.uid());
 
 -- ─── Messages RLS ──────────────────────────────────────
-alter table messages enable row level security;
-create policy "messages_select_own" on messages for select
+-- [RLS DISABLED] alter table messages enable row level security;
+-- [RLS DISABLED] create policy "messages_select_own" on messages for select
   using (from_id = auth.uid() or to_id = auth.uid());
-create policy "messages_insert_own" on messages for insert
+-- [RLS DISABLED] create policy "messages_insert_own" on messages for insert
   with check (from_id = auth.uid());
-create policy "messages_update_own" on messages for update
+-- [RLS DISABLED] create policy "messages_update_own" on messages for update
   using (to_id = auth.uid()); -- only recipient can update (mark read)
-create policy "messages_delete_own" on messages for delete
+-- [RLS DISABLED] create policy "messages_delete_own" on messages for delete
   using (from_id = auth.uid());
 
 -- ─── Announcements ──────────────────────────────────────
@@ -233,14 +251,14 @@ create table if not exists notifications (
 );
 
 -- RLS: users can read/manage their own notifications, system can create
-alter table notifications enable row level security;
-create policy "notifications_select_own" on notifications for select
+-- [RLS DISABLED] alter table notifications enable row level security;
+-- [RLS DISABLED] create policy "notifications_select_own" on notifications for select
   using (user_id = auth.uid());
-create policy "notifications_insert" on notifications for insert
+-- [RLS DISABLED] create policy "notifications_insert" on notifications for insert
   with check (user_id = auth.uid());
-create policy "notifications_update_own" on notifications for update
+-- [RLS DISABLED] create policy "notifications_update_own" on notifications for update
   using (user_id = auth.uid());
-create policy "notifications_delete_own" on notifications for delete
+-- [RLS DISABLED] create policy "notifications_delete_own" on notifications for delete
   using (user_id = auth.uid());
 
 -- ─── Coaching Programs ──────────────────────────────────
@@ -288,6 +306,7 @@ create table if not exists notification_preferences (
 );
 
 -- ─── RLS Helper Functions ──────────────────────────────
+-- [PIN AUTH] is_admin() returns false — RLS disabled, API routes handle access control
 create or replace function is_admin()
 returns boolean as $$
   select exists (
@@ -337,54 +356,25 @@ do $$ begin
 end $$;
 
 -- RLS for families
-alter table families enable row level security;
-create policy "families_select_own" on families for select using (primary_user_id = auth.uid());
-create policy "families_insert_own" on families for insert with check (primary_user_id = auth.uid());
-create policy "families_update_own" on families for update using (primary_user_id = auth.uid());
-create policy "families_delete_own" on families for delete using (primary_user_id = auth.uid());
+-- [RLS DISABLED] alter table families enable row level security;
+-- [RLS DISABLED] create policy "families_select_own" on families for select using (primary_user_id = auth.uid());
+-- [RLS DISABLED] create policy "families_insert_own" on families for insert with check (primary_user_id = auth.uid());
+-- [RLS DISABLED] create policy "families_update_own" on families for update using (primary_user_id = auth.uid());
+-- [RLS DISABLED] create policy "families_delete_own" on families for delete using (primary_user_id = auth.uid());
 
 -- RLS for family_members
-alter table family_members enable row level security;
-create policy "family_members_select_own" on family_members for select
+-- [RLS DISABLED] alter table family_members enable row level security;
+-- [RLS DISABLED] create policy "family_members_select_own" on family_members for select
   using (family_id in (select id from families where primary_user_id = auth.uid()));
-create policy "family_members_insert_own" on family_members for insert
+-- [RLS DISABLED] create policy "family_members_insert_own" on family_members for insert
   with check (family_id in (select id from families where primary_user_id = auth.uid()));
-create policy "family_members_update_own" on family_members for update
+-- [RLS DISABLED] create policy "family_members_update_own" on family_members for update
   using (family_id in (select id from families where primary_user_id = auth.uid()));
-create policy "family_members_delete_own" on family_members for delete
+-- [RLS DISABLED] create policy "family_members_delete_own" on family_members for delete
   using (family_id in (select id from families where primary_user_id = auth.uid()));
 
--- ─── Auto-create profile on signup ──────────────────────
-create or replace function public.handle_new_user()
-returns trigger as $$
-begin
-  insert into public.profiles (id, name, email, role, skill_level, skill_level_set, membership_type, residence, avatar, member_since)
-  values (
-    new.id,
-    coalesce(new.raw_user_meta_data->>'name', split_part(new.email, '@', 1)),
-    new.email,
-    coalesce(new.raw_user_meta_data->>'role', 'member'),
-    coalesce(new.raw_user_meta_data->>'skill_level', 'intermediate'),
-    coalesce((new.raw_user_meta_data->>'skill_level_set')::boolean, (new.raw_user_meta_data->>'skill_level' is not null)),
-    coalesce(new.raw_user_meta_data->>'membership_type', 'adult'),
-    coalesce(new.raw_user_meta_data->>'residence', 'mono'),
-    'tennis-male-1',
-    to_char(now(), 'YYYY-MM')
-  );
-
-  -- Create default notification preferences
-  insert into public.notification_preferences (user_id)
-  values (new.id);
-
-  return new;
-end;
-$$ language plpgsql security definer set search_path = '';
-
--- Trigger: create profile when a new auth user signs up
-drop trigger if exists on_auth_user_created on auth.users;
-create trigger on_auth_user_created
-  after insert on auth.users
-  for each row execute procedure public.handle_new_user();
+-- [PIN AUTH] handle_new_user trigger REMOVED — profiles are created directly by /api/auth/signup
+-- The old trigger on auth.users is no longer needed since we don't use Supabase Auth.
 
 -- ─── Club Settings (key-value) ────────────────────────────
 create table if not exists club_settings (
@@ -395,11 +385,11 @@ create table if not exists club_settings (
 );
 
 -- RLS: everyone can read, only admins can modify
-alter table club_settings enable row level security;
-create policy "club_settings_select" on club_settings for select using (true);
-create policy "club_settings_admin_modify" on club_settings for insert with check (is_admin());
-create policy "club_settings_admin_update" on club_settings for update using (is_admin());
-create policy "club_settings_admin_delete" on club_settings for delete using (is_admin());
+-- [RLS DISABLED] alter table club_settings enable row level security;
+-- [RLS DISABLED] create policy "club_settings_select" on club_settings for select using (true);
+-- [RLS DISABLED] create policy "club_settings_admin_modify" on club_settings for insert with check (is_admin());
+-- [RLS DISABLED] create policy "club_settings_admin_update" on club_settings for update using (is_admin());
+-- [RLS DISABLED] create policy "club_settings_admin_delete" on club_settings for delete using (is_admin());
 
 -- Seed default gate code
 insert into club_settings (key, value) values ('gate_code', '1234') on conflict do nothing;
@@ -421,11 +411,11 @@ create index if not exists idx_court_blocks_date on court_blocks(block_date);
 create index if not exists idx_court_blocks_court_date on court_blocks(court_id, block_date);
 
 -- RLS: everyone can read (for booking calendar), only admins can modify
-alter table court_blocks enable row level security;
-create policy "court_blocks_select" on court_blocks for select using (true);
-create policy "court_blocks_admin_insert" on court_blocks for insert with check (is_admin());
-create policy "court_blocks_admin_update" on court_blocks for update using (is_admin());
-create policy "court_blocks_admin_delete" on court_blocks for delete using (is_admin());
+-- [RLS DISABLED] alter table court_blocks enable row level security;
+-- [RLS DISABLED] create policy "court_blocks_select" on court_blocks for select using (true);
+-- [RLS DISABLED] create policy "court_blocks_admin_insert" on court_blocks for insert with check (is_admin());
+-- [RLS DISABLED] create policy "court_blocks_admin_update" on court_blocks for update using (is_admin());
+-- [RLS DISABLED] create policy "court_blocks_admin_delete" on court_blocks for delete using (is_admin());
 
 -- ─── Delete Member (Admin RPC) ────────────────────────────
 -- Deletes a user and all related data. Most FKs have ON DELETE CASCADE,
@@ -463,8 +453,11 @@ begin
     delete from public.family_members where family_id = fid;
   end if;
 
-  -- Everything else cascades from: delete auth.users → profiles → child tables
-  delete from auth.users where id = target_user_id;
+  -- Delete sessions for this user
+  delete from public.sessions where user_id = target_user_id;
+
+  -- Delete profile (child tables cascade via FK)
+  delete from public.profiles where id = target_user_id;
 end;
 $$ language plpgsql security definer set search_path = '';
 
@@ -580,11 +573,11 @@ create table if not exists email_logs (
 );
 
 -- RLS: admins can read all logs, users can read their own
-alter table email_logs enable row level security;
-create policy "email_logs_admin_read" on email_logs for select using (is_admin());
-create policy "email_logs_own_read" on email_logs for select using (recipient_user_id = auth.uid());
+-- [RLS DISABLED] alter table email_logs enable row level security;
+-- [RLS DISABLED] create policy "email_logs_admin_read" on email_logs for select using (is_admin());
+-- [RLS DISABLED] create policy "email_logs_own_read" on email_logs for select using (recipient_user_id = auth.uid());
 -- Service role inserts (from API routes) bypass RLS, but allow authenticated inserts too
-create policy "email_logs_insert" on email_logs for insert with check (true);
+-- [RLS DISABLED] create policy "email_logs_insert" on email_logs for insert with check (true);
 
 create index if not exists idx_email_logs_recipient on email_logs(recipient_email);
 create index if not exists idx_email_logs_type on email_logs(type);
@@ -615,9 +608,9 @@ create table if not exists error_logs (
 );
 
 -- Only admins can read error logs; API route inserts via service role (bypasses RLS)
-alter table error_logs enable row level security;
-create policy "error_logs_admin_read" on error_logs for select using (is_admin());
-create policy "error_logs_insert" on error_logs for insert with check (true);
+-- [RLS DISABLED] alter table error_logs enable row level security;
+-- [RLS DISABLED] create policy "error_logs_admin_read" on error_logs for select using (is_admin());
+-- [RLS DISABLED] create policy "error_logs_insert" on error_logs for insert with check (true);
 
 create index if not exists idx_error_logs_created on error_logs(created_at desc);
 create index if not exists idx_error_logs_context on error_logs(context);
@@ -648,41 +641,41 @@ create table if not exists lineup_entries (
 );
 
 -- RLS: captains manage their team's lineups, members read + update own entry
-alter table match_lineups enable row level security;
-alter table lineup_entries enable row level security;
+-- [RLS DISABLED] alter table match_lineups enable row level security;
+-- [RLS DISABLED] alter table lineup_entries enable row level security;
 
 -- Admins: full access
-create policy "lineups_admin_all" on match_lineups for all using (is_admin());
-create policy "entries_admin_all" on lineup_entries for all using (is_admin());
+-- [RLS DISABLED] create policy "lineups_admin_all" on match_lineups for all using (is_admin());
+-- [RLS DISABLED] create policy "entries_admin_all" on lineup_entries for all using (is_admin());
 
 -- Captains: full CRUD on their team's lineups
-create policy "lineups_captain_select" on match_lineups for select using (
+-- [RLS DISABLED] create policy "lineups_captain_select" on match_lineups for select using (
   exists(select 1 from profiles where id = auth.uid() and interclub_team = match_lineups.team)
 );
-create policy "lineups_captain_insert" on match_lineups for insert with check (
+-- [RLS DISABLED] create policy "lineups_captain_insert" on match_lineups for insert with check (
   exists(select 1 from profiles where id = auth.uid() and interclub_captain = true and interclub_team = match_lineups.team)
 );
-create policy "lineups_captain_update" on match_lineups for update using (
+-- [RLS DISABLED] create policy "lineups_captain_update" on match_lineups for update using (
   exists(select 1 from profiles where id = auth.uid() and interclub_captain = true and interclub_team = match_lineups.team)
 );
-create policy "lineups_captain_delete" on match_lineups for delete using (
+-- [RLS DISABLED] create policy "lineups_captain_delete" on match_lineups for delete using (
   exists(select 1 from profiles where id = auth.uid() and interclub_captain = true and interclub_team = match_lineups.team)
 );
 
 -- Team members: read entries for their team's lineups, update own entry only
-create policy "entries_team_select" on lineup_entries for select using (
+-- [RLS DISABLED] create policy "entries_team_select" on lineup_entries for select using (
   exists(select 1 from match_lineups ml join profiles p on p.id = auth.uid()
     where ml.id = lineup_entries.lineup_id and p.interclub_team = ml.team)
 );
-create policy "entries_captain_insert" on lineup_entries for insert with check (
+-- [RLS DISABLED] create policy "entries_captain_insert" on lineup_entries for insert with check (
   exists(select 1 from match_lineups ml join profiles p on p.id = auth.uid()
     where ml.id = lineup_entries.lineup_id and p.interclub_captain = true and p.interclub_team = ml.team)
 );
-create policy "entries_member_update" on lineup_entries for update using (
+-- [RLS DISABLED] create policy "entries_member_update" on lineup_entries for update using (
   member_id = auth.uid()
   or exists(select 1 from profiles where id = auth.uid() and interclub_captain = true)
 );
-create policy "entries_captain_delete" on lineup_entries for delete using (
+-- [RLS DISABLED] create policy "entries_captain_delete" on lineup_entries for delete using (
   exists(select 1 from match_lineups ml join profiles p on p.id = auth.uid()
     where ml.id = lineup_entries.lineup_id and p.interclub_captain = true and p.interclub_team = ml.team)
 );

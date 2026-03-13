@@ -26,11 +26,16 @@ export async function POST(request: Request) {
     }
 
     const token = authHeader.slice(7);
-    const supabase = createClient(supabaseUrl, supabaseAnonKey);
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-    if (authError || !user) {
+    const supabase = createClient(supabaseUrl, supabaseServiceKey || supabaseAnonKey);
+    const { data: session } = await supabase
+      .from('sessions')
+      .select('user_id')
+      .eq('token', token)
+      .single();
+    if (!session) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
+    const userId = session.user_id;
 
     const body = await request.json();
     const { recipientId, title, body: msgBody, tag, url, type } = body;
@@ -40,20 +45,20 @@ export async function POST(request: Request) {
     }
 
     // Prevent sending push to yourself
-    if (recipientId === user.id) {
+    if (recipientId === userId) {
       return NextResponse.json({ success: true, sent: 0, reason: 'self' });
     }
 
     // Rate limit per sender
     const now = Date.now();
-    const limit = pushLimits.get(user.id);
+    const limit = pushLimits.get(userId);
     if (limit && now < limit.resetAt) {
       if (limit.count >= 30) {
         return NextResponse.json({ error: 'Rate limit' }, { status: 429 });
       }
       limit.count++;
     } else {
-      pushLimits.set(user.id, { count: 1, resetAt: now + 60000 });
+      pushLimits.set(userId, { count: 1, resetAt: now + 60000 });
     }
 
     // Use shared push utility (handles VAPID config, preferences, cleanup)

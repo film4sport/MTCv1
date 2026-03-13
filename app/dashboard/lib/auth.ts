@@ -1,302 +1,289 @@
 import type { User, SkillLevel } from './types';
-import { supabase } from '../../lib/supabase';
 
-// ── Client-side rate limiting (60s cooldown per email) ──────────────
-const EMAIL_COOLDOWN_MS = 60_000;
+// ── Session Token Management ─────────────────────────────
+// Session token is stored in localStorage. All API calls use it as Bearer token.
 
-function checkEmailCooldown(key: string, email: string): { blocked: boolean; secondsLeft: number } {
-  if (typeof window === 'undefined') return { blocked: false, secondsLeft: 0 };
-  const storageKey = `${key}:${email.toLowerCase().trim()}`;
-  const lastSent = parseInt(localStorage.getItem(storageKey) || '0', 10);
-  const elapsed = Date.now() - lastSent;
-  if (elapsed < EMAIL_COOLDOWN_MS) {
-    return { blocked: true, secondsLeft: Math.ceil((EMAIL_COOLDOWN_MS - elapsed) / 1000) };
-  }
-  return { blocked: false, secondsLeft: 0 };
+const SESSION_KEY = 'mtc-session-token';
+const USER_KEY = 'mtc-current-user';
+
+export function getSessionToken(): string | null {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem(SESSION_KEY);
 }
 
-function setEmailCooldown(key: string, email: string): void {
+export function setSession(token: string, user: User): void {
   if (typeof window === 'undefined') return;
-  const storageKey = `${key}:${email.toLowerCase().trim()}`;
-  localStorage.setItem(storageKey, Date.now().toString());
+  localStorage.setItem(SESSION_KEY, token);
+  localStorage.setItem(USER_KEY, JSON.stringify(user));
 }
 
-/**
- * Sign in with Supabase Auth.
- * Returns a User object from the profiles table if successful, null if rejected.
- */
-export async function signIn(email: string, password: string): Promise<User | null> {
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error || !data.user) return null;
-
-  // Fetch profile from profiles table
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', data.user.id)
-    .single();
-
-  if (!profile) return null;
-
-  return {
-    id: profile.id,
-    name: profile.name,
-    email: profile.email,
-    role: profile.role as User['role'],
-    status: (profile.status as User['status']) || 'active',
-    ntrp: profile.ntrp ?? undefined,
-    skillLevel: (profile.skill_level as SkillLevel) ?? undefined,
-    skillLevelSet: profile.skill_level_set ?? false,
-    membershipType: (profile.membership_type as User['membershipType']) ?? undefined,
-    familyId: profile.family_id ?? undefined,
-    memberSince: profile.member_since ?? undefined,
-    avatar: profile.avatar ?? undefined,
-    preferences: profile.preferences ?? {},
-  };
+export function clearSession(): void {
+  if (typeof window === 'undefined') return;
+  localStorage.removeItem(SESSION_KEY);
+  localStorage.removeItem(USER_KEY);
 }
 
-/**
- * Sign up a new member with Supabase Auth (passwordless).
- * A random password is generated internally — users log in via Google or Magic Link only.
- * Profile row is auto-created by the database trigger.
- */
-export async function signUp(
-  email: string,
-  name: string,
-  membershipType?: string,
-  skillLevel?: string,
-  residence?: string,
-): Promise<{ user: User | null; error: string | null; emailConfirmRequired?: boolean; cooldownSeconds?: number }> {
-  // Rate limit: 1 signup email per 60 seconds per address
-  const cooldown = checkEmailCooldown('mtc-signup', email);
-  if (cooldown.blocked) {
-    return { user: null, error: `Please wait ${cooldown.secondsLeft} seconds before trying again.`, cooldownSeconds: cooldown.secondsLeft };
-  }
-
-  // Generate a strong random password the user never sees (Supabase requires one)
-  const randomPassword = crypto.randomUUID() + '-Aa1!';
-
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password: randomPassword,
-    options: {
-      data: { name, role: 'member', membership_type: membershipType || 'adult', skill_level: skillLevel || undefined, skill_level_set: skillLevel ? true : false, residence: residence || 'mono' },
-      emailRedirectTo: `${typeof window !== 'undefined' ? window.location.origin : 'https://www.monotennisclub.com'}/auth/callback`,
-    },
-  });
-
-  if (error) return { user: null, error: error.message };
-  if (!data.user) return { user: null, error: 'Signup failed' };
-
-  setEmailCooldown('mtc-signup', email);
-
-  // Supabase returns identities=[] when email confirmation is required and
-  // the email is already registered but unconfirmed. It also sets
-  // session=null when confirmation is pending.
-  const needsConfirmation = !data.session;
-
-  return {
-    user: {
-      id: data.user.id,
-      name,
-      email,
-      role: 'member',
-      memberSince: new Date().toISOString().slice(0, 7),
-    },
-    error: null,
-    emailConfirmRequired: needsConfirmation,
-  };
-}
-
-/**
- * Sign in (or sign up) with Google OAuth.
- * Redirects to Google's consent screen. After auth, Supabase sends
- * the user back to /auth/callback with a ?next= hint so the callback
- * knows where to go (e.g. /signup for new users, /dashboard for logins).
- */
-export async function signInWithGoogle(nextPath?: string): Promise<{ error: string | null }> {
-  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.monotennisclub.com';
-  const redirectTo = `${origin}/auth/callback${nextPath ? `?next=${encodeURIComponent(nextPath)}` : ''}`;
-
-  const { error } = await supabase.auth.signInWithOAuth({
-    provider: 'google',
-    options: {
-      redirectTo,
-      queryParams: {
-        access_type: 'offline',
-        prompt: 'consent',
-      },
-    },
-  });
-
-  return { error: error?.message || null };
-}
-
-/**
- * Send a magic link (passwordless email login).
- * Only works for existing users — new users should go through the signup wizard.
- */
-export async function signInWithMagicLink(email: string, nextPath?: string): Promise<{ error: string | null; cooldownSeconds?: number }> {
-  // Rate limit: 1 email per 60 seconds per address
-  const cooldown = checkEmailCooldown('mtc-magic-link', email);
-  if (cooldown.blocked) {
-    return { error: `Please wait ${cooldown.secondsLeft} seconds before requesting another link.`, cooldownSeconds: cooldown.secondsLeft };
-  }
-
-  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.monotennisclub.com';
-  const redirectTo = nextPath
-    ? `${origin}/auth/callback?next=${encodeURIComponent(nextPath)}`
-    : `${origin}/auth/callback`;
-
-  const { error } = await supabase.auth.signInWithOtp({
-    email,
-    options: {
-      shouldCreateUser: false,
-      emailRedirectTo: redirectTo,
-    },
-  });
-
-  if (error) {
-    // Supabase returns "Signups not allowed for otp" when user doesn't exist
-    if (error.message?.toLowerCase().includes('signups not allowed') || error.message?.toLowerCase().includes('user not found')) {
-      return { error: 'No account found with this email. Please sign up first.' };
-    }
-    return { error: error.message };
-  }
-
-  setEmailCooldown('mtc-magic-link', email);
-  return { error: null };
-}
-
-/**
- * Resend the signup confirmation email. Rate-limited to 1 per 60 seconds.
- */
-export async function resendConfirmation(email: string): Promise<{ error: string | null; cooldownSeconds?: number }> {
-  const cooldown = checkEmailCooldown('mtc-signup', email);
-  if (cooldown.blocked) {
-    return { error: `Please wait ${cooldown.secondsLeft} seconds before resending.`, cooldownSeconds: cooldown.secondsLeft };
-  }
-
-  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.monotennisclub.com';
-
-  const { error } = await supabase.auth.resend({
-    type: 'signup',
-    email,
-    options: {
-      emailRedirectTo: `${origin}/auth/callback`,
-    },
-  });
-
-  if (error) return { error: error.message };
-
-  setEmailCooldown('mtc-signup', email);
-  return { error: null };
-}
-
-/**
- * Complete an OAuth signup by updating the user's profile with wizard data.
- * Called after an OAuth user finishes the signup wizard steps.
- */
-export async function completeOAuthProfile(
-  userId: string,
-  data: { membershipType: string; skillLevel?: string; name?: string; residence?: string },
-): Promise<{ error: string | null }> {
-  // Update user metadata in Supabase Auth
-  const { error: metaError } = await supabase.auth.updateUser({
-    data: {
-      membership_type: data.membershipType,
-      skill_level: data.skillLevel || undefined,
-      skill_level_set: data.skillLevel ? true : false,
-      residence: data.residence || 'mono',
-      ...(data.name ? { name: data.name } : {}),
-    },
-  });
-  if (metaError) return { error: metaError.message };
-
-  // Update the profiles table directly
-  const updateFields: Record<string, unknown> = {
-    membership_type: data.membershipType,
-    residence: data.residence || 'mono',
-  };
-  if (data.skillLevel) {
-    updateFields.skill_level = data.skillLevel;
-    updateFields.skill_level_set = true;
-  }
-  if (data.name) {
-    updateFields.name = data.name;
-  }
-  const { error: profileError } = await supabase
-    .from('profiles')
-    .update(updateFields)
-    .eq('id', userId);
-
-  return { error: profileError?.message || null };
-}
-
-/**
- * Sign out the current user.
- */
-export async function signOut(): Promise<void> {
-  await supabase.auth.signOut();
-}
-
-/**
- * Send a password reset email via server-side API (rate-limited).
- * Returns an error message or null on success.
- */
-export async function resetPassword(email: string): Promise<string | null> {
+export function getCachedUser(): User | null {
+  if (typeof window === 'undefined') return null;
   try {
-    const res = await fetch('/api/reset-password', {
+    const raw = localStorage.getItem(USER_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Helper for authenticated API calls.
+ * Attaches the session token as Bearer header.
+ */
+export async function authFetch(url: string, options: RequestInit = {}): Promise<Response> {
+  const token = getSessionToken();
+  const headers = new Headers(options.headers);
+  if (token) {
+    headers.set('Authorization', `Bearer ${token}`);
+  }
+  return fetch(url, { ...options, headers });
+}
+
+// ── mapProfileToUser ─────────────────────────────────────
+// Maps API response shape to dashboard User type
+function mapProfileToUser(p: Record<string, unknown>): User {
+  return {
+    id: p.id as string,
+    name: p.name as string,
+    email: p.email as string,
+    role: (p.role as User['role']) || 'member',
+    status: (p.status as User['status']) || 'active',
+    ntrp: (p.ntrp as number) ?? undefined,
+    skillLevel: (p.skillLevel as SkillLevel) ?? undefined,
+    skillLevelSet: (p.skillLevelSet as boolean) ?? false,
+    membershipType: (p.membershipType as User['membershipType']) ?? undefined,
+    familyId: (p.familyId as string) ?? undefined,
+    memberSince: (p.memberSince as string) ?? undefined,
+    avatar: (p.avatar as string) ?? undefined,
+    residence: (p.residence as User['residence']) ?? 'mono',
+    interclubTeam: (p.interclubTeam as User['interclubTeam']) ?? 'none',
+    interclubCaptain: (p.interclubCaptain as boolean) ?? false,
+    preferences: (p.preferences as Record<string, unknown>) ?? {},
+  };
+}
+
+// ── PIN Login ────────────────────────────────────────────
+
+/**
+ * Login with email + 4-digit PIN.
+ * Returns User on success, error message on failure.
+ */
+export async function pinLogin(
+  email: string,
+  pin: string
+): Promise<{ user: User | null; error: string | null; needsPinSetup?: boolean; attemptsRemaining?: number }> {
+  try {
+    const res = await fetch('/api/auth/pin-login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email.trim().toLowerCase(), pin }),
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      return {
+        user: null,
+        error: data.error || 'Login failed',
+        needsPinSetup: data.needsPinSetup,
+        attemptsRemaining: data.attemptsRemaining,
+      };
+    }
+
+    const user = mapProfileToUser(data.user);
+    setSession(data.token, user);
+    return { user, error: null };
+  } catch {
+    return { user: null, error: 'Network error. Please try again.' };
+  }
+}
+
+// ── PIN Setup (migration / first-time) ───────────────────
+
+/**
+ * Set PIN for a user who doesn't have one yet (migration from old auth).
+ */
+export async function pinSetup(
+  email: string,
+  pin: string
+): Promise<{ user: User | null; error: string | null }> {
+  try {
+    const res = await fetch('/api/auth/pin-setup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email.trim().toLowerCase(), pin }),
+    });
+    const data = await res.json();
+
+    if (!res.ok) return { user: null, error: data.error || 'Failed to set PIN' };
+
+    if (data.token && data.user) {
+      const user = mapProfileToUser(data.user);
+      setSession(data.token, user);
+      return { user, error: null };
+    }
+
+    return { user: null, error: null };
+  } catch {
+    return { user: null, error: 'Network error. Please try again.' };
+  }
+}
+
+// ── Forgot PIN ───────────────────────────────────────────
+
+/**
+ * Request a PIN reset code be sent via email.
+ */
+export async function forgotPin(email: string): Promise<{ error: string | null }> {
+  try {
+    const res = await fetch('/api/auth/forgot-pin', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: email.trim().toLowerCase() }),
     });
     const data = await res.json();
-    if (!res.ok) return data.error || 'Failed to send reset email';
-    return null;
+    if (!res.ok) return { error: data.error || 'Failed to send reset code' };
+    return { error: null };
   } catch {
-    return 'Network error. Please try again.';
+    return { error: 'Network error. Please try again.' };
   }
 }
 
 /**
- * Update the current user's password (used after reset link click).
- * Requires an active recovery session.
+ * Verify the reset code and set a new PIN. Auto-logs in on success.
  */
-export async function updatePassword(newPassword: string): Promise<string | null> {
-  const { error } = await supabase.auth.updateUser({ password: newPassword });
-  return error ? error.message : null;
+export async function verifyResetCode(
+  email: string,
+  code: string,
+  newPin: string
+): Promise<{ user: User | null; error: string | null }> {
+  try {
+    const res = await fetch('/api/auth/verify-code', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: email.trim().toLowerCase(),
+        code,
+        newPin,
+      }),
+    });
+    const data = await res.json();
+
+    if (!res.ok) return { user: null, error: data.error || 'Invalid code' };
+
+    if (data.token && data.user) {
+      const user = mapProfileToUser(data.user);
+      setSession(data.token, user);
+      return { user, error: null };
+    }
+
+    return { user: null, error: null };
+  } catch {
+    return { user: null, error: 'Network error. Please try again.' };
+  }
 }
 
+// ── Signup ───────────────────────────────────────────────
+
 /**
- * Get the currently authenticated user's profile.
- * Returns null if not authenticated.
+ * Create a new account with name + email + PIN.
+ */
+export async function signUp(
+  name: string,
+  email: string,
+  pin: string,
+  membershipType?: string,
+  skillLevel?: string,
+  residence?: string,
+): Promise<{ user: User | null; error: string | null }> {
+  try {
+    const res = await fetch('/api/auth/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: name.trim(),
+        email: email.trim().toLowerCase(),
+        pin,
+        membershipType,
+        skillLevel,
+        residence,
+      }),
+    });
+    const data = await res.json();
+
+    if (!res.ok) return { user: null, error: data.error || 'Signup failed' };
+
+    if (data.token && data.user) {
+      const user = mapProfileToUser(data.user);
+      setSession(data.token, user);
+      return { user, error: null };
+    }
+
+    return { user: null, error: 'Signup failed' };
+  } catch {
+    return { user: null, error: 'Network error. Please try again.' };
+  }
+}
+
+// ── Session Validation ───────────────────────────────────
+
+/**
+ * Validate the current session and return the user profile.
+ * Called on page load to check if still logged in.
  */
 export async function getCurrentUser(): Promise<User | null> {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session?.user) return null;
+  const token = getSessionToken();
+  if (!token) return null;
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', session.user.id)
-    .single();
+  try {
+    const res = await fetch('/api/auth/session', {
+      headers: { 'Authorization': `Bearer ${token}` },
+    });
 
-  if (!profile) return null;
+    if (!res.ok) {
+      // Token invalid or expired — clear local storage
+      clearSession();
+      return null;
+    }
 
-  return {
-    id: profile.id,
-    name: profile.name,
-    email: profile.email,
-    role: profile.role as User['role'],
-    status: (profile.status as User['status']) || 'active',
-    ntrp: profile.ntrp ?? undefined,
-    skillLevel: (profile.skill_level as SkillLevel) ?? undefined,
-    skillLevelSet: profile.skill_level_set ?? false,
-    membershipType: (profile.membership_type as User['membershipType']) ?? undefined,
-    familyId: profile.family_id ?? undefined,
-    memberSince: profile.member_since ?? undefined,
-    avatar: profile.avatar ?? undefined,
-    preferences: profile.preferences ?? {},
-  };
+    const data = await res.json();
+    if (!data.user) {
+      clearSession();
+      return null;
+    }
+
+    const user = mapProfileToUser(data.user);
+    // Update cached user data
+    localStorage.setItem(USER_KEY, JSON.stringify(user));
+    return user;
+  } catch {
+    // Network error — return cached user if available (offline support)
+    return getCachedUser();
+  }
+}
+
+// ── Logout ───────────────────────────────────────────────
+
+/**
+ * Sign out — delete session on server and clear local storage.
+ */
+export async function signOut(): Promise<void> {
+  const token = getSessionToken();
+  if (token) {
+    try {
+      await fetch('/api/auth/session', {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+    } catch {
+      // Server logout failed — still clear local
+    }
+  }
+  clearSession();
 }
