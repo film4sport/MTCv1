@@ -34,8 +34,8 @@ test.describe('Mobile PWA — Offline Resilience', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
   test('login shows error when API is unreachable', async ({ page }) => {
-    // Block all API calls to simulate offline
-    await page.route('**/api/mobile-auth', (route) => {
+    // Block all API calls to simulate offline (PIN auth uses /api/auth/pin-login)
+    await page.route('**/api/auth/**', (route) => {
       route.abort('connectionrefused');
     });
 
@@ -48,12 +48,13 @@ test.describe('Mobile PWA — Offline Resilience', () => {
     await page.waitForTimeout(1000);
     await dismissOnboarding(page);
 
-    // Fill in email and use magic link (no password field — Google + Magic Link auth)
+    // Fill in email and PIN, attempt login (PIN auth)
     await page.fill('#loginEmail', 'test@mtc.ca');
-    await page.locator('.login-btn-magic').click({ force: true });
+    await page.fill('#loginPin', '5678');
+    await page.locator('#pinLoginBtn').click({ force: true });
     await page.waitForTimeout(2000);
 
-    // Login screen should still be visible (not crashed)
+    // Login screen should still be visible (not crashed — API is offline)
     await expect(page.locator('#login-screen')).toBeAttached();
   });
 
@@ -80,7 +81,7 @@ test.describe('Mobile PWA — Offline Resilience', () => {
     const errors = [];
     page.on('pageerror', (err) => errors.push(err.message));
 
-    await page.route('**/api/mobile-auth', (route) => {
+    await page.route('**/api/auth/pin-login', (route) => {
       route.fulfill({ status: 500, contentType: 'application/json', body: '{"error":"Server error"}' });
     });
 
@@ -94,7 +95,8 @@ test.describe('Mobile PWA — Offline Resilience', () => {
     await dismissOnboarding(page);
 
     await page.fill('#loginEmail', 'test@mtc.ca');
-    await page.locator('.login-btn-magic').click({ force: true });
+    await page.fill('#loginPin', '5678');
+    await page.locator('#pinLoginBtn').click({ force: true });
     await page.waitForTimeout(2000);
 
     // Should have no unhandled JS errors (global error handler catches them)
@@ -102,7 +104,7 @@ test.describe('Mobile PWA — Offline Resilience', () => {
   });
 
   test('API rate limiting returns proper error', async ({ page }) => {
-    await page.route('**/api/mobile-auth', (route) => {
+    await page.route('**/api/auth/pin-login', (route) => {
       route.fulfill({
         status: 429,
         contentType: 'application/json',
@@ -120,7 +122,8 @@ test.describe('Mobile PWA — Offline Resilience', () => {
     await dismissOnboarding(page);
 
     await page.fill('#loginEmail', 'test@mtc.ca');
-    await page.locator('.login-btn-magic').click({ force: true });
+    await page.fill('#loginPin', '5678');
+    await page.locator('#pinLoginBtn').click({ force: true });
     await page.waitForTimeout(2000);
 
     // Login screen should still be showing (not navigated away)
