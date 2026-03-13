@@ -184,6 +184,8 @@
       if (nameEl) nameEl.textContent = name ? ('Welcome back, ' + name.split(' ')[0] + '!') : 'Welcome back!';
     }
   }
+  // Expose for interactive.js (auto-migration of old auth sessions)
+  window.showPinSetupScreen = showPinSetupScreen;
 
   window.handlePinSetup = function() {
     var pinInput = document.getElementById('setupPin');

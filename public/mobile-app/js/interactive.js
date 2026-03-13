@@ -69,6 +69,18 @@
     // Check for saved login
     currentUser = MTC.storage.get('mtc-user', null);
     if (currentUser) {
+      // Check if user has a valid PIN auth session (token starts with 'sess-')
+      // Old users from Google OAuth / magic link have JWT tokens or no token — they need to set a PIN
+      var storedToken = MTC.storage.get('mtc-access-token', '');
+      if (!storedToken || (typeof storedToken === 'string' && storedToken.length > 0 && !storedToken.startsWith('sess-'))) {
+        // Old auth session — show PIN setup screen so they can migrate seamlessly
+        if (typeof showPinSetupScreen === 'function') {
+          showPinSetupScreen(currentUser.email || '', currentUser.name || '');
+        }
+        // Don't proceed to main app — let them set their PIN first
+        return;
+      }
+
       // Populate MTC.state so all modules (profile switcher, booking, etc.) have user data
       MTC.state.currentUser = currentUser;
       window.currentUser = currentUser;
