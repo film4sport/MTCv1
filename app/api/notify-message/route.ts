@@ -28,11 +28,16 @@ export async function POST(request: Request) {
     }
 
     const token = authHeader.slice(7);
-    const supabase = createClient(supabaseUrl, supabaseAnonKey);
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-    if (authError || !user) {
+    const supabase = createClient(supabaseUrl, supabaseServiceKey || supabaseAnonKey);
+    const { data: session } = await supabase
+      .from('sessions')
+      .select('user_id')
+      .eq('token', token)
+      .single();
+    if (!session) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
+    const senderId = session.user_id;
 
     const body = await request.json();
     const { recipientId, senderName, preview } = body;
@@ -48,20 +53,20 @@ export async function POST(request: Request) {
     }
 
     // Prevent sending push to yourself
-    if (recipientId === user.id) {
+    if (recipientId === senderId) {
       return NextResponse.json({ success: true, sent: 0, reason: 'self' });
     }
 
     // Rate limit per sender
     const now = Date.now();
-    const limit = msgLimits.get(user.id);
+    const limit = msgLimits.get(senderId);
     if (limit && now < limit.resetAt) {
       if (limit.count >= 30) {
         return NextResponse.json({ error: 'Rate limit' }, { status: 429 });
       }
       limit.count++;
     } else {
-      msgLimits.set(user.id, { count: 1, resetAt: now + 60000 });
+      msgLimits.set(senderId, { count: 1, resetAt: now + 60000 });
     }
 
     // Check VAPID config
@@ -99,7 +104,7 @@ export async function POST(request: Request) {
         icon: '/mobile-app/icons/icon-192x192.png',
         badge: '/mobile-app/icons/icon-72x72.png',
         url: '/dashboard/messages',
-        tag: `msg-${user.id}-${Date.now()}`,
+        tag: `msg-${senderId}-${Date.now()}`,
       });
 
       const results = await Promise.allSettled(

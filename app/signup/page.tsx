@@ -1,11 +1,9 @@
 'use client';
 
 import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
 
-import { signUp, signInWithGoogle, completeOAuthProfile, resendConfirmation } from '../dashboard/lib/auth';
-import { supabase } from '../lib/supabase';
-import { sendWelcomeMessage, createFamily, addFamilyMember } from '../dashboard/lib/db';
+import { signUp } from '../dashboard/lib/auth';
+import { createFamily, addFamilyMember } from '../dashboard/lib/db';
 import { membershipTypes, signupMembershipTypes, waiverText, acknowledgementText } from '../info/data';
 
 export default function SignupPage() {
@@ -17,7 +15,6 @@ export default function SignupPage() {
 }
 
 function SignupContent() {
-  const searchParams = useSearchParams();
   const waiverRef = useRef<HTMLDivElement>(null);
   const ackRef = useRef<HTMLDivElement>(null);
 
@@ -25,28 +22,19 @@ function SignupContent() {
   const [stepDirection, setStepDirection] = useState<'forward' | 'back'>('forward');
   const [animKey, setAnimKey] = useState(0);
   const [signupData, setSignupData] = useState({ membershipType: '', name: '', email: '', skillLevel: '', residence: 'mono' });
+  const [emailConfirm, setEmailConfirm] = useState('');
+  const [pin, setPin] = useState('');
+  const [pinConfirm, setPinConfirm] = useState('');
   const [popCard, setPopCard] = useState<string | null>(null);
   const [waiverAccepted, setWaiverAccepted] = useState(false);
   const [waiverScrolled, setWaiverScrolled] = useState(false);
   const [ackScrolled, setAckScrolled] = useState(false);
   const [signupError, setSignupError] = useState('');
   const [signupLoading, setSignupLoading] = useState(false);
-  const [emailConfirmPending, setEmailConfirmPending] = useState(false);
   const [existingProfile, setExistingProfile] = useState<{ name: string; email: string; role?: string; status?: string } | null>(null);
   const [familyMemberInputs, setFamilyMemberInputs] = useState<{ name: string; type: 'adult' | 'junior'; birthYear: string }[]>([]);
-  const [isOAuthUser, setIsOAuthUser] = useState(false);
-  const [oauthUserId, setOauthUserId] = useState<string | null>(null);
-  const [resendCooldown, setResendCooldown] = useState(0);
-  const [resendStatus, setResendStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
   const isFamily = signupData.membershipType === 'family';
   const totalSteps = 7;
-
-  // Countdown timer for resend cooldown
-  useEffect(() => {
-    if (resendCooldown <= 0) return;
-    const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
-    return () => clearTimeout(timer);
-  }, [resendCooldown]);
 
   // Navigate with direction tracking for animations
   const goToStep = useCallback((target: number) => {
@@ -62,45 +50,6 @@ function SignupContent() {
       if (stored) setExistingProfile(JSON.parse(stored));
     } catch { /* ignore */ }
   }, []);
-
-  // Detect OAuth return — user is coming back from Google with an active session
-  useEffect(() => {
-    if (searchParams.get('oauth') !== 'true') return;
-
-    const detectOAuthUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) return;
-
-      const user = session.user;
-      const fullName = user.user_metadata?.full_name || user.user_metadata?.name || '';
-      const userEmail = user.email || '';
-
-      setIsOAuthUser(true);
-      setOauthUserId(user.id);
-
-      // Pre-fill name and email from Google
-      setSignupData((prev) => ({
-        ...prev,
-        name: fullName || prev.name,
-        email: userEmail || prev.email,
-      }));
-
-      // Restore membership type from localStorage (saved before OAuth redirect)
-      const savedType = localStorage.getItem('mtc-oauth-membership-type');
-      if (savedType) {
-        setSignupData((prev) => ({ ...prev, membershipType: savedType }));
-        localStorage.removeItem('mtc-oauth-membership-type');
-        // Skip to the step after info (family members or skill level)
-        const isFam = savedType === 'family';
-        setSignupStep(isFam ? 3 : 4);
-      } else {
-        // No saved membership type — start from step 1
-        setSignupStep(1);
-      }
-    };
-
-    detectOAuthUser();
-  }, [searchParams]);
 
   // Auto-detect if waiver/ack content fits without scrolling (large screens)
   useEffect(() => {
@@ -161,82 +110,28 @@ function SignupContent() {
       const trimmedEmail = signupData.email.trim().toLowerCase();
       const trimmedName = signupData.name.trim();
 
-      // ── OAuth path: user already authenticated via Google ──
-      if (isOAuthUser && oauthUserId) {
-        const { error: profileError } = await completeOAuthProfile(oauthUserId, {
-          membershipType: signupData.membershipType,
-          skillLevel: signupData.skillLevel || undefined,
-          name: trimmedName || undefined,
-          residence: signupData.residence || 'mono',
-        });
-        if (profileError) {
-          setSignupError(profileError);
-          setSignupLoading(false);
-          return;
-        }
-
-        // Send welcome message
-        sendWelcomeMessage(oauthUserId, trimmedName).catch(err => console.error('[MTC] welcome message:', err));
-
-        // Create family group and add family members if this is a family membership
-        if (isFamily && familyMemberInputs.length > 0) {
-          try {
-            const familyName = `The ${trimmedName.split(' ').pop() || trimmedName} Family`;
-            const familyId = await createFamily(oauthUserId, familyName);
-            if (familyId) {
-              const validMembers = familyMemberInputs.filter(fm => fm.name.trim());
-              await Promise.all(validMembers.map(fm =>
-                addFamilyMember(familyId, {
-                  name: fm.name.trim(),
-                  type: fm.type,
-                  birthYear: fm.birthYear ? parseInt(fm.birthYear) : undefined,
-                })
-              ));
-            }
-          } catch (err) {
-            console.error('[MTC] family creation:', err);
-          }
-        }
-
-        // Cache user for dashboard hydration
-        localStorage.setItem('mtc-current-user', JSON.stringify({
-          id: oauthUserId,
-          name: trimmedName,
-          email: trimmedEmail,
-          role: 'member',
-          membershipType: signupData.membershipType,
-          skillLevel: signupData.skillLevel || undefined,
-          memberSince: new Date().toISOString().slice(0, 7),
-        }));
-
-        // OAuth users skip email confirmation — go straight to confirmation step
-        setEmailConfirmPending(false);
-        setSignupLoading(false);
-        setSignupStep(totalSteps);
-        return;
-      }
-
-      // ── Passwordless signup (user logs in via Google or Magic Link) ──
-      const { user, error, emailConfirmRequired } = await signUp(trimmedEmail, trimmedName, signupData.membershipType, signupData.skillLevel || undefined, signupData.residence || 'mono');
-      if (error || !user) {
-        const msg = error?.toLowerCase() || '';
-        if (msg.includes('already registered') || msg.includes('already been registered')) {
+      // PIN-based signup — POST to /api/auth/signup
+      const result = await signUp(trimmedName, trimmedEmail, pin, signupData.membershipType, signupData.skillLevel || undefined, signupData.residence || 'mono');
+      if (result.error || !result.user) {
+        const msg = (result.error || '').toLowerCase();
+        if (msg.includes('already registered') || msg.includes('already exists')) {
           setSignupError('This email is already registered. Please log in instead.');
         } else if (msg.includes('valid email') || msg.includes('invalid')) {
           setSignupError('Please enter a valid email address.');
+        } else if (msg.includes('pin')) {
+          setSignupError(result.error || 'Invalid PIN. Choose a 4-digit PIN that isn\'t too easy to guess.');
         } else {
-          setSignupError(error || 'Signup failed. Please try again.');
+          setSignupError(result.error || 'Signup failed. Please try again.');
         }
         setSignupLoading(false);
         return;
       }
 
-      // Create family group and add family members BEFORE email confirm check
-      // so family members exist in DB regardless of confirmation flow
+      // Create family group and add family members
       if (isFamily && familyMemberInputs.length > 0) {
         try {
           const familyName = `The ${trimmedName.split(' ').pop() || trimmedName} Family`;
-          const familyId = await createFamily(user.id, familyName);
+          const familyId = await createFamily(result.user.id, familyName);
           if (familyId) {
             const validMembers = familyMemberInputs.filter(fm => fm.name.trim());
             await Promise.all(validMembers.map(fm =>
@@ -249,34 +144,11 @@ function SignupContent() {
           }
         } catch (err) {
           console.error('[MTC] family creation:', err);
-          // Don't block signup — family members can be added later
         }
       }
 
-      if (emailConfirmRequired) {
-        // Log the Supabase-sent confirmation email
-        fetch('/api/log-email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            type: 'signup_confirmation',
-            recipientEmail: trimmedEmail,
-            recipientUserId: user.id,
-            status: 'requested',
-            subject: 'Confirm Your Email — Mono Tennis Club',
-            metadata: { source: 'desktop', membershipType: signupData.membershipType },
-          }),
-        }).catch(() => { /* non-critical */ });
-        setEmailConfirmPending(true);
-        setResendCooldown(60);
-        setSignupLoading(false);
-        setSignupStep(totalSteps);
-        return;
-      }
-
-      sendWelcomeMessage(user.id, user.name).catch(err => console.error('[MTC] welcome message:', err));
-
-      localStorage.setItem('mtc-current-user', JSON.stringify(user));
+      // Cache user for dashboard hydration
+      localStorage.setItem('mtc-current-user', JSON.stringify(result.user));
 
       setSignupLoading(false);
       setSignupStep(totalSteps);
@@ -307,6 +179,13 @@ function SignupContent() {
         .signup-input:focus { box-shadow: 0 0 0 3px rgba(107, 122, 61, 0.18) !important; border-color: #6b7a3d !important; }
         .card-select-pop { animation: cardPop 0.3s ease-out; }
         @keyframes cardPop { 0% { transform: scale(1); } 40% { transform: scale(1.04); } 100% { transform: scale(1); } }
+        @keyframes checkPop { 0% { transform: scale(0); opacity: 0; } 60% { transform: scale(1.2); } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+        .check-pop { animation: checkPop 0.5s ease-out 0.1s both; }
+        .fade-up-1 { animation: fadeUp 0.4s ease-out 0.3s both; }
+        .fade-up-2 { animation: fadeUp 0.4s ease-out 0.5s both; }
+        .fade-up-3 { animation: fadeUp 0.4s ease-out 0.7s both; }
+        .fade-up-4 { animation: fadeUp 0.4s ease-out 0.9s both; }
       `}</style>
       {/* Header */}
       <header className="px-6 py-4 flex items-center justify-between" style={{ backgroundColor: '#1a1f12' }}>
@@ -321,6 +200,91 @@ function SignupContent() {
         </a>
       </header>
 
+      {/* Final Step: Confirmation — single contained card */}
+      {signupStep === totalSteps && (
+        <div key={`step7-${animKey}`} className="step-enter-forward px-6 py-10 sm:py-14 max-w-xl mx-auto">
+          <div className="rounded-3xl overflow-hidden" style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.12), 0 4px 16px rgba(0,0,0,0.06)' }}>
+            {/* Dark top section */}
+            <div className="text-center px-8 pt-12 pb-14" style={{ background: 'linear-gradient(165deg, #1a1f12 0%, #2a2f1e 60%, #3a4028 100%)' }}>
+              <div className="w-12 h-1 rounded-full mx-auto mb-8" style={{ background: 'linear-gradient(90deg, #6b7a3d, #d4e157)' }} />
+              <div className="check-pop w-18 h-18 rounded-full flex items-center justify-center mx-auto mb-5" style={{ width: '72px', height: '72px', background: 'linear-gradient(135deg, #6b7a3d, #8a9f4d)', boxShadow: '0 0 0 5px rgba(107, 122, 61, 0.2), 0 6px 24px rgba(0,0,0,0.3)' }}>
+                <svg className="w-9 h-9" style={{ color: '#fff' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h3 className="fade-up-1 headline-font text-2xl sm:text-3xl mb-2" style={{ color: '#e8e4d9' }}>
+                Welcome, {signupData.name.split(' ')[0]}!
+              </h3>
+              <p className="fade-up-1 text-sm" style={{ color: 'rgba(232, 228, 217, 0.55)' }}>
+                You&apos;re now a member of Mono Tennis Club.
+              </p>
+            </div>
+
+            {/* White bottom section */}
+            <div className="bg-white px-8 pb-8">
+              {/* Profile header — overlapping dark section */}
+              <div className="fade-up-2 flex items-center gap-3 py-5" style={{ marginTop: '-1.5rem', backgroundColor: '#fff', borderRadius: '16px', padding: '16px 20px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)', border: '1px solid rgba(0,0,0,0.04)' }}>
+                <div className="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'linear-gradient(135deg, #6b7a3d, #8a9f4d)', color: '#fff', fontSize: '1rem', fontWeight: 700 }}>
+                  {signupData.name.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <p className="font-semibold text-sm" style={{ color: '#2a2f1e' }}>{signupData.name}</p>
+                  <p className="text-xs" style={{ color: '#999' }}>{signupData.email}</p>
+                </div>
+              </div>
+
+              {/* Profile details */}
+              <div className="fade-up-2 mt-4">
+                {[
+                  { label: 'Membership', value: getMembershipLabel() },
+                  { label: 'Skill Level', value: signupData.skillLevel ? signupData.skillLevel.charAt(0).toUpperCase() + signupData.skillLevel.slice(1) : 'Not set' },
+                  ...(familyMemberInputs.filter(f => f.name.trim()).length > 0 ? [{ label: 'Family Members', value: familyMemberInputs.filter(f => f.name.trim()).map(f => f.name.trim()).join(', ') }] : []),
+                  { label: 'Waiver', value: 'Signed' },
+                ].map((row, i, arr) => (
+                  <div key={i} className="flex items-center justify-between py-3" style={i < arr.length - 1 ? { borderBottom: '1px solid #f0ede6' } : {}}>
+                    <span className="text-sm" style={{ color: '#999' }}>{row.label}</span>
+                    <span className="text-sm font-medium" style={{ color: '#2a2f1e' }}>{row.value}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Divider */}
+              <div className="my-5" style={{ borderTop: '1px solid #f0ede6' }} />
+
+              {/* Info items */}
+              <div className="fade-up-3 space-y-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(107, 122, 61, 0.1)' }}>
+                    <svg className="w-4 h-4" style={{ color: '#6b7a3d' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold" style={{ color: '#2a2f1e' }}>Gate code</p>
+                    <p className="text-xs mt-0.5 leading-relaxed" style={{ color: '#6b7266' }}>Find the court gate code in your Profile settings. It changes monthly.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(212, 225, 87, 0.12)' }}>
+                    <svg className="w-4 h-4" style={{ color: '#6b7a3d' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold" style={{ color: '#2a2f1e' }}>Apps in development</p>
+                    <p className="text-xs mt-0.5 leading-relaxed" style={{ color: '#6b7266' }}>Court booking, messaging, and partner matching are being built. We&apos;d love testers! Feedback: <a href="mailto:monotennisclub1@gmail.com" style={{ color: '#6b7a3d', textDecoration: 'underline' }}>monotennisclub1@gmail.com</a></p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action buttons */}
+              <div className="fade-up-4 mt-8 flex flex-col sm:flex-row items-center gap-3">
+                <a href="/dashboard" className="w-full sm:flex-1 inline-block text-center px-8 py-3.5 rounded-full text-sm font-semibold transition-all hover:opacity-90" style={{ background: 'linear-gradient(135deg, #6b7a3d, #8a9f4d)', color: '#fff', boxShadow: '0 4px 16px rgba(107, 122, 61, 0.25)' }}>Go to Dashboard</a>
+                <a href="/" className="w-full sm:flex-1 inline-block text-center px-8 py-3.5 rounded-full text-sm font-semibold transition-all hover:opacity-90" style={{ backgroundColor: '#faf8f3', color: '#6b7a3d', border: '1px solid #e0dcd3' }}>Back to Home</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Steps 1-6 container — hidden on final step */}
+      {signupStep < totalSteps && (
       <div className="px-6 py-12 sm:py-16 max-w-2xl mx-auto">
         {/* Branding */}
         <div className="text-center mb-10">
@@ -410,36 +374,6 @@ function SignupContent() {
             <h3 className="headline-font text-2xl mb-2 text-center" style={{ color: '#2a2f1e' }}>Your Information</h3>
             <p className="text-sm text-center mb-8" style={{ color: '#6b7266' }}>Tell us a bit about yourself.</p>
 
-            {/* Google OAuth option (only for non-OAuth users — OAuth users already authenticated) */}
-            {!isOAuthUser && (
-              <div className="mb-6">
-                <button
-                  type="button"
-                  onClick={async () => {
-                    // Save membership type before redirecting to Google
-                    localStorage.setItem('mtc-oauth-membership-type', signupData.membershipType);
-                    const { error } = await signInWithGoogle('/signup?oauth=true');
-                    if (error) setSignupError(error);
-                  }}
-                  className="w-full py-3.5 rounded-xl text-sm font-medium transition-all hover:-translate-y-0.5 flex items-center justify-center gap-3"
-                  style={{ background: '#faf8f3', border: '1px solid #e0dcd3', color: '#2a2f1e' }}
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
-                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A10.96 10.96 0 001 12c0 1.77.42 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
-                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                  </svg>
-                  Sign up with Google
-                </button>
-                <div className="flex items-center gap-3 mt-5 mb-1">
-                  <div className="flex-1 h-px" style={{ backgroundColor: '#e0dcd3' }} />
-                  <span className="text-xs font-medium" style={{ color: '#999' }}>or continue with email</span>
-                  <div className="flex-1 h-px" style={{ backgroundColor: '#e0dcd3' }} />
-                </div>
-              </div>
-            )}
-
             <div className="space-y-5">
               <div>
                 <label htmlFor="signup-name" className="block text-sm font-medium mb-2" style={{ color: '#6b7266' }}>Full Name</label>
@@ -469,8 +403,59 @@ function SignupContent() {
                   style={{ backgroundColor: '#faf8f3', border: '1px solid #e0dcd3', color: '#2a2f1e' }}
                 />
               </div>
+              <div>
+                <label htmlFor="signup-email-confirm" className="block text-sm font-medium mb-2" style={{ color: emailConfirm && signupData.email.trim().toLowerCase() !== emailConfirm.trim().toLowerCase() ? '#ef4444' : '#6b7266' }}>
+                  Confirm Email{emailConfirm && signupData.email.trim().toLowerCase() !== emailConfirm.trim().toLowerCase() ? ' — does not match' : ''}
+                </label>
+                <input
+                  id="signup-email-confirm"
+                  type="email"
+                  value={emailConfirm}
+                  onChange={(e) => setEmailConfirm(e.target.value)}
+                  maxLength={100}
+                  placeholder="Re-enter your email"
+                  aria-required="true"
+                  className="signup-input w-full px-4 py-3 rounded-xl text-sm outline-none transition-all"
+                  style={{ backgroundColor: '#faf8f3', border: `1px solid ${emailConfirm && signupData.email.trim().toLowerCase() !== emailConfirm.trim().toLowerCase() ? '#ef4444' : '#e0dcd3'}`, color: '#2a2f1e' }}
+                />
+              </div>
+              <div>
+                <label htmlFor="signup-pin" className="block text-sm font-medium mb-2" style={{ color: '#6b7266' }}>4-Digit PIN</label>
+                <input
+                  id="signup-pin"
+                  type="password"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  maxLength={4}
+                  value={pin}
+                  onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                  placeholder="Choose a 4-digit PIN"
+                  aria-required="true"
+                  className="signup-input w-full px-4 py-3 rounded-xl text-sm outline-none transition-all"
+                  style={{ backgroundColor: '#faf8f3', border: '1px solid #e0dcd3', color: '#2a2f1e', letterSpacing: '4px', textAlign: 'center', fontSize: '16px', fontWeight: 600 }}
+                />
+              </div>
+              <div>
+                <label htmlFor="signup-pin-confirm" className="block text-sm font-medium mb-2" style={{ color: '#6b7266' }}>Confirm PIN</label>
+                <input
+                  id="signup-pin-confirm"
+                  type="password"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  maxLength={4}
+                  value={pinConfirm}
+                  onChange={(e) => setPinConfirm(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                  placeholder="Re-enter your PIN"
+                  aria-required="true"
+                  className="signup-input w-full px-4 py-3 rounded-xl text-sm outline-none transition-all"
+                  style={{ backgroundColor: '#faf8f3', border: '1px solid #e0dcd3', color: '#2a2f1e', letterSpacing: '4px', textAlign: 'center', fontSize: '16px', fontWeight: 600 }}
+                />
+              </div>
               <p className="text-sm mt-3 text-center font-medium leading-relaxed rounded-xl" style={{ color: '#6b7a3d', background: 'rgba(107, 122, 61, 0.08)', padding: '10px 14px' }}>
-                You&apos;ll sign in with Google or a magic email link — <strong style={{ color: '#2a2f1e' }}>no password needed</strong>.
+                You&apos;ll use your <strong style={{ color: '#2a2f1e' }}>email + 4-digit PIN</strong> to sign in.
+              </p>
+              <p className="text-xs mt-2 text-center leading-relaxed rounded-xl" style={{ color: '#b45309', background: 'rgba(180, 83, 9, 0.06)', padding: '8px 12px', border: '1px solid rgba(180, 83, 9, 0.12)' }}>
+                Avoid easy PINs like 1234. Anyone who knows your email and PIN can access your profile and messages.
               </p>
             </div>
             {signupError && signupStep === 2 && (
@@ -491,13 +476,29 @@ function SignupContent() {
                     setSignupError('Please enter a valid email address');
                     return;
                   }
+                  if (signupData.email.trim().toLowerCase() !== emailConfirm.trim().toLowerCase()) {
+                    setSignupError('Email addresses do not match');
+                    return;
+                  }
+                  if (!/^\d{4}$/.test(pin)) {
+                    setSignupError('PIN must be exactly 4 digits');
+                    return;
+                  }
+                  if (/^(\d)\1{3}$/.test(pin) || pin === '1234' || pin === '4321') {
+                    setSignupError('That PIN is too easy to guess. Pick something less obvious.');
+                    return;
+                  }
+                  if (pin !== pinConfirm) {
+                    setSignupError('PINs do not match');
+                    return;
+                  }
                   setSignupError('');
                   goToStep(isFamily ? 3 : 4);
                 }}
-                disabled={!signupData.name.trim() || !signupData.email.trim()}
+                disabled={!signupData.name.trim() || !signupData.email.trim() || !emailConfirm.trim() || signupData.email.trim().toLowerCase() !== emailConfirm.trim().toLowerCase() || pin.length !== 4 || pin !== pinConfirm}
                 className="flex-1 px-6 py-3 rounded-full text-sm font-semibold transition-all"
                 style={
-                  signupData.name.trim() && signupData.email.trim()
+                  signupData.name.trim() && signupData.email.trim() && emailConfirm.trim() && signupData.email.trim().toLowerCase() === emailConfirm.trim().toLowerCase() && pin.length === 4 && pin === pinConfirm
                     ? { backgroundColor: '#6b7a3d', color: '#fff' }
                     : { backgroundColor: '#e0dcd3', color: '#999', cursor: 'not-allowed' }
                 }
@@ -848,118 +849,8 @@ function SignupContent() {
             </div>
           </div>
         )}
-
-        {/* Final Step: Confirmation */}
-        {signupStep === totalSteps && (
-          <div key={`step7-${animKey}`} className={`text-center ${stepDirection === 'forward' ? 'step-enter-forward' : 'step-enter-back'}`}>
-            {emailConfirmPending ? (
-              <>
-                <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: 'rgba(59, 175, 218, 0.15)' }}>
-                  <svg className="w-8 h-8" style={{ color: '#3BAFDA' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
-                </div>
-                <h3 className="headline-font text-2xl mb-3" style={{ color: '#2a2f1e' }}>Check Your Email</h3>
-                <p className="text-sm mb-6" style={{ color: '#6b7266' }}>
-                  We&apos;ve sent a verification link to <strong style={{ color: '#2a2f1e' }}>{signupData.email}</strong>.
-                  Click the link to verify your account, then log in to get started.
-                </p>
-                <div className="rounded-xl p-6 text-left" style={{ backgroundColor: '#faf8f3', border: '1px solid #e0dcd3' }}>
-                  <h4 className="font-semibold text-sm mb-4" style={{ color: '#999' }}>Your Profile</h4>
-                  <div className="space-y-3">
-                    {[
-                      { label: 'Name', value: signupData.name },
-                      { label: 'Email', value: signupData.email },
-                      { label: 'Membership', value: getMembershipLabel() },
-                      { label: 'Skill Level', value: signupData.skillLevel ? signupData.skillLevel.charAt(0).toUpperCase() + signupData.skillLevel.slice(1) : 'Not set' },
-                      ...(familyMemberInputs.filter(f => f.name.trim()).length > 0 ? [{ label: 'Family Members', value: familyMemberInputs.filter(f => f.name.trim()).map(f => f.name.trim()).join(', ') }] : []),
-                      { label: 'Waiver', value: 'Signed' },
-                    ].map((row, i, arr) => (
-                      <div key={i} className="flex items-center justify-between py-2" style={i < arr.length - 1 ? { borderBottom: '1px solid #e0dcd3' } : {}}>
-                        <span className="text-sm" style={{ color: '#999' }}>{row.label}</span>
-                        <span className="text-sm font-medium" style={{ color: '#2a2f1e' }}>{row.value}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8">
-                  <a href="/login" className="inline-block px-8 py-3 rounded-full text-sm font-semibold transition-all hover:opacity-90" style={{ backgroundColor: '#6b7a3d', color: '#fff' }}>Go to Login</a>
-                  <a href="/" className="inline-block px-8 py-3 rounded-full text-sm font-semibold transition-all hover:opacity-90" style={{ backgroundColor: '#faf8f3', color: '#6b7a3d', border: '1px solid #e0dcd3' }}>Back to Home</a>
-                </div>
-                <div className="mt-6 text-center">
-                  <p className="text-xs mb-2" style={{ color: '#6b7266' }}>Didn&apos;t receive it? Check your spam folder, or</p>
-                  <button
-                    type="button"
-                    disabled={resendCooldown > 0 || resendStatus === 'sending'}
-                    onClick={async () => {
-                      setResendStatus('sending');
-                      const { error: resendErr } = await resendConfirmation(signupData.email);
-                      if (resendErr) {
-                        setResendStatus('error');
-                        setSignupError(resendErr);
-                      } else {
-                        setResendStatus('sent');
-                        setResendCooldown(60);
-                        // Log the resend
-                        fetch('/api/log-email', {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ type: 'signup_confirmation', recipientEmail: signupData.email, status: 'requested', subject: 'Confirm Your Email — Mono Tennis Club (resend)', metadata: { source: 'resend_button' } }),
-                        }).catch(() => {});
-                      }
-                      setTimeout(() => setResendStatus('idle'), 3000);
-                    }}
-                    className="text-sm font-medium transition-all"
-                    style={{ color: resendCooldown > 0 ? '#999' : '#6b7a3d', cursor: resendCooldown > 0 ? 'default' : 'pointer' }}
-                  >
-                    {resendStatus === 'sending' ? 'Sending...' :
-                     resendStatus === 'sent' ? 'Email sent!' :
-                     resendCooldown > 0 ? `Resend in ${resendCooldown}s` :
-                     'Resend verification email'}
-                  </button>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: 'rgba(107, 122, 61, 0.15)' }}>
-                  <svg className="w-8 h-8" style={{ color: '#6b7a3d' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                <h3 className="headline-font text-2xl mb-3" style={{ color: '#2a2f1e' }}>
-                  Welcome to Mono Tennis Club, {signupData.name.split(' ')[0]}!
-                </h3>
-                <p className="text-sm mb-10" style={{ color: '#6b7266' }}>
-                  Your profile has been created. We&apos;ll confirm your payment and activate your membership shortly.
-                </p>
-                <div className="rounded-xl p-6 text-left" style={{ backgroundColor: '#faf8f3', border: '1px solid #e0dcd3' }}>
-                  <h4 className="font-semibold text-sm mb-4" style={{ color: '#999' }}>Your Profile</h4>
-                  <div className="space-y-3">
-                    {[
-                      { label: 'Name', value: signupData.name },
-                      { label: 'Email', value: signupData.email },
-                      { label: 'Membership', value: getMembershipLabel() },
-                      { label: 'Skill Level', value: signupData.skillLevel ? signupData.skillLevel.charAt(0).toUpperCase() + signupData.skillLevel.slice(1) : 'Not set' },
-                      ...(familyMemberInputs.filter(f => f.name.trim()).length > 0 ? [{ label: 'Family Members', value: familyMemberInputs.filter(f => f.name.trim()).map(f => f.name.trim()).join(', ') }] : []),
-                      { label: 'Waiver', value: 'Signed' },
-                    ].map((row, i, arr) => (
-                      <div key={i} className="flex items-center justify-between py-2" style={i < arr.length - 1 ? { borderBottom: '1px solid #e0dcd3' } : {}}>
-                        <span className="text-sm" style={{ color: '#999' }}>{row.label}</span>
-                        <span className="text-sm font-medium" style={{ color: '#2a2f1e' }}>{row.value}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8">
-                  <a href="/dashboard" className="inline-block px-8 py-3 rounded-full text-sm font-semibold transition-all hover:opacity-90" style={{ backgroundColor: '#6b7a3d', color: '#fff' }}>Go to Dashboard</a>
-                  <a href="/" className="inline-block px-8 py-3 rounded-full text-sm font-semibold transition-all hover:opacity-90" style={{ backgroundColor: '#faf8f3', color: '#6b7a3d', border: '1px solid #e0dcd3' }}>Back to Home</a>
-                </div>
-                <p className="text-xs mt-4" style={{ color: '#6b7266' }}>Your membership will be activated once payment is confirmed.</p>
-              </>
-            )}
-          </div>
-        )}
       </div>
+      )}
     </div>
   );
 }

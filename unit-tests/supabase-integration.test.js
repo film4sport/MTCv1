@@ -47,8 +47,8 @@ describe('Supabase Client — supabase.ts', () => {
 describe('Auth Module — auth.ts', () => {
   const content = readFileSync(resolve(root, 'app/dashboard/lib/auth.ts'), 'utf-8');
 
-  it('exports signIn function', () => {
-    expect(content).toMatch(/export\s+(async\s+)?function\s+signIn/);
+  it('exports pinLogin function', () => {
+    expect(content).toMatch(/export\s+(async\s+)?function\s+pinLogin/);
   });
 
   it('exports signOut function', () => {
@@ -59,12 +59,13 @@ describe('Auth Module — auth.ts', () => {
     expect(content).toMatch(/export\s+(async\s+)?function\s+signUp/);
   });
 
-  it('exports resetPassword function', () => {
-    expect(content).toMatch(/export\s+(async\s+)?function\s+resetPassword/);
+  it('exports forgotPin function', () => {
+    expect(content).toMatch(/export\s+(async\s+)?function\s+forgotPin/);
   });
 
-  it('uses supabase.auth methods', () => {
-    expect(content).toContain('supabase.auth');
+  it('uses PIN-based auth (no supabase.auth)', () => {
+    expect(content).not.toContain('supabase.auth');
+    expect(content).toContain('mtc-session-token');
   });
 
   it('does not export CREDENTIALS constant', () => {

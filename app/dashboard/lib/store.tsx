@@ -5,7 +5,7 @@ import type { User, Court, Booking, ClubEvent, Partner, Conversation, Announceme
 import { CLUB_LOCATION, DEFAULT_NOTIFICATION_PREFS } from './types';
 import { DEFAULT_COURTS, DEFAULT_EVENTS, DEFAULT_ANNOUNCEMENTS, DEFAULT_PROGRAMS } from './data';
 import { generateId } from './utils';
-import { signIn, signOut, getCurrentUser } from './auth';
+import { pinLogin, signOut, getCurrentUser } from './auth';
 import { useToast } from './toast';
 import { reportError } from '../../lib/errorReporter';
 import { supabase } from '../../lib/supabase';
@@ -201,11 +201,11 @@ function mergeEventsWithDefaults(supabaseEvents: ClubEvent[]): ClubEvent[] {
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function apiCall<T = any>(path: string, method: string, body?: Record<string, unknown>): Promise<T> {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session?.access_token) throw new Error('No active session');
+  const token = typeof window !== 'undefined' ? localStorage.getItem('mtc-session-token') : null;
+  if (!token) throw new Error('No active session');
   const res = await fetch(path, {
     method,
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
     ...(body ? { body: JSON.stringify(body) } : {}),
   });
   if (!res.ok) {
@@ -748,12 +748,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return currentUser?.skillLevel || 'intermediate';
   }, [activeProfile, currentUser?.skillLevel]);
 
-  // Auth — uses Supabase signIn from auth.ts
-  const login = useCallback(async (email: string, password: string): Promise<boolean> => {
-    const user = await signIn(email, password);
-    if (!user) return false;
-    setCurrentUser(user);
-    saveJSON('mtc-current-user', user);
+  // Auth — PIN-based login via auth.ts (pinLogin handles session internally)
+  const login = useCallback(async (email: string, pin: string): Promise<boolean> => {
+    const result = await pinLogin(email, pin);
+    if (result.error || !result.user) return false;
+    setCurrentUser(result.user);
+    saveJSON('mtc-current-user', result.user);
     return true;
   }, []);
 
@@ -979,11 +979,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
       // Send confirmation email (fire and forget)
       if (currentUser.email) {
-        supabase.auth.getSession().then(({ data: { session } }) => {
-          if (!session?.access_token) return;
+        const sessionToken = typeof window !== 'undefined' ? localStorage.getItem('mtc-session-token') : null;
+        if (sessionToken) {
           fetch('/api/notify-email', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${sessionToken}` },
             body: JSON.stringify({
               recipientEmail: currentUser.email, recipientName: currentUser.name,
               recipientUserId: currentUser.id,
@@ -994,7 +994,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
               logType: 'partner_request',
             }),
           }).catch(() => { /* email is best-effort */ });
-        });
+        }
       }
     }
   }, [currentUser]);

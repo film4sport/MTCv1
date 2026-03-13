@@ -6,7 +6,7 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
 /**
- * Verify the caller's identity via Bearer token.
+ * Verify the caller's identity via session token.
  * Returns the authenticated user's ID or null.
  */
 async function authenticateRequest(request: Request): Promise<string | null> {
@@ -14,10 +14,14 @@ async function authenticateRequest(request: Request): Promise<string | null> {
   if (!authHeader?.startsWith('Bearer ')) return null;
 
   const token = authHeader.slice(7);
-  const supabase = createClient(supabaseUrl, supabaseAnonKey);
-  const { data: { user }, error } = await supabase.auth.getUser(token);
-  if (error || !user) return null;
-  return user.id;
+  const supabase = createClient(supabaseUrl, supabaseServiceKey || supabaseAnonKey);
+  const { data: session } = await supabase
+    .from('sessions')
+    .select('user_id')
+    .eq('token', token)
+    .single();
+  if (!session) return null;
+  return session.user_id;
 }
 
 export async function POST(request: Request) {

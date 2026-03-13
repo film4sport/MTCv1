@@ -15,7 +15,7 @@ let pushCount = 0;
 let pushResetAt = Date.now() + 60000;
 
 /**
- * Verify the caller is an authenticated admin.
+ * Verify the caller is an authenticated admin via session token.
  * Returns the admin's user ID or null.
  */
 async function authenticateAdmin(request: Request): Promise<string | null> {
@@ -23,20 +23,25 @@ async function authenticateAdmin(request: Request): Promise<string | null> {
   if (!authHeader?.startsWith('Bearer ')) return null;
 
   const token = authHeader.slice(7);
-  const supabase = createClient(supabaseUrl, supabaseAnonKey);
-  const { data: { user }, error } = await supabase.auth.getUser(token);
-  if (error || !user) return null;
+  const adminSupabase = createClient(supabaseUrl, supabaseServiceKey || supabaseAnonKey);
+
+  // Look up session token
+  const { data: session } = await adminSupabase
+    .from('sessions')
+    .select('user_id')
+    .eq('token', token)
+    .single();
+  if (!session) return null;
 
   // Check admin role in profiles
-  const adminSupabase = createClient(supabaseUrl, supabaseServiceKey || supabaseAnonKey);
   const { data: profile } = await adminSupabase
     .from('profiles')
     .select('role')
-    .eq('id', user.id)
+    .eq('id', session.user_id)
     .single();
 
   if (!profile || profile.role !== 'admin') return null;
-  return user.id;
+  return session.user_id;
 }
 
 export async function POST(request: Request) {

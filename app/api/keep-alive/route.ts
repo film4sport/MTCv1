@@ -21,17 +21,11 @@ export async function GET() {
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
     // Warm up database (PostgREST)
-    const dbPing = supabase.from('profiles').select('id').limit(1);
-
-    // Warm up auth service (GoTrue) — getSession is a lightweight auth call
-    const authPing = supabase.auth.getSession();
-
-    const [db, auth] = await Promise.all([dbPing, authPing]);
+    const dbPing = await supabase.from('profiles').select('id').limit(1);
 
     return NextResponse.json({
-      ok: !db.error,
-      db: !db.error,
-      auth: !auth.error,
+      ok: !dbPing.error,
+      db: !dbPing.error,
       ts: Date.now(),
     });
   } catch {

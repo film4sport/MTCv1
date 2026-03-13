@@ -27,7 +27,8 @@ export interface AuthenticatedUser {
 }
 
 /**
- * Validate a Bearer token from the mobile PWA and return the authenticated user.
+ * Validate a Bearer token (session token) and return the authenticated user.
+ * PIN auth: tokens are from the `sessions` table, not Supabase Auth.
  * Returns the user profile or a NextResponse error.
  */
 export async function authenticateMobileRequest(
@@ -38,34 +39,48 @@ export async function authenticateMobileRequest(
     return NextResponse.json({ error: 'Missing authorization header' }, { status: 401 });
   }
 
-  if (!supabaseUrl || (!supabaseServiceKey && !supabaseAnonKey)) {
+  if (!supabaseUrl || !supabaseServiceKey) {
     return NextResponse.json({ error: 'Supabase not configured' }, { status: 500 });
   }
 
   const token = authHeader.slice(7);
+  const adminClient = createClient(supabaseUrl, supabaseServiceKey);
 
-  // Verify token with Supabase auth (use anon key for auth verification)
-  const authClient = createClient(supabaseUrl, supabaseAnonKey);
-  const { data: { user }, error } = await authClient.auth.getUser(token);
+  // Look up session token in our sessions table
+  const { data: session, error: sessionError } = await adminClient
+    .from('sessions')
+    .select('user_id')
+    .eq('token', token)
+    .single();
 
-  if (error || !user) {
+  if (sessionError || !session) {
     return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
   }
 
-  // Fetch user profile using service role (bypasses RLS)
-  const adminClient = createClient(supabaseUrl, supabaseServiceKey || supabaseAnonKey);
+  // Update last_used (fire-and-forget, don't block the request)
+  adminClient
+    .from('sessions')
+    .update({ last_used: new Date().toISOString() })
+    .eq('token', token)
+    .then(() => {});
+
+  // Fetch user profile
   const { data: profile } = await adminClient
     .from('profiles')
-    .select('name, role, email, interclub_team, interclub_captain')
-    .eq('id', user.id)
+    .select('name, role, email, status, interclub_team, interclub_captain')
+    .eq('id', session.user_id)
     .single();
 
   if (!profile) {
     return NextResponse.json({ error: 'User profile not found' }, { status: 404 });
   }
 
+  if (profile.status === 'paused') {
+    return NextResponse.json({ error: 'Account paused' }, { status: 403 });
+  }
+
   return {
-    id: user.id,
+    id: session.user_id,
     email: profile.email,
     role: profile.role,
     name: profile.name,

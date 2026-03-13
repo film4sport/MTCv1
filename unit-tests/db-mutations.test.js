@@ -119,8 +119,8 @@ describe('db.ts — Mutation operations', () => {
     expect(dbSource).toContain("member_id");
   });
 
-  it('sendWelcomeMessage uses RPC', () => {
-    expect(dbSource).toContain("rpc('send_welcome_message'");
+  it('sendWelcomeMessage removed (welcome messaging disabled)', () => {
+    expect(dbSource).not.toContain("rpc('send_welcome_message'");
   });
 });
 

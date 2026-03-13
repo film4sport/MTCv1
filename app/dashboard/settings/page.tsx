@@ -122,11 +122,21 @@ export default function SettingsPage() {
     if (!trimmed || trimmed === currentUser.name) { setEditingName(false); return; }
     setNameSaving(true);
     try {
-      await db.updateProfile(currentUser.id, { name: trimmed });
+      // Use API route so name propagates to denormalized columns (bookings, messages, partners, etc.)
+      const token = localStorage.getItem('mtc-session-token');
+      const res = await fetch('/api/mobile/members', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', ...(token ? { 'Authorization': `Bearer ${token}` } : {}) },
+        body: JSON.stringify({ memberId: currentUser.id, name: trimmed }),
+      });
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({ error: 'Failed' }));
+        throw new Error(errBody.error || 'Failed to update name');
+      }
       updateCurrentUser({ name: trimmed });
       showToast('Name updated');
     } catch (err) {
-      reportError(err instanceof Error ? err : new Error(String(err)), 'Supabase');
+      reportError(err instanceof Error ? err : new Error(String(err)), 'API');
       showToast('Failed to update name. Please try again.', 'error');
       setNameValue(currentUser.name);
     } finally {

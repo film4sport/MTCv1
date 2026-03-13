@@ -84,8 +84,7 @@ export default function AdminCourtsTab({
       }
 
       // Use the API route (triggers auto-cancel + user notifications)
-      const session = await supabase.auth.getSession();
-      const token = session?.data?.session?.access_token;
+      const token = localStorage.getItem('mtc-session-token');
       let totalCancelled = 0;
 
       const promises = dates.map(async (d) => {
@@ -131,8 +130,7 @@ export default function AdminCourtsTab({
   const handleDelete = async (id: string) => {
     setDeleting(id);
     try {
-      const session = await supabase.auth.getSession();
-      const token = session?.data?.session?.access_token;
+      const token = localStorage.getItem('mtc-session-token');
       const res = await fetch(`/api/mobile/court-blocks?id=${encodeURIComponent(id)}`, {
         method: 'DELETE',
         headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
@@ -153,8 +151,7 @@ export default function AdminCourtsTab({
     setLoading(true);
     try {
       const ids = blocks.map(b => b.id);
-      const session = await supabase.auth.getSession();
-      const token = session?.data?.session?.access_token;
+      const token = localStorage.getItem('mtc-session-token');
       const res = await fetch('/api/mobile/court-blocks', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json', ...(token ? { 'Authorization': `Bearer ${token}` } : {}) },
