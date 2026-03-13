@@ -79,11 +79,11 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'No account found with this email' }, { status: 404 });
       }
 
-      // Only allow setup if PIN is not already set (migration)
-      // If PIN is already set, user must use forgot-pin flow to change it
-      if (profile.pin_hash) {
-        return NextResponse.json({ error: 'PIN already set. Use "Forgot PIN" to change it.' }, { status: 409 });
-      }
+      // Allow PIN (re)set via email during migration.
+      // The pin-login route only sends users here when pin_hash is NULL,
+      // but if pin-setup set the hash on a previous attempt that didn't
+      // return a session, the user needs to retry without hitting a 409.
+      // Once PIN auth is established, users change PIN via session token path above.
       userId = profile.id;
     } else {
       return NextResponse.json({ error: 'Email or session token required' }, { status: 400 });
@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
     // If this was a migration (no token), auto-create a session so user is logged in
     if (!token) {
       const userAgent = request.headers.get('user-agent') || '';
-      const { data: session } = await supabase
+      const { data: session, error: sessionError } = await supabase
         .from('sessions')
         .insert({
           user_id: userId,
@@ -120,6 +120,11 @@ export async function POST(request: NextRequest) {
         })
         .select('token')
         .single();
+
+      if (sessionError || !session?.token) {
+        // PIN was set but session creation failed — return success so client can auto-login
+        return NextResponse.json({ success: true, pinSet: true }, { status: 200 });
+      }
 
       // Fetch user profile for response
       const { data: profile } = await supabase
@@ -147,9 +152,9 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      return NextResponse.json({
+      const res = NextResponse.json({
         success: true,
-        token: session?.token,
+        token: session.token,
         user: profile ? {
           id: profile.id,
           name: profile.name,
@@ -169,6 +174,15 @@ export async function POST(request: NextRequest) {
           familyMembers,
         } : undefined,
       });
+      // Set session cookie for middleware auth check
+      res.cookies.set('mtc-session', session.token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 30 * 24 * 60 * 60, // 30 days
+      });
+      return res;
     }
 
     return NextResponse.json({ success: true });

@@ -115,7 +115,16 @@ export async function DELETE(request: Request) {
 
     await supabase.from('sessions').delete().eq('token', token);
 
-    return NextResponse.json({ success: true });
+    // Clear session cookie on logout
+    const response = NextResponse.json({ success: true });
+    response.cookies.set('mtc-session', '', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 0, // Expire immediately
+    });
+    return response;
   } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }

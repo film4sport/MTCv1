@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { pinLogin, pinSetup, forgotPin, verifyResetCode } from '../dashboard/lib/auth';
 
 export default function LoginPage() {
@@ -24,6 +24,9 @@ function LoginContent() {
   const [resetCode, setResetCode] = useState('');
   const [newPin, setNewPin] = useState('');
   const [newPinConfirm, setNewPinConfirm] = useState('');
+
+  // Ref to persist the verified email across screen changes — immune to autofill/re-renders
+  const verifiedEmailRef = useRef('');
 
   const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/;
 
@@ -990,7 +993,7 @@ function LoginContent() {
                     value={pin}
                     onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
                     placeholder="4-digit PIN"
-                    autoComplete="off"
+                    autoComplete="one-time-code"
                     className="w-full px-5 py-4 text-base text-center transition-all focus:outline-none"
                     style={{ background: 'transparent', border: 'none', borderBottom: '1px solid #e0dcd3', color: '#2a2f1e', borderRadius: 0, letterSpacing: '6px', fontWeight: 600 }}
                     onFocus={(e) => { e.currentTarget.style.borderBottomColor = '#6b7a3d'; }}
@@ -999,18 +1002,26 @@ function LoginContent() {
                   <button
                     type="button"
                     onClick={async () => {
-                      if (!email || !emailRegex.test(email)) {
+                      // Read DOM value directly — browser autofill can bypass React onChange
+                      const domEmail = (document.getElementById('login-email') as HTMLInputElement)?.value || email;
+                      const domPin = (document.getElementById('login-pin') as HTMLInputElement)?.value || pin;
+                      if (!domEmail || !emailRegex.test(domEmail)) {
                         setLoginError('Please enter a valid email address.');
                         setEmailError(true);
                         return;
                       }
-                      if (!/^\d{4}$/.test(pin)) {
+                      if (!/^\d{4}$/.test(domPin)) {
                         setLoginError('Please enter your 4-digit PIN.');
                         return;
                       }
+                      // Store in ref — immune to autofill/re-renders across screen changes
+                      const cleanEmail = domEmail.trim().toLowerCase();
+                      verifiedEmailRef.current = cleanEmail;
+                      setEmail(domEmail);
+                      setPin(domPin);
                       setLoginError('');
                       setLoading(true);
-                      const result = await pinLogin(email.trim().toLowerCase(), pin);
+                      const result = await pinLogin(cleanEmail, domPin);
                       setLoading(false);
                       if (result.needsPinSetup) {
                         setScreen('pinSetup');
@@ -1080,12 +1091,27 @@ function LoginContent() {
                       if (setupPin !== setupPinConfirm) { setLoginError('PINs do not match.'); return; }
                       setLoginError('');
                       setLoading(true);
-                      const result = await pinSetup(email.trim().toLowerCase(), setupPin);
+                      // Use ref (immune to autofill) — falls back to state if ref is empty
+                      const setupEmail = verifiedEmailRef.current || email.trim().toLowerCase();
+                      const result = await pinSetup(setupEmail, setupPin);
                       setLoading(false);
                       if (result.error) { setLoginError(result.error); return; }
                       if (result.user) {
                         localStorage.setItem('mtc-current-user', JSON.stringify(result.user));
                         window.location.href = '/dashboard';
+                      } else {
+                        // PIN was set but no user returned — try logging in with the new PIN
+                        setLoading(true);
+                        const loginResult = await pinLogin(setupEmail, setupPin);
+                        setLoading(false);
+                        if (loginResult.user) {
+                          localStorage.setItem('mtc-current-user', JSON.stringify(loginResult.user));
+                          window.location.href = '/dashboard';
+                        } else {
+                          setLoginError('PIN was set. Please sign in with your new PIN.');
+                          setPin('');
+                          setScreen('login');
+                        }
                       }
                     }}
                     disabled={loading}

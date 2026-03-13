@@ -1,5 +1,18 @@
 # CLAUDE.md - MTC Landing Page Project Rules
 
+---
+## *** STOP — READ THIS FIRST ***
+## #25: NEVER USE THE USER'S PERSONAL EMAIL FOR TESTING
+**THIS RULE HAS BEEN VIOLATED MULTIPLE TIMES. READ IT CAREFULLY.**
+- The user's personal email is in the `<user>` block (protonmail). **DO NOT USE IT. EVER.**
+- When testing in BDG (Chrome), Playwright, Cowork, or ANY browser/tool: **USE ONLY dummy emails.**
+- Approved test emails: `test@example.com`, `testuser@mtc.ca` — create a NEW dummy account if needed
+- **NEVER use any account the user actually uses** (including `film4sports@gmail.com`) — testing can corrupt their data (PINs, sessions, etc.)
+- DO NOT type, paste, or autofill the user's real email into ANY form, URL, API call, or console command.
+- **Why**: Browser autofill caches it, then keeps overriding the user's real input on their machine. This has caused repeated frustration.
+- **Violation count: 3+** — this is the most-violated rule in the project. If you are about to type an email into a browser, STOP and verify it is NOT the user's personal email.
+---
+
 ## #1: FOLLOW WHAT WAS DECIDED
 **If we already discussed and agreed on an approach, USE IT. Don't invent alternatives.**
 - Before making ANY change, check: did we already decide how this should work?
@@ -208,6 +221,9 @@ The three platforms are:
 - **Auth**: Email + 6-digit PIN. No Google OAuth, no magic link, no Supabase Auth. See MEMORY.md "Auth System — PIN-Based" for full plan.
 - **Safe-area-insets**: All screens must respect `env(safe-area-inset-*)` for notch, Dynamic Island, and home indicator.
 - **User tests on real devices**: iPad Mini 5th gen (2019), iPhone SE 2nd gen (2020).
+
+## #25: NEVER USE THE USER'S PERSONAL EMAIL FOR TESTING
+See rule at the TOP of this file — duplicated here for grep-ability. **USE `test@example.com` or `testuser@mtc.ca`. NEVER the user's real email.**
 
 ## PROJECT OVERVIEW
 - **Mono Tennis Club** — Next.js 14 + TypeScript (strict mode) + Tailwind CSS monorepo

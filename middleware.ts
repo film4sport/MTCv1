@@ -1,60 +1,28 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  // Check for PIN auth session cookie (set on login)
+  const sessionToken = request.cookies.get('mtc-session')?.value;
 
-  if (!supabaseUrl || !supabaseAnonKey) {
-    // If Supabase isn't configured, allow all requests
-    return NextResponse.next();
-  }
-
-  let response = NextResponse.next({
-    request: { headers: request.headers },
-  });
-
-  const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
-    cookies: {
-      getAll() {
-        return request.cookies.getAll();
-      },
-      setAll(cookiesToSet) {
-        cookiesToSet.forEach(({ name, value }) =>
-          request.cookies.set(name, value)
-        );
-        response = NextResponse.next({
-          request: { headers: request.headers },
-        });
-        cookiesToSet.forEach(({ name, value, options }) =>
-          response.cookies.set(name, value, options)
-        );
-      },
-    },
-  });
-
-  const { data: { user } } = await supabase.auth.getUser();
-
-  // Protect dashboard routes — redirect to login if not authenticated
-  if (pathname.startsWith('/dashboard') && !user) {
+  // Protect dashboard routes — redirect to login if no session cookie
+  if (pathname.startsWith('/dashboard') && !sessionToken) {
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('redirect', pathname);
     return NextResponse.redirect(loginUrl);
   }
 
   // Redirect logged-in users from login page to dashboard
-  // BUT allow /login?reset=true so they can set a new password after recovery
-  if (pathname === '/login' && user) {
+  if (pathname === '/login' && sessionToken) {
     const isReset = request.nextUrl.searchParams.get('reset') === 'true';
     if (!isReset) {
       return NextResponse.redirect(new URL('/dashboard', request.url));
     }
   }
 
-  return response;
+  return NextResponse.next();
 }
 
 export const config = {
