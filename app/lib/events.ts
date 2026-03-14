@@ -298,8 +298,8 @@ export function getJsonLdEvents() {
 /** Event filter categories for the landing page */
 export const eventFilters = [
   { label: 'All Events', value: 'all' },
-  { label: 'Tournaments', value: 'tournament' },
-  { label: 'Camps', value: 'camp' },
   { label: 'Coaching', value: 'coaching' },
   { label: 'Social', value: 'social' },
+  { label: 'Tournaments', value: 'tournament' },
+  { label: 'Camps', value: 'camp' },
 ] as const;

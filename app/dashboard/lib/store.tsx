@@ -591,6 +591,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }, 1500);
     };
 
+    // Fetch events via API route (admin client, bypasses RLS).
+    // The browser Supabase client's nested select on event_attendees can silently
+    // return empty attendees if RLS blocks the join — the API uses the service key.
+    const fetchEventsViaApi = async () => {
+      try {
+        const events = await apiCall<ClubEvent[]>('/api/mobile/events', 'GET');
+        setEvents(mergeEventsWithDefaults(events));
+      } catch {
+        // Fallback to browser client if API fails (e.g. not logged in yet)
+        const e = await db.fetchEvents();
+        setEvents(mergeEventsWithDefaults(e));
+      }
+    };
+
     const channel = supabase.channel('dashboard-realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, () => {
         db.fetchBookings().then(b => setBookings(Array.isArray(b) ? b : [])).catch(err => reportError(err, 'Realtime bookings'));
@@ -626,10 +640,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
         db.fetchPrograms().then(p => { const arr = safeArray(p); if (arr.length > 0) setPrograms(arr); }).catch(err => reportError(err, 'Realtime enrollments'));
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'events' }, () => {
-        db.fetchEvents().then(e => setEvents(mergeEventsWithDefaults(e))).catch(err => reportError(err, 'Realtime events'));
+        fetchEventsViaApi().catch(err => reportError(err, 'Realtime events'));
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'event_attendees' }, () => {
-        db.fetchEvents().then(e => setEvents(mergeEventsWithDefaults(e))).catch(err => reportError(err, 'Realtime RSVPs'));
+        fetchEventsViaApi().catch(err => reportError(err, 'Realtime RSVPs'));
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'court_blocks' }, () => {
         // Court blocks are fetched directly in the booking page — trigger a bookings refetch
@@ -1021,44 +1035,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const updated = prev.map(e => {
         if (e.id !== eventId) return e;
         const attending = e.attendees.includes(userName);
-        // Create notification when RSVPing (not when un-RSVPing)
-        if (!attending && currentUser) {
-          const notif: Notification = {
-            id: generateId('n'),
-            type: 'event',
-            title: `RSVP Confirmed — ${e.title}`,
-            body: `${e.date} at ${e.time}, ${e.location}. ${(e.spotsTaken ?? 0) + 1} members going.`,
-            timestamp: new Date().toISOString(),
-            read: false,
-          };
-          if (shouldNotify('event')) {
-            addNotification(notif);
-            db.createNotification(currentUser.id, notif).catch(err => reportError(err, 'Supabase'));
-            firePush(currentUser.id, notif.title, notif.body, 'event', `event-rsvp-${eventId}`);
-          }
-          // Log RSVP to audit trail
-          fetch('/api/log-email', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              type: 'event_rsvp', recipientEmail: currentUser.email,
-              recipientUserId: currentUser.id, status: 'sent',
-              subject: `RSVP Confirmed — ${e.title}`,
-              metadata: { eventId: e.id, eventTitle: e.title, date: e.date, time: e.time },
-            }),
-          }).catch(() => { /* non-critical */ });
-        }
         return {
           ...e,
           attendees: attending ? e.attendees.filter(a => a !== userName) : [...e.attendees, userName],
           ...(e.spotsTaken != null ? { spotsTaken: attending ? e.spotsTaken - 1 : e.spotsTaken + 1 } : {}),
         };
       });
-      // Persist via API route (admin client, bypasses RLS) — rollback on failure, re-fetch on success
+      // Persist via API route (admin client, bypasses RLS).
+      // Do NOT refetch after success — the optimistic update is correct and
+      // refetching via browser client can lose attendees if RLS blocks event_attendees.
+      // Notifications are created server-side by the API route (single source of truth).
       apiCall('/api/mobile/events', 'POST', { eventId })
-        .then(() => {
-          // Re-fetch to pick up other members' RSVPs (safety net if Realtime is slow)
-          db.fetchEvents().then(e => setEvents(mergeEventsWithDefaults(e))).catch(() => {});
-        })
         .catch((err) => {
           reportError(err, 'API');
           setEvents(snapshot);
