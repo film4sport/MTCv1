@@ -1374,3 +1374,18 @@ Closed ALL notification asymmetries. Every action fires symmetric bell + push + 
 - **Install screen Safari/Chrome toggle**: Added browser toggle buttons (Safari | Chrome) between subtitle and steps. `install-gate.js` has `MTC.fn.switchInstallBrowser(browser)` that swaps step text+icons. Auto-selects Safari for iPhone/iPad, Chrome for Android. HTML defaults are generic fallback for unknown devices. Toggle CSS: glass-style buttons with `.active` state highlight.
 - **Inline SVG icons on install steps**: Each step ends with an 18px inline SVG icon matching the action: Safari share (square+arrow), plus-in-square (Add to Home Screen), checkmark (confirm), three-dots (Chrome menu), download arrow (Install App). CSS class `.install-icon` with drop-shadow for readability on glass card.
 - **Mobile PWA rebuilt**: Bundle hash `mtc-court-e298a927`. All changes in `install-gate.js`, `login.css`, `index.html` compiled into `dist/app.bundle.*`.
+
+**Cowork Session (2026-03-14 continued) — Mobile PWA batch fixes:**
+- **Onboarding slide 4 (PWA install) removed**: HTML slide with `data-slide="4"` deleted, slide 5 ("You're All Set") renumbered to slide 4. Dot indicators reduced from 6 to 5. `totalOnboardingSlides` changed from 6 to 5 in `onboarding.js`. Dead `customizeInstallSlide()` function removed.
+- **Calendar/Schedule toggle on homepage**: Added pill toggle (Calendar | Schedule) next to "CLUB CALENDAR" header. Calendar view (month grid) is default. Schedule view shows 2-column grid of weekly program times (Mon/Tue/Thu/Fri). Toggle function `switchHomeCalView()` in `home-calendar.js`. CSS in `home.css`.
+- **RSVP refresh after toggle**: Both `toggleEventRsvp()` (events.js) and `rsvpToEvent()` (avatar.js) now call `MTC.fn.renderHomeCalendar()` and `generateCalendar()` after RSVP state changes so calendar dots and schedule view update immediately.
+- **Third event date fixed**: Men's Round Robin HTML default changed from "—"/"—" to "MAY"/"12" (matching `homeEventDates.mensrr`). JS `populateHomeEventDates()` still overwrites on login, but now safe HTML defaults prevent dashes if timing is off.
+- **Admin dashboard simplified**: Removed 4 colorful stat cards (Bookings Month, Total Bookings, Active Members, Courts Open). Dashboard tab now shows: Gate Code, Court Usage (Today/Week/Month), and collapsible "Reports & Analytics" section containing Peak Times, Revenue Breakdown, Member Activity, Monthly Trends, and CSV Exports. `toggleAdminReports()` in admin.js toggles the collapsible.
+- **Admin dropdown dark backgrounds fixed**: Added `color-scheme: dark` to `.admin-input, .admin-textarea, .admin-select` in admin.css so native browser date pickers render in dark mode.
+- **Calendar multi-dots**: CSS updated in `screens.css` for 1/2/3/4+ event indicators per calendar day (was single glowing dot). JS class logic updated in `home-calendar.js` and `schedule.js`.
+- **Build hash**: `mtc-court-fbc4915e`
+
+**Pending from user's latest message:**
+- User wants member list with pause/cancel account ability (already has Members tab, may need pause/cancel buttons added)
+- User wants reports focused on: monthly court booking usage, partner connections, sellable metrics for pitching to other clubs
+- RSVP end-to-end verification still pending

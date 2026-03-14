@@ -116,6 +116,10 @@
       // Trigger push notification
       triggerRSVPNotification(info.name);
     }
+
+    // Refresh home calendar dots and schedule calendar to reflect RSVP change
+    if (typeof MTC.fn.renderHomeCalendar === 'function') MTC.fn.renderHomeCalendar();
+    if (typeof generateCalendar === 'function') generateCalendar();
   };
   // Backward-compat alias (onclick in index.html uses rsvpToEvent)
   window.rsvpToEvent = MTC.fn.rsvpToEvent;

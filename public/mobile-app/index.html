@@ -20,7 +20,7 @@
     if ('serviceWorker' in navigator) {
       caches.keys().then(function(names) {
         names.forEach(function(name) {
-          if (name.indexOf('mtc-court-3c9d19f5') === -1) {
+          if (name.indexOf('mtc-court-fbc4915e') === -1) {
             caches.delete(name);
             console.log('[CacheBust] Deleted old cache:', name);
           }
@@ -771,8 +771,8 @@
         </div>
         <div class="event-item event-item-wrap" id="homeEvent-mensrr" onclick="showRsvpListModal('mensrr')" style="cursor:pointer;">
           <div class="event-date-box">
-            <div class="event-date-month" data-home-event-month="mensrr">—</div>
-            <div class="event-date-day" data-home-event-day="mensrr">—</div>
+            <div class="event-date-month" data-home-event-month="mensrr">MAY</div>
+            <div class="event-date-day" data-home-event-day="mensrr">12</div>
           </div>
           <div class="event-info event-info-flex">
             <div class="event-name">Men's Round Robin</div>
@@ -783,11 +783,16 @@
       </div>
       
       
-      <!-- Club Calendar -->
-      <div class="section-header">
-        <h3 class="section-title">CLUB CALENDAR</h3>
+      <!-- Club Calendar / Weekly Schedule Toggle -->
+      <div class="section-header" style="display:flex;justify-content:space-between;align-items:center;">
+        <h3 class="section-title" id="homeCalSchedTitle">CLUB CALENDAR</h3>
+        <div class="home-cal-toggle" id="homeCalToggle">
+          <button class="home-cal-toggle-btn active" id="homeCalBtn" onclick="switchHomeCalView('calendar')">Calendar</button>
+          <button class="home-cal-toggle-btn" id="homeSchedBtn" onclick="switchHomeCalView('schedule')">Schedule</button>
+        </div>
       </div>
 
+      <!-- Calendar View (default) -->
       <div class="home-calendar-wrap" id="homeCalendarSection">
         <div class="calendar-header" style="display:flex;justify-content:space-between;align-items:center;padding:0 16px 12px;">
           <button class="calendar-nav-btn" onclick="MTC.fn.changeHomeMonth(-1)" aria-label="Previous month">
@@ -816,6 +821,50 @@
           </div>
           <div id="homeCalendarEvents">
             <div class="calendar-event-item-empty" style="text-align:center;padding:16px;color:var(--text-muted);font-size:13px;">Tap a date to see events</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Weekly Schedule View (hidden by default) -->
+      <div id="homeWeeklySchedule" style="display:none;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 0 16px;">
+          <div style="background:var(--bg-secondary);border-radius:14px;padding:14px;">
+            <div style="font-weight:700;font-size:13px;color:var(--volt);margin-bottom:4px;display:flex;align-items:center;gap:6px;"><span style="width:6px;height:6px;border-radius:50%;background:var(--volt);"></span>Monday</div>
+            <div style="font-size:10px;color:var(--text-muted);margin-bottom:8px;">Starts May 11</div>
+            <div style="font-size:12px;color:var(--text-secondary);line-height:1.8;">
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Live Ball</span><span>9:30–11 AM</span></div>
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Team Practice</span><span>11 AM–1 PM</span></div>
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Teen Tennis</span><span>5–6 PM</span></div>
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Live Ball</span><span>6–7:30 PM</span></div>
+            </div>
+          </div>
+          <div style="background:var(--bg-secondary);border-radius:14px;padding:14px;">
+            <div style="font-weight:700;font-size:13px;color:var(--volt);margin-bottom:4px;display:flex;align-items:center;gap:6px;"><span style="width:6px;height:6px;border-radius:50%;background:var(--volt);"></span>Tuesday</div>
+            <div style="font-size:10px;color:var(--text-muted);margin-bottom:8px;">Starts May 12</div>
+            <div style="font-size:12px;color:var(--text-secondary);line-height:1.8;">
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Orange Ball</span><span>4–5 PM</span></div>
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Green Ball</span><span>5–6 PM</span></div>
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Teen Tennis</span><span>6–7 PM</span></div>
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Live Ball</span><span>7–8:30 PM</span></div>
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Adult 101/102</span><span>8:30–9:30 PM</span></div>
+            </div>
+          </div>
+          <div style="background:var(--bg-secondary);border-radius:14px;padding:14px;">
+            <div style="font-weight:700;font-size:13px;color:var(--volt);margin-bottom:4px;display:flex;align-items:center;gap:6px;"><span style="width:6px;height:6px;border-radius:50%;background:var(--volt);"></span>Thursday</div>
+            <div style="font-size:10px;color:var(--text-muted);margin-bottom:8px;">Starts May 14</div>
+            <div style="font-size:12px;color:var(--text-secondary);line-height:1.8;">
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Munchkin Stars</span><span>4:30–5 PM</span></div>
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Red Ball</span><span>5–6 PM</span></div>
+            </div>
+          </div>
+          <div style="background:var(--bg-secondary);border-radius:14px;padding:14px;">
+            <div style="font-weight:700;font-size:13px;color:var(--volt);margin-bottom:4px;display:flex;align-items:center;gap:6px;"><span style="width:6px;height:6px;border-radius:50%;background:var(--volt);"></span>Friday</div>
+            <div style="font-size:10px;color:var(--text-muted);margin-bottom:8px;">Starts May 15</div>
+            <div style="font-size:12px;color:var(--text-secondary);line-height:1.8;">
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Teen Tennis</span><span>4:30–5:30 PM</span></div>
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Live Ball</span><span>5:30–7 PM</span></div>
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">House League</span><span>7–9 PM</span></div>
+            </div>
           </div>
         </div>
       </div>
@@ -2259,30 +2308,6 @@
 
       <!-- ===== TAB 1: DASHBOARD ===== -->
       <div id="adminTabDashboard" class="admin-tab-content active">
-        <!-- Analytics Cards -->
-        <div class="admin-stats-grid">
-          <div class="admin-stat-card volt">
-            <div class="admin-stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></div>
-            <div class="admin-stat-value loading" id="statBookingsMonth">--</div>
-            <div class="admin-stat-label">Bookings (Month)</div>
-          </div>
-          <div class="admin-stat-card dark">
-            <div class="admin-stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg></div>
-            <div class="admin-stat-value loading" id="statBookingsTotal">--</div>
-            <div class="admin-stat-label">Total Bookings</div>
-          </div>
-          <div class="admin-stat-card blue">
-            <div class="admin-stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></div>
-            <div class="admin-stat-value loading" id="statActiveMembers">--</div>
-            <div class="admin-stat-label">Active Members</div>
-          </div>
-          <div class="admin-stat-card coral">
-            <div class="admin-stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"></rect><line x1="12" y1="4" x2="12" y2="20"></line><line x1="2" y1="12" x2="22" y2="12"></line></svg></div>
-            <div class="admin-stat-value loading" id="statCourtsOpen">--</div>
-            <div class="admin-stat-label">Courts Open</div>
-          </div>
-        </div>
-
         <!-- Gate Code -->
         <div class="admin-card">
           <div class="admin-card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>Gate Code</div>
@@ -2292,37 +2317,6 @@
           <div class="admin-gate-code-form">
             <input type="text" id="newGateCodeInput" class="admin-input" placeholder="New code" maxlength="10">
             <button class="admin-btn admin-btn-primary" onclick="updateGateCodeAndNotify()">Update & Notify All</button>
-          </div>
-        </div>
-
-        <!-- CSV Exports -->
-        <div class="admin-card">
-          <div class="admin-card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>Export Data</div>
-          <div class="admin-export-date-filter">
-            <label class="admin-label" for="adminExportFromDate">Export from date</label>
-            <input type="date" id="adminExportFromDate" class="admin-input" style="margin-bottom:8px">
-          </div>
-          <div class="admin-export-btns">
-            <button class="admin-btn admin-btn-secondary" onclick="exportMembersCSV()">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
-              Members
-            </button>
-            <button class="admin-btn admin-btn-secondary" onclick="exportPaymentsCSV()">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-              Payments
-            </button>
-            <button class="admin-btn admin-btn-secondary" onclick="exportCourtUsageCSV()">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-              Court Usage
-            </button>
-          </div>
-        </div>
-
-        <!-- Peak Times -->
-        <div class="admin-card">
-          <div class="admin-card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>Top Booking Times</div>
-          <div id="peakTimesList" class="admin-peak-times">
-            <div class="admin-empty-state">Loading...</div>
           </div>
         </div>
 
@@ -2344,34 +2338,78 @@
             </div>
           </div>
         </div>
-        <!-- Revenue Breakdown -->
-        <div class="admin-card">
-          <div class="admin-card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>Revenue Breakdown</div>
-          <div id="revenueBarContainer" class="admin-revenue-bar"></div>
-          <div id="revenueLegend" class="admin-revenue-legend"></div>
-        </div>
 
-        <!-- Member Activity -->
-        <div class="admin-card">
-          <div class="admin-card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>Member Activity</div>
-          <div class="admin-usage-grid" id="memberActivityStats">
-            <div class="admin-usage-item">
-              <div class="admin-usage-label">New This Month</div>
-              <div class="admin-usage-value" id="statNewMembers">--</div>
+        <!-- Reports Section (collapsible) -->
+        <div class="admin-card" style="padding:0;">
+          <button class="admin-reports-toggle" onclick="toggleAdminReports()" id="adminReportsToggle" style="display:flex;align-items:center;justify-content:space-between;width:100%;padding:14px 16px;background:none;border:none;color:var(--text-primary);font-weight:700;font-size:13px;cursor:pointer;">
+            <span style="display:flex;align-items:center;gap:8px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+              Reports & Analytics
+            </span>
+            <svg id="adminReportsChevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transition:transform 0.2s;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div id="adminReportsContent" style="display:none;padding:0 16px 16px;">
+            <!-- Peak Times -->
+            <div style="margin-bottom:16px;">
+              <div style="font-weight:600;font-size:12px;color:var(--text-secondary);margin-bottom:8px;">TOP BOOKING TIMES</div>
+              <div id="peakTimesList" class="admin-peak-times">
+                <div class="admin-empty-state">Loading...</div>
+              </div>
             </div>
-            <div class="admin-usage-item">
-              <div class="admin-usage-label">Avg Bookings</div>
-              <div class="admin-usage-value" id="statAvgBookings">--</div>
+
+            <!-- Revenue Breakdown -->
+            <div style="margin-bottom:16px;">
+              <div style="font-weight:600;font-size:12px;color:var(--text-secondary);margin-bottom:8px;">REVENUE BREAKDOWN</div>
+              <div id="revenueBarContainer" class="admin-revenue-bar"></div>
+              <div id="revenueLegend" class="admin-revenue-legend"></div>
+            </div>
+
+            <!-- Member Activity -->
+            <div style="margin-bottom:16px;">
+              <div style="font-weight:600;font-size:12px;color:var(--text-secondary);margin-bottom:8px;">MEMBER ACTIVITY</div>
+              <div class="admin-usage-grid" id="memberActivityStats">
+                <div class="admin-usage-item">
+                  <div class="admin-usage-label">New This Month</div>
+                  <div class="admin-usage-value" id="statNewMembers">--</div>
+                </div>
+                <div class="admin-usage-item">
+                  <div class="admin-usage-label">Avg Bookings</div>
+                  <div class="admin-usage-value" id="statAvgBookings">--</div>
+                </div>
+              </div>
+              <div style="font-weight:600;font-size:11px;color:var(--text-muted);margin:8px 0 4px;">Most Active</div>
+              <div id="mostActiveList" class="admin-peak-times"></div>
+            </div>
+
+            <!-- Monthly Trends -->
+            <div style="margin-bottom:8px;">
+              <div style="font-weight:600;font-size:12px;color:var(--text-secondary);margin-bottom:8px;">MONTHLY TRENDS</div>
+              <div id="monthlyTrendsChart" class="admin-monthly-chart"></div>
+            </div>
+
+            <!-- CSV Exports -->
+            <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:12px;margin-top:8px;">
+              <div style="font-weight:600;font-size:12px;color:var(--text-secondary);margin-bottom:8px;">EXPORT DATA</div>
+              <div class="admin-export-date-filter">
+                <label class="admin-label" for="adminExportFromDate">Export from date</label>
+                <input type="date" id="adminExportFromDate" class="admin-input" style="margin-bottom:8px">
+              </div>
+              <div class="admin-export-btns">
+                <button class="admin-btn admin-btn-secondary" onclick="exportMembersCSV()">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+                  Members
+                </button>
+                <button class="admin-btn admin-btn-secondary" onclick="exportPaymentsCSV()">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                  Payments
+                </button>
+                <button class="admin-btn admin-btn-secondary" onclick="exportCourtUsageCSV()">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                  Court Usage
+                </button>
+              </div>
             </div>
           </div>
-          <div class="admin-card-subtitle">Most Active Members</div>
-          <div id="mostActiveList" class="admin-peak-times"></div>
-        </div>
-
-        <!-- Monthly Trends -->
-        <div class="admin-card">
-          <div class="admin-card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>Monthly Trends</div>
-          <div id="monthlyTrendsChart" class="admin-monthly-chart"></div>
         </div>
       </div>
 
@@ -2821,34 +2859,8 @@
             </div>
           </div>
         </div>
-        <!-- Slide 4: Install -->
+        <!-- Slide 4: All Set -->
         <div class="onboarding-slide" data-slide="4">
-          <div class="onboarding-card">
-            <div class="onboarding-icon onboarding-icon-volt">
-              <svg id="onboardingDeviceIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/><path d="M9 9l3-3 3 3M12 6v8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </div>
-            <div class="onboarding-title" id="onboardingInstallTitle">ADD TO HOME SCREEN</div>
-            <div class="onboarding-text" id="onboardingInstallText">Install MTC Court as an app! Tap the Share button, then "Add to Home Screen" — works on iPhone, iPad, and Android. No App Store needed.</div>
-            <div class="onboarding-preview">
-              <div style="display:flex;flex-direction:column;gap:8px;align-items:center;">
-                <div style="display:flex;align-items:center;gap:10px;">
-                  <div style="width:24px;height:24px;border-radius:50%;background:rgba(200,255,0,0.15);border:1px solid rgba(200,255,0,0.3);display:flex;align-items:center;justify-content:center;font-size:11px;color:rgba(200,255,0,0.9);font-weight:700;">1</div>
-                  <span style="font-size:11px;color:rgba(255,255,255,0.6);">Tap Share button</span>
-                </div>
-                <div style="display:flex;align-items:center;gap:10px;">
-                  <div style="width:24px;height:24px;border-radius:50%;background:rgba(200,255,0,0.15);border:1px solid rgba(200,255,0,0.3);display:flex;align-items:center;justify-content:center;font-size:11px;color:rgba(200,255,0,0.9);font-weight:700;">2</div>
-                  <span style="font-size:11px;color:rgba(255,255,255,0.6);">"Add to Home Screen"</span>
-                </div>
-                <div style="display:flex;align-items:center;gap:10px;">
-                  <div style="width:24px;height:24px;border-radius:50%;background:rgba(200,255,0,0.15);border:1px solid rgba(200,255,0,0.3);display:flex;align-items:center;justify-content:center;font-size:11px;color:rgba(200,255,0,0.9);font-weight:700;">3</div>
-                  <span style="font-size:11px;color:rgba(255,255,255,0.6);">Open from home screen</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- Slide 5: All Set -->
-        <div class="onboarding-slide" data-slide="5">
           <div class="onboarding-card">
             <div class="onboarding-icon onboarding-icon-blue">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
@@ -2869,7 +2881,6 @@
         <div class="onboarding-dot" data-dot="2"></div>
         <div class="onboarding-dot" data-dot="3"></div>
         <div class="onboarding-dot" data-dot="4"></div>
-        <div class="onboarding-dot" data-dot="5"></div>
       </div>
       
       <div class="onboarding-actions">

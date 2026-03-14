@@ -524,12 +524,36 @@
 }
 .admin-tab.active svg { opacity: 1; stroke: var(--text-primary); }
 
-/* Dark theme: tab active uses volt accent */
-[data-theme="dark"] .admin-tab.active {
-  background: rgba(200, 255, 0, 0.12);
+/* Dark theme: each tab gets a unique color accent */
+[data-theme="dark"] .admin-tab[data-tab="dashboard"].active {
+  background: rgba(200, 255, 0, 0.15);
   color: var(--volt);
 }
-[data-theme="dark"] .admin-tab.active svg { stroke: var(--volt); }
+[data-theme="dark"] .admin-tab[data-tab="dashboard"].active svg { stroke: var(--volt); }
+
+[data-theme="dark"] .admin-tab[data-tab="members"].active {
+  background: rgba(0, 212, 255, 0.15);
+  color: #00d4ff;
+}
+[data-theme="dark"] .admin-tab[data-tab="members"].active svg { stroke: #00d4ff; }
+
+[data-theme="dark"] .admin-tab[data-tab="courts"].active {
+  background: rgba(255, 90, 95, 0.15);
+  color: #ff5a5f;
+}
+[data-theme="dark"] .admin-tab[data-tab="courts"].active svg { stroke: #ff5a5f; }
+
+[data-theme="dark"] .admin-tab[data-tab="announcements"].active {
+  background: rgba(168, 130, 255, 0.15);
+  color: #a882ff;
+}
+[data-theme="dark"] .admin-tab[data-tab="announcements"].active svg { stroke: #a882ff; }
+
+/* Light theme fallback */
+.admin-tab[data-tab="dashboard"].active { background: rgba(200, 255, 0, 0.12); color: #5a7a00; }
+.admin-tab[data-tab="members"].active { background: rgba(0, 180, 220, 0.1); color: #007a99; }
+.admin-tab[data-tab="courts"].active { background: rgba(255, 90, 95, 0.1); color: #cc3a3f; }
+.admin-tab[data-tab="announcements"].active { background: rgba(168, 130, 255, 0.1); color: #6a42cc; }
 
 /* Tab content panels */
 .admin-tab-content {
@@ -574,6 +598,7 @@
   margin-bottom: 8px;
   box-sizing: border-box;
   min-height: 44px;
+  color-scheme: dark;
 }
 .admin-input:focus, .admin-textarea:focus, .admin-select:focus {
   outline: none;

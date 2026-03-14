@@ -524,6 +524,10 @@
       });
     }
 
+    // Refresh home calendar dots and schedule calendar to reflect RSVP change
+    if (typeof MTC.fn.renderHomeCalendar === 'function') MTC.fn.renderHomeCalendar();
+    if (typeof generateCalendar === 'function') generateCalendar();
+
     // Close modal after brief delay for visual feedback
     setTimeout(function() { closeEventModal(); }, 600);
   }
