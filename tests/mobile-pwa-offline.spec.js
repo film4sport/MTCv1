@@ -59,8 +59,8 @@ test.describe('Mobile PWA — Offline Resilience', () => {
   });
 
   test('page structure intact even without network', async ({ page }) => {
-    // Block all external network calls
-    await page.route('**supabase**', (route) => route.abort('connectionrefused'));
+    // Block Supabase API calls (but NOT the CDN JS library — it's render-blocking)
+    await page.route('**supabase.co**', (route) => route.abort('connectionrefused'));
     await page.route('**/api/**', (route) => route.abort('connectionrefused'));
 
     await page.goto(MOBILE_URL, { waitUntil: 'load', timeout: 30000 });
@@ -145,7 +145,7 @@ test.describe('Mobile PWA — Offline Resilience', () => {
   });
 
   test('MTC global object initializes without network', async ({ page }) => {
-    await page.route('**supabase**', (route) => route.abort('connectionrefused'));
+    await page.route('**supabase.co**', (route) => route.abort('connectionrefused'));
     await page.route('**/api/**', (route) => route.abort('connectionrefused'));
 
     await page.goto(MOBILE_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
