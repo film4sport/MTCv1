@@ -1398,3 +1398,21 @@ Closed ALL notification asymmetries. Every action fires symmetric bell + push + 
 - **Removed**: Collapsible Reports section (everything is flat scrollable now), Member Activity section, date filter on exports.
 - **Members tab**: Already had Pause/Reactivate + Cancel (Remove) buttons. No changes needed — was built in the original admin.js.
 - **Build hash**: `mtc-court-fbc4915e`
+
+**Admin improvements batch (Mar 14, 2026 — session 2):**
+- **5 admin improvements implemented** (6th — live court status dots — dropped per user as unnecessary/KISS):
+  1. Monthly Trends bars: gradient fill + smooth cubic-bezier animation
+  2. Engagement metric: "X% active this week" pill below quick stats (calculates unique bookers in last 7 days / total members)
+  3. Month picker on Export section: `<input type="month">` defaulting to current month
+  4. Active/paused count at top of Members tab: "X active · Y paused" summary line via `renderMembersList()`
+  5. "Updated HH:MM AM" timestamp below quick stats row
+- **Admin tabs restyled**: Liquid glass pills → uniform rounded rectangles (`border-radius: 12px`), `flex: 1 1 0` for equal sizing. Three palette colors: Dashboard=volt, Members=cyan, Courts=coral, Announce=cyan. Dark mode: glass backdrop-filter + colored glow box-shadows + border accents. Member count badge removed from tab.
+- **Admin cards dark mode**: Glass effect with `backdrop-filter: blur(8px) saturate(130%)`, `rgba(255,255,255,0.04)` bg, subtle inset highlight.
+- **Engagement pill dark mode**: Volt text + volt border + dark bg.
+- **Calendar event dots deduplicated**: `getEventsByDate()` in `home-calendar.js` now deduplicates by `title+date` key. Root cause: API `updateEventsFromAPI()` adds expanded recurring events (e.g. `freedom-55-2026-05-14`) which duplicate the hardcoded base events that already had dates set by `setRecurringDates()`. May 14 was showing "4" badge instead of 2 dots.
+- **Tablet #app width fix**: Added `#app { width: 100%; max-width: 100%; }` at `@media (min-width: 744px)` in `tablet.css`. Previously `#app` was hardcoded `390px` at default and only went `100%` at `≤500px`, causing quick action cards to collapse at iPad widths.
+- **Build hash**: `mtc-court-2d74a569`
+
+**Pending:**
+- RSVP end-to-end verification
+- Events screen calendar may also need dedup (uses `getCalendarEvents()` in schedule.js — only shows RSVP'd events, lower priority)

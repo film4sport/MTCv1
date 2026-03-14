@@ -8,6 +8,14 @@
 
 @media (min-width: 744px) {
 
+  /* ── App container: full width on tablets ── */
+  #app {
+    width: 100%;
+    max-width: 100%;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
   /* ── Global Spacing ── */
   .screen {
     padding-left: 24px;

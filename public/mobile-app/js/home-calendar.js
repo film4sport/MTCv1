@@ -15,13 +15,18 @@
     return y + '-' + String(m + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
   }
 
-  /** Collect all events keyed by date string */
+  /** Collect all events keyed by date string (deduped by title+date) */
   function getEventsByDate() {
     var map = {};
     if (typeof clubEventsData === 'undefined') return map;
     var evts = Object.values(clubEventsData);
+    var seen = {};
     evts.forEach(function(ev) {
       if (!ev.date) return;
+      // Deduplicate: API recurring expansions duplicate hardcoded base events
+      var key = ev.title + '|' + ev.date;
+      if (seen[key]) return;
+      seen[key] = true;
       if (!map[ev.date]) map[ev.date] = [];
       map[ev.date].push(ev);
     });
@@ -60,12 +65,19 @@
       var cls = 'calendar-day';
       var count = evts ? evts.length : 0;
       if (ds === todayStr) cls += ' today';
-      if (count === 1) cls += ' has-event';
-      else if (count === 2) cls += ' has-events-2';
-      else if (count === 3) cls += ' has-events-3';
-      else if (count >= 4) cls += ' has-events-many';
-      var extra = count >= 4 ? ' data-event-count="' + count + '"' : '';
-      html += '<div class="' + cls + '" data-date="' + ds + '"' + extra + '>' + day + '</div>';
+      if (count > 0) cls += ' has-events';
+      var dots = '';
+      if (count > 0) {
+        var dotColors = ['var(--coral)', 'var(--electric-blue)', 'var(--volt)', '#0a0a0a'];
+        var dotCount = Math.min(count, 12);
+        dots = '<div class="cal-dots">';
+        for (var di = 0; di < dotCount; di++) {
+          var c = dotColors[di % dotColors.length];
+          dots += '<span class="cal-dot" style="background:' + c + '"></span>';
+        }
+        dots += '</div>';
+      }
+      html += '<div class="' + cls + '" data-date="' + ds + '">' + day + dots + '</div>';
     }
 
     // Next month filler
