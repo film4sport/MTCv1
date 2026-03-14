@@ -8,7 +8,7 @@ test.describe('Signup Flow — /info?tab=membership', () => {
   });
 
   test('membership tab loads by default', async ({ page }) => {
-    await expect(page.getByText('How to Join').first()).toBeAttached();
+    await expect(page.getByText('Why Join Mono Tennis Club').first()).toBeAttached();
   });
 
   test('has membership fee information', async ({ page }) => {

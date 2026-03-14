@@ -1020,16 +1020,55 @@
   visibility: visible;
 }
 
+/* Liquid glass card — iOS 26 style: see-through, refractive edges, specular highlight, minimal blur */
 .install-card {
   text-align: center;
+  /* Halfway between glassmorphism and pure liquid glass */
+  background:
+    /* Specular highlight — light catching the top-left like curved glass */
+    radial-gradient(ellipse at 25% 0%, rgba(255, 255, 255, 0.3) 0%, transparent 50%),
+    /* Slightly more tinted base */
+    linear-gradient(180deg, rgba(255, 255, 255, 0.13) 0%, rgba(255, 255, 255, 0.05) 100%) !important;
+  /* Light blur — see through but softened */
+  backdrop-filter: blur(12px) saturate(130%) brightness(1.05) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(130%) brightness(1.05) !important;
+  /* Thin bright border — light refracting at glass edges */
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+  border-radius: 24px !important;
+  box-shadow:
+    /* Depth */
+    0 8px 32px rgba(0, 0, 0, 0.2),
+    /* Inner top edge — specular reflection on glass surface */
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    /* Inner bottom edge — subtle thickness */
+    inset 0 -1px 0 rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Kill the parent glassmorphism orbs — liquid glass is clean */
+.install-card .refraction-orb,
+.install-card .liquid-highlight {
+  display: none !important;
+}
+
+/* Thinner accent bar for liquid glass */
+.install-card .card-accent {
+  height: 2px;
+  opacity: 0.5;
+  box-shadow: none;
 }
 
 .install-icon-wrap {
-  width: 64px;
-  height: 64px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
-  background: rgba(200, 255, 0, 0.1);
-  border: 1.5px solid rgba(200, 255, 0, 0.2);
+  /* Liquid glass circle */
+  background:
+    radial-gradient(ellipse at 30% 20%, rgba(255, 255, 255, 0.25) 0%, transparent 60%),
+    rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    0 4px 12px rgba(0, 0, 0, 0.15);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1039,24 +1078,27 @@
 }
 
 .install-icon-wrap svg {
-  stroke: var(--volt, #c8ff00);
+  stroke: #fff;
+  opacity: 0.85;
 }
 
 .install-title {
   font-size: 18px;
   font-weight: 700;
   color: #fff;
-  margin-bottom: 8px;
-  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+  letter-spacing: 0.3px;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.7), 0 0 2px rgba(0, 0, 0, 0.5);
   position: relative;
   z-index: 1;
 }
 
 .install-subtitle {
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(255, 255, 255, 0.95);
   line-height: 1.5;
   margin-bottom: 24px;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.7), 0 0 2px rgba(0, 0, 0, 0.5);
   position: relative;
   z-index: 1;
 }
@@ -1064,7 +1106,7 @@
 .install-steps {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
   text-align: left;
   position: relative;
   z-index: 1;
@@ -1077,55 +1119,93 @@
 }
 
 .install-step-num {
-  width: 28px;
-  height: 28px;
-  min-width: 28px;
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
   border-radius: 50%;
-  background: rgba(200, 255, 0, 0.12);
-  border: 1.5px solid rgba(200, 255, 0, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
-  color: var(--volt, #c8ff00);
+}
+
+/* Step 1 — cyan (#00d4ff) */
+.install-step:nth-child(1) .install-step-num {
+  background:
+    radial-gradient(ellipse at 30% 20%, rgba(0, 212, 255, 0.35) 0%, transparent 60%),
+    rgba(0, 212, 255, 0.12);
+  border: 1px solid rgba(0, 212, 255, 0.4);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 0 8px rgba(0, 212, 255, 0.15);
+  color: #00d4ff;
+  text-shadow: 0 0 4px rgba(0, 212, 255, 0.4);
+}
+
+/* Step 2 — coral (#ff5a5f) */
+.install-step:nth-child(2) .install-step-num {
+  background:
+    radial-gradient(ellipse at 30% 20%, rgba(255, 90, 95, 0.35) 0%, transparent 60%),
+    rgba(255, 90, 95, 0.12);
+  border: 1px solid rgba(255, 90, 95, 0.4);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 0 8px rgba(255, 90, 95, 0.15);
+  color: #ff5a5f;
+  text-shadow: 0 0 4px rgba(255, 90, 95, 0.4);
+}
+
+/* Step 3 — volt (#c8ff00) */
+.install-step:nth-child(3) .install-step-num {
+  background:
+    radial-gradient(ellipse at 30% 20%, rgba(200, 255, 0, 0.35) 0%, transparent 60%),
+    rgba(200, 255, 0, 0.12);
+  border: 1px solid rgba(200, 255, 0, 0.4);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 0 8px rgba(200, 255, 0, 0.15);
+  color: #c8ff00;
+  text-shadow: 0 0 4px rgba(200, 255, 0, 0.4);
 }
 
 .install-step-content {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding-top: 3px;
+  padding-top: 2px;
 }
 
 .install-step-label {
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.85);
+  color: rgba(255, 255, 255, 0.95);
   line-height: 1.4;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
 .install-step-label strong {
   color: #fff;
+  font-weight: 700;
 }
 
 .install-step-hint {
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.35);
+  color: rgba(255, 255, 255, 0.75);
   line-height: 1.3;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6), 0 0 2px rgba(0, 0, 0, 0.4);
 }
 
 .install-footer-note {
   margin-top: 24px;
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.85);
   line-height: 1.5;
   text-align: center;
-  padding: 12px 16px;
-  background: rgba(200, 255, 0, 0.04);
-  border: 1px solid rgba(200, 255, 0, 0.1);
+  padding: 10px 14px;
+  /* Nested liquid glass */
+  background:
+    radial-gradient(ellipse at 20% 20%, rgba(255, 255, 255, 0.12) 0%, transparent 50%),
+    rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 12px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
   position: relative;
   z-index: 1;
+  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.6), 0 0 2px rgba(0, 0, 0, 0.4);
 }
 
 @media (max-width: 500px) {
