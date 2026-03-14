@@ -180,10 +180,56 @@ export const recurringCardEvents: MTCEvent[] = [
   },
 ];
 
-// Combined list for the Events section cards (special + recurring, sorted by date)
+// ────────────────────────────────────────────────────────────
+// COACHING PROGRAMS (for Events section Coaching filter)
+// ────────────────────────────────────────────────────────────
+
+export const coachingEvents: MTCEvent[] = [
+  {
+    id: 'junior-programs',
+    category: 'coaching',
+    isoDate: '2026-05-11',
+    date: 'Starting May 11 · 9 weeks',
+    title: 'Junior Tennis Programs',
+    description:
+      '5 programs for ages 3–12+: Munchkin Stars, Red Ball, Orange Ball, Green Ball, and Teen Tennis. Progressive coaching from first-time players to competitive teens. Register with Suzanne Taylor.',
+    highlight: 'From $127.25',
+    time: 'Various days & times',
+    calendarType: 'special',
+    price: '127.25',
+  },
+  {
+    id: 'adult-programs',
+    category: 'coaching',
+    isoDate: '2026-05-11',
+    date: 'Starting May 11 · 9 weeks',
+    title: 'Adult Tennis Programs',
+    description:
+      'Adult Tennis 101/102 (all skill levels, Tuesdays 8:30 PM) and Live Ball (competitive doubles, multiple sessions Mon/Tue/Fri). Register with Suzanne Taylor.',
+    highlight: 'From $223.75',
+    time: 'Various days & times',
+    calendarType: 'special',
+    price: '223.75',
+  },
+  {
+    id: 'private-lessons',
+    category: 'coaching',
+    isoDate: '2026-05-11',
+    date: 'Season 2026 · By appointment',
+    title: 'Private Lessons',
+    description:
+      'One-on-one coaching with Mark Taylor (Head Professional) or Adrian Shelley. All ages and skill levels. Contact coaches directly to book.',
+    highlight: 'By Appointment',
+    time: 'Flexible',
+    calendarType: 'special',
+  },
+];
+
+// Combined list for the Events section cards (special + recurring + coaching, sorted by date)
 export const allCardEvents: MTCEvent[] = [
   ...specialEvents,
   ...recurringCardEvents,
+  ...coachingEvents,
 ].sort((a, b) => a.isoDate.localeCompare(b.isoDate));
 
 // ────────────────────────────────────────────────────────────

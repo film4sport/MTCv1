@@ -176,11 +176,11 @@ export default function Events() {
                       {event.highlight}
                     </span>
                     <a
-                      href="/login"
+                      href={event.category === 'coaching' ? '/info?tab=coaching' : '/login'}
                       className="text-xs font-medium transition-opacity hover:opacity-80"
                       style={{ color: '#6b7a3d' }}
                     >
-                      Log in to RSVP →
+                      {event.category === 'coaching' ? 'View programs →' : 'Log in to RSVP →'}
                     </a>
                   </div>
                 </div>

@@ -16,8 +16,8 @@ describe('Coaching tab — coach contact info', () => {
     expect(coachingFile).toContain('Taylor.mark.tennis@gmail.com');
   });
 
-  it('should have a Sign Up & Contact section', () => {
-    expect(coachingFile).toContain('Sign Up & Contact');
+  it('should have a registration section', () => {
+    expect(coachingFile).toContain('Ready to Register');
   });
 
   it('should have mailto: links for coach emails', () => {
@@ -30,7 +30,7 @@ describe('Coaching tab — coach contact info', () => {
   });
 
   it('should mention summer camp dates TBC', () => {
-    expect(coachingFile).toContain('Dates coming soon');
+    expect(coachingFile).toContain('Coming soon');
   });
 });
 
