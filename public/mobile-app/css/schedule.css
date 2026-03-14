@@ -393,7 +393,11 @@
 
 .event-modal-rsvp-btn.registered {
   background: transparent;
-  border: 2px solid var(--volt);
+  border: 2px solid var(--electric-blue);
+  color: var(--electric-blue);
+}
+[data-theme="dark"] .event-modal-rsvp-btn.registered {
+  border-color: var(--volt);
   color: var(--volt);
 }
 

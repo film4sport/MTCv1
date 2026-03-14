@@ -486,8 +486,8 @@
 /* Tab bar — sticky under header */
 .admin-tabs-bar {
   display: flex;
-  gap: 4px;
-  padding: 8px 12px;
+  gap: 6px;
+  padding: 10px 12px;
   background: var(--bg-card);
   border-bottom: 1px solid var(--border-color);
   overflow-x: auto;
@@ -502,58 +502,110 @@
 
 .admin-tab {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 6px;
-  padding: 10px 14px;
-  border: none;
-  border-radius: 10px;
-  background: transparent;
-  color: var(--text-muted);
-  font-size: 13px;
+  justify-content: center;
+  gap: 3px;
+  padding: 8px 4px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 11px;
   font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
-  transition: all 0.2s;
-  min-height: 44px;
+  transition: all 0.25s ease;
+  flex: 1 1 0;
+  min-width: 0;
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
 }
-.admin-tab svg { flex-shrink: 0; opacity: 0.6; }
-.admin-tab.active {
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-}
-.admin-tab.active svg { opacity: 1; stroke: var(--text-primary); }
+.admin-tab svg { flex-shrink: 0; width: 16px; height: 16px; }
 
-/* Dark theme: each tab gets a unique color accent */
-[data-theme="dark"] .admin-tab[data-tab="dashboard"].active {
+/* ── Light theme — always-on palette colors ── */
+.admin-tab[data-tab="dashboard"] { color: #6a8a00; }
+.admin-tab[data-tab="dashboard"] svg { stroke: #6a8a00; opacity: 0.6; }
+.admin-tab[data-tab="members"] { color: #008faa; }
+.admin-tab[data-tab="members"] svg { stroke: #008faa; opacity: 0.6; }
+.admin-tab[data-tab="courts"] { color: #cc4a4f; }
+.admin-tab[data-tab="courts"] svg { stroke: #cc4a4f; opacity: 0.6; }
+.admin-tab[data-tab="announcements"] { color: #008faa; }
+.admin-tab[data-tab="announcements"] svg { stroke: #008faa; opacity: 0.6; }
+
+.admin-tab.active { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+.admin-tab.active svg { opacity: 1; }
+
+.admin-tab[data-tab="dashboard"].active {
   background: rgba(200, 255, 0, 0.15);
+  color: #5a7a00;
+  border-color: rgba(200, 255, 0, 0.3);
+}
+.admin-tab[data-tab="members"].active {
+  background: rgba(0, 180, 220, 0.12);
+  color: #007a99;
+  border-color: rgba(0, 212, 255, 0.25);
+}
+.admin-tab[data-tab="courts"].active {
+  background: rgba(255, 90, 95, 0.12);
+  color: #cc3a3f;
+  border-color: rgba(255, 90, 95, 0.25);
+}
+.admin-tab[data-tab="announcements"].active {
+  background: rgba(0, 212, 255, 0.12);
+  color: #007a99;
+  border-color: rgba(0, 212, 255, 0.25);
+}
+
+/* ── Dark theme — liquid glass tabs with always-on palette ── */
+[data-theme="dark"] .admin-tabs-bar {
+  background: rgba(20, 20, 20, 0.85);
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+[data-theme="dark"] .admin-tab {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+[data-theme="dark"] .admin-tab[data-tab="dashboard"] { color: rgba(200, 255, 0, 0.6); }
+[data-theme="dark"] .admin-tab[data-tab="dashboard"] svg { stroke: rgba(200, 255, 0, 0.5); }
+[data-theme="dark"] .admin-tab[data-tab="members"] { color: rgba(0, 212, 255, 0.6); }
+[data-theme="dark"] .admin-tab[data-tab="members"] svg { stroke: rgba(0, 212, 255, 0.5); }
+[data-theme="dark"] .admin-tab[data-tab="courts"] { color: rgba(255, 90, 95, 0.6); }
+[data-theme="dark"] .admin-tab[data-tab="courts"] svg { stroke: rgba(255, 90, 95, 0.5); }
+[data-theme="dark"] .admin-tab[data-tab="announcements"] { color: rgba(0, 212, 255, 0.6); }
+[data-theme="dark"] .admin-tab[data-tab="announcements"] svg { stroke: rgba(0, 212, 255, 0.5); }
+
+[data-theme="dark"] .admin-tab[data-tab="dashboard"].active {
+  background: rgba(200, 255, 0, 0.12);
   color: var(--volt);
+  border-color: rgba(200, 255, 0, 0.3);
+  box-shadow: 0 0 14px rgba(200, 255, 0, 0.12), inset 0 1px 0 rgba(200, 255, 0, 0.15);
 }
 [data-theme="dark"] .admin-tab[data-tab="dashboard"].active svg { stroke: var(--volt); }
 
 [data-theme="dark"] .admin-tab[data-tab="members"].active {
-  background: rgba(0, 212, 255, 0.15);
+  background: rgba(0, 212, 255, 0.12);
   color: #00d4ff;
+  border-color: rgba(0, 212, 255, 0.3);
+  box-shadow: 0 0 14px rgba(0, 212, 255, 0.12), inset 0 1px 0 rgba(0, 212, 255, 0.15);
 }
 [data-theme="dark"] .admin-tab[data-tab="members"].active svg { stroke: #00d4ff; }
 
 [data-theme="dark"] .admin-tab[data-tab="courts"].active {
-  background: rgba(255, 90, 95, 0.15);
+  background: rgba(255, 90, 95, 0.12);
   color: #ff5a5f;
+  border-color: rgba(255, 90, 95, 0.3);
+  box-shadow: 0 0 14px rgba(255, 90, 95, 0.12), inset 0 1px 0 rgba(255, 90, 95, 0.15);
 }
 [data-theme="dark"] .admin-tab[data-tab="courts"].active svg { stroke: #ff5a5f; }
 
 [data-theme="dark"] .admin-tab[data-tab="announcements"].active {
-  background: rgba(168, 130, 255, 0.15);
-  color: #a882ff;
+  background: rgba(0, 212, 255, 0.12);
+  color: #00d4ff;
+  border-color: rgba(0, 212, 255, 0.3);
+  box-shadow: 0 0 14px rgba(0, 212, 255, 0.12), inset 0 1px 0 rgba(0, 212, 255, 0.15);
 }
-[data-theme="dark"] .admin-tab[data-tab="announcements"].active svg { stroke: #a882ff; }
-
-/* Light theme fallback */
-.admin-tab[data-tab="dashboard"].active { background: rgba(200, 255, 0, 0.12); color: #5a7a00; }
-.admin-tab[data-tab="members"].active { background: rgba(0, 180, 220, 0.1); color: #007a99; }
-.admin-tab[data-tab="courts"].active { background: rgba(255, 90, 95, 0.1); color: #cc3a3f; }
-.admin-tab[data-tab="announcements"].active { background: rgba(168, 130, 255, 0.1); color: #6a42cc; }
+[data-theme="dark"] .admin-tab[data-tab="announcements"].active svg { stroke: #00d4ff; }
 
 /* Tab content panels */
 .admin-tab-content {
@@ -572,6 +624,16 @@
   margin-bottom: 12px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.06);
 }
+
+[data-theme="dark"] .admin-card {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px) saturate(130%);
+  -webkit-backdrop-filter: blur(8px) saturate(130%);
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
 [data-theme="dark"] .admin-card {
   border-color: rgba(255,255,255,0.06);
   box-shadow: 0 2px 8px rgba(0,0,0,0.3);
@@ -583,6 +645,58 @@
   letter-spacing: 0.5px;
   color: var(--text-muted);
   margin-bottom: 12px;
+}
+
+/* Subtle theme color accents for admin card titles by section */
+.admin-tab-content[data-tab="dashboard"] .admin-card-title {
+  color: #6a8a00;
+}
+[data-theme="dark"] .admin-tab-content[data-tab="dashboard"] .admin-card-title {
+  color: rgba(200, 255, 0, 0.7);
+}
+.admin-tab-content[data-tab="members"] .admin-card-title {
+  color: #008faa;
+}
+[data-theme="dark"] .admin-tab-content[data-tab="members"] .admin-card-title {
+  color: rgba(0, 212, 255, 0.7);
+}
+.admin-tab-content[data-tab="courts"] .admin-card-title {
+  color: #cc4a4f;
+}
+[data-theme="dark"] .admin-tab-content[data-tab="courts"] .admin-card-title {
+  color: rgba(255, 90, 95, 0.7);
+}
+.admin-tab-content[data-tab="announcements"] .admin-card-title {
+  color: #008faa;
+}
+[data-theme="dark"] .admin-tab-content[data-tab="announcements"] .admin-card-title {
+  color: rgba(0, 212, 255, 0.7);
+}
+
+/* Subtle left-border accent on admin cards by section */
+.admin-tab-content[data-tab="dashboard"] .admin-card {
+  border-left: 3px solid rgba(200, 255, 0, 0.25);
+}
+.admin-tab-content[data-tab="members"] .admin-card {
+  border-left: 3px solid rgba(0, 212, 255, 0.25);
+}
+.admin-tab-content[data-tab="courts"] .admin-card {
+  border-left: 3px solid rgba(255, 90, 95, 0.25);
+}
+.admin-tab-content[data-tab="announcements"] .admin-card {
+  border-left: 3px solid rgba(0, 212, 255, 0.25);
+}
+[data-theme="dark"] .admin-tab-content[data-tab="dashboard"] .admin-card {
+  border-left-color: rgba(200, 255, 0, 0.15);
+}
+[data-theme="dark"] .admin-tab-content[data-tab="members"] .admin-card {
+  border-left-color: rgba(0, 212, 255, 0.15);
+}
+[data-theme="dark"] .admin-tab-content[data-tab="courts"] .admin-card {
+  border-left-color: rgba(255, 90, 95, 0.15);
+}
+[data-theme="dark"] .admin-tab-content[data-tab="announcements"] .admin-card {
+  border-left-color: rgba(0, 212, 255, 0.15);
 }
 
 /* Inputs — light-theme compatible */
@@ -768,6 +882,15 @@
 .admin-usage-item { text-align: center; }
 .admin-usage-label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; }
 .admin-usage-value { font-size: 24px; font-weight: 700; color: var(--text-primary); }
+
+/* Subtle theme tint on usage values */
+[data-theme="dark"] .admin-usage-value { color: rgba(200, 255, 0, 0.85); }
+
+/* Section header subtle color accent */
+.admin-card-subtitle {
+  border-left: 2px solid rgba(200, 255, 0, 0.3);
+  padding-left: 8px;
+}
 
 /* Members: Search — neumorphic */
 .admin-search-bar {
@@ -1061,11 +1184,60 @@
 .admin-trend-bar {
   width: 100%;
   border-radius: 6px 6px 0 0;
-  background: var(--volt);
+  background: linear-gradient(to top, var(--volt), rgba(200, 255, 0, 0.5));
   opacity: 0.85;
-  transition: height 0.3s ease;
+  transition: height 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .admin-trend-label { font-size: 11px; color: var(--text-muted); }
+
+/* Quick stats footer — engagement + last updated */
+.admin-quick-stats-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-color);
+}
+.admin-engagement-pill {
+  font-size: 11px;
+  font-weight: 600;
+  color: #5a7a00;
+  background: rgba(200,255,0,0.12);
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+[data-theme="dark"] .admin-engagement-pill {
+  color: var(--volt);
+  background: rgba(200,255,0,0.1);
+  border: 1px solid rgba(200,255,0,0.15);
+}
+.admin-last-updated {
+  font-size: 10px;
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+/* Member summary line */
+.admin-member-summary {
+  font-size: 12px;
+  color: var(--text-muted);
+  padding: 4px 0 8px;
+  letter-spacing: 0.3px;
+}
+.admin-member-summary .count-active { color: var(--volt); font-weight: 600; }
+.admin-member-summary .count-paused { color: #ff5a5f; font-weight: 600; }
+
+/* Export month picker */
+.admin-export-month-picker {
+  margin-bottom: 10px;
+}
+.admin-export-month-picker .admin-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+  display: block;
+}
 
 /* Export date filter */
 .admin-export-date-filter { margin-bottom: 8px; }

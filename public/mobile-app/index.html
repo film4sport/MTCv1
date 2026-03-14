@@ -20,7 +20,7 @@
     if ('serviceWorker' in navigator) {
       caches.keys().then(function(names) {
         names.forEach(function(name) {
-          if (name.indexOf('mtc-court-fbc4915e') === -1) {
+          if (name.indexOf('mtc-court-f683a58f') === -1) {
             caches.delete(name);
             console.log('[CacheBust] Deleted old cache:', name);
           }
@@ -2294,7 +2294,7 @@
         </button>
         <button class="admin-tab" data-tab="members" onclick="switchAdminTab('members')">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-          Members<span class="admin-tab-badge" id="adminMemberCountBadge"></span>
+          Members
         </button>
         <button class="admin-tab" data-tab="courts" onclick="switchAdminTab('courts')">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"></rect><line x1="12" y1="4" x2="12" y2="20"></line><line x1="2" y1="12" x2="22" y2="12"></line></svg>
@@ -2327,6 +2327,10 @@
               <div class="admin-usage-value" id="statPartnerMatches" style="font-size:20px;">--</div>
               <div class="admin-usage-label">Matches</div>
             </div>
+          </div>
+          <div class="admin-quick-stats-footer">
+            <span id="statEngagement" class="admin-engagement-pill">--% active this week</span>
+            <span id="statLastUpdated" class="admin-last-updated">Updated just now</span>
           </div>
         </div>
 
@@ -2397,6 +2401,10 @@
         <!-- Export -->
         <div class="admin-card">
           <div class="admin-card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>Export</div>
+          <div class="admin-export-month-picker">
+            <label class="admin-label">Month</label>
+            <input type="month" id="exportMonthPicker" class="admin-input" style="max-width:180px;">
+          </div>
           <div class="admin-export-btns">
             <button class="admin-btn admin-btn-secondary" onclick="exportMembersCSV()">Members CSV</button>
             <button class="admin-btn admin-btn-secondary" onclick="exportPaymentsCSV()">Payments CSV</button>
@@ -2407,6 +2415,7 @@
 
       <!-- ===== TAB 2: MEMBERS ===== -->
       <div id="adminTabMembers" class="admin-tab-content">
+        <div id="adminMemberSummary" class="admin-member-summary"></div>
         <div class="admin-search-bar">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
           <input type="text" id="adminMemberSearch" class="admin-search-input" placeholder="Search by name or email..." oninput="filterAdminMembers(this.value)">

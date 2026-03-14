@@ -70,6 +70,13 @@
       renderRevenueBreakdown();
       renderMonthlyTrends();
 
+      // Set export month picker to current month
+      var exportPicker = document.getElementById('exportMonthPicker');
+      if (exportPicker && !exportPicker.value) {
+        var now2 = new Date();
+        exportPicker.value = now2.getFullYear() + '-' + String(now2.getMonth() + 1).padStart(2, '0');
+      }
+
       // Gate code
       var gateCodeSetting = settings.find(function(s) { return s.key === 'gate_code'; });
       var codeEl = document.getElementById('currentGateCode');
@@ -93,6 +100,19 @@
     el = document.getElementById('statBookingsMonth'); if (el) el.textContent = thisMonth.length;
     el = document.getElementById('statCourtsOpen'); if (el) el.textContent = openCourts.length + '/' + _adminCourts.length;
     el = document.getElementById('statPartnerMatches'); if (el) el.textContent = matched.length;
+
+    // Engagement: % of members who booked in last 7 days
+    var weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    var weekStr = weekAgo.toISOString().split('T')[0];
+    var recentBookers = {};
+    confirmed.forEach(function(b) { if (b.date >= weekStr && b.user_id) recentBookers[b.user_id] = true; });
+    var engagementPct = _adminMembers.length > 0 ? Math.round((Object.keys(recentBookers).length / _adminMembers.length) * 100) : 0;
+    el = document.getElementById('statEngagement'); if (el) el.textContent = engagementPct + '% active this week';
+
+    // Last updated timestamp
+    var updatedEl = document.getElementById('statLastUpdated');
+    if (updatedEl) updatedEl.textContent = 'Updated ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
     // Update member count badge on Members tab
     var memberBadge = document.getElementById('adminMemberCountBadge');
@@ -373,6 +393,14 @@
   }
 
   function renderMembersList() {
+    // Active/paused summary
+    var summaryEl = document.getElementById('adminMemberSummary');
+    if (summaryEl) {
+      var activeCount = _adminMembers.filter(function(m) { return m.status !== 'paused'; }).length;
+      var pausedCount = _adminMembers.filter(function(m) { return m.status === 'paused'; }).length;
+      summaryEl.innerHTML = '<span class="count-active">' + activeCount + ' active</span> · <span class="count-paused">' + pausedCount + ' paused</span>';
+    }
+
     var container = document.getElementById('adminMembersList');
     if (!container) return;
     var filtered = _adminMembers.filter(function(m) {

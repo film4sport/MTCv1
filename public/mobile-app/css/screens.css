@@ -103,92 +103,37 @@
   border: 2px solid var(--electric-blue);
   box-shadow: 0 0 12px rgba(0, 180, 216, 0.3);
 }
-/* Event dots — 1 dot centered, 2 dots side by side, 3+ = 3 dots */
-.calendar-grid .calendar-day.has-event::after {
-  content: '';
-  width: 6px;
-  height: 6px;
-  background: var(--coral);
-  border-radius: 50%;
+/* Event dots — DOM-based, fill around calendar day edges */
+.cal-dots {
   position: absolute;
-  bottom: 4px;
-  left: calc(50% - 3px);
-  box-shadow: 0 0 5px rgba(255, 90, 95, 0.5);
-}
-
-/* 2 events — two dots side by side */
-.calendar-grid .calendar-day.has-events-2::after {
-  content: '';
-  width: 6px;
-  height: 6px;
-  background: var(--coral);
-  border-radius: 50%;
-  position: absolute;
-  bottom: 4px;
-  left: calc(50% - 8px);
-  box-shadow: 0 0 5px rgba(255, 90, 95, 0.5);
-}
-.calendar-grid .calendar-day.has-events-2::before {
-  content: '';
-  width: 6px;
-  height: 6px;
-  background: var(--volt);
-  border-radius: 50%;
-  position: absolute;
-  bottom: 4px;
-  left: calc(50% + 2px);
-  box-shadow: 0 0 5px rgba(200, 255, 0, 0.5);
-  z-index: 1;
-}
-
-/* 3+ events — three dots */
-.calendar-grid .calendar-day.has-events-3::after {
-  content: '';
-  width: 6px;
-  height: 6px;
-  background: var(--coral);
-  border-radius: 50%;
-  position: absolute;
-  bottom: 4px;
-  left: calc(50% - 11px);
-  box-shadow: 0 0 5px rgba(255, 90, 95, 0.5);
-}
-.calendar-grid .calendar-day.has-events-3::before {
-  content: '';
-  width: 6px;
-  height: 6px;
-  background: var(--volt);
-  border-radius: 50%;
-  position: absolute;
-  bottom: 4px;
-  left: calc(50% - 3px);
-  box-shadow: 0 0 5px rgba(200, 255, 0, 0.5);
-  z-index: 1;
-}
-
-/* 4+ events — three dots + count overlay */
-.calendar-grid .calendar-day.has-events-many::after {
-  content: attr(data-event-count);
-  position: absolute;
-  bottom: 2px;
-  right: 2px;
-  width: 16px;
-  height: 16px;
-  background: var(--coral);
-  color: var(--color-white);
-  font-size: 9px;
-  font-weight: 700;
-  border-radius: 50%;
+  inset: 0;
+  pointer-events: none;
   display: flex;
-  align-items: center;
+  flex-wrap: wrap;
+  align-content: flex-end;
   justify-content: center;
-  box-shadow: 0 2px 4px rgba(255, 90, 95, 0.4);
-  left: auto;
+  gap: 3px;
+  padding: 0 4px 3px;
+  z-index: 1;
+}
+.cal-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
 }
 
-.calendar-grid .calendar-day.today.has-event::after {
-  box-shadow: 0 0 8px rgba(255, 90, 95, 0.6);
+/* When 5+ dots, start filling top edge too */
+.calendar-grid .calendar-day .cal-dots:has(.cal-dot:nth-child(5)) {
+  align-content: space-between;
+  padding-top: 3px;
 }
+
+/* Light glow on dots */
+.cal-dot[style*="coral"] { box-shadow: 0 0 5px rgba(255, 90, 95, 0.5); }
+.cal-dot[style*="electric-blue"] { box-shadow: 0 0 5px rgba(0, 212, 255, 0.5); }
+.cal-dot[style*="volt"] { box-shadow: 0 0 5px rgba(200, 255, 0, 0.5); }
 
 /* Fun Tennis-themed Animations */
 @keyframes flashFade {
