@@ -21,7 +21,7 @@ const MOCK_USER = {
   name: 'Test User',
   email: 'test@mtc.ca',
   userId: 'test-user-id-123',
-  accessToken: 'mock-access-token-xyz',
+  accessToken: 'sess-mock-token-xyz',
   membershipType: 'adult',
   familyId: null,
   familyMembers: [],
@@ -76,8 +76,9 @@ async function setupAuthenticatedState(page) {
     localStorage.setItem('mtc-onboarding-complete', 'true');
     localStorage.setItem('mtc-user', JSON.stringify({
       role: 'member', name: 'Test User', email: 'test@mtc.ca',
-      userId: 'test-user-id-123', accessToken: 'mock-access-token-xyz',
+      userId: 'test-user-id-123', accessToken: 'sess-mock-token-xyz',
     }));
+    localStorage.setItem('mtc-access-token', 'sess-mock-token-xyz');
   });
 }
 

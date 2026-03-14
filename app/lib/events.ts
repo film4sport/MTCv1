@@ -129,7 +129,7 @@ export const recurringCardEvents: MTCEvent[] = [
     date: 'Every Tuesday · Starts May 12',
     title: "Men's Round Robin",
     description:
-      "Weekly men's round robin every Tuesday morning. All skill levels welcome. Courts 1-2.",
+      "Weekly men's round robin every Tuesday morning. All skill levels welcome. Courts 1-2. $20 season ball fee — covers balls for the whole season. Payment details coming by email soon.",
     highlight: '9:00 - 11:00 AM',
     time: '9:00 - 11:00 AM',
     calendarType: 'social',
@@ -157,7 +157,7 @@ export const recurringCardEvents: MTCEvent[] = [
     date: 'Every Friday · Starts May 15',
     title: "Ladies Round Robin",
     description:
-      "Weekly ladies round robin every Friday morning. All skill levels welcome. Courts 1-2.",
+      "Weekly ladies round robin every Friday morning. All skill levels welcome. Courts 1-2. $20 season ball fee — covers balls for the whole season. Payment details coming by email soon.",
     highlight: '9:00 - 11:00 AM',
     time: '9:00 - 11:00 AM',
     calendarType: 'social',
@@ -171,7 +171,7 @@ export const recurringCardEvents: MTCEvent[] = [
     date: 'Every Friday · Starts May 15',
     title: 'Friday Night Mixed Round Robin',
     description:
-      'Mixed doubles round robin every Friday evening. Rotating partners, fun format! All Courts.',
+      'Mixed doubles round robin every Friday evening. Rotating partners, fun format! All Courts. $20 season ball fee — covers balls for the whole season. Payment details coming by email soon.',
     highlight: '6:00 - 9:00 PM',
     time: '6:00 - 9:00 PM',
     calendarType: 'social',
