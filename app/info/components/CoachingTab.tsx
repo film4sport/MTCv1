@@ -81,82 +81,68 @@ export default function CoachingTab() {
         </div>
       </div>
 
-      <section className="py-16 lg:py-20 px-8 lg:px-16" style={{ backgroundColor: '#edeae3' }}>
+      {/* Meet the Pros — compact side-by-side on desktop, stacked on mobile */}
+      <section className="py-12 lg:py-16 px-8 lg:px-16" style={{ backgroundColor: '#edeae3' }}>
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12 fade-in">
-            <span className="section-label">// Head Professional</span>
-            <h2 className="headline-font text-2xl md:text-3xl lg:text-4xl leading-tight mt-4 mb-4" style={{ color: '#2a2f1e' }}>
-              Mark Taylor
+          <div className="text-center mb-10 fade-in">
+            <span className="section-label">// Meet the Pros</span>
+            <h2 className="headline-font text-2xl md:text-3xl leading-tight mt-4 mb-2" style={{ color: '#2a2f1e' }}>
+              Your Coaching Team
             </h2>
-            <p className="max-w-2xl mx-auto text-sm leading-relaxed" style={{ color: '#6b7266' }}>
-              Tennis Canada certified professional coaching players of all ages and skill levels.
+            <p className="max-w-xl mx-auto text-sm leading-relaxed" style={{ color: '#6b7266' }}>
+              Two experienced professionals dedicated to helping players of every age and level.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8 fade-in">
-            <div className="rounded-xl p-8" style={{ background: '#faf8f3', border: '1px solid #e0dcd3' }}>
-              <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-4" style={{ background: 'rgba(107, 122, 61, 0.12)' }}>
-                <svg className="w-5 h-5" style={{ color: '#6b7a3d' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                </svg>
+          <div className="grid md:grid-cols-2 gap-6 fade-in">
+            {/* Mark Taylor */}
+            <div className="rounded-xl p-6" style={{ background: '#faf8f3', border: '1px solid #e0dcd3' }}>
+              <div className="flex items-center gap-3 mb-4">
+                <img src="/coach-mark.jpeg" alt="Mark Taylor" className="w-14 h-14 rounded-full object-cover flex-shrink-0" style={{ border: '2px solid #e0dcd3' }} />
+                <div>
+                  <h3 className="font-bold text-lg leading-tight" style={{ color: '#2a2f1e' }}>Mark Taylor</h3>
+                  <span className="text-xs" style={{ color: '#6b7a3d' }}>Head Professional</span>
+                </div>
               </div>
-              <h3 className="font-bold text-xl mb-4" style={{ color: '#2a2f1e' }}>Certifications</h3>
-              <ul className="space-y-3 text-sm leading-relaxed" style={{ color: '#6b7266' }}>
-                {['Tennis Canada — Tennis Instructor (2007)', 'Tennis Canada — Club Professional 1 (2007)', 'Tennis Canada — Coach 2 (2011)', 'Tennis Professionals Association (TPA) member'].map((cert, i) => (
-                  <li key={i} className="flex items-start gap-2">
-                    <svg className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: '#6b7a3d' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    {cert}
-                  </li>
+              <p className="text-sm leading-relaxed mb-4" style={{ color: '#6b7266' }}>
+                Tennis Canada certified coach (Club Professional 1, Coach 2, TPA member) with competitive NCTA, OTA, FTQ, and ITF Futures experience. Trained with Bob Brett in San Remo, Italy and played a 2017 exhibition match with Denis Shapovalov.
+              </p>
+              <div className="flex flex-wrap gap-1.5 mb-4">
+                {['Club Pro 1', 'Coach 2', 'TPA Member'].map((tag) => (
+                  <span key={tag} className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(107, 122, 61, 0.1)', color: '#4a5528' }}>{tag}</span>
                 ))}
-              </ul>
+              </div>
+              <a href="mailto:Taylor.mark.tennis@gmail.com" className="inline-flex items-center gap-2 text-sm font-medium hover:underline" style={{ color: '#6b7a3d' }}>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                Private lessons
+              </a>
             </div>
 
-            <div className="rounded-xl p-8" style={{ background: '#faf8f3', border: '1px solid #e0dcd3' }}>
-              <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-4" style={{ background: 'rgba(107, 122, 61, 0.12)' }}>
-                <svg className="w-5 h-5" style={{ color: '#6b7a3d' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
+            {/* Adrian Shelley */}
+            <div className="rounded-xl p-6" style={{ background: '#faf8f3', border: '1px solid #e0dcd3' }}>
+              <div className="flex items-center gap-3 mb-4">
+                <img src="/coach-adrian.jpeg" alt="Adrian Shelley" className="w-14 h-14 rounded-full object-cover flex-shrink-0" style={{ border: '2px solid #e0dcd3' }} />
+                <div>
+                  <h3 className="font-bold text-lg leading-tight" style={{ color: '#2a2f1e' }}>Adrian Shelley</h3>
+                  <span className="text-xs" style={{ color: '#6b7a3d' }}>Tennis Professional</span>
+                </div>
               </div>
-              <h3 className="font-bold text-xl mb-4" style={{ color: '#2a2f1e' }}>Playing & Coaching Background</h3>
-              <ul className="space-y-3 text-sm leading-relaxed" style={{ color: '#6b7266' }}>
-                {['Competitive player in NCTA, OTA, FTQ tournaments and Circuit Canada Series', 'Competed in ITF Futures events', '2017 exhibition match with Denis Shapovalov', 'Trained with Bob Brett (coach of Becker, Ivanisevic, Cilic) in San Remo, Italy', 'Coaches juniors through adults, beginner to elite level'].map((item, i) => (
-                  <li key={i} className="flex items-start gap-2">
-                    <svg className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: '#6b7a3d' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    {item}
-                  </li>
+              <p className="text-sm leading-relaxed mb-4" style={{ color: '#6b7266' }}>
+                40+ years as a player, instructor, and coach. Provincially ranked junior who reached nationals, 5 years Varsity Tennis at Brock University, and 23+ years coaching at North Park S.S. (5 OFSAA appearances). Taught at Olympia Sports Camp, Deerhurst Resort, and more.
+              </p>
+              <div className="flex flex-wrap gap-1.5 mb-4">
+                {['40+ Years', 'Varsity Coach', '5× OFSAA'].map((tag) => (
+                  <span key={tag} className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(107, 122, 61, 0.1)', color: '#4a5528' }}>{tag}</span>
                 ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="py-12 px-8 lg:px-16" style={{ backgroundColor: '#f5f2eb' }}>
-        <div className="max-w-4xl mx-auto fade-in">
-          <div className="rounded-xl p-8" style={{ background: '#faf8f3', border: '1px solid #e0dcd3' }}>
-            <div className="flex items-start gap-5">
-              <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(107, 122, 61, 0.12)' }}>
-                <svg className="w-5 h-5" style={{ color: '#6b7a3d' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </div>
+              <a href="mailto:Shelley.Adrian.Tennis@gmail.com" className="inline-flex items-center gap-2 text-sm font-medium hover:underline" style={{ color: '#6b7a3d' }}>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
-              </div>
-              <div>
-                <h3 className="font-bold text-xl mb-2" style={{ color: '#2a2f1e' }}>Adrian Shelley</h3>
-                <span className="text-xs px-3 py-1 rounded-full inline-block mb-3" style={{ backgroundColor: 'rgba(107, 122, 61, 0.12)', color: '#4a5528' }}>Tennis Professional</span>
-                <p className="text-sm leading-relaxed mb-3" style={{ color: '#6b7266' }}>
-                  Over 40 years of experience as a player, instructor, and coach. Provincially ranked junior who reached the junior nationals, then played Varsity Tennis at Brock University for 5 years and served as Assistant Coach. Tennis Coach at North Park S.S. for 23+ years, advancing his team to OFSAA 5 times. Adrian has taught at Olympia Sports Camp, Deerhurst Resort, St. Catharines Tennis Club, and White Oaks Tennis Club. He enjoys helping players of all abilities improve their skills, fitness, and most importantly have fun.
-                </p>
-                <a href="mailto:Shelley.Adrian.Tennis@gmail.com" className="inline-flex items-center gap-2 text-sm font-medium hover:underline" style={{ color: '#6b7a3d' }}>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
-                  Shelley.Adrian.Tennis@gmail.com — Private lessons
-                </a>
-              </div>
+                Private lessons
+              </a>
             </div>
           </div>
         </div>
@@ -211,7 +197,7 @@ export default function CoachingTab() {
               Junior Tennis Programs
             </h2>
             <p className="max-w-2xl mx-auto text-sm leading-relaxed" style={{ color: '#6b7266' }}>
-              Progressive programs designed for each age group, from first-time players to competitive teens.
+              Progressive programs designed for each age group, from first-time players to competitive teens. All prices include HST.
             </p>
           </div>
 
@@ -232,7 +218,13 @@ export default function CoachingTab() {
                   </div>
                 </div>
                 <p className="text-sm mb-2" style={{ color: '#6b7266' }}>{prog.schedule}</p>
-                <p className="text-sm leading-relaxed" style={{ color: '#6b7266' }}>{prog.description}</p>
+                <p className="text-sm leading-relaxed mb-3" style={{ color: '#6b7266' }}>{prog.description}</p>
+                <a href={`mailto:Taylor.suzanne.tennis@gmail.com?subject=Registration: ${prog.name}`} className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full transition-colors hover:opacity-80" style={{ background: 'rgba(107, 122, 61, 0.12)', color: '#4a5528' }}>
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  Register
+                </a>
               </div>
             ))}
           </div>
@@ -248,7 +240,7 @@ export default function CoachingTab() {
               Adult Tennis Programs
             </h2>
             <p className="max-w-2xl mx-auto text-sm leading-relaxed" style={{ color: '#6b7266' }}>
-              From beginner instruction to competitive match play, there&apos;s a program for every level.
+              From beginner instruction to competitive match play, there&apos;s a program for every level. All prices include HST.
             </p>
           </div>
 
@@ -266,7 +258,13 @@ export default function CoachingTab() {
                   </div>
                 </div>
                 <p className="text-sm mb-2" style={{ color: '#6b7266' }}>{prog.schedule}</p>
-                <p className="text-sm leading-relaxed" style={{ color: '#6b7266' }}>{prog.description}</p>
+                <p className="text-sm leading-relaxed mb-3" style={{ color: '#6b7266' }}>{prog.description}</p>
+                <a href={`mailto:Taylor.suzanne.tennis@gmail.com?subject=Registration: ${prog.name}`} className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full transition-colors hover:opacity-80" style={{ background: 'rgba(107, 122, 61, 0.12)', color: '#4a5528' }}>
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  Register
+                </a>
               </div>
             ))}
           </div>

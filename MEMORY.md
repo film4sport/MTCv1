@@ -1278,6 +1278,17 @@ Closed ALL notification asymmetries. Every action fires symmetric bell + push + 
 - **Supabase vendor lib (160KB)**: Deeply integrated (auth + realtime + channels). Risk too high for minimal gain. Already cached by SW.
 - **Store.tsx context split**: 40+ values in one context = every change re-renders all consumers. This is the highest-impact remaining optimization but requires a major refactor (touches every dashboard page). Should be a dedicated session.
 
+### Spring 2026 Program Guide Integration (Mar 13, 2026)
+- **Source**: PDF from club pro's wife with full junior/adult program details
+- **Updated across all 3 platforms**: landing CoachingTab, dashboard Lessons page, mobile PWA Lessons screen
+- **Data added**: 5 junior programs (Munchkin Stars, Red Ball, Orange Ball, Green Ball, Teen Tennis) with ages/duration/schedule/pricing, 2 adult programs (Adult 101/102, Live Ball), weekly schedule grid with start dates (week of May 11), summer camp (Ages 5+, dates TBD), Adrian Shelley full bio + email (Shelley.Adrian.Tennis@gmail.com)
+- **CoachingTab.tsx redesigned**: Replaced 2-viewport separate coach sections (Mark centered heading + 2-col grid, Adrian in separate bg section) with compact side-by-side "Meet the Pros" cards (~half viewport). Each card: name/title, condensed bio, certification/achievement pills, private lessons email link
+- **Hero.tsx**: Added "Spring Programs Now Open" glass CTA card linking to /info?tab=coaching
+- **$20 ball fee**: Added to all 3 round robin descriptions (mens, ladies, friday mixed) across events.ts, data.ts, events.js
+- **CI fix**: mobile-pwa-rollback.spec.js — 3 test failures from missing `mtc-access-token` in setupAuthenticatedState(). Fixed by adding `sess-` prefixed token to localStorage
+- **Unit test fix**: coaching-and-settings.test.js assertion updated for new CoachingTab content
+- **Test count**: 1209 tests across 36 files, all passing
+
 ### Pending
 - Run migration `20260309_add_conversation_individual_indexes.sql` on production Supabase
 - Deploy to Railway with all optimization changes
