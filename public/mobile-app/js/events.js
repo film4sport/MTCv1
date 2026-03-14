@@ -133,7 +133,7 @@
       price: 'Members',
       spotsTotal: 16,
       spotsTaken: 0,
-      description: 'Weekly men\'s round robin every Tuesday morning. All skill levels welcome. Drop in and play!',
+      description: 'Weekly men\'s round robin every Tuesday morning. All skill levels welcome. Drop in and play! $20 season ball fee — covers balls for the whole season. Payment details coming by email soon.',
       attendees: []
     },
     'freedom-55': {
@@ -172,7 +172,7 @@
       price: 'Members',
       spotsTotal: 16,
       spotsTaken: 0,
-      description: 'Weekly ladies round robin every Friday morning. All skill levels welcome. A fun way to start the weekend!',
+      description: 'Weekly ladies round robin every Friday morning. All skill levels welcome. A fun way to start the weekend! $20 season ball fee — covers balls for the whole season. Payment details coming by email soon.',
       attendees: []
     },
     'friday-mixed': {
@@ -185,7 +185,7 @@
       price: 'Members',
       spotsTotal: 24,
       spotsTaken: 0,
-      description: 'Friday night mixed doubles round robin under the lights! Bring a partner or get matched. The most popular weekly event at MTC.',
+      description: 'Friday night mixed doubles round robin under the lights! Bring a partner or get matched. The most popular weekly event at MTC. $20 season ball fee — covers balls for the whole season. Payment details coming by email soon.',
       attendees: []
     },
     'mixed-doubles-tournament-day1': {
