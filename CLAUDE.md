@@ -225,6 +225,14 @@ The three platforms are:
 ## #25: NEVER USE THE USER'S PERSONAL EMAIL FOR TESTING
 See rule at the TOP of this file — duplicated here for grep-ability. **USE `test@example.com` or `testuser@mtc.ca`. NEVER the user's real email.**
 
+## #26: NEVER MIX PLATFORM THEME COLORS
+**Each platform has its own color palette. NEVER use colors from one platform in another.**
+- **Landing page / Info pages**: `#1a1f12` bg, `#6b7a3d` olive, `#d4e157` accent, `#e8e4d9` cream text, `#faf8f3` card bg
+- **Dashboard**: Same olive/cream palette as landing page — `#6b7a3d`, `#d4e157`, `#1a1f12`, `#e8e4d9`, `#faf8f3`
+- **Mobile PWA**: Different palette — `#c8ff00` neon lime, `#ff5a5f` coral, `#00d4ff` cyan, `#0a0a0a` dark
+- **Rule**: Dashboard components must NEVER use mobile PWA colors (`#c8ff00`, `#ff5a5f`, `#00d4ff`, etc.) and vice versa
+- **Incident**: Mar 14, 2026 — OnboardingTour.tsx had mobile PWA colors (neon lime, coral, cyan) mixed into dashboard olive theme. Looked terrible.
+
 ## PROJECT OVERVIEW
 - **Mono Tennis Club** — Next.js 14 + TypeScript (strict mode) + Tailwind CSS monorepo
 - **Deployment**: Railway (standard Node.js server) — NOT Vercel, NOT serverless
