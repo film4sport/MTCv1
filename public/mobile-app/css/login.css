@@ -49,16 +49,17 @@
 }
 
 .login-bg img {
-  width: 100%;
-  height: 100%;
+  width: 115%;
+  height: 115%;
   object-fit: cover;
-  object-position: center 70%;
+  object-position: center 60%;
+  margin: -7.5% 0 0 -7.5%;
   animation: kenBurns 20s ease-in-out infinite alternate;
 }
 
 @keyframes kenBurns {
-  0% { transform: scale(1) translateY(0); }
-  100% { transform: scale(1.1) translateY(-1%); }
+  0% { transform: scale(0.92) translateY(0); }
+  100% { transform: scale(1) translateY(-1%); }
 }
 
 /* ============================================
@@ -379,27 +380,18 @@
   width: 100%;
   max-width: 340px;
   padding: 36px 28px;
-  /* More visible glass effect */
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.18) 0%,
-    rgba(255, 255, 255, 0.08) 40%,
-    rgba(255, 255, 255, 0.12) 100%
-  );
-  backdrop-filter: blur(24px) saturate(200%);
-  -webkit-backdrop-filter: blur(24px) saturate(200%);
-  border-radius: 28px;
-  box-shadow: 
-    /* Outer glow */
-    0 0 60px rgba(200, 255, 0, 0.15),
-    0 0 100px rgba(0, 212, 255, 0.1),
-    /* Depth shadow */
-    0 25px 50px rgba(0, 0, 0, 0.4),
-    /* Glass edge highlights */
-    inset 0 1px 1px rgba(255, 255, 255, 0.4),
-    inset 0 -1px 1px rgba(255, 255, 255, 0.1);
-  /* Visible border */
-  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  /* Liquid glass — matches install card */
+  background:
+    radial-gradient(ellipse at 25% 0%, rgba(255, 255, 255, 0.3) 0%, transparent 50%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.13) 0%, rgba(255, 255, 255, 0.05) 100%);
+  -webkit-backdrop-filter: blur(12px) saturate(130%) brightness(1.05);
+  backdrop-filter: blur(12px) saturate(130%) brightness(1.05);
+  border-radius: 24px;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.4);
   position: relative;
   z-index: 10;
   animation: cardSlideUp 0.6s ease-out 0.4s backwards;
@@ -490,7 +482,7 @@
   text-align: center;
   letter-spacing: 2px;
   text-transform: uppercase;
-  text-shadow: 0 0 20px rgba(200, 255, 0, 0.5);
+  text-shadow: 0 0 20px rgba(200, 255, 0, 0.5), 0 1px 6px rgba(0, 0, 0, 0.7);
   position: relative;
   z-index: 1;
 }
@@ -509,8 +501,9 @@
   transition: all 0.3s ease;
   background: rgba(255, 255, 255, 0.08);
   color: var(--color-white);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
   box-sizing: border-box;
-  box-shadow: 
+  box-shadow:
     inset 0 2px 4px rgba(0, 0, 0, 0.2),
     0 0 0 0 rgba(200, 255, 0, 0);
   position: relative;
@@ -519,6 +512,7 @@
 
 .login-input::placeholder {
   color: rgba(255, 255, 255, 0.5);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
 }
 
 .login-input:focus {
@@ -809,6 +803,7 @@
   margin-top: 20px;
   position: relative;
   z-index: 1;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
 }
 
 .login-footer a {
@@ -816,6 +811,7 @@
   text-decoration: none;
   font-weight: 600;
   transition: color 0.2s;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.7);
 }
 
 .login-footer a:hover {
@@ -1023,39 +1019,9 @@
 /* Liquid glass card — iOS 26 style: see-through, refractive edges, specular highlight, minimal blur */
 .install-card {
   text-align: center;
-  /* Halfway between glassmorphism and pure liquid glass */
-  background:
-    /* Specular highlight — light catching the top-left like curved glass */
-    radial-gradient(ellipse at 25% 0%, rgba(255, 255, 255, 0.3) 0%, transparent 50%),
-    /* Slightly more tinted base */
-    linear-gradient(180deg, rgba(255, 255, 255, 0.13) 0%, rgba(255, 255, 255, 0.05) 100%) !important;
-  /* Light blur — see through but softened */
-  -webkit-backdrop-filter: blur(12px) saturate(130%) brightness(1.05) !important;
-  backdrop-filter: blur(12px) saturate(130%) brightness(1.05) !important;
-  /* Thin bright border — light refracting at glass edges */
-  border: 1px solid rgba(255, 255, 255, 0.4) !important;
-  border-radius: 24px !important;
-  box-shadow:
-    /* Depth */
-    0 8px 32px rgba(0, 0, 0, 0.2),
-    /* Inner top edge — specular reflection on glass surface */
-    inset 0 1px 0 rgba(255, 255, 255, 0.5),
-    /* Inner bottom edge — subtle thickness */
-    inset 0 -1px 0 rgba(255, 255, 255, 0.1) !important;
 }
 
-/* Kill the parent glassmorphism orbs — liquid glass is clean */
-.install-card .refraction-orb,
-.install-card .liquid-highlight {
-  display: none !important;
-}
-
-/* Thinner accent bar for liquid glass */
-.install-card .card-accent {
-  height: 2px;
-  opacity: 0.5;
-  box-shadow: none;
-}
+/* Match login card effects exactly */
 
 .install-icon-wrap {
   width: 52px;

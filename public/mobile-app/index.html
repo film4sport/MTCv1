@@ -20,7 +20,7 @@
     if ('serviceWorker' in navigator) {
       caches.keys().then(function(names) {
         names.forEach(function(name) {
-          if (name.indexOf('mtc-court-95af1095') === -1) {
+          if (name.indexOf('mtc-court-8fa0c7ab') === -1) {
             caches.delete(name);
             console.log('[CacheBust] Deleted old cache:', name);
           }
@@ -311,22 +311,17 @@
         <div class="refraction-orb refraction-orb-2" aria-hidden="true"></div>
 
         <div class="card-accent"></div>
-        <p class="card-welcome">Welcome back</p>
 
-        <input type="email" class="login-input" placeholder="your@email.com" id="loginEmail" aria-label="Email address" autocomplete="email">
+        <input type="email" class="login-input" placeholder="your@email.com" id="loginEmail" aria-label="Email address" autocomplete="email" style="text-align: center; margin-top: 8px;">
         <input type="tel" class="login-input" placeholder="4-digit PIN" id="loginPin" maxlength="4" inputmode="numeric" pattern="[0-9]*" aria-label="PIN" autocomplete="off" style="letter-spacing: 6px; text-align: center; font-size: 18px; font-weight: 600;">
         <button type="button" class="login-btn" id="pinLoginBtn" onclick="handlePinLogin()" aria-label="Sign in">Sign In</button>
 
         <div style="text-align: center; margin: 8px 0;">
-          <a href="#" onclick="showForgotPinScreen(); return false;" style="font-size: 13px; color: var(--volt); text-decoration: none; font-weight: 500;">Forgot PIN?</a>
+          <a href="#" onclick="showForgotPinScreen(); return false;" style="font-size: 13px; color: var(--volt); text-decoration: none; font-weight: 500; text-shadow: 0 0 16px rgba(200,255,0,0.4), 0 1px 4px rgba(0,0,0,0.6);">Forgot PIN?</a>
         </div>
 
-        <div style="margin: 16px 0 8px; padding: 12px 14px; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; text-align: center; font-size: 12px; color: rgba(255, 255, 255, 0.6); line-height: 1.5;">
-          <span style="font-size: 16px;">&#x1F6A7;</span><br>
-          <span style="font-weight: 600; color: rgba(255, 255, 255, 0.85);">Under Construction</span><br>
-          Our desktop and mobile/tablet apps are still in development. If you find any bugs or have feedback, please email<br>
-          <a href="mailto:monotennisclub1@gmail.com" style="color: var(--volt); text-decoration: none; font-weight: 600;">monotennisclub1@gmail.com</a><br>
-          <span style="font-size: 11px; color: rgba(255, 255, 255, 0.45);">with a relevant subject line.</span>
+        <div style="margin: 16px 0 8px; padding: 10px 14px; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; text-align: center; font-size: 13px; color: rgba(255, 255, 255, 0.75); line-height: 1.5; text-shadow: 0 1px 4px rgba(0,0,0,0.5);">
+          App in beta — bugs? Email <a href="mailto:monotennisclub1@gmail.com" style="color: var(--volt); text-decoration: none; font-weight: 600;">monotennisclub1@gmail.com</a>
         </div>
 
         <div class="login-footer">
@@ -342,8 +337,8 @@
 
         <div class="card-accent"></div>
         <p class="card-welcome">Set Your PIN</p>
-        <p style="font-size: 13px; color: var(--text-secondary); margin: 0 0 6px; text-align: center; line-height: 1.4;">Choose a 4-digit PIN to secure your account. You'll use this to sign in from now on.</p>
-        <p style="font-size: 12px; color: #b45309; margin: 0 0 12px; text-align: center; line-height: 1.4; padding: 6px 12px; background: rgba(180, 83, 9, 0.06); border: 1px solid rgba(180, 83, 9, 0.12); border-radius: 10px;">Avoid easy PINs like 1234. Anyone who knows your email and PIN can access your profile and messages.</p>
+        <p style="font-size: 13px; color: var(--text-secondary); margin: 0 0 6px; text-align: center; line-height: 1.4; text-shadow: 0 1px 4px rgba(0,0,0,0.5);">Choose a 4-digit PIN to secure your account. You'll use this to sign in from now on.</p>
+        <p style="font-size: 12px; color: #b45309; margin: 0 0 12px; text-align: center; line-height: 1.4; padding: 6px 12px; background: rgba(180, 83, 9, 0.06); border: 1px solid rgba(180, 83, 9, 0.12); border-radius: 10px; text-shadow: 0 1px 3px rgba(0,0,0,0.3);">Avoid easy PINs like 1234. Anyone who knows your email and PIN can access your profile and messages.</p>
 
         <input type="tel" class="login-input" placeholder="New 4-digit PIN" id="setupPin" maxlength="4" inputmode="numeric" pattern="[0-9]*" aria-label="New PIN" autocomplete="off" style="letter-spacing: 6px; text-align: center; font-size: 18px; font-weight: 600;">
         <input type="tel" class="login-input" placeholder="Confirm PIN" id="setupPinConfirm" maxlength="4" inputmode="numeric" pattern="[0-9]*" aria-label="Confirm PIN" autocomplete="off" style="letter-spacing: 6px; text-align: center; font-size: 18px; font-weight: 600;">
@@ -362,7 +357,7 @@
 
         <div class="card-accent"></div>
         <p class="card-welcome">Reset PIN</p>
-        <p style="font-size: 13px; color: var(--text-secondary); margin: 0 0 12px; text-align: center; line-height: 1.4;">Enter your email and we'll send a 4-digit code to reset your PIN.</p>
+        <p style="font-size: 13px; color: var(--text-secondary); margin: 0 0 12px; text-align: center; line-height: 1.4; text-shadow: 0 1px 4px rgba(0,0,0,0.5);">Enter your email and we'll send a 4-digit code to reset your PIN.</p>
 
         <input type="email" class="login-input" placeholder="your@email.com" id="forgotPinEmail" aria-label="Email address" autocomplete="email">
         <button type="button" class="login-btn" id="forgotPinBtn" onclick="handleForgotPin()" aria-label="Send reset code">Send Reset Code</button>
@@ -380,7 +375,7 @@
 
         <div class="card-accent"></div>
         <p class="card-welcome">Enter Code</p>
-        <p style="font-size: 13px; color: var(--text-secondary); margin: 0 0 12px; text-align: center; line-height: 1.4;">Check your email for a 4-digit code, then choose a new PIN.</p>
+        <p style="font-size: 13px; color: var(--text-secondary); margin: 0 0 12px; text-align: center; line-height: 1.4; text-shadow: 0 1px 4px rgba(0,0,0,0.5);">Check your email for a 4-digit code, then choose a new PIN.</p>
 
         <input type="tel" class="login-input" placeholder="4-digit code" id="resetCode" maxlength="4" inputmode="numeric" pattern="[0-9]*" aria-label="Reset code" autocomplete="off" style="letter-spacing: 6px; text-align: center; font-size: 18px; font-weight: 600;">
         <input type="tel" class="login-input" placeholder="New 4-digit PIN" id="newPin" maxlength="4" inputmode="numeric" pattern="[0-9]*" aria-label="New PIN" autocomplete="off" style="letter-spacing: 6px; text-align: center; font-size: 18px; font-weight: 600;">
