@@ -49,23 +49,25 @@
     if (!token) return;
     var headers = { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' };
 
-    // Fetch bookings, members, courts, settings in parallel
+    // Fetch bookings, members, courts, settings, partners in parallel
     Promise.all([
       fetch('/api/mobile/bookings', { headers: headers }).then(function(r) { return r.ok ? r.json() : { bookings: [] }; }),
       fetch('/api/mobile/members', { headers: headers }).then(function(r) { return r.ok ? r.json() : { members: [] }; }),
       fetch('/api/mobile/courts', { headers: headers }).then(function(r) { return r.ok ? r.json() : { courts: [] }; }),
-      fetch('/api/mobile/settings', { headers: headers }).then(function(r) { return r.ok ? r.json() : { settings: [] }; })
+      fetch('/api/mobile/settings', { headers: headers }).then(function(r) { return r.ok ? r.json() : { settings: [] }; }),
+      fetch('/api/mobile/partners', { headers: headers }).then(function(r) { return r.ok ? r.json() : { partners: [] }; }).catch(function() { return { partners: [] }; })
     ]).then(function(results) {
       _adminBookings = results[0].bookings || [];
       _adminMembers = results[1].members || [];
       _adminCourts = results[2].courts || [];
       var settings = results[3].settings || [];
+      var partners = results[4].partners || [];
 
-      renderAnalyticsCards();
+      renderQuickStats(partners);
       renderPeakTimes();
       renderCourtUsage();
+      renderPartnerStats(partners);
       renderRevenueBreakdown();
-      renderMemberActivity();
       renderMonthlyTrends();
 
       // Gate code
@@ -77,23 +79,35 @@
     });
   }
 
-  function renderAnalyticsCards() {
+  function renderQuickStats(partners) {
     var now = new Date();
     var monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
     var confirmed = _adminBookings.filter(function(b) { return b.status === 'confirmed'; });
     var thisMonth = confirmed.filter(function(b) { return b.date >= monthStart; });
     var activeMembers = _adminMembers.filter(function(m) { return m.status !== 'paused'; });
     var openCourts = _adminCourts.filter(function(c) { return c.status !== 'maintenance'; });
+    var matched = (partners || []).filter(function(p) { return p.status === 'matched'; });
 
     var el;
-    el = document.getElementById('statBookingsMonth'); if (el) { el.textContent = thisMonth.length; el.classList.remove('loading'); }
-    el = document.getElementById('statBookingsTotal'); if (el) { el.textContent = confirmed.length; el.classList.remove('loading'); }
-    el = document.getElementById('statActiveMembers'); if (el) { el.textContent = activeMembers.length; el.classList.remove('loading'); }
-    el = document.getElementById('statCourtsOpen'); if (el) { el.textContent = openCourts.length + '/' + _adminCourts.length; el.classList.remove('loading'); }
+    el = document.getElementById('statActiveMembers'); if (el) el.textContent = activeMembers.length;
+    el = document.getElementById('statBookingsMonth'); if (el) el.textContent = thisMonth.length;
+    el = document.getElementById('statCourtsOpen'); if (el) el.textContent = openCourts.length + '/' + _adminCourts.length;
+    el = document.getElementById('statPartnerMatches'); if (el) el.textContent = matched.length;
 
     // Update member count badge on Members tab
     var memberBadge = document.getElementById('adminMemberCountBadge');
     if (memberBadge) memberBadge.textContent = _adminMembers.length;
+  }
+
+  function renderPartnerStats(partners) {
+    var total = (partners || []).length;
+    var matched = (partners || []).filter(function(p) { return p.status === 'matched'; }).length;
+    var rate = total > 0 ? Math.round((matched / total) * 100) : 0;
+
+    var el;
+    el = document.getElementById('statPartnerRequests'); if (el) el.textContent = total;
+    el = document.getElementById('statPartnerMatched'); if (el) el.textContent = matched;
+    el = document.getElementById('statPartnerRate'); if (el) el.textContent = rate + '%';
   }
 
   function renderPeakTimes() {

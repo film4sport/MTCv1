@@ -1389,3 +1389,12 @@ Closed ALL notification asymmetries. Every action fires symmetric bell + push + 
 - User wants member list with pause/cancel account ability (already has Members tab, may need pause/cancel buttons added)
 - User wants reports focused on: monthly court booking usage, partner connections, sellable metrics for pitching to other clubs
 - RSVP end-to-end verification still pending
+
+**Admin dashboard final rework (continued):**
+- **Stat cards replaced with Quick Stats row**: 4 simple text stats in a single compact row — Members, Bookings (this month), Courts (open/total), Matches (partner). No more colorful cards.
+- **Colorful tab pills**: Each admin tab has a unique accent color when active — Dashboard (volt/lime), Members (cyan), Courts (coral), Announce (purple). Both dark and light theme variants.
+- **Partner Matching card added**: New "Partner Matching" section shows Requests, Matched, Match Rate. Fetches from `/api/mobile/partners` in `loadAdminDashboard()`. New `renderPartnerStats()` function.
+- **Dashboard flow**: Quick Stats → Gate Code → Court Usage (+ peak times inline) → Partner Matching → Monthly Trends → Revenue → Export (3 CSV buttons, no date filter).
+- **Removed**: Collapsible Reports section (everything is flat scrollable now), Member Activity section, date filter on exports.
+- **Members tab**: Already had Pause/Reactivate + Cancel (Remove) buttons. No changes needed — was built in the original admin.js.
+- **Build hash**: `mtc-court-fbc4915e`
