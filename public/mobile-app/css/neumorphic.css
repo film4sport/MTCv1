@@ -626,7 +626,8 @@
 /* Neumorphic Tabs and Toggles - Inset with texture-compatible bg */
 .schedule-tabs,
 .view-toggle,
-.booking-view-toggle {
+.booking-view-toggle,
+.home-cal-toggle {
   background: rgba(220, 220, 220, 0.7);
   border: none;
   box-shadow: var(--neu-inset);
@@ -679,7 +680,8 @@
 
 [data-theme="dark"] .schedule-tab.active,
 [data-theme="dark"] .view-toggle-btn.active,
-[data-theme="dark"] .booking-view-btn.active {
+[data-theme="dark"] .booking-view-btn.active,
+[data-theme="dark"] .home-cal-toggle-btn.active {
   background: var(--volt);
   color: var(--color-black);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
@@ -908,6 +910,7 @@
 [data-theme="dark"] .schedule-tabs,
 [data-theme="dark"] .view-toggle,
 [data-theme="dark"] .booking-view-toggle,
+[data-theme="dark"] .home-cal-toggle,
 [data-theme="dark"] .search-bar,
 [data-theme="dark"] .stat-circle {
   background: rgba(30, 30, 30, 0.8);

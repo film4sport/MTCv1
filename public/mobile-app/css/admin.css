@@ -523,8 +523,8 @@
 .admin-tab svg { flex-shrink: 0; width: 16px; height: 16px; }
 
 /* ── Light theme — always-on palette colors ── */
-.admin-tab[data-tab="dashboard"] { color: #6a8a00; }
-.admin-tab[data-tab="dashboard"] svg { stroke: #6a8a00; opacity: 0.6; }
+.admin-tab[data-tab="dashboard"] { color: #78a800; }
+.admin-tab[data-tab="dashboard"] svg { stroke: #78a800; opacity: 0.6; }
 .admin-tab[data-tab="members"] { color: #008faa; }
 .admin-tab[data-tab="members"] svg { stroke: #008faa; opacity: 0.6; }
 .admin-tab[data-tab="courts"] { color: #cc4a4f; }
@@ -537,7 +537,7 @@
 
 .admin-tab[data-tab="dashboard"].active {
   background: rgba(200, 255, 0, 0.15);
-  color: #5a7a00;
+  color: #78a800;
   border-color: rgba(200, 255, 0, 0.3);
 }
 .admin-tab[data-tab="members"].active {
@@ -649,7 +649,7 @@
 
 /* Subtle theme color accents for admin card titles by section */
 .admin-tab-content[data-tab="dashboard"] .admin-card-title {
-  color: #6a8a00;
+  color: #78a800;
 }
 [data-theme="dark"] .admin-tab-content[data-tab="dashboard"] .admin-card-title {
   color: rgba(200, 255, 0, 0.7);
@@ -870,7 +870,7 @@
 .peak-row .peak-bar { flex: 1; height: 8px; border-radius: 4px; background: var(--bg-primary); overflow: hidden; }
 [data-theme="dark"] .peak-row .peak-bar { background: rgba(200,255,0,0.1); }
 .peak-row .peak-bar-fill { height: 100%; border-radius: 4px; background: var(--volt); }
-.peak-row .peak-count { font-size: 13px; font-weight: 600; color: #4d7c0f; min-width: 30px; text-align: right; }
+.peak-row .peak-count { font-size: 13px; font-weight: 600; color: #78a800; min-width: 30px; text-align: right; }
 [data-theme="dark"] .peak-row .peak-count { color: var(--volt); }
 
 /* Dashboard: Usage grid */
@@ -1019,7 +1019,7 @@
 .admin-badge-junior { background: rgba(59, 130, 246, 0.12); color: #2563eb; }
 .admin-badge-adult { background: rgba(34, 197, 94, 0.12); color: #16a34a; }
 .admin-badge-team { background: rgba(59, 130, 246, 0.12); color: #2563eb; }
-.admin-badge-captain { background: rgba(200, 255, 0, 0.15); color: #4d7c0f; }
+.admin-badge-captain { background: rgba(200, 255, 0, 0.15); color: #78a800; }
 [data-theme="dark"] .admin-badge-admin { color: #ef4444; }
 [data-theme="dark"] .admin-badge-coach { color: #f59e0b; }
 [data-theme="dark"] .admin-badge-member { color: #22c55e; }
@@ -1107,7 +1107,7 @@
 .admin-block-info { flex: 1; }
 .admin-block-court { font-size: 13px; font-weight: 600; color: var(--text-primary); }
 .admin-block-time { font-size: 12px; color: var(--text-muted); }
-.admin-block-reason { font-size: 11px; color: #4d7c0f; }
+.admin-block-reason { font-size: 11px; color: #78a800; }
 [data-theme="dark"] .admin-block-reason { color: var(--volt); }
 
 /* Announcements: Options row */
@@ -1202,7 +1202,7 @@
 .admin-engagement-pill {
   font-size: 11px;
   font-weight: 600;
-  color: #5a7a00;
+  color: #78a800;
   background: rgba(200,255,0,0.12);
   padding: 3px 10px;
   border-radius: 20px;

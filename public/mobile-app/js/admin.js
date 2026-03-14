@@ -191,12 +191,12 @@
     Object.keys(categories).forEach(function(k) { total += categories[k].amount; });
     if (total === 0) { barEl.innerHTML = ''; legendEl.innerHTML = '<div class="admin-empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>No revenue data yet</div>'; return; }
 
-    var colors = { adult: '#6b7a3d', family: '#d4e157', junior: '#a3b356' };
+    var colors = { adult: '#00d4ff', family: '#c8ff00', junior: '#ff5a5f' };
     var barHtml = '';
     var legendHtml = '';
     Object.keys(categories).forEach(function(type) {
       var pct = Math.round((categories[type].amount / total) * 100);
-      var color = colors[type] || '#6b7a3d';
+      var color = colors[type] || '#00d4ff';
       barHtml += '<div class="admin-rev-segment" style="width:' + pct + '%;background:' + color + '" title="' + type + ': $' + categories[type].amount + '"></div>';
       legendHtml += '<div class="admin-rev-legend-item"><span class="admin-rev-dot" style="background:' + color + '"></span><span class="admin-rev-label">' + type.charAt(0).toUpperCase() + type.slice(1) + '</span><span class="admin-rev-amount">$' + categories[type].amount + '</span><span class="admin-rev-pct">' + pct + '%</span></div>';
     });

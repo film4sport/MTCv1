@@ -210,6 +210,76 @@
     setTimeout(init, 100);
   }
 
+  /** Render dynamic upcoming events into the Weekly view */
+  function renderWeeklyEvents() {
+    var container = document.getElementById('homeWeeklyDynamic');
+    if (!container) return;
+    container.innerHTML = '';
+
+    if (typeof clubEventsData === 'undefined') return;
+
+    // Get events for the next 7 days
+    var now = new Date();
+    var weekEnd = new Date(now);
+    weekEnd.setDate(weekEnd.getDate() + 7);
+    var nowStr = toDateStr(now.getFullYear(), now.getMonth(), now.getDate());
+    var endStr = toDateStr(weekEnd.getFullYear(), weekEnd.getMonth(), weekEnd.getDate());
+
+    var upcoming = [];
+    var seen = {};
+    Object.values(clubEventsData).forEach(function(ev) {
+      if (!ev.date || ev.date < nowStr || ev.date > endStr) return;
+      var key = ev.title + '|' + ev.date;
+      if (seen[key]) return;
+      seen[key] = true;
+      upcoming.push(ev);
+    });
+
+    if (upcoming.length === 0) return;
+
+    // Sort by date then time
+    upcoming.sort(function(a, b) {
+      var d = (a.date || '').localeCompare(b.date || '');
+      return d !== 0 ? d : (a.time || '').localeCompare(b.time || '');
+    });
+
+    var html = '<div class="section-header"><h3 class="section-title">THIS WEEK</h3></div>';
+    var dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+    upcoming.forEach(function(ev) {
+      var timeParts = (ev.time || '').match(/(\d+):?(\d*)\s*(AM|PM)?/i);
+      var hour = timeParts ? timeParts[1] : '--';
+      var minutes = timeParts && timeParts[2] ? ':' + timeParts[2] : '';
+      var period = timeParts && timeParts[3] ? timeParts[3].toUpperCase() : '';
+      if (!period && timeParts) {
+        var h = parseInt(timeParts[1], 10);
+        period = h >= 12 ? 'PM' : 'AM';
+        if (h > 12) hour = String(h - 12);
+        if (h === 0) hour = '12';
+      }
+
+      var dateObj = new Date(ev.date + 'T12:00:00');
+      var dayLabel = dayNames[dateObj.getDay()] + ', ' +
+        dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+      html += '<div class="schedule-item stagger-item">' +
+        '<div class="schedule-time-block">' +
+          '<div class="schedule-time">' + hour + minutes + '</div>' +
+          '<div class="schedule-period">' + period + '</div>' +
+        '</div>' +
+        '<div class="schedule-details">' +
+          '<div class="schedule-title">' + (typeof sanitizeHTML !== 'undefined' ? sanitizeHTML(ev.title) : ev.title) + '</div>' +
+          '<div class="schedule-subtitle">' + dayLabel + (ev.location ? ' &bull; ' + (typeof sanitizeHTML !== 'undefined' ? sanitizeHTML(ev.location) : ev.location) : '') + '</div>' +
+          '<div class="schedule-meta">' +
+            (ev.courts ? '<div class="schedule-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>' + (typeof sanitizeHTML !== 'undefined' ? sanitizeHTML(ev.courts) : ev.courts) + '</div>' : '') +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    });
+
+    container.innerHTML = html;
+  }
+
   /** Switch between Calendar and Weekly Schedule on homepage */
   function switchHomeCalView(view) {
     var calSection = document.getElementById('homeCalendarSection');
@@ -224,6 +294,7 @@
       if (calBtn) calBtn.classList.remove('active');
       if (schedBtn) schedBtn.classList.add('active');
       if (title) title.textContent = 'WEEKLY SCHEDULE';
+      renderWeeklyEvents();
     } else {
       if (calSection) calSection.style.display = '';
       if (schedSection) schedSection.style.display = 'none';

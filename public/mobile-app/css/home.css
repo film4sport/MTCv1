@@ -2694,27 +2694,36 @@ body.offline #app {
 
 /* ============================================
    HOME CALENDAR / SCHEDULE TOGGLE
+   (Matches .schedule-tabs neumorphic style)
 ============================================ */
 .home-cal-toggle {
   display: flex;
-  background: rgba(255,255,255,0.06);
-  border-radius: 8px;
-  overflow: hidden;
+  gap: 4px;
+  background: var(--bg-card);
+  border-radius: 14px;
+  padding: 4px;
+  box-shadow: var(--neu-inset);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
 }
 .home-cal-toggle-btn {
-  padding: 5px 12px;
-  font-size: 11px;
+  flex: 1;
+  padding: 8px 12px;
+  text-align: center;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.5px;
   color: var(--text-muted);
   background: transparent;
   border: none;
+  border-radius: 10px;
   cursor: pointer;
   transition: all 0.2s;
 }
 .home-cal-toggle-btn.active {
-  color: var(--text-primary);
-  background: rgba(255,255,255,0.12);
+  color: var(--color-black);
+  background: var(--color-light-border);
+  box-shadow: var(--neu-raised-sm);
 }
 
 /* ============================================
@@ -2752,7 +2761,7 @@ body.offline #app {
 }
 .hce-badge.free { background: rgba(0, 212, 255, 0.12); color: #00a8cc; }
 .hce-badge.paid { background: rgba(212, 175, 55, 0.12); color: #b8860b; }
-.hce-badge.members { background: rgba(107, 122, 61, 0.12); color: #6b7a3d; }
+.hce-badge.members { background: rgba(0, 212, 255, 0.12); color: #008faa; }
 .hce-title {
   font-size: 15px;
   font-weight: 700;
@@ -2839,8 +2848,8 @@ body.offline #app {
 }
 .hce-rsvp-btn:active { transform: scale(0.95); }
 .hce-rsvp-btn.registered {
-  background: rgba(107, 122, 61, 0.15);
-  color: #6b7a3d;
+  background: rgba(0, 212, 255, 0.12);
+  color: #008faa;
 }
 .hce-details-btn {
   padding: 6px 12px;
