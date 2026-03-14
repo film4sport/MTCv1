@@ -20,7 +20,7 @@
     if ('serviceWorker' in navigator) {
       caches.keys().then(function(names) {
         names.forEach(function(name) {
-          if (name.indexOf('mtc-court-20d97b09') === -1) {
+          if (name.indexOf('mtc-court-95af1095') === -1) {
             caches.delete(name);
             console.log('[CacheBust] Deleted old cache:', name);
           }
@@ -207,34 +207,40 @@
         <p class="install-title" id="installTitle">Install MTC Court</p>
         <p class="install-subtitle">To use MTC Court, add it to your home screen first. It takes 10 seconds!</p>
 
+        <!-- Browser toggle — Safari vs Chrome -->
+        <div class="install-browser-toggle" id="installBrowserToggle">
+          <button class="install-toggle-btn active" id="installToggleSafari" onclick="MTC.fn.switchInstallBrowser('safari')">Safari</button>
+          <button class="install-toggle-btn" id="installToggleChrome" onclick="MTC.fn.switchInstallBrowser('chrome')">Chrome</button>
+        </div>
+
         <!-- Steps — customized per device by JS -->
         <div class="install-steps" id="installSteps">
           <!-- iOS steps (default) -->
           <div class="install-step">
             <div class="install-step-num">1</div>
             <div class="install-step-content">
-              <span class="install-step-label" id="installStep1">Tap the <strong>Share</strong> button</span>
-              <span class="install-step-hint" id="installStep1Hint">The square with an arrow at the bottom of Safari</span>
+              <span class="install-step-label" id="installStep1">Tap <strong>Share</strong></span>
+              <span class="install-step-hint" id="installStep1Hint">Bottom of screen (iPhone) or top-right (iPad)</span>
             </div>
           </div>
           <div class="install-step">
             <div class="install-step-num">2</div>
             <div class="install-step-content">
-              <span class="install-step-label" id="installStep2">Tap <strong>"Add to Home Screen"</strong></span>
-              <span class="install-step-hint" id="installStep2Hint">Scroll down in the share menu if you don't see it</span>
+              <span class="install-step-label" id="installStep2">Tap <strong>&quot;Add to Home Screen&quot;</strong></span>
+              <span class="install-step-hint" id="installStep2Hint">Scroll down if you don&rsquo;t see it</span>
             </div>
           </div>
           <div class="install-step">
             <div class="install-step-num">3</div>
             <div class="install-step-content">
-              <span class="install-step-label">Tap <strong>"Add"</strong> to confirm</span>
-              <span class="install-step-hint">Then open MTC Court from your home screen</span>
+              <span class="install-step-label" id="installStep3">Tap <strong>&quot;Add&quot;</strong></span>
+              <span class="install-step-hint" id="installStep3Hint">MTC Court will appear on your home screen</span>
             </div>
           </div>
         </div>
 
         <div class="install-footer-note" id="installFooterNote">
-          After installing, open the app from your home screen to sign in.
+          After installing, open the MTC Court app from your home screen to sign in.
         </div>
       </div>
     </div>

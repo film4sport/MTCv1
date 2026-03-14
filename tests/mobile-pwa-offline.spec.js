@@ -42,6 +42,7 @@ test.describe('Mobile PWA — Offline Resilience', () => {
     // Pre-set onboarding complete so overlay never activates (avoids race with 600ms setTimeout)
     await page.addInitScript(() => {
       localStorage.setItem('mtc-onboarding-complete', 'true');
+      localStorage.setItem('mtc-bypass-install-gate', 'true');
     });
 
     await page.goto(MOBILE_URL, { waitUntil: 'load', timeout: 30000 });
@@ -88,6 +89,7 @@ test.describe('Mobile PWA — Offline Resilience', () => {
     // Pre-set onboarding complete so overlay never activates
     await page.addInitScript(() => {
       localStorage.setItem('mtc-onboarding-complete', 'true');
+      localStorage.setItem('mtc-bypass-install-gate', 'true');
     });
 
     await page.goto(MOBILE_URL, { waitUntil: 'load', timeout: 30000 });
@@ -115,6 +117,7 @@ test.describe('Mobile PWA — Offline Resilience', () => {
     // Pre-set onboarding complete so overlay never activates
     await page.addInitScript(() => {
       localStorage.setItem('mtc-onboarding-complete', 'true');
+      localStorage.setItem('mtc-bypass-install-gate', 'true');
     });
 
     await page.goto(MOBILE_URL, { waitUntil: 'load', timeout: 30000 });
@@ -131,8 +134,13 @@ test.describe('Mobile PWA — Offline Resilience', () => {
   });
 
   test('service worker is registered', async ({ page }) => {
-    await page.goto(MOBILE_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
-    await page.waitForTimeout(2000);
+    await page.addInitScript(() => {
+      localStorage.setItem('mtc-onboarding-complete', 'true');
+      localStorage.setItem('mtc-bypass-install-gate', 'true');
+    });
+    await page.goto(MOBILE_URL, { waitUntil: 'load', timeout: 30000 });
+    // Give SW time to register — CI headless can be slow
+    await page.waitForTimeout(4000);
 
     const swRegistered = await page.evaluate(async () => {
       if (!('serviceWorker' in navigator)) return false;

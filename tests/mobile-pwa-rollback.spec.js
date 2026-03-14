@@ -74,6 +74,7 @@ async function setupAuthenticatedState(page) {
   // Skip onboarding
   await page.addInitScript(() => {
     localStorage.setItem('mtc-onboarding-complete', 'true');
+      localStorage.setItem('mtc-bypass-install-gate', 'true');
     localStorage.setItem('mtc-user', JSON.stringify({
       role: 'member', name: 'Test User', email: 'test@mtc.ca',
       userId: 'test-user-id-123', accessToken: 'sess-mock-token-xyz',

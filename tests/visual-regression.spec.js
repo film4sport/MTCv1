@@ -207,6 +207,7 @@ test.describe('Visual Regression — Mobile PWA', () => {
   async function skipOnboarding(page) {
     await page.addInitScript(() => {
       localStorage.setItem('mtc-onboarding-complete', 'true');
+      localStorage.setItem('mtc-bypass-install-gate', 'true');
     });
   }
 
