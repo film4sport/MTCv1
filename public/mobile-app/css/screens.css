@@ -103,27 +103,71 @@
   border: 2px solid var(--electric-blue);
   box-shadow: 0 0 12px rgba(0, 180, 216, 0.3);
 }
-/* Fun tennis ball event indicator */
+/* Event dots — 1 dot centered, 2 dots side by side, 3+ = 3 dots */
 .calendar-grid .calendar-day.has-event::after {
   content: '';
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   background: var(--coral);
   border-radius: 50%;
   position: absolute;
   bottom: 4px;
-  left: calc(50% - 4px);
-  box-shadow: 0 0 6px rgba(255, 90, 95, 0.5);
-  animation: dotBounce 2s ease-in-out infinite;
+  left: calc(50% - 3px);
+  box-shadow: 0 0 5px rgba(255, 90, 95, 0.5);
 }
 
-@keyframes ballBounce {
-  0%, 100% { transform: translateX(-50%) translateY(0); }
-  50% { transform: translateX(-50%) translateY(-2px); }
+/* 2 events — two dots side by side */
+.calendar-grid .calendar-day.has-events-2::after {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: var(--coral);
+  border-radius: 50%;
+  position: absolute;
+  bottom: 4px;
+  left: calc(50% - 8px);
+  box-shadow: 0 0 5px rgba(255, 90, 95, 0.5);
+}
+.calendar-grid .calendar-day.has-events-2::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: var(--volt);
+  border-radius: 50%;
+  position: absolute;
+  bottom: 4px;
+  left: calc(50% + 2px);
+  box-shadow: 0 0 5px rgba(200, 255, 0, 0.5);
+  z-index: 1;
 }
 
-/* Multiple events - show count badge */
-.calendar-grid .calendar-day.has-events-multi::after {
+/* 3+ events — three dots */
+.calendar-grid .calendar-day.has-events-3::after {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: var(--coral);
+  border-radius: 50%;
+  position: absolute;
+  bottom: 4px;
+  left: calc(50% - 11px);
+  box-shadow: 0 0 5px rgba(255, 90, 95, 0.5);
+}
+.calendar-grid .calendar-day.has-events-3::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: var(--volt);
+  border-radius: 50%;
+  position: absolute;
+  bottom: 4px;
+  left: calc(50% - 3px);
+  box-shadow: 0 0 5px rgba(200, 255, 0, 0.5);
+  z-index: 1;
+}
+
+/* 4+ events — three dots + count overlay */
+.calendar-grid .calendar-day.has-events-many::after {
   content: attr(data-event-count);
   position: absolute;
   bottom: 2px;
@@ -139,10 +183,10 @@
   align-items: center;
   justify-content: center;
   box-shadow: 0 2px 4px rgba(255, 90, 95, 0.4);
+  left: auto;
 }
 
 .calendar-grid .calendar-day.today.has-event::after {
-  background: var(--coral);
   box-shadow: 0 0 8px rgba(255, 90, 95, 0.6);
 }
 

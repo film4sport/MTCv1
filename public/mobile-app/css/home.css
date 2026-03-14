@@ -2693,6 +2693,31 @@ body.offline #app {
 }
 
 /* ============================================
+   HOME CALENDAR / SCHEDULE TOGGLE
+============================================ */
+.home-cal-toggle {
+  display: flex;
+  background: rgba(255,255,255,0.06);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.home-cal-toggle-btn {
+  padding: 5px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.home-cal-toggle-btn.active {
+  color: var(--text-primary);
+  background: rgba(255,255,255,0.12);
+}
+
+/* ============================================
    HOME CALENDAR EVENT CARDS (interactive)
 ============================================ */
 .home-cal-event-card {

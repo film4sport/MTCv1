@@ -58,10 +58,14 @@
       var ds = toDateStr(year, month, day);
       var evts = eventsByDate[ds];
       var cls = 'calendar-day';
+      var count = evts ? evts.length : 0;
       if (ds === todayStr) cls += ' today';
-      if (evts && evts.length > 0) cls += ' has-event';
-      if (evts && evts.length > 1) cls += ' has-events-multi';
-      html += '<div class="' + cls + '" data-date="' + ds + '">' + day + '</div>';
+      if (count === 1) cls += ' has-event';
+      else if (count === 2) cls += ' has-events-2';
+      else if (count === 3) cls += ' has-events-3';
+      else if (count >= 4) cls += ' has-events-many';
+      var extra = count >= 4 ? ' data-event-count="' + count + '"' : '';
+      html += '<div class="' + cls + '" data-date="' + ds + '"' + extra + '>' + day + '</div>';
     }
 
     // Next month filler
@@ -193,6 +197,30 @@
   } else {
     setTimeout(init, 100);
   }
+
+  /** Switch between Calendar and Weekly Schedule on homepage */
+  function switchHomeCalView(view) {
+    var calSection = document.getElementById('homeCalendarSection');
+    var schedSection = document.getElementById('homeWeeklySchedule');
+    var calBtn = document.getElementById('homeCalBtn');
+    var schedBtn = document.getElementById('homeSchedBtn');
+    var title = document.getElementById('homeCalSchedTitle');
+
+    if (view === 'schedule') {
+      if (calSection) calSection.style.display = 'none';
+      if (schedSection) schedSection.style.display = '';
+      if (calBtn) calBtn.classList.remove('active');
+      if (schedBtn) schedBtn.classList.add('active');
+      if (title) title.textContent = 'WEEKLY SCHEDULE';
+    } else {
+      if (calSection) calSection.style.display = '';
+      if (schedSection) schedSection.style.display = 'none';
+      if (calBtn) calBtn.classList.add('active');
+      if (schedBtn) schedBtn.classList.remove('active');
+      if (title) title.textContent = 'CLUB CALENDAR';
+    }
+  }
+  window.switchHomeCalView = switchHomeCalView;
 
   // Expose for nav refresh, month navigation, and RSVP refresh
   MTC.fn.renderHomeCalendar = renderHomeCalendar;

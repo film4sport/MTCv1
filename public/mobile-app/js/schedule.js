@@ -104,13 +104,17 @@
       const dateStr = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(day).padStart(2, '0');
       const isToday = dateStr === todayStr;
       const dayEvents = calendarEvents[dateStr];
-      const hasEvent = dayEvents && dayEvents.length > 0;
+      const count = dayEvents ? dayEvents.length : 0;
 
       let classes = 'calendar-day';
       if (isToday) classes += ' today';
-      if (hasEvent) classes += ' has-event';
+      if (count === 1) classes += ' has-event';
+      else if (count === 2) classes += ' has-events-2';
+      else if (count === 3) classes += ' has-events-3';
+      else if (count >= 4) classes += ' has-events-many';
+      const extra = count >= 4 ? ' data-event-count="' + count + '"' : '';
 
-      html += '<div class="' + classes + '" onclick="showDayEvents(\'' + dateStr + '\')">' + day + '</div>';
+      html += '<div class="' + classes + '"' + extra + ' onclick="showDayEvents(\'' + dateStr + '\')">' + day + '</div>';
     }
 
     // Next month days

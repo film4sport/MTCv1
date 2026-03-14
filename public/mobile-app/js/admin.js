@@ -779,6 +779,16 @@
     switchAdminTab('dashboard');
   };
 
+  // Toggle Reports & Analytics collapsible section
+  window.toggleAdminReports = function() {
+    var content = document.getElementById('adminReportsContent');
+    var chevron = document.getElementById('adminReportsChevron');
+    if (!content) return;
+    var isOpen = content.style.display !== 'none';
+    content.style.display = isOpen ? 'none' : '';
+    if (chevron) chevron.style.transform = isOpen ? '' : 'rotate(180deg)';
+  };
+
   // Refresh current tab data
   window.refreshAdminTab = function() {
     var activeTab = document.querySelector('.admin-tabs-bar .admin-tab.active');
