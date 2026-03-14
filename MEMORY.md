@@ -1413,6 +1413,18 @@ Closed ALL notification asymmetries. Every action fires symmetric bell + push + 
 - **Tablet #app width fix**: Added `#app { width: 100%; max-width: 100%; }` at `@media (min-width: 744px)` in `tablet.css`. Previously `#app` was hardcoded `390px` at default and only went `100%` at `≤500px`, causing quick action cards to collapse at iPad widths.
 - **Build hash**: `mtc-court-2d74a569`
 
+**Admin panel theme colors + modal fixes + calendar dots redesign (Mar 14, 2026 — session 3):**
+- **Admin tabs always-on palette colors**: Tabs now show their palette color even when inactive (reduced opacity), not just when active. Light + dark theme rules for all 4 tabs.
+- **Subtle theme colors throughout admin**: Card titles colored per-tab (volt for Dashboard, cyan for Members/Announcements, coral for Courts). Left-border accents on admin cards. Dark mode usage values tinted volt. Card subtitles get left-border accent.
+- **Dark mode modals fixed**: Bumped `.modal` bg from `var(--bg-card)`/`#1b1a18` to `rgba(38,38,36,0.92)` with visible border + subtle volt glow. Same treatment for `.confirm-modal` and `.profile-edit-modal`. Added blanket white text rules: `[data-theme="dark"] .modal` gets `color: #f5f5f4`, plus explicit white on `label`, `span`, `p`, `.admin-label`, `.modal-title`, `.modal-desc` inside modals. Confirm-modal title/message also explicitly set to white.
+- **RSVP registered button**: `.event-modal-rsvp-btn.registered` changed from volt border/text to electric blue in light mode (volt was unreadable on glass). Dark mode keeps volt.
+- **Calendar dots completely redesigned**: Replaced CSS pseudo-element system (::before/::after, limited to 2-3 dots) with DOM-based dots (`<span class="cal-dot">` inside `<div class="cal-dots">`). Dots are 7px (was 6px), positioned via flexbox inside calendar day cells. Color cycle: coral → electric blue → volt → black (#0a0a0a), repeating for 5+. Bottom edge fills first, then top (via `align-content: space-between` when 5+ dots). Sides theoretically possible but user says it'll never reach that many events. Up to 12 dots supported.
+- **Old CSS removed**: `has-event`, `has-events-2`, `has-events-3`, `has-events-many` pseudo-element rules all deleted from `screens.css`.
+- **New CSS added**: `.cal-dots` (flex container, absolute positioned, bottom-aligned) and `.cal-dot` (7px circles with box-shadow glow).
+- **Build hash**: `mtc-court-f683a58f`
+
+**Brave browser search result**: Shows outdated thumbnail/description from early development. This is a Brave Search crawler issue — their index updates independently from Google. User can submit sitemap to search.brave.com/webmasters to speed up re-crawl.
+
 **Pending:**
 - RSVP end-to-end verification
 - Events screen calendar may also need dedup (uses `getCalendarEvents()` in schedule.js — only shows RSVP'd events, lower priority)
