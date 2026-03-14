@@ -20,7 +20,7 @@
     if ('serviceWorker' in navigator) {
       caches.keys().then(function(names) {
         names.forEach(function(name) {
-          if (name.indexOf('mtc-court-93e1a5bb') === -1) {
+          if (name.indexOf('mtc-court-58f206f9') === -1) {
             caches.delete(name);
             console.log('[CacheBust] Deleted old cache:', name);
           }
@@ -111,21 +111,14 @@
     }
     
     /* === FIX: Messages screen scroll === */
-    #screen-messages {
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
     #screen-messages .screen-header {
       flex-shrink: 0;
     }
-    #screen-messages .messages-content,
-    #screen-messages .messages-list {
+    #screen-messages #conversationsList {
       flex: 1;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
       min-height: 0;
-      padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px));
     }
     
     /* === FIX: Push notification — true liquid glass === */

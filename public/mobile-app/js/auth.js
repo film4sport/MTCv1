@@ -505,6 +505,27 @@
     // Apply guest restrictions
     applyGuestRestrictions();
 
+    // Sync profile data from currentUser (prefills settings screen with name/email)
+    if (currentUser && MTC.state.profileData) {
+      if (currentUser.name && !MTC.state.profileData.name) {
+        MTC.state.profileData.name = currentUser.name;
+      }
+      if (currentUser.email && !MTC.state.profileData.email) {
+        MTC.state.profileData.email = currentUser.email;
+      }
+      if (currentUser.skillLevel && !MTC.state.profileData.skill) {
+        MTC.state.profileData.skill = currentUser.skillLevel;
+      }
+      MTC.storage.set('mtc-profile', MTC.state.profileData);
+      // Update display elements
+      var nameEl = document.getElementById('profileName');
+      if (nameEl && currentUser.name) nameEl.textContent = currentUser.name.toUpperCase();
+      if (typeof window.updateProfileDisplay === 'function') {
+        window.updateProfileDisplay('name');
+        window.updateProfileDisplay('email');
+      }
+    }
+
     // Navigate to appropriate start screen
     if (currentUser.isMember === false) {
       navigateTo('book');

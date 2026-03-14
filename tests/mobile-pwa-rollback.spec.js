@@ -52,7 +52,8 @@ async function setupAuthenticatedState(page) {
     });
   });
 
-  await page.route('**supabase**', (route) => {
+  // Mock Supabase API calls (but NOT the CDN JS library at cdn.jsdelivr.net — it's render-blocking)
+  await page.route('**supabase.co**', (route) => {
     if (route.request().url().includes('/auth/')) {
       route.fulfill({ status: 200, contentType: 'application/json', body: '{"data":{"user":null}}' });
     } else {

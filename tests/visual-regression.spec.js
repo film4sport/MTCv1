@@ -259,7 +259,8 @@ test.describe('Visual Regression — Mobile PWA', () => {
       });
     });
 
-    await page.route('**supabase**', (route) => {
+    // Mock Supabase API (but NOT the CDN JS library — it's render-blocking)
+    await page.route('**supabase.co**', (route) => {
       route.fulfill({ status: 200, contentType: 'application/json', body: '{"data":[]}' });
     });
 
