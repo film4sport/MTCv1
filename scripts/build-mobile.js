@@ -57,6 +57,7 @@ const JS_FILES = [
   'schedule.js',
   'events.js',
   'home-calendar.js',
+  'install-gate.js',
   'interactive.js',
   'mybookings.js',
   'onboarding.js',

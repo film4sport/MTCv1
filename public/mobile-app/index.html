@@ -20,7 +20,7 @@
     if ('serviceWorker' in navigator) {
       caches.keys().then(function(names) {
         names.forEach(function(name) {
-          if (name.indexOf('mtc-court-eb60b861') === -1) {
+          if (name.indexOf('mtc-court-1df9d450') === -1) {
             caches.delete(name);
             console.log('[CacheBust] Deleted old cache:', name);
           }
@@ -168,6 +168,75 @@
     <div class="offline-banner" role="status" aria-live="polite">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="1" y1="1" x2="23" y2="23"></line><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"></path><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"></path><path d="M10.71 5.05A16 16 0 0 1 22.56 9"></path><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg>
       You're offline
+    </div>
+
+    <!-- ============================================
+         INSTALL REQUIRED SCREEN — shown when running in browser, not as installed PWA
+    ============================================ -->
+    <div class="install-screen" id="install-screen" style="display:none;">
+      <!-- Same background as login -->
+      <div class="login-bg">
+        <img src="https://cdn.jsdelivr.net/gh/film4sport/my-webapp-images@main/mtc-images/gallery-05-serve.png" alt="Mono Tennis Club">
+      </div>
+      <div class="liquid-orbs" aria-hidden="true">
+        <div class="liquid-orb orb-1"></div>
+        <div class="liquid-orb orb-2"></div>
+        <div class="liquid-orb orb-3"></div>
+      </div>
+
+      <!-- MTC Badge -->
+      <div class="mtc-badge">
+        <span class="badge-text">MONO TENNIS CLUB</span>
+      </div>
+
+      <!-- Install Card -->
+      <div class="login-card install-card" id="installCard">
+        <div class="liquid-highlight" aria-hidden="true"></div>
+        <div class="refraction-orb refraction-orb-1" aria-hidden="true"></div>
+        <div class="refraction-orb refraction-orb-2" aria-hidden="true"></div>
+        <div class="card-accent"></div>
+
+        <!-- Device icon -->
+        <div class="install-icon-wrap">
+          <svg id="installDeviceIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="40" height="40">
+            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+            <line x1="12" y1="18" x2="12.01" y2="18"/>
+          </svg>
+        </div>
+
+        <p class="install-title" id="installTitle">Install MTC Court</p>
+        <p class="install-subtitle">To use MTC Court, add it to your home screen first. It takes 10 seconds!</p>
+
+        <!-- Steps — customized per device by JS -->
+        <div class="install-steps" id="installSteps">
+          <!-- iOS steps (default) -->
+          <div class="install-step">
+            <div class="install-step-num">1</div>
+            <div class="install-step-content">
+              <span class="install-step-label" id="installStep1">Tap the <strong>Share</strong> button</span>
+              <span class="install-step-hint" id="installStep1Hint">The square with an arrow at the bottom of Safari</span>
+            </div>
+          </div>
+          <div class="install-step">
+            <div class="install-step-num">2</div>
+            <div class="install-step-content">
+              <span class="install-step-label" id="installStep2">Tap <strong>"Add to Home Screen"</strong></span>
+              <span class="install-step-hint" id="installStep2Hint">Scroll down in the share menu if you don't see it</span>
+            </div>
+          </div>
+          <div class="install-step">
+            <div class="install-step-num">3</div>
+            <div class="install-step-content">
+              <span class="install-step-label">Tap <strong>"Add"</strong> to confirm</span>
+              <span class="install-step-hint">Then open MTC Court from your home screen</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="install-footer-note" id="installFooterNote">
+          After installing, open the app from your home screen to sign in.
+        </div>
+      </div>
     </div>
 
     <!-- ============================================

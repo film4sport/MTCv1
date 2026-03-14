@@ -1348,3 +1348,16 @@ Closed ALL notification asymmetries. Every action fires symmetric bell + push + 
 
 **Event filter tab reorder (lib/events.ts):**
 - New order: All Events → Coaching → Social → Tournaments → Camps
+
+**Dashboard desktop-only + PWA install gate (continued Mar 14):**
+- **Middleware device redirect**: `middleware.ts` now redirects mobile/tablet users from both `/dashboard` AND `/login` to `/mobile-app/index.html` (UA-based detection)
+- **Client-side fallback**: `app/dashboard/layout.tsx` has `useEffect` that catches iPadOS pretending to be Mac (checks `'ontouchend' in document`) and redirects to mobile PWA
+- **Removed MobileAppBanner + TabletNagBanner**: Both removed from dashboard layout — no longer needed since mobile/tablet users never reach the dashboard. Component files still on disk but dead code.
+- **TabletNagBanner had Rule #26 violation**: Used `#00d4ff` cyan (mobile PWA color) in dashboard — removing it also fixed that.
+- **PWA install gate**: New `install-gate.js` in mobile PWA. Detects if running in browser vs installed PWA (`navigator.standalone` for iOS, `display-mode: standalone` media query for Android). If browser → hides login, shows install screen. If standalone → login works normally.
+- **Install screen**: New `#install-screen` div in `index.html` with device-specific instructions (iPhone/iPad/Android). Uses same glass card styling as login screen.
+- **CSS**: Install screen styles added to `login.css`
+- **Build**: `install-gate.js` added to `scripts/build-mobile.js` JS_FILES array (before `interactive.js`)
+- **Flow**: mobile/tablet user visits site → middleware redirects to mobile PWA → install screen shown (browser mode) → user installs to home screen → opens from home screen (standalone mode) → login form appears → stays logged in until explicit sign out
+
+**Visual testing tip**: To test the install gate and device-specific flows without real devices, use Chrome DevTools: open `/mobile-app/index.html`, use device toolbar (Ctrl+Shift+M) to emulate different UAs (iPhone, iPad, Android), and toggle Application > Manifest display mode between "browser" and "standalone" to test the gate. BDG (Claude in Chrome) can also resize viewport and take screenshots for visual verification.

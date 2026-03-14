@@ -24,8 +24,8 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const ua = request.headers.get('user-agent') || '';
 
-  // Dashboard is desktop-only — redirect mobile/tablet to mobile PWA
-  if (pathname.startsWith('/dashboard') && isMobileOrTablet(ua)) {
+  // Dashboard and login are desktop-only — redirect mobile/tablet to mobile PWA
+  if ((pathname.startsWith('/dashboard') || pathname === '/login') && isMobileOrTablet(ua)) {
     return NextResponse.redirect(new URL('/mobile-app/index.html', request.url));
   }
 

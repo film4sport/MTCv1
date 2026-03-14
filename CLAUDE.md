@@ -103,6 +103,7 @@ When new project rules or conventions are established, add them to this file AND
   - Runs a real Chrome browser (not headless), so rendering is more accurate than Playwright screenshots
   - Defer to Cowork for subjective visual checks; use Playwright for automated regression checks
 - **Workflow**: Playwright for automated regression tests → Cowork for exploratory visual QA → BDG for quick live spot-checks
+- **Mobile/tablet device testing without real devices**: Use Chrome DevTools device toolbar (Ctrl+Shift+M) to emulate iPhone/iPad/Android user agents. For PWA install gate testing, toggle Application > Manifest display mode between "browser" and "standalone". BDG can also resize viewport and take screenshots for visual verification. No need to buy real devices for most testing.
 
 ## #12: VISUAL VERIFICATION — PLAYWRIGHT OR BDG ONLY
 - **ONLY use Playwright, BDG (Claude in Chrome), or Cowork for ALL visual verification.** No exceptions.
