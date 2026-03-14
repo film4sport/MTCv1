@@ -1319,3 +1319,32 @@ Closed ALL notification asymmetries. Every action fires symmetric bell + push + 
 - **Local verification**: Use `npm run check` (tsc + mobile build) instead of `npm run build` in Cowork/Claude Code sessions. Full Next.js build times out in the VM.
 - Landing page events are static TypeScript (marketing/SEO purpose), different from dashboard events (operational/RSVP)
 - **CRITICAL RULE — Cross-Platform Sync:** ALL features must be synced across desktop PWA and mobile PWA. Check all 3 codebases on ANY change.
+
+### Cowork Session (2026-03-14) — Membership Tab Rewrite + Dashboard Tour Fix
+
+**MembershipTab.tsx rewritten (KISS approach):**
+- Removed bloated "Why Join" benefits section (was 6 cards → trimmed to 4 → made side-by-side with fees)
+- Final layout: heading + 4 compact feature cards (2x2 left) + fees table (right) + "Join Now" button, all in one section
+- Feature cards: Bookings ("Reserve courts on any device"), Messaging ("Message members and interclub teammates"), Partners ("Match with members by level for singles, doubles & mixed"), Programs ("Coaching for juniors, teens & adults")
+- Solid olive icon badges (#6b7a3d bg, white icons)
+- Removed filler text: "since 1980", "Starting at $55/season", "2026 registration is open", "Pay by Interac e-transfer", "All members must sign a waiver"
+- Removed "How to Join" card entirely
+- Removed duplicate "Become a Member" button (shared footer CTA already handles it)
+- Hidden "Ready to Play?" shared footer CTA on membership tab only (has its own "Join Now")
+- `lg:grid-cols-2` for desktop side-by-side, stacks on mobile/tablet
+
+**Signup wizard — REVERTED to original:**
+- User rejected step labels under dots and "Join Mono Tennis Club for the 2026 season" subtitle
+- `git checkout HEAD -- app/signup/page.tsx` — back to original stepper with just numbered dots
+
+**Dashboard OnboardingTour.tsx — fixed mixed theme colors (CLAUDE.md #26):**
+- Replaced mobile PWA colors: `#c8ff00` → `#d4e157`, `#ff5a5f` → `#6b7a3d`, `#00d4ff` → `#8b9a5e`, `#00a5c8` → `#6b7a3d`
+- Fixed all rgba tints: `rgba(255,90,95,...)` → `rgba(107,122,61,...)`, `rgba(0,212,255,...)` → `rgba(107,122,61,...)`
+- Fixed iconBg values for Partners and Messaging steps
+- Added CLAUDE.md rule #26: NEVER MIX PLATFORM THEME COLORS
+
+**Info page (page.tsx):**
+- "Ready to Play?" CTA section conditionally hidden when `activeTab === 'membership'`
+
+**Event filter tab reorder (lib/events.ts):**
+- New order: All Events → Coaching → Social → Tournaments → Camps
