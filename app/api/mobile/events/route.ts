@@ -77,7 +77,7 @@ export async function GET(request: Request) {
       };
     });
 
-    return cachedJson(result, 300, { isPublic: true, swr: 60 });
+    return cachedJson(result, 0);
   } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
