@@ -296,15 +296,15 @@ test.describe('Info Page', () => {
   test('default tab is membership', async ({ page }) => {
     await page.goto('/info', { waitUntil: 'networkidle' });
     await page.waitForTimeout(1000);
-    const heading = page.getByText('How to Join').first();
+    const heading = page.getByText('Why Join Mono Tennis Club').first();
     await expect(heading).toBeAttached();
   });
 
-  test('info page has How to Join section on membership tab', async ({ page }) => {
+  test('info page has membership section on membership tab', async ({ page }) => {
     await page.goto('/info?tab=membership', { waitUntil: 'networkidle' });
     await page.waitForTimeout(1000);
-    const howToJoin = page.getByText('How to Join').first();
-    await expect(howToJoin).toBeAttached();
+    const membershipHeading = page.getByText('Why Join Mono Tennis Club').first();
+    await expect(membershipHeading).toBeAttached();
   });
 
   test('info page has Membership Fees on membership tab', async ({ page }) => {
