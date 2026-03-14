@@ -14,6 +14,17 @@ function DashboardGuard({ children }: { children: React.ReactNode }) {
   const { sidebarCollapsed, setMobileSidebarOpen } = useUI();
   const router = useRouter();
 
+  // Client-side fallback: catch iPadOS pretending to be Mac (middleware can't detect it)
+  useEffect(() => {
+    const ua = navigator.userAgent || '';
+    const isIPad = /iPad/.test(ua) || (/Macintosh/.test(ua) && 'ontouchend' in document);
+    const isAndroidTablet = /Android/.test(ua) && !/Mobile/.test(ua);
+    const isMobilePhone = /iPhone|iPod/.test(ua) || (/Android/.test(ua) && /Mobile/.test(ua));
+    if (isIPad || isAndroidTablet || isMobilePhone) {
+      window.location.replace('/mobile-app/index.html');
+    }
+  }, []);
+
   useEffect(() => {
     if (isLoaded && !currentUser) {
       router.replace('/login');
