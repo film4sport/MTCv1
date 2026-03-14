@@ -32,6 +32,11 @@ test.describe('Mobile PWA — Login Screen', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
   test.beforeEach(async ({ page }) => {
+    // Set onboarding complete BEFORE page load so the overlay never appears
+    // (WebKit timing issues cause dismissOnboarding to fail intermittently)
+    await page.addInitScript(() => {
+      localStorage.setItem('mtc-onboarding-complete', 'true');
+    });
     await page.goto(MOBILE_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
     await page.waitForTimeout(1000);
     await dismissOnboarding(page);

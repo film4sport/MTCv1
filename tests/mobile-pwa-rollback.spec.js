@@ -78,7 +78,7 @@ async function setupAuthenticatedState(page) {
       role: 'member', name: 'Test User', email: 'test@mtc.ca',
       userId: 'test-user-id-123', accessToken: 'sess-mock-token-xyz',
     }));
-    localStorage.setItem('mtc-access-token', 'sess-mock-token-xyz');
+    localStorage.setItem('mtc-access-token', JSON.stringify('sess-mock-token-xyz'));
   });
 }
 
