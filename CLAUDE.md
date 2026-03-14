@@ -233,6 +233,12 @@ See rule at the TOP of this file — duplicated here for grep-ability. **USE `te
 - **Rule**: Dashboard components must NEVER use mobile PWA colors (`#c8ff00`, `#ff5a5f`, `#00d4ff`, etc.) and vice versa
 - **Incident**: Mar 14, 2026 — OnboardingTour.tsx had mobile PWA colors (neon lime, coral, cyan) mixed into dashboard olive theme. Looked terrible.
 
+## #27: BDG RECONNECTION — NEVER USE switch_browser
+**When BDG (Claude in Chrome) disconnects, NEVER use `switch_browser` tool.** It triggers a Windows popup that always errors out.
+- **Instead**: Ask the user to click the Claude extension icon in Chrome and hit "Connect"
+- Or just retry `tabs_context_mcp` — the user will reconnect on their end
+- `switch_browser` has NEVER worked. Don't try it.
+
 ## PROJECT OVERVIEW
 - **Mono Tennis Club** — Next.js 14 + TypeScript (strict mode) + Tailwind CSS monorepo
 - **Deployment**: Railway (standard Node.js server) — NOT Vercel, NOT serverless

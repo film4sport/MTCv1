@@ -87,7 +87,7 @@
 
 .booking-card-status.upcoming {
   background: rgba(200, 255, 0, 0.2);
-  color: #5a7a00;
+  color: var(--text-primary);
 }
 
 .booking-card-status.completed {
@@ -407,7 +407,7 @@
 
 .skill-badge-large.intermediate {
   background: rgba(200, 255, 0, 0.15);
-  color: #5a7a00;
+  color: var(--text-primary);
 }
 
 .skill-badge-large.advanced {
@@ -529,7 +529,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: #6b7a3d;
+  color: #008faa;
   margin-bottom: 8px;
 }
 
@@ -544,17 +544,17 @@
   border-radius: 20px;
   font-size: 13px;
   font-weight: 600;
-  border: 1.5px solid rgba(107, 122, 61, 0.25);
+  border: 1.5px solid rgba(0, 212, 255, 0.25);
   background: #fff;
-  color: #2a2f1e;
+  color: var(--text-primary);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .family-pill.active {
-  background: #6b7a3d;
+  background: var(--electric-blue);
   color: #fff;
-  border-color: #6b7a3d;
+  border-color: var(--electric-blue);
 }
 
 .family-pill-type {
@@ -604,8 +604,8 @@
   letter-spacing: 0.5px;
 }
 .family-member-type.adult {
-  background: rgba(107, 122, 61, 0.15);
-  color: #6b7a3d;
+  background: rgba(200, 255, 0, 0.15);
+  color: var(--text-primary);
 }
 .family-member-type.junior {
   background: rgba(37, 99, 235, 0.1);
@@ -645,9 +645,9 @@
   cursor: pointer;
 }
 .family-add-btn:active {
-  background: rgba(107, 122, 61, 0.05);
-  border-color: var(--volt);
-  color: #6b7a3d;
+  background: rgba(0, 212, 255, 0.08);
+  border-color: var(--electric-blue);
+  color: #008faa;
 }
 .family-type-toggle {
   display: flex;

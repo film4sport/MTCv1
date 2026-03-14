@@ -20,7 +20,7 @@
     if ('serviceWorker' in navigator) {
       caches.keys().then(function(names) {
         names.forEach(function(name) {
-          if (name.indexOf('mtc-court-eb057a4f') === -1) {
+          if (name.indexOf('mtc-court-187f34c7') === -1) {
             caches.delete(name);
             console.log('[CacheBust] Deleted old cache:', name);
           }
@@ -788,7 +788,7 @@
         <h3 class="section-title" id="homeCalSchedTitle">CLUB CALENDAR</h3>
         <div class="home-cal-toggle" id="homeCalToggle">
           <button class="home-cal-toggle-btn active" id="homeCalBtn" onclick="switchHomeCalView('calendar')">Calendar</button>
-          <button class="home-cal-toggle-btn" id="homeSchedBtn" onclick="switchHomeCalView('schedule')">Schedule</button>
+          <button class="home-cal-toggle-btn" id="homeSchedBtn" onclick="switchHomeCalView('schedule')">Weekly</button>
         </div>
       </div>
 
@@ -827,46 +827,125 @@
 
       <!-- Weekly Schedule View (hidden by default) -->
       <div id="homeWeeklySchedule" style="display:none;">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 0 16px;">
-          <div style="background:var(--bg-secondary);border-radius:14px;padding:14px;">
-            <div style="font-weight:700;font-size:13px;color:var(--volt);margin-bottom:4px;display:flex;align-items:center;gap:6px;"><span style="width:6px;height:6px;border-radius:50%;background:var(--volt);"></span>Monday</div>
-            <div style="font-size:10px;color:var(--text-muted);margin-bottom:8px;">Starts May 11</div>
-            <div style="font-size:12px;color:var(--text-secondary);line-height:1.8;">
-              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Live Ball</span><span>9:30–11 AM</span></div>
-              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Team Practice</span><span>11 AM–1 PM</span></div>
-              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Teen Tennis</span><span>5–6 PM</span></div>
-              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Live Ball</span><span>6–7:30 PM</span></div>
+          <!-- Dynamic events happening this week (populated by JS) -->
+          <div id="homeWeeklyDynamic"></div>
+
+          <div class="section-header">
+            <h3 class="section-title">TUESDAY</h3>
+          </div>
+
+          <div class="schedule-item stagger-item">
+            <div class="schedule-time-block">
+              <div class="schedule-time">9:00</div>
+              <div class="schedule-period">AM</div>
+            </div>
+            <div class="schedule-details">
+              <div class="schedule-title">Men's Round Robin</div>
+              <div class="schedule-subtitle">Weekly morning session</div>
+              <div class="schedule-meta">
+                <div class="schedule-meta-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                  Courts 1-2
+                </div>
+                <div class="schedule-meta-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                  2 hours
+                </div>
+              </div>
             </div>
           </div>
-          <div style="background:var(--bg-secondary);border-radius:14px;padding:14px;">
-            <div style="font-weight:700;font-size:13px;color:var(--volt);margin-bottom:4px;display:flex;align-items:center;gap:6px;"><span style="width:6px;height:6px;border-radius:50%;background:var(--volt);"></span>Tuesday</div>
-            <div style="font-size:10px;color:var(--text-muted);margin-bottom:8px;">Starts May 12</div>
-            <div style="font-size:12px;color:var(--text-secondary);line-height:1.8;">
-              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Orange Ball</span><span>4–5 PM</span></div>
-              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Green Ball</span><span>5–6 PM</span></div>
-              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Teen Tennis</span><span>6–7 PM</span></div>
-              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Live Ball</span><span>7–8:30 PM</span></div>
-              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Adult 101/102</span><span>8:30–9:30 PM</span></div>
+
+          <div class="section-header">
+            <h3 class="section-title">THURSDAY</h3>
+          </div>
+
+          <div class="schedule-item stagger-item">
+            <div class="schedule-time-block">
+              <div class="schedule-time">9:00</div>
+              <div class="schedule-period">AM</div>
+            </div>
+            <div class="schedule-details">
+              <div class="schedule-title">Freedom 55 League</div>
+              <div class="schedule-subtitle">Weekday morning league</div>
+              <div class="schedule-meta">
+                <div class="schedule-meta-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                  Courts 1-2
+                </div>
+                <div class="schedule-meta-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                  2 hours
+                </div>
+              </div>
             </div>
           </div>
-          <div style="background:var(--bg-secondary);border-radius:14px;padding:14px;">
-            <div style="font-weight:700;font-size:13px;color:var(--volt);margin-bottom:4px;display:flex;align-items:center;gap:6px;"><span style="width:6px;height:6px;border-radius:50%;background:var(--volt);"></span>Thursday</div>
-            <div style="font-size:10px;color:var(--text-muted);margin-bottom:8px;">Starts May 14</div>
-            <div style="font-size:12px;color:var(--text-secondary);line-height:1.8;">
-              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Munchkin Stars</span><span>4:30–5 PM</span></div>
-              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Red Ball</span><span>5–6 PM</span></div>
+
+          <div class="schedule-item stagger-item">
+            <div class="schedule-time-block">
+              <div class="schedule-time">7:00</div>
+              <div class="schedule-period">PM</div>
+            </div>
+            <div class="schedule-details">
+              <div class="schedule-title">Interclub Competitive League</div>
+              <div class="schedule-subtitle">A &amp; B Teams</div>
+              <div class="schedule-meta">
+                <div class="schedule-meta-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                  Courts 1-2
+                </div>
+                <div class="schedule-meta-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path></svg>
+                  2.5 hours
+                </div>
+              </div>
             </div>
           </div>
-          <div style="background:var(--bg-secondary);border-radius:14px;padding:14px;">
-            <div style="font-weight:700;font-size:13px;color:var(--volt);margin-bottom:4px;display:flex;align-items:center;gap:6px;"><span style="width:6px;height:6px;border-radius:50%;background:var(--volt);"></span>Friday</div>
-            <div style="font-size:10px;color:var(--text-muted);margin-bottom:8px;">Starts May 15</div>
-            <div style="font-size:12px;color:var(--text-secondary);line-height:1.8;">
-              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Teen Tennis</span><span>4:30–5:30 PM</span></div>
-              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Live Ball</span><span>5:30–7 PM</span></div>
-              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">House League</span><span>7–9 PM</span></div>
+
+          <div class="section-header">
+            <h3 class="section-title">FRIDAY</h3>
+          </div>
+
+          <div class="schedule-item stagger-item">
+            <div class="schedule-time-block">
+              <div class="schedule-time">9:00</div>
+              <div class="schedule-period">AM</div>
+            </div>
+            <div class="schedule-details">
+              <div class="schedule-title">Ladies Round Robin</div>
+              <div class="schedule-subtitle">Weekly morning session</div>
+              <div class="schedule-meta">
+                <div class="schedule-meta-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                  Courts 1-2
+                </div>
+                <div class="schedule-meta-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                  2 hours
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+
+          <div class="schedule-item stagger-item">
+            <div class="schedule-time-block">
+              <div class="schedule-time">6:00</div>
+              <div class="schedule-period">PM</div>
+            </div>
+            <div class="schedule-details">
+              <div class="schedule-title">Friday Night Mixed Round Robin</div>
+              <div class="schedule-subtitle">Mixed doubles under the lights</div>
+              <div class="schedule-meta">
+                <div class="schedule-meta-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                  All Courts
+                </div>
+                <div class="schedule-meta-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                  3 hours
+                </div>
+              </div>
+            </div>
+          </div>
       </div>
     </div>
     
@@ -1281,12 +1360,12 @@
     <!-- ============================================
          SCHEDULE SCREEN
     ============================================ -->
-    <div class="screen" id="screen-schedule" aria-label="Schedule">
+    <div class="screen" id="screen-schedule" aria-label="My Schedule">
       <div class="screen-header">
         <button class="back-btn" onclick="navigateTo('home')" aria-label="Go back to home">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
         </button>
-        <h2 class="screen-title">SCHEDULE</h2>
+        <h2 class="screen-title">MY SCHEDULE</h2>
       </div>
 
       <!-- Personal schedule (bookings, RSVPs, programs) -->
@@ -1303,123 +1382,6 @@
         <div class="schedule-content active" id="upcomingContent">
           <!-- Dynamic bookings (RSVPs, court bookings, partner matches) -->
           <div id="scheduleEventBookings"></div>
-
-          <div class="section-header">
-            <h3 class="section-title">TUESDAY</h3>
-          </div>
-
-          <div class="schedule-item stagger-item">
-            <div class="schedule-time-block">
-              <div class="schedule-time">9:00</div>
-              <div class="schedule-period">AM</div>
-            </div>
-            <div class="schedule-details">
-              <div class="schedule-title">Men's Round Robin</div>
-              <div class="schedule-subtitle">Weekly morning session</div>
-              <div class="schedule-meta">
-                <div class="schedule-meta-item">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                  Courts 1-2
-                </div>
-                <div class="schedule-meta-item">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                  2 hours
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="section-header">
-            <h3 class="section-title">THURSDAY</h3>
-          </div>
-
-          <div class="schedule-item stagger-item">
-            <div class="schedule-time-block">
-              <div class="schedule-time">9:00</div>
-              <div class="schedule-period">AM</div>
-            </div>
-            <div class="schedule-details">
-              <div class="schedule-title">Freedom 55 League</div>
-              <div class="schedule-subtitle">Weekday morning league</div>
-              <div class="schedule-meta">
-                <div class="schedule-meta-item">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                  Courts 1-2
-                </div>
-                <div class="schedule-meta-item">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                  2 hours
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="schedule-item stagger-item">
-            <div class="schedule-time-block">
-              <div class="schedule-time">7:00</div>
-              <div class="schedule-period">PM</div>
-            </div>
-            <div class="schedule-details">
-              <div class="schedule-title">Interclub Competitive League</div>
-              <div class="schedule-subtitle">A &amp; B Teams</div>
-              <div class="schedule-meta">
-                <div class="schedule-meta-item">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                  Courts 1-2
-                </div>
-                <div class="schedule-meta-item">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path></svg>
-                  2.5 hours
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="section-header">
-            <h3 class="section-title">FRIDAY</h3>
-          </div>
-
-          <div class="schedule-item stagger-item">
-            <div class="schedule-time-block">
-              <div class="schedule-time">9:00</div>
-              <div class="schedule-period">AM</div>
-            </div>
-            <div class="schedule-details">
-              <div class="schedule-title">Ladies Round Robin</div>
-              <div class="schedule-subtitle">Weekly morning session</div>
-              <div class="schedule-meta">
-                <div class="schedule-meta-item">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                  Courts 1-2
-                </div>
-                <div class="schedule-meta-item">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                  2 hours
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="schedule-item stagger-item">
-            <div class="schedule-time-block">
-              <div class="schedule-time">6:00</div>
-              <div class="schedule-period">PM</div>
-            </div>
-            <div class="schedule-details">
-              <div class="schedule-title">Friday Night Mixed Round Robin</div>
-              <div class="schedule-subtitle">Mixed doubles under the lights</div>
-              <div class="schedule-meta">
-                <div class="schedule-meta-item">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                  All Courts
-                </div>
-                <div class="schedule-meta-item">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                  3 hours
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
         
         <!-- Past Content -->

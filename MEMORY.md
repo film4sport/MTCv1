@@ -1425,6 +1425,20 @@ Closed ALL notification asymmetries. Every action fires symmetric bell + push + 
 
 **Brave browser search result**: Shows outdated thumbnail/description from early development. This is a Brave Search crawler issue — their index updates independently from Google. User can submit sitemap to search.brave.com/webmasters to speed up re-crawl.
 
+**Olive green purge + homepage/schedule restructure (Mar 14, 2026 — session 4):**
+- **Olive green (#6b7a3d, #6a8a00, #5a7a00, #4d7c0f) completely removed from mobile PWA**: All CSS files and JS files cleaned. Replacements: `#6b7a3d` → `#00d4ff` (electric blue) for avatar colors in `booking.js`; `#6b7a3d` → `#00d4ff`/`var(--electric-blue)` for badges and buttons in `home.css`, `profile.css`; `#6a8a00`/`#5a7a00`/`#4d7c0f` → `#78a800` (bright saturated lime for readable volt on white) in `admin.css`; revenue bar colors in `admin.js` → electric blue/volt/coral. Focus outlines in `base.css` → `#008faa`. Zero olive green matches in mobile PWA source files (verified with grep).
+- **Light mode volt text color**: `#78a800` (bright saturated lime) is the approved light-mode-readable version of volt. NOT `#6a8a00` or `#5a7a00` — those read as olive.
+- **Homepage Calendar/Weekly restructure**:
+  - Home "Club Calendar" section now has two tabs: **Calendar** (month grid, default) and **Weekly** (club recurring schedule)
+  - Weekly tab shows hardcoded club activities (Men's Round Robin Tue, Freedom 55 Thu, Interclub Thu, Ladies RR Fri, Friday Night Mixed Fri)
+  - **Dynamic "THIS WEEK" section** at top of Weekly view: `renderWeeklyEvents()` in `home-calendar.js` pulls events from `clubEventsData` for the next 7 days
+  - Old coaching programs grid (Live Ball, Orange Ball, Green Ball, etc.) replaced with club schedule items
+- **Schedule navbar screen → "MY SCHEDULE"**: Screen title changed to "MY SCHEDULE" (navbar label stays "Schedule"). Hardcoded club items (TUESDAY/THURSDAY/FRIDAY) removed from schedule screen — now shows only personal events via `scheduleEventBookings` container + Past tab. The `switchSchedulePill` JS function still exists but is a no-op (HTML elements removed).
+- **Home toggle neumorphism**: `.home-cal-toggle` restyled to match `.schedule-tabs` neumorphic pattern: `rgba(220,220,220,0.7)` bg, `var(--neu-inset)` shadow, `blur(4px)` backdrop-filter. Active button gets `var(--color-light-border)` bg + `var(--neu-raised-sm)` shadow. Dark mode: volt active state. Added to neumorphic.css group selectors for both light and dark.
+- **CI fix: webkit prefix regression**: Added `-webkit-backdrop-filter` to `home.css` (.home-cal-toggle) and `enhancements.css` (.login-card dark mode). Count back to ≤57.
+- **Rule #27 added to CLAUDE.md**: Never use `switch_browser` tool — triggers Windows popup that always errors. Ask user to reconnect manually instead.
+- **Build hash**: `mtc-court-187f34c7`
+
 **Pending:**
 - RSVP end-to-end verification
 - Events screen calendar may also need dedup (uses `getCalendarEvents()` in schedule.js — only shows RSVP'd events, lower priority)

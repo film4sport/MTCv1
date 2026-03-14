@@ -489,7 +489,7 @@
     // Registered members list with avatar circles (matching dashboard style)
     const regList = ev.registered || [];
     let regHtml = '';
-    var _avatarColors = ['#6b7a3d','#d97706','#2563eb','#7c3aed','#dc2626','#0891b2','#4f46e5','#059669'];
+    var _avatarColors = ['#00d4ff','#d97706','#2563eb','#7c3aed','#dc2626','#0891b2','#4f46e5','#059669'];
     function _getAvatarColor(n) {
       var sum=0; for(var i=0;i<n.length;i++) sum+=n.charCodeAt(i);
       return _avatarColors[sum % _avatarColors.length];
@@ -504,7 +504,7 @@
         var isYou = name === 'You';
         var displayName = isYou ? 'You' : name.split(' ')[0];
         var initials = isYou ? 'U' : _getInitials(name);
-        var bgColor = isYou ? '#6b7a3d' : _getAvatarColor(name);
+        var bgColor = isYou ? '#00d4ff' : _getAvatarColor(name);
         regHtml += '<div class="reg-avatar-item'+(isYou?' you':'')+'">' +
           '<div class="reg-avatar-circle" style="background:'+bgColor+'">'+sanitizeHTML(initials)+'</div>' +
           '<span class="reg-avatar-name">'+sanitizeHTML(displayName)+'</span></div>';

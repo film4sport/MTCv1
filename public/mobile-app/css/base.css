@@ -21,8 +21,8 @@
 
 /* Light mode focus - darker outline for better contrast */
 [data-theme="light"] *:focus-visible {
-  outline-color: #5a7a00;
-  box-shadow: 0 0 0 6px rgba(90, 122, 0, 0.15);
+  outline-color: #008faa;
+  box-shadow: 0 0 0 6px rgba(0, 143, 170, 0.15);
 }
 
 /* Remove default outline for mouse/touch users */
