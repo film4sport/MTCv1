@@ -36,46 +36,54 @@ export default function MembershipTab() {
         </section>
       )}
 
-      {/* How to Join + Fees */}
-      <section className="py-16 lg:py-20 px-8 lg:px-16" style={{ backgroundColor: '#edeae3' }}>
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12 fade-in">
+      {/* ─── Membership: features + fees side by side ─── */}
+      <section className="py-12 lg:py-16 px-6 lg:px-16 animate-fadeIn" style={{ backgroundColor: '#edeae3' }}>
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-8">
             <span className="section-label">// Membership</span>
-            <h2 className="headline-font text-2xl md:text-3xl lg:text-4xl leading-tight mt-4 mb-4" style={{ color: '#2a2f1e' }}>
-              How to Join
+            <h2 className="headline-font text-2xl md:text-3xl leading-tight mt-4" style={{ color: '#2a2f1e' }}>
+              Why Join Mono Tennis Club
             </h2>
-            <p className="max-w-2xl mx-auto text-sm leading-relaxed" style={{ color: '#6b7266' }}>
-              Mono Tennis Club is a not-for-profit community club that has been promoting tennis in Mono since 1980. Registration opens March 1st each year for the May–October season.
-            </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8 fade-in">
-            <div className="rounded-xl p-8" style={{ background: '#faf8f3', border: '1px solid #e0dcd3' }}>
-              <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-4" style={{ background: 'rgba(107, 122, 61, 0.12)' }}>
-                <svg className="w-5 h-5" style={{ color: '#6b7a3d' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                </svg>
-              </div>
-              <h3 className="font-bold text-xl mb-4" style={{ color: '#2a2f1e' }}>How to Join</h3>
-              <ul className="space-y-3 text-sm leading-relaxed" style={{ color: '#6b7266' }}>
-                {['Registration opens March 1st each year', 'Pay by Interac e-transfer', 'Guest passes available for $10 per visit', 'All members must sign a waiver'].map((item, i) => (
-                  <li key={i} className="flex items-start gap-2">
-                    <svg className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: '#6b7a3d' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    {item}
-                  </li>
-                ))}
-              </ul>
+          <div className="grid lg:grid-cols-2 gap-6">
+            {/* Left — 4 feature cards in 2x2 */}
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                {
+                  icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />,
+                  title: 'Bookings',
+                  desc: 'Reserve courts on any device',
+                },
+                {
+                  icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />,
+                  title: 'Messaging',
+                  desc: 'Message members and interclub teammates',
+                },
+                {
+                  icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />,
+                  title: 'Partners',
+                  desc: 'Match with members by level for singles, doubles & mixed',
+                },
+                {
+                  icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />,
+                  title: 'Programs',
+                  desc: 'Coaching for juniors, teens & adults',
+                },
+              ].map((b, i) => (
+                <div key={i} className="rounded-xl p-4" style={{ background: '#faf8f3', border: '1px solid #e0dcd3' }}>
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center mb-2" style={{ background: '#6b7a3d' }}>
+                    <svg style={{ color: '#fff', width: 16, height: 16 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">{b.icon}</svg>
+                  </div>
+                  <h4 className="font-semibold text-sm mb-0.5" style={{ color: '#2a2f1e' }}>{b.title}</h4>
+                  <p className="text-xs leading-relaxed" style={{ color: '#6b7266' }}>{b.desc}</p>
+                </div>
+              ))}
             </div>
 
-            <div className="rounded-xl p-8" style={{ background: '#faf8f3', border: '1px solid #e0dcd3' }}>
-              <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-4" style={{ background: 'rgba(107, 122, 61, 0.12)' }}>
-                <svg className="w-5 h-5" style={{ color: '#6b7a3d' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <h3 className="font-bold text-xl mb-4" style={{ color: '#2a2f1e' }}>Membership Fees</h3>
+            {/* Right — fees */}
+            <div className="rounded-xl p-6" style={{ background: '#faf8f3', border: '1px solid #e0dcd3' }}>
+              <h3 className="font-bold text-lg mb-4" style={{ color: '#2a2f1e' }}>Membership Fees</h3>
               <div className="space-y-3">
                 {membershipTypes.map((fee, i) => (
                   <div key={i} className="flex items-center justify-between py-3" style={i < 3 ? { borderBottom: '1px solid #e0dcd3' } : {}}>
@@ -90,18 +98,20 @@ export default function MembershipTab() {
             </div>
           </div>
 
-          <div className="text-center mt-12 fade-in">
+          <div className="mt-8 text-center">
             <a
               href="/signup"
-              className="inline-block px-10 py-4 rounded-full text-sm font-semibold transition-all hover:opacity-90 hover:shadow-lg"
-              style={{ backgroundColor: '#6b7a3d', color: '#fff' }}
+              className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full text-sm font-semibold transition-all hover:shadow-lg"
+              style={{ background: '#6b7a3d', color: '#fff' }}
             >
               Join Now
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
             </a>
           </div>
         </div>
       </section>
-
     </>
   );
 }

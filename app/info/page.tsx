@@ -166,8 +166,8 @@ function InfoPageContent() {
       {activeTab === 'privacy' && <div role="tabpanel" id="tabpanel-privacy" aria-labelledby="tab-privacy" className="animate-fadeIn"><PrivacyTab /></div>}
       {activeTab === 'terms' && <div role="tabpanel" id="tabpanel-terms" aria-labelledby="tab-terms" className="animate-fadeIn"><TermsTab /></div>}
 
-      {/* Back to Home CTA */}
-      <section className="py-12 lg:py-16 px-8 lg:px-16 text-center fade-in" style={{ backgroundColor: '#1a1f12' }}>
+      {/* Back to Home CTA — hidden on membership tab (has its own Join Now) */}
+      {activeTab !== 'membership' && <section className="py-12 lg:py-16 px-8 lg:px-16 text-center fade-in" style={{ backgroundColor: '#1a1f12' }}>
         <h2 className="headline-font text-2xl md:text-3xl" style={{ color: '#e8e4d9' }}>
           Ready to Play?
         </h2>
@@ -181,7 +181,7 @@ function InfoPageContent() {
         >
           Become a Member
         </a>
-      </section>
+      </section>}
 
       {/* Footer */}
       <footer className="py-8 px-8 lg:px-16 text-center" style={{ backgroundColor: '#1a1f12', borderTop: '1px solid rgba(232, 228, 217, 0.08)' }}>
