@@ -314,6 +314,86 @@
   color: #f5f5f4;
 }
 
+/* Subtle color accents inside dark mode modals */
+
+/* Calendar picker icons → electric blue */
+[data-theme="dark"] .modal input[type="date"]::-webkit-calendar-picker-indicator,
+[data-theme="dark"] .modal input[type="month"]::-webkit-calendar-picker-indicator,
+[data-theme="dark"] .modal input[type="time"]::-webkit-calendar-picker-indicator,
+[data-theme="dark"] .admin-input[type="date"]::-webkit-calendar-picker-indicator,
+[data-theme="dark"] .admin-input[type="month"]::-webkit-calendar-picker-indicator,
+[data-theme="dark"] .admin-input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: brightness(0) saturate(100%) invert(70%) sepia(80%) saturate(1000%) hue-rotate(160deg) brightness(1.1);
+}
+
+/* Select dropdown arrow → coral tint */
+[data-theme="dark"] .modal select,
+[data-theme="dark"] .modal .admin-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23ff5a5f' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 14px;
+  padding-right: 36px;
+}
+
+/* Checkbox accent → volt */
+[data-theme="dark"] .modal input[type="checkbox"] {
+  accent-color: var(--volt);
+}
+
+/* Modal form labels → subtle electric blue tint */
+[data-theme="dark"] .modal label:not(.admin-label) {
+  color: rgba(0, 212, 255, 0.75);
+}
+
+/* Input focus glow → electric blue border */
+[data-theme="dark"] .modal .admin-input:focus,
+[data-theme="dark"] .modal .admin-select:focus,
+[data-theme="dark"] .modal .admin-textarea:focus {
+  border-color: var(--electric-blue);
+  box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.15);
+}
+
+/* ── Light mode modal color accents ── */
+
+/* Calendar picker icons → electric blue tint (light) */
+[data-theme="light"] .modal input[type="date"]::-webkit-calendar-picker-indicator,
+[data-theme="light"] .modal input[type="month"]::-webkit-calendar-picker-indicator,
+[data-theme="light"] .modal input[type="time"]::-webkit-calendar-picker-indicator,
+[data-theme="light"] .admin-input[type="date"]::-webkit-calendar-picker-indicator,
+[data-theme="light"] .admin-input[type="month"]::-webkit-calendar-picker-indicator,
+[data-theme="light"] .admin-input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: brightness(0) saturate(100%) invert(45%) sepia(90%) saturate(800%) hue-rotate(160deg) brightness(0.95);
+}
+
+/* Select dropdown arrow → coral (light) */
+[data-theme="light"] .modal select,
+[data-theme="light"] .modal .admin-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23cc4a4f' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 14px;
+  padding-right: 36px;
+}
+
+/* Checkbox accent → deeper volt green (light) */
+[data-theme="light"] .modal input[type="checkbox"] {
+  accent-color: #6a8a00;
+}
+
+/* Modal form labels → subtle deeper blue tint (light) */
+[data-theme="light"] .modal label:not(.admin-label) {
+  color: #007a99;
+}
+
+/* Input focus glow → electric blue border (light) */
+[data-theme="light"] .modal .admin-input:focus,
+[data-theme="light"] .modal .admin-select:focus,
+[data-theme="light"] .modal .admin-textarea:focus {
+  border-color: #008faa;
+  box-shadow: 0 0 0 2px rgba(0, 143, 170, 0.12);
+}
+
 /* Empty state dark */
 [data-theme="dark"] .empty-state-icon {
   background: var(--bg-card);
