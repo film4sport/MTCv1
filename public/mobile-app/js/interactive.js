@@ -51,6 +51,11 @@
   // APP INITIALIZATION (DOMContentLoaded)
   // ============================================
   document.addEventListener('DOMContentLoaded', function() {
+    // PWA install gate — block login if running in browser (not installed as PWA)
+    if (MTC.fn.checkInstallGate && MTC.fn.checkInstallGate()) {
+      return; // Install screen is showing, don't initialize the app
+    }
+
     // Restore saved theme preference
     const savedTheme = MTC.storage.get('mtc-theme', null);
     if (savedTheme) {
