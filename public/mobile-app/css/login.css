@@ -1030,8 +1030,8 @@
     /* Slightly more tinted base */
     linear-gradient(180deg, rgba(255, 255, 255, 0.13) 0%, rgba(255, 255, 255, 0.05) 100%) !important;
   /* Light blur — see through but softened */
-  backdrop-filter: blur(12px) saturate(130%) brightness(1.05) !important;
   -webkit-backdrop-filter: blur(12px) saturate(130%) brightness(1.05) !important;
+  backdrop-filter: blur(12px) saturate(130%) brightness(1.05) !important;
   /* Thin bright border — light refracting at glass edges */
   border: 1px solid rgba(255, 255, 255, 0.4) !important;
   border-radius: 24px !important;
