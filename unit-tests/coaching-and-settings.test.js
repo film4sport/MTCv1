@@ -30,7 +30,7 @@ describe('Coaching tab — coach contact info', () => {
   });
 
   it('should mention summer camp dates TBC', () => {
-    expect(coachingFile).toContain('Summer camp dates coming soon');
+    expect(coachingFile).toContain('Dates coming soon');
   });
 });
 
