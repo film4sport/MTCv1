@@ -1282,10 +1282,20 @@ Closed ALL notification asymmetries. Every action fires symmetric bell + push + 
 - **Source**: PDF from club pro's wife with full junior/adult program details
 - **Updated across all 3 platforms**: landing CoachingTab, dashboard Lessons page, mobile PWA Lessons screen
 - **Data added**: 5 junior programs (Munchkin Stars, Red Ball, Orange Ball, Green Ball, Teen Tennis) with ages/duration/schedule/pricing, 2 adult programs (Adult 101/102, Live Ball), weekly schedule grid with start dates (week of May 11), summer camp (Ages 5+, dates TBD), Adrian Shelley full bio + email (Shelley.Adrian.Tennis@gmail.com)
-- **CoachingTab.tsx redesigned**: Replaced 2-viewport separate coach sections (Mark centered heading + 2-col grid, Adrian in separate bg section) with compact side-by-side "Meet the Pros" cards (~half viewport). Each card: name/title, condensed bio, certification/achievement pills, private lessons email link
+- **CoachingTab.tsx redesigned** (multiple iterations):
+  - Coach cards: Side-by-side "Meet the Pros" with photos (`/coach-mark.jpeg`, `/coach-adrian.jpeg`), expandable bios (160-char truncation + "Read full bio" toggle via useState), full credential highlights with checkmark icons, "Book a private lesson" mailto button
+  - Photos are ONLY on landing page coaching tab — NOT on dashboard or mobile PWA (per user instruction)
+  - Unified Pricing Table: Dark header row (#2a2f1e), Junior/Adult sub-headers, 12-col grid (Program/Ages/Schedule/Member/Non-member), alternating row backgrounds, mobile-responsive stacking, "All prices include HST" note
+  - Schedule grid: 4 day cards (Mon/Tue/Thu/Fri) with program names and times only — NO prices in schedule (moved to pricing table)
+  - "What to Expect" section: ProgramDetail accordions (expandable with chevron) for all 7 programs + summer camp card
+  - Contact section: 3 emails (Suzanne for registration, Mark for private lessons, Adrian for private lessons)
+- **events.ts**: Added 3 coaching events (junior-programs, adult-programs, private-lessons) to `coachingEvents` array → included in `allCardEvents`. Coaching filter on landing page Events section now shows cards with "View programs →" links
+- **Events.tsx**: Coaching category cards link to `/info?tab=coaching` with "View programs →" instead of login
 - **Hero.tsx**: Added "Spring Programs Now Open" glass CTA card linking to /info?tab=coaching
 - **$20 ball fee**: Added to all 3 round robin descriptions (mens, ladies, friday mixed) across events.ts, data.ts, events.js
-- **CI fix**: mobile-pwa-rollback.spec.js — 3 test failures from missing `mtc-access-token` in setupAuthenticatedState(). Fixed by adding `sess-` prefixed token to localStorage
+- **CI fixes**:
+  - mobile-pwa-rollback.spec.js + mobile-pwa-flows.spec.js — `MTC.storage.get()` does JSON.parse, so token must be stored as `JSON.stringify('sess-mock-token-xyz')` not raw string
+  - mobile-pwa.spec.js — WebKit onboarding overlay timing fix: set `mtc-onboarding-complete` via `addInitScript` before page load
 - **Unit test fix**: coaching-and-settings.test.js assertion updated for new CoachingTab content
 - **Test count**: 1209 tests across 36 files, all passing
 
