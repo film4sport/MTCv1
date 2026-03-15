@@ -1515,6 +1515,35 @@ Closed ALL notification asymmetries. Every action fires symmetric bell + push + 
 - **Home screen partner cards** (`repopulateHomePartners` in navigation.js) still use old card structure — may need v2 update for consistency
 - **Build**: needs `npm run build:mobile` after changes
 
+## PWA Icon Upgrade (Mar 15, 2026)
+- **New branded icon**: "MTC COURT" text icon replacing generic tennis ball. MTC white on top, COURT in prismatic gradient (volt→cyan→coral), dark #0a0a0a background.
+- **Master file**: `public/mobile-app/icons/icon-master-2048.jpg` — refined in CapCut Pro by user.
+- **All 8 PWA sizes regenerated**: 72, 96, 128, 144, 152, 192, 384, 512px via Lanczos downscale from CapCut master.
+- **Design philosophy**: "Prismatic Monolith" — documented in `mtc-icon-philosophy.md`.
+
+## Login Screen Scroll Fix (Mar 15, 2026)
+- **Bug**: Real user (Michael Nicol) reported app login screen wouldn't scroll on iPhone, trapping them on a form.
+- **Root cause**: `overflow: hidden` on login screen container prevented scrolling when content exceeded viewport.
+- **Fix in `login.css`**: Changed `overflow: hidden` → `overflow-x: hidden; overflow-y: auto; -webkit-overflow-scrolling: touch;`. Changed `justify-content: center` → `flex-start`. Added `padding-top: max(24px, env(safe-area-inset-top, 24px))`.
+
+## Signup Card Removal (Mar 15, 2026)
+- **Discovery**: Login screen had a self-signup card (member/guest selector, name, email, PIN, create account) from the original mtc-app merge (Feb 21). Never intended, never seen by user.
+- **Removed entirely**: `#signupCard` div from `index.html`, all signup CSS from `login.css`, `showSignUpScreen()`, `handleSignUp()`, `selectSignupType()`, `selectResidence()` from `auth.js`.
+- **Login footer "Need an account?" text also removed** — users on login screen already have accounts.
+- **Test updated**: `pin-auth.test.js` assertion flipped from `toContain('signupPin')` to `not.toContain('signupPin')`.
+
+## Onboarding Walkthrough Overhaul (Mar 15, 2026)
+- **Problem**: Onboarding cards were dark mode style that clashed with light mode homepage. Content was stale (referenced old features).
+- **CSS restyled** (`events.css`): Liquid glass/glassmorphism matching login screen — `backdrop-filter: blur(12px) saturate(130%) brightness(1.05)`, specular highlights, prismatic accent bar with shimmer animation, brighter text (0.8 alpha), stronger overlay (0.92).
+- **Slides updated** (5→6): Slide 0 Welcome (updated feature pills: Book, Partners, Messages, Events), Slide 1 Book Courts, Slide 2 Messages (NEW, replaced "Your Schedule"), Slide 3 Partners & Events (updated with RSVP/JOIN/SPOTS previews), Slide 4 Your Profile (NEW, avatar/settings), Slide 5 You're All Set ("Book a Court" CTA).
+- **6th dot added**, `totalOnboardingSlides` updated to 6 in `onboarding.js`.
+- **Files changed**: `index.html` (slides HTML), `events.css` (glassmorphism CSS), `onboarding.js` (slide count), `auth.js` (signup removal), `login.css` (scroll fix + signup CSS removal).
+- **Visually verified** in BDG: all 6 slides render with liquid glass cards, prismatic accent bars, correct dot navigation, NEXT→GET STARTED transition.
+
+## CLAUDE.md Rule #28 Added (Mar 15, 2026)
+- "EVERY CODE CHANGE MUST UPDATE AFFECTED TESTS" — grep `unit-tests/` and `tests/` for references to removed/renamed elements and update in the same pass.
+- Triggered by: signup card removal broke `pin-auth.test.js` assertion.
+
 **Pending:**
 - RSVP end-to-end verification
 - Events screen calendar may also need dedup (uses `getCalendarEvents()` in schedule.js — only shows RSVP'd events, lower priority)

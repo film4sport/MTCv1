@@ -239,6 +239,14 @@ See rule at the TOP of this file — duplicated here for grep-ability. **USE `te
 - Or just retry `tabs_context_mcp` — the user will reconnect on their end
 - `switch_browser` has NEVER worked. Don't try it.
 
+## #28: EVERY CODE CHANGE MUST UPDATE AFFECTED TESTS
+**When removing, renaming, or changing ANY HTML element, JS function, CSS class, API endpoint, or DOM ID — IMMEDIATELY grep `unit-tests/` and `tests/` for references and update them in the same pass.**
+- Removing a DOM element (e.g. `#signupCard`)? Grep tests for `signupCard`, `signupPin`, etc. and update/remove assertions.
+- Renaming a function or ID? Find-and-replace in tests too.
+- Changing slide count, element count, or text content? Update any assertions that check those values.
+- **Do this BEFORE saying "done"** — not as a follow-up after CI fails.
+- **Incident log**: Mar 15, 2026 — signup card removed from mobile PWA but `pin-auth.test.js` still asserted `signupPin` existed → CI broke. This pattern has happened multiple times.
+
 ## PROJECT OVERVIEW
 - **Mono Tennis Club** — Next.js 14 + TypeScript (strict mode) + Tailwind CSS monorepo
 - **Deployment**: Railway (standard Node.js server) — NOT Vercel, NOT serverless
