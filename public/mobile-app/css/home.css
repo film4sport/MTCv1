@@ -2283,16 +2283,26 @@
   border: 1.5px solid rgba(0, 0, 0, 0.08);
 }
 
+/* Date boxes — neumorphic style matching weekly time blocks */
 .event-date-box {
   width: 48px;
   height: 48px;
-  background: var(--volt);
+  background: rgba(220, 220, 220, 0.5);
   border-radius: 12px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  box-shadow:
+    3px 3px 6px var(--neu-shadow-dark),
+    -3px -3px 6px var(--neu-shadow-light),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+[data-theme="dark"] .event-date-box {
+  background: linear-gradient(135deg, var(--deep-black) 0%, #2a2a2a 100%);
+  box-shadow: none;
 }
 
 .event-date-month {
@@ -2302,11 +2312,19 @@
   text-transform: uppercase;
 }
 
+[data-theme="dark"] .event-date-month {
+  color: rgba(255, 255, 255, 0.7);
+}
+
 .event-date-day {
   font-family: 'Bebas Neue', sans-serif;
   font-size: 22px;
   color: var(--color-black);
   line-height: 1;
+}
+
+[data-theme="dark"] .event-date-day {
+  color: var(--volt);
 }
 
 .event-info {
@@ -2345,18 +2363,52 @@
   color: var(--volt);
 }
 
-/* Event RSVP Button */
+/* Event RSVP Buttons — cycle through quick action card colors */
 .event-rsvp-btn {
   padding: 10px 20px;
-  background: var(--volt);
   border: none;
   border-radius: 10px;
   font-size: 14px;
   font-weight: 700;
-  color: var(--color-black);
   cursor: pointer;
   transition: all 0.2s;
   min-width: 80px;
+  background: var(--coral);
+  color: var(--color-white);
+}
+
+/* 1st event = coral */
+.events-card .event-item:nth-child(2) .event-rsvp-btn {
+  background: var(--coral);
+  color: var(--color-white);
+}
+
+/* 2nd event = electric blue */
+.events-card .event-item:nth-child(3) .event-rsvp-btn {
+  background: var(--electric-blue);
+  color: var(--color-white);
+}
+
+/* 3rd event = dark (white text light, volt text dark) */
+.events-card .event-item:nth-child(4) .event-rsvp-btn {
+  background: var(--deep-black);
+  color: var(--color-white);
+}
+
+/* Dark mode RSVP button glows — matching quick action cards */
+[data-theme="dark"] .events-card .event-item:nth-child(2) .event-rsvp-btn {
+  box-shadow: 0 2px 10px rgba(255, 90, 95, 0.25);
+}
+
+[data-theme="dark"] .events-card .event-item:nth-child(3) .event-rsvp-btn {
+  box-shadow: 0 2px 10px rgba(0, 212, 255, 0.25);
+}
+
+[data-theme="dark"] .events-card .event-item:nth-child(4) .event-rsvp-btn {
+  background: var(--color-dark-bg);
+  color: var(--volt);
+  border: 1px solid rgba(200, 255, 0, 0.2);
+  box-shadow: 0 2px 10px rgba(200, 255, 0, 0.12);
 }
 
 .event-rsvp-btn:active {
@@ -2718,13 +2770,34 @@ body.offline #app {
   border: none;
   border-radius: 10px;
   cursor: pointer;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
   transition: all 0.2s;
 }
 .home-cal-toggle-btn.active {
   color: var(--color-black);
-  background: var(--color-light-border);
+  background: var(--volt);
   box-shadow: var(--neu-raised-sm);
 }
+
+/* ============================================
+   WEEKLY SCHEDULE — ALTERNATING ICON COLORS
+   Cycles: 1st=coral, 2nd=electric-blue, 3rd=dark
+============================================ */
+#homeWeeklySchedule .schedule-item:nth-child(3n+1 of .schedule-item) .schedule-meta-item:last-child svg {
+  color: var(--coral);
+}
+#homeWeeklySchedule .schedule-item:nth-child(3n+2 of .schedule-item) .schedule-meta-item:last-child svg {
+  color: var(--electric-blue);
+}
+#homeWeeklySchedule .schedule-item:nth-child(3n of .schedule-item) .schedule-meta-item:last-child svg {
+  color: var(--deep-black);
+}
+/* Dark mode: 3rd icon uses volt instead of black */
+[data-theme="dark"] #homeWeeklySchedule .schedule-item:nth-child(3n of .schedule-item) .schedule-meta-item:last-child svg {
+  color: var(--volt);
+}
+
 
 /* ============================================
    HOME CALENDAR EVENT CARDS (interactive)

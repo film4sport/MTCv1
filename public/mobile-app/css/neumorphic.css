@@ -631,6 +631,7 @@
   background: rgba(220, 220, 220, 0.7);
   border: none;
   box-shadow: var(--neu-inset);
+  -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
 }
 
@@ -819,18 +820,36 @@
   box-shadow: var(--neu-inset);
 }
 
-/* Neumorphic Time Block - dark gradient with volt text */
+/* Neumorphic Time Block - light mode: soft raised block matching toggle style */
 .schedule-time-block {
-  background: linear-gradient(135deg, var(--deep-black) 0%, #2a2a2a 100%);
-  box-shadow: none;
+  background: rgba(220, 220, 220, 0.5);
+  box-shadow:
+    3px 3px 6px var(--neu-shadow-dark),
+    -3px -3px 6px var(--neu-shadow-light),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
   border-radius: 12px;
 }
 
 .schedule-time {
-  color: var(--volt);
+  color: var(--color-black);
+  font-weight: 700;
 }
 
 .schedule-period {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+/* Neumorphic Time Block - dark mode: dark gradient with volt text */
+[data-theme="dark"] .schedule-time-block {
+  background: linear-gradient(135deg, var(--deep-black) 0%, #2a2a2a 100%);
+  box-shadow: none;
+}
+
+[data-theme="dark"] .schedule-time {
+  color: var(--volt);
+}
+
+[data-theme="dark"] .schedule-period {
   color: rgba(255, 255, 255, 0.7);
 }
 

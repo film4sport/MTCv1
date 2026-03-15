@@ -20,7 +20,7 @@
     if ('serviceWorker' in navigator) {
       caches.keys().then(function(names) {
         names.forEach(function(name) {
-          if (name.indexOf('mtc-court-187f34c7') === -1) {
+          if (name.indexOf('mtc-court-a1af7e4c') === -1) {
             caches.delete(name);
             console.log('[CacheBust] Deleted old cache:', name);
           }
@@ -745,7 +745,7 @@
       <div class="events-card stagger-item">
         <div class="events-header">
           <div class="events-title">UPCOMING EVENTS</div>
-          <div class="events-see-all" onclick="document.getElementById('homeCalendarSection').scrollIntoView({behavior:'smooth',block:'start'})">See All →</div>
+          <div class="events-see-all" onclick="document.getElementById('homeCalendarSection').scrollIntoView({behavior:'smooth',block:'start'})">SEE ALL ↓</div>
         </div>
         <div class="event-item event-item-wrap" id="homeEvent-euchre" onclick="showRsvpListModal('euchre')" style="cursor:pointer;">
           <div class="event-date-box">
@@ -776,7 +776,7 @@
           </div>
           <div class="event-info event-info-flex">
             <div class="event-name">Men's Round Robin</div>
-            <div class="event-details">Tue 9:00 AM • Courts 1-2</div>
+            <div class="event-details">Tue 9:00 AM • All Courts</div>
           </div>
           <button class="event-rsvp-btn" aria-label="RSVP to event" onclick="event.stopPropagation(); rsvpToEvent('mensrr', this)">RSVP</button>
         </div>
@@ -834,7 +834,7 @@
             <h3 class="section-title">TUESDAY</h3>
           </div>
 
-          <div class="schedule-item stagger-item">
+          <div class="schedule-item stagger-item" onclick="showEventModal('mens-round-robin','var(--coral)')" style="cursor:pointer">
             <div class="schedule-time-block">
               <div class="schedule-time">9:00</div>
               <div class="schedule-period">AM</div>
@@ -845,7 +845,7 @@
               <div class="schedule-meta">
                 <div class="schedule-meta-item">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                  Courts 1-2
+                  All Courts
                 </div>
                 <div class="schedule-meta-item">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
@@ -859,7 +859,7 @@
             <h3 class="section-title">THURSDAY</h3>
           </div>
 
-          <div class="schedule-item stagger-item">
+          <div class="schedule-item stagger-item" onclick="showEventModal('freedom-55','var(--electric-blue)')" style="cursor:pointer">
             <div class="schedule-time-block">
               <div class="schedule-time">9:00</div>
               <div class="schedule-period">AM</div>
@@ -870,7 +870,7 @@
               <div class="schedule-meta">
                 <div class="schedule-meta-item">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                  Courts 1-2
+                  All Courts
                 </div>
                 <div class="schedule-meta-item">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
@@ -880,7 +880,7 @@
             </div>
           </div>
 
-          <div class="schedule-item stagger-item">
+          <div class="schedule-item stagger-item" onclick="showEventModal('interclub-league','var(--deep-black)')" style="cursor:pointer">
             <div class="schedule-time-block">
               <div class="schedule-time">7:00</div>
               <div class="schedule-period">PM</div>
@@ -891,7 +891,7 @@
               <div class="schedule-meta">
                 <div class="schedule-meta-item">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                  Courts 1-2
+                  All Courts
                 </div>
                 <div class="schedule-meta-item">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path></svg>
@@ -905,7 +905,7 @@
             <h3 class="section-title">FRIDAY</h3>
           </div>
 
-          <div class="schedule-item stagger-item">
+          <div class="schedule-item stagger-item" onclick="showEventModal('ladies-round-robin','var(--coral)')" style="cursor:pointer">
             <div class="schedule-time-block">
               <div class="schedule-time">9:00</div>
               <div class="schedule-period">AM</div>
@@ -916,7 +916,7 @@
               <div class="schedule-meta">
                 <div class="schedule-meta-item">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                  Courts 1-2
+                  All Courts
                 </div>
                 <div class="schedule-meta-item">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
@@ -926,7 +926,7 @@
             </div>
           </div>
 
-          <div class="schedule-item stagger-item">
+          <div class="schedule-item stagger-item" onclick="showEventModal('friday-mixed','var(--electric-blue)')" style="cursor:pointer">
             <div class="schedule-time-block">
               <div class="schedule-time">6:00</div>
               <div class="schedule-period">PM</div>
@@ -1571,7 +1571,7 @@
               </div>
               <div class="event-card-info">
                 <div class="event-card-title">Men's Round Robin</div>
-                <div class="event-card-meta">Tuesdays 9:00 - 11:00 AM • Courts 1-2</div>
+                <div class="event-card-meta">Tuesdays 9:00 - 11:00 AM • All Courts</div>
               </div>
               <div class="event-card-badge members">Members</div>
             </div>
@@ -1589,7 +1589,7 @@
               </div>
               <div class="event-card-info">
                 <div class="event-card-title">Freedom 55 League</div>
-                <div class="event-card-meta">Thursdays 9:00 - 11:00 AM • Courts 1-2</div>
+                <div class="event-card-meta">Thursdays 9:00 - 11:00 AM • All Courts</div>
               </div>
               <div class="event-card-badge members">Members</div>
             </div>
@@ -1607,7 +1607,7 @@
               </div>
               <div class="event-card-info">
                 <div class="event-card-title">Interclub Competitive League</div>
-                <div class="event-card-meta">Thursdays 7:00 - 9:30 PM • Courts 1-2</div>
+                <div class="event-card-meta">Thursdays 7:00 - 9:30 PM • All Courts</div>
               </div>
               <div class="event-card-badge members">Team</div>
             </div>
@@ -1625,7 +1625,7 @@
               </div>
               <div class="event-card-info">
                 <div class="event-card-title">Ladies Round Robin</div>
-                <div class="event-card-meta">Fridays 9:00 - 11:00 AM • Courts 1-2</div>
+                <div class="event-card-meta">Fridays 9:00 - 11:00 AM • All Courts</div>
               </div>
               <div class="event-card-badge members">Members</div>
             </div>

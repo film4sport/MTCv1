@@ -124,6 +124,29 @@
   // Backward-compat alias (onclick in index.html uses rsvpToEvent)
   window.rsvpToEvent = MTC.fn.rsvpToEvent;
 
+  // Sync home screen RSVP buttons with userRsvps state
+  MTC.fn.syncHomeRsvpButtons = function() {
+    var map = MTC.state.homeToClubEventMap || {};
+    var ids = Object.keys(map);
+    for (var i = 0; i < ids.length; i++) {
+      var shortId = ids[i];
+      var realId = map[shortId];
+      var el = document.getElementById('homeEvent-' + shortId);
+      if (!el) continue;
+      var btn = el.querySelector('.event-rsvp-btn');
+      if (!btn) continue;
+      var isRsvpd = typeof userRsvps !== 'undefined' && userRsvps.indexOf(realId) !== -1;
+      if (isRsvpd) {
+        btn.classList.add('confirmed');
+        btn.textContent = 'Going';
+      } else {
+        btn.classList.remove('confirmed');
+        btn.textContent = 'RSVP';
+      }
+    }
+  };
+  window.syncHomeRsvpButtons = MTC.fn.syncHomeRsvpButtons;
+
   // Private (dead code â€” never called externally)
   function showEventDetails(eventId) {
     navigateTo('events');

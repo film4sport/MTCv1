@@ -904,7 +904,7 @@ html, body {
 
 /* Partners */
 .partner-logo { transition: all 0.4s ease; display: flex; flex-direction: column; align-items: center; }
-.partner-logo img { filter: grayscale(100%) opacity(0.6); transition: filter 0.4s ease; }
+.partner-logo img { filter: grayscale(0%) opacity(1); transition: filter 0.4s ease; }
 .partner-logo:hover img { filter: grayscale(0%) opacity(1); }
 .partner-logo:hover { transform: translateY(-6px); }
 .partner-logo:active { transform: scale(0.97); }
