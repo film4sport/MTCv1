@@ -240,12 +240,16 @@ See rule at the TOP of this file — duplicated here for grep-ability. **USE `te
 - `switch_browser` has NEVER worked. Don't try it.
 
 ## #28: EVERY CODE CHANGE MUST UPDATE AFFECTED TESTS
-**When removing, renaming, or changing ANY HTML element, JS function, CSS class, API endpoint, or DOM ID — IMMEDIATELY grep `unit-tests/` and `tests/` for references and update them in the same pass.**
+**When removing, renaming, or changing ANY HTML element, JS function, CSS class, API endpoint, or DOM ID — IMMEDIATELY grep ALL THREE test directories for references and update them in the same pass.**
+- **MANDATORY grep checklist** (run ALL three, not just one):
+  1. `grep -r "searchTerm" unit-tests/` — Vitest unit tests
+  2. `grep -r "searchTerm" tests/` — Playwright E2E tests
+  3. `grep -r "searchTerm" mobile-app-tests/` — Mobile PWA tests
 - Removing a DOM element (e.g. `#signupCard`)? Grep tests for `signupCard`, `signupPin`, etc. and update/remove assertions.
 - Renaming a function or ID? Find-and-replace in tests too.
 - Changing slide count, element count, or text content? Update any assertions that check those values.
 - **Do this BEFORE saying "done"** — not as a follow-up after CI fails.
-- **Incident log**: Mar 15, 2026 — signup card removed from mobile PWA but `pin-auth.test.js` still asserted `signupPin` existed → CI broke. This pattern has happened multiple times.
+- **Incident log**: Mar 15, 2026 — signup card removed from mobile PWA but `pin-auth.test.js` (unit) AND `mobile-pwa.spec.js` (E2E) still asserted signup elements existed → CI broke TWICE. First fix only caught unit tests, missed E2E. Always grep all three directories.
 
 ## PROJECT OVERVIEW
 - **Mono Tennis Club** — Next.js 14 + TypeScript (strict mode) + Tailwind CSS monorepo

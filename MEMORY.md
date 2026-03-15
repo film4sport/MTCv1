@@ -1541,8 +1541,8 @@ Closed ALL notification asymmetries. Every action fires symmetric bell + push + 
 - **Visually verified** in BDG: all 6 slides render with liquid glass cards, prismatic accent bars, correct dot navigation, NEXT→GET STARTED transition.
 
 ## CLAUDE.md Rule #28 Added (Mar 15, 2026)
-- "EVERY CODE CHANGE MUST UPDATE AFFECTED TESTS" — grep `unit-tests/` and `tests/` for references to removed/renamed elements and update in the same pass.
-- Triggered by: signup card removal broke `pin-auth.test.js` assertion.
+- "EVERY CODE CHANGE MUST UPDATE AFFECTED TESTS" — mandatory grep checklist: `unit-tests/`, `tests/`, AND `mobile-app-tests/`. All three, every time.
+- Triggered by: signup card removal broke `pin-auth.test.js` (unit) AND `mobile-pwa.spec.js` (E2E). First fix only caught unit tests, missed E2E → CI broke twice on same issue.
 
 **Pending:**
 - RSVP end-to-end verification
