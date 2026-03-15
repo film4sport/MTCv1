@@ -67,34 +67,11 @@ test.describe('Mobile PWA — Login Screen', () => {
     await expect(pinError.first()).toBeAttached();
   });
 
-  test('signup card toggle works', async ({ page }) => {
-    const signupCard = page.locator('#signupCard');
-    await expect(signupCard).toBeHidden();
-    // Use dispatchEvent to bypass any overlay interception
-    await page.locator('a[onclick*="showSignUpScreen"]').dispatchEvent('click');
-    await page.waitForTimeout(500);
-    await expect(signupCard).toBeVisible();
-    await expect(page.locator('#signupName')).toBeVisible();
-    await expect(page.locator('#signupEmail')).toBeVisible();
-    await expect(page.locator('#signupEmailConfirm')).toBeVisible();
-  });
-
-  test('signup form validates empty fields', async ({ page }) => {
-    // Show signup card via JS
-    await page.locator('a[onclick*="showSignUpScreen"]').dispatchEvent('click');
-    await page.waitForTimeout(500);
-    // Submit empty — target the signup card's button specifically
-    // Scroll into view first — on small WebKit viewports the button may be below the fold
-    await page.locator('#signupCard .login-btn').scrollIntoViewIfNeeded();
-    await page.locator('#signupCard .login-btn').click();
-    await page.waitForTimeout(500);
-    const errors = page.locator('#signupCard .field-error');
-    await expect(errors.first()).toBeAttached();
-  });
-
-  test('sign up link exists on login screen', async ({ page }) => {
-    const signupLink = page.getByText('Sign up');
-    await expect(signupLink.first()).toBeAttached();
+  test('signup card was removed (no self-signup on mobile PWA)', async ({ page }) => {
+    // Signup card and related elements were removed — verify they don't exist
+    await expect(page.locator('#signupCard')).toHaveCount(0);
+    await expect(page.locator('a[onclick*="showSignUpScreen"]')).toHaveCount(0);
+    await expect(page.locator('#signupName')).toHaveCount(0);
   });
 
   test('no horizontal overflow on login screen', async ({ page }) => {
