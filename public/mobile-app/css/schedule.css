@@ -242,134 +242,205 @@
   color: var(--volt);
 }
 
-/* Event Modal */
+/* ============================================
+   EVENT DETAIL MODAL — v2
+============================================ */
+
+/* Solid backgrounds so modal doesn't look washed out */
+#eventModal .modal {
+  background: rgba(255, 255, 255, 0.97);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+}
+[data-theme="dark"] #eventModal .modal {
+  background: rgba(20, 20, 18, 0.97);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+}
+
+/* Header: accent top bar + clean layout */
 .event-modal-header {
-  background: linear-gradient(135deg, var(--deep-black) 0%, #2a2a2a 100%);
-  padding: 24px;
+  padding: 0 0 20px 0;
+  margin: -24px -24px 0 -24px;
+  position: relative;
+}
+/* Animated prismatic accent bar at top (matches login page) */
+.event-modal-header::before {
+  content: '';
+  display: block;
+  height: 6px;
+  background: linear-gradient(90deg, #c8ff00, #00d4ff, #ff5a5f, #c8ff00);
+  background-size: 200% 100%;
   border-radius: 20px 20px 0 0;
-  margin: -24px -24px 20px -24px;
+  animation: eventAccentShimmer 3s linear infinite;
+  box-shadow: 0 0 12px rgba(200, 255, 0, 0.3);
 }
-
-.event-modal-badge {
-  display: inline-block;
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 14px;
-  font-weight: 700;
-  margin-bottom: 12px;
+@keyframes eventAccentShimmer {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
 }
-
-.event-modal-badge.paid {
-  background: var(--volt);
-  color: var(--color-black);
-}
-
-.event-modal-badge.free {
-  background: var(--electric-blue);
-  color: var(--color-white);
-}
-
-.event-modal-badge.members {
-  background: var(--coral);
-  color: var(--color-white);
+.event-modal-header-content {
+  padding: 20px 24px 0;
 }
 
 .event-modal-title {
   font-family: 'Bebas Neue', sans-serif;
   font-size: 26px;
-  color: var(--color-white);
-  margin-bottom: 12px;
+  color: var(--text-primary);
+  margin-bottom: 14px;
+  letter-spacing: 0.5px;
+  line-height: 1.1;
 }
 
+/* Meta: horizontal pills */
 .event-modal-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 14px;
+  gap: 8px;
 }
 
 .event-modal-meta-item {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 6px;
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+  padding: 6px 12px;
+  border-radius: 20px;
 }
 
 .event-modal-meta-item svg {
-  width: 16px;
-  height: 16px;
-  stroke: var(--volt);
+  width: 14px;
+  height: 14px;
+  stroke: var(--modal-accent, var(--volt));
+  flex-shrink: 0;
+}
+
+/* Divider between sections */
+.event-modal-divider {
+  height: 1px;
+  background: var(--border-color);
+  margin: 16px 0;
 }
 
 .event-modal-section {
-  margin-bottom: 20px;
+  margin-bottom: 0;
 }
 
 .event-modal-section-title {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   color: var(--text-muted);
   margin-bottom: 8px;
   text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
+/* About section */
 .event-modal-description {
   font-size: 14px;
   color: var(--text-secondary);
-  line-height: 1.6;
+  line-height: 1.7;
 }
 
+/* Spots bar (paid events) */
 .event-modal-spots-bar {
-  height: 8px;
+  height: 6px;
   background: var(--bg-secondary);
-  border-radius: 4px;
+  border-radius: 3px;
   overflow: hidden;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .event-modal-spots-fill {
   height: 100%;
   background: var(--volt);
-  border-radius: 4px;
+  border-radius: 3px;
   transition: width 0.3s ease;
 }
 
 .event-modal-spots-text {
   display: flex;
   justify-content: space-between;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* Who's Playing — title row with count */
+.event-modal-whos-playing {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.event-modal-whos-playing-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.event-modal-whos-playing-count {
   font-size: 13px;
   color: var(--text-muted);
 }
 
+/* Attendee grid — 2 columns like the reference */
 .event-modal-attendees {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
 }
 
 .event-modal-attendee {
   display: flex;
   align-items: center;
-  gap: 8px;
-  background: var(--bg-secondary);
-  padding: 6px 12px 6px 6px;
-  border-radius: 20px;
-  font-size: 13px;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 500;
   color: var(--text-primary);
 }
 
 .event-modal-attendee-avatar {
-  width: 28px;
-  height: 28px;
+  width: 36px;
+  height: 36px;
   flex-shrink: 0;
+  background: var(--bg-secondary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .event-modal-attendee-avatar svg {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  stroke: var(--text-muted);
 }
 
+/* Overflow chip (+N more) */
+.event-modal-attendee-overflow {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--bg-secondary);
+  border: 2px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+/* Empty state */
+.event-modal-empty {
+  color: var(--text-muted);
+  font-size: 13px;
+  font-style: italic;
+}
+
+/* RSVP button — hero CTA */
 .event-modal-rsvp-btn {
   width: 100%;
   padding: 16px;
@@ -382,23 +453,28 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  margin-top: 8px;
-  transition: all 0.2s;
+  margin-top: 16px;
+  transition: transform 0.15s, box-shadow 0.15s, background 0.2s;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.event-modal-rsvp-btn:active {
+  transform: scale(0.97);
 }
 
 .event-modal-rsvp-btn.register {
-  background: var(--volt);
-  color: var(--color-black);
+  background: var(--modal-accent, var(--volt));
+  color: var(--modal-btn-text, var(--color-black));
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+.event-modal-rsvp-btn.register:active {
+  box-shadow: 0 2px 8px rgba(200, 255, 0, 0.15);
 }
 
 .event-modal-rsvp-btn.registered {
   background: transparent;
-  border: 2px solid var(--electric-blue);
-  color: var(--electric-blue);
-}
-[data-theme="dark"] .event-modal-rsvp-btn.registered {
-  border-color: var(--volt);
-  color: var(--volt);
+  border: 2px solid var(--modal-accent, var(--electric-blue));
+  color: var(--modal-accent, var(--electric-blue));
 }
 
 .event-modal-rsvp-btn svg {
@@ -406,15 +482,18 @@
   height: 20px;
 }
 
-.event-modal-close-btn {
-  width: 100%;
-  padding: 14px;
-  background: transparent;
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
-  font-size: 14px;
-  color: var(--text-secondary);
-  cursor: pointer;
+/* Success state animation */
+@keyframes rsvpSuccess {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.05); }
+  60% { transform: scale(0.98); }
+  100% { transform: scale(1); }
+}
+.event-modal-rsvp-btn.success-flash {
+  animation: rsvpSuccess 0.5s ease;
+  background: var(--electric-blue) !important;
+  color: var(--color-white) !important;
+  border: none !important;
 }
 
 /* ============================================

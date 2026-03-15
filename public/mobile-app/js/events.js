@@ -128,7 +128,7 @@
       title: "Men's Round Robin",
       date: '2026-05-12',
       time: '9:00 AM - 11:00 AM',
-      location: 'Courts 1-2',
+      location: 'All Courts',
       badge: 'members',
       price: 'Members',
       spotsTotal: 16,
@@ -141,7 +141,7 @@
       title: 'Freedom 55 League',
       date: '2026-05-14',
       time: '9:00 AM - 11:00 AM',
-      location: 'Courts 1-2',
+      location: 'All Courts',
       badge: 'members',
       price: 'Members',
       spotsTotal: 16,
@@ -154,7 +154,7 @@
       title: 'Interclub Competitive League',
       date: '2026-05-14',
       time: '7:00 PM - 9:30 PM',
-      location: 'Courts 1-2',
+      location: 'All Courts',
       badge: 'members',
       price: 'Team',
       spotsTotal: 12,
@@ -167,7 +167,7 @@
       title: "Ladies Round Robin",
       date: '2026-05-15',
       time: '9:00 AM - 11:00 AM',
-      location: 'Courts 1-2',
+      location: 'All Courts',
       badge: 'members',
       price: 'Members',
       spotsTotal: 16,
@@ -274,6 +274,10 @@
         ev.spotsTaken++;
       }
     });
+    // Sync home RSVP buttons on initial load
+    setTimeout(function() {
+      if (typeof syncHomeRsvpButtons === 'function') syncHomeRsvpButtons();
+    }, 100);
   })();
 
   // Sync HTML event card date boxes with dynamic clubEventsData dates
@@ -393,7 +397,7 @@
     }
   }
 
-  function showEventModal(eventId) {
+  function showEventModal(eventId, accentOverride) {
     const event = clubEventsData[eventId];
     if (!event) return;
 
@@ -402,19 +406,49 @@
     const spotsPercent = hasSpotsLimit ? (event.spotsTaken / event.spotsTotal) * 100 : 0;
     const spotsLeft = hasSpotsLimit ? event.spotsTotal - event.spotsTaken : 999;
 
-    const attendeesHtml = event.attendees.length > 0 ? event.attendees.map(function(name) {
-      return '<div class="event-modal-attendee">' +
-        '<span class="event-modal-attendee-avatar">' + getAvatar(name) + '</span>' +
-        '<span>' + sanitizeHTML(name) + '</span>' +
-      '</div>';
-    }).join('') : '<span style="color: var(--text-muted); font-size: 13px;">Be the first to register!</span>';
+    // Accent color cycling: coral → electric-blue → dark, repeating
+    const accentColors = ['var(--coral)', 'var(--electric-blue)', 'var(--deep-black)'];
+    // Fixed map for homepage events to match their RSVP button colors
+    const accentMap = {
+      'euchre-tournament': 'var(--coral)',
+      'opening-day-bbq': 'var(--electric-blue)',
+      'mens-round-robin': 'var(--deep-black)'
+    };
+    const accentColor = accentOverride || accentMap[eventId] || accentColors[Object.keys(clubEventsData).indexOf(eventId) % 3];
+    // For dark accent colors, button text must be white (light mode) or volt (dark mode)
+    const isDarkAccent = accentColor === 'var(--deep-black)';
+    const btnTextColor = isDarkAccent ? '#ffffff' : 'var(--color-black)';
 
-    const dateDisplay = new Date(event.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    // Build attendee grid (2-col, max 6 shown, overflow chip)
+    const maxShow = 6;
+    const attendees = event.attendees || [];
+    let attendeesHtml = '';
+    if (attendees.length > 0) {
+      const shown = attendees.slice(0, maxShow);
+      var genericIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>';
+      attendeesHtml = shown.map(function(name) {
+        return '<div class="event-modal-attendee">' +
+          '<span class="event-modal-attendee-avatar">' + genericIcon + '</span>' +
+          '<span>' + sanitizeHTML(name) + '</span>' +
+        '</div>';
+      }).join('');
+      if (attendees.length > maxShow) {
+        attendeesHtml += '<div class="event-modal-attendee">' +
+          '<span class="event-modal-attendee-overflow">+' + (attendees.length - maxShow) + '</span>' +
+        '</div>';
+      }
+    } else {
+      attendeesHtml = '<div class="event-modal-empty">Be the first to register!</div>';
+    }
+
+    const dateDisplay = new Date(event.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
 
     const rsvpBtnClass = isRegistered ? 'registered' : 'register';
     const rsvpBtnContent = isRegistered
-      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> REGISTERED - TAP TO CANCEL'
+      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> REGISTERED \u2014 TAP TO CANCEL'
       : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg> REGISTER NOW';
+
+    const goingText = event.spotsTaken + (isRegistered ? ' confirmed' : ' going');
 
     const modal = document.createElement('div');
     modal.className = 'modal-overlay';
@@ -424,39 +458,46 @@
     modal.setAttribute('aria-label', 'Event details');
     modal.onclick = function(e) { if (e.target === this) closeEventModal(); };
     modal.innerHTML =
-      '<div class="modal" onclick="event.stopPropagation()" style="max-height: 85vh; overflow-y: auto;">' +
+      '<div class="modal" onclick="event.stopPropagation()" style="max-height: 85vh; overflow-y: auto; --modal-accent: ' + accentColor + '; --modal-btn-text: ' + btnTextColor + ';">' +
         '<div class="event-modal-header">' +
-          '<div class="event-modal-badge ' + event.badge + '">' + sanitizeHTML(event.price) + '</div>' +
-          '<div class="event-modal-title">' + sanitizeHTML(event.title) + '</div>' +
-          '<div class="event-modal-meta">' +
-            '<div class="event-modal-meta-item">' +
-              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> ' +
-              dateDisplay +
-            '</div>' +
-            '<div class="event-modal-meta-item">' +
-              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> ' +
-              sanitizeHTML(event.time) +
-            '</div>' +
-            '<div class="event-modal-meta-item">' +
-              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> ' +
-              sanitizeHTML(event.location) +
+          '<div class="event-modal-header-content">' +
+            '<div class="event-modal-title">' + sanitizeHTML(event.title) + '</div>' +
+            '<div class="event-modal-meta">' +
+              '<div class="event-modal-meta-item">' +
+                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> ' +
+                dateDisplay +
+              '</div>' +
+              '<div class="event-modal-meta-item">' +
+                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> ' +
+                sanitizeHTML(event.time) +
+              '</div>' +
+              '<div class="event-modal-meta-item">' +
+                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> ' +
+                sanitizeHTML(event.location) +
+              '</div>' +
             '</div>' +
           '</div>' +
         '</div>' +
+        '<div class="event-modal-divider"></div>' +
         '<div class="event-modal-section">' +
-          '<div class="event-modal-section-title">About This Event</div>' +
           '<div class="event-modal-description">' + sanitizeHTML(event.description) + '</div>' +
         '</div>' +
+        (hasSpotsLimit ?
+          '<div class="event-modal-divider"></div>' +
+          '<div class="event-modal-section">' +
+            '<div class="event-modal-section-title">Availability</div>' +
+            '<div class="event-modal-spots-bar"><div class="event-modal-spots-fill" style="width: ' + spotsPercent + '%"></div></div>' +
+            '<div class="event-modal-spots-text">' +
+              '<span>' + event.spotsTaken + ' / ' + event.spotsTotal + ' registered</span>' +
+              '<span>' + spotsLeft + ' spots left</span>' +
+            '</div>' +
+          '</div>' : '') +
+        '<div class="event-modal-divider"></div>' +
         '<div class="event-modal-section">' +
-          '<div class="event-modal-section-title">' + (hasSpotsLimit ? 'Availability' : 'Attendance') + '</div>' +
-          (hasSpotsLimit ? '<div class="event-modal-spots-bar"><div class="event-modal-spots-fill" style="width: ' + spotsPercent + '%"></div></div>' : '') +
-          '<div class="event-modal-spots-text">' +
-            '<span>' + event.spotsTaken + ' ' + (hasSpotsLimit ? 'registered' : 'going') + '</span>' +
-            (hasSpotsLimit ? '<span>' + spotsLeft + ' spots left</span>' : '') +
+          '<div class="event-modal-whos-playing">' +
+            '<span class="event-modal-whos-playing-title">Who\'s Playing</span>' +
+            '<span class="event-modal-whos-playing-count">' + goingText + '</span>' +
           '</div>' +
-        '</div>' +
-        '<div class="event-modal-section">' +
-          '<div class="event-modal-section-title">Who\'s Coming (' + event.attendees.length + ')</div>' +
           '<div class="event-modal-attendees">' +
             attendeesHtml +
           '</div>' +
@@ -464,7 +505,6 @@
         '<button class="event-modal-rsvp-btn ' + rsvpBtnClass + '" onclick="toggleEventRsvp(\'' + eventId + '\')">' +
           rsvpBtnContent +
         '</button>' +
-        '<button class="event-modal-close-btn" onclick="closeEventModal()">Close</button>' +
       '</div>';
 
     document.getElementById('app').appendChild(modal);
@@ -477,6 +517,8 @@
       modal.classList.remove('active');
       setTimeout(function() { modal.remove(); }, 300);
     }
+    // Sync home RSVP buttons with current state
+    if (typeof syncHomeRsvpButtons === 'function') syncHomeRsvpButtons();
   }
 
   function toggleEventRsvp(eventId) {
@@ -505,8 +547,15 @@
       saveUserRsvps();
       event.spotsTaken++;
       event.attendees.unshift('You');
-      showToast('Successfully registered!');
+      showToast('You\'re in!');
       addEventToMyBookings(eventId, 'event');
+
+      // Success flash on the button
+      var rsvpBtn = document.querySelector('#eventModal .event-modal-rsvp-btn');
+      if (rsvpBtn) {
+        rsvpBtn.classList.add('success-flash');
+        rsvpBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> YOU\'RE IN!';
+      }
     }
 
     // Persist RSVP to Supabase via API
@@ -528,8 +577,8 @@
     if (typeof MTC.fn.renderHomeCalendar === 'function') MTC.fn.renderHomeCalendar();
     if (typeof generateCalendar === 'function') generateCalendar();
 
-    // Close modal after brief delay for visual feedback
-    setTimeout(function() { closeEventModal(); }, 600);
+    // Close modal after success animation
+    setTimeout(function() { closeEventModal(); }, 900);
   }
 
   // Coach registration modal removed — coaching info lives on the Lessons screen
@@ -544,71 +593,8 @@
     if (typeof homeToClubEventMap !== 'undefined' && homeToClubEventMap[eventId]) {
       realId = homeToClubEventMap[eventId];
     }
-
-    const ev = (typeof clubEventsData !== 'undefined') ? clubEventsData[realId] : null;
-    if (!ev) { showToast('Event not found'); return; }
-
-    const isRegistered = userRsvps.indexOf(realId) !== -1;
-    const hasSpotsLimit = ev.badge === 'paid';
-    const spotsLeft = hasSpotsLimit ? ev.spotsTotal - ev.spotsTaken : 999;
-    const spotsPercent = hasSpotsLimit ? Math.min(100, Math.round((ev.spotsTaken / ev.spotsTotal) * 100)) : 0;
-
-    // Build attendee list HTML
-    let attendeesHtml = '';
-    if (ev.attendees && ev.attendees.length > 0) {
-      attendeesHtml = ev.attendees.map(function(name) {
-        const isYou = name === 'You';
-        return '<div class="rsvp-attendee' + (isYou ? ' you' : '') + '">' +
-          '<span class="rsvp-attendee-avatar">' + getAvatar(name) + '</span>' +
-          '<span class="rsvp-attendee-name">' + (isYou ? 'You' : sanitizeHTML(name)) + '</span>' +
-          (isYou ? '<span class="rsvp-you-badge">YOU</span>' : '') +
-        '</div>';
-      }).join('');
-    } else {
-      attendeesHtml = '<div class="rsvp-empty">No one has RSVP\'d yet. Be the first!</div>';
-    }
-
-    // Status bar color
-    const barColor = spotsPercent < 60 ? 'var(--volt)' : (spotsPercent < 85 ? '#ffb400' : 'var(--coral)');
-    const statusText = hasSpotsLimit
-      ? (spotsLeft > 0 ? '<span style="color:' + barColor + ';">' + spotsLeft + ' spots left</span>' : '<span style="color:var(--coral);">FULL</span>')
-      : '';
-
-    let rsvpBtn = '';
-    if (!isRegistered && (hasSpotsLimit ? spotsLeft > 0 : true)) {
-      rsvpBtn = '<button class="rsvp-modal-action-btn register" onclick="rsvpFromModal(\'' + eventId + '\')">RSVP NOW</button>';
-    } else if (isRegistered) {
-      rsvpBtn = '<button class="rsvp-modal-action-btn registered" onclick="rsvpFromModal(\'' + eventId + '\')">\u2713 REGISTERED \u2014 TAP TO CANCEL</button>';
-    }
-
-    const modal = document.createElement('div');
-    modal.className = 'modal-overlay';
-    modal.id = 'rsvpListModal';
-    modal.setAttribute('role', 'dialog');
-    modal.setAttribute('aria-modal', 'true');
-    modal.setAttribute('aria-label', 'RSVP list');
-    modal.onclick = function(e) { if (e.target === modal) closeRsvpListModal(); };
-    modal.innerHTML =
-      '<div class="rsvp-list-modal" onclick="event.stopPropagation()">' +
-        '<button class="rsvp-modal-close" onclick="closeRsvpListModal()" aria-label="Close">' +
-          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>' +
-        '</button>' +
-        '<div class="rsvp-modal-title">' + sanitizeHTML(ev.title) + '</div>' +
-        '<div class="rsvp-modal-meta">' + sanitizeHTML(ev.time) + ' \u2022 ' + sanitizeHTML(ev.location) + '</div>' +
-        '<div class="rsvp-modal-spots">' +
-          (hasSpotsLimit ? '<div class="rsvp-spots-bar"><div class="rsvp-spots-fill" style="width:' + spotsPercent + '%;background:' + barColor + ';"></div></div>' : '') +
-          '<div class="rsvp-spots-text">' +
-            '<span>' + ev.spotsTaken + (hasSpotsLimit ? ' / ' + ev.spotsTotal + ' registered' : ' going') + '</span>' +
-            statusText +
-          '</div>' +
-        '</div>' +
-        '<div class="rsvp-modal-section-title">WHO\'S COMING (' + ev.attendees.length + ')</div>' +
-        '<div class="rsvp-attendee-list">' + attendeesHtml + '</div>' +
-        rsvpBtn +
-      '</div>';
-
-    document.getElementById('app').appendChild(modal);
-    setTimeout(function() { modal.classList.add('active'); }, 10);
+    // Reuse the unified event detail modal
+    showEventModal(realId);
   }
 
   function closeRsvpListModal() {
@@ -617,6 +603,8 @@
       modal.classList.remove('active');
       setTimeout(function() { modal.remove(); }, 300);
     }
+    // Sync home RSVP buttons with current state
+    if (typeof syncHomeRsvpButtons === 'function') syncHomeRsvpButtons();
   }
 
   function rsvpFromModal(eventId) {
