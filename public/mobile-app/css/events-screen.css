@@ -63,70 +63,9 @@
     inset -3px -3px 6px rgba(30, 30, 30, 0.3);
 }
 
-/* .partner-card moved to partners.css */
+/* Partner card styles moved to partners.css v2 */
 
-.partner-avatar {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid var(--coral);
-}
-
-.partner-info {
-  flex: 1;
-}
-
-.partner-name {
-  font-weight: 600;
-  font-size: 15px;
-  color: var(--text-primary);
-  margin-bottom: 4px;
-}
-
-.partner-level {
-  display: inline-block;
-  padding: 2px 8px;
-  background: rgba(255, 90, 95, 0.15);
-  border-radius: 100px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--coral);
-  margin-bottom: 4px;
-}
-
-.partner-availability {
-  font-size: 15px;
-  color: var(--text-muted);
-}
-
-.partner-action {
-  display: flex;
-  align-items: center;
-}
-
-.partner-action-btn {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: var(--coral);
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.2s;
-}
-
-.partner-action-btn:active {
-  transform: scale(0.9);
-}
-
-.partner-action-btn svg {
-  width: 18px;
-  height: 18px;
-  color: var(--color-black);
-}
+/* .partner-action-btn svg moved to partners.css v2 */
 
 /* ============================================
    SCHEDULE SCREEN

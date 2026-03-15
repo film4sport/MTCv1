@@ -802,14 +802,12 @@
 }
 
 /* Neumorphic Action Buttons */
-.partner-action-btn,
 .request-action {
-  box-shadow: 
+  box-shadow:
     3px 3px 6px var(--neu-shadow-dark),
     -3px -3px 6px var(--neu-shadow-light);
 }
 
-.partner-action-btn:active,
 .request-action:active {
   box-shadow: var(--neu-inset-sm);
 }

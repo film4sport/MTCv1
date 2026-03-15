@@ -569,6 +569,12 @@
   resize: vertical;
   font-family: 'Inter', sans-serif;
   box-sizing: border-box;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.modal-textarea:focus {
+  border-color: var(--volt);
+  box-shadow: 0 0 0 2px rgba(200, 255, 0, 0.2);
 }
 
 /* Full-width primary action button in modals */

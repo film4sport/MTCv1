@@ -80,60 +80,207 @@
 }
 
 /* ============================================
-   PARTNER CARDS — consolidated from navigation.css, events-screen.css, neumorphic.css
+   PARTNER CARDS v2 — vertical layout with avatar, pills, meta
 ============================================ */
 .partner-card {
   display: flex;
-  gap: 14px;
-  padding: 16px;
+  flex-direction: column;
+  gap: 0;
+  padding: 16px 16px 12px;
   margin: 0 16px 12px;
-  background: transparent;
-  backdrop-filter: blur(16px) saturate(200%);
-  -webkit-backdrop-filter: blur(16px) saturate(200%);
-  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-color);
   border-radius: 16px;
-  box-shadow:
-    0 0 30px rgba(200, 255, 0, 0.08),
-    0 10px 30px rgba(0, 0, 0, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
   transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   position: relative;
-  overflow: hidden;
 }
-
-.partner-card:hover {
-  transform: translateY(-3px) scale(1.01);
-  border-color: rgba(255, 255, 255, 0.4);
-  box-shadow:
-    0 0 40px rgba(200, 255, 0, 0.15),
-    0 15px 40px rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
-}
-
 .partner-card:active {
-  transform: translateY(1px) scale(0.98);
+  transform: scale(0.98);
   transition: all 0.1s ease;
 }
 
-[data-theme="light"] .partner-card {
-  background: transparent;
-  backdrop-filter: blur(16px) saturate(200%);
-  -webkit-backdrop-filter: blur(16px) saturate(200%);
-  border: 1.5px solid rgba(0, 0, 0, 0.1);
-  box-shadow:
-    0 10px 30px rgba(0, 0, 0, 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.5);
-}
-
-[data-theme="light"] .partner-card:hover {
-  border-color: rgba(0, 0, 0, 0.15);
-}
-
 [data-theme="dark"] .partner-card {
-  background: transparent;
+  background: rgba(255, 255, 255, 0.04);
   backdrop-filter: blur(16px) saturate(200%);
   -webkit-backdrop-filter: blur(16px) saturate(200%);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Top row: avatar + name + pills */
+.partner-card-top {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+/* Stroke-style avatar in colored ring */
+.partner-avatar-wrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2.5px solid var(--ring-color, var(--electric-blue));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: var(--bg-secondary);
+}
+.partner-avatar-wrap svg {
+  width: 26px;
+  height: 26px;
+  stroke: var(--text-muted);
+}
+
+.partner-card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.partner-card-info .partner-name {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* (You) badge — outline style to reduce volt overload */
+.partner-you-badge {
+  display: inline-block;
+  padding: 1px 7px;
+  background: transparent;
+  color: var(--volt);
+  border: 1.5px solid var(--volt);
+  font-size: 10px;
+  font-weight: 800;
+  border-radius: 100px;
+  letter-spacing: 0.5px;
+  line-height: 1.4;
+}
+
+/* Pills row */
+.partner-card-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.partner-match-pill {
+  display: inline-block;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  border-radius: 100px;
+}
+.partner-match-pill.singles {
+  background: rgba(0, 212, 255, 0.15);
+  color: var(--electric-blue);
+}
+.partner-match-pill.mixed {
+  background: rgba(200, 255, 0, 0.2);
+  color: #6a9a00;
+}
+[data-theme="dark"] .partner-match-pill.mixed {
+  color: var(--volt);
+}
+.partner-match-pill.mens {
+  background: rgba(255, 90, 95, 0.15);
+  color: var(--coral);
+}
+.partner-match-pill.womens {
+  background: rgba(255, 105, 180, 0.15);
+  color: #ff69b4;
+}
+
+.partner-level-pill {
+  display: inline-block;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 100px;
+  background: var(--bg-secondary);
+  color: var(--text-muted);
+}
+
+/* Bottom row: meta + action */
+.partner-card-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-color);
+}
+.partner-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-muted);
+  min-width: 0;
+  overflow: hidden;
+}
+.partner-card-meta span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.partner-card-meta svg {
+  stroke: var(--electric-blue);
+  flex-shrink: 0;
+}
+
+/* Action buttons with labels */
+.partner-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.partner-action-btn svg {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+}
+.partner-action-btn:active {
+  transform: scale(0.93);
+}
+
+.partner-msg-btn {
+  background: var(--volt);
+  color: var(--deep-black);
+}
+.partner-msg-btn svg {
+  stroke: var(--deep-black);
+}
+
+.partner-cancel-btn {
+  background: rgba(255, 90, 95, 0.15);
+  color: var(--coral);
+}
+.partner-cancel-btn svg {
+  stroke: var(--coral);
+}
+
+/* Make partner card position relative for absolute label */
+.partner-card {
+  position: relative;
 }
 
 
@@ -253,81 +400,39 @@
   background: rgba(200, 255, 0, 0.2);
 }
 
-/* Match Type Labels - Top Corner */
-.partner-match-type {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  padding: 4px 10px;
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.3);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  max-width: 110px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* Match type color coding */
-.partner-match-type.singles {
-  background: rgba(59, 175, 218, 0.2);
-  color: #0088aa;
-  border-color: rgba(59, 175, 218, 0.4);
-}
-
-.partner-match-type.mixed {
-  background: rgba(200, 255, 0, 0.25);
-  color: #5a8a00;
-  border-color: rgba(200, 255, 0, 0.5);
-}
-
-.partner-match-type.mens {
-  background: rgba(100, 149, 237, 0.2);
-  color: #2563eb;
-  border-color: rgba(100, 149, 237, 0.4);
-}
-
-.partner-match-type.womens {
-  background: rgba(255, 105, 180, 0.2);
-  color: #d63384;
-  border-color: rgba(255, 105, 180, 0.4);
-}
-
-[data-theme="dark"] .partner-match-type.singles {
-  background: rgba(59, 175, 218, 0.25);
-  color: #5bc0de;
-}
-
-[data-theme="dark"] .partner-match-type.mixed {
-  background: rgba(200, 255, 0, 0.2);
-  color: var(--volt);
-}
-
-[data-theme="dark"] .partner-match-type.mens {
-  background: rgba(100, 149, 237, 0.25);
-  color: #6495ed;
-}
-
-[data-theme="dark"] .partner-match-type.womens {
-  background: rgba(255, 105, 180, 0.25);
-  color: #ff69b4;
-}
-
-/* Make partner card position relative for absolute label */
-.partner-card {
-  position: relative;
-}
+/* Old .partner-match-type corner label removed — replaced by inline .partner-match-pill */
 
 /* ============================================
-   POST PARTNER REQUEST MODAL BUTTONS
+   POST PARTNER REQUEST MODAL
 ============================================ */
 
+/* Prismatic animated bar */
+.partner-post-header {
+  margin: -24px -24px 20px -24px;
+  position: relative;
+}
+.partner-post-bar {
+  height: 6px;
+  background: linear-gradient(90deg, #c8ff00, #00d4ff, #ff5a5f, #c8ff00);
+  background-size: 200% 100%;
+  border-radius: 20px 20px 0 0;
+  animation: partnerBarShimmer 3s linear infinite;
+  box-shadow: 0 0 12px rgba(200, 255, 0, 0.3);
+}
+@keyframes partnerBarShimmer {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+.partner-post-header .modal-title,
+.partner-post-header .modal-desc {
+  padding: 0 24px;
+}
+.partner-post-header .modal-title {
+  padding-top: 20px;
+}
+
+/* Post success flash */
+/* Pill buttons */
 .partner-type-btn {
   padding: 8px 16px;
   border-radius: 100px;
@@ -430,4 +535,84 @@
   background: var(--text-primary);
   color: #fff;
   border-color: var(--text-primary);
+}
+
+/* ============================================
+   PARTNER FILTER SECTION — two-row layout
+============================================ */
+.partner-filter-section {
+  padding: 0 16px 8px;
+}
+.partner-filter-row-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.partner-filter-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  min-width: 34px;
+  flex-shrink: 0;
+}
+.partner-filter-row-wrap .filter-pills {
+  padding: 0;
+  flex: 1;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ============================================
+   PARTNER EMPTY STATE — more inviting
+============================================ */
+.partner-empty-state {
+  text-align: center;
+  padding: 40px 24px;
+}
+.partner-empty-icon {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+.partner-empty-icon svg {
+  stroke: var(--volt);
+}
+.partner-empty-state .empty-state-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+.partner-empty-state .empty-state-text {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+}
+.partner-empty-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: var(--volt);
+  color: var(--deep-black);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 16px;
+  letter-spacing: 1px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.2s;
+  box-shadow: 0 4px 16px rgba(200, 255, 0, 0.3);
+}
+.partner-empty-cta:active {
+  transform: scale(0.95);
+}
+.partner-empty-cta svg {
+  stroke: var(--deep-black);
 }

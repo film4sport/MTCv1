@@ -20,7 +20,7 @@
     if ('serviceWorker' in navigator) {
       caches.keys().then(function(names) {
         names.forEach(function(name) {
-          if (name.indexOf('mtc-court-da27461e') === -1) {
+          if (name.indexOf('mtc-court-f685cc5e') === -1) {
             caches.delete(name);
             console.log('[CacheBust] Deleted old cache:', name);
           }
@@ -1192,7 +1192,7 @@
           
           <!-- Match Type Toggle -->
           <div class="booking-modal-option-group">
-            <span class="booking-modal-option-label">Match Type</span>
+            <span class="booking-modal-option-label" style="color: var(--coral);">Match Type</span>
             <div class="booking-match-type-toggle" id="matchTypeToggle">
               <button class="match-type-btn active" data-type="singles" onclick="selectMatchType('singles')">Singles</button>
               <button class="match-type-btn" data-type="doubles" onclick="selectMatchType('doubles')">Doubles</button>
@@ -1263,38 +1263,60 @@
         </button>
       </div>
       
-      <div class="filter-pills" id="partnerFilterPills">
-        <div class="filter-pill active" onclick="filterPartners(this, 'all')">All</div>
-        <div class="filter-pill" onclick="filterPartners(this, 'available')">Available Now</div>
-        <div class="filter-pill" onclick="filterPartners(this, 'singles')">Singles</div>
-        <div class="filter-pill" onclick="filterPartners(this, 'mixed')">Mixed Doubles</div>
-        <div class="filter-pill" onclick="filterPartners(this, 'mens')">Men's Doubles</div>
-        <div class="filter-pill" onclick="filterPartners(this, 'womens')">Women's Doubles</div>
-        <div class="filter-pill" onclick="filterPartners(this, 'beginner')">Beginner</div>
-        <div class="filter-pill" onclick="filterPartners(this, 'intermediate')">Intermediate</div>
-        <div class="filter-pill" onclick="filterPartners(this, 'advanced')">Advanced</div>
+      <div class="partner-filter-section" id="partnerFilterPills">
+        <div class="partner-filter-row-wrap">
+          <span class="partner-filter-label">Type</span>
+          <div class="filter-pills">
+            <div class="filter-pill active" onclick="filterPartners(this, 'all')">All</div>
+            <div class="filter-pill" onclick="filterPartners(this, 'available')">Available</div>
+            <div class="filter-pill" onclick="filterPartners(this, 'singles')">Singles</div>
+            <div class="filter-pill" onclick="filterPartners(this, 'mixed')">Mixed</div>
+            <div class="filter-pill" onclick="filterPartners(this, 'mens')">Men's</div>
+            <div class="filter-pill" onclick="filterPartners(this, 'womens')">Women's</div>
+          </div>
+        </div>
+        <div class="partner-filter-row-wrap">
+          <span class="partner-filter-label">Level</span>
+          <div class="filter-pills">
+            <div class="filter-pill" onclick="filterPartners(this, 'beginner')">Beginner</div>
+            <div class="filter-pill" onclick="filterPartners(this, 'intermediate')">Intermediate</div>
+            <div class="filter-pill" onclick="filterPartners(this, 'advanced')">Advanced</div>
+          </div>
+        </div>
       </div>
       
       <div class="partner-cards-container" id="partnerCardsContainer">
         <!-- Partner cards populated by JavaScript from API data -->
       </div>
 
-      <div class="empty-state" id="noPartners" style="display: block;">
-        <div class="empty-state-icon">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+      <div class="empty-state partner-empty-state" id="noPartners" style="display: block;">
+        <div class="partner-empty-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="48" height="48">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <line x1="19" y1="8" x2="19" y2="14"></line>
+            <line x1="22" y1="11" x2="16" y2="11"></line>
+          </svg>
         </div>
-        <div class="empty-state-title">NO PARTNERS FOUND</div>
-        <div class="empty-state-text">No players match this filter. Try a different skill level.</div>
+        <div class="empty-state-title">LOOKING FOR A MATCH?</div>
+        <div class="empty-state-text">No partner requests yet. Be the first to post one!</div>
+        <button class="partner-empty-cta" onclick="showPostPartnerModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          POST REQUEST
+        </button>
       </div>
       
       <!-- Post Partner Request Modal -->
       <div class="modal-overlay" id="postPartnerModal" onclick="closePostPartnerModal()" role="dialog" aria-modal="true" aria-label="Post partner request">
-        <div class="modal modal-scrollable-tall" onclick="event.stopPropagation()">
-          <div class="modal-title">POST PARTNER REQUEST</div>
-          <div class="modal-desc">Let other members know you're looking for a match</div>
+        <div class="modal modal-scrollable-tall partner-post-modal" onclick="event.stopPropagation()">
+          <div class="partner-post-header">
+            <div class="partner-post-bar"></div>
+            <div class="modal-title" style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:0.5px;margin-bottom:4px;">POST PARTNER REQUEST</div>
+            <div class="modal-desc">Let other members know you're looking for a match</div>
+          </div>
 
           <div class="modal-form-group">
-            <label class="modal-form-label">Match Type</label>
+            <label class="modal-form-label" style="color: var(--coral);">Match Type</label>
             <div class="partner-post-types modal-pill-group">
               <button class="partner-type-btn active" data-type="singles" onclick="selectPartnerType(this)">Singles</button>
               <button class="partner-type-btn" data-type="mixed" onclick="selectPartnerType(this)">Mixed Doubles</button>
@@ -1302,7 +1324,7 @@
               <button class="partner-type-btn" data-type="womens" onclick="selectPartnerType(this)">Women's Doubles</button>
             </div>
 
-            <label class="modal-form-label">Preferred Skill Level</label>
+            <label class="modal-form-label" style="color: var(--electric-blue);">Preferred Skill Level</label>
             <div class="partner-post-types modal-pill-group">
               <button class="partner-type-btn active" data-level="any" onclick="selectPartnerLevel(this)">Any Level</button>
               <button class="partner-type-btn" data-level="beginner" onclick="selectPartnerLevel(this)">Beginner</button>
@@ -1310,7 +1332,7 @@
               <button class="partner-type-btn" data-level="advanced" onclick="selectPartnerLevel(this)">Advanced</button>
             </div>
 
-            <label class="modal-form-label">When</label>
+            <label class="modal-form-label" style="color: var(--coral);">When</label>
             <div class="partner-post-types modal-pill-group">
               <button class="partner-type-btn active" data-when="anytime" onclick="selectPartnerWhen(this)">Anytime</button>
               <button class="partner-type-btn" data-when="today" onclick="selectPartnerWhen(this)">Today</button>
@@ -1347,11 +1369,14 @@
               </div>
             </div>
 
-            <label class="modal-form-label">Message (optional)</label>
+            <label class="modal-form-label" style="color: var(--electric-blue);">Message (optional)</label>
             <textarea id="partnerPostMessage" class="modal-textarea" aria-label="Partner request message" placeholder="Looking for a rally partner..."></textarea>
           </div>
 
-          <button class="modal-btn-primary-full" onclick="submitPartnerRequest()">Post Request</button>
+          <button class="modal-btn-primary-full" onclick="submitPartnerRequest()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" style="vertical-align:-3px;margin-right:6px;"><path d="M22 2L11 13"></path><path d="M22 2l-7 20-4-9-9-4 20-7z"></path></svg>
+            POST REQUEST
+          </button>
           <button class="modal-btn-secondary" onclick="closePostPartnerModal()">Cancel</button>
         </div>
       </div>
@@ -2557,7 +2582,6 @@
         <button class="nav-item" id="nav-partners" onclick="navigateTo('partners');" style="position:relative;" aria-label="Find partners">
           <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
           <span class="nav-label">Partners</span>
-          <span class="message-badge" id="navPartnersBadge" aria-hidden="true" style="display:none">0</span>
         </button>
         <button class="nav-item" id="nav-messages" onclick="navigateTo('messages');" style="position: relative;" aria-label="Messages">
           <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>

@@ -904,16 +904,7 @@
         availability: p.availability || ''
       });
     });
-    // Update partners nav badge
-    var partnersBadge = document.getElementById('navPartnersBadge');
-    if (partnersBadge) {
-      if (homePartnerPool.length > 0) {
-        partnersBadge.textContent = homePartnerPool.length > 99 ? '99+' : homePartnerPool.length;
-        partnersBadge.style.display = 'flex';
-      } else {
-        partnersBadge.style.display = 'none';
-      }
-    }
+    // Partners nav badge removed — user doesn't want notification counts for partner requests
     // Re-populate the home screen partner cards
     repopulateHomePartners();
     // Also populate the dedicated partners screen if it has been rendered
@@ -943,28 +934,32 @@
     var currentUserObj = MTC.storage.get('mtc-user', null) || MTC.storage.get('mtc-current-user', null);
     var currentUserId = currentUserObj ? (currentUserObj.id || currentUserObj.email || '') : '';
 
-    // Build cards HTML from API data
+    // Build cards HTML from API data — v2 redesign
+    var personIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>';
+    // Ring colors cycle by match type
+    var ringColorMap = { singles: 'var(--electric-blue)', mixed: 'var(--electric-blue)', mens: 'var(--coral)', womens: '#ff69b4' };
+
     var html = '';
     homePartnerPool.forEach(function(p) {
       var isOwnRequest = currentUserId && p.userId && p.userId === currentUserId;
-      var avatar = typeof getAvatar === 'function' ? getAvatar(p.name) : '';
       var matchType = p.matchType || 'singles';
       var matchLabel = matchType === 'mixed' ? 'Mixed Doubles' : matchType === 'mens' ? "Men's Doubles" : matchType === 'womens' ? "Women's Doubles" : 'Singles';
       var levelDisplay = p.level ? (p.level.charAt(0).toUpperCase() + p.level.slice(1)) : 'Intermediate';
       var isAvailable = p.availability && (p.availability.toLowerCase().indexOf('today') !== -1 || p.availability.toLowerCase().indexOf('now') !== -1);
+      var ringColor = ringColorMap[matchType] || 'var(--electric-blue)';
 
       var actionBtn;
       if (isOwnRequest) {
-        // Own request: show cancel button (red X) instead of join
         actionBtn =
-          '<button class="partner-action-btn ripple" data-action="cancelApiPartner" data-id="' + (p.id || '') + '" style="background: var(--coral);">' +
+          '<button class="partner-action-btn partner-cancel-btn ripple" data-action="cancelApiPartner" data-id="' + (p.id || '') + '">' +
             '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>' +
+            '<span>Cancel</span>' +
           '</button>';
       } else {
-        // Other member's request: show message/join button
         actionBtn =
-          '<button class="partner-action-btn ripple" data-action="joinPartner" data-id="' + (p.id || '') + '" data-name="' + sanitizeHTML(p.name) + '">' +
+          '<button class="partner-action-btn partner-msg-btn ripple" data-action="joinPartner" data-id="' + (p.id || '') + '" data-name="' + sanitizeHTML(p.name) + '">' +
             '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"></path><path d="M22 2l-7 20-4-9-9-4 20-7z"></path></svg>' +
+            '<span>Message</span>' +
           '</button>';
       }
 
@@ -978,21 +973,34 @@
       }
 
       html += '<div class="partner-card stagger-item" data-match-type="' + sanitizeHTML(matchType) + '" data-level="' + sanitizeHTML((p.level || 'intermediate').toLowerCase()) + '" data-available="' + isAvailable + '" data-partner-id="' + (p.id || '') + '">' +
-        '<div class="partner-match-type ' + sanitizeHTML(matchType) + '">' + sanitizeHTML(matchLabel) + '</div>' +
-        '<svg class="partner-avatar" viewBox="0 0 100 100">' + (avatar || '').replace(/<\/?svg[^>]*>/g, '') + '</svg>' +
-        '<div class="partner-info">' +
-          '<div class="partner-name">' + sanitizeHTML(p.name) + (isOwnRequest ? ' <span style="font-size: 11px; color: var(--volt); font-weight: 600;">(You)</span>' : '') + '</div>' +
-          '<div class="partner-level">' + sanitizeHTML(levelDisplay) + '</div>' +
-          (dateDisplay ? '<div class="partner-availability" style="font-size:11px;color:var(--text-muted);">' + sanitizeHTML(dateDisplay) + '</div>' : '') +
-          '<div class="partner-availability">' + sanitizeHTML(p.time || 'Anytime') + '</div>' +
+        '<div class="partner-card-top">' +
+          '<div class="partner-card-info">' +
+            '<div class="partner-name">' + sanitizeHTML(p.name) + '</div>' +
+            '<div class="partner-card-pills">' +
+              '<span class="partner-match-pill ' + sanitizeHTML(matchType) + '">' + sanitizeHTML(matchLabel) + '</span>' +
+              '<span class="partner-level-pill">' + sanitizeHTML(levelDisplay) + '</span>' +
+            '</div>' +
+          '</div>' +
         '</div>' +
-        '<div class="partner-action">' + actionBtn + '</div>' +
+        '<div class="partner-card-bottom">' +
+          '<div class="partner-card-meta">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="var(--electric-blue)" stroke-width="2" width="14" height="14"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>' +
+            '<span>' + sanitizeHTML(p.time || 'Anytime') + (dateDisplay ? ' &middot; ' + sanitizeHTML(dateDisplay) : '') + '</span>' +
+          '</div>' +
+          '<div class="partner-action">' + actionBtn + '</div>' +
+        '</div>' +
       '</div>';
     });
     container.innerHTML = html;
 
-    // User's own local requests are appended by partners.js DOMContentLoaded handler
-    // and insertPartnerRequestCard, so they'll layer on top naturally
+    // Re-insert user's own local requests from localStorage
+    var localRequests = MTC.storage.get('mtc-partner-requests', []);
+    var today = new Date().toISOString().split('T')[0];
+    localRequests.filter(function(req) { return !req.date || req.date >= today; }).forEach(function(req) {
+      if (typeof insertPartnerRequestCard === 'function') {
+        insertPartnerRequestCard(req);
+      }
+    });
   }
   window.renderPartnersScreen = renderPartnersScreen;
 

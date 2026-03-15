@@ -345,29 +345,7 @@
   box-shadow: 0 2px 6px rgba(0, 212, 255, 0.4);
 }
 
-/* .partner-card moved to partners.css */
-
-.partner-action-btn {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: var(--volt);
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
-}
-
-.partner-action-btn:hover {
-  transform: scale(1.15);
-  box-shadow: 0 4px 16px rgba(200, 255, 0, 0.4);
-}
-
-.partner-action-btn:active {
-  transform: scale(0.95);
-}
+/* Partner card + action buttons moved to partners.css v2 */
 
 /* Message Item Animations */
 .message-item {

@@ -1439,6 +1439,32 @@ Closed ALL notification asymmetries. Every action fires symmetric bell + push + 
 - **Rule #27 added to CLAUDE.md**: Never use `switch_browser` tool — triggers Windows popup that always errors. Ask user to reconnect manually instead.
 - **Build hash**: `mtc-court-187f34c7`
 
+**Event modal accent + partner screen v2 redesign (Mar 14, 2026 — session 5):**
+- **Accent color mismatch fixed**: 3rd homepage event (mens-round-robin) had black RSVP button but electric-blue modal. Added `accentMap` in `events.js` mapping each event ID to its accent color. Added `accentOverride` parameter to `showEventModal(eventId, accentOverride)` for weekly schedule items in `index.html`.
+- **Dark accent modal icon fix**: When modal accent is `var(--deep-black)`, meta icons (calendar/clock/location) were invisible in dark mode. Added `--modal-icon-stroke` CSS variable set to volt for dark accents. CSS fallback chain: `stroke: var(--modal-icon-stroke, var(--modal-accent, var(--volt)))`.
+- **RSVP button text color**: `--modal-btn-text` variable — white text on dark accent buttons, black on light accent buttons.
+- **Event modal prismatic accent bar**: Static colored bar replaced with animated prismatic gradient (`#c8ff00, #00d4ff, #ff5a5f, #c8ff00`) with shimmer animation. Same treatment on partner post modal.
+- **Partner modal textarea fix**: Added `outline: none` and volt focus border to `.modal-textarea` in `modals.css`.
+- **Partner modal label colors**: "Match Type"=coral, "Preferred Skill Level"=electric-blue, "When"=coral, "Message (optional)"=electric-blue — set via inline styles in `index.html`.
+- **Full partner screen v2 redesign (13 improvements)**:
+  1. Prismatic animated bar on post partner modal header
+  2. Bebas Neue "POST A PARTNER REQUEST" title
+  3. Partner card v2 layout: top section (avatar + info) / bottom section (meta + actions)
+  4. Stroke-style person avatars with colored rings (ring color = match type: singles=electric-blue, mixed=volt, mens=coral, womens=coral)
+  5. Match-type pills (colored: singles=blue, mixed=volt, mens=coral, womens=coral) + level pills (muted)
+  6. Labeled action buttons: volt "MESSAGE" pill, coral "CANCEL" pill (replaces icon-only circles)
+  7. YOU badge (volt pill) on own requests
+  8. Redesigned empty state: "LOOKING FOR A MATCH?" heading + person icon + POST REQUEST CTA
+  9. Filter pills split into two rows with TYPE/LEVEL labels in `.partner-filter-section`
+  10. Success flash animation on post submit ("REQUEST POSTED!" overlay, 900ms)
+  11. POST REQUEST button with send icon SVG + uppercase
+  12. Dark mode verified — all elements render correctly
+  13. Old CSS cleanup across navigation.css, events-screen.css, neumorphic.css (removed stale `.partner-action-btn` rules)
+- **Files changed**: `events.js`, `index.html`, `schedule.css`, `modals.css`, `partners.css` (major rewrite), `partners.js`, `navigation.js` (renderPartnersScreen + insertPartnerRequestCard rewritten), `events-screen.css` (old partner styles removed), `neumorphic.css` (old partner selector removed)
+- **Home screen partner cards** (`repopulateHomePartners` in navigation.js) still use old card structure — may need v2 update for consistency
+- **Build**: needs `npm run build:mobile` after changes
+
 **Pending:**
 - RSVP end-to-end verification
 - Events screen calendar may also need dedup (uses `getCalendarEvents()` in schedule.js — only shows RSVP'd events, lower priority)
+- Home screen partner cards v2 consistency update (optional)

@@ -68,6 +68,9 @@
       if (timeInp) timeInp.value = '';
       var timeSection = document.getElementById('partnerTimeSection');
       if (timeSection) timeSection.style.display = 'none';
+      // Remove success flash if present
+      var flash = modal.querySelector('.success-flash-overlay');
+      if (flash) flash.remove();
     }
   };
 
@@ -240,23 +243,36 @@
       avatarHtml = (typeof avatarSVGs !== 'undefined' && avatarSVGs[avatarKey]) ? avatarSVGs[avatarKey] : (typeof avatarSVGs !== 'undefined' ? avatarSVGs['default'] : '');
     }
 
+    var personIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>';
+    var ringColorMap = { singles: 'var(--electric-blue)', mixed: 'var(--electric-blue)', mens: 'var(--coral)', womens: '#ff69b4' };
+    var ringColor = ringColorMap[req.type] || 'var(--electric-blue)';
+
     const card = document.createElement('div');
     card.className = 'partner-card stagger-item';
     card.setAttribute('data-match-type', req.type);
     card.setAttribute('data-request-id', req.id);
-    card.style.border = '2px solid var(--volt)';
+    card.style.border = '1.5px solid rgba(200, 255, 0, 0.3)';
     card.innerHTML =
-      '<div class="partner-match-type ' + sanitizeHTML(req.type) + '">' + sanitizeHTML(req.typeLabel) + '</div>' +
-      '<svg class="partner-avatar" viewBox="0 0 100 100">' + (avatarHtml || '').replace(/<\/?svg[^>]*>/g, '') + '</svg>' +
-      '<div class="partner-info">' +
-        '<div class="partner-name">' + sanitizeHTML(req.userName) + ' <span style="font-size: 11px; color: var(--volt); font-weight: 600;">(You)</span></div>' +
-        '<div class="partner-level">' + sanitizeHTML(req.level) + '</div>' +
-        '<div class="partner-availability">' + sanitizeHTML(req.when) + '</div>' +
+      '<div class="partner-card-top">' +
+        '<div class="partner-card-info">' +
+          '<div class="partner-name">' + sanitizeHTML(req.userName) + '</div>' +
+          '<div class="partner-card-pills">' +
+            '<span class="partner-match-pill ' + sanitizeHTML(req.type) + '">' + sanitizeHTML(req.typeLabel) + '</span>' +
+            '<span class="partner-level-pill">' + sanitizeHTML(req.level) + '</span>' +
+          '</div>' +
+        '</div>' +
       '</div>' +
-      '<div class="partner-action">' +
-        '<button class="partner-action-btn ripple" data-action="removePartnerRequest" data-req-id="' + sanitizeHTML(req.id) + '" style="background: var(--coral);">' +
-          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>' +
-        '</button>' +
+      '<div class="partner-card-bottom">' +
+        '<div class="partner-card-meta">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="var(--electric-blue)" stroke-width="2" width="14" height="14"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>' +
+          '<span>' + sanitizeHTML(req.when) + '</span>' +
+        '</div>' +
+        '<div class="partner-action">' +
+          '<button class="partner-action-btn partner-cancel-btn ripple" data-action="removePartnerRequest" data-req-id="' + sanitizeHTML(req.id) + '">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>' +
+            '<span>Cancel</span>' +
+          '</button>' +
+        '</div>' +
       '</div>';
 
     var container = document.getElementById('partnerCardsContainer');
@@ -267,6 +283,9 @@
       if (emptyState) emptyState.style.display = 'none';
     }
   }
+
+  // Expose for navigation.js renderPartnersScreen()
+  window.insertPartnerRequestCard = insertPartnerRequestCard;
 
   // onclick handler (generated HTML)
   window.removePartnerRequest = function(requestId) {
@@ -316,16 +335,8 @@
     }
   };
 
-  // Restore saved partner requests on page load (filter out expired — past date)
-  document.addEventListener('DOMContentLoaded', function() {
-    var requests = MTC.storage.get('mtc-partner-requests', []);
-    var today = new Date().toISOString().split('T')[0];
-    var active = requests.filter(function(req) { return !req.date || req.date >= today; });
-    if (active.length !== requests.length) {
-      MTC.storage.set('mtc-partner-requests', active);
-    }
-    active.forEach(function(req) { insertPartnerRequestCard(req); });
-  });
+  // Local requests are restored by renderPartnersScreen() in navigation.js
+  // which is called on API data load and on every navigate-to-partners.
 
   // ============================================
   // PROGRAM ENROLLMENT
