@@ -1412,7 +1412,8 @@
   margin-bottom: 20px;
 }
 
-.calendar-month {
+.calendar-month,
+.calendar-month-label {
   font-family: 'Bebas Neue', sans-serif;
   font-size: 24px;
   color: var(--text-primary);

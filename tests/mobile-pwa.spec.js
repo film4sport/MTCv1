@@ -84,6 +84,8 @@ test.describe('Mobile PWA — Login Screen', () => {
     await page.locator('a[onclick*="showSignUpScreen"]').dispatchEvent('click');
     await page.waitForTimeout(500);
     // Submit empty — target the signup card's button specifically
+    // Scroll into view first — on small WebKit viewports the button may be below the fold
+    await page.locator('#signupCard .login-btn').scrollIntoViewIfNeeded();
     await page.locator('#signupCard .login-btn').click();
     await page.waitForTimeout(500);
     const errors = page.locator('#signupCard .field-error');

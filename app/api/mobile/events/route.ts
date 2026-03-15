@@ -288,23 +288,18 @@ export async function POST(request: Request) {
       const { error } = await supabase.from('event_attendees').insert({ event_id: eventId, user_name: userName });
       if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-      // Bell + push notification on RSVP (fire-and-forget)
+      // Bell notification on RSVP (fire-and-forget)
+      // No push notification — user already sees in-app "You're in!" toast.
+      // Sending push to the same user caused a duplicate notification.
       const { data: evt } = await supabase.from('events').select('title, date').eq('id', eventId).single();
       if (evt) {
         const now = new Date().toISOString();
         const notifId = `notif-rsvp-${eventId}-${authResult.id.slice(0, 8)}`;
-        Promise.all([
-          createNotification(supabase, authResult.id, {
-            id: notifId, type: 'event', title: 'RSVP Confirmed',
-            body: `You're going to "${evt.title}" on ${evt.date}`,
-            timestamp: now,
-          }),
-          sendPushToUser(supabase, authResult.id, {
-            title: 'RSVP Confirmed',
-            body: `You're going to "${evt.title}" on ${evt.date}`,
-            tag: `event-rsvp-${eventId}`,
-          }),
-        ]).catch(() => { /* best-effort */ });
+        createNotification(supabase, authResult.id, {
+          id: notifId, type: 'event', title: 'RSVP Confirmed',
+          body: `You're going to "${evt.title}" on ${evt.date}`,
+          timestamp: now,
+        }).catch(() => { /* best-effort */ });
       }
 
       return NextResponse.json({ success: true, action: 'added' });

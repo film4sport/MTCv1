@@ -300,8 +300,11 @@
     var readItems = document.querySelectorAll('.notification-item:not(.unread)');
     if (readItems.length === 0) { showToast('No read notifications to clear'); return; }
     readItems.forEach(function(item) { item.remove(); });
-    // Also remove from API data cache
-    apiNotifications = apiNotifications.filter(function(n) { return !n.read; });
+    // Update localStorage cache
+    var cached = MTC.storage.get('mtc-api-notifications', []);
+    if (Array.isArray(cached)) {
+      MTC.storage.set('mtc-api-notifications', cached.filter(function(n) { return !n.read; }));
+    }
     // Delete from server
     if (typeof MTC !== 'undefined' && MTC.fn && MTC.fn.apiRequest) {
       MTC.fn.apiRequest('/mobile/notifications', {

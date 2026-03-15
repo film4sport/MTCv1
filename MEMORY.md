@@ -254,6 +254,46 @@ Before reporting any feature change as "done", verify:
 - **No confetti** (per user request).
 - To test: clear `mtc-onboarding-complete` (mobile) or `mtc-onboarding-done-{userId}` (desktop) from localStorage.
 
+### Cowork Session (2026-03-14) — Mobile PWA Visual Polish + Bug Fixes
+
+**Partner request cards toned down:**
+- Removed YOU badge and avatar icons from partner cards (user knows it's theirs from Cancel button)
+- Card border toned down to `rgba(200,255,0,0.3)` (was full volt)
+- Clock icon changed from volt to electric-blue
+- Success flash animation removed from partner post submit (was too fast/not useful)
+- Empty state icon: removed white circle background (light mode looked ugly)
+- Files: `partners.js`, `navigation.js`, `partners.css`
+
+**Calendar month dark mode fix:**
+- `.calendar-month-label` added to `.calendar-month` CSS rule for dark mode visibility
+- File: `home.css`
+
+**Notification panel fixes:**
+- Fixed `deleteReadNotifications()` — was referencing undefined `apiNotifications` variable, causing "Something went wrong" toast. Replaced with localStorage cache update.
+- Mark-read checkmark: electric blue in light mode, volt in dark mode. X button stays default/black.
+- Unread notification borders changed from full volt border to left-accent-bar only (volt in dark, electric-blue in light)
+- File: `notifications.js`, `menu-notifications.css`
+
+**Double toast on RSVP — FIXED:**
+- **Root cause**: `events.js` showed `showToast('You\'re in!')` immediately, then the API route (`/api/mobile/events POST`) sent a push notification back to the same user via `sendPushToUser()`. The push arrived ~1 second later as a second notification.
+- **Fix**: Removed `sendPushToUser()` from RSVP in `app/api/mobile/events/route.ts`. Bell notification (stored in DB) is kept — only the redundant push to the self-initiating user was removed.
+- File: `app/api/mobile/events/route.ts`
+
+**Partner request broadcast — NOT YET IMPLEMENTED:**
+- Currently, when a user posts a partner request, only they get notified (bell + push + email confirmation).
+- Other users only see the request when they open the Partners screen.
+- TODO: Broadcast push notification to all users when a new partner request is posted.
+
+**Files modified this session:**
+- `public/mobile-app/js/partners.js` — removed success flash, YOU badge, avatar, exposed `insertPartnerRequestCard` globally
+- `public/mobile-app/js/navigation.js` — removed YOU badge/avatar from cards, re-inserts local requests after render
+- `public/mobile-app/css/partners.css` — toned down volt, removed success flash CSS, clock icon electric-blue
+- `public/mobile-app/css/home.css` — calendar month label dark mode fix
+- `public/mobile-app/js/notifications.js` — fixed deleteReadNotifications undefined var
+- `public/mobile-app/css/menu-notifications.css` — mark-read icon colors, unread left-accent-bar
+- `public/mobile-app/index.html` — Match Type label coral inline style, removed partner nav badge
+- `app/api/mobile/events/route.ts` — removed sendPushToUser for self-RSVP
+- `tests/mobile-pwa.spec.js` — scrollIntoViewIfNeeded for WebKit small viewports
 
 
 **Bugs fixed:**

@@ -347,7 +347,7 @@
 
 .notification-item.unread {
   background: transparent;
-  border: 1.5px solid var(--volt);
+  border: 1.5px solid transparent;
   border-left: 4px solid var(--volt);
 }
 
@@ -459,6 +459,9 @@
 .mark-read-btn svg {
   width: 20px;
   height: 20px;
+  stroke: var(--electric-blue);
+}
+[data-theme="dark"] .mark-read-btn svg {
   stroke: var(--volt);
 }
 
@@ -534,7 +537,8 @@
 }
 
 [data-theme="light"] .notification-item.unread {
-  border: 1.5px solid var(--volt);
+  border: 1.5px solid transparent;
+  border-left: 4px solid var(--electric-blue);
 }
 
 /* Light mode notification text - MUST be dark */

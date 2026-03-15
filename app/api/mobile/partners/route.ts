@@ -100,39 +100,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Failed to create partner request' }, { status: 500 });
     }
 
-    // Notifications (non-blocking, best-effort)
-    const notifBody = `Looking for ${type === 'any' ? 'any match type' : type} on ${todayStr} at ${timeStr}.`;
-    try {
-      // Bell notification
-      await supabase.from('notifications').insert({
-        id: generateId('n'), user_id: userId, type: 'partner',
-        title: 'Partner Request Posted', body: notifBody,
-        timestamp: new Date().toISOString(), read: false,
-      });
-      // Push notification
-      await sendPushToUser(supabase, userId, {
-        title: 'Partner Request Posted', body: notifBody,
-        type: 'partner', tag: `partner-post-${partnerId}`,
-      });
-      // Email confirmation
-      const token = request.headers.get('authorization')?.slice(7);
-      if (token && authResult.email) {
-        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://monotennisclub.com';
-        fetch(`${siteUrl}/api/notify-email`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-          body: JSON.stringify({
-            recipientEmail: authResult.email, recipientName: authResult.name,
-            recipientUserId: userId,
-            subject: 'Partner Request Posted — Mono Tennis Club',
-            heading: 'Partner Request Posted',
-            body: `Your partner request is live! Looking for ${type === 'any' ? 'any match type' : type} on ${todayStr} at ${timeStr}. You'll be notified when someone responds.`,
-            ctaText: 'View Requests', ctaUrl: `${siteUrl}/mobile-app/index.html#partners`,
-            logType: 'partner_request',
-          }),
-        }).catch(() => { /* email is best-effort */ });
-      }
-    } catch { /* notifications are non-critical */ }
+    // No self-notifications on post — user already sees in-app confirmation.
+    // They'll be notified when someone joins their request (PATCH handler).
 
     return NextResponse.json({ success: true, id: partnerId });
   } catch {
