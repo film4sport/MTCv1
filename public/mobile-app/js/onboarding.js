@@ -7,7 +7,7 @@
 
   // Private state
   let currentOnboardingSlide = 0;
-  const totalOnboardingSlides = 5;
+  const totalOnboardingSlides = 6;
 
   // Cross-file function (called from interactive.js)
   /** Shows onboarding flow if user hasn't completed it yet */

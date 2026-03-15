@@ -545,9 +545,9 @@ describe('Mobile PWA index.html — PIN Auth HTML', () => {
     expect(content).toContain('id="newPinConfirm"');
   });
 
-  it('has signupPin and signupPinConfirm inputs', () => {
-    expect(content).toContain('id="signupPin"');
-    expect(content).toContain('id="signupPinConfirm"');
+  it('does NOT have signupPin inputs (signup card removed)', () => {
+    expect(content).not.toContain('id="signupPin"');
+    expect(content).not.toContain('id="signupPinConfirm"');
   });
 
   it('does NOT have Google Sign-In button', () => {
