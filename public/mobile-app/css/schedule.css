@@ -314,7 +314,7 @@
 .event-modal-meta-item svg {
   width: 14px;
   height: 14px;
-  stroke: var(--modal-accent, var(--volt));
+  stroke: var(--modal-icon-stroke, var(--modal-accent, var(--volt)));
   flex-shrink: 0;
 }
 

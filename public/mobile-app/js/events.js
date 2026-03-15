@@ -415,9 +415,10 @@
       'mens-round-robin': 'var(--deep-black)'
     };
     const accentColor = accentOverride || accentMap[eventId] || accentColors[Object.keys(clubEventsData).indexOf(eventId) % 3];
-    // For dark accent colors, button text must be white (light mode) or volt (dark mode)
+    // For dark accent colors, button text must be white; icons need volt override in dark mode
     const isDarkAccent = accentColor === 'var(--deep-black)';
     const btnTextColor = isDarkAccent ? '#ffffff' : 'var(--color-black)';
+    const iconStroke = isDarkAccent ? 'var(--volt)' : '';
 
     // Build attendee grid (2-col, max 6 shown, overflow chip)
     const maxShow = 6;
@@ -458,7 +459,7 @@
     modal.setAttribute('aria-label', 'Event details');
     modal.onclick = function(e) { if (e.target === this) closeEventModal(); };
     modal.innerHTML =
-      '<div class="modal" onclick="event.stopPropagation()" style="max-height: 85vh; overflow-y: auto; --modal-accent: ' + accentColor + '; --modal-btn-text: ' + btnTextColor + ';">' +
+      '<div class="modal" onclick="event.stopPropagation()" style="max-height: 85vh; overflow-y: auto; --modal-accent: ' + accentColor + '; --modal-btn-text: ' + btnTextColor + (iconStroke ? '; --modal-icon-stroke: ' + iconStroke : '') + ';">' +
         '<div class="event-modal-header">' +
           '<div class="event-modal-header-content">' +
             '<div class="event-modal-title">' + sanitizeHTML(event.title) + '</div>' +
