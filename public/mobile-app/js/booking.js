@@ -596,6 +596,22 @@
       ev.registered.push('You');
     }
 
+    // Persist RSVP to backend via events API
+    if (ev && MTC.getToken() && typeof MTC.fn.apiRequest === 'function') {
+      // Use the event title + date as a stable ID for grid events
+      var eventId = ev.id || (ev.title + '-' + dateStr);
+      MTC.fn.apiRequest('/mobile/events', {
+        method: 'POST',
+        body: JSON.stringify({ eventId: eventId })
+      }).then(function(res) {
+        if (!res.ok) {
+          MTC.warn('[MTC] Grid event RSVP sync failed:', res.data);
+        }
+      }).catch(function(err) {
+        MTC.warn('[MTC] Grid event RSVP sync error:', err);
+      });
+    }
+
   }
 
 

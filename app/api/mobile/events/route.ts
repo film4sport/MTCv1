@@ -284,14 +284,24 @@ export async function POST(request: Request) {
       if (error) return NextResponse.json({ error: error.message }, { status: 500 });
       return NextResponse.json({ success: true, action: 'removed' });
     } else {
-      // RSVP
+      // RSVP — enforce server-side spot limit
+      const { data: evt } = await supabase.from('events').select('title, date, spots_total').eq('id', eventId).single();
+      if (evt?.spots_total && evt.spots_total > 0) {
+        const { count } = await supabase
+          .from('event_attendees')
+          .select('id', { count: 'exact', head: true })
+          .eq('event_id', eventId);
+        if (count !== null && count >= evt.spots_total) {
+          return NextResponse.json({ error: 'Event is full' }, { status: 409 });
+        }
+      }
+
       const { error } = await supabase.from('event_attendees').insert({ event_id: eventId, user_name: userName });
       if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
       // Bell notification on RSVP (fire-and-forget)
       // No push notification — user already sees in-app "You're in!" toast.
       // Sending push to the same user caused a duplicate notification.
-      const { data: evt } = await supabase.from('events').select('title, date').eq('id', eventId).single();
       if (evt) {
         const now = new Date().toISOString();
         const notifId = `notif-rsvp-${eventId}-${authResult.id.slice(0, 8)}`;

@@ -559,27 +559,56 @@
       }
     }
 
-    // Persist RSVP to Supabase via API
+    // Refresh home calendar dots and schedule calendar to reflect RSVP change
+    if (typeof MTC.fn.renderHomeCalendar === 'function') MTC.fn.renderHomeCalendar();
+    if (typeof generateCalendar === 'function') generateCalendar();
+
+    // Persist RSVP to Supabase via API — wait for confirmation before closing modal
     var token = MTC.getToken();
+    var isUnrsvp = !userRsvps.includes(eventId); // we just toggled, so check current state
     if (token && typeof MTC.fn.apiRequest === 'function') {
       MTC.fn.apiRequest('/mobile/events', {
         method: 'POST',
         body: JSON.stringify({ eventId: eventId })
       }).then(function(res) {
         if (!res.ok) {
-          MTC.warn('[MTC] RSVP sync failed:', res.data);
+          // Rollback optimistic UI
+          if (!isUnrsvp) {
+            // Was an RSVP that failed — undo it
+            var idx = userRsvps.indexOf(eventId);
+            if (idx !== -1) userRsvps.splice(idx, 1);
+            saveUserRsvps();
+            event.spotsTaken--;
+            var attIdx = event.attendees.indexOf('You');
+            if (attIdx !== -1) event.attendees.splice(attIdx, 1);
+            removeEventFromMyBookings(eventId);
+          } else {
+            // Was an un-RSVP that failed — re-add
+            userRsvps.push(eventId);
+            saveUserRsvps();
+            event.spotsTaken++;
+            event.attendees.unshift('You');
+            addEventToMyBookings(eventId, 'event');
+          }
+          var errMsg = (res.data && res.data.error) || 'RSVP failed';
+          if (res.status === 409) errMsg = 'Sorry, this event is full!';
+          showToast(errMsg, 'error');
+          if (typeof MTC.fn.renderHomeCalendar === 'function') MTC.fn.renderHomeCalendar();
+          if (typeof generateCalendar === 'function') generateCalendar();
+          renderEventModal(event);
+        } else {
+          // Success — close modal
+          setTimeout(function() { closeEventModal(); }, 900);
         }
       }).catch(function(err) {
         MTC.warn('[MTC] RSVP sync error:', err);
+        showToast('Network error — please try again', 'error');
+        setTimeout(function() { closeEventModal(); }, 900);
       });
+    } else {
+      // No token / offline — close after animation (local-only)
+      setTimeout(function() { closeEventModal(); }, 900);
     }
-
-    // Refresh home calendar dots and schedule calendar to reflect RSVP change
-    if (typeof MTC.fn.renderHomeCalendar === 'function') MTC.fn.renderHomeCalendar();
-    if (typeof generateCalendar === 'function') generateCalendar();
-
-    // Close modal after success animation
-    setTimeout(function() { closeEventModal(); }, 900);
   }
 
   // Coach registration modal removed — coaching info lives on the Lessons screen

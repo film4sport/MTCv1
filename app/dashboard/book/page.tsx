@@ -125,7 +125,7 @@ export default function BookCourtPage() {
     setShowModal(true);
   };
 
-  const confirmBooking = (isGuest: boolean, guestName: string, participants: { id: string; name: string }[], matchType: 'singles' | 'doubles', duration: number) => {
+  const confirmBooking = async (isGuest: boolean, guestName: string, participants: { id: string; name: string }[], matchType: 'singles' | 'doubles', duration: number) => {
     if (!modalData || !currentUser || bookingLoading) return;
     if (isGuest && !guestName.trim()) return;
     const alreadyBooked = isSlotBooked(bookings, modalData.courtId, modalData.date, modalData.time);
@@ -135,26 +135,31 @@ export default function BookCourtPage() {
       return;
     }
     setBookingLoading(true);
-    addBooking({
-      id: generateId('b'),
-      courtId: modalData.courtId,
-      courtName: modalData.courtName,
-      date: modalData.date,
-      time: modalData.time,
-      userId: currentUser.id,
-      userName: currentUser.name,
-      guestName: isGuest ? guestName.trim() : undefined,
-      participants: participants.length > 0 ? participants : undefined,
-      status: 'confirmed' as const,
-      type: 'court' as const,
-      matchType,
-      duration,
-      bookedFor: activeProfile.type === 'family_member' ? activeDisplayName : undefined,
-    });
-    setBookingLoading(false);
-    setShowModal(false);
-    setBookingSuccess({ courtName: modalData.courtName, date: modalData.date, time: modalData.time, participants: participants.length > 0 ? participants : undefined, duration, matchType });
-    showToast(`Court booked: ${getTimeRange(modalData.time, duration)}`);
+    try {
+      await addBooking({
+        id: generateId('b'),
+        courtId: modalData.courtId,
+        courtName: modalData.courtName,
+        date: modalData.date,
+        time: modalData.time,
+        userId: currentUser.id,
+        userName: currentUser.name,
+        guestName: isGuest ? guestName.trim() : undefined,
+        participants: participants.length > 0 ? participants : undefined,
+        status: 'confirmed' as const,
+        type: 'court' as const,
+        matchType,
+        duration,
+        bookedFor: activeProfile.type === 'family_member' ? activeDisplayName : undefined,
+      });
+      setShowModal(false);
+      setBookingSuccess({ courtName: modalData.courtName, date: modalData.date, time: modalData.time, participants: participants.length > 0 ? participants : undefined, duration, matchType });
+      showToast(`Court booked: ${getTimeRange(modalData.time, duration)}`);
+    } catch {
+      // addBooking already shows error toast and rolls back — just close loading
+    } finally {
+      setBookingLoading(false);
+    }
   };
 
   const myUpcoming = bookings

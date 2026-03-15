@@ -279,10 +279,21 @@ Before reporting any feature change as "done", verify:
 - **Fix**: Removed `sendPushToUser()` from RSVP in `app/api/mobile/events/route.ts`. Bell notification (stored in DB) is kept — only the redundant push to the self-initiating user was removed.
 - File: `app/api/mobile/events/route.ts`
 
+**Core flow hardening — Booking, Messaging, RSVP (9 bugs fixed):**
+1. **Server-side spot limit** (API): RSVP endpoint checks attendee count against `spots_total`. Returns 409 if full.
+2. **Booking modal await** (dashboard): `addBooking()` returns Promise. `confirmBooking` awaits — modal stays open until API confirms.
+3. **RSVP rollback** (mobile): `toggleEventRsvp()` waits for API. On failure, rolls back UI. Handles 409.
+4. **Event modal close timing** (mobile): Only closes after API success.
+5. **Grid event registration** (mobile): `registerForGridEvent()` now calls `/mobile/events` POST.
+6. **Message ID capture** (mobile): Server-returned `messageId` stored on local message for delete.
+7. **Message double-tap prevention** (both): `_sending` flag (mobile), `sending` state (dashboard).
+8. **Reply context preserved on failure** (both): Reply restored on send error.
+9. **Self-notifications removed**: RSVP no push to self. Partner post no bell/push/email to self.
+
 **Partner request broadcast — NOT YET IMPLEMENTED:**
-- Currently, when a user posts a partner request, only they get notified (bell + push + email confirmation).
-- Other users only see the request when they open the Partners screen.
-- TODO: Broadcast push notification to all users when a new partner request is posted.
+- When a user posts a partner request, other users are NOT notified.
+- They only see it when they open the Partners screen.
+- TODO: Broadcast push to all users on new partner request.
 
 **Files modified this session:**
 - `public/mobile-app/js/partners.js` — removed success flash, YOU badge, avatar, exposed `insertPartnerRequestCard` globally

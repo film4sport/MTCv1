@@ -663,8 +663,13 @@
 
     if (!rawText || !currentConversation) return;
 
+    // Prevent double-tap: disable send while in flight
+    if (sendMessage._sending) return;
+    sendMessage._sending = true;
+
     // Prepend reply-to quote if replying
     var text = rawText;
+    var savedReplyTo = _replyTo; // Save reply context in case send fails
     if (_replyTo) {
       text = '[reply:' + _replyTo.fromName + ':' + _replyTo.text.slice(0, 80) + ']\n' + rawText;
     }
@@ -676,14 +681,17 @@
     const now = new Date();
     const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-    // Optimistic: add to local state immediately
-    conversations[currentConversation].push({
+    // Optimistic: add to local state immediately (with temp ID)
+    var tempId = 'temp-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
+    var localMsg = {
+      id: tempId,
       text: text,
       sent: true,
       read: true,
       time: time,
       timestamp: now.toISOString()
-    });
+    };
+    conversations[currentConversation].push(localMsg);
 
     MTC.fn.saveConversations();
     input.value = '';
@@ -697,16 +705,26 @@
         method: 'POST',
         body: JSON.stringify({ toId: currentConversation, text: text })
       }).then(function(res) {
+        sendMessage._sending = false;
         if (!res.ok) {
           MTC.warn('[MTC] Message send failed:', res.data);
           if (typeof showToast === 'function') showToast('Message may not have been saved');
+        } else if (res.data && res.data.messageId) {
+          // Update local message with server ID so delete works
+          localMsg.id = res.data.messageId;
+          MTC.fn.saveConversations();
         }
       }).catch(function() {
+        sendMessage._sending = false;
+        // Restore reply context so user can retry
+        if (savedReplyTo) _replyTo = savedReplyTo;
         if (typeof showToast === 'function') showToast('Message may not have been saved');
       });
+    } else {
+      sendMessage._sending = false;
     }
 
-    } catch(e) { MTC.warn('sendMessage error:', e); }
+    } catch(e) { sendMessage._sending = false; MTC.warn('sendMessage error:', e); }
   };
 
   // simulateReply removed — real messages come via Supabase API

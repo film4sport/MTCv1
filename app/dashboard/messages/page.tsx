@@ -118,15 +118,26 @@ function MessagesContent() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [activeConvo?.messages.length]);
 
-  const handleSend = () => {
-    if (!messageText.trim() || !selectedConvo) return;
+  const [sending, setSending] = useState(false);
+  const handleSend = async () => {
+    if (!messageText.trim() || !selectedConvo || sending) return;
+    setSending(true);
+    const savedReply = replyTo;
     const text = replyTo
       ? `[reply:${replyTo.fromName}:${replyTo.text.slice(0, 80)}]\n${messageText.trim()}`
       : messageText.trim();
-    sendMessage(selectedConvo, text);
     setMessageText('');
     setReplyTo(null);
-    showToast('Message sent');
+    try {
+      await sendMessage(selectedConvo, text);
+      showToast('Message sent');
+    } catch {
+      // Restore reply context so user can retry
+      if (savedReply) setReplyTo(savedReply);
+      setMessageText(messageText);
+    } finally {
+      setSending(false);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -568,7 +579,7 @@ function MessagesContent() {
                     />
                     <button
                       onClick={handleSend}
-                      disabled={!messageText.trim()}
+                      disabled={!messageText.trim() || sending}
                       className="px-4 py-2.5 rounded-xl text-sm font-medium text-white transition-all hover:opacity-90 disabled:opacity-50 active:scale-95"
                       style={{ background: '#6b7a3d' }}
                     >

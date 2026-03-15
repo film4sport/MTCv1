@@ -25,7 +25,7 @@ interface AuthState {
 interface BookingState {
   bookings: Booking[];
   setBookings: (bookings: Booking[]) => void;
-  addBooking: (booking: Booking) => void;
+  addBooking: (booking: Booking) => Promise<void>;
   cancelBooking: (id: string) => void;
   confirmParticipant: (bookingId: string, participantId: string) => void;
   courts: Court[];
@@ -54,7 +54,7 @@ interface SocialState {
   removePartner: (partnerId: string) => void;
   conversations: Conversation[];
   setConversations: (conversations: Conversation[]) => void;
-  sendMessage: (toId: string, text: string) => void;
+  sendMessage: (toId: string, text: string) => Promise<void>;
   markConversationRead: (memberId: string) => void;
   deleteConversation: (memberId: string) => void;
   deleteMessage: (memberId: string, messageId: string) => void;
@@ -792,10 +792,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Actions
-  const addBooking = useCallback((booking: Booking) => {
+  const addBooking = useCallback((booking: Booking): Promise<void> => {
     setBookings(prev => [...prev, booking]);
     // Persist via server-side validated API — rollback booking + its notifications on failure
-    apiCall('/api/mobile/bookings', 'POST', {
+    return apiCall('/api/mobile/bookings', 'POST', {
       courtId: booking.courtId,
       date: booking.date,
       time: booking.time,
@@ -817,6 +817,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setBookings(prev => prev.filter(b => b.id !== booking.id));
       setNotifications(prev => prev.filter(n => !(n.type === 'booking' && n.body?.includes(booking.date) && n.body?.includes(booking.time))));
       showToast(err.message || 'Failed to save booking. Please try again.', 'error');
+      throw err; // Re-throw so caller knows it failed
     });
     // Create notification for booker
     if (booking.type === 'lesson') {
@@ -1076,8 +1077,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setEvents(prev => prev.filter(e => e.id !== id));
   }, []);
 
-  const sendMessage = useCallback((toId: string, text: string) => {
-    if (!currentUser) return;
+  const sendMessage = useCallback((toId: string, text: string): Promise<void> => {
+    if (!currentUser) return Promise.resolve();
     const toName = members.find(m => m.id === toId)?.name || '';
     const msg = {
       id: generateId('msg'),
@@ -1103,7 +1104,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }];
     });
     // Persist via API route (admin client — bypasses RLS, also handles push + bell notification)
-    apiCall('/api/mobile/conversations', 'POST', { toId, text }).catch((err) => {
+    return apiCall('/api/mobile/conversations', 'POST', { toId, text }).then(() => {}).catch((err) => {
       reportError(err, 'API');
       setConversations(prev => prev.map(c => {
         if (c.memberId !== toId) return c;
@@ -1112,6 +1113,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         return { ...c, messages: filtered, lastMessage: last?.text || '', lastTimestamp: last?.timestamp || c.lastTimestamp };
       }));
       showToast('Failed to send message. Please try again.', 'error');
+      throw err; // Re-throw so caller knows it failed
     });
   }, [currentUser, members]);
 
