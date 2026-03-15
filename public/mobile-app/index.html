@@ -20,7 +20,7 @@
     if ('serviceWorker' in navigator) {
       caches.keys().then(function(names) {
         names.forEach(function(name) {
-          if (name.indexOf('mtc-court-df1d9c1f') === -1) {
+          if (name.indexOf('mtc-court-9f47a3d6') === -1) {
             caches.delete(name);
             console.log('[CacheBust] Deleted old cache:', name);
           }
@@ -324,9 +324,6 @@
           App in beta — bugs? Email <a href="mailto:monotennisclub1@gmail.com" style="color: var(--volt); text-decoration: none; font-weight: 600;">monotennisclub1@gmail.com</a>
         </div>
 
-        <div class="login-footer">
-          Don't have an account? <a href="#" onclick="showSignUpScreen()">Sign up</a>
-        </div>
       </div>
 
       <!-- PIN SETUP CARD — for migrating users who have no PIN yet -->
@@ -387,52 +384,6 @@
         </div>
       </div>
 
-      <!-- SIGN UP CARD (hidden by default, replaces login card) -->
-      <div class="login-card signup-card" id="signupCard" style="display:none;">
-        <div class="liquid-highlight" aria-hidden="true"></div>
-        <div class="refraction-orb refraction-orb-1" aria-hidden="true"></div>
-        <div class="refraction-orb refraction-orb-2" aria-hidden="true"></div>
-
-        <div class="card-accent"></div>
-        <p class="card-welcome">Create Account</p>
-
-        <!-- Account type selector -->
-        <div class="signup-type-selector">
-          <button class="signup-type-btn active" id="signupTypeMember" onclick="selectSignupType('member')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-            Member
-          </button>
-          <button class="signup-type-btn" id="signupTypeGuest" onclick="selectSignupType('guest')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
-            Guest
-          </button>
-        </div>
-
-        <div class="signup-type-desc" id="signupTypeDesc">
-          Full access to courts, programs, partners, messaging, and all club features.
-        </div>
-
-        <input type="text" class="login-input" placeholder="Full Name" id="signupName" aria-label="Full name">
-        <input type="email" class="login-input" placeholder="Email" id="signupEmail" aria-label="Email address">
-        <input type="email" class="login-input" placeholder="Confirm Email" id="signupEmailConfirm" aria-label="Confirm email address">
-        <input type="tel" class="login-input" placeholder="4-digit PIN" id="signupPin" maxlength="4" inputmode="numeric" pattern="[0-9]*" aria-label="PIN" autocomplete="off" style="letter-spacing: 6px; text-align: center; font-size: 18px; font-weight: 600;">
-        <input type="tel" class="login-input" placeholder="Confirm PIN" id="signupPinConfirm" maxlength="4" inputmode="numeric" pattern="[0-9]*" aria-label="Confirm PIN" autocomplete="off" style="letter-spacing: 6px; text-align: center; font-size: 18px; font-weight: 600;">
-
-        <!-- Residence: Mono vs Other -->
-        <div style="display: flex; gap: 8px; margin: 8px 0 12px;">
-          <button type="button" id="residenceMono" onclick="selectResidence('mono')" style="flex:1; padding: 10px 8px; border-radius: 12px; border: 2px solid var(--accent-primary); background: rgba(107, 122, 61, 0.08); font-size: 13px; font-weight: 600; color: var(--text-primary); cursor: pointer; text-align: center;" aria-label="I live in Mono">Mono</button>
-          <button type="button" id="residenceOther" onclick="selectResidence('other')" style="flex:1; padding: 10px 8px; border-radius: 12px; border: 2px solid var(--border-primary); background: var(--bg-secondary); font-size: 13px; font-weight: 500; color: var(--text-secondary); cursor: pointer; text-align: center;" aria-label="I live elsewhere">Other</button>
-        </div>
-
-        <p style="font-size: 13px; color: var(--text-secondary); margin: 8px 0 6px; text-align: center; font-weight: 500; line-height: 1.4; padding: 8px 12px; background: rgba(107, 122, 61, 0.08); border-radius: 10px;">You'll use your <strong style="color: var(--text-primary);">email + 4-digit PIN</strong> to sign in.</p>
-        <p style="font-size: 12px; color: #b45309; margin: 0 0 12px; text-align: center; line-height: 1.4; padding: 6px 12px; background: rgba(180, 83, 9, 0.06); border: 1px solid rgba(180, 83, 9, 0.12); border-radius: 10px;">Avoid easy PINs like 1234. Anyone who knows your email and PIN can access your profile and messages.</p>
-
-        <button type="button" class="login-btn" onclick="handleSignUp()" aria-label="Create account">Create Account</button>
-
-        <div class="login-footer">
-          Already have an account? <a href="#" onclick="showLoginScreen()">Sign in</a>
-        </div>
-      </div>
     </div>
     
     <!-- Supabase JS for client-side OAuth + Magic Link (CDN primary, local fallback) -->

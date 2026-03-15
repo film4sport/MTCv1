@@ -12,8 +12,6 @@
   // GUEST_ALLOWED_SCREENS is in config.js
 
   // Private state
-  let signupAccountType = 'member';
-  let signupResidence = 'mono';
 
   // Inline field error helpers
   function showFieldError(input, message) {
@@ -685,144 +683,17 @@
     setTimeout(installGuestNavigationGuard, 100);
   }
 
-  // ============================================
-  // SIGN UP SCREEN TOGGLE
-  // ============================================
-  window.showSignUpScreen = function() {
-    const loginCard = document.querySelector('.login-card:not(.signup-card)');
-    const signupCard = document.getElementById('signupCard');
-    if (loginCard) loginCard.style.display = 'none';
-    if (signupCard) signupCard.style.display = '';
-    selectSignupType('member');
-  };
-
   window.showLoginScreen = function() {
-    const loginCard = document.querySelector('.login-card:not(.signup-card)');
-    const signupCard = document.getElementById('signupCard');
-    const pinSetupCard = document.getElementById('pinSetupCard');
-    const forgotPinCard = document.getElementById('forgotPinCard');
-    const verifyCodeCard = document.getElementById('verifyCodeCard');
+    var loginCard = document.getElementById('loginCard');
+    var pinSetupCard = document.getElementById('pinSetupCard');
+    var forgotPinCard = document.getElementById('forgotPinCard');
+    var verifyCodeCard = document.getElementById('verifyCodeCard');
     if (loginCard) loginCard.style.display = '';
-    if (signupCard) signupCard.style.display = 'none';
     if (pinSetupCard) pinSetupCard.style.display = 'none';
     if (forgotPinCard) forgotPinCard.style.display = 'none';
     if (verifyCodeCard) verifyCodeCard.style.display = 'none';
   };
 
-  window.selectSignupType = function(type) {
-    signupAccountType = type;
-    const memberBtn = document.getElementById('signupTypeMember');
-    const guestBtn = document.getElementById('signupTypeGuest');
-    const descEl = document.getElementById('signupTypeDesc');
-
-    if (memberBtn) memberBtn.classList.toggle('active', type === 'member');
-    if (guestBtn) guestBtn.classList.toggle('active', type === 'guest');
-
-    if (descEl) {
-      descEl.textContent = type === 'member'
-        ? 'Full access to courts, programs, partners, messaging, and all club features.'
-        : 'Book courts ($10/hr) and register for programs. Upgrade to member anytime.';
-    }
-  };
-
-  window.selectResidence = function(val) {
-    signupResidence = val;
-    var monoBtn = document.getElementById('residenceMono');
-    var otherBtn = document.getElementById('residenceOther');
-    if (monoBtn) {
-      monoBtn.style.border = val === 'mono' ? '2px solid var(--accent-primary)' : '2px solid var(--border-primary)';
-      monoBtn.style.background = val === 'mono' ? 'rgba(107, 122, 61, 0.08)' : 'var(--bg-secondary)';
-      monoBtn.style.fontWeight = val === 'mono' ? '600' : '500';
-      monoBtn.style.color = val === 'mono' ? 'var(--text-primary)' : 'var(--text-secondary)';
-    }
-    if (otherBtn) {
-      otherBtn.style.border = val === 'other' ? '2px solid var(--accent-primary)' : '2px solid var(--border-primary)';
-      otherBtn.style.background = val === 'other' ? 'rgba(107, 122, 61, 0.08)' : 'var(--bg-secondary)';
-      otherBtn.style.fontWeight = val === 'other' ? '600' : '500';
-      otherBtn.style.color = val === 'other' ? 'var(--text-primary)' : 'var(--text-secondary)';
-    }
-  };
-
-  // ============================================
-  // HANDLE SIGN UP (with PIN)
-  // ============================================
-  window.handleSignUp = function() {
-    const nameInput = document.getElementById('signupName');
-    const emailInput = document.getElementById('signupEmail');
-    const emailConfirmInput = document.getElementById('signupEmailConfirm');
-    const pinInput = document.getElementById('signupPin');
-    const pinConfirmInput = document.getElementById('signupPinConfirm');
-
-    const name = nameInput ? nameInput.value.trim() : '';
-    const email = emailInput ? emailInput.value.trim() : '';
-    const emailConfirm = emailConfirmInput ? emailConfirmInput.value.trim() : '';
-    const pin = pinInput ? pinInput.value.trim() : '';
-    const pinConfirm = pinConfirmInput ? pinConfirmInput.value.trim() : '';
-
-    [nameInput, emailInput, emailConfirmInput, pinInput, pinConfirmInput].forEach(function(el) {
-      if (el) { el.classList.remove('input-error'); clearFieldErrors(el); }
-    });
-
-    const errors = [];
-    if (!name || name.length < 2) { showFieldError(nameInput, 'Name must be at least 2 characters'); errors.push('name'); }
-    if (!email) { showFieldError(emailInput, 'Email is required'); errors.push('email'); }
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showFieldError(emailInput, 'Enter a valid email address'); errors.push('email'); }
-    if (email.toLowerCase() !== emailConfirm.toLowerCase()) { showFieldError(emailConfirmInput, 'Email addresses do not match'); errors.push('email confirm'); }
-    if (!pin || !/^\d{4}$/.test(pin)) { showFieldError(pinInput, 'Enter a 4-digit PIN'); errors.push('pin'); }
-    else if (/^(\d)\1{3}$/.test(pin) || pin === '1234' || pin === '4321') { showFieldError(pinInput, 'That PIN is too easy to guess'); errors.push('pin'); }
-    if (pin !== pinConfirm) { showFieldError(pinConfirmInput, 'PINs do not match'); errors.push('pin confirm'); }
-
-    if (errors.length > 0) {
-      const signupCard = document.getElementById('signupCard');
-      if (signupCard) { signupCard.style.animation='none'; signupCard.offsetHeight; signupCard.style.animation='shakeX 0.4s ease'; }
-      return;
-    }
-
-    const isMember = signupAccountType === 'member';
-    const btn = document.getElementById('signupBtn');
-    if (btn) { btn.disabled = true; btn.textContent = 'Creating account...'; }
-
-    fetch('/api/auth/signup', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name: name,
-        email: email.toLowerCase(),
-        pin: pin,
-        membershipType: isMember ? 'adult' : 'guest',
-        residence: signupResidence || 'mono'
-      })
-    })
-    .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
-    .then(function(result) {
-      if (btn) { btn.disabled = false; btn.textContent = 'Create Account'; }
-
-      if (!result.ok) {
-        showToast(result.data.error || 'Signup failed');
-        return;
-      }
-
-      finishLogin(email.toLowerCase(), {
-        name: result.data.user.name,
-        email: result.data.user.email,
-        role: result.data.user.role,
-        userId: result.data.user.id,
-        accessToken: result.data.token,
-        membershipType: result.data.user.membershipType || 'adult',
-        familyId: null,
-        residence: result.data.user.residence || 'mono',
-        interclubTeam: 'none',
-        interclubCaptain: false,
-        familyMembers: []
-      });
-
-      try { localStorage.setItem('mtc-remembered-email', email.toLowerCase()); } catch(e) {}
-    })
-    .catch(function() {
-      if (btn) { btn.disabled = false; btn.textContent = 'Create Account'; }
-      showToast('Network error. Please try again.');
-    });
-  };
 
   // ============================================
   // LOAD APP DATA FROM SUPABASE API
