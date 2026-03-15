@@ -1,0 +1,115 @@
+/* splash.css - MTC Court */
+/* ============================================
+   APP LAUNCH SPLASH SCREEN
+   Animated branded splash that plays after the
+   OS splash dismisses, before login screen.
+   ============================================ */
+
+.splash-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: #0a0a0a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  transition: opacity 0.4s ease-out;
+  pointer-events: all;
+  /* Ensure it covers everything including safe areas */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+.splash-screen.dismissed {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.splash-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  opacity: 0;
+  transform: scale(0.85);
+  animation: splashFadeIn 0.6s ease-out 0.15s forwards;
+}
+
+.splash-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+  gap: 0;
+}
+
+.splash-mtc {
+  font-family: 'Bebas Neue', 'Arial Narrow', sans-serif;
+  font-size: 64px;
+  font-weight: 400;
+  letter-spacing: 8px;
+  color: #ffffff;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: splashTextUp 0.5s ease-out 0.3s forwards;
+}
+
+.splash-court {
+  font-family: 'Bebas Neue', 'Arial Narrow', sans-serif;
+  font-size: 64px;
+  font-weight: 400;
+  letter-spacing: 8px;
+  margin-top: -8px;
+  /* Prismatic gradient: volt → cyan → coral */
+  background: linear-gradient(90deg, #c8ff00 0%, #00d4ff 50%, #ff5a5f 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: splashTextUp 0.5s ease-out 0.45s forwards;
+}
+
+.splash-tagline {
+  font-family: 'Inter', -apple-system, sans-serif;
+  font-size: 11px;
+  letter-spacing: 4px;
+  color: rgba(255, 255, 255, 0.35);
+  opacity: 0;
+  transform: translateY(8px);
+  animation: splashTextUp 0.5s ease-out 0.65s forwards;
+}
+
+/* Subtle prismatic glow behind the logo */
+.splash-glow {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(200, 255, 0, 0.08) 0%, rgba(0, 212, 255, 0.05) 40%, transparent 70%);
+  filter: blur(40px);
+  opacity: 0;
+  animation: splashGlow 1.2s ease-out 0.3s forwards;
+  pointer-events: none;
+}
+
+/* Animations */
+@keyframes splashFadeIn {
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes splashTextUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes splashGlow {
+  0% { opacity: 0; transform: scale(0.5); }
+  50% { opacity: 1; transform: scale(1.2); }
+  100% { opacity: 0.6; transform: scale(1); }
+}

@@ -20,7 +20,7 @@
     if ('serviceWorker' in navigator) {
       caches.keys().then(function(names) {
         names.forEach(function(name) {
-          if (name.indexOf('mtc-court-ef9b330d') === -1) {
+          if (name.indexOf('mtc-court-fd656344') === -1) {
             caches.delete(name);
             console.log('[CacheBust] Deleted old cache:', name);
           }
@@ -158,6 +158,18 @@
   <!-- Offline Banner -->
   <div class="offline-banner" role="alert">📡 You're offline - Some features unavailable</div>
   
+  <!-- Splash Screen — shows on app launch, dismisses after animation -->
+  <div id="splashScreen" class="splash-screen" aria-hidden="true">
+    <div class="splash-content">
+      <div class="splash-logo">
+        <div class="splash-mtc">MTC</div>
+        <div class="splash-court">COURT</div>
+      </div>
+      <div class="splash-tagline">YOUR GAME, ELEVATED</div>
+    </div>
+    <div class="splash-glow"></div>
+  </div>
+
   <div id="app" data-theme="light" role="application" aria-label="Mono Tennis Club App">
     <!-- Pull to Refresh Indicator -->
     <div id="ptrIndicator" class="ptr-indicator"><svg class="ptr-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg></div>

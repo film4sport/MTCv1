@@ -18,6 +18,7 @@ const DIST_DIR = path.join(MOBILE_DIR, 'dist');
 // NOTE: admin.css and captain.css are split into separate lazy-loaded bundles
 const CSS_FILES = [
   'variables.css',
+  'splash.css',
   'base.css',
   'login.css',
   'layout.css',
@@ -44,6 +45,7 @@ const CSS_FILES = [
 // JS files in load order (must match original index.html dependency chain)
 // NOTE: admin.js and captain.js are split into separate lazy-loaded bundles
 const JS_FILES = [
+  'splash.js',
   'utils.js',
   'config.js',
   'event-delegation.js',
