@@ -891,7 +891,7 @@
   MTC.state.currentRole = 'member';
   window.currentRole = 'member';
 
-  // Hide admin + captain menu items on initial load
+  // Hide admin + captain + coach menu items on initial load
   document.addEventListener('DOMContentLoaded', function() {
     const adminMenuItem = document.getElementById('menuAdminItem');
     if (adminMenuItem) adminMenuItem.classList.add('admin-hidden');

@@ -292,20 +292,18 @@ describe('[BUG-0309] All API routes have rate limiting', () => {
 });
 
 // ══════════════════════════════════════════════════════════════════════════
-// BUG-0310: Coaching panel not visible to admins in sidebar
-// Sidebar must show coaching link for coaches AND admins.
+// BUG-0310: Coaching panel removed — route redirects to lessons
 // ══════════════════════════════════════════════════════════════════════════
 
-describe('[BUG-0310] Coaching panel visible to admins', () => {
-  const sidebar = readFileSync(resolve(root, 'app/dashboard/components/Sidebar.tsx'), 'utf-8');
-
-  it('coaching link shows for coaches OR admins', () => {
-    // Should have (isCoach || isAdmin) not just isCoach
-    expect(sidebar).toMatch(/isCoach\s*\|\|\s*isAdmin|isAdmin\s*\|\|\s*isCoach/);
+describe('[BUG-0310] Coaching panel removed', () => {
+  it('coaching page redirects to lessons', () => {
+    const coachingPage = readFileSync(resolve(root, 'app/dashboard/coaching/page.tsx'), 'utf-8');
+    expect(coachingPage).toMatch(/redirect.*lessons/i);
   });
 
-  it('coaching page accepts admin role', () => {
-    const coachingPage = readFileSync(resolve(root, 'app/dashboard/coaching/page.tsx'), 'utf-8');
-    expect(coachingPage).toMatch(/admin/);
+  it('sidebar does not reference coaching panel', () => {
+    const sidebar = readFileSync(resolve(root, 'app/dashboard/components/Sidebar.tsx'), 'utf-8');
+    expect(sidebar).not.toContain('coachItem');
+    expect(sidebar).not.toContain("Coach's Panel");
   });
 });

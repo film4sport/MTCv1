@@ -178,9 +178,9 @@ test.describe('Coach Dashboard', () => {
     await loginAs(page, 'coach');
   });
 
-  test('coach dashboard shows coaching panel quick action', async ({ page }) => {
+  test('coach dashboard shows Club Events quick action', async ({ page }) => {
     const main = page.locator('main');
-    await expect(main.getByText('Coaching Panel')).toBeVisible();
+    await expect(main.getByText('Club Events')).toBeVisible();
   });
 
   test('coach dashboard does not show Find Partner', async ({ page }) => {
@@ -188,23 +188,16 @@ test.describe('Coach Dashboard', () => {
     await expect(findPartner).toHaveCount(0);
   });
 
-  test('coaching panel page loads', async ({ page }) => {
+  test('coaching route redirects to lessons', async ({ page }) => {
     await goTo(page, '/dashboard/coaching');
-    await expect(page.locator('h1')).toContainText('Book Lessons');
+    await page.waitForURL('**/dashboard/lessons');
   });
 
-  test('coach can see lesson booking UI', async ({ page }) => {
-    await goTo(page, '/dashboard/coaching');
-    // Coach should see lesson booking form (Book Lesson tab)
-    const body = await page.textContent('body');
-    expect(body).toContain('Court');
-  });
-
-  test('coach sidebar hides Partners and shows Book Lessons', async ({ page }) => {
+  test('coach sidebar hides Partners but shows Lessons', async ({ page }) => {
     const sidebar = page.locator('aside');
     await expect(sidebar).toBeAttached();
-    // Coach should see Book Lessons
-    await expect(sidebar.getByText('Book Lessons')).toBeAttached();
+    // Coach should see Lessons
+    await expect(sidebar.getByText('Lessons')).toBeAttached();
     // Partners should NOT appear for coach
     const navText = await sidebar.locator('nav').textContent();
     expect(navText).not.toContain('Partners');

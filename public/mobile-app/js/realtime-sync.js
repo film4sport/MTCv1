@@ -119,6 +119,9 @@
     MTC.fn.loadFromAPI('/mobile/programs', 'mtc-api-programs', null).then(function(programs) {
       if (programs) {
         MTC.state.programs = programs;
+        if (typeof window.updateProgramsFromAPI === 'function') {
+          window.updateProgramsFromAPI(programs);
+        }
       }
       _lastSyncTimestamps.programs = Date.now();
       updateStaleIndicators();

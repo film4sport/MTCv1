@@ -88,8 +88,7 @@ Before reporting any feature change as "done", verify:
 - **Total test count (Mar 9 updated)**: **1058 tests across 35 files**, all passing. (21 filter tab tests removed with the UI.)
 - **PIN auth refactor (Mar 13)**: Changed 6-digit PIN to 4-digit PIN across all files. Removed welcome messaging from signup flows. Added security warning to all signup/PIN-setup forms. Confirm email (type twice) on both platforms. Client-side weak PIN check. Rate limit bumped to 5/15min. Confirmation page redesigned as contained card. `tsc --noEmit` clean, `npm run build:mobile` clean, **1209 tests across 36 files**, 610 passing in CI (2 pre-existing failures unrelated to PIN auth).
 - **Rule #2 incident (Mar 9)**: Added filter tabs + cleanup button to messages UI without user asking → had to remove them → broke 21 CI tests. CLAUDE.md #2 strengthened: NEVER add features, functionality, UI elements, API endpoints, RPC functions, or logic the user didn't ask for. Suggest in text only.
-- **Coaching panel access (Mar 8)**: Sidebar now shows "Book Lessons" link for both coaches AND admins (was coach-only). Sidebar.tsx line 145: `(isCoach || isAdmin)`.
-- **Coaching program bookings**: `db.createBooking` is still used in the coaching program creation flow (line 966 of store.tsx). This is coach-only (coaching panel), not admin. Coaches create program bookings (type: 'program') via the coaching panel.
+- **Coach's Panel REMOVED (Mar 16)**: Removed Coach's Panel from both mobile PWA and dashboard entirely. Lessons tab now visible to ALL users (including coaches and admins). `/dashboard/coaching` redirects to `/dashboard/lessons`. Mobile PWA: removed `#menuCoachItem`, `#screen-coach`, coach visibility logic in auth.js, coach-panel.js deleted. Dashboard: removed `coachItem` from Sidebar.tsx, removed coach-specific quick actions from page.tsx. API: reverted all `lessonType` additions (bookings route, types, db, store, schema). Tests updated in regression.test.js and qa-full-flow.spec.js.
 
 ### Cowork Session (2026-03-10) — Admin Bug Fix + Member List Redesign + Login Tablet Fix
 
@@ -1543,6 +1542,27 @@ Closed ALL notification asymmetries. Every action fires symmetric bell + push + 
 ## CLAUDE.md Rule #28 Added (Mar 15, 2026)
 - "EVERY CODE CHANGE MUST UPDATE AFFECTED TESTS" — mandatory grep checklist: `unit-tests/`, `tests/`, AND `mobile-app-tests/`. All three, every time.
 - Triggered by: signup card removal broke `pin-auth.test.js` (unit) AND `mobile-pwa.spec.js` (E2E). First fix only caught unit tests, missed E2E → CI broke twice on same issue.
+
+## Mobile PWA Lessons Panel — Dynamic Enrollment (Mar 15, 2026)
+- **New file**: `public/mobile-app/js/lessons.js` (258 lines) — fetches programs from `/api/mobile/programs`, renders dynamically with enroll/withdraw buttons, spot availability, enrollment status.
+- **HTML change**: Replaced hardcoded junior/adult program cards in `index.html` with `<div id="lessons-programs-container">` for dynamic rendering. Static coach cards (Mark Taylor, Adrian Shelley), weekly schedule grid, summer camp, and contact info kept as-is.
+- **Build pipeline**: Added `lessons.js` to `scripts/build-mobile.js` JS_FILES array (after events-registration.js, before avatar.js). Build outputs 30 JS files now.
+- **Realtime sync**: `realtime-sync.js` already subscribed to `coaching_programs` and `program_enrollments` tables. Updated `refetchPrograms()` to also call `window.updateProgramsFromAPI(programs)` so the lessons screen re-renders live.
+- **Auth load**: `auth.js` already calls `loadFromAPI('/mobile/programs')` → `window.updateProgramsFromAPI()` on login.
+- **API**: Programs API (`app/api/mobile/programs/route.ts`) already supports GET (list with enrollment status), POST enroll/withdraw (with full notification pipeline: bell + push + email + coach welcome message).
+- **Features**: Programs auto-categorized as junior/adult based on `level` field. Spot availability with color-coded indicator (green/orange/red). Full state shows greyed "FULL" button. Enrolled programs show green checkmark + red "WITHDRAW" button with confirm modal. Prevents double-tap.
+- **Tests**: 1258 tests pass across 37 files. TypeScript passes. Build succeeds.
+- **Visually verified** in BDG with mock data.
+
+## Dashboard → API Migration (Rule #21) — Completed (Mar 15, 2026)
+- ALL dashboard mutations migrated from direct Supabase to API routes via `apiCall()` helper.
+- **Admin page**: gate code, pause/unpause, delete member, court status, captain toggle, announcements — all via `/api/mobile/*`.
+- **Settings page**: skill level, interclub team, avatar, family add/remove/update — all via `/api/mobile/*`.
+- **Captain page**: add/remove from team, post team announcement — all via `/api/mobile/*`.
+- **Onboarding + Banner**: preferences update — all via `/api/mobile/members PATCH`.
+- **Members API**: Now sends push+bell notifications on pause/reactivate status changes.
+- **Realtime gaps fixed**: `booking_participants` subscription added to dashboard `store.tsx`, `courts` subscription added to mobile PWA `realtime-sync.js`.
+- **18 integration tests** in `unit-tests/announcement-integration.test.js` covering client-server contract + Rule #21 compliance.
 
 **Pending:**
 - RSVP end-to-end verification

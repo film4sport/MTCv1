@@ -18,7 +18,7 @@ const navItems = [
 ];
 
 const adminItem = { href: '/dashboard/admin', label: 'Admin Panel', icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z' };
-const coachItem = { href: '/dashboard/coaching', label: 'Book Lessons', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01' };
+
 
 function Sidebar() {
   const pathname = usePathname();
@@ -33,10 +33,9 @@ function Sidebar() {
 
   // Role-based nav filtering (memoized — only changes when role changes)
   const filteredNavItems = useMemo(() => navItems.filter(item => {
-    if (isCoach && (item.label === 'Partners' || item.label === 'Lessons')) return false;
-    if (isAdmin && item.label === 'Lessons') return false;
+    if (isCoach && item.label === 'Partners') return false;
     return true;
-  }), [isAdmin, isCoach]);
+  }), [isCoach]);
 
   const closeMobileSidebar = () => setMobileSidebarOpen(false);
   const [tappedHref, setTappedHref] = useState<string | null>(null);
@@ -141,28 +140,6 @@ function Sidebar() {
                 </li>
               );
             })}
-
-            {/* Coach link — visible to coaches and admins */}
-            {(isCoach || isAdmin) && (
-              <li className="pt-2 mt-2" style={{ borderTop: '1px solid rgba(232, 228, 217, 0.1)' }}>
-                <Link
-                  href={coachItem.href}
-                  onClick={() => handleNavClick(coachItem.href)}
-                  aria-current={pathname.startsWith(coachItem.href) ? 'page' : undefined}
-                  className={`sidebar-nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${
-                    pathname.startsWith(coachItem.href)
-                      ? 'sidebar-nav-active font-semibold'
-                      : ''
-                  } ${tappedHref === coachItem.href ? 'sidebar-tapped' : ''}`}
-                  title={sidebarCollapsed ? coachItem.label : undefined}
-                >
-                  <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={pathname.startsWith(coachItem.href) ? 2.5 : 2} aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" d={coachItem.icon} />
-                  </svg>
-                  {!sidebarCollapsed && <span className="text-sm">{coachItem.label}</span>}
-                </Link>
-              </li>
-            )}
 
             {/* My Team — interclub members */}
             {isOnTeam && (

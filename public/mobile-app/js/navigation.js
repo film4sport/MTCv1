@@ -65,7 +65,6 @@
       }, 100);
     }
     if (screen === 'matches') screen = 'home';
-    if (screen === 'coach') screen = 'lessons';
     if (screen === 'profile') screen = 'settings';
 
     // Show target screen

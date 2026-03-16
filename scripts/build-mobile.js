@@ -64,6 +64,7 @@ const JS_FILES = [
   'mybookings.js',
   'onboarding.js',
   'events-registration.js',
+  'lessons.js',
   'avatar.js',
   'messaging.js',
   'account.js',
