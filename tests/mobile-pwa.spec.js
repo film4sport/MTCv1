@@ -131,17 +131,10 @@ test.describe('Mobile PWA — Page Structure', () => {
     await expect(bottomNav.first()).toBeAttached();
   });
 
-  test('PWA manifest is linked on iOS only (conditional loading)', async ({ page, browserName }) => {
+  test('PWA manifest is linked', async ({ page }) => {
     await page.goto(MOBILE_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
-    await page.waitForTimeout(500); // Allow conditional script to run
     const manifest = page.locator('link[rel="manifest"]');
-    if (browserName === 'webkit') {
-      // WebKit UA matches iOS check — manifest should be injected
-      await expect(manifest).toBeAttached();
-    } else {
-      // Chromium/Firefox = non-iOS — manifest intentionally skipped (prevents Android splash screen)
-      await expect(manifest).toHaveCount(0);
-    }
+    await expect(manifest).toBeAttached();
   });
 
   test('viewport meta tag is set correctly', async ({ page }) => {

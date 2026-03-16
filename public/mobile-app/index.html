@@ -6,28 +6,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#c8ff00">
-  <!-- iOS: full manifest for PWA + splash support -->
-  <!-- Android: skip manifest to prevent Chrome's auto-generated splash screen -->
-  <!-- Android home screen icon comes from apple-touch-icon fallback (192px) -->
-  <script>
-    (function() {
-      var ua = navigator.userAgent;
-      var isIOS = /iPad|iPhone|iPod/.test(ua) ||
-        (ua.includes('Macintosh') && 'ontouchend' in document);
-      if (isIOS) {
-        var m = document.createElement('link');
-        m.rel = 'manifest';
-        m.href = 'manifest.json';
-        document.head.appendChild(m);
-      }
-      // mobile-web-app-capable only on iOS (Android uses it to trigger standalone + splash)
-      if (!isIOS) {
-        var meta = document.querySelector('meta[name="mobile-web-app-capable"]');
-        if (meta) meta.remove();
-      }
-    })();
-  </script>
   <meta name="mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
@@ -40,7 +20,7 @@
     if ('serviceWorker' in navigator) {
       caches.keys().then(function(names) {
         names.forEach(function(name) {
-          if (name.indexOf('mtc-court-e70d54ef') === -1) {
+          if (name.indexOf('mtc-court-b972547a') === -1) {
             caches.delete(name);
             console.log('[CacheBust] Deleted old cache:', name);
           }
