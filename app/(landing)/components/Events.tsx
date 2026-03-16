@@ -45,7 +45,7 @@ export default function Events() {
 
   const today = new Date().toISOString().slice(0, 10);
   const filtered = useMemo(
-    () => filter === 'all' ? events : events.filter(e => e.category === filter),
+    () => filter === 'all' ? events.filter(e => e.category !== 'coaching') : events.filter(e => e.category === filter),
     [filter]
   );
   const upcoming = useMemo(
