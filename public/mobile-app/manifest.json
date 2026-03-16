@@ -4,7 +4,7 @@
   "description": "Book courts, find partners, and manage your tennis at Mono Tennis Club.",
   "start_url": "/mobile-app/index.html",
   "scope": "/mobile-app/",
-  "display": "standalone",
+  "display": "minimal-ui",
   "orientation": "portrait",
   "theme_color": "#c8ff00",
   "categories": ["sports", "lifestyle"],
