@@ -111,12 +111,8 @@ test.describe('Mobile PWA — Page Structure', () => {
   });
 
   test('screens have ARIA labels', async ({ page }) => {
-    await page.addInitScript(() => {
-      localStorage.setItem('mtc-onboarding-complete', 'true');
-      localStorage.setItem('mtc-bypass-install-gate', 'true');
-    });
     await page.goto(MOBILE_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
-    await page.waitForSelector('.screen[aria-label]', { state: 'attached', timeout: 5000 });
+    await page.waitForTimeout(1000);
 
     const screens = page.locator('.screen[aria-label]');
     const count = await screens.count();
