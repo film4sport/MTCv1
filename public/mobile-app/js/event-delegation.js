@@ -141,17 +141,24 @@
   registerAction('cancelApiPartner', function(el, data) {
     var card = el.closest('.partner-card');
     if (card) card.remove();
-    showToast('Request removed');
+    showToast('Removing request...');
+    // Remove from in-memory pool so it doesn't reappear on re-render
+    if (data.id && typeof window.removeFromPartnerPool === 'function') {
+      window.removeFromPartnerPool(data.id);
+    }
     // Delete from Supabase
     if (data.id && MTC.fn.apiRequest && MTC.getToken()) {
       MTC.fn.apiRequest('/mobile/partners', {
         method: 'DELETE',
         body: JSON.stringify({ partnerId: data.id })
-      }).catch(function() { /* best effort */ });
+      }).then(function(res) {
+        if (res.ok) showToast('Request removed');
+        else showToast('Failed to remove request', 'error');
+      }).catch(function() { showToast('Failed to remove request', 'error'); });
     }
     // Also remove from local storage if exists
     var reqs = MTC.storage.get('mtc-partner-requests', []);
-    MTC.storage.set('mtc-partner-requests', reqs.filter(function(r) { return r.serverId !== data.id; }));
+    MTC.storage.set('mtc-partner-requests', reqs.filter(function(r) { return r.serverId !== data.id && r.id !== data.id; }));
   });
 
   // Show/cancel/modify booking modals

@@ -20,7 +20,7 @@
     if ('serviceWorker' in navigator) {
       caches.keys().then(function(names) {
         names.forEach(function(name) {
-          if (name.indexOf('mtc-court-f47bef20') === -1) {
+          if (name.indexOf('mtc-court-11a4cb5d') === -1) {
             caches.delete(name);
             console.log('[CacheBust] Deleted old cache:', name);
           }
@@ -708,7 +708,7 @@
       <div class="events-card stagger-item">
         <div class="events-header">
           <div class="events-title">UPCOMING EVENTS</div>
-          <div class="events-see-all" onclick="document.getElementById('homeCalendarSection').scrollIntoView({behavior:'smooth',block:'start'})">SEE ALL ↓</div>
+          <div class="events-see-all" onclick="var s=document.getElementById('screen-home'),c=document.getElementById('homeCalendarSection');if(s&&c){s.scrollTop=c.offsetTop-s.offsetTop;}">SEE ALL ↓</div>
         </div>
         <div class="event-item event-item-wrap" id="homeEvent-euchre" onclick="showRsvpListModal('euchre')" style="cursor:pointer;">
           <div class="event-date-box">

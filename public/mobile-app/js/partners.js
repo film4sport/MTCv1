@@ -309,6 +309,10 @@
     if (card) card.remove();
     var filtered = prevRequests.filter(function(r) { return r.id !== requestId; });
     MTC.storage.set('mtc-partner-requests', filtered);
+    // Also remove from in-memory pool so it doesn't reappear on re-render
+    if (serverId && typeof window.removeFromPartnerPool === 'function') {
+      window.removeFromPartnerPool(serverId);
+    }
     showToast('Removing request...');
 
     // Delete from Supabase with rollback

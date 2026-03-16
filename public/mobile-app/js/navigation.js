@@ -57,11 +57,15 @@
       screen = 'schedule';
     }
     if (screen === 'events') {
-      // Club events live on the home calendar — smooth-scroll to it
+      // Club events live on the home calendar — scroll within .screen container
+      // (scrollIntoView scrolls <html> in absolute-positioned screens, breaking scroll)
       screen = 'home';
       setTimeout(function() {
+        var screenEl = document.getElementById('screen-home');
         var cal = document.getElementById('homeCalendarSection');
-        if (cal) cal.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        if (screenEl && cal) {
+          screenEl.scrollTop = cal.offsetTop - screenEl.offsetTop;
+        }
       }, 100);
     }
     if (screen === 'matches') screen = 'home';
@@ -993,15 +997,33 @@
     container.innerHTML = html;
 
     // Re-insert user's own local requests from localStorage
+    // BUT skip any that already appear in API data (have a serverId matching an API partner ID)
     var localRequests = MTC.storage.get('mtc-partner-requests', []);
+    var apiIds = {};
+    homePartnerPool.forEach(function(p) { if (p.id) apiIds[p.id] = true; });
     var today = new Date().toISOString().split('T')[0];
-    localRequests.filter(function(req) { return !req.date || req.date >= today; }).forEach(function(req) {
+    localRequests.filter(function(req) {
+      if (req.date && req.date < today) return false;
+      // Skip if this local request's serverId matches an API partner (already rendered above)
+      if (req.serverId && apiIds[req.serverId]) return false;
+      return true;
+    }).forEach(function(req) {
       if (typeof insertPartnerRequestCard === 'function') {
         insertPartnerRequestCard(req);
       }
     });
   }
   window.renderPartnersScreen = renderPartnersScreen;
+
+  // Remove a partner from the in-memory pool (after cancel/delete)
+  window.removeFromPartnerPool = function(partnerId) {
+    for (var i = homePartnerPool.length - 1; i >= 0; i--) {
+      if (homePartnerPool[i].id === partnerId) {
+        homePartnerPool.splice(i, 1);
+        break;
+      }
+    }
+  };
 
   // ============================================
   // PULL TO REFRESH — home + events screens
