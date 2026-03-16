@@ -81,6 +81,17 @@
     });
   }
 
+  function refetchCourts() {
+    if (!MTC.fn.loadFromAPI) return;
+    MTC.fn.loadFromAPI('/mobile/courts', 'mtc-api-courts', null).then(function(courts) {
+      if (courts && typeof window.updateCourtsFromAPI === 'function') {
+        window.updateCourtsFromAPI(courts);
+      }
+      _lastSyncTimestamps.courts = Date.now();
+      updateStaleIndicators();
+    });
+  }
+
   function refetchCourtBlocks() {
     if (!MTC.fn.loadFromAPI) return;
     MTC.fn.loadFromAPI('/mobile/court-blocks', 'mtc-api-court-blocks', null).then(function(blocks) {
@@ -211,6 +222,9 @@
         })
         .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications' }, function() {
           debouncedRefetch('notifications', refetchNotifications);
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'courts' }, function() {
+          debouncedRefetch('courts', refetchCourts);
         })
         .on('postgres_changes', { event: '*', schema: 'public', table: 'court_blocks' }, function() {
           debouncedRefetch('courtBlocks', refetchCourtBlocks);

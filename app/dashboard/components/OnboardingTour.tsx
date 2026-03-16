@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '../lib/store';
-import * as db from '../lib/db';
+import { useAuth, apiCall } from '../lib/store';
 
 interface TourStep {
   title: string;
@@ -240,8 +239,8 @@ export default function OnboardingTour() {
     try {
       localStorage.setItem(`mtc-onboarding-done-${currentUser.id}`, 'true');
     } catch { /* localStorage full or blocked */ }
-    db.updateProfile(currentUser.id, {
-      preferences: { ...(currentUser.preferences || {}), onboardingCompleted: true },
+    apiCall('/api/mobile/members', 'PATCH', {
+      preferences: { onboardingCompleted: true },
     }).catch((err) => {
       console.error('[OnboardingTour] Failed to save onboarding preference:', err);
     });

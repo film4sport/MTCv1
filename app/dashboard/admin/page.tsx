@@ -47,36 +47,28 @@ export default function AdminPage() {
     if (!newGateCode.trim() || !currentUser) return;
     setGateCodeLoading(true);
     try {
-      await db.updateGateCode(newGateCode.trim(), currentUser.id);
+      // Update gate code via settings API
+      await apiCall('/api/mobile/settings', 'POST', {
+        settings: { gate_code: newGateCode.trim() },
+      });
       setGateCode(newGateCode.trim());
       setNewGateCode('');
     } catch (err) {
-      reportError(err instanceof Error ? err : new Error(String(err)), 'Supabase gate code update');
+      reportError(err instanceof Error ? err : new Error(String(err)), 'API gate code update');
       showToast('Failed to update gate code', 'error');
       setGateCodeLoading(false);
       return;
     }
 
-    // Notify members separately — don't let notification failures show "failed to update"
+    // Notify members separately via conversations API (creates bell + push per message)
     const code = newGateCode.trim() || gateCode;
     const activeMembers = members.filter(m => m.id !== currentUser.id && m.role !== 'admin' && (m.status || 'active') === 'active');
     let notified = 0;
     for (const member of activeMembers) {
       try {
-        await db.sendMessageByUsers({
-          id: generateId('msg'),
-          fromId: currentUser.id,
-          fromName: 'Mono Tennis Club',
+        await apiCall('/api/mobile/conversations', 'POST', {
           toId: member.id,
-          toName: member.name,
           text: `The court gate code has been updated. Your new gate code is: ${code}\n\nPlease keep this code confidential and do not share it with non-members.`,
-        });
-        await db.createNotification(member.id, {
-          id: generateId('n'),
-          type: 'message',
-          title: 'Gate Code Updated',
-          body: 'The court gate code has been changed. Check your messages for the new code.',
-          timestamp: new Date().toISOString(),
         });
         notified++;
       } catch (err) {
@@ -98,21 +90,21 @@ export default function AdminPage() {
     setActionLoading(true);
     try {
       if (actionTarget.action === 'pause') {
-        await db.pauseMember(actionTarget.id);
+        await apiCall('/api/mobile/members', 'PATCH', { memberId: actionTarget.id, status: 'paused' });
         setMembers(members.map(m => m.id === actionTarget.id ? { ...m, status: 'paused' as const } : m));
         showToast(`${actionTarget.name}'s membership paused.`);
       } else if (actionTarget.action === 'unpause') {
-        await db.unpauseMember(actionTarget.id);
+        await apiCall('/api/mobile/members', 'PATCH', { memberId: actionTarget.id, status: 'active' });
         setMembers(members.map(m => m.id === actionTarget.id ? { ...m, status: 'active' as const } : m));
         showToast(`${actionTarget.name}'s membership reactivated.`);
       } else if (actionTarget.action === 'cancel') {
-        await db.deleteMember(actionTarget.id);
+        await apiCall('/api/mobile/members', 'DELETE', { memberId: actionTarget.id });
         setMembers(members.filter(m => m.id !== actionTarget.id));
         showToast(`${actionTarget.name}'s account deleted.`);
       }
     } catch (err) {
-      reportError(err instanceof Error ? err : new Error(String(err)), 'Supabase member action');
-      showToast('Action failed', 'error');
+      reportError(err instanceof Error ? err : new Error(String(err)), 'API member action');
+      showToast(err instanceof Error ? err.message : 'Action failed', 'error');
     }
     setActionLoading(false);
     setActionTarget(null);
@@ -133,7 +125,12 @@ export default function AdminPage() {
     const court = courts.find(c => c.id === courtId);
     const newStatus = court?.status === 'maintenance' ? 'available' : 'maintenance';
     setCourts(courts.map(c => c.id === courtId ? { ...c, status: newStatus } as typeof c : c));
-    db.updateCourtStatus(courtId, newStatus).catch((err) => reportError(err instanceof Error ? err : new Error(String(err)), 'Supabase'));
+    apiCall('/api/mobile/courts', 'PATCH', { courtId, status: newStatus }).catch((err) => {
+      // Rollback
+      setCourts(courts.map(c => c.id === courtId ? { ...c, status: court?.status || 'available' } as typeof c : c));
+      reportError(err instanceof Error ? err : new Error(String(err)), 'API');
+      showToast('Failed to update court status', 'error');
+    });
   };
 
   const addAnnouncement = async () => {
@@ -243,11 +240,11 @@ export default function AdminPage() {
             onActionClick={(id, name, action) => setActionTarget({ id, name, action })}
             onSetCaptain={async (userId, captain) => {
               try {
-                await db.updateProfile(userId, { interclub_captain: captain });
+                await apiCall('/api/mobile/members', 'PATCH', { memberId: userId, interclub_captain: captain });
                 setMembers(members.map(m => m.id === userId ? { ...m, interclubCaptain: captain } : m));
                 showToast(captain ? 'Set as team captain' : 'Removed captain status');
               } catch (err) {
-                reportError(err instanceof Error ? err : new Error(String(err)), 'Supabase');
+                reportError(err instanceof Error ? err : new Error(String(err)), 'API');
                 showToast('Failed to update captain status', 'error');
               }
             }}

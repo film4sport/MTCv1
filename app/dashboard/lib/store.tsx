@@ -609,6 +609,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, () => {
         db.fetchBookings().then(b => setBookings(Array.isArray(b) ? b : [])).catch(err => reportError(err, 'Realtime bookings'));
       })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'booking_participants' }, () => {
+        db.fetchBookings().then(b => setBookings(Array.isArray(b) ? b : [])).catch(err => reportError(err, 'Realtime booking_participants'));
+      })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, () => {
         debouncedFetchConversations();
       })

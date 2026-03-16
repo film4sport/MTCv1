@@ -3,7 +3,6 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useAuth, useNotifications, useDerived, apiCall } from '../lib/store';
 import DashboardHeader from '../components/DashboardHeader';
-import * as db from '../lib/db';
 import type { AnnouncementAudience } from '../lib/types';
 import { reportError } from '../../lib/errorReporter';
 
@@ -65,14 +64,14 @@ export default function CaptainPage() {
   const addToTeam = useCallback(async (userId: string) => {
     if (!team) return;
     try {
-      await db.updateProfile(userId, { interclub_team: team });
+      await apiCall('/api/mobile/members', 'PATCH', { memberId: userId, interclub_team: team });
       // Refresh will happen via Realtime subscription on profiles
     } catch (e) { reportError(e, 'addToTeam'); }
   }, [team]);
 
   const removeFromTeam = useCallback(async (userId: string) => {
     try {
-      await db.updateProfile(userId, { interclub_team: 'none' });
+      await apiCall('/api/mobile/members', 'PATCH', { memberId: userId, interclub_team: 'none' });
     } catch (e) { reportError(e, 'removeFromTeam'); }
   }, []);
 

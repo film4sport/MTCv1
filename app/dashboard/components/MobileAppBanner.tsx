@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '../lib/store';
-import * as db from '../lib/db';
+import { useAuth, apiCall } from '../lib/store';
 
 export default function MobileAppBanner() {
   const { currentUser } = useAuth();
@@ -53,7 +52,7 @@ export default function MobileAppBanner() {
           if (currentUser?.id) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const prefs = ((currentUser as any)?.preferences || {});
-            db.updateProfile(currentUser.id, { preferences: { ...prefs, mobileAppBannerDismissed: true } }).catch(() => {});
+            apiCall('/api/mobile/members', 'PATCH', { preferences: { mobileAppBannerDismissed: true } }).catch(() => {});
           }
         }}
         className="shrink-0 p-0.5 rounded-full hover:bg-black/5 transition-colors"

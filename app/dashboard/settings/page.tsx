@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useAuth, useBookings, useSocial, useNotifications, useFamily } from '../lib/store';
+import { useAuth, useBookings, useSocial, useNotifications, useFamily, apiCall } from '../lib/store';
 import { useToast } from '../lib/toast';
 import DashboardHeader from '../components/DashboardHeader';
 import { AvatarDisplay, AVATAR_OPTIONS, AVATAR_SVGS } from '../lib/avatars';
@@ -82,7 +82,7 @@ export default function SettingsPage() {
   const saveSkillLevel = async (level: SkillLevel) => {
     if (!currentUser) return;
     try {
-      await db.updateProfile(currentUser.id, { skill_level: level, skill_level_set: true });
+      await apiCall('/api/mobile/members', 'PATCH', { skillLevel: level, skillLevelSet: true });
       updateCurrentUser({ skillLevel: level, skillLevelSet: true });
       showToast('Skill level updated');
     } catch (err) {
@@ -94,7 +94,7 @@ export default function SettingsPage() {
   const saveInterclubTeam = async (team: User['interclubTeam']) => {
     if (!currentUser || team === undefined) return;
     try {
-      await db.updateProfile(currentUser.id, { interclub_team: team });
+      await apiCall('/api/mobile/settings', 'PATCH', { action: 'setInterclubTeam', team });
       updateCurrentUser({ interclubTeam: team });
       showToast(team === 'none' ? 'Removed from interclub team' : `Set to Interclub ${team.toUpperCase()} Team`);
     } catch (err) {
@@ -106,7 +106,7 @@ export default function SettingsPage() {
   const selectAvatar = async (avatarId: string) => {
     if (!currentUser) return;
     try {
-      await db.updateProfile(currentUser.id, { avatar: avatarId });
+      await apiCall('/api/mobile/members', 'PATCH', { avatar: avatarId });
       updateCurrentUser({ avatar: avatarId });
       setShowAvatarPicker(false);
       showToast('Avatar updated!');
@@ -150,13 +150,17 @@ export default function SettingsPage() {
     if (!trimmed || !currentUser?.familyId) return;
     setSavingMember(true);
     try {
-      const member = await db.addFamilyMember(currentUser.familyId, {
+      const result = await apiCall<{ success: boolean; memberId?: string }>('/api/mobile/families', 'POST', {
+        action: 'addMember',
+        familyId: currentUser.familyId,
         name: trimmed,
         type: newMemberType,
         birthYear: newMemberType === 'junior' && newMemberBirthYear ? parseInt(newMemberBirthYear) : undefined,
       });
-      if (member) {
-        setFamilyMembers([...familyMembers, member]);
+      if (result.success) {
+        // Refetch family members to get the full member object
+        const freshMembers = await db.fetchFamilyMembers(currentUser.familyId);
+        setFamilyMembers(freshMembers);
         showToast(`${trimmed} added to family`);
       }
       setNewMemberName('');
@@ -173,7 +177,7 @@ export default function SettingsPage() {
   const handleRemoveMember = useCallback(async (member: FamilyMember) => {
     if (!confirm(`Remove ${member.name} from your family?`)) return;
     try {
-      await db.removeFamilyMember(member.id);
+      await apiCall('/api/mobile/families', 'DELETE', { memberId: member.id });
       setFamilyMembers(familyMembers.filter(m => m.id !== member.id));
       showToast(`${member.name} removed`);
     } catch (err) {
@@ -184,7 +188,7 @@ export default function SettingsPage() {
 
   const handleMemberSkillChange = useCallback(async (member: FamilyMember, level: SkillLevel) => {
     try {
-      await db.updateFamilyMember(member.id, { skill_level: level, skill_level_set: true });
+      await apiCall('/api/mobile/families', 'PATCH', { memberId: member.id, skillLevel: level, skillLevelSet: true });
       setFamilyMembers(familyMembers.map(m => m.id === member.id ? { ...m, skillLevel: level, skillLevelSet: true } : m));
       setEditingMemberSkill(null);
       showToast(`${member.name}'s skill level updated`);

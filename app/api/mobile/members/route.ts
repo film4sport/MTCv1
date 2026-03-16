@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { authenticateMobileRequest, getAdminClient, sanitizeInput, isRateLimited, isValidUUID, isValidEmail, isValidEnum, validationError, cachedJson, VALID_STATUSES, VALID_MEMBERSHIP_TYPES, VALID_SKILL_LEVELS, VALID_INTERCLUB_TEAMS } from '../auth-helper';
+import { sendPushToUser } from '../../lib/push';
 import type { ProfileUpdate } from '../types';
 
 export async function GET(request: Request) {
@@ -212,6 +213,23 @@ export async function PATCH(request: Request) {
       .eq('id', memberId);
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+    // Notify member when their status changes (pause/unpause) — fire-and-forget
+    if (updates.status && !isSelf) {
+      const isPaused = updates.status === 'paused';
+      const title = isPaused ? 'Account Paused' : 'Account Reactivated';
+      const body = isPaused
+        ? 'Your MTC account has been paused by an administrator. Contact the club for details.'
+        : 'Your MTC account has been reactivated. Welcome back!';
+      const notifId = `notif-status-${Date.now()}-${memberId.slice(0, 8)}`;
+      // Bell notification (member may not be able to see it if paused, but it's there when reactivated)
+      supabase.from('notifications').insert({
+        id: notifId, user_id: memberId, type: 'announcement',
+        title, body, timestamp: new Date().toISOString(), read: false,
+      }).then(() => {});
+      // Push notification (reaches device even if account is paused)
+      sendPushToUser(supabase, memberId, { title, body, tag: `status-${memberId}`, url: '/mobile-app/index.html#home' }).catch(() => {});
+    }
 
     // Propagate name change to denormalized columns (fire-and-forget)
     if (updates.name) {
