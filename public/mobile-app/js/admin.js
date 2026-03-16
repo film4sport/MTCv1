@@ -45,7 +45,7 @@
   // ============================================
   function loadAdminDashboard() {
     _adminDataLoaded.dashboard = true;
-    var token = MTC.state.currentUser && MTC.state.currentUser.accessToken;
+    var token = MTC.getToken();
     if (!token) return;
     var headers = { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' };
 
@@ -280,7 +280,7 @@
     var input = document.getElementById('newGateCodeInput');
     if (!input || !input.value.trim()) { showToast('Enter a new gate code'); return; }
     var code = input.value.trim();
-    var token = MTC.state.currentUser && MTC.state.currentUser.accessToken;
+    var token = MTC.getToken();
     if (!token) return;
     var headers = { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' };
 
@@ -379,7 +379,7 @@
   // ============================================
   function loadMembersList() {
     _adminDataLoaded.members = true;
-    var token = MTC.state.currentUser && MTC.state.currentUser.accessToken;
+    var token = MTC.getToken();
     if (!token) return;
     fetch('/api/mobile/members', { headers: { 'Authorization': 'Bearer ' + token } })
       .then(function(r) { return r.ok ? r.json() : { members: [] }; })
@@ -476,7 +476,7 @@
   };
 
   window.toggleCaptain = function(userId, value) {
-    var token = MTC.state.currentUser && MTC.state.currentUser.accessToken;
+    var token = MTC.getToken();
     if (!token) return;
     fetch('/api/mobile/members', {
       method: 'PATCH',
@@ -493,7 +493,7 @@
 
   window.pauseMember = function(userId, name) {
     if (!confirm('Pause ' + name + "'s membership? They won't be able to book courts.")) return;
-    var token = MTC.state.currentUser && MTC.state.currentUser.accessToken;
+    var token = MTC.getToken();
     fetch('/api/mobile/members', {
       method: 'PATCH',
       headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
@@ -507,7 +507,7 @@
   };
 
   window.unpauseMember = function(userId, name) {
-    var token = MTC.state.currentUser && MTC.state.currentUser.accessToken;
+    var token = MTC.getToken();
     fetch('/api/mobile/members', {
       method: 'PATCH',
       headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
@@ -525,7 +525,7 @@
   // ============================================
   function loadCourts() {
     _adminDataLoaded.courts = true;
-    var token = MTC.state.currentUser && MTC.state.currentUser.accessToken;
+    var token = MTC.getToken();
     if (!token) return;
     Promise.all([
       fetch('/api/mobile/courts', { headers: { 'Authorization': 'Bearer ' + token } }).then(function(r) { return r.ok ? r.json() : { courts: [] }; }),
@@ -557,7 +557,7 @@
   }
 
   window.toggleCourtStatus = function(courtId, newStatus) {
-    var token = MTC.state.currentUser && MTC.state.currentUser.accessToken;
+    var token = MTC.getToken();
     fetch('/api/mobile/courts', {
       method: 'PATCH',
       headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
@@ -679,7 +679,7 @@
       cur.setDate(cur.getDate() + 1);
     }
 
-    var token = MTC.state.currentUser && MTC.state.currentUser.accessToken;
+    var token = MTC.getToken();
     var courtId = courtSelect && courtSelect.value ? parseInt(courtSelect.value) : null;
     var reasonVal = reason ? reason.value : 'Maintenance';
     var notesVal = notes ? notes.value.trim() : '';
@@ -710,7 +710,7 @@
 
   window.deleteCourtBlock = function(blockId) {
     if (!confirm('Remove this court block?')) return;
-    var token = MTC.state.currentUser && MTC.state.currentUser.accessToken;
+    var token = MTC.getToken();
     fetch('/api/mobile/court-blocks?id=' + encodeURIComponent(blockId), {
       method: 'DELETE',
       headers: { 'Authorization': 'Bearer ' + token }
@@ -727,7 +727,7 @@
     var upcoming = _adminBlocks.filter(function(b) { return b.block_date >= today; });
     if (!upcoming.length) return;
     if (!confirm('Delete all ' + upcoming.length + ' court blocks?')) return;
-    var token = MTC.state.currentUser && MTC.state.currentUser.accessToken;
+    var token = MTC.getToken();
     var ids = upcoming.map(function(b) { return b.id; });
     fetch('/api/mobile/court-blocks', {
       method: 'DELETE',
@@ -748,7 +748,7 @@
   // ============================================
   function loadAnnouncementHistory() {
     _adminDataLoaded.announcements = true;
-    var token = MTC.state.currentUser && MTC.state.currentUser.accessToken;
+    var token = MTC.getToken();
     if (!token) return;
     fetch('/api/mobile/announcements', { headers: { 'Authorization': 'Bearer ' + token } })
       .then(function(r) { return r.ok ? r.json() : { announcements: [] }; })
@@ -778,7 +778,7 @@
     var type = document.getElementById('adminAnnType');
     var audience = document.getElementById('adminAnnAudience');
     if (!msg || !msg.value.trim()) { showToast('Write an announcement message'); return; }
-    var token = MTC.state.currentUser && MTC.state.currentUser.accessToken;
+    var token = MTC.getToken();
     var title = document.getElementById('adminAnnTitle');
     fetch('/api/mobile/announcements', {
       method: 'POST',
@@ -801,7 +801,7 @@
 
   window.deleteAdminAnnouncement = function(id) {
     if (!confirm('Delete this announcement?')) return;
-    var token = MTC.state.currentUser && MTC.state.currentUser.accessToken;
+    var token = MTC.getToken();
     fetch('/api/mobile/announcements', {
       method: 'DELETE',
       headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },

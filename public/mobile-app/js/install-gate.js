@@ -64,9 +64,9 @@
   var chromeSteps = {
     step1: 'Tap <strong>\u22EE</strong> (three dots) ' + ic.dots,
     step1Hint: 'Top-right corner of Chrome',
-    step2: 'Tap <strong>\u201CAdd to Home Screen\u201D</strong> ' + ic.download,
-    step2Hint: 'Or \u201CInstall App\u201D if shown',
-    step3: 'Tap <strong>\u201CInstall\u201D</strong> ' + ic.check,
+    step2: 'Tap <strong>\u201CAdd to\u201D</strong> ' + ic.plusSquare,
+    step2Hint: 'Look for the \u2295 icon in the menu',
+    step3: 'Tap <strong>\u201CInstall as Webapp\u201D</strong> ' + ic.check,
     step3Hint: 'MTC Court will appear on your home screen'
   };
 

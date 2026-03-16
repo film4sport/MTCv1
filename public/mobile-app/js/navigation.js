@@ -1046,7 +1046,7 @@
         indicator.classList.add('refreshing', 'visible');
         indicator.innerHTML = '<div class="ptr-spinner"></div>';
         // Trigger data refresh
-        if (typeof MTC !== 'undefined' && MTC.state && MTC.state.accessToken && typeof loadAppDataFromAPI === 'function') {
+        if (typeof MTC !== 'undefined' && MTC.getToken() && typeof loadAppDataFromAPI === 'function') {
           loadAppDataFromAPI().then(function() {
             indicator.classList.remove('refreshing', 'visible');
             indicator.innerHTML = '<svg class="ptr-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';

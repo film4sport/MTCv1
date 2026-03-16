@@ -68,7 +68,7 @@ async function setupAuthenticatedMobile(page, apiOverrides = {}) {
   await page.addInitScript((user) => {
     localStorage.setItem('mtc-user', JSON.stringify(user));
     localStorage.setItem('mtc-current-user', JSON.stringify(user));
-    localStorage.setItem('mtc-access-token', JSON.stringify(user.accessToken));
+    localStorage.setItem('mtc-access-token', user.accessToken);
     localStorage.setItem('mtc-user-name', user.name);
     localStorage.setItem('mtc-onboarding-complete', 'true');
     localStorage.setItem('mtc-bypass-install-gate', 'true');
