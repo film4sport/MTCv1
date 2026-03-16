@@ -18,14 +18,17 @@
   var isTestMode = /[?&]splash=1/.test(params);
   var isHoldMode = /[?&]hold=1/.test(params);
 
-  // Show splash on iOS standalone only (iPhone/iPad PWA).
-  // Android gets Chrome's OS splash from the manifest — no double splash.
+  // Show splash on all mobile devices (standalone or browser).
+  // Skip only on desktop browsers.
   // Test mode (?splash=1) always shows it for development.
-  var isIOSStandalone = window.navigator.standalone === true;
-  var isAndroid = /Android/i.test(navigator.userAgent);
+  var isStandalone = window.navigator.standalone === true ||
+    window.matchMedia('(display-mode: standalone)').matches ||
+    window.matchMedia('(display-mode: fullscreen)').matches;
+  var isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+    (navigator.userAgent.includes('Macintosh') && 'ontouchend' in document);
 
-  if (!isIOSStandalone && !isTestMode) {
-    // Not iOS standalone and not test mode — skip splash
+  if (!isStandalone && !isMobile && !isTestMode) {
+    // Desktop browser — skip splash
     splash.style.display = 'none';
     return;
   }
