@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useAuth, useBookings, useNotifications, useDerived } from '../lib/store';
+import { useAuth, useBookings, useNotifications, useDerived, apiCall } from '../lib/store';
 import { useToast } from '../lib/toast';
 import DashboardHeader from '../components/DashboardHeader';
 import { generateId, useFocusTrap } from '../lib/utils';
@@ -138,7 +138,7 @@ export default function AdminPage() {
 
   const addAnnouncement = async () => {
     if (!newAnnouncement.trim()) return;
-    const ann = {
+    const optimisticAnn = {
       id: generateId('a'),
       text: newAnnouncement.trim(),
       type: newAnnouncementType,
@@ -146,44 +146,37 @@ export default function AdminPage() {
       date: new Date().toISOString().split('T')[0],
       dismissedBy: [] as string[],
     };
-    setAnnouncements([ann, ...announcements]);
+    setAnnouncements([optimisticAnn, ...announcements]);
     setNewAnnouncement('');
     setNewAnnouncementAudience('all');
 
     try {
-      await db.createAnnouncement(ann);
-      // Create a notification for targeted members
-      const typeEmoji = ann.type === 'urgent' ? '🔴' : ann.type === 'warning' ? '⚠️' : '📢';
-      const now = new Date().toISOString();
-      const targetMembers = members.filter(member => {
-        if (ann.audience === 'all') return true;
-        if (ann.audience === 'interclub_a') return member.interclubTeam === 'a';
-        if (ann.audience === 'interclub_b') return member.interclubTeam === 'b';
-        if (ann.audience === 'interclub_all') return member.interclubTeam === 'a' || member.interclubTeam === 'b';
-        return true;
+      // API route handles: DB insert + bell notifications + push notifications
+      await apiCall('/api/mobile/announcements', 'POST', {
+        text: optimisticAnn.text,
+        type: optimisticAnn.type,
+        audience: optimisticAnn.audience,
       });
-      await Promise.allSettled(
-        targetMembers.map(member =>
-          db.createNotification(member.id, {
-            id: generateId('n'),
-            type: 'announcement',
-            title: `${typeEmoji} Club Announcement`,
-            body: ann.text,
-            timestamp: now,
-          })
-        )
-      );
-      const audienceLabel = ann.audience === 'all' ? 'all members' : ann.audience === 'interclub_a' ? 'Team A' : ann.audience === 'interclub_b' ? 'Team B' : 'all interclub members';
+      const audienceLabel = optimisticAnn.audience === 'all' ? 'all members' : optimisticAnn.audience === 'interclub_a' ? 'Team A' : optimisticAnn.audience === 'interclub_b' ? 'Team B' : 'all interclub members';
       showToast(`Announcement posted to ${audienceLabel}`);
     } catch (err) {
-      reportError(err instanceof Error ? err : new Error(String(err)), 'Supabase');
-      showToast('Announcement saved locally — sync may be delayed', 'error');
+      // Rollback optimistic update
+      setAnnouncements(announcements.filter(a => a.id !== optimisticAnn.id));
+      reportError(err instanceof Error ? err : new Error(String(err)), 'API');
+      showToast(err instanceof Error ? err.message : 'Failed to post announcement', 'error');
     }
   };
 
-  const deleteAnnouncement = (id: string) => {
+  const deleteAnnouncement = async (id: string) => {
+    const prev = announcements;
     setAnnouncements(announcements.filter(a => a.id !== id));
-    db.deleteAnnouncement(id).catch((err) => reportError(err instanceof Error ? err : new Error(String(err)), 'Supabase'));
+    try {
+      await apiCall('/api/mobile/announcements', 'DELETE', { id });
+    } catch (err) {
+      setAnnouncements(prev); // Rollback
+      reportError(err instanceof Error ? err : new Error(String(err)), 'API');
+      showToast('Failed to delete announcement', 'error');
+    }
   };
 
   const tabs: { key: AdminTab; label: string; icon: React.ReactNode }[] = [

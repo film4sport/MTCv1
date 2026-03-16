@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useCallback } from 'react';
-import { useAuth, useNotifications, useDerived } from '../lib/store';
+import { useAuth, useNotifications, useDerived, apiCall } from '../lib/store';
 import DashboardHeader from '../components/DashboardHeader';
 import * as db from '../lib/db';
 import type { AnnouncementAudience } from '../lib/types';
@@ -86,11 +86,23 @@ export default function CaptainPage() {
     setPostingAnnouncement(true);
     try {
       const audience: AnnouncementAudience = team === 'a' ? 'interclub_a' : 'interclub_b';
-      const id = `ann-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-      const date = new Date().toISOString().split('T')[0];
-      const ann = { id, text: newAnnouncement.trim(), type: announcementType, audience, date, dismissedBy: [] as string[] };
-      await db.createAnnouncement(ann);
-      setAnnouncements([ann, ...announcements]);
+      // API route handles: DB insert + bell notifications + push notifications
+      // Captain's audience is enforced server-side too (can only post to own team)
+      await apiCall('/api/mobile/announcements', 'POST', {
+        text: newAnnouncement.trim(),
+        type: announcementType,
+        audience,
+      });
+      // Optimistic update with a temp id — Realtime subscription will sync the real one
+      const tempAnn = {
+        id: `ann-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        text: newAnnouncement.trim(),
+        type: announcementType,
+        audience,
+        date: new Date().toISOString().split('T')[0],
+        dismissedBy: [] as string[],
+      };
+      setAnnouncements([tempAnn, ...announcements]);
       setNewAnnouncement('');
       setAnnouncementType('info');
     } catch (e) { reportError(e, 'postTeamAnnouncement'); }

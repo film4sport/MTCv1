@@ -200,7 +200,7 @@ function mergeEventsWithDefaults(supabaseEvents: ClubEvent[]): ClubEvent[] {
  * cause silent failures (200 OK, 0 rows affected).
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function apiCall<T = any>(path: string, method: string, body?: Record<string, unknown>): Promise<T> {
+export async function apiCall<T = any>(path: string, method: string, body?: Record<string, unknown>): Promise<T> {
   const token = typeof window !== 'undefined' ? localStorage.getItem('mtc-session-token') : null;
   if (!token) throw new Error('No active session');
   const res = await fetch(path, {

@@ -755,7 +755,7 @@
       .then(function(data) {
         var container = document.getElementById('adminAnnouncementHistory');
         if (!container) return;
-        var anns = data.announcements || [];
+        var anns = Array.isArray(data) ? data : (data.announcements || []);
         if (!anns.length) { container.innerHTML = '<div class="admin-empty-state">No announcements sent yet</div>'; return; }
         container.innerHTML = anns.map(function(a) {
           var icon = a.type === 'urgent' ? '<span style="color:#ef4444">URGENT</span>' : a.type === 'warning' ? '<span style="color:#f59e0b">WARNING</span>' : '<span style="color:#3b82f6">INFO</span>';
@@ -763,7 +763,7 @@
           return '<div class="admin-card" style="margin-bottom:8px">' +
             '<div style="display:flex;justify-content:space-between;align-items:start">' +
               '<div style="flex:1">' +
-                '<div style="font-size:12px;margin-bottom:4px">' + icon + audience + ' · ' + (a.created_at ? a.created_at.split('T')[0] : '') + '</div>' +
+                '<div style="font-size:12px;margin-bottom:4px">' + icon + audience + ' · ' + (a.date || '') + '</div>' +
                 '<div style="font-size:14px;color:var(--text-primary)">' + (a.text || a.message || '') + '</div>' +
               '</div>' +
               '<button class="admin-btn admin-btn-danger" style="min-height:32px;padding:4px 10px;font-size:11px" onclick="deleteAdminAnnouncement(\'' + a.id + '\')">Delete</button>' +
@@ -790,27 +790,28 @@
         audience: audience ? audience.value : 'all'
       })
     }).then(function(r) {
-      if (!r.ok) throw new Error('Failed');
+      if (!r.ok) return r.json().then(function(err) { throw new Error(err.error || 'Failed'); });
       msg.value = '';
       if (title) title.value = '';
       showToast('Announcement posted');
       _adminDataLoaded.announcements = false;
       loadAnnouncementHistory();
-    }).catch(function() { showToast('Failed to post announcement'); });
+    }).catch(function(e) { showToast(e.message || 'Failed to post announcement'); });
   };
 
   window.deleteAdminAnnouncement = function(id) {
     if (!confirm('Delete this announcement?')) return;
     var token = MTC.state.currentUser && MTC.state.currentUser.accessToken;
-    fetch('/api/mobile/announcements?id=' + encodeURIComponent(id), {
+    fetch('/api/mobile/announcements', {
       method: 'DELETE',
-      headers: { 'Authorization': 'Bearer ' + token }
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: id })
     }).then(function(r) {
-      if (!r.ok) throw new Error('Failed');
+      if (!r.ok) return r.json().then(function(err) { throw new Error(err.error || 'Failed'); });
       _adminDataLoaded.announcements = false;
       loadAnnouncementHistory();
       showToast('Announcement deleted');
-    }).catch(function() { showToast('Failed to delete announcement'); });
+    }).catch(function(e) { showToast(e.message || 'Failed to delete announcement'); });
   };
 
   // ============================================
