@@ -18,14 +18,19 @@
   var isTestMode = /[?&]splash=1/.test(params);
   var isHoldMode = /[?&]hold=1/.test(params);
 
-  // Only show splash when running as installed PWA (standalone),
-  // or in test mode for localhost development
+  // Show splash on:
+  //   - Installed PWA (standalone/fullscreen)
+  //   - Any mobile device (Android without manifest still gets our custom splash)
+  //   - Test mode (?splash=1)
+  // Skip only on desktop browsers (non-mobile, non-standalone)
   var isStandalone = window.navigator.standalone === true ||
     window.matchMedia('(display-mode: standalone)').matches ||
     window.matchMedia('(display-mode: fullscreen)').matches;
+  var isMobile = /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+    (navigator.userAgent.includes('Macintosh') && 'ontouchend' in document);
 
-  if (!isStandalone && !isTestMode) {
-    // Running in browser — skip splash entirely
+  if (!isStandalone && !isMobile && !isTestMode) {
+    // Desktop browser — skip splash
     splash.style.display = 'none';
     return;
   }
