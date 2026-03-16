@@ -228,9 +228,10 @@ describe('[BUG-0307] Mobile PWA test uses domcontentloaded', () => {
     }
   });
 
-  it('uses waitForSelector instead of waitForTimeout for reliability', () => {
-    // waitForTimeout is flaky in CI; prefer explicit waitForSelector
-    expect(content).toContain('waitForSelector');
+  it('ARIA labels test checks screen count directly', () => {
+    // ARIA test uses .count() + toBeGreaterThanOrEqual, matching the pattern of other structure tests
+    expect(content).toContain("screen[aria-label]");
+    expect(content).toContain('toBeGreaterThanOrEqual(5)');
   });
 });
 
