@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
 import { withAuth, isValidDate, isValidTime, isInRange, isValidEnum, sanitizeInput, validationError, VALID_BLOCK_REASONS } from '../auth-helper';
 import { sendPushToUser } from '../../lib/push';
+import { createNotification } from '../../lib/notifications';
 
-/** Parse "9:30 AM" or "6:00 PM" → minutes since midnight */
+/** Parse "9:30 AM" or "6:00 PM" to minutes since midnight */
 function parseTimeMinutes(time: string): number {
   const match = time.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
   if (!match) return 0;
@@ -21,14 +22,12 @@ async function cancelConflictingBookings(
   block: { court_id: number | null; block_date: string; time_start: string | null; time_end: string | null; reason: string },
   adminName: string
 ) {
-  // Find confirmed bookings on this date
   let query = supabase
     .from('bookings')
     .select('id, court_id, court_name, date, time, user_id, user_name')
     .eq('date', block.block_date)
     .eq('status', 'confirmed');
 
-  // If blocking a specific court, filter to that court only
   if (block.court_id !== null) {
     query = query.eq('court_id', block.court_id);
   }
@@ -36,9 +35,8 @@ async function cancelConflictingBookings(
   const { data: bookings, error } = await query;
   if (error || !bookings || bookings.length === 0) return [];
 
-  // Filter by time range if not full-day
   const affected = bookings.filter((b: { time: string }) => {
-    if (!block.time_start && !block.time_end) return true; // full-day → all bookings
+    if (!block.time_start && !block.time_end) return true;
     const slotMins = parseTimeMinutes(b.time);
     const startMins = block.time_start ? parseTimeMinutes(block.time_start) : 0;
     const endMins = block.time_end ? parseTimeMinutes(block.time_end) : 1440;
@@ -47,7 +45,6 @@ async function cancelConflictingBookings(
 
   if (affected.length === 0) return [];
 
-  // Cancel all affected bookings
   const affectedIds = affected.map((b: { id: string }) => b.id);
   const { error: cancelError } = await supabase
     .from('bookings')
@@ -59,43 +56,87 @@ async function cancelConflictingBookings(
     return [];
   }
 
-  // Notify each affected user (bell + push, fire-and-forget)
-  const notifiedUsers = new Set<string>();
   for (const booking of affected) {
-    if (notifiedUsers.has(booking.user_id)) continue;
-    notifiedUsers.add(booking.user_id);
-
     const courtLabel = booking.court_name || 'Court';
-    const notifBody = `Your booking on ${courtLabel} at ${booking.time} on ${booking.date} was cancelled: ${block.reason}`;
+    const ownerBody = `Your booking on ${courtLabel} at ${booking.time} on ${booking.date} was cancelled: ${block.reason}`;
+    const participantBody = `${booking.user_name}'s booking on ${courtLabel} at ${booking.time} on ${booking.date} was cancelled: ${block.reason}`;
+    const timestamp = new Date().toISOString();
 
-    // Bell notification
-    supabase.from('notifications').insert({
+    await createNotification(supabase, booking.user_id, {
       id: `notif-block-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-      user_id: booking.user_id,
       type: 'booking',
-      title: 'Booking cancelled — court blocked',
-      body: notifBody,
-      timestamp: new Date().toISOString(),
-      read: false,
-    }).then(({ error: e }: { error: { message: string } | null }) => { if (e) console.error('[court-blocks] notification insert error:', e.message); });
+      title: 'Booking cancelled - court blocked',
+      body: ownerBody,
+      timestamp,
+    }, 'court-blocks');
 
-    // Push notification
     sendPushToUser(supabase, booking.user_id, {
       title: 'Booking Cancelled',
-      body: notifBody,
+      body: ownerBody,
       tag: `block-cancel-${booking.id}`,
       url: '/mobile-app/index.html#book',
     }).catch(() => { /* best-effort */ });
+
+    const { data: participants } = await supabase
+      .from('booking_participants')
+      .select('participant_id')
+      .eq('booking_id', booking.id);
+
+    for (const participant of participants || []) {
+      await createNotification(supabase, participant.participant_id, {
+        id: `notif-block-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        type: 'booking',
+        title: 'Booking cancelled - court blocked',
+        body: participantBody,
+        timestamp,
+      }, 'court-blocks');
+
+      sendPushToUser(supabase, participant.participant_id, {
+        title: 'Booking Cancelled',
+        body: participantBody,
+        tag: `block-cancel-${booking.id}-${participant.participant_id.slice(0, 8)}`,
+        url: '/mobile-app/index.html#book',
+      }).catch(() => { /* best-effort */ });
+    }
+
+    const recipientIds = [booking.user_id, ...(participants || []).map((participant: { participant_id: string }) => participant.participant_id)];
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('email, name')
+      .in('id', recipientIds);
+
+    const recipients = (profiles || [])
+      .filter((profile: { email?: string | null }) => Boolean(profile.email))
+      .map((profile: { email: string; name: string }) => ({ email: profile.email, name: profile.name }));
+
+    if (recipients.length > 0) {
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://monotennisclub.com';
+      fetch(`${siteUrl}/api/booking-email`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bookingId: booking.id,
+          recipients,
+          courtName: courtLabel,
+          date: booking.date,
+          time: booking.time,
+        }),
+      }).then((res) => {
+        if (!res.ok) console.error(`[court-blocks] Cancel email API returned ${res.status}`);
+      }).catch(() => {
+        // best-effort
+      });
+    }
   }
 
   return affected;
 }
 
-// GET /api/mobile/court-blocks — list court blocks (optionally filter by date range)
+// GET /api/mobile/court-blocks - list court blocks (optionally filter by date range)
 export const GET = withAuth(async (user, request, supabase) => {
   const url = new URL(request.url);
-  const from = url.searchParams.get('from'); // YYYY-MM-DD
-  const to = url.searchParams.get('to');     // YYYY-MM-DD
+  const from = url.searchParams.get('from');
+  const to = url.searchParams.get('to');
 
   let query = supabase
     .from('court_blocks')
@@ -112,7 +153,7 @@ export const GET = withAuth(async (user, request, supabase) => {
   return NextResponse.json({ blocks: data || [] });
 });
 
-// POST /api/mobile/court-blocks — create a new court block (admin only)
+// POST /api/mobile/court-blocks - create a new court block (admin only)
 // Auto-cancels conflicting bookings and notifies affected users
 export const POST = withAuth(async (user, request, supabase) => {
   const body = await request.json();
@@ -125,9 +166,8 @@ export const POST = withAuth(async (user, request, supabase) => {
     return NextResponse.json({ error: 'reason is required' }, { status: 400 });
   }
 
-  // Validate inputs
   if (!isValidDate(block_date)) return validationError('block_date', 'must be YYYY-MM-DD');
-  if (court_id !== null && court_id !== undefined && !isInRange(Number(court_id), 1, 4)) return validationError('court_id', 'must be 1–4');
+  if (court_id !== null && court_id !== undefined && !isInRange(Number(court_id), 1, 4)) return validationError('court_id', 'must be 1-4');
   if (!isValidEnum(reason, VALID_BLOCK_REASONS)) return validationError('reason', 'must be one of: ' + VALID_BLOCK_REASONS.join(', '));
   if (time_start && !isValidTime(time_start)) return validationError('time_start', 'invalid time format');
   if (time_end && !isValidTime(time_end)) return validationError('time_end', 'invalid time format');
@@ -151,7 +191,6 @@ export const POST = withAuth(async (user, request, supabase) => {
     return NextResponse.json({ error: 'Failed to create court block' }, { status: 500 });
   }
 
-  // Auto-cancel conflicting bookings and notify affected users
   const cancelled = await cancelConflictingBookings(supabase, {
     court_id: court_id || null,
     block_date,
@@ -163,17 +202,21 @@ export const POST = withAuth(async (user, request, supabase) => {
   return NextResponse.json({
     block: data,
     cancelledBookings: cancelled.length,
-    cancelledDetails: cancelled.map((b: { id: string; user_name: string; time: string; court_name: string }) => ({ id: b.id, userName: b.user_name, time: b.time, court: b.court_name })),
+    cancelledDetails: cancelled.map((b: { id: string; user_name: string; time: string; court_name: string }) => ({
+      id: b.id,
+      userName: b.user_name,
+      time: b.time,
+      court: b.court_name,
+    })),
   });
 }, { role: 'admin' });
 
-// DELETE /api/mobile/court-blocks — delete court block(s) (admin only)
+// DELETE /api/mobile/court-blocks - delete court block(s) (admin only)
 // Supports: ?id=... (single), or body { ids: [...] } (bulk), or body { courtId, from, to } (range)
 export const DELETE = withAuth(async (user, request, supabase) => {
   const url = new URL(request.url);
   const singleId = url.searchParams.get('id');
 
-  // Single delete via query param (existing behavior)
   if (singleId) {
     const { error } = await supabase
       .from('court_blocks')
@@ -187,7 +230,6 @@ export const DELETE = withAuth(async (user, request, supabase) => {
     return NextResponse.json({ success: true, deleted: 1 });
   }
 
-  // Bulk delete via request body
   let body: { ids?: string[]; courtId?: number | null; from?: string; to?: string } = {};
   try {
     body = await request.json();
@@ -195,7 +237,6 @@ export const DELETE = withAuth(async (user, request, supabase) => {
     return NextResponse.json({ error: 'id query param or JSON body required' }, { status: 400 });
   }
 
-  // Option 1: Delete by specific IDs
   if (body.ids && Array.isArray(body.ids) && body.ids.length > 0) {
     const { data, error } = await supabase
       .from('court_blocks')
@@ -210,7 +251,6 @@ export const DELETE = withAuth(async (user, request, supabase) => {
     return NextResponse.json({ success: true, deleted: data?.length || 0 });
   }
 
-  // Option 2: Delete by date range (+ optional court filter)
   if (body.from) {
     let query = supabase
       .from('court_blocks')

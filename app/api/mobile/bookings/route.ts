@@ -404,10 +404,12 @@ export async function POST(request: Request) {
 
     const courtName = COURT_NAMES[courtId] || `Court ${courtId}`;
     const bookerName = userName ? sanitizeInput(userName, 200) : authResult.name || 'Member';
+    const bookingId = generateId('b');
 
     const { data: newBooking, error: insertError } = await supabase
       .from('bookings')
       .insert({
+        id: bookingId,
         court_id: courtId,
         court_name: courtName,
         date,
