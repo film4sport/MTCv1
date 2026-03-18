@@ -12,6 +12,9 @@
   // Cross-file function (called from interactive.js)
   /** Shows onboarding flow if user hasn't completed it yet */
   MTC.fn.checkOnboarding = function() {
+    var currentUser = MTC.storage.get('mtc-user', null);
+    if (!currentUser) return;
+
     const hasSeenOnboarding = MTC.storage.get('mtc-onboarding-complete', null);
     if (!hasSeenOnboarding) {
       setTimeout(function() { showOnboarding(); }, 600);
