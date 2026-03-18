@@ -6,10 +6,11 @@ import { logEmail } from '../../lib/email-logger';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
-// Rate limit: 3 signups per 15 min per IP
+// Rate limit: keep abuse protection, but avoid blocking whole households/venues.
+// Scope attempts to IP + email so multiple legitimate signups on one network can proceed.
 const signupAttempts = new Map<string, { count: number; firstAttempt: number }>();
 const RATE_WINDOW = 15 * 60_000;
-const RATE_MAX = 5;
+const RATE_MAX = 8;
 
 function isRateLimited(key: string): boolean {
   const now = Date.now();
@@ -36,13 +37,6 @@ function sanitize(str: string): string {
 export async function POST(request: NextRequest) {
   try {
     const ip = request.headers.get('x-forwarded-for') || 'unknown';
-    if (isRateLimited(ip)) {
-      return NextResponse.json(
-        { error: 'Too many signup attempts. Please wait 15 minutes.' },
-        { status: 429 }
-      );
-    }
-
     const { name, email, pin, membershipType, skillLevel, residence } = await request.json();
 
     // ── Validation ────────────────────────────────────
@@ -59,6 +53,14 @@ export async function POST(request: NextRequest) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(emailLower)) {
       return NextResponse.json({ error: 'Invalid email format' }, { status: 400 });
+    }
+
+    const rateLimitKey = `${ip}:${emailLower}`;
+    if (isRateLimited(rateLimitKey)) {
+      return NextResponse.json(
+        { error: 'Too many signup attempts for this email. Please wait 15 minutes.' },
+        { status: 429 }
+      );
     }
 
     const pinClean = pin.trim();
