@@ -70,6 +70,7 @@ async function fireBookingNotifications(
   booking: { id: string; courtName: string; date: string; time: string; matchType?: string; duration?: number },
   booker: { id: string; name: string; email: string },
   participantRows: { participant_id: string; participant_name: string }[],
+  emailApiBaseUrl: string,
 ) {
   const now = new Date().toISOString();
   const formattedDate = new Date(booking.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
@@ -134,8 +135,7 @@ async function fireBookingNotifications(
       });
     }
 
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://monotennisclub.com';
-    await fetch(`${siteUrl}/api/booking-email`, {
+    await fetch(`${emailApiBaseUrl}/api/booking-email`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -161,6 +161,7 @@ async function fireCancellationNotifications(
   supabase: ReturnType<typeof getAdminClient>,
   booking: { id: string; court_name: string; date: string; time: string; user_id: string; user_name: string },
   participantRows: { participant_id: string; participant_name: string }[],
+  emailApiBaseUrl: string,
 ) {
   const now = new Date().toISOString();
   const cancelDate = new Date(booking.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
@@ -203,8 +204,7 @@ async function fireCancellationNotifications(
     });
 
     if (cancelRecipients.length > 0) {
-      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://monotennisclub.com';
-      await fetch(`${siteUrl}/api/booking-email`, {
+      await fetch(`${emailApiBaseUrl}/api/booking-email`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -281,6 +281,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   const authResult = await authenticateMobileRequest(request);
   if (authResult instanceof NextResponse) return authResult;
+  const emailApiBaseUrl = new URL(request.url).origin;
 
   if (isRateLimited(authResult.id, 10)) {
     return NextResponse.json({ error: 'Too many booking attempts. Please wait.' }, { status: 429 });
@@ -457,6 +458,7 @@ export async function POST(request: Request) {
       { id: newBooking.id, courtName, date, time, matchType, duration },
       { id: authResult.id, name: bookerName, email: authResult.email },
       participantRows,
+      emailApiBaseUrl,
     ).catch(err => console.error('[mobile-booking] Notification error:', err));
 
     return NextResponse.json({ success: true, booking: newBooking });
@@ -469,6 +471,7 @@ export async function POST(request: Request) {
 export async function DELETE(request: Request) {
   const authResult = await authenticateMobileRequest(request);
   if (authResult instanceof NextResponse) return authResult;
+  const emailApiBaseUrl = new URL(request.url).origin;
 
   try {
     const { bookingId } = await request.json();
@@ -529,7 +532,7 @@ export async function DELETE(request: Request) {
 
     // Fire cancellation notifications (non-blocking)
     if (participants && participants.length > 0) {
-      fireCancellationNotifications(supabase, booking, participants)
+      fireCancellationNotifications(supabase, booking, participants, emailApiBaseUrl)
         .catch(err => console.error('[mobile-booking] Cancel notification error:', err));
     }
 

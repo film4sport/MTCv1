@@ -20,7 +20,8 @@ function parseTimeMinutes(time: string): number {
 async function cancelConflictingBookings(
   supabase: any,
   block: { court_id: number | null; block_date: string; time_start: string | null; time_end: string | null; reason: string },
-  adminName: string
+  adminName: string,
+  emailApiBaseUrl: string,
 ) {
   let query = supabase
     .from('bookings')
@@ -110,8 +111,7 @@ async function cancelConflictingBookings(
       .map((profile: { email: string; name: string }) => ({ email: profile.email, name: profile.name }));
 
     if (recipients.length > 0) {
-      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://monotennisclub.com';
-      fetch(`${siteUrl}/api/booking-email`, {
+      fetch(`${emailApiBaseUrl}/api/booking-email`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -156,6 +156,7 @@ export const GET = withAuth(async (user, request, supabase) => {
 // POST /api/mobile/court-blocks - create a new court block (admin only)
 // Auto-cancels conflicting bookings and notifies affected users
 export const POST = withAuth(async (user, request, supabase) => {
+  const emailApiBaseUrl = new URL(request.url).origin;
   const body = await request.json();
 
   const { court_id, block_date, time_start, time_end, reason, notes } = body;
@@ -197,7 +198,7 @@ export const POST = withAuth(async (user, request, supabase) => {
     time_start: time_start || null,
     time_end: time_end || null,
     reason: reason || 'Maintenance',
-  }, user.name);
+  }, user.name, emailApiBaseUrl);
 
   return NextResponse.json({
     block: data,

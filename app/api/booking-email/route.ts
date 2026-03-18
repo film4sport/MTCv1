@@ -10,6 +10,17 @@ const SMTP_FROM = process.env.SMTP_FROM || 'noreply@monotennisclub.com';
 // ICS generator (server-compatible copy from dashboard/lib/calendar.ts)
 const TIMEZONE = 'America/Toronto';
 
+function summarizeEmailError(err: unknown): string {
+  if (!err) return 'Unknown email error';
+  if (err instanceof Error) {
+    const parts = [err.name, err.message].filter(Boolean);
+    const responseCode = 'responseCode' in err ? (err as { responseCode?: number }).responseCode : undefined;
+    if (responseCode) parts.push(`SMTP ${responseCode}`);
+    return parts.join(': ');
+  }
+  return String(err);
+}
+
 function parseTime(time: string): { hour: number; minute: number } {
   const match = time.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
   if (!match) return { hour: 9, minute: 0 };
@@ -269,6 +280,9 @@ export async function POST(request: Request) {
           port: smtpPort,
           secure: smtpPort === 465,
           auth: { user: smtpUser, pass: smtpPass },
+          connectionTimeout: 15000,
+          greetingTimeout: 15000,
+          socketTimeout: 30000,
         });
 
         // Send to each recipient with retry + exponential backoff
@@ -318,7 +332,7 @@ export async function POST(request: Request) {
             sentCount++;
           } else {
             failedCount++;
-            console.error(`[booking-email] Failed to send to ${recipientList[i]?.email}:`, r.reason);
+            console.error(`[booking-email] Failed to send to ${recipientList[i]?.email}: ${summarizeEmailError(r.reason)}`);
           }
         });
 
@@ -330,14 +344,14 @@ export async function POST(request: Request) {
             status: results![i].status === 'fulfilled' ? 'sent' as const : 'failed' as const,
             subject: `Booking Confirmed — ${courtName}, ${formattedDate}`,
             metadata: { bookingId, courtName, date, time, matchType, role: recipient.role },
-            error: results![i].status === 'rejected' ? String((results![i] as PromiseRejectedResult).reason) : undefined,
+            error: results![i].status === 'rejected' ? summarizeEmailError((results![i] as PromiseRejectedResult).reason) : undefined,
           }))
         );
       } else {
         console.warn('[booking-email] SMTP not configured. SMTP_HOST:', !!smtpHost, 'SMTP_USER:', !!smtpUser, 'SMTP_PASS:', !!smtpPass);
       }
     } catch (err) {
-      console.error('[booking-email] SMTP/nodemailer error:', err);
+      console.error('[booking-email] SMTP/nodemailer error:', summarizeEmailError(err));
       // Don't swallow — record the error so it surfaces in the response
       failedCount = recipientList.length;
     }
@@ -386,11 +400,22 @@ export async function POST(request: Request) {
     }
 
     const allFailed = sentCount === 0 && recipientList.length > 0;
+    const failedRecipients = recipientList
+      .map((recipient, i) => ({ recipient, result: results?.[i] }))
+      .filter(({ result }) => !result || result.status === 'rejected')
+      .map(({ recipient, result }) => ({
+        email: recipient.email,
+        role: recipient.role,
+        error: result && result.status === 'rejected' ? summarizeEmailError(result.reason) : 'Email send did not complete',
+      }));
+
     return NextResponse.json({
       success: sentCount > 0,
       sent: sentCount,
       failed: failedCount,
       totalRecipients: recipientList.length,
+      smtpConfigured: Boolean(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS),
+      failedRecipients,
       ics: icsContent,
       message: sentCount > 0
         ? `${sentCount} confirmation email(s) sent`
