@@ -5,7 +5,7 @@ import type { User, Court, Booking, ClubEvent, Partner, Conversation, Announceme
 import { CLUB_LOCATION, DEFAULT_NOTIFICATION_PREFS } from './types';
 import { DEFAULT_COURTS, DEFAULT_EVENTS, DEFAULT_ANNOUNCEMENTS, DEFAULT_PROGRAMS } from './data';
 import { generateId } from './utils';
-import { pinLogin, signOut, getCurrentUser } from './auth';
+import { pinLogin, signOut, getCurrentUser, getCachedUser } from './auth';
 import { useToast } from './toast';
 import { reportError } from '../../lib/errorReporter';
 import { supabase } from '../../lib/supabase';
@@ -218,7 +218,7 @@ export async function apiCall<T = any>(path: string, method: string, body?: Reco
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [isLoaded, setIsLoaded] = useState(false);
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(() => getCachedUser());
   const [members, setMembers] = useState<User[]>([]);
   const [courts, setCourts] = useState<Court[]>(DEFAULT_COURTS);
   const [bookings, setBookings] = useState<Booking[]>([]);

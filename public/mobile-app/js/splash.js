@@ -1,8 +1,7 @@
 /* splash.js - MTC Court */
 // ============================================
 // APP LAUNCH SPLASH SCREEN CONTROLLER
-// Shows branded animation on launch, dismisses
-// after 1.6s (total visible ~2s with fade-out).
+// Shows branded animation on launch.
 // Test mode: add ?splash=1 to URL to force-show.
 // ============================================
 (function() {
@@ -12,15 +11,14 @@
   if (!splash) return;
 
   // Test modes via URL params:
-  //   ?splash=1        — force-show splash (auto-dismisses after animation)
-  //   ?splash=1&hold=1 — force-show and HOLD (tap anywhere to dismiss)
+  //   ?splash=1        force-show splash (auto-dismisses after animation)
+  //   ?splash=1&hold=1 force-show and hold (tap anywhere to dismiss)
   var params = window.location.search;
   var isTestMode = /[?&]splash=1/.test(params);
   var isHoldMode = /[?&]hold=1/.test(params);
 
   // Show splash on all mobile devices (standalone or browser).
   // Skip only on desktop browsers.
-  // Test mode (?splash=1) always shows it for development.
   var isStandalone = window.navigator.standalone === true ||
     window.matchMedia('(display-mode: standalone)').matches ||
     window.matchMedia('(display-mode: fullscreen)').matches;
@@ -28,25 +26,29 @@
     (navigator.userAgent.includes('Macintosh') && 'ontouchend' in document);
 
   if (!isStandalone && !isMobile && !isTestMode) {
-    // Desktop browser — skip splash
     splash.style.display = 'none';
     return;
   }
 
   function dismissSplash() {
     splash.classList.add('dismissed');
-    // Remove from DOM after fade-out completes
     setTimeout(function() {
       splash.style.display = 'none';
-    }, 400); // matches CSS transition duration
+    }, 400);
   }
 
   if (isHoldMode) {
-    // Hold mode — splash stays until user taps it
     splash.addEventListener('click', dismissSplash);
   } else {
-    // Normal mode — dismiss after animation plays
-    var SPLASH_DURATION = 1600; // ms — enough for all staggered animations to finish
-    setTimeout(dismissSplash, SPLASH_DURATION);
+    var hasWarmSession = false;
+    try {
+      hasWarmSession = !!localStorage.getItem('mtc-session-active') && !!localStorage.getItem('mtc-user');
+    } catch (e) {
+      hasWarmSession = false;
+    }
+
+    // Warm return sessions should feel faster than a cold launch.
+    var splashDuration = hasWarmSession ? 900 : 1400;
+    setTimeout(dismissSplash, splashDuration);
   }
 })();
