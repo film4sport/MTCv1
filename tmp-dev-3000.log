@@ -446,3 +446,5 @@
  GET /info?tab=privacy 200 in 32ms (compile: 5ms, render: 26ms)
  GET /info?tab=terms 200 in 35ms (compile: 6ms, render: 29ms)
  GET /api/mobile/settings 401 in 6ms (compile: 2ms, render: 3ms)
+✓ Compiled in 214ms
+✓ Compiled in 201ms
