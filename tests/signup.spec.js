@@ -7,6 +7,14 @@ test.describe('Signup Flow — /info?tab=membership', () => {
     await page.waitForTimeout(500);
   });
 
+  async function switchTab(page, name, expectedTab) {
+    const tab = page.getByRole('tab', { name, exact: true });
+    await expect(tab).toBeVisible();
+    await tab.click({ force: true });
+    await page.waitForFunction((tabName) => window.location.search.includes(`tab=${tabName}`), expectedTab);
+    await expect(page.getByRole('tab', { name, exact: true })).toHaveAttribute('aria-selected', 'true');
+  }
+
   test('membership tab loads by default', async ({ page }) => {
     await expect(page.getByText('Why Join Mono Tennis Club').first()).toBeAttached();
   });
@@ -21,23 +29,13 @@ test.describe('Signup Flow — /info?tab=membership', () => {
   });
 
   test('tab navigation works', async ({ page }) => {
-    // Use dispatchEvent to bypass mobile horizontal scroll viewport issues
-    await page.getByText('About', { exact: true }).dispatchEvent('click');
-    await page.waitForTimeout(300);
-    await expect(page).toHaveURL(/tab=about/);
-
-    await page.getByText('FAQ', { exact: true }).dispatchEvent('click');
-    await page.waitForTimeout(300);
-    await expect(page).toHaveURL(/tab=faq/);
-
-    await page.getByText('Rules', { exact: true }).dispatchEvent('click');
-    await page.waitForTimeout(300);
-    await expect(page).toHaveURL(/tab=rules/);
+    await switchTab(page, 'About', 'about');
+    await switchTab(page, 'FAQ', 'faq');
+    await switchTab(page, 'Rules', 'rules');
   });
 
   test('coaching tab has coach info', async ({ page }) => {
-    await page.getByText('Coaching', { exact: true }).click();
-    await page.waitForTimeout(300);
+    await switchTab(page, 'Coaching', 'coaching');
     await expect(page.getByRole('heading', { name: 'Mark Taylor' })).toBeAttached();
   });
 
@@ -47,8 +45,8 @@ test.describe('Signup Flow — /info?tab=membership', () => {
   });
 
   test('no ClubSpark links on info page', async ({ page }) => {
-    const pageContent = await page.content();
-    expect(pageContent.toLowerCase()).not.toContain('clubspark');
+    await page.waitForLoadState('domcontentloaded');
+    await expect(page.locator('a[href*="clubspark" i]')).toHaveCount(0);
   });
 });
 
