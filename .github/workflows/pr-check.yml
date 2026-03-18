@@ -85,6 +85,7 @@ jobs:
   # ── E2E tests — sharded across 2 parallel jobs ──
   pr-e2e:
     runs-on: ubuntu-latest
+    container: mcr.microsoft.com/playwright:v1.58.0-noble
     needs: pr-validate
     strategy:
       fail-fast: false
@@ -106,9 +107,6 @@ jobs:
         with:
           path: .next
           key: nextjs-build-pr-${{ github.event.pull_request.number }}-${{ github.sha }}
-
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium webkit
 
       - name: Run E2E tests (shard ${{ matrix.shard }}/2)
         run: npx playwright test --shard=${{ matrix.shard }}/2

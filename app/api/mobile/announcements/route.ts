@@ -11,22 +11,29 @@ function generateId(prefix: string): string {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
+function isDuplicateError(error: { code?: string; message?: string } | null | undefined): boolean {
+  const message = error?.message || '';
+  return error?.code === '23505' || message.includes('duplicate key value') || message.includes('unique constraint');
+}
+
 async function sendAnnouncementInboxMessage(
   supabase: ReturnType<typeof getAdminClient>,
   message: { fromId: string; fromName: string; toId: string; toName: string; text: string }
 ) {
   const timestamp = new Date().toISOString();
-  const { data: existingConversation } = await supabase
+  const fetchConversation = () => supabase
     .from('conversations')
     .select('id')
     .or(`and(member_a.eq.${message.fromId},member_b.eq.${message.toId}),and(member_a.eq.${message.toId},member_b.eq.${message.fromId})`)
     .single();
 
+  const { data: existingConversation } = await fetchConversation();
+
   let conversationId: number;
   if (existingConversation?.id) {
     conversationId = existingConversation.id;
   } else {
-    const { data: newConversation } = await supabase
+    const { data: newConversation, error: conversationError } = await supabase
       .from('conversations')
       .insert({
         member_a: message.fromId,
@@ -36,8 +43,15 @@ async function sendAnnouncementInboxMessage(
       })
       .select('id')
       .single();
-    if (!newConversation?.id) return;
-    conversationId = newConversation.id;
+    if (newConversation?.id) {
+      conversationId = newConversation.id;
+    } else if (isDuplicateError(conversationError)) {
+      const { data: racedConversation } = await fetchConversation();
+      if (!racedConversation?.id) return;
+      conversationId = racedConversation.id;
+    } else {
+      return;
+    }
   }
 
   const { error: messageError } = await supabase.from('messages').insert({

@@ -550,6 +550,7 @@ export async function fetchNotificationPreferences(userId: string): Promise<Noti
     bookings: data.bookings,
     events: data.events,
     partners: data.partners,
+    announcements: data.announcements ?? true,
     messages: data.messages,
     programs: data.programs,
   };

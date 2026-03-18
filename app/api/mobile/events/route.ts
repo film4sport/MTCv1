@@ -297,7 +297,15 @@ export async function POST(request: Request) {
       }
 
       const { error } = await supabase.from('event_attendees').insert({ event_id: eventId, user_name: userName });
-      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      if (error) {
+        const duplicateRsvp = error.code === '23505'
+          || error.message?.includes('event_attendees_event_id_user_name_key')
+          || error.message?.includes('duplicate key value')
+          || error.message?.includes('unique constraint');
+        if (!duplicateRsvp) {
+          return NextResponse.json({ error: error.message }, { status: 500 });
+        }
+      }
 
       // Bell notification on RSVP (fire-and-forget)
       // No push notification — user already sees in-app "You're in!" toast.

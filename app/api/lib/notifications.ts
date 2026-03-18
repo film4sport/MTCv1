@@ -13,6 +13,11 @@ export interface NotificationPayload {
   timestamp: string;
 }
 
+function isDuplicateError(error: { code?: string; message?: string } | null | undefined): boolean {
+  const message = error?.message || '';
+  return error?.code === '23505' || message.includes('duplicate key value') || message.includes('unique constraint');
+}
+
 /**
  * Create a bell notification in the notifications table.
  * Logs errors with the given context prefix but never throws.
@@ -27,6 +32,8 @@ export async function createNotification(
     id: notif.id, user_id: userId, type: notif.type,
     title: notif.title, body: notif.body, timestamp: notif.timestamp, read: false,
   }).then(({ error }) => {
-    if (error) console.error(`[${context}] Failed to create notification for ${userId}:`, error.message);
+    if (error && !isDuplicateError(error)) {
+      console.error(`[${context}] Failed to create notification for ${userId}:`, error.message);
+    }
   });
 }

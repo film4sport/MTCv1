@@ -209,7 +209,6 @@ function MessagesContent() {
         <div className="dashboard-panel rounded-[32px] border p-5 sm:p-6 shadow-[0_28px_70px_rgba(31,40,23,0.16)]">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="max-w-2xl">
-              <span className="dashboard-soft-pill mb-3 inline-flex">Member Messaging</span>
               <h2 className="text-2xl sm:text-3xl font-semibold tracking-[-0.03em]" style={{ color: '#24301c' }}>
                 Keep conversations quick, clear, and easy to act on.
               </h2>

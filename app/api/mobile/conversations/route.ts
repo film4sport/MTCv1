@@ -11,6 +11,11 @@ function withTimeout<T>(promise: Promise<T>, ms = 5000): Promise<T | undefined> 
   return Promise.race([promise, new Promise<undefined>(r => setTimeout(() => r(undefined), ms))]);
 }
 
+function isDuplicateError(error: { code?: string; message?: string } | null | undefined): boolean {
+  const message = error?.message || '';
+  return error?.code === '23505' || message.includes('duplicate key value') || message.includes('unique constraint');
+}
+
 export async function GET(request: Request) {
   const authResult = await authenticateMobileRequest(request);
   if (authResult instanceof NextResponse) return authResult;
@@ -138,11 +143,13 @@ export async function POST(request: Request) {
     const toName = toProfile.name || 'Unknown';
 
     // Find or create conversation
-    const { data: existing } = await supabase
+    const fetchConversation = () => supabase
       .from('conversations')
       .select('id')
       .or(`and(member_a.eq.${fromId},member_b.eq.${toId}),and(member_a.eq.${toId},member_b.eq.${fromId})`)
       .single();
+
+    const { data: existing } = await fetchConversation();
 
     let conversationId: number;
     if (existing) {
@@ -153,10 +160,17 @@ export async function POST(request: Request) {
         .insert({ member_a: fromId, member_b: toId, last_message: sanitizeInput(text, 200), last_timestamp: timestamp })
         .select('id')
         .single();
-      if (convErr || !newConv) {
+      if (newConv) {
+        conversationId = newConv.id;
+      } else if (isDuplicateError(convErr)) {
+        const { data: racedConversation } = await fetchConversation();
+        if (!racedConversation) {
+          return NextResponse.json({ error: 'Failed to create conversation' }, { status: 500 });
+        }
+        conversationId = racedConversation.id;
+      } else {
         return NextResponse.json({ error: 'Failed to create conversation' }, { status: 500 });
       }
-      conversationId = newConv.id;
     }
 
     // Insert message

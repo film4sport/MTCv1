@@ -53,34 +53,6 @@ export default function PartnersPage() {
       <DashboardHeader title="Find a Partner" />
 
       <div className="p-6 lg:p-8 max-w-5xl mx-auto animate-slideUp space-y-5">
-        <div className="dashboard-panel rounded-[32px] border p-5 sm:p-6 shadow-[0_28px_70px_rgba(31,40,23,0.14)]">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-            <div className="max-w-2xl">
-              <span className="dashboard-soft-pill mb-3 inline-flex">Matchmaking</span>
-              <h2 className="text-2xl sm:text-3xl font-semibold tracking-[-0.03em]" style={{ color: '#24301c' }}>
-                Help members find the right game faster.
-              </h2>
-              <p className="mt-3 text-sm leading-6" style={{ color: '#6d685e' }}>
-                Surface the right partner requests quickly, then move straight into messaging or booking.
-              </p>
-            </div>
-            <div className="grid grid-cols-3 gap-3 lg:min-w-[320px]">
-              <div className="rounded-2xl px-4 py-3" style={{ background: 'rgba(107,122,61,0.08)', border: '1px solid rgba(107,122,61,0.12)' }}>
-                <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em]" style={{ color: '#8c866f' }}>Open Posts</p>
-                <p className="mt-1 text-2xl font-semibold" style={{ color: '#24301c' }}>{filtered.length}</p>
-              </div>
-              <div className="rounded-2xl px-4 py-3" style={{ background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.55)' }}>
-                <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em]" style={{ color: '#8c866f' }}>Format</p>
-                <p className="mt-1 text-sm font-semibold capitalize" style={{ color: '#24301c' }}>{filter === 'all' ? 'All types' : filter}</p>
-              </div>
-              <div className="rounded-2xl px-4 py-3" style={{ background: 'rgba(255,248,231,0.74)', border: '1px solid rgba(214,188,123,0.2)' }}>
-                <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em]" style={{ color: '#8c866f' }}>Level</p>
-                <p className="mt-1 text-sm font-semibold capitalize" style={{ color: '#24301c' }}>{skillFilter === 'all' ? 'Any level' : skillFilter}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* Filters + Post Button */}
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
           <div className="flex flex-wrap items-center gap-3">

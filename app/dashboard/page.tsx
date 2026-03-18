@@ -67,7 +67,7 @@ export default function DashboardHome() {
         className="pointer-events-none select-none absolute inset-0"
         style={{
           backgroundColor: 'transparent',
-          backgroundImage: `url(${Math.random() > 0.5 ? '/tennis-silhouette-1.png' : '/tennis-silhouette-2.png'})`,
+          backgroundImage: "url('/tennis-silhouette-1.png')",
           backgroundSize: 'contain',
           backgroundPosition: 'right center',
           backgroundRepeat: 'no-repeat',
@@ -78,42 +78,6 @@ export default function DashboardHome() {
       />
 
       <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-6 relative z-[1]">
-        <section className="dashboard-panel relative overflow-hidden rounded-[32px] border px-6 py-6 lg:px-8 lg:py-8">
-          <div className="dashboard-hero-grid absolute inset-0 opacity-40" />
-          <div className="pointer-events-none absolute -right-16 -top-20 h-48 w-48 rounded-full blur-3xl" style={{ background: 'rgba(212, 225, 87, 0.18)' }} />
-          <div className="pointer-events-none absolute -bottom-16 left-8 h-40 w-40 rounded-full blur-3xl" style={{ background: 'rgba(107, 122, 61, 0.14)' }} />
-          <div className="relative flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-            <div className="max-w-2xl">
-              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.28em]" style={{ color: '#6b7a3d' }}>
-                Member Home
-              </p>
-              <h2 className="headline-font text-3xl sm:text-4xl" style={{ color: '#202617' }}>
-                {currentUser ? `Welcome back, ${currentUser.name.split(' ')[0]}.` : 'Welcome back.'}
-              </h2>
-              <p className="mt-3 max-w-xl text-sm sm:text-[15px] leading-6" style={{ color: '#5f6658' }}>
-                Everything important for your week is here: bookings, confirmations, events, and club updates in one calmer, cleaner view.
-              </p>
-            </div>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-              <div className="rounded-2xl px-4 py-3" style={{ background: 'rgba(255,255,255,0.62)', border: '1px solid rgba(107, 122, 61, 0.12)' }}>
-                <p className="text-[10px] uppercase tracking-[0.22em]" style={{ color: '#7c836f' }}>Upcoming</p>
-                <p className="mt-1 text-2xl font-semibold" style={{ color: '#202617' }}>{myBookings.length}</p>
-                <p className="text-xs" style={{ color: '#5f6658' }}>Booked courts</p>
-              </div>
-              <div className="rounded-2xl px-4 py-3" style={{ background: 'rgba(255,255,255,0.62)', border: '1px solid rgba(107, 122, 61, 0.12)' }}>
-                <p className="text-[10px] uppercase tracking-[0.22em]" style={{ color: '#7c836f' }}>Pending</p>
-                <p className="mt-1 text-2xl font-semibold" style={{ color: '#202617' }}>{pendingConfirmations.length}</p>
-                <p className="text-xs" style={{ color: '#5f6658' }}>Confirmations</p>
-              </div>
-              <div className="rounded-2xl px-4 py-3 col-span-2 sm:col-span-1" style={{ background: 'rgba(32,38,23,0.94)', border: '1px solid rgba(212, 225, 87, 0.16)' }}>
-                <p className="text-[10px] uppercase tracking-[0.22em]" style={{ color: 'rgba(212,225,87,0.72)' }}>Club Pulse</p>
-                <p className="mt-1 text-2xl font-semibold" style={{ color: '#f3f0e8' }}>{upcomingEvents.length}</p>
-                <p className="text-xs" style={{ color: 'rgba(232,228,217,0.72)' }}>Upcoming events</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
         {/* Announcements */}
         {activeAnnouncements.map(a => (
           <div

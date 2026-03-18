@@ -19,7 +19,6 @@ const navItems = [
 
 const adminItem = { href: '/dashboard/admin', label: 'Admin Panel', icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z' };
 
-
 function Sidebar() {
   const pathname = usePathname();
   const { currentUser } = useAuth();
@@ -62,14 +61,7 @@ function Sidebar() {
           ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
           lg:translate-x-0
         `}
-        style={{
-          background:
-            'linear-gradient(180deg, rgba(23, 29, 17, 0.98) 0%, rgba(31, 38, 23, 0.96) 52%, rgba(26, 31, 18, 0.98) 100%)',
-          borderRight: '1px solid rgba(212, 225, 87, 0.12)',
-          boxShadow: '24px 0 60px rgba(10, 13, 8, 0.18)',
-          backdropFilter: 'blur(18px)',
-          WebkitBackdropFilter: 'blur(18px)',
-        }}
+        style={{ backgroundColor: '#1a1f12' }}
       >
         {/* Mobile close button */}
         <button
@@ -84,20 +76,15 @@ function Sidebar() {
         </button>
 
         {/* Logo */}
-        <div className="p-4 flex items-center gap-3 border-b" style={{ borderColor: 'rgba(232, 228, 217, 0.08)' }}>
+        <div className="p-4 flex items-center gap-3 border-b" style={{ borderColor: 'rgba(232, 228, 217, 0.1)' }}>
           {sidebarCollapsed ? (
             <span className="headline-font text-lg flex-shrink-0 w-10 text-center" style={{ color: '#d4e157' }}>
               MTC
             </span>
           ) : (
-            <div className="min-w-0">
-              <span className="headline-font block text-base truncate tracking-[0.12em]" style={{ color: '#f2eee4' }}>
-                Mono Tennis Club
-              </span>
-              <span className="block text-[10px] uppercase tracking-[0.28em]" style={{ color: 'rgba(212, 225, 87, 0.72)' }}>
-                Member Dashboard
-              </span>
-            </div>
+            <span className="headline-font text-base truncate" style={{ color: '#e8e4d9' }}>
+              Mono Tennis Club
+            </span>
           )}
         </div>
 
@@ -110,7 +97,6 @@ function Sidebar() {
                 item.href === '/dashboard' ? pathname === '/dashboard' : pathname.startsWith(item.href)
               );
               if (activeIdx === -1) return null;
-              // Each li is ~44px tall (py-2.5 + content + space-y-1 gap)
               const top = activeIdx * 44;
               return (
                 <div
@@ -142,7 +128,6 @@ function Sidebar() {
                       <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
                     </svg>
                     {!sidebarCollapsed && <span className="text-sm">{item.label}</span>}
-                    {/* Unread badge for messages */}
                     {item.label === 'Messages' && unreadMessages > 0 && (
                       <span className={`${sidebarCollapsed ? 'absolute top-0 right-0' : 'ml-auto'} bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center`}>
                         {unreadMessages}
@@ -203,7 +188,7 @@ function Sidebar() {
         <button
           onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
           className="hidden lg:flex p-4 border-t hover:bg-white/5 transition-colors items-center justify-center"
-          style={{ borderColor: 'rgba(232, 228, 217, 0.08)', color: 'rgba(232, 228, 217, 0.5)' }}
+          style={{ borderColor: 'rgba(232, 228, 217, 0.1)', color: 'rgba(232, 228, 217, 0.5)' }}
           aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           aria-expanded={!sidebarCollapsed}
         >

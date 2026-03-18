@@ -150,6 +150,7 @@ export interface NotificationPreferences {
   bookings: boolean;
   events: boolean;
   partners: boolean;
+  announcements: boolean;
   messages: boolean;
   programs: boolean;
 }
@@ -158,6 +159,7 @@ export const DEFAULT_NOTIFICATION_PREFS: NotificationPreferences = {
   bookings: true,
   events: true,
   partners: true,
+  announcements: true,
   messages: true,
   programs: true,
 };

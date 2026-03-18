@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server';
 import { authenticateMobileRequest, getAdminClient, isRateLimited, sanitizeInput, cachedJson, SETTINGS_KEY_WHITELIST } from '../auth-helper';
 
+function isMissingAnnouncementsColumn(message?: string) {
+  return typeof message === 'string' && message.toLowerCase().includes('announcements');
+}
+
 /** Get club settings */
 export async function GET(request: Request) {
   const authResult = await authenticateMobileRequest(request);
@@ -56,15 +60,25 @@ export async function PATCH(request: Request) {
         return NextResponse.json({ error: 'Missing prefs object' }, { status: 400 });
       }
 
-      const { error } = await supabase.from('notification_preferences').upsert({
+      const basePrefs = {
         user_id: authResult.id,
         bookings: prefs.bookings !== undefined ? !!prefs.bookings : true,
         events: prefs.events !== undefined ? !!prefs.events : true,
         partners: prefs.partners !== undefined ? !!prefs.partners : true,
-        announcements: prefs.announcements !== undefined ? !!prefs.announcements : true,
         messages: prefs.messages !== undefined ? !!prefs.messages : true,
         programs: prefs.programs !== undefined ? !!prefs.programs : true,
-      }, { onConflict: 'user_id' });
+      };
+
+      const withAnnouncements = {
+        ...basePrefs,
+        announcements: prefs.announcements !== undefined ? !!prefs.announcements : true,
+      };
+
+      let { error } = await supabase.from('notification_preferences').upsert(withAnnouncements, { onConflict: 'user_id' });
+      if (error && isMissingAnnouncementsColumn(error.message)) {
+        const retry = await supabase.from('notification_preferences').upsert(basePrefs, { onConflict: 'user_id' });
+        error = retry.error;
+      }
 
       if (error) return NextResponse.json({ error: error.message }, { status: 500 });
       return NextResponse.json({ success: true });

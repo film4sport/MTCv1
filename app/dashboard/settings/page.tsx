@@ -242,29 +242,6 @@ export default function SettingsPage() {
       <DashboardHeader title="Settings" />
 
       <div className="p-6 lg:p-8 max-w-3xl mx-auto space-y-6 animate-slideUp">
-        <div className="dashboard-panel rounded-[32px] border p-5 sm:p-6 shadow-[0_28px_70px_rgba(31,40,23,0.14)]">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <div className="max-w-2xl">
-              <span className="dashboard-soft-pill mb-3 inline-flex">Account Control</span>
-              <h2 className="text-2xl sm:text-3xl font-semibold tracking-[-0.03em]" style={{ color: '#24301c' }}>
-                Keep your profile, notifications, and family setup in sync.
-              </h2>
-              <p className="mt-3 text-sm leading-6" style={{ color: '#6d685e' }}>
-                Everything important in one calm place, from profile details to member preferences and club access info.
-              </p>
-            </div>
-            <div className="grid grid-cols-2 gap-3 sm:w-[320px]">
-              <div className="rounded-2xl px-4 py-3" style={{ background: 'rgba(107,122,61,0.08)', border: '1px solid rgba(107,122,61,0.12)' }}>
-                <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em]" style={{ color: '#8c866f' }}>Membership</p>
-                <p className="mt-1 text-sm font-semibold capitalize" style={{ color: '#24301c' }}>{currentUser.membershipType}</p>
-              </div>
-              <div className="rounded-2xl px-4 py-3" style={{ background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.55)' }}>
-                <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em]" style={{ color: '#8c866f' }}>Alerts On</p>
-                <p className="mt-1 text-sm font-semibold" style={{ color: '#24301c' }}>{Object.values(notificationPreferences).filter(Boolean).length}</p>
-              </div>
-            </div>
-          </div>
-        </div>
 
         {/* ═══ PROFILE SECTION ═══ */}
 
@@ -408,6 +385,8 @@ export default function SettingsPage() {
               { label: 'Events & Tournaments', desc: 'New events, RSVP reminders', key: 'events' as const },
               { label: 'Partner Requests', desc: 'New partner matches and requests', key: 'partners' as const },
               { label: 'Messages', desc: 'New messages from members', key: 'messages' as const },
+              { label: 'Club Announcements', desc: 'Announcements, club updates, and important notices', key: 'announcements' as const },
+              { label: 'Programs', desc: 'Program enrollment confirmations and coaching updates', key: 'programs' as const },
             ]).map(item => (
               <label key={item.label} className="flex items-center justify-between cursor-pointer py-2">
                 <div>
@@ -585,32 +564,6 @@ export default function SettingsPage() {
             )}
           </div>
         )}
-
-        {/* Mobile App */}
-        <div className="glass-card rounded-2xl border p-6 section-card" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
-          <h3 className="font-semibold mb-2" style={{ color: '#2a2f1e' }}>Mobile App</h3>
-          <p className="text-sm mb-4" style={{ color: '#6b7266' }}>
-            Access your club on the go with our mobile web app. Live court status, bookings, and messaging — all from your phone.
-          </p>
-          <a
-            href="/mobile-app/index.html"
-            className="w-full rounded-xl p-4 flex items-center gap-4 transition-all hover:shadow-md btn-press"
-            style={{ background: 'rgba(107, 122, 61, 0.06)', border: '1px solid rgba(107, 122, 61, 0.15)', textDecoration: 'none' }}
-          >
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: '#6b7a3d' }}>
-              <svg className="w-5 h-5" fill="none" stroke="#fff" viewBox="0 0 24 24" strokeWidth="1.5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"/>
-              </svg>
-            </div>
-            <div className="flex-1 text-left">
-              <p className="font-medium text-sm" style={{ color: '#2a2f1e' }}>Open MTC Court App</p>
-              <p className="text-xs" style={{ color: '#6b7266' }}>Optimized for your phone — courts, bookings & more</p>
-            </div>
-            <svg className="w-5 h-5 shrink-0" fill="none" stroke="#6b7a3d" viewBox="0 0 24 24" strokeWidth="1.5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/>
-            </svg>
-          </a>
-        </div>
 
         {/* Your Data (PIPEDA) */}
         <div className="glass-card rounded-2xl border p-6 section-card" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>

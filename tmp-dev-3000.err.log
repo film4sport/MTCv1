@@ -1,3 +1,1531 @@
 ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
 ⚠ Cross origin request detected from 127.0.0.1 to /_next/* resource. In a future major version of Next.js, you will need to explicitly configure "allowedDevOrigins" in next.config to allow this.
 Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+⨯ ./app/dashboard/settings/page.tsx:8:1
+Module not found: Can't resolve '../components/DashboardHeader'
+[0m [90m  6 |[39m [36mimport[39m { useAuth[33m,[39m useBookings[33m,[39m useSocial[33m,[39m useNotifications[33m,[39m useFamily[33m,[39m apiCall } [36mfrom[39m [32m'../lib/store'[39m[33m;[39m
+ [90m  7 |[39m [36mimport[39m { useToast } [36mfrom[39m [32m'../lib/toast'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  8 |[39m [36mimport[39m [33mDashboardHeader[39m [36mfrom[39m [32m'../components/DashboardHeader'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m  9 |[39m [36mimport[39m { [33mAvatarDisplay[39m[33m,[39m [33mAVATAR_OPTIONS[39m[33m,[39m [33mAVATAR_SVGS[39m } [36mfrom[39m [32m'../lib/avatars'[39m[33m;[39m
+ [90m 10 |[39m [36mimport[39m type { [33mSkillLevel[39m[33m,[39m [33mFamilyMember[39m[33m,[39m [33mUser[39m } [36mfrom[39m [32m'../lib/types'[39m[33m;[39m
+ [90m 11 |[39m [36mimport[39m [33m*[39m [36mas[39m db [36mfrom[39m [32m'../lib/db'[39m[33m;[39m[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./app/dashboard/settings/page.tsx [Client Component Browser]
+    ./app/dashboard/settings/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/dashboard/settings/page.tsx [Client Component SSR]
+    ./app/dashboard/settings/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/settings/page.tsx:8:1
+Module not found: Can't resolve '../components/DashboardHeader'
+[0m [90m  6 |[39m [36mimport[39m { useAuth[33m,[39m useBookings[33m,[39m useSocial[33m,[39m useNotifications[33m,[39m useFamily[33m,[39m apiCall } [36mfrom[39m [32m'../lib/store'[39m[33m;[39m
+ [90m  7 |[39m [36mimport[39m { useToast } [36mfrom[39m [32m'../lib/toast'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  8 |[39m [36mimport[39m [33mDashboardHeader[39m [36mfrom[39m [32m'../components/DashboardHeader'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m  9 |[39m [36mimport[39m { [33mAvatarDisplay[39m[33m,[39m [33mAVATAR_OPTIONS[39m[33m,[39m [33mAVATAR_SVGS[39m } [36mfrom[39m [32m'../lib/avatars'[39m[33m;[39m
+ [90m 10 |[39m [36mimport[39m type { [33mSkillLevel[39m[33m,[39m [33mFamilyMember[39m[33m,[39m [33mUser[39m } [36mfrom[39m [32m'../lib/types'[39m[33m;[39m
+ [90m 11 |[39m [36mimport[39m [33m*[39m [36mas[39m db [36mfrom[39m [32m'../lib/db'[39m[33m;[39m[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./app/dashboard/settings/page.tsx [Client Component Browser]
+    ./app/dashboard/settings/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/dashboard/settings/page.tsx [Client Component SSR]
+    ./app/dashboard/settings/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/settings/page.tsx:8:1
+Module not found: Can't resolve '../components/DashboardHeader'
+[0m [90m  6 |[39m [36mimport[39m { useAuth[33m,[39m useBookings[33m,[39m useSocial[33m,[39m useNotifications[33m,[39m useFamily[33m,[39m apiCall } [36mfrom[39m [32m'../lib/store'[39m[33m;[39m
+ [90m  7 |[39m [36mimport[39m { useToast } [36mfrom[39m [32m'../lib/toast'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  8 |[39m [36mimport[39m [33mDashboardHeader[39m [36mfrom[39m [32m'../components/DashboardHeader'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m  9 |[39m [36mimport[39m { [33mAvatarDisplay[39m[33m,[39m [33mAVATAR_OPTIONS[39m[33m,[39m [33mAVATAR_SVGS[39m } [36mfrom[39m [32m'../lib/avatars'[39m[33m;[39m
+ [90m 10 |[39m [36mimport[39m type { [33mSkillLevel[39m[33m,[39m [33mFamilyMember[39m[33m,[39m [33mUser[39m } [36mfrom[39m [32m'../lib/types'[39m[33m;[39m
+ [90m 11 |[39m [36mimport[39m [33m*[39m [36mas[39m db [36mfrom[39m [32m'../lib/db'[39m[33m;[39m[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./app/dashboard/settings/page.tsx [Client Component Browser]
+    ./app/dashboard/settings/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/dashboard/settings/page.tsx [Client Component SSR]
+    ./app/dashboard/settings/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/settings/page.tsx:8:1
+Module not found: Can't resolve '../components/DashboardHeader'
+[0m [90m  6 |[39m [36mimport[39m { useAuth[33m,[39m useBookings[33m,[39m useSocial[33m,[39m useNotifications[33m,[39m useFamily[33m,[39m apiCall } [36mfrom[39m [32m'../lib/store'[39m[33m;[39m
+ [90m  7 |[39m [36mimport[39m { useToast } [36mfrom[39m [32m'../lib/toast'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  8 |[39m [36mimport[39m [33mDashboardHeader[39m [36mfrom[39m [32m'../components/DashboardHeader'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m  9 |[39m [36mimport[39m { [33mAvatarDisplay[39m[33m,[39m [33mAVATAR_OPTIONS[39m[33m,[39m [33mAVATAR_SVGS[39m } [36mfrom[39m [32m'../lib/avatars'[39m[33m;[39m
+ [90m 10 |[39m [36mimport[39m type { [33mSkillLevel[39m[33m,[39m [33mFamilyMember[39m[33m,[39m [33mUser[39m } [36mfrom[39m [32m'../lib/types'[39m[33m;[39m
+ [90m 11 |[39m [36mimport[39m [33m*[39m [36mas[39m db [36mfrom[39m [32m'../lib/db'[39m[33m;[39m[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./app/dashboard/settings/page.tsx [Client Component Browser]
+    ./app/dashboard/settings/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/dashboard/settings/page.tsx [Client Component SSR]
+    ./app/dashboard/settings/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/partners/page.tsx:6:1
+Module not found: Can't resolve '../components/DashboardHeader'
+[0m [90m 4 |[39m [36mimport[39m { useAuth[33m,[39m useSocial } [36mfrom[39m [32m'../lib/store'[39m[33m;[39m
+ [90m 5 |[39m [36mimport[39m { useToast } [36mfrom[39m [32m'../lib/toast'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 6 |[39m [36mimport[39m [33mDashboardHeader[39m [36mfrom[39m [32m'../components/DashboardHeader'[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 7 |[39m [36mimport[39m { [33mAvatarDisplay[39m } [36mfrom[39m [32m'../lib/avatars'[39m[33m;[39m
+ [90m 8 |[39m [36mimport[39m [33mLink[39m [36mfrom[39m [32m'next/link'[39m[33m;[39m
+ [90m 9 |[39m [36mimport[39m { generateId[33m,[39m useFocusTrap } [36mfrom[39m [32m'../lib/utils'[39m[33m;[39m[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./app/dashboard/partners/page.tsx [Client Component Browser]
+    ./app/dashboard/partners/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/dashboard/partners/page.tsx [Client Component SSR]
+    ./app/dashboard/partners/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/partners/page.tsx:6:1
+Module not found: Can't resolve '../components/DashboardHeader'
+[0m [90m 4 |[39m [36mimport[39m { useAuth[33m,[39m useSocial } [36mfrom[39m [32m'../lib/store'[39m[33m;[39m
+ [90m 5 |[39m [36mimport[39m { useToast } [36mfrom[39m [32m'../lib/toast'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 6 |[39m [36mimport[39m [33mDashboardHeader[39m [36mfrom[39m [32m'../components/DashboardHeader'[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 7 |[39m [36mimport[39m { [33mAvatarDisplay[39m } [36mfrom[39m [32m'../lib/avatars'[39m[33m;[39m
+ [90m 8 |[39m [36mimport[39m [33mLink[39m [36mfrom[39m [32m'next/link'[39m[33m;[39m
+ [90m 9 |[39m [36mimport[39m { generateId[33m,[39m useFocusTrap } [36mfrom[39m [32m'../lib/utils'[39m[33m;[39m[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./app/dashboard/partners/page.tsx [Client Component Browser]
+    ./app/dashboard/partners/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/dashboard/partners/page.tsx [Client Component SSR]
+    ./app/dashboard/partners/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/partners/page.tsx:6:1
+Module not found: Can't resolve '../components/DashboardHeader'
+[0m [90m 4 |[39m [36mimport[39m { useAuth[33m,[39m useSocial } [36mfrom[39m [32m'../lib/store'[39m[33m;[39m
+ [90m 5 |[39m [36mimport[39m { useToast } [36mfrom[39m [32m'../lib/toast'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 6 |[39m [36mimport[39m [33mDashboardHeader[39m [36mfrom[39m [32m'../components/DashboardHeader'[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 7 |[39m [36mimport[39m { [33mAvatarDisplay[39m } [36mfrom[39m [32m'../lib/avatars'[39m[33m;[39m
+ [90m 8 |[39m [36mimport[39m [33mLink[39m [36mfrom[39m [32m'next/link'[39m[33m;[39m
+ [90m 9 |[39m [36mimport[39m { generateId[33m,[39m useFocusTrap } [36mfrom[39m [32m'../lib/utils'[39m[33m;[39m[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./app/dashboard/partners/page.tsx [Client Component Browser]
+    ./app/dashboard/partners/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/dashboard/partners/page.tsx [Client Component SSR]
+    ./app/dashboard/partners/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/partners/page.tsx:6:1
+Module not found: Can't resolve '../components/DashboardHeader'
+[0m [90m 4 |[39m [36mimport[39m { useAuth[33m,[39m useSocial } [36mfrom[39m [32m'../lib/store'[39m[33m;[39m
+ [90m 5 |[39m [36mimport[39m { useToast } [36mfrom[39m [32m'../lib/toast'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 6 |[39m [36mimport[39m [33mDashboardHeader[39m [36mfrom[39m [32m'../components/DashboardHeader'[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 7 |[39m [36mimport[39m { [33mAvatarDisplay[39m } [36mfrom[39m [32m'../lib/avatars'[39m[33m;[39m
+ [90m 8 |[39m [36mimport[39m [33mLink[39m [36mfrom[39m [32m'next/link'[39m[33m;[39m
+ [90m 9 |[39m [36mimport[39m { generateId[33m,[39m useFocusTrap } [36mfrom[39m [32m'../lib/utils'[39m[33m;[39m[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./app/dashboard/partners/page.tsx [Client Component Browser]
+    ./app/dashboard/partners/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/dashboard/partners/page.tsx [Client Component SSR]
+    ./app/dashboard/partners/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/page.tsx:4:1
+Module not found: Can't resolve './components/DashboardHeader'
+[0m [90m 2 |[39m
+ [90m 3 |[39m [36mimport[39m { useAuth[33m,[39m useBookings[33m,[39m useEvents[33m,[39m useNotifications } [36mfrom[39m [32m'./lib/store'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 4 |[39m [36mimport[39m [33mDashboardHeader[39m [36mfrom[39m [32m'./components/DashboardHeader'[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 5 |[39m [36mimport[39m [33mOnboardingTour[39m [36mfrom[39m [32m'./components/OnboardingTour'[39m[33m;[39m
+ [90m 6 |[39m [36mimport[39m [33mLink[39m [36mfrom[39m [32m'next/link'[39m[33m;[39m
+ [90m 7 |[39m[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./app/dashboard/page.tsx [Client Component Browser]
+    ./app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/dashboard/page.tsx [Client Component SSR]
+    ./app/dashboard/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/page.tsx:4:1
+Module not found: Can't resolve './components/DashboardHeader'
+[0m [90m 2 |[39m
+ [90m 3 |[39m [36mimport[39m { useAuth[33m,[39m useBookings[33m,[39m useEvents[33m,[39m useNotifications } [36mfrom[39m [32m'./lib/store'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 4 |[39m [36mimport[39m [33mDashboardHeader[39m [36mfrom[39m [32m'./components/DashboardHeader'[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 5 |[39m [36mimport[39m [33mOnboardingTour[39m [36mfrom[39m [32m'./components/OnboardingTour'[39m[33m;[39m
+ [90m 6 |[39m [36mimport[39m [33mLink[39m [36mfrom[39m [32m'next/link'[39m[33m;[39m
+ [90m 7 |[39m[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./app/dashboard/page.tsx [Client Component Browser]
+    ./app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/dashboard/page.tsx [Client Component SSR]
+    ./app/dashboard/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/page.tsx:4:1
+Module not found: Can't resolve './components/DashboardHeader'
+[0m [90m 2 |[39m
+ [90m 3 |[39m [36mimport[39m { useAuth[33m,[39m useBookings[33m,[39m useEvents[33m,[39m useNotifications } [36mfrom[39m [32m'./lib/store'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 4 |[39m [36mimport[39m [33mDashboardHeader[39m [36mfrom[39m [32m'./components/DashboardHeader'[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 5 |[39m [36mimport[39m [33mOnboardingTour[39m [36mfrom[39m [32m'./components/OnboardingTour'[39m[33m;[39m
+ [90m 6 |[39m [36mimport[39m [33mLink[39m [36mfrom[39m [32m'next/link'[39m[33m;[39m
+ [90m 7 |[39m[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./app/dashboard/page.tsx [Client Component Browser]
+    ./app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/dashboard/page.tsx [Client Component SSR]
+    ./app/dashboard/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/page.tsx:4:1
+Module not found: Can't resolve './components/DashboardHeader'
+[0m [90m 2 |[39m
+ [90m 3 |[39m [36mimport[39m { useAuth[33m,[39m useBookings[33m,[39m useEvents[33m,[39m useNotifications } [36mfrom[39m [32m'./lib/store'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 4 |[39m [36mimport[39m [33mDashboardHeader[39m [36mfrom[39m [32m'./components/DashboardHeader'[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 5 |[39m [36mimport[39m [33mOnboardingTour[39m [36mfrom[39m [32m'./components/OnboardingTour'[39m[33m;[39m
+ [90m 6 |[39m [36mimport[39m [33mLink[39m [36mfrom[39m [32m'next/link'[39m[33m;[39m
+ [90m 7 |[39m[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./app/dashboard/page.tsx [Client Component Browser]
+    ./app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/dashboard/page.tsx [Client Component SSR]
+    ./app/dashboard/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/page.tsx:4:1
+Module not found: Can't resolve './components/DashboardHeader'
+[0m [90m 2 |[39m
+ [90m 3 |[39m [36mimport[39m { useAuth[33m,[39m useBookings[33m,[39m useEvents[33m,[39m useNotifications } [36mfrom[39m [32m'./lib/store'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 4 |[39m [36mimport[39m [33mDashboardHeader[39m [36mfrom[39m [32m'./components/DashboardHeader'[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 5 |[39m [36mimport[39m [33mOnboardingTour[39m [36mfrom[39m [32m'./components/OnboardingTour'[39m[33m;[39m
+ [90m 6 |[39m [36mimport[39m [33mLink[39m [36mfrom[39m [32m'next/link'[39m[33m;[39m
+ [90m 7 |[39m[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./app/dashboard/page.tsx [Client Component Browser]
+    ./app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/dashboard/page.tsx [Client Component SSR]
+    ./app/dashboard/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/page.tsx:4:1
+Module not found: Can't resolve './components/DashboardHeader'
+[0m [90m 2 |[39m
+ [90m 3 |[39m [36mimport[39m { useAuth[33m,[39m useBookings[33m,[39m useEvents[33m,[39m useNotifications } [36mfrom[39m [32m'./lib/store'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 4 |[39m [36mimport[39m [33mDashboardHeader[39m [36mfrom[39m [32m'./components/DashboardHeader'[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 5 |[39m [36mimport[39m [33mOnboardingTour[39m [36mfrom[39m [32m'./components/OnboardingTour'[39m[33m;[39m
+ [90m 6 |[39m [36mimport[39m [33mLink[39m [36mfrom[39m [32m'next/link'[39m[33m;[39m
+ [90m 7 |[39m[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./app/dashboard/page.tsx [Client Component Browser]
+    ./app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/dashboard/page.tsx [Client Component SSR]
+    ./app/dashboard/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/page.tsx:4:1
+Module not found: Can't resolve './components/DashboardHeader'
+[0m [90m 2 |[39m
+ [90m 3 |[39m [36mimport[39m { useAuth[33m,[39m useBookings[33m,[39m useEvents[33m,[39m useNotifications } [36mfrom[39m [32m'./lib/store'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 4 |[39m [36mimport[39m [33mDashboardHeader[39m [36mfrom[39m [32m'./components/DashboardHeader'[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 5 |[39m [36mimport[39m [33mOnboardingTour[39m [36mfrom[39m [32m'./components/OnboardingTour'[39m[33m;[39m
+ [90m 6 |[39m [36mimport[39m [33mLink[39m [36mfrom[39m [32m'next/link'[39m[33m;[39m
+ [90m 7 |[39m[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./app/dashboard/page.tsx [Client Component Browser]
+    ./app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/dashboard/page.tsx [Client Component SSR]
+    ./app/dashboard/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/page.tsx:4:1
+Module not found: Can't resolve './components/DashboardHeader'
+[0m [90m 2 |[39m
+ [90m 3 |[39m [36mimport[39m { useAuth[33m,[39m useBookings[33m,[39m useEvents[33m,[39m useNotifications } [36mfrom[39m [32m'./lib/store'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 4 |[39m [36mimport[39m [33mDashboardHeader[39m [36mfrom[39m [32m'./components/DashboardHeader'[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 5 |[39m [36mimport[39m [33mOnboardingTour[39m [36mfrom[39m [32m'./components/OnboardingTour'[39m[33m;[39m
+ [90m 6 |[39m [36mimport[39m [33mLink[39m [36mfrom[39m [32m'next/link'[39m[33m;[39m
+ [90m 7 |[39m[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./app/dashboard/page.tsx [Client Component Browser]
+    ./app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/dashboard/page.tsx [Client Component SSR]
+    ./app/dashboard/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/page.tsx:4:1
+Module not found: Can't resolve './components/DashboardHeader'
+[0m [90m 2 |[39m
+ [90m 3 |[39m [36mimport[39m { useAuth[33m,[39m useBookings[33m,[39m useEvents[33m,[39m useNotifications } [36mfrom[39m [32m'./lib/store'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 4 |[39m [36mimport[39m [33mDashboardHeader[39m [36mfrom[39m [32m'./components/DashboardHeader'[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 5 |[39m [36mimport[39m [33mOnboardingTour[39m [36mfrom[39m [32m'./components/OnboardingTour'[39m[33m;[39m
+ [90m 6 |[39m [36mimport[39m [33mLink[39m [36mfrom[39m [32m'next/link'[39m[33m;[39m
+ [90m 7 |[39m[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./app/dashboard/page.tsx [Client Component Browser]
+    ./app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/dashboard/page.tsx [Client Component SSR]
+    ./app/dashboard/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/page.tsx:4:1
+Module not found: Can't resolve './components/DashboardHeader'
+[0m [90m 2 |[39m
+ [90m 3 |[39m [36mimport[39m { useAuth[33m,[39m useBookings[33m,[39m useEvents[33m,[39m useNotifications } [36mfrom[39m [32m'./lib/store'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 4 |[39m [36mimport[39m [33mDashboardHeader[39m [36mfrom[39m [32m'./components/DashboardHeader'[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 5 |[39m [36mimport[39m [33mOnboardingTour[39m [36mfrom[39m [32m'./components/OnboardingTour'[39m[33m;[39m
+ [90m 6 |[39m [36mimport[39m [33mLink[39m [36mfrom[39m [32m'next/link'[39m[33m;[39m
+ [90m 7 |[39m[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./app/dashboard/page.tsx [Client Component Browser]
+    ./app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/dashboard/page.tsx [Client Component SSR]
+    ./app/dashboard/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/page.tsx:4:1
+Module not found: Can't resolve './components/DashboardHeader'
+[0m [90m 2 |[39m
+ [90m 3 |[39m [36mimport[39m { useAuth[33m,[39m useBookings[33m,[39m useEvents[33m,[39m useNotifications } [36mfrom[39m [32m'./lib/store'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 4 |[39m [36mimport[39m [33mDashboardHeader[39m [36mfrom[39m [32m'./components/DashboardHeader'[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 5 |[39m [36mimport[39m [33mOnboardingTour[39m [36mfrom[39m [32m'./components/OnboardingTour'[39m[33m;[39m
+ [90m 6 |[39m [36mimport[39m [33mLink[39m [36mfrom[39m [32m'next/link'[39m[33m;[39m
+ [90m 7 |[39m[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./app/dashboard/page.tsx [Client Component Browser]
+    ./app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/dashboard/page.tsx [Client Component SSR]
+    ./app/dashboard/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/page.tsx:4:1
+Module not found: Can't resolve './components/DashboardHeader'
+[0m [90m 2 |[39m
+ [90m 3 |[39m [36mimport[39m { useAuth[33m,[39m useBookings[33m,[39m useEvents[33m,[39m useNotifications } [36mfrom[39m [32m'./lib/store'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 4 |[39m [36mimport[39m [33mDashboardHeader[39m [36mfrom[39m [32m'./components/DashboardHeader'[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 5 |[39m [36mimport[39m [33mOnboardingTour[39m [36mfrom[39m [32m'./components/OnboardingTour'[39m[33m;[39m
+ [90m 6 |[39m [36mimport[39m [33mLink[39m [36mfrom[39m [32m'next/link'[39m[33m;[39m
+ [90m 7 |[39m[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./app/dashboard/page.tsx [Client Component Browser]
+    ./app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/dashboard/page.tsx [Client Component SSR]
+    ./app/dashboard/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/page.tsx:4:1
+Module not found: Can't resolve './components/DashboardHeader'
+[0m [90m 2 |[39m
+ [90m 3 |[39m [36mimport[39m { useAuth[33m,[39m useBookings[33m,[39m useEvents[33m,[39m useNotifications } [36mfrom[39m [32m'./lib/store'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 4 |[39m [36mimport[39m [33mDashboardHeader[39m [36mfrom[39m [32m'./components/DashboardHeader'[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 5 |[39m [36mimport[39m [33mOnboardingTour[39m [36mfrom[39m [32m'./components/OnboardingTour'[39m[33m;[39m
+ [90m 6 |[39m [36mimport[39m [33mLink[39m [36mfrom[39m [32m'next/link'[39m[33m;[39m
+ [90m 7 |[39m[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./app/dashboard/page.tsx [Client Component Browser]
+    ./app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/dashboard/page.tsx [Client Component SSR]
+    ./app/dashboard/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/page.tsx:4:1
+Module not found: Can't resolve './components/DashboardHeader'
+[0m [90m 2 |[39m
+ [90m 3 |[39m [36mimport[39m { useAuth[33m,[39m useBookings[33m,[39m useEvents[33m,[39m useNotifications } [36mfrom[39m [32m'./lib/store'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 4 |[39m [36mimport[39m [33mDashboardHeader[39m [36mfrom[39m [32m'./components/DashboardHeader'[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 5 |[39m [36mimport[39m [33mOnboardingTour[39m [36mfrom[39m [32m'./components/OnboardingTour'[39m[33m;[39m
+ [90m 6 |[39m [36mimport[39m [33mLink[39m [36mfrom[39m [32m'next/link'[39m[33m;[39m
+ [90m 7 |[39m[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./app/dashboard/page.tsx [Client Component Browser]
+    ./app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/dashboard/page.tsx [Client Component SSR]
+    ./app/dashboard/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/page.tsx:4:1
+Module not found: Can't resolve './components/DashboardHeader'
+[0m [90m 2 |[39m
+ [90m 3 |[39m [36mimport[39m { useAuth[33m,[39m useBookings[33m,[39m useEvents[33m,[39m useNotifications } [36mfrom[39m [32m'./lib/store'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 4 |[39m [36mimport[39m [33mDashboardHeader[39m [36mfrom[39m [32m'./components/DashboardHeader'[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 5 |[39m [36mimport[39m [33mOnboardingTour[39m [36mfrom[39m [32m'./components/OnboardingTour'[39m[33m;[39m
+ [90m 6 |[39m [36mimport[39m [33mLink[39m [36mfrom[39m [32m'next/link'[39m[33m;[39m
+ [90m 7 |[39m[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./app/dashboard/page.tsx [Client Component Browser]
+    ./app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/dashboard/page.tsx [Client Component SSR]
+    ./app/dashboard/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/page.tsx:4:1
+Module not found: Can't resolve './components/DashboardHeader'
+[0m [90m 2 |[39m
+ [90m 3 |[39m [36mimport[39m { useAuth[33m,[39m useBookings[33m,[39m useEvents[33m,[39m useNotifications } [36mfrom[39m [32m'./lib/store'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 4 |[39m [36mimport[39m [33mDashboardHeader[39m [36mfrom[39m [32m'./components/DashboardHeader'[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 5 |[39m [36mimport[39m [33mOnboardingTour[39m [36mfrom[39m [32m'./components/OnboardingTour'[39m[33m;[39m
+ [90m 6 |[39m [36mimport[39m [33mLink[39m [36mfrom[39m [32m'next/link'[39m[33m;[39m
+ [90m 7 |[39m[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./app/dashboard/page.tsx [Client Component Browser]
+    ./app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/dashboard/page.tsx [Client Component SSR]
+    ./app/dashboard/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/page.tsx:4:1
+Module not found: Can't resolve './components/DashboardHeader'
+[0m [90m 2 |[39m
+ [90m 3 |[39m [36mimport[39m { useAuth[33m,[39m useBookings[33m,[39m useEvents[33m,[39m useNotifications } [36mfrom[39m [32m'./lib/store'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 4 |[39m [36mimport[39m [33mDashboardHeader[39m [36mfrom[39m [32m'./components/DashboardHeader'[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 5 |[39m [36mimport[39m [33mOnboardingTour[39m [36mfrom[39m [32m'./components/OnboardingTour'[39m[33m;[39m
+ [90m 6 |[39m [36mimport[39m [33mLink[39m [36mfrom[39m [32m'next/link'[39m[33m;[39m
+ [90m 7 |[39m[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./app/dashboard/page.tsx [Client Component Browser]
+    ./app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/dashboard/page.tsx [Client Component SSR]
+    ./app/dashboard/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/page.tsx:4:1
+Module not found: Can't resolve './components/DashboardHeader'
+[0m [90m 2 |[39m
+ [90m 3 |[39m [36mimport[39m { useAuth[33m,[39m useBookings[33m,[39m useEvents[33m,[39m useNotifications } [36mfrom[39m [32m'./lib/store'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 4 |[39m [36mimport[39m [33mDashboardHeader[39m [36mfrom[39m [32m'./components/DashboardHeader'[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 5 |[39m [36mimport[39m [33mOnboardingTour[39m [36mfrom[39m [32m'./components/OnboardingTour'[39m[33m;[39m
+ [90m 6 |[39m [36mimport[39m [33mLink[39m [36mfrom[39m [32m'next/link'[39m[33m;[39m
+ [90m 7 |[39m[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./app/dashboard/page.tsx [Client Component Browser]
+    ./app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/dashboard/page.tsx [Client Component SSR]
+    ./app/dashboard/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/page.tsx:4:1
+Module not found: Can't resolve './components/DashboardHeader'
+[0m [90m 2 |[39m
+ [90m 3 |[39m [36mimport[39m { useAuth[33m,[39m useBookings[33m,[39m useEvents[33m,[39m useNotifications } [36mfrom[39m [32m'./lib/store'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 4 |[39m [36mimport[39m [33mDashboardHeader[39m [36mfrom[39m [32m'./components/DashboardHeader'[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 5 |[39m [36mimport[39m [33mOnboardingTour[39m [36mfrom[39m [32m'./components/OnboardingTour'[39m[33m;[39m
+ [90m 6 |[39m [36mimport[39m [33mLink[39m [36mfrom[39m [32m'next/link'[39m[33m;[39m
+ [90m 7 |[39m[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./app/dashboard/page.tsx [Client Component Browser]
+    ./app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/dashboard/page.tsx [Client Component SSR]
+    ./app/dashboard/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/page.tsx:4:1
+Module not found: Can't resolve './components/DashboardHeader'
+[0m [90m 2 |[39m
+ [90m 3 |[39m [36mimport[39m { useAuth[33m,[39m useBookings[33m,[39m useEvents[33m,[39m useNotifications } [36mfrom[39m [32m'./lib/store'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 4 |[39m [36mimport[39m [33mDashboardHeader[39m [36mfrom[39m [32m'./components/DashboardHeader'[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 5 |[39m [36mimport[39m [33mOnboardingTour[39m [36mfrom[39m [32m'./components/OnboardingTour'[39m[33m;[39m
+ [90m 6 |[39m [36mimport[39m [33mLink[39m [36mfrom[39m [32m'next/link'[39m[33m;[39m
+ [90m 7 |[39m[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./app/dashboard/page.tsx [Client Component Browser]
+    ./app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/dashboard/page.tsx [Client Component SSR]
+    ./app/dashboard/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/admin/page.tsx:6:1
+Module not found: Can't resolve '../components/DashboardHeader'
+[0m [90m 4 |[39m [36mimport[39m { useAuth[33m,[39m useBookings[33m,[39m useNotifications[33m,[39m useDerived[33m,[39m apiCall } [36mfrom[39m [32m'../lib/store'[39m[33m;[39m
+ [90m 5 |[39m [36mimport[39m { useToast } [36mfrom[39m [32m'../lib/toast'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 6 |[39m [36mimport[39m [33mDashboardHeader[39m [36mfrom[39m [32m'../components/DashboardHeader'[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 7 |[39m [36mimport[39m { generateId[33m,[39m useFocusTrap } [36mfrom[39m [32m'../lib/utils'[39m[33m;[39m
+ [90m 8 |[39m [36mimport[39m [33m*[39m [36mas[39m db [36mfrom[39m [32m'../lib/db'[39m[33m;[39m
+ [90m 9 |[39m [36mimport[39m { reportError } [36mfrom[39m [32m'../../lib/errorReporter'[39m[33m;[39m[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./app/dashboard/admin/page.tsx [Client Component Browser]
+    ./app/dashboard/admin/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/dashboard/admin/page.tsx [Client Component SSR]
+    ./app/dashboard/admin/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/admin/page.tsx:6:1
+Module not found: Can't resolve '../components/DashboardHeader'
+[0m [90m 4 |[39m [36mimport[39m { useAuth[33m,[39m useBookings[33m,[39m useNotifications[33m,[39m useDerived[33m,[39m apiCall } [36mfrom[39m [32m'../lib/store'[39m[33m;[39m
+ [90m 5 |[39m [36mimport[39m { useToast } [36mfrom[39m [32m'../lib/toast'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 6 |[39m [36mimport[39m [33mDashboardHeader[39m [36mfrom[39m [32m'../components/DashboardHeader'[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 7 |[39m [36mimport[39m { generateId[33m,[39m useFocusTrap } [36mfrom[39m [32m'../lib/utils'[39m[33m;[39m
+ [90m 8 |[39m [36mimport[39m [33m*[39m [36mas[39m db [36mfrom[39m [32m'../lib/db'[39m[33m;[39m
+ [90m 9 |[39m [36mimport[39m { reportError } [36mfrom[39m [32m'../../lib/errorReporter'[39m[33m;[39m[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./app/dashboard/admin/page.tsx [Client Component Browser]
+    ./app/dashboard/admin/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/dashboard/admin/page.tsx [Client Component SSR]
+    ./app/dashboard/admin/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/admin/page.tsx:6:1
+Module not found: Can't resolve '../components/DashboardHeader'
+[0m [90m 4 |[39m [36mimport[39m { useAuth[33m,[39m useBookings[33m,[39m useNotifications[33m,[39m useDerived[33m,[39m apiCall } [36mfrom[39m [32m'../lib/store'[39m[33m;[39m
+ [90m 5 |[39m [36mimport[39m { useToast } [36mfrom[39m [32m'../lib/toast'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 6 |[39m [36mimport[39m [33mDashboardHeader[39m [36mfrom[39m [32m'../components/DashboardHeader'[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 7 |[39m [36mimport[39m { generateId[33m,[39m useFocusTrap } [36mfrom[39m [32m'../lib/utils'[39m[33m;[39m
+ [90m 8 |[39m [36mimport[39m [33m*[39m [36mas[39m db [36mfrom[39m [32m'../lib/db'[39m[33m;[39m
+ [90m 9 |[39m [36mimport[39m { reportError } [36mfrom[39m [32m'../../lib/errorReporter'[39m[33m;[39m[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./app/dashboard/admin/page.tsx [Client Component Browser]
+    ./app/dashboard/admin/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/dashboard/admin/page.tsx [Client Component SSR]
+    ./app/dashboard/admin/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/admin/page.tsx:6:1
+Module not found: Can't resolve '../components/DashboardHeader'
+[0m [90m 4 |[39m [36mimport[39m { useAuth[33m,[39m useBookings[33m,[39m useNotifications[33m,[39m useDerived[33m,[39m apiCall } [36mfrom[39m [32m'../lib/store'[39m[33m;[39m
+ [90m 5 |[39m [36mimport[39m { useToast } [36mfrom[39m [32m'../lib/toast'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 6 |[39m [36mimport[39m [33mDashboardHeader[39m [36mfrom[39m [32m'../components/DashboardHeader'[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 7 |[39m [36mimport[39m { generateId[33m,[39m useFocusTrap } [36mfrom[39m [32m'../lib/utils'[39m[33m;[39m
+ [90m 8 |[39m [36mimport[39m [33m*[39m [36mas[39m db [36mfrom[39m [32m'../lib/db'[39m[33m;[39m
+ [90m 9 |[39m [36mimport[39m { reportError } [36mfrom[39m [32m'../../lib/errorReporter'[39m[33m;[39m[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./app/dashboard/admin/page.tsx [Client Component Browser]
+    ./app/dashboard/admin/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/dashboard/admin/page.tsx [Client Component SSR]
+    ./app/dashboard/admin/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/messages/page.tsx:7:1
+Module not found: Can't resolve '../components/DashboardHeader'
+[0m [90m  5 |[39m [36mimport[39m { useAuth[33m,[39m useSocial[33m,[39m useBookings[33m,[39m useDerived } [36mfrom[39m [32m'../lib/store'[39m[33m;[39m
+ [90m  6 |[39m [36mimport[39m { useToast } [36mfrom[39m [32m'../lib/toast'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  7 |[39m [36mimport[39m [33mDashboardHeader[39m [36mfrom[39m [32m'../components/DashboardHeader'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m  8 |[39m [36mimport[39m { downloadICS } [36mfrom[39m [32m'../lib/calendar'[39m[33m;[39m
+ [90m  9 |[39m [36mimport[39m { supabase } [36mfrom[39m [32m'../../lib/supabase'[39m[33m;[39m
+ [90m 10 |[39m[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./app/dashboard/messages/page.tsx [Client Component Browser]
+    ./app/dashboard/messages/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/dashboard/messages/page.tsx [Client Component SSR]
+    ./app/dashboard/messages/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/messages/page.tsx:7:1
+Module not found: Can't resolve '../components/DashboardHeader'
+[0m [90m  5 |[39m [36mimport[39m { useAuth[33m,[39m useSocial[33m,[39m useBookings[33m,[39m useDerived } [36mfrom[39m [32m'../lib/store'[39m[33m;[39m
+ [90m  6 |[39m [36mimport[39m { useToast } [36mfrom[39m [32m'../lib/toast'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  7 |[39m [36mimport[39m [33mDashboardHeader[39m [36mfrom[39m [32m'../components/DashboardHeader'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m  8 |[39m [36mimport[39m { downloadICS } [36mfrom[39m [32m'../lib/calendar'[39m[33m;[39m
+ [90m  9 |[39m [36mimport[39m { supabase } [36mfrom[39m [32m'../../lib/supabase'[39m[33m;[39m
+ [90m 10 |[39m[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./app/dashboard/messages/page.tsx [Client Component Browser]
+    ./app/dashboard/messages/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/dashboard/messages/page.tsx [Client Component SSR]
+    ./app/dashboard/messages/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/messages/page.tsx:7:1
+Module not found: Can't resolve '../components/DashboardHeader'
+[0m [90m  5 |[39m [36mimport[39m { useAuth[33m,[39m useSocial[33m,[39m useBookings[33m,[39m useDerived } [36mfrom[39m [32m'../lib/store'[39m[33m;[39m
+ [90m  6 |[39m [36mimport[39m { useToast } [36mfrom[39m [32m'../lib/toast'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  7 |[39m [36mimport[39m [33mDashboardHeader[39m [36mfrom[39m [32m'../components/DashboardHeader'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m  8 |[39m [36mimport[39m { downloadICS } [36mfrom[39m [32m'../lib/calendar'[39m[33m;[39m
+ [90m  9 |[39m [36mimport[39m { supabase } [36mfrom[39m [32m'../../lib/supabase'[39m[33m;[39m
+ [90m 10 |[39m[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./app/dashboard/messages/page.tsx [Client Component Browser]
+    ./app/dashboard/messages/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/dashboard/messages/page.tsx [Client Component SSR]
+    ./app/dashboard/messages/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/messages/page.tsx:7:1
+Module not found: Can't resolve '../components/DashboardHeader'
+[0m [90m  5 |[39m [36mimport[39m { useAuth[33m,[39m useSocial[33m,[39m useBookings[33m,[39m useDerived } [36mfrom[39m [32m'../lib/store'[39m[33m;[39m
+ [90m  6 |[39m [36mimport[39m { useToast } [36mfrom[39m [32m'../lib/toast'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  7 |[39m [36mimport[39m [33mDashboardHeader[39m [36mfrom[39m [32m'../components/DashboardHeader'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m  8 |[39m [36mimport[39m { downloadICS } [36mfrom[39m [32m'../lib/calendar'[39m[33m;[39m
+ [90m  9 |[39m [36mimport[39m { supabase } [36mfrom[39m [32m'../../lib/supabase'[39m[33m;[39m
+ [90m 10 |[39m[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./app/dashboard/messages/page.tsx [Client Component Browser]
+    ./app/dashboard/messages/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/dashboard/messages/page.tsx [Client Component SSR]
+    ./app/dashboard/messages/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/page.tsx:4:1
+Module not found: Can't resolve './components/DashboardHeader'
+[0m [90m 2 |[39m
+ [90m 3 |[39m [36mimport[39m { useAuth[33m,[39m useBookings[33m,[39m useEvents[33m,[39m useNotifications } [36mfrom[39m [32m'./lib/store'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 4 |[39m [36mimport[39m [33mDashboardHeader[39m [36mfrom[39m [32m'./components/DashboardHeader'[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 5 |[39m [36mimport[39m [33mOnboardingTour[39m [36mfrom[39m [32m'./components/OnboardingTour'[39m[33m;[39m
+ [90m 6 |[39m [36mimport[39m [33mLink[39m [36mfrom[39m [32m'next/link'[39m[33m;[39m
+ [90m 7 |[39m[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./app/dashboard/page.tsx [Client Component Browser]
+    ./app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/dashboard/page.tsx [Client Component SSR]
+    ./app/dashboard/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/DashboardLayoutClient.tsx:9:1
+Module not found: Can't resolve './components/Sidebar'
+[0m [90m  7 |[39m [36mimport[39m { [33mUIProvider[39m[33m,[39m useUI } [36mfrom[39m [32m'./lib/ui'[39m[33m;[39m
+ [90m  8 |[39m [36mimport[39m { [33mErrorBoundary[39m } [36mfrom[39m [32m'./components/ErrorBoundary'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  9 |[39m [36mimport[39m [33mSidebar[39m [36mfrom[39m [32m'./components/Sidebar'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 10 |[39m [36mimport[39m [33mToast[39m [36mfrom[39m [32m'./components/Toast'[39m[33m;[39m
+ [90m 11 |[39m
+ [90m 12 |[39m [36mfunction[39m [33mDashboardGuard[39m({ children }[33m:[39m { children[33m:[39m [33mReact[39m[33m.[39m[33mReactNode[39m }) {[0m
+
+
+
+Import trace:
+  Server Component:
+    ./app/dashboard/DashboardLayoutClient.tsx
+    ./app/dashboard/layout.tsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/DashboardLayoutClient.tsx:9:1
+Module not found: Can't resolve './components/Sidebar'
+[0m [90m  7 |[39m [36mimport[39m { [33mUIProvider[39m[33m,[39m useUI } [36mfrom[39m [32m'./lib/ui'[39m[33m;[39m
+ [90m  8 |[39m [36mimport[39m { [33mErrorBoundary[39m } [36mfrom[39m [32m'./components/ErrorBoundary'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  9 |[39m [36mimport[39m [33mSidebar[39m [36mfrom[39m [32m'./components/Sidebar'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 10 |[39m [36mimport[39m [33mToast[39m [36mfrom[39m [32m'./components/Toast'[39m[33m;[39m
+ [90m 11 |[39m
+ [90m 12 |[39m [36mfunction[39m [33mDashboardGuard[39m({ children }[33m:[39m { children[33m:[39m [33mReact[39m[33m.[39m[33mReactNode[39m }) {[0m
+
+
+
+Import trace:
+  Server Component:
+    ./app/dashboard/DashboardLayoutClient.tsx
+    ./app/dashboard/layout.tsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/DashboardLayoutClient.tsx:9:1
+Module not found: Can't resolve './components/Sidebar'
+[0m [90m  7 |[39m [36mimport[39m { [33mUIProvider[39m[33m,[39m useUI } [36mfrom[39m [32m'./lib/ui'[39m[33m;[39m
+ [90m  8 |[39m [36mimport[39m { [33mErrorBoundary[39m } [36mfrom[39m [32m'./components/ErrorBoundary'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  9 |[39m [36mimport[39m [33mSidebar[39m [36mfrom[39m [32m'./components/Sidebar'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 10 |[39m [36mimport[39m [33mToast[39m [36mfrom[39m [32m'./components/Toast'[39m[33m;[39m
+ [90m 11 |[39m
+ [90m 12 |[39m [36mfunction[39m [33mDashboardGuard[39m({ children }[33m:[39m { children[33m:[39m [33mReact[39m[33m.[39m[33mReactNode[39m }) {[0m
+
+
+
+Import trace:
+  Server Component:
+    ./app/dashboard/DashboardLayoutClient.tsx
+    ./app/dashboard/layout.tsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/DashboardLayoutClient.tsx:9:1
+Module not found: Can't resolve './components/Sidebar'
+[0m [90m  7 |[39m [36mimport[39m { [33mUIProvider[39m[33m,[39m useUI } [36mfrom[39m [32m'./lib/ui'[39m[33m;[39m
+ [90m  8 |[39m [36mimport[39m { [33mErrorBoundary[39m } [36mfrom[39m [32m'./components/ErrorBoundary'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  9 |[39m [36mimport[39m [33mSidebar[39m [36mfrom[39m [32m'./components/Sidebar'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 10 |[39m [36mimport[39m [33mToast[39m [36mfrom[39m [32m'./components/Toast'[39m[33m;[39m
+ [90m 11 |[39m
+ [90m 12 |[39m [36mfunction[39m [33mDashboardGuard[39m({ children }[33m:[39m { children[33m:[39m [33mReact[39m[33m.[39m[33mReactNode[39m }) {[0m
+
+
+
+Import trace:
+  Server Component:
+    ./app/dashboard/DashboardLayoutClient.tsx
+    ./app/dashboard/layout.tsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/DashboardLayoutClient.tsx:9:1
+Module not found: Can't resolve './components/Sidebar'
+[0m [90m  7 |[39m [36mimport[39m { [33mUIProvider[39m[33m,[39m useUI } [36mfrom[39m [32m'./lib/ui'[39m[33m;[39m
+ [90m  8 |[39m [36mimport[39m { [33mErrorBoundary[39m } [36mfrom[39m [32m'./components/ErrorBoundary'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  9 |[39m [36mimport[39m [33mSidebar[39m [36mfrom[39m [32m'./components/Sidebar'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 10 |[39m [36mimport[39m [33mToast[39m [36mfrom[39m [32m'./components/Toast'[39m[33m;[39m
+ [90m 11 |[39m
+ [90m 12 |[39m [36mfunction[39m [33mDashboardGuard[39m({ children }[33m:[39m { children[33m:[39m [33mReact[39m[33m.[39m[33mReactNode[39m }) {[0m
+
+
+
+Import trace:
+  Server Component:
+    ./app/dashboard/DashboardLayoutClient.tsx
+    ./app/dashboard/layout.tsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/DashboardLayoutClient.tsx:9:1
+Module not found: Can't resolve './components/Sidebar'
+[0m [90m  7 |[39m [36mimport[39m { [33mUIProvider[39m[33m,[39m useUI } [36mfrom[39m [32m'./lib/ui'[39m[33m;[39m
+ [90m  8 |[39m [36mimport[39m { [33mErrorBoundary[39m } [36mfrom[39m [32m'./components/ErrorBoundary'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  9 |[39m [36mimport[39m [33mSidebar[39m [36mfrom[39m [32m'./components/Sidebar'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 10 |[39m [36mimport[39m [33mToast[39m [36mfrom[39m [32m'./components/Toast'[39m[33m;[39m
+ [90m 11 |[39m
+ [90m 12 |[39m [36mfunction[39m [33mDashboardGuard[39m({ children }[33m:[39m { children[33m:[39m [33mReact[39m[33m.[39m[33mReactNode[39m }) {[0m
+
+
+
+Import trace:
+  Server Component:
+    ./app/dashboard/DashboardLayoutClient.tsx
+    ./app/dashboard/layout.tsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/DashboardLayoutClient.tsx:9:1
+Module not found: Can't resolve './components/Sidebar'
+[0m [90m  7 |[39m [36mimport[39m { [33mUIProvider[39m[33m,[39m useUI } [36mfrom[39m [32m'./lib/ui'[39m[33m;[39m
+ [90m  8 |[39m [36mimport[39m { [33mErrorBoundary[39m } [36mfrom[39m [32m'./components/ErrorBoundary'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  9 |[39m [36mimport[39m [33mSidebar[39m [36mfrom[39m [32m'./components/Sidebar'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 10 |[39m [36mimport[39m [33mToast[39m [36mfrom[39m [32m'./components/Toast'[39m[33m;[39m
+ [90m 11 |[39m
+ [90m 12 |[39m [36mfunction[39m [33mDashboardGuard[39m({ children }[33m:[39m { children[33m:[39m [33mReact[39m[33m.[39m[33mReactNode[39m }) {[0m
+
+
+
+Import trace:
+  Server Component:
+    ./app/dashboard/DashboardLayoutClient.tsx
+    ./app/dashboard/layout.tsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/DashboardLayoutClient.tsx:9:1
+Module not found: Can't resolve './components/Sidebar'
+[0m [90m  7 |[39m [36mimport[39m { [33mUIProvider[39m[33m,[39m useUI } [36mfrom[39m [32m'./lib/ui'[39m[33m;[39m
+ [90m  8 |[39m [36mimport[39m { [33mErrorBoundary[39m } [36mfrom[39m [32m'./components/ErrorBoundary'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  9 |[39m [36mimport[39m [33mSidebar[39m [36mfrom[39m [32m'./components/Sidebar'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 10 |[39m [36mimport[39m [33mToast[39m [36mfrom[39m [32m'./components/Toast'[39m[33m;[39m
+ [90m 11 |[39m
+ [90m 12 |[39m [36mfunction[39m [33mDashboardGuard[39m({ children }[33m:[39m { children[33m:[39m [33mReact[39m[33m.[39m[33mReactNode[39m }) {[0m
+
+
+
+Import trace:
+  Server Component:
+    ./app/dashboard/DashboardLayoutClient.tsx
+    ./app/dashboard/layout.tsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/DashboardLayoutClient.tsx:9:1
+Module not found: Can't resolve './components/Sidebar'
+[0m [90m  7 |[39m [36mimport[39m { [33mUIProvider[39m[33m,[39m useUI } [36mfrom[39m [32m'./lib/ui'[39m[33m;[39m
+ [90m  8 |[39m [36mimport[39m { [33mErrorBoundary[39m } [36mfrom[39m [32m'./components/ErrorBoundary'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  9 |[39m [36mimport[39m [33mSidebar[39m [36mfrom[39m [32m'./components/Sidebar'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 10 |[39m [36mimport[39m [33mToast[39m [36mfrom[39m [32m'./components/Toast'[39m[33m;[39m
+ [90m 11 |[39m
+ [90m 12 |[39m [36mfunction[39m [33mDashboardGuard[39m({ children }[33m:[39m { children[33m:[39m [33mReact[39m[33m.[39m[33mReactNode[39m }) {[0m
+
+
+
+Import trace:
+  Server Component:
+    ./app/dashboard/DashboardLayoutClient.tsx
+    ./app/dashboard/layout.tsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/DashboardLayoutClient.tsx:9:1
+Module not found: Can't resolve './components/Sidebar'
+[0m [90m  7 |[39m [36mimport[39m { [33mUIProvider[39m[33m,[39m useUI } [36mfrom[39m [32m'./lib/ui'[39m[33m;[39m
+ [90m  8 |[39m [36mimport[39m { [33mErrorBoundary[39m } [36mfrom[39m [32m'./components/ErrorBoundary'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  9 |[39m [36mimport[39m [33mSidebar[39m [36mfrom[39m [32m'./components/Sidebar'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 10 |[39m [36mimport[39m [33mToast[39m [36mfrom[39m [32m'./components/Toast'[39m[33m;[39m
+ [90m 11 |[39m
+ [90m 12 |[39m [36mfunction[39m [33mDashboardGuard[39m({ children }[33m:[39m { children[33m:[39m [33mReact[39m[33m.[39m[33mReactNode[39m }) {[0m
+
+
+
+Import trace:
+  Server Component:
+    ./app/dashboard/DashboardLayoutClient.tsx
+    ./app/dashboard/layout.tsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/DashboardLayoutClient.tsx:9:1
+Module not found: Can't resolve './components/Sidebar'
+[0m [90m  7 |[39m [36mimport[39m { [33mUIProvider[39m[33m,[39m useUI } [36mfrom[39m [32m'./lib/ui'[39m[33m;[39m
+ [90m  8 |[39m [36mimport[39m { [33mErrorBoundary[39m } [36mfrom[39m [32m'./components/ErrorBoundary'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  9 |[39m [36mimport[39m [33mSidebar[39m [36mfrom[39m [32m'./components/Sidebar'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 10 |[39m [36mimport[39m [33mToast[39m [36mfrom[39m [32m'./components/Toast'[39m[33m;[39m
+ [90m 11 |[39m
+ [90m 12 |[39m [36mfunction[39m [33mDashboardGuard[39m({ children }[33m:[39m { children[33m:[39m [33mReact[39m[33m.[39m[33mReactNode[39m }) {[0m
+
+
+
+Import trace:
+  Server Component:
+    ./app/dashboard/DashboardLayoutClient.tsx
+    ./app/dashboard/layout.tsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/DashboardLayoutClient.tsx:9:1
+Module not found: Can't resolve './components/Sidebar'
+[0m [90m  7 |[39m [36mimport[39m { [33mUIProvider[39m[33m,[39m useUI } [36mfrom[39m [32m'./lib/ui'[39m[33m;[39m
+ [90m  8 |[39m [36mimport[39m { [33mErrorBoundary[39m } [36mfrom[39m [32m'./components/ErrorBoundary'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  9 |[39m [36mimport[39m [33mSidebar[39m [36mfrom[39m [32m'./components/Sidebar'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 10 |[39m [36mimport[39m [33mToast[39m [36mfrom[39m [32m'./components/Toast'[39m[33m;[39m
+ [90m 11 |[39m
+ [90m 12 |[39m [36mfunction[39m [33mDashboardGuard[39m({ children }[33m:[39m { children[33m:[39m [33mReact[39m[33m.[39m[33mReactNode[39m }) {[0m
+
+
+
+Import trace:
+  Server Component:
+    ./app/dashboard/DashboardLayoutClient.tsx
+    ./app/dashboard/layout.tsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/DashboardLayoutClient.tsx:9:1
+Module not found: Can't resolve './components/Sidebar'
+[0m [90m  7 |[39m [36mimport[39m { [33mUIProvider[39m[33m,[39m useUI } [36mfrom[39m [32m'./lib/ui'[39m[33m;[39m
+ [90m  8 |[39m [36mimport[39m { [33mErrorBoundary[39m } [36mfrom[39m [32m'./components/ErrorBoundary'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  9 |[39m [36mimport[39m [33mSidebar[39m [36mfrom[39m [32m'./components/Sidebar'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 10 |[39m [36mimport[39m [33mToast[39m [36mfrom[39m [32m'./components/Toast'[39m[33m;[39m
+ [90m 11 |[39m
+ [90m 12 |[39m [36mfunction[39m [33mDashboardGuard[39m({ children }[33m:[39m { children[33m:[39m [33mReact[39m[33m.[39m[33mReactNode[39m }) {[0m
+
+
+
+Import trace:
+  Server Component:
+    ./app/dashboard/DashboardLayoutClient.tsx
+    ./app/dashboard/layout.tsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/DashboardLayoutClient.tsx:9:1
+Module not found: Can't resolve './components/Sidebar'
+[0m [90m  7 |[39m [36mimport[39m { [33mUIProvider[39m[33m,[39m useUI } [36mfrom[39m [32m'./lib/ui'[39m[33m;[39m
+ [90m  8 |[39m [36mimport[39m { [33mErrorBoundary[39m } [36mfrom[39m [32m'./components/ErrorBoundary'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  9 |[39m [36mimport[39m [33mSidebar[39m [36mfrom[39m [32m'./components/Sidebar'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 10 |[39m [36mimport[39m [33mToast[39m [36mfrom[39m [32m'./components/Toast'[39m[33m;[39m
+ [90m 11 |[39m
+ [90m 12 |[39m [36mfunction[39m [33mDashboardGuard[39m({ children }[33m:[39m { children[33m:[39m [33mReact[39m[33m.[39m[33mReactNode[39m }) {[0m
+
+
+
+Import trace:
+  Server Component:
+    ./app/dashboard/DashboardLayoutClient.tsx
+    ./app/dashboard/layout.tsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/DashboardLayoutClient.tsx:9:1
+Module not found: Can't resolve './components/Sidebar'
+[0m [90m  7 |[39m [36mimport[39m { [33mUIProvider[39m[33m,[39m useUI } [36mfrom[39m [32m'./lib/ui'[39m[33m;[39m
+ [90m  8 |[39m [36mimport[39m { [33mErrorBoundary[39m } [36mfrom[39m [32m'./components/ErrorBoundary'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  9 |[39m [36mimport[39m [33mSidebar[39m [36mfrom[39m [32m'./components/Sidebar'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 10 |[39m [36mimport[39m [33mToast[39m [36mfrom[39m [32m'./components/Toast'[39m[33m;[39m
+ [90m 11 |[39m
+ [90m 12 |[39m [36mfunction[39m [33mDashboardGuard[39m({ children }[33m:[39m { children[33m:[39m [33mReact[39m[33m.[39m[33mReactNode[39m }) {[0m
+
+
+
+Import trace:
+  Server Component:
+    ./app/dashboard/DashboardLayoutClient.tsx
+    ./app/dashboard/layout.tsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/DashboardLayoutClient.tsx:9:1
+Module not found: Can't resolve './components/Sidebar'
+[0m [90m  7 |[39m [36mimport[39m { [33mUIProvider[39m[33m,[39m useUI } [36mfrom[39m [32m'./lib/ui'[39m[33m;[39m
+ [90m  8 |[39m [36mimport[39m { [33mErrorBoundary[39m } [36mfrom[39m [32m'./components/ErrorBoundary'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  9 |[39m [36mimport[39m [33mSidebar[39m [36mfrom[39m [32m'./components/Sidebar'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 10 |[39m [36mimport[39m [33mToast[39m [36mfrom[39m [32m'./components/Toast'[39m[33m;[39m
+ [90m 11 |[39m
+ [90m 12 |[39m [36mfunction[39m [33mDashboardGuard[39m({ children }[33m:[39m { children[33m:[39m [33mReact[39m[33m.[39m[33mReactNode[39m }) {[0m
+
+
+
+Import trace:
+  Server Component:
+    ./app/dashboard/DashboardLayoutClient.tsx
+    ./app/dashboard/layout.tsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/DashboardLayoutClient.tsx:9:1
+Module not found: Can't resolve './components/Sidebar'
+[0m [90m  7 |[39m [36mimport[39m { [33mUIProvider[39m[33m,[39m useUI } [36mfrom[39m [32m'./lib/ui'[39m[33m;[39m
+ [90m  8 |[39m [36mimport[39m { [33mErrorBoundary[39m } [36mfrom[39m [32m'./components/ErrorBoundary'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  9 |[39m [36mimport[39m [33mSidebar[39m [36mfrom[39m [32m'./components/Sidebar'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 10 |[39m [36mimport[39m [33mToast[39m [36mfrom[39m [32m'./components/Toast'[39m[33m;[39m
+ [90m 11 |[39m
+ [90m 12 |[39m [36mfunction[39m [33mDashboardGuard[39m({ children }[33m:[39m { children[33m:[39m [33mReact[39m[33m.[39m[33mReactNode[39m }) {[0m
+
+
+
+Import trace:
+  Server Component:
+    ./app/dashboard/DashboardLayoutClient.tsx
+    ./app/dashboard/layout.tsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/DashboardLayoutClient.tsx:9:1
+Module not found: Can't resolve './components/Sidebar'
+[0m [90m  7 |[39m [36mimport[39m { [33mUIProvider[39m[33m,[39m useUI } [36mfrom[39m [32m'./lib/ui'[39m[33m;[39m
+ [90m  8 |[39m [36mimport[39m { [33mErrorBoundary[39m } [36mfrom[39m [32m'./components/ErrorBoundary'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  9 |[39m [36mimport[39m [33mSidebar[39m [36mfrom[39m [32m'./components/Sidebar'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 10 |[39m [36mimport[39m [33mToast[39m [36mfrom[39m [32m'./components/Toast'[39m[33m;[39m
+ [90m 11 |[39m
+ [90m 12 |[39m [36mfunction[39m [33mDashboardGuard[39m({ children }[33m:[39m { children[33m:[39m [33mReact[39m[33m.[39m[33mReactNode[39m }) {[0m
+
+
+
+Import trace:
+  Server Component:
+    ./app/dashboard/DashboardLayoutClient.tsx
+    ./app/dashboard/layout.tsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/DashboardLayoutClient.tsx:9:1
+Module not found: Can't resolve './components/Sidebar'
+[0m [90m  7 |[39m [36mimport[39m { [33mUIProvider[39m[33m,[39m useUI } [36mfrom[39m [32m'./lib/ui'[39m[33m;[39m
+ [90m  8 |[39m [36mimport[39m { [33mErrorBoundary[39m } [36mfrom[39m [32m'./components/ErrorBoundary'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  9 |[39m [36mimport[39m [33mSidebar[39m [36mfrom[39m [32m'./components/Sidebar'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 10 |[39m [36mimport[39m [33mToast[39m [36mfrom[39m [32m'./components/Toast'[39m[33m;[39m
+ [90m 11 |[39m
+ [90m 12 |[39m [36mfunction[39m [33mDashboardGuard[39m({ children }[33m:[39m { children[33m:[39m [33mReact[39m[33m.[39m[33mReactNode[39m }) {[0m
+
+
+
+Import trace:
+  Server Component:
+    ./app/dashboard/DashboardLayoutClient.tsx
+    ./app/dashboard/layout.tsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/DashboardLayoutClient.tsx:9:1
+Module not found: Can't resolve './components/Sidebar'
+[0m [90m  7 |[39m [36mimport[39m { [33mUIProvider[39m[33m,[39m useUI } [36mfrom[39m [32m'./lib/ui'[39m[33m;[39m
+ [90m  8 |[39m [36mimport[39m { [33mErrorBoundary[39m } [36mfrom[39m [32m'./components/ErrorBoundary'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  9 |[39m [36mimport[39m [33mSidebar[39m [36mfrom[39m [32m'./components/Sidebar'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 10 |[39m [36mimport[39m [33mToast[39m [36mfrom[39m [32m'./components/Toast'[39m[33m;[39m
+ [90m 11 |[39m
+ [90m 12 |[39m [36mfunction[39m [33mDashboardGuard[39m({ children }[33m:[39m { children[33m:[39m [33mReact[39m[33m.[39m[33mReactNode[39m }) {[0m
+
+
+
+Import trace:
+  Server Component:
+    ./app/dashboard/DashboardLayoutClient.tsx
+    ./app/dashboard/layout.tsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/DashboardLayoutClient.tsx:9:1
+Module not found: Can't resolve './components/Sidebar'
+[0m [90m  7 |[39m [36mimport[39m { [33mUIProvider[39m[33m,[39m useUI } [36mfrom[39m [32m'./lib/ui'[39m[33m;[39m
+ [90m  8 |[39m [36mimport[39m { [33mErrorBoundary[39m } [36mfrom[39m [32m'./components/ErrorBoundary'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  9 |[39m [36mimport[39m [33mSidebar[39m [36mfrom[39m [32m'./components/Sidebar'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 10 |[39m [36mimport[39m [33mToast[39m [36mfrom[39m [32m'./components/Toast'[39m[33m;[39m
+ [90m 11 |[39m
+ [90m 12 |[39m [36mfunction[39m [33mDashboardGuard[39m({ children }[33m:[39m { children[33m:[39m [33mReact[39m[33m.[39m[33mReactNode[39m }) {[0m
+
+
+
+Import trace:
+  Server Component:
+    ./app/dashboard/DashboardLayoutClient.tsx
+    ./app/dashboard/layout.tsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/DashboardLayoutClient.tsx:9:1
+Module not found: Can't resolve './components/Sidebar'
+[0m [90m  7 |[39m [36mimport[39m { [33mUIProvider[39m[33m,[39m useUI } [36mfrom[39m [32m'./lib/ui'[39m[33m;[39m
+ [90m  8 |[39m [36mimport[39m { [33mErrorBoundary[39m } [36mfrom[39m [32m'./components/ErrorBoundary'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  9 |[39m [36mimport[39m [33mSidebar[39m [36mfrom[39m [32m'./components/Sidebar'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 10 |[39m [36mimport[39m [33mToast[39m [36mfrom[39m [32m'./components/Toast'[39m[33m;[39m
+ [90m 11 |[39m
+ [90m 12 |[39m [36mfunction[39m [33mDashboardGuard[39m({ children }[33m:[39m { children[33m:[39m [33mReact[39m[33m.[39m[33mReactNode[39m }) {[0m
+
+
+
+Import trace:
+  Server Component:
+    ./app/dashboard/DashboardLayoutClient.tsx
+    ./app/dashboard/layout.tsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/DashboardLayoutClient.tsx:9:1
+Module not found: Can't resolve './components/Sidebar'
+[0m [90m  7 |[39m [36mimport[39m { [33mUIProvider[39m[33m,[39m useUI } [36mfrom[39m [32m'./lib/ui'[39m[33m;[39m
+ [90m  8 |[39m [36mimport[39m { [33mErrorBoundary[39m } [36mfrom[39m [32m'./components/ErrorBoundary'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  9 |[39m [36mimport[39m [33mSidebar[39m [36mfrom[39m [32m'./components/Sidebar'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 10 |[39m [36mimport[39m [33mToast[39m [36mfrom[39m [32m'./components/Toast'[39m[33m;[39m
+ [90m 11 |[39m
+ [90m 12 |[39m [36mfunction[39m [33mDashboardGuard[39m({ children }[33m:[39m { children[33m:[39m [33mReact[39m[33m.[39m[33mReactNode[39m }) {[0m
+
+
+
+Import trace:
+  Server Component:
+    ./app/dashboard/DashboardLayoutClient.tsx
+    ./app/dashboard/layout.tsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/DashboardLayoutClient.tsx:9:1
+Module not found: Can't resolve './components/Sidebar'
+[0m [90m  7 |[39m [36mimport[39m { [33mUIProvider[39m[33m,[39m useUI } [36mfrom[39m [32m'./lib/ui'[39m[33m;[39m
+ [90m  8 |[39m [36mimport[39m { [33mErrorBoundary[39m } [36mfrom[39m [32m'./components/ErrorBoundary'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  9 |[39m [36mimport[39m [33mSidebar[39m [36mfrom[39m [32m'./components/Sidebar'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 10 |[39m [36mimport[39m [33mToast[39m [36mfrom[39m [32m'./components/Toast'[39m[33m;[39m
+ [90m 11 |[39m
+ [90m 12 |[39m [36mfunction[39m [33mDashboardGuard[39m({ children }[33m:[39m { children[33m:[39m [33mReact[39m[33m.[39m[33mReactNode[39m }) {[0m
+
+
+
+Import trace:
+  Server Component:
+    ./app/dashboard/DashboardLayoutClient.tsx
+    ./app/dashboard/layout.tsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/DashboardLayoutClient.tsx:9:1
+Module not found: Can't resolve './components/Sidebar'
+[0m [90m  7 |[39m [36mimport[39m { [33mUIProvider[39m[33m,[39m useUI } [36mfrom[39m [32m'./lib/ui'[39m[33m;[39m
+ [90m  8 |[39m [36mimport[39m { [33mErrorBoundary[39m } [36mfrom[39m [32m'./components/ErrorBoundary'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  9 |[39m [36mimport[39m [33mSidebar[39m [36mfrom[39m [32m'./components/Sidebar'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 10 |[39m [36mimport[39m [33mToast[39m [36mfrom[39m [32m'./components/Toast'[39m[33m;[39m
+ [90m 11 |[39m
+ [90m 12 |[39m [36mfunction[39m [33mDashboardGuard[39m({ children }[33m:[39m { children[33m:[39m [33mReact[39m[33m.[39m[33mReactNode[39m }) {[0m
+
+
+
+Import trace:
+  Server Component:
+    ./app/dashboard/DashboardLayoutClient.tsx
+    ./app/dashboard/layout.tsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/DashboardLayoutClient.tsx:9:1
+Module not found: Can't resolve './components/Sidebar'
+[0m [90m  7 |[39m [36mimport[39m { [33mUIProvider[39m[33m,[39m useUI } [36mfrom[39m [32m'./lib/ui'[39m[33m;[39m
+ [90m  8 |[39m [36mimport[39m { [33mErrorBoundary[39m } [36mfrom[39m [32m'./components/ErrorBoundary'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  9 |[39m [36mimport[39m [33mSidebar[39m [36mfrom[39m [32m'./components/Sidebar'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 10 |[39m [36mimport[39m [33mToast[39m [36mfrom[39m [32m'./components/Toast'[39m[33m;[39m
+ [90m 11 |[39m
+ [90m 12 |[39m [36mfunction[39m [33mDashboardGuard[39m({ children }[33m:[39m { children[33m:[39m [33mReact[39m[33m.[39m[33mReactNode[39m }) {[0m
+
+
+
+Import trace:
+  Server Component:
+    ./app/dashboard/DashboardLayoutClient.tsx
+    ./app/dashboard/layout.tsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/DashboardLayoutClient.tsx:9:1
+Module not found: Can't resolve './components/Sidebar'
+[0m [90m  7 |[39m [36mimport[39m { [33mUIProvider[39m[33m,[39m useUI } [36mfrom[39m [32m'./lib/ui'[39m[33m;[39m
+ [90m  8 |[39m [36mimport[39m { [33mErrorBoundary[39m } [36mfrom[39m [32m'./components/ErrorBoundary'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  9 |[39m [36mimport[39m [33mSidebar[39m [36mfrom[39m [32m'./components/Sidebar'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 10 |[39m [36mimport[39m [33mToast[39m [36mfrom[39m [32m'./components/Toast'[39m[33m;[39m
+ [90m 11 |[39m
+ [90m 12 |[39m [36mfunction[39m [33mDashboardGuard[39m({ children }[33m:[39m { children[33m:[39m [33mReact[39m[33m.[39m[33mReactNode[39m }) {[0m
+
+
+
+Import trace:
+  Server Component:
+    ./app/dashboard/DashboardLayoutClient.tsx
+    ./app/dashboard/layout.tsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/DashboardLayoutClient.tsx:9:1
+Module not found: Can't resolve './components/Sidebar'
+[0m [90m  7 |[39m [36mimport[39m { [33mUIProvider[39m[33m,[39m useUI } [36mfrom[39m [32m'./lib/ui'[39m[33m;[39m
+ [90m  8 |[39m [36mimport[39m { [33mErrorBoundary[39m } [36mfrom[39m [32m'./components/ErrorBoundary'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  9 |[39m [36mimport[39m [33mSidebar[39m [36mfrom[39m [32m'./components/Sidebar'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 10 |[39m [36mimport[39m [33mToast[39m [36mfrom[39m [32m'./components/Toast'[39m[33m;[39m
+ [90m 11 |[39m
+ [90m 12 |[39m [36mfunction[39m [33mDashboardGuard[39m({ children }[33m:[39m { children[33m:[39m [33mReact[39m[33m.[39m[33mReactNode[39m }) {[0m
+
+
+
+Import trace:
+  Server Component:
+    ./app/dashboard/DashboardLayoutClient.tsx
+    ./app/dashboard/layout.tsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/DashboardLayoutClient.tsx:9:1
+Module not found: Can't resolve './components/Sidebar'
+[0m [90m  7 |[39m [36mimport[39m { [33mUIProvider[39m[33m,[39m useUI } [36mfrom[39m [32m'./lib/ui'[39m[33m;[39m
+ [90m  8 |[39m [36mimport[39m { [33mErrorBoundary[39m } [36mfrom[39m [32m'./components/ErrorBoundary'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  9 |[39m [36mimport[39m [33mSidebar[39m [36mfrom[39m [32m'./components/Sidebar'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 10 |[39m [36mimport[39m [33mToast[39m [36mfrom[39m [32m'./components/Toast'[39m[33m;[39m
+ [90m 11 |[39m
+ [90m 12 |[39m [36mfunction[39m [33mDashboardGuard[39m({ children }[33m:[39m { children[33m:[39m [33mReact[39m[33m.[39m[33mReactNode[39m }) {[0m
+
+
+
+Import trace:
+  Server Component:
+    ./app/dashboard/DashboardLayoutClient.tsx
+    ./app/dashboard/layout.tsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/DashboardLayoutClient.tsx:9:1
+Module not found: Can't resolve './components/Sidebar'
+[0m [90m  7 |[39m [36mimport[39m { [33mUIProvider[39m[33m,[39m useUI } [36mfrom[39m [32m'./lib/ui'[39m[33m;[39m
+ [90m  8 |[39m [36mimport[39m { [33mErrorBoundary[39m } [36mfrom[39m [32m'./components/ErrorBoundary'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  9 |[39m [36mimport[39m [33mSidebar[39m [36mfrom[39m [32m'./components/Sidebar'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 10 |[39m [36mimport[39m [33mToast[39m [36mfrom[39m [32m'./components/Toast'[39m[33m;[39m
+ [90m 11 |[39m
+ [90m 12 |[39m [36mfunction[39m [33mDashboardGuard[39m({ children }[33m:[39m { children[33m:[39m [33mReact[39m[33m.[39m[33mReactNode[39m }) {[0m
+
+
+
+Import trace:
+  Server Component:
+    ./app/dashboard/DashboardLayoutClient.tsx
+    ./app/dashboard/layout.tsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/DashboardLayoutClient.tsx:9:1
+Module not found: Can't resolve './components/Sidebar'
+[0m [90m  7 |[39m [36mimport[39m { [33mUIProvider[39m[33m,[39m useUI } [36mfrom[39m [32m'./lib/ui'[39m[33m;[39m
+ [90m  8 |[39m [36mimport[39m { [33mErrorBoundary[39m } [36mfrom[39m [32m'./components/ErrorBoundary'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  9 |[39m [36mimport[39m [33mSidebar[39m [36mfrom[39m [32m'./components/Sidebar'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 10 |[39m [36mimport[39m [33mToast[39m [36mfrom[39m [32m'./components/Toast'[39m[33m;[39m
+ [90m 11 |[39m
+ [90m 12 |[39m [36mfunction[39m [33mDashboardGuard[39m({ children }[33m:[39m { children[33m:[39m [33mReact[39m[33m.[39m[33mReactNode[39m }) {[0m
+
+
+
+Import trace:
+  Server Component:
+    ./app/dashboard/DashboardLayoutClient.tsx
+    ./app/dashboard/layout.tsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/dashboard/DashboardLayoutClient.tsx:9:1
+Module not found: Can't resolve './components/Sidebar'
+[0m [90m  7 |[39m [36mimport[39m { [33mUIProvider[39m[33m,[39m useUI } [36mfrom[39m [32m'./lib/ui'[39m[33m;[39m
+ [90m  8 |[39m [36mimport[39m { [33mErrorBoundary[39m } [36mfrom[39m [32m'./components/ErrorBoundary'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  9 |[39m [36mimport[39m [33mSidebar[39m [36mfrom[39m [32m'./components/Sidebar'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 10 |[39m [36mimport[39m [33mToast[39m [36mfrom[39m [32m'./components/Toast'[39m[33m;[39m
+ [90m 11 |[39m
+ [90m 12 |[39m [36mfunction[39m [33mDashboardGuard[39m({ children }[33m:[39m { children[33m:[39m [33mReact[39m[33m.[39m[33mReactNode[39m }) {[0m
+
+
+
+Import trace:
+  Server Component:
+    ./app/dashboard/DashboardLayoutClient.tsx
+    ./app/dashboard/layout.tsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+

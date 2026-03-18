@@ -3,6 +3,11 @@ import { authenticateMobileRequest, getAdminClient, cachedJson, withAuth } from 
 import { sendPushToUser } from '../../lib/push';
 import crypto from 'crypto';
 
+function isDuplicateError(error: { code?: string; message?: string } | null | undefined): boolean {
+  const message = error?.message || '';
+  return error?.code === '23505' || message.includes('duplicate key value') || message.includes('unique constraint');
+}
+
 /** List all coaching programs with enrollment counts and user enrollment status */
 export async function GET(request: Request) {
   const authResult = await authenticateMobileRequest(request);
@@ -167,7 +172,9 @@ export async function POST(request: Request) {
         program_id: programId,
         member_id: memberId,
       });
-      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      if (error && !isDuplicateError(error)) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
 
       // Enrollment notifications (non-blocking, best-effort)
       if (program?.title) {
@@ -213,18 +220,26 @@ export async function POST(request: Request) {
           if (program.coach_id) {
             const timestamp = new Date().toISOString();
             const convFilter = `and(member_a.eq.${program.coach_id},member_b.eq.${memberId}),and(member_a.eq.${memberId},member_b.eq.${program.coach_id})`;
-            const { data: conv } = await supabase
+            const fetchConversation = () => supabase
               .from('conversations').select('id').or(convFilter).single();
+            const { data: conv } = await fetchConversation();
             let conversationId: number;
             if (conv) {
               conversationId = conv.id;
             } else {
-              const { data: newConv } = await supabase
+              const { data: newConv, error: convErr } = await supabase
                 .from('conversations')
                 .insert({ member_a: program.coach_id, member_b: memberId, last_message: `Welcome to ${program.title}!`, last_timestamp: timestamp })
                 .select('id').single();
-              if (!newConv) throw new Error('Failed to create conversation');
-              conversationId = newConv.id;
+              if (newConv) {
+                conversationId = newConv.id;
+              } else if (isDuplicateError(convErr)) {
+                const { data: racedConversation } = await fetchConversation();
+                if (!racedConversation) throw new Error('Failed to create conversation');
+                conversationId = racedConversation.id;
+              } else {
+                throw new Error('Failed to create conversation');
+              }
             }
             await supabase.from('messages').insert({
               id: `msg-${crypto.randomUUID().slice(0, 8)}`, conversation_id: conversationId,
