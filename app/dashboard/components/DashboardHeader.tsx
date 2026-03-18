@@ -28,6 +28,7 @@ export default function DashboardHeader({ title }: DashboardHeaderProps) {
   const prefMap: Record<string, keyof typeof notificationPreferences> = {
     booking: 'bookings', event: 'events',
     partner: 'partners', message: 'messages', program: 'programs',
+    announcement: 'announcements',
   };
   const filteredNotifications = notifications.filter(n => {
     if (n.type === 'announcement') return true;
