@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { withAuth, isValidDate, isValidTime, isInRange, isValidEnum, sanitizeInput, validationError, VALID_BLOCK_REASONS } from '../auth-helper';
 import { sendPushToUser } from '../../lib/push';
 import { createNotification } from '../../lib/notifications';
+import { getRequestOrigin } from '../../lib/request-url';
 
 /** Parse "9:30 AM" or "6:00 PM" to minutes since midnight */
 function parseTimeMinutes(time: string): number {
@@ -156,7 +157,7 @@ export const GET = withAuth(async (user, request, supabase) => {
 // POST /api/mobile/court-blocks - create a new court block (admin only)
 // Auto-cancels conflicting bookings and notifies affected users
 export const POST = withAuth(async (user, request, supabase) => {
-  const emailApiBaseUrl = new URL(request.url).origin;
+  const emailApiBaseUrl = getRequestOrigin(request);
   const body = await request.json();
 
   const { court_id, block_date, time_start, time_end, reason, notes } = body;

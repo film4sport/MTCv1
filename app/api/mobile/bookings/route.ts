@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { authenticateMobileRequest, getAdminClient, sanitizeInput, isRateLimited, cachedJson, isValidUUID } from '../auth-helper';
 import { sendPushToUser } from '../../lib/push';
+import { getRequestOrigin } from '../../lib/request-url';
 import type { BookingRules } from '../types';
 import crypto from 'crypto';
 
@@ -281,7 +282,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   const authResult = await authenticateMobileRequest(request);
   if (authResult instanceof NextResponse) return authResult;
-  const emailApiBaseUrl = new URL(request.url).origin;
+  const emailApiBaseUrl = getRequestOrigin(request);
 
   if (isRateLimited(authResult.id, 10)) {
     return NextResponse.json({ error: 'Too many booking attempts. Please wait.' }, { status: 429 });
@@ -471,7 +472,7 @@ export async function POST(request: Request) {
 export async function DELETE(request: Request) {
   const authResult = await authenticateMobileRequest(request);
   if (authResult instanceof NextResponse) return authResult;
-  const emailApiBaseUrl = new URL(request.url).origin;
+  const emailApiBaseUrl = getRequestOrigin(request);
 
   try {
     const { bookingId } = await request.json();
