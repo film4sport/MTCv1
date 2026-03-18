@@ -107,38 +107,71 @@ export default function AdminDashboardTab({
 
   return (
     <div className="space-y-6">
-      {/* Export Buttons */}
-      <div className="flex flex-wrap items-center gap-3">
-        <label className="inline-flex items-center gap-1.5 text-xs" style={{ color: '#6b7266' }}>
-          From:
-          <input
-            type="date"
-            value={exportFromDate}
-            onChange={e => onExportFromDateChange(e.target.value)}
-            className="px-2 py-1.5 rounded-lg text-xs"
-            style={{ background: '#faf8f3', border: '1px solid #e0dcd3', color: '#2a2f1e' }}
-          />
-          {exportFromDate && (
-            <button onClick={() => onExportFromDateChange('')} className="text-xs underline" style={{ color: '#6b7a3d' }}>Clear</button>
-          )}
-        </label>
-        {[
-          { label: 'Export Members', onClick: exportMembers },
-          { label: 'Export Payments', onClick: exportPayments },
-          { label: 'Export Court Usage', onClick: exportCourtUsage },
-        ].map(btn => (
-          <button
-            key={btn.label}
-            onClick={btn.onClick}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-medium transition-colors hover:bg-white"
-            style={{ background: '#faf8f3', border: '1px solid #e0dcd3', color: '#2a2f1e' }}
-          >
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-            </svg>
-            {btn.label}
-          </button>
-        ))}
+      <div className="grid gap-4 xl:grid-cols-[1.25fr_0.9fr]">
+        <div className="glass-card rounded-2xl border p-5" style={{ background: 'rgba(255, 255, 255, 0.64)', borderColor: 'rgba(255, 255, 255, 0.55)' }}>
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-xl">
+              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em]" style={{ color: '#8c866f' }}>Exports</p>
+              <h4 className="mt-1 font-semibold text-lg" style={{ color: '#2a2f1e' }}>Pull the operational numbers you need without digging.</h4>
+              <p className="mt-2 text-xs leading-6" style={{ color: '#6b7266' }}>
+                Filter by join date when needed, then download member, payment, or court-usage snapshots for bookkeeping and planning.
+              </p>
+            </div>
+            <label className="inline-flex items-center gap-2 text-xs rounded-xl px-3 py-2 self-start lg:self-auto" style={{ color: '#6b7266', background: '#faf8f3', border: '1px solid #e0dcd3' }}>
+              From
+              <input
+                type="date"
+                value={exportFromDate}
+                onChange={e => onExportFromDateChange(e.target.value)}
+                className="px-2 py-1.5 rounded-lg text-xs"
+                style={{ background: '#fff', border: '1px solid #e0dcd3', color: '#2a2f1e' }}
+              />
+              {exportFromDate && (
+                <button onClick={() => onExportFromDateChange('')} className="text-xs underline" style={{ color: '#6b7a3d' }}>Clear</button>
+              )}
+            </label>
+          </div>
+          <div className="mt-4 flex flex-wrap gap-3">
+            {[
+              { label: 'Export Members', onClick: exportMembers },
+              { label: 'Export Payments', onClick: exportPayments },
+              { label: 'Export Court Usage', onClick: exportCourtUsage },
+            ].map(btn => (
+              <button
+                key={btn.label}
+                onClick={btn.onClick}
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-medium transition-colors hover:bg-white"
+                style={{ background: '#faf8f3', border: '1px solid #e0dcd3', color: '#2a2f1e' }}
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                {btn.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="glass-card rounded-2xl border p-5" style={{ background: 'rgba(255, 248, 231, 0.7)', borderColor: 'rgba(214,188,123,0.2)' }}>
+          <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em]" style={{ color: '#8c866f' }}>Today at a Glance</p>
+          <div className="mt-4 grid grid-cols-3 gap-3">
+            <div className="rounded-2xl px-3 py-3" style={{ background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.55)' }}>
+              <p className="text-[0.65rem]" style={{ color: '#8c866f' }}>Admins</p>
+              <p className="mt-1 text-xl font-semibold" style={{ color: '#2a2f1e' }}>{members.filter(m => m.role === 'admin').length}</p>
+            </div>
+            <div className="rounded-2xl px-3 py-3" style={{ background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.55)' }}>
+              <p className="text-[0.65rem]" style={{ color: '#8c866f' }}>Revenue Streams</p>
+              <p className="mt-1 text-xl font-semibold" style={{ color: '#2a2f1e' }}>{analytics.revenueBreakdown.length}</p>
+            </div>
+            <div className="rounded-2xl px-3 py-3" style={{ background: 'rgba(107,122,61,0.08)', border: '1px solid rgba(107,122,61,0.12)' }}>
+              <p className="text-[0.65rem]" style={{ color: '#8c866f' }}>Operator</p>
+              <p className="mt-1 text-sm font-semibold truncate" style={{ color: '#2a2f1e' }}>{currentUser?.name || 'Admin'}</p>
+            </div>
+          </div>
+          <p className="mt-4 text-xs leading-6" style={{ color: '#6b7266' }}>
+            Keep member communication, gate updates, and reporting moving from one calm operations surface.
+          </p>
+        </div>
       </div>
 
       {/* Gate Code Management */}
@@ -154,11 +187,14 @@ export default function AdminDashboardTab({
             <p className="text-xs" style={{ color: '#6b7266' }}>Access code for the court gate lock</p>
           </div>
         </div>
-        <div className="flex items-center gap-3 mb-4">
-          <div className="px-4 py-2.5 rounded-xl text-lg font-bold tracking-widest" style={{ background: '#f5f2eb', color: '#2a2f1e' }}>
+        <div className="flex flex-col gap-3 mb-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="px-4 py-2.5 rounded-xl text-lg font-bold tracking-widest self-start" style={{ background: '#f5f2eb', color: '#2a2f1e' }}>
             {gateCode || '—'}
           </div>
-          <span className="text-xs" style={{ color: '#6b7266' }}>Current code</span>
+          <div className="text-xs leading-5 sm:text-right" style={{ color: '#6b7266' }}>
+            <p>Current code</p>
+            <p>Updating this will message all active non-admin members.</p>
+          </div>
         </div>
         <div className="flex gap-2">
           <input

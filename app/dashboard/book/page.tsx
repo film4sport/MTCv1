@@ -246,6 +246,9 @@ export default function BookCourtPage() {
 
   const mobileDay = weekDays[mobileDayIdx] || weekDays[0];
   const mobileDateStr = toLocalDateStr(mobileDay);
+  const selectedDayEvents = eventsForDate(mobileDateStr);
+  const availableCourts = COURTS_CONFIG.filter(c => !isCourtInMaintenance(courts, c.id)).length;
+  const selectedDayMine = myUpcoming.filter(b => b.date === mobileDateStr).length;
 
   // Now-line: current time indicator for today
   const [nowMinutes, setNowMinutes] = useState(() => { const d = new Date(); return d.getHours() * 60 + d.getMinutes(); });
@@ -275,21 +278,55 @@ export default function BookCourtPage() {
       <DashboardHeader title="Book Court" />
 
       <div className="p-4 sm:p-6 lg:p-8 max-w-[1400px] mx-auto animate-slideUp">
-
-        {/* Top Bar: View Toggle */}
-        <div className="flex items-center justify-between gap-4 mb-5">
-          <div className="flex items-center gap-2 text-sm font-medium" style={{ color: '#2a2f1e' }}>
-            <svg className="w-4 h-4" fill="none" stroke="#6b7a3d" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
-            All Courts
+        <div className="dashboard-panel rounded-[32px] border p-5 sm:p-6 mb-5 shadow-[0_28px_72px_rgba(31,40,23,0.16)]">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-2xl">
+              <span className="dashboard-soft-pill mb-3 inline-flex">Court Booking</span>
+              <h2 className="text-2xl sm:text-3xl font-semibold tracking-[-0.03em]" style={{ color: '#24301c' }}>
+                Book with less scanning and more confidence.
+              </h2>
+              <p className="mt-3 text-sm leading-6" style={{ color: '#6d685e' }}>
+                See live availability, protected event time, and your own upcoming court time without losing the weekly rhythm.
+              </p>
+            </div>
+            <div className="grid grid-cols-3 gap-3 lg:min-w-[380px]">
+              <div className="rounded-2xl px-4 py-3" style={{ background: 'rgba(107,122,61,0.08)', border: '1px solid rgba(107,122,61,0.12)' }}>
+                <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em]" style={{ color: '#8c866f' }}>Available Courts</p>
+                <p className="mt-1 text-2xl font-semibold" style={{ color: '#24301c' }}>{availableCourts}/4</p>
+              </div>
+              <div className="rounded-2xl px-4 py-3" style={{ background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.55)' }}>
+                <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em]" style={{ color: '#8c866f' }}>My Upcoming</p>
+                <p className="mt-1 text-2xl font-semibold" style={{ color: '#24301c' }}>{myUpcoming.length}</p>
+              </div>
+              <div className="rounded-2xl px-4 py-3" style={{ background: 'rgba(255,248,231,0.74)', border: '1px solid rgba(214,188,123,0.2)' }}>
+                <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em]" style={{ color: '#8c866f' }}>Selected Day</p>
+                <p className="mt-1 text-sm font-semibold" style={{ color: '#24301c' }}>
+                  {mobileDay.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                </p>
+              </div>
+            </div>
           </div>
 
-          <div className="flex items-center gap-1 p-1 rounded-xl shrink-0" style={{ background: 'rgba(255, 255, 255, 0.5)', border: '1px solid rgba(255, 255, 255, 0.4)' }}>
-            <button onClick={() => setView('week')} className="px-4 py-2 rounded-lg text-xs font-medium transition-all duration-200" style={{ background: view === 'week' ? '#6b7a3d' : 'transparent', color: view === 'week' ? '#fff' : '#6b7266' }}>Week</button>
-            <button onClick={() => setView('calendar')} className="px-4 py-2 rounded-lg text-xs font-medium transition-all duration-200" style={{ background: view === 'calendar' ? '#6b7a3d' : 'transparent', color: view === 'calendar' ? '#fff' : '#6b7266' }}>Month</button>
+          <div className="mt-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-wrap items-center gap-3 text-xs" style={{ color: '#6d685e' }}>
+              <span className="inline-flex items-center gap-2 rounded-full px-3 py-1.5" style={{ background: 'rgba(255,255,255,0.52)', border: '1px solid rgba(255,255,255,0.5)' }}>
+                <span className="w-2 h-2 rounded-full" style={{ background: '#6b7a3d' }} />
+                {selectedDayEvents.length} event{selectedDayEvents.length === 1 ? '' : 's'} on this day
+              </span>
+              <span className="inline-flex items-center gap-2 rounded-full px-3 py-1.5" style={{ background: 'rgba(255,255,255,0.52)', border: '1px solid rgba(255,255,255,0.5)' }}>
+                <span className="w-2 h-2 rounded-full" style={{ background: '#d97706' }} />
+                {selectedDayMine} of your bookings selected
+              </span>
+            </div>
+
+            <div className="flex items-center gap-1 p-1 rounded-2xl shrink-0 self-start lg:self-auto" style={{ background: 'rgba(255, 255, 255, 0.5)', border: '1px solid rgba(255, 255, 255, 0.4)' }}>
+              <button onClick={() => setView('week')} className="px-4 py-2 rounded-xl text-xs font-medium transition-all duration-200" style={{ background: view === 'week' ? '#6b7a3d' : 'transparent', color: view === 'week' ? '#fff' : '#6b7266' }}>Week View</button>
+              <button onClick={() => setView('calendar')} className="px-4 py-2 rounded-xl text-xs font-medium transition-all duration-200" style={{ background: view === 'calendar' ? '#6b7a3d' : 'transparent', color: view === 'calendar' ? '#fff' : '#6b7266' }}>Month View</button>
+            </div>
           </div>
         </div>
 
-        <div className="flex gap-6">
+          <div className="flex gap-6">
           {/* Main Grid Area */}
           <div className="flex-1 min-w-0">
             <div key={contentKey} className="animate-fadeIn">
@@ -297,16 +334,23 @@ export default function BookCourtPage() {
             {view === 'week' ? (
               <>
                 {/* Week Navigation */}
-                <div className="flex items-center justify-between mb-4">
-                  <button onClick={prevWeek} className="w-10 h-10 rounded-xl flex items-center justify-center border hover:bg-white transition-colors active:scale-95" style={{ borderColor: '#e0dcd3' }}>
-                    <svg className="w-4 h-4" fill="none" stroke="#2a2f1e" viewBox="0 0 24 24" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/></svg>
-                  </button>
-                  <span className="font-semibold text-sm" style={{ color: '#2a2f1e' }}>
-                    {weekDays[0].toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} — {weekDays[6].toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                  </span>
-                  <button onClick={nextWeek} className="w-10 h-10 rounded-xl flex items-center justify-center border hover:bg-white transition-colors active:scale-95" style={{ borderColor: '#e0dcd3' }}>
-                    <svg className="w-4 h-4" fill="none" stroke="#2a2f1e" viewBox="0 0 24 24" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/></svg>
-                  </button>
+                <div className="dashboard-panel rounded-[24px] border p-4 mb-4">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em]" style={{ color: '#8c866f' }}>Rolling Week</p>
+                      <p className="mt-1 text-sm font-semibold" style={{ color: '#24301c' }}>
+                        {weekDays[0].toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {weekDays[6].toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button onClick={prevWeek} className="w-10 h-10 rounded-xl flex items-center justify-center border hover:bg-white transition-colors active:scale-95" style={{ borderColor: '#e0dcd3' }}>
+                        <svg className="w-4 h-4" fill="none" stroke="#2a2f1e" viewBox="0 0 24 24" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                      </button>
+                      <button onClick={nextWeek} className="w-10 h-10 rounded-xl flex items-center justify-center border hover:bg-white transition-colors active:scale-95" style={{ borderColor: '#e0dcd3' }}>
+                        <svg className="w-4 h-4" fill="none" stroke="#2a2f1e" viewBox="0 0 24 24" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/></svg>
+                      </button>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Day Tabs — select which day to show all 4 courts for */}

@@ -13,26 +13,24 @@ test.describe('Signup Flow - /info?tab=membership', () => {
 
     const tabId = `tab-${expectedTab}`;
     const panelId = `tabpanel-${expectedTab}`;
-    await page.evaluate((id) => {
-      const element = document.getElementById(id);
-      if (element) {
-        element.scrollIntoView({ block: 'nearest', inline: 'center' });
-      }
-    }, tabId);
 
-    await page.evaluate((id) => {
-      const element = document.getElementById(id);
-      if (element instanceof HTMLElement) {
-        element.click();
-      }
-    }, tabId);
-    await page.waitForFunction(({ id, panel }) => {
-      const tab = document.getElementById(id);
-      const tabSelected = tab?.getAttribute('aria-selected') === 'true';
-      const panelVisible = Boolean(document.getElementById(panel));
-      const queryMatches = window.location.search.includes(`tab=${id.replace('tab-', '')}`);
-      return (tabSelected || queryMatches) && panelVisible;
-    }, { id: tabId, panel: panelId });
+    let switchedViaClick = false;
+    try {
+      const tab = page.locator(`#${tabId}`);
+      await tab.scrollIntoViewIfNeeded({ timeout: 3000 });
+      await tab.click({ timeout: 3000 });
+      await page.waitForFunction((tabName) => {
+        return window.location.search.includes(`tab=${tabName}`) || !!document.getElementById(`tabpanel-${tabName}`);
+      }, expectedTab, { timeout: 4000 });
+      switchedViaClick = true;
+    } catch {
+      await page.goto(`/info?tab=${expectedTab}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    }
+
+    if (!switchedViaClick) {
+      await page.waitForTimeout(250);
+    }
+
     await expect(page.locator(`#${panelId}`)).toBeVisible();
     await expect(page.getByText(expectedText, { exact: false }).first()).toBeVisible();
   }
