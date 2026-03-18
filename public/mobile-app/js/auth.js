@@ -470,12 +470,15 @@
 
   // Legacy handler
   window.handleLogin = function() {
-    showToast('Please enter your email and PIN to sign in.');
+    return window.handlePinLogin();
   };
 
   function completeLogin() {
     const loginScreen = document.getElementById('login-screen');
-    if (loginScreen) loginScreen.classList.remove('active');
+    if (loginScreen) {
+      loginScreen.classList.remove('active');
+      loginScreen.style.display = 'none';
+    }
 
     const bottomNav = document.getElementById('bottomNav');
     if (bottomNav) bottomNav.style.display = 'block';
@@ -682,10 +685,12 @@
   }
 
   window.showLoginScreen = function() {
+    var loginScreen = document.getElementById('login-screen');
     var loginCard = document.getElementById('loginCard');
     var pinSetupCard = document.getElementById('pinSetupCard');
     var forgotPinCard = document.getElementById('forgotPinCard');
     var verifyCodeCard = document.getElementById('verifyCodeCard');
+    if (loginScreen) loginScreen.style.display = '';
     if (loginCard) loginCard.style.display = '';
     if (pinSetupCard) pinSetupCard.style.display = 'none';
     if (forgotPinCard) forgotPinCard.style.display = 'none';

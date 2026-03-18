@@ -111,6 +111,7 @@
             MTC.storage.remove('mtc-user');
             document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
             document.getElementById('bottomNav').style.display = 'none';
+            document.getElementById('login-screen').style.display = '';
             document.getElementById('login-screen').classList.add('active');
             if (typeof closeMenu === 'function') closeMenu();
             showToast('Logged out successfully');

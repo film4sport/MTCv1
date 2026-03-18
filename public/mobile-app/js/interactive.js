@@ -101,6 +101,7 @@
       }
 
       document.getElementById('login-screen').classList.remove('active');
+      document.getElementById('login-screen').style.display = 'none';
       document.getElementById('bottomNav').style.display = 'block';
 
       // Show/hide admin & captain menu items based on role (mirrors completeLogin() in auth.js)
@@ -166,14 +167,6 @@
     // Register service worker for offline support
     registerServiceWorker();
 
-    // Backup: Add click listener to login button
-    const loginBtn = document.querySelector('.login-btn');
-    if (loginBtn) {
-      loginBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        handleLogin();
-      });
-    }
   });
 
   // ============================================

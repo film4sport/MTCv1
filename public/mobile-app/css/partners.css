@@ -577,45 +577,54 @@
 ============================================ */
 .partner-empty-state {
   text-align: center;
-  padding: 40px 24px;
+  padding: 42px 24px;
 }
 .partner-empty-icon {
-  width: 80px;
-  height: 80px;
+  width: 84px;
+  height: 84px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 16px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, rgba(200, 255, 0, 0.14), rgba(255, 255, 255, 0.88));
+  border: 1px solid rgba(200, 255, 0, 0.18);
+  box-shadow:
+    0 16px 28px rgba(31, 39, 25, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.84);
 }
 .partner-empty-icon svg {
   stroke: var(--volt);
 }
 .partner-empty-state .empty-state-title {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 20px;
-  letter-spacing: 0.5px;
-  margin-bottom: 6px;
+  font-size: 24px;
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
 }
 .partner-empty-state .empty-state-text {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-muted);
-  margin-bottom: 20px;
+  line-height: 1.6;
+  margin-bottom: 22px;
 }
 .partner-empty-cta {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 24px;
-  background: var(--volt);
-  color: var(--deep-black);
+  padding: 13px 22px;
+  background: linear-gradient(135deg, var(--volt), #ecff92);
+  color: #182100;
   font-family: 'Bebas Neue', sans-serif;
   font-size: 16px;
-  letter-spacing: 1px;
+  letter-spacing: 0.08em;
   border: none;
-  border-radius: 12px;
+  border-radius: 999px;
   cursor: pointer;
   transition: transform 0.2s;
-  box-shadow: 0 4px 16px rgba(200, 255, 0, 0.3);
+  box-shadow:
+    0 14px 24px rgba(172, 214, 34, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 .partner-empty-cta:active {
   transform: scale(0.95);
