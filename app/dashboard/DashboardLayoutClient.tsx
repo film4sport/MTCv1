@@ -32,10 +32,10 @@ function DashboardGuard({ children }: { children: React.ReactNode }) {
 
   if (!isLoaded || !currentUser) {
     return (
-      <div className="min-h-screen flex" style={{ backgroundColor: '#f5f2eb' }}>
-        <div className="hidden lg:block w-[72px] min-h-screen" style={{ backgroundColor: '#1a1f12' }} />
+      <div className="dashboard-shell min-h-screen flex">
+        <div className="dashboard-panel-strong hidden lg:block w-[80px] min-h-screen border-r" />
         <div className="flex-1">
-          <div className="h-16 border-b flex items-center justify-between px-6" style={{ backgroundColor: '#faf8f3', borderColor: '#e0dcd3' }}>
+          <div className="dashboard-topbar h-16 border-b flex items-center justify-between px-6">
             <div className="skeleton w-9 h-9 rounded-full" />
             <div className="flex gap-2">
               <div className="skeleton w-10 h-10 rounded-xl" />
@@ -85,7 +85,7 @@ function DashboardGuard({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen flex overflow-x-hidden" style={{ backgroundColor: '#f5f2eb' }}>
+    <div className="dashboard-shell min-h-screen flex overflow-x-hidden">
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:rounded-lg focus:text-sm focus:font-medium focus:text-white"
@@ -95,8 +95,8 @@ function DashboardGuard({ children }: { children: React.ReactNode }) {
       </a>
       <Sidebar />
       <button
-        className="lg:hidden fixed top-3.5 left-3 z-20 p-2.5 rounded-xl shadow-lg"
-        style={{ backgroundColor: '#1a1f12', color: '#e8e4d9' }}
+        className="dashboard-panel-strong lg:hidden fixed top-3.5 left-3 z-20 p-2.5 rounded-2xl shadow-lg"
+        style={{ color: '#e8e4d9' }}
         onClick={() => setMobileSidebarOpen(true)}
         aria-label="Open menu"
       >
@@ -110,7 +110,14 @@ function DashboardGuard({ children }: { children: React.ReactNode }) {
           sidebarCollapsed ? 'lg:ml-[72px]' : 'lg:ml-[240px]'
         }`}
       >
-        <div className="animate-fadeIn">
+        <div className="animate-fadeIn relative">
+          <div
+            className="pointer-events-none absolute inset-x-0 top-0 h-52 opacity-80"
+            style={{
+              background:
+                'radial-gradient(circle at 12% 8%, rgba(212, 225, 87, 0.18), transparent 30%), radial-gradient(circle at 88% 0%, rgba(107, 122, 61, 0.12), transparent 34%)',
+            }}
+          />
           {children}
         </div>
       </main>

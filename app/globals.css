@@ -489,6 +489,55 @@ html {
     #f5f2eb;
 }
 
+.dashboard-shell {
+  background:
+    radial-gradient(circle at top left, rgba(212, 225, 87, 0.16), transparent 28%),
+    radial-gradient(circle at 85% 10%, rgba(107, 122, 61, 0.14), transparent 32%),
+    linear-gradient(180deg, #f7f4ee 0%, #efe9dd 100%);
+}
+
+.dashboard-topbar {
+  background: rgba(250, 248, 243, 0.86);
+  border-color: rgba(120, 112, 95, 0.14);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: 0 10px 30px rgba(32, 31, 24, 0.06);
+}
+
+.dashboard-panel {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(248, 245, 238, 0.82));
+  border: 1px solid rgba(120, 112, 95, 0.12);
+  box-shadow:
+    0 18px 50px rgba(31, 34, 22, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.dashboard-panel-strong {
+  background:
+    linear-gradient(135deg, rgba(32, 38, 24, 0.98), rgba(48, 56, 35, 0.95));
+  border: 1px solid rgba(212, 225, 87, 0.18);
+  box-shadow:
+    0 20px 40px rgba(24, 28, 17, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.dashboard-soft-pill {
+  background: rgba(107, 122, 61, 0.1);
+  border: 1px solid rgba(107, 122, 61, 0.14);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+.dashboard-hero-grid {
+  background-image:
+    linear-gradient(rgba(107, 122, 61, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(107, 122, 61, 0.08) 1px, transparent 1px);
+  background-size: 26px 26px;
+  background-position: center center;
+}
+
 /* Section card hover — subtle lift on glass section cards */
 .section-card {
   transition: transform 0.2s ease, box-shadow 0.2s ease;

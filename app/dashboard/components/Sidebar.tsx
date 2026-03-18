@@ -62,7 +62,14 @@ function Sidebar() {
           ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
           lg:translate-x-0
         `}
-        style={{ backgroundColor: '#1a1f12' }}
+        style={{
+          background:
+            'linear-gradient(180deg, rgba(23, 29, 17, 0.98) 0%, rgba(31, 38, 23, 0.96) 52%, rgba(26, 31, 18, 0.98) 100%)',
+          borderRight: '1px solid rgba(212, 225, 87, 0.12)',
+          boxShadow: '24px 0 60px rgba(10, 13, 8, 0.18)',
+          backdropFilter: 'blur(18px)',
+          WebkitBackdropFilter: 'blur(18px)',
+        }}
       >
         {/* Mobile close button */}
         <button
@@ -77,15 +84,20 @@ function Sidebar() {
         </button>
 
         {/* Logo */}
-        <div className="p-4 flex items-center gap-3 border-b" style={{ borderColor: 'rgba(232, 228, 217, 0.1)' }}>
+        <div className="p-4 flex items-center gap-3 border-b" style={{ borderColor: 'rgba(232, 228, 217, 0.08)' }}>
           {sidebarCollapsed ? (
             <span className="headline-font text-lg flex-shrink-0 w-10 text-center" style={{ color: '#d4e157' }}>
               MTC
             </span>
           ) : (
-            <span className="headline-font text-base truncate" style={{ color: '#e8e4d9' }}>
-              Mono Tennis Club
-            </span>
+            <div className="min-w-0">
+              <span className="headline-font block text-base truncate tracking-[0.12em]" style={{ color: '#f2eee4' }}>
+                Mono Tennis Club
+              </span>
+              <span className="block text-[10px] uppercase tracking-[0.28em]" style={{ color: 'rgba(212, 225, 87, 0.72)' }}>
+                Member Dashboard
+              </span>
+            </div>
           )}
         </div>
 
@@ -191,7 +203,7 @@ function Sidebar() {
         <button
           onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
           className="hidden lg:flex p-4 border-t hover:bg-white/5 transition-colors items-center justify-center"
-          style={{ borderColor: 'rgba(232, 228, 217, 0.1)', color: 'rgba(232, 228, 217, 0.5)' }}
+          style={{ borderColor: 'rgba(232, 228, 217, 0.08)', color: 'rgba(232, 228, 217, 0.5)' }}
           aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           aria-expanded={!sidebarCollapsed}
         >

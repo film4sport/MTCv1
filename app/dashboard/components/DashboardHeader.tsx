@@ -109,14 +109,26 @@ export default function DashboardHeader({ title }: DashboardHeaderProps) {
 
   return (
     <>
-      <header className="h-16 flex items-center justify-between px-4 pl-14 sm:pl-6 lg:pl-6 border-b relative z-10" style={{ backgroundColor: '#faf8f3', borderColor: '#e0dcd3' }}>
+      <header className="dashboard-topbar h-16 flex items-center justify-between px-4 pl-14 sm:pl-6 lg:pl-6 border-b relative z-10">
         {/* Logo */}
-        <div className="flex items-center">
-          <Image src="/mono-logo-transparent.png" alt="Mono Tennis Club" width={36} height={36} className="h-9 w-auto" style={{ filter: 'brightness(0.2)' }} />
+        <div className="flex items-center gap-3">
+          <div
+            className="dashboard-soft-pill hidden sm:flex h-10 w-10 items-center justify-center rounded-2xl"
+            style={{ background: 'rgba(255,255,255,0.58)' }}
+          >
+            <Image src="/mono-logo-transparent.png" alt="Mono Tennis Club" width={32} height={32} className="h-8 w-auto" style={{ filter: 'brightness(0.18)' }} />
+          </div>
+          <div className="hidden lg:block">
+            <p className="text-[10px] uppercase tracking-[0.28em]" style={{ color: '#6b7a3d' }}>Club Operations</p>
+            <p className="text-sm font-semibold" style={{ color: '#2a2f1e' }}>Mono Tennis Club</p>
+          </div>
         </div>
 
         {/* Centered Title */}
-        <h1 className="absolute left-1/2 -translate-x-1/2 text-lg font-semibold" style={{ color: '#2a2f1e' }}>{title}</h1>
+        <div className="absolute left-1/2 -translate-x-1/2 text-center">
+          <p className="hidden sm:block text-[10px] uppercase tracking-[0.28em]" style={{ color: '#6b7a3d' }}>Dashboard</p>
+          <h1 className="text-lg font-semibold" style={{ color: '#2a2f1e' }}>{title}</h1>
+        </div>
 
         {/* Right Side */}
         <div className="flex items-center gap-2">
@@ -128,7 +140,7 @@ export default function DashboardHeader({ title }: DashboardHeaderProps) {
               setRefreshing(false);
               showToast('Data refreshed', 'info');
             }}
-            className="w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 bg-[#6b7a3d]/10 hover:bg-[#6b7a3d]/20 active:scale-95"
+            className="dashboard-soft-pill w-10 h-10 rounded-2xl flex items-center justify-center transition-all duration-200 hover:bg-[#6b7a3d]/20 active:scale-95"
             title="Refresh data"
             aria-label="Refresh data"
           >
@@ -140,7 +152,7 @@ export default function DashboardHeader({ title }: DashboardHeaderProps) {
           <div ref={notifRef} className="relative">
             <button
               onClick={() => { setNotifOpen(!notifOpen); setMenuOpen(false); }}
-              className={`bell-btn relative w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 ${bellShake ? 'bell-notify' : ''} ${notifOpen ? 'bg-[#6b7a3d] shadow-md' : 'bg-[#6b7a3d]/10 hover:bg-[#6b7a3d]/20 active:scale-95'}`}
+              className={`bell-btn relative w-10 h-10 rounded-2xl flex items-center justify-center transition-all duration-200 ${bellShake ? 'bell-notify' : ''} ${notifOpen ? 'bg-[#6b7a3d] shadow-md' : 'dashboard-soft-pill hover:bg-[#6b7a3d]/20 active:scale-95'}`}
               aria-label="Notifications"
             >
               <svg className="bell-icon w-[22px] h-[22px] transition-transform duration-200" style={{ color: notifOpen ? '#fff' : '#1a1f12' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -155,7 +167,7 @@ export default function DashboardHeader({ title }: DashboardHeaderProps) {
 
             {/* Notification Dropdown */}
             {notifOpen && (
-              <div className="dropdown-enter absolute right-0 top-[52px] w-[calc(100vw-24px)] sm:w-80 rounded-2xl shadow-2xl border overflow-hidden z-50" style={{ backgroundColor: '#faf8f3', borderColor: '#e0dcd3' }}>
+              <div className="dashboard-panel dropdown-enter absolute right-0 top-[52px] w-[calc(100vw-24px)] sm:w-80 rounded-[24px] shadow-2xl border overflow-hidden z-50">
                 <div className="p-4 border-b flex items-center justify-between" style={{ borderColor: '#e0dcd3' }}>
                   <span className="font-semibold text-sm" style={{ color: '#1a1f12' }}>Notifications</span>
                   <div className="flex gap-3">
@@ -226,7 +238,7 @@ export default function DashboardHeader({ title }: DashboardHeaderProps) {
           <div ref={menuRef} className="relative">
             <button
               onClick={() => { setMenuOpen(!menuOpen); setNotifOpen(false); }}
-              className={`${menuOpen ? 'menu-open' : ''} relative w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 ${menuOpen ? 'bg-[#6b7a3d] shadow-md' : 'bg-[#6b7a3d]/10 hover:bg-[#6b7a3d]/20 active:scale-95'}`}
+              className={`${menuOpen ? 'menu-open' : ''} relative w-10 h-10 rounded-2xl flex items-center justify-center transition-all duration-200 ${menuOpen ? 'bg-[#6b7a3d] shadow-md' : 'dashboard-soft-pill hover:bg-[#6b7a3d]/20 active:scale-95'}`}
               aria-label="Menu"
             >
               <div className="w-[18px] h-[14px] flex flex-col justify-between">
@@ -238,7 +250,7 @@ export default function DashboardHeader({ title }: DashboardHeaderProps) {
 
             {/* Menu Dropdown */}
             {menuOpen && (
-              <div className="dropdown-enter absolute right-0 top-[52px] w-[calc(100vw-24px)] sm:w-72 rounded-2xl shadow-2xl border overflow-hidden z-50" style={{ backgroundColor: '#faf8f3', borderColor: '#e0dcd3' }}>
+              <div className="dashboard-panel dropdown-enter absolute right-0 top-[52px] w-[calc(100vw-24px)] sm:w-72 rounded-[24px] shadow-2xl border overflow-hidden z-50">
                 {/* User info */}
                 <div className="p-4 border-b" style={{ borderColor: '#e0dcd3' }}>
                   <p className="font-semibold text-sm" style={{ color: '#1a1f12' }}>{activeDisplayName}</p>

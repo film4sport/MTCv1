@@ -58,7 +58,7 @@ export default function DashboardHome() {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden" style={{ backgroundColor: '#f5f2eb' }}>
+    <div className="min-h-screen relative overflow-hidden">
       <DashboardHeader title="Home" />
       <OnboardingTour />
 
@@ -66,26 +66,59 @@ export default function DashboardHome() {
       <div
         className="pointer-events-none select-none absolute inset-0"
         style={{
-          backgroundColor: '#f5f2eb',
+          backgroundColor: 'transparent',
           backgroundImage: `url(${Math.random() > 0.5 ? '/tennis-silhouette-1.png' : '/tennis-silhouette-2.png'})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
           backgroundBlendMode: 'multiply',
-          opacity: 0.35,
-          filter: 'sepia(1) hue-rotate(60deg) saturate(0.4) brightness(1.05)',
+          opacity: 0.2,
+          filter: 'sepia(1) hue-rotate(54deg) saturate(0.3) brightness(1.08)',
         }}
       />
 
       <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-6 relative z-[1]">
-
-        {/* Greeting removed — takes up space unnecessarily */}
+        <section className="dashboard-panel relative overflow-hidden rounded-[32px] border px-6 py-6 lg:px-8 lg:py-8">
+          <div className="dashboard-hero-grid absolute inset-0 opacity-40" />
+          <div className="pointer-events-none absolute -right-16 -top-20 h-48 w-48 rounded-full blur-3xl" style={{ background: 'rgba(212, 225, 87, 0.18)' }} />
+          <div className="pointer-events-none absolute -bottom-16 left-8 h-40 w-40 rounded-full blur-3xl" style={{ background: 'rgba(107, 122, 61, 0.14)' }} />
+          <div className="relative flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-2xl">
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.28em]" style={{ color: '#6b7a3d' }}>
+                Member Home
+              </p>
+              <h2 className="headline-font text-3xl sm:text-4xl" style={{ color: '#202617' }}>
+                {currentUser ? `Welcome back, ${currentUser.name.split(' ')[0]}.` : 'Welcome back.'}
+              </h2>
+              <p className="mt-3 max-w-xl text-sm sm:text-[15px] leading-6" style={{ color: '#5f6658' }}>
+                Everything important for your week is here: bookings, confirmations, events, and club updates in one calmer, cleaner view.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              <div className="rounded-2xl px-4 py-3" style={{ background: 'rgba(255,255,255,0.62)', border: '1px solid rgba(107, 122, 61, 0.12)' }}>
+                <p className="text-[10px] uppercase tracking-[0.22em]" style={{ color: '#7c836f' }}>Upcoming</p>
+                <p className="mt-1 text-2xl font-semibold" style={{ color: '#202617' }}>{myBookings.length}</p>
+                <p className="text-xs" style={{ color: '#5f6658' }}>Booked courts</p>
+              </div>
+              <div className="rounded-2xl px-4 py-3" style={{ background: 'rgba(255,255,255,0.62)', border: '1px solid rgba(107, 122, 61, 0.12)' }}>
+                <p className="text-[10px] uppercase tracking-[0.22em]" style={{ color: '#7c836f' }}>Pending</p>
+                <p className="mt-1 text-2xl font-semibold" style={{ color: '#202617' }}>{pendingConfirmations.length}</p>
+                <p className="text-xs" style={{ color: '#5f6658' }}>Confirmations</p>
+              </div>
+              <div className="rounded-2xl px-4 py-3 col-span-2 sm:col-span-1" style={{ background: 'rgba(32,38,23,0.94)', border: '1px solid rgba(212, 225, 87, 0.16)' }}>
+                <p className="text-[10px] uppercase tracking-[0.22em]" style={{ color: 'rgba(212,225,87,0.72)' }}>Club Pulse</p>
+                <p className="mt-1 text-2xl font-semibold" style={{ color: '#f3f0e8' }}>{upcomingEvents.length}</p>
+                <p className="text-xs" style={{ color: 'rgba(232,228,217,0.72)' }}>Upcoming events</p>
+              </div>
+            </div>
+          </div>
+        </section>
 
         {/* Announcements */}
         {activeAnnouncements.map(a => (
           <div
             key={a.id}
-            className="flex items-center justify-between rounded-xl px-5 py-3.5 border"
+            className="dashboard-panel flex items-center justify-between rounded-2xl px-5 py-4 border"
             style={{
               background: a.type === 'urgent' ? '#fef2f2' : a.type === 'warning' ? '#fffbeb' : '#f0fdf4',
               borderColor: a.type === 'urgent' ? '#fecaca' : a.type === 'warning' ? '#fde68a' : '#bbf7d0',
@@ -121,7 +154,7 @@ export default function DashboardHome() {
                 </span>
               </span>
               <p className="text-sm font-medium" style={{ color: '#2a2f1e' }}>
-                Complete your profile — set your skill level to get matched with the right partners!
+                Complete your profile - set your skill level to get matched with the right partners.
               </p>
             </div>
             <Link
@@ -129,7 +162,7 @@ export default function DashboardHome() {
               className="text-xs font-semibold px-4 py-2 rounded-lg whitespace-nowrap transition-all hover:opacity-90"
               style={{ backgroundColor: '#6b7a3d', color: '#fff' }}
             >
-              Go to Profile →
+              Go to Profile
             </Link>
           </div>
         )}
@@ -151,7 +184,7 @@ export default function DashboardHome() {
               key={action.label}
               href={action.href}
               data-tour={action.label === 'Book Court' ? 'book-court' : action.label === 'Find Partner' ? 'find-partner' : undefined}
-              className="glass-card rounded-2xl p-5 flex flex-col gap-3 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-xl active:translate-y-0 active:duration-100"
+              className="dashboard-panel rounded-[28px] p-5 flex flex-col gap-3 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-xl active:translate-y-0 active:duration-100"
               style={{
                 background: action.bg,
                 color: action.color,
@@ -166,9 +199,9 @@ export default function DashboardHome() {
           ))}
         </div>
 
-        {/* Pending Confirmations — bookings you're invited to */}
+        {/* Pending Confirmations - bookings you're invited to */}
         {pendingConfirmations.length > 0 && (
-          <div className="glass-card rounded-2xl border p-5 section-card mb-6" style={{ background: 'rgba(234, 179, 8, 0.04)', borderColor: 'rgba(234, 179, 8, 0.2)' }}>
+          <div className="dashboard-panel rounded-[28px] border p-5 section-card mb-6" style={{ background: 'rgba(234, 179, 8, 0.05)', borderColor: 'rgba(234, 179, 8, 0.2)' }}>
             <h3 className="font-semibold text-sm mb-3 flex items-center gap-2" style={{ color: '#ca8a04' }}>
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
               Pending Confirmations
@@ -177,8 +210,8 @@ export default function DashboardHome() {
               {pendingConfirmations.map(b => (
                 <div key={b.id} className="flex items-center gap-3 rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.7)' }}>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm" style={{ color: '#2a2f1e' }}>{b.courtName} &bull; {b.matchType === 'doubles' ? 'Doubles' : 'Singles'}</p>
-                    <p className="text-xs" style={{ color: '#6b7266' }}>{new Date(b.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} &bull; {b.time}</p>
+                    <p className="font-medium text-sm" style={{ color: '#2a2f1e' }}>{b.courtName} • {b.matchType === 'doubles' ? 'Doubles' : 'Singles'}</p>
+                    <p className="text-xs" style={{ color: '#6b7266' }}>{new Date(b.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} • {b.time}</p>
                     <p className="text-xs mt-0.5" style={{ color: '#6b7a3d' }}>Booked by {b.userName}</p>
                   </div>
                   <button
@@ -198,7 +231,7 @@ export default function DashboardHome() {
         <div className="grid lg:grid-cols-2 gap-6">
 
           {/* Upcoming Bookings */}
-          <div className="glass-card rounded-2xl border p-5 section-card" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
+          <div className="dashboard-panel rounded-[28px] border p-5 section-card">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold" style={{ color: '#2a2f1e' }}>Upcoming Bookings</h3>
               <Link href="/dashboard/schedule" className="text-xs font-medium hover:underline" style={{ color: '#6b7a3d' }}>View All</Link>
@@ -229,7 +262,7 @@ export default function DashboardHome() {
                     </div>
                     <div className="flex-1">
                       <p className="font-medium text-sm" style={{ color: '#2a2f1e' }}>{b.courtName}</p>
-                      <p className="text-xs" style={{ color: '#6b7266' }}>{formatDate(b.date)} &bull; {b.time}</p>
+                      <p className="text-xs" style={{ color: '#6b7266' }}>{formatDate(b.date)} • {b.time}</p>
                     </div>
                     <span className="text-xs px-2.5 py-1 rounded-full font-medium" style={{ background: 'rgba(245, 158, 11, 0.1)', color: '#d97706' }}>
                       Confirmed
@@ -241,7 +274,7 @@ export default function DashboardHome() {
           </div>
 
           {/* Upcoming Events */}
-          <div className="glass-card rounded-2xl border p-5 section-card" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
+          <div className="dashboard-panel rounded-[28px] border p-5 section-card">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold" style={{ color: '#2a2f1e' }}>Upcoming Events</h3>
               <Link href="/dashboard/events" className="text-xs font-medium hover:underline" style={{ color: '#6b7a3d' }}>View All</Link>
@@ -276,7 +309,7 @@ export default function DashboardHome() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-sm truncate" style={{ color: '#2a2f1e' }}>{ev.title}</p>
-                      <p className="text-xs mt-0.5" style={{ color: '#6b7266' }}>{ev.time} &bull; {ev.location}</p>
+                      <p className="text-xs mt-0.5" style={{ color: '#6b7266' }}>{ev.time} • {ev.location}</p>
                       <div className="flex items-center gap-3 mt-1.5">
                         {spotsLeft != null && (
                           <span className="text-xs" style={{ color: spotsLeft <= 3 ? '#ef4444' : '#6b7266' }}>

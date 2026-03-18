@@ -100,7 +100,10 @@
   justify-content: space-between;
   /* Use safe area + minimum padding for notched devices */
   padding: calc(20px + env(safe-area-inset-top, 40px)) 20px 16px;
-  background: var(--bg-primary);
+  background: linear-gradient(180deg, rgba(244, 239, 229, 0.92), rgba(244, 239, 229, 0.74));
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-bottom: var(--surface-outline);
   pointer-events: auto;
 }
 
@@ -127,14 +130,13 @@
   align-items: center;
   gap: 4px;
   padding: 8px 12px;
-  background: #e0e0e0;
+  background: rgba(255, 252, 246, 0.82);
   border-radius: 20px;
   font-size: 15px;
   font-weight: 600;
   color: var(--text-primary);
-  box-shadow: 
-    3px 3px 6px rgba(0, 0, 0, 0.1),
-    -3px -3px 6px rgba(255, 255, 255, 0.8);
+  box-shadow: var(--glass-shadow);
+  border: var(--surface-outline);
 }
 
 .header-weather-icon {
@@ -2255,14 +2257,14 @@
   align-items: center;
   gap: 12px;
   padding: 14px;
-  background: transparent;
+  background: rgba(255, 252, 246, 0.54);
   backdrop-filter: blur(16px) saturate(200%);
   -webkit-backdrop-filter: blur(16px) saturate(200%);
-  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  border: 1.5px solid rgba(84, 92, 64, 0.12);
   border-radius: 16px;
   margin-bottom: 12px;
   box-shadow: 
-    0 4px 20px rgba(0, 0, 0, 0.05),
+    0 12px 28px rgba(32, 37, 24, 0.08),
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
@@ -2601,12 +2603,12 @@
   height: 40px;
   border-radius: 50%;
   background: var(--bg-card);
-  border: none;
+  border: var(--surface-outline);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--glass-shadow);
   transition: all var(--duration-normal) var(--ease-out);
   position: relative;
 }
