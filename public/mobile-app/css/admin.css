@@ -6,6 +6,7 @@
 /* Admin content area */
 .admin-content {
   padding: 16px;
+  padding-bottom: 120px;
 }
 
 /* Admin section header spacing */
@@ -49,10 +50,11 @@
 
 .admin-chart-card {
   margin: 0 16px 12px;
-  padding: 14px;
-  background: var(--bg-card);
-  border-radius: 16px;
-  box-shadow: var(--card-shadow);
+  padding: 16px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(250, 246, 239, 0.96));
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  box-shadow: 0 18px 36px rgba(32, 38, 24, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.78);
 }
 
 .chart-header {
@@ -152,9 +154,10 @@
 
 .admin-mini-stat {
   padding: 16px;
-  background: var(--bg-card);
-  border-radius: 16px;
-  box-shadow: var(--card-shadow);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(250, 246, 239, 0.95));
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  box-shadow: 0 16px 34px rgba(32, 38, 24, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.72);
 }
 
 .admin-mini-stat-label {
@@ -308,9 +311,10 @@
 .admin-chart-compact {
   margin: 0 var(--content-padding) 20px;
   padding: var(--content-padding);
-  background: var(--bg-primary);
-  border-radius: 16px;
-  box-shadow: var(--shadow-md);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(250, 246, 239, 0.96));
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  box-shadow: 0 18px 36px rgba(32, 38, 24, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.78);
 }
 
 [data-theme="dark"] .admin-chart-compact {

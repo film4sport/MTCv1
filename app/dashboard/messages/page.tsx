@@ -205,14 +205,40 @@ function MessagesContent() {
     <div className="min-h-screen dashboard-gradient-bg">
       <DashboardHeader title="Messages" />
 
-      <div className="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto animate-slideUp">
-        <div className="glass-card flex rounded-2xl border overflow-hidden" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)', height: 'calc(100vh - 160px)', minHeight: 500 }}>
+      <div className="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto animate-slideUp space-y-5">
+        <div className="dashboard-panel rounded-[32px] border p-5 sm:p-6 shadow-[0_28px_70px_rgba(31,40,23,0.16)]">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div className="max-w-2xl">
+              <span className="dashboard-soft-pill mb-3 inline-flex">Member Messaging</span>
+              <h2 className="text-2xl sm:text-3xl font-semibold tracking-[-0.03em]" style={{ color: '#24301c' }}>
+                Keep conversations quick, clear, and easy to act on.
+              </h2>
+              <p className="mt-3 text-sm leading-6" style={{ color: '#6d685e' }}>
+                Follow up on bookings, confirm attendance, and message members without losing the thread.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-3 sm:w-[320px]">
+              <div className="rounded-2xl px-4 py-3" style={{ background: 'rgba(107, 122, 61, 0.08)', border: '1px solid rgba(107, 122, 61, 0.12)' }}>
+                <p className="text-[0.68rem] font-semibold uppercase tracking-[0.24em]" style={{ color: '#7b765f' }}>Open Threads</p>
+                <p className="mt-1 text-2xl font-semibold" style={{ color: '#24301c' }}>{conversations.length}</p>
+              </div>
+              <div className="rounded-2xl px-4 py-3" style={{ background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.55)' }}>
+                <p className="text-[0.68rem] font-semibold uppercase tracking-[0.24em]" style={{ color: '#7b765f' }}>Unread</p>
+                <p className="mt-1 text-2xl font-semibold" style={{ color: '#24301c' }}>{conversations.reduce((total, convo) => total + convo.unread, 0)}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="dashboard-panel flex rounded-[32px] border overflow-hidden shadow-[0_26px_64px_rgba(33,41,25,0.14)]" style={{ height: 'calc(100vh - 240px)', minHeight: 560 }}>
 
           {/* Conversation List — hidden on mobile when chat is open */}
           <div className={`w-full sm:w-80 shrink-0 border-r flex flex-col ${mobileShowChat ? 'hidden sm:flex' : 'flex'}`} style={{ borderColor: '#f0ede6' }}>
-            <div className="p-4 border-b" style={{ borderColor: '#f0ede6' }}>
+            <div className="p-5 border-b" style={{ borderColor: '#ece6db', background: 'linear-gradient(180deg, rgba(255,255,255,0.52), rgba(250,246,239,0.86))' }}>
               <div className="flex items-center justify-between mb-3">
-                <h3 className="font-semibold text-sm" style={{ color: '#2a2f1e' }}>Conversations</h3>
+                <div>
+                  <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em]" style={{ color: '#8c866f' }}>Inbox</p>
+                  <h3 className="font-semibold text-base mt-1" style={{ color: '#2a2f1e' }}>Conversations</h3>
+                </div>
                 <button
                   onClick={() => setShowNewConvo(!showNewConvo)}
                   className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold text-white transition-all hover:shadow-md active:scale-95"
