@@ -12,6 +12,7 @@ test.describe('Signup Flow - /info?tab=membership', () => {
     await expect(tabByRole).toBeVisible();
 
     const tabId = `tab-${expectedTab}`;
+    const panelId = `tabpanel-${expectedTab}`;
     await page.evaluate((id) => {
       const element = document.getElementById(id);
       if (element) {
@@ -20,8 +21,14 @@ test.describe('Signup Flow - /info?tab=membership', () => {
     }, tabId);
 
     await page.locator(`#${tabId}`).dispatchEvent('click');
-    await page.waitForFunction((tabName) => window.location.search.includes(`tab=${tabName}`), expectedTab);
+    await page.waitForFunction(({ id, panel }) => {
+      const tab = document.getElementById(id);
+      const tabSelected = tab?.getAttribute('aria-selected') === 'true';
+      const panelVisible = Boolean(document.getElementById(panel));
+      return tabSelected && panelVisible;
+    }, { id: tabId, panel: panelId });
     await expect(page.locator(`#${tabId}`)).toHaveAttribute('aria-selected', 'true');
+    await expect(page.locator(`#${panelId}`)).toBeVisible();
   }
 
   test('membership tab loads by default', async ({ page }) => {

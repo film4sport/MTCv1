@@ -1,0 +1,53 @@
+
+> mtc-website@1.0.0 dev
+> next dev --port 3000
+
+▲ Next.js 16.1.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.0.18:3000
+- Environments: .env.local
+
+✓ Starting...
+✓ Ready in 2.5s
+○ Compiling / ...
+ GET / 200 in 4.8s (compile: 4.3s, render: 548ms)
+ GET /login 200 in 646ms (compile: 118ms, proxy.ts: 157ms, render: 370ms)
+ GET /login 200 in 253ms (compile: 8ms, proxy.ts: 8ms, render: 236ms)
+ GET /api/keep-alive 200 in 1339ms (compile: 233ms, render: 1106ms)
+ GET /login?redirect=%2Fdashboard%2Fmessages 200 in 289ms (compile: 8ms, proxy.ts: 9ms, render: 273ms)
+ GET /login?redirect=%2Fdashboard%2Fmessages 200 in 278ms (compile: 8ms, proxy.ts: 11ms, render: 258ms)
+ GET /api/keep-alive 200 in 136ms (compile: 5ms, render: 131ms)
+ GET /login?redirect=%2Fdashboard%2Fpartners 200 in 289ms (compile: 6ms, proxy.ts: 7ms, render: 276ms)
+ GET /login?redirect=%2Fdashboard%2Fpartners 200 in 290ms (compile: 6ms, proxy.ts: 6ms, render: 278ms)
+ GET /api/keep-alive 200 in 969ms (compile: 5ms, render: 964ms)
+ GET /login?redirect=%2Fdashboard%2Fsettings 200 in 290ms (compile: 6ms, proxy.ts: 9ms, render: 274ms)
+ GET /api/keep-alive 200 in 130ms (compile: 9ms, render: 120ms)
+ GET /login?redirect=%2Fdashboard%2Fsettings 200 in 264ms (compile: 17ms, proxy.ts: 10ms, render: 238ms)
+ GET /api/keep-alive 200 in 168ms (compile: 4ms, render: 164ms)
+ GET /login?redirect=%2Fdashboard%2Fadmin 200 in 298ms (compile: 7ms, proxy.ts: 6ms, render: 286ms)
+ GET /api/keep-alive 200 in 113ms (compile: 5ms, render: 108ms)
+ GET /login?redirect=%2Fdashboard%2Fadmin 200 in 270ms (compile: 9ms, proxy.ts: 5ms, render: 256ms)
+ GET /api/keep-alive 200 in 130ms (compile: 8ms, render: 121ms)
+ GET /api/mobile/settings 401 in 94ms (compile: 83ms, render: 11ms)
+ GET /info?tab=membership 200 in 332ms (compile: 130ms, render: 202ms)
+ GET /info?tab=membership 200 in 140ms (compile: 6ms, render: 135ms)
+ POST /api/auth/signup 200 in 3.5s (compile: 102ms, render: 3.4s)
+ POST /api/auth/signup 200 in 2.9s (compile: 5ms, render: 2.9s)
+ GET /dashboard/messages 200 in 859ms (compile: 317ms, proxy.ts: 14ms, render: 528ms)
+ GET /api/auth/session 200 in 313ms (compile: 80ms, render: 233ms)
+ GET /dashboard/messages 200 in 393ms (compile: 75ms, proxy.ts: 9ms, render: 310ms)
+ GET /api/auth/session 200 in 264ms (compile: 4ms, render: 260ms)
+ GET /dashboard/partners 200 in 1062ms (compile: 801ms, proxy.ts: 6ms, render: 254ms)
+ GET /dashboard/partners 200 in 250ms (compile: 8ms, proxy.ts: 7ms, render: 235ms)
+ GET /api/auth/session 200 in 319ms (compile: 5ms, render: 314ms)
+ GET /api/auth/session 200 in 273ms (compile: 4ms, render: 270ms)
+ GET /dashboard/settings 200 in 890ms (compile: 626ms, proxy.ts: 5ms, render: 259ms)
+ GET /dashboard/settings 200 in 271ms (compile: 7ms, proxy.ts: 6ms, render: 258ms)
+ GET /api/auth/session 200 in 255ms (compile: 5ms, render: 250ms)
+ GET /api/auth/session 200 in 253ms (compile: 3ms, render: 249ms)
+ GET /api/mobile/settings 401 in 16ms (compile: 5ms, render: 11ms)
+ GET /api/mobile/settings 401 in 13ms (compile: 5ms, render: 8ms)
+ GET /dashboard/admin 200 in 1171ms (compile: 153ms, proxy.ts: 8ms, render: 1010ms)
+ GET /dashboard/admin 200 in 260ms (compile: 9ms, proxy.ts: 7ms, render: 243ms)
+ GET /api/auth/session 200 in 972ms (compile: 5ms, render: 966ms)
+ GET /api/auth/session 200 in 270ms (compile: 6ms, render: 264ms)
