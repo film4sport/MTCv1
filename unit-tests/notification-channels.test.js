@@ -90,7 +90,7 @@ describe('Notification Channels — Court Blocks', () => {
   const content = readRoute('court-blocks');
 
   it('sends bell notification when bookings are cancelled', () => {
-    expect(content).toMatch(/notifications.*insert/);
+    expect(content).toMatch(/notifications.*insert|createNotification/);
   });
 
   it('sends push notification when bookings are cancelled', () => {
