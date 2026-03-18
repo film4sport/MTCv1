@@ -393,16 +393,16 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  padding: 6px 14px;
-  background: var(--volt);
+  padding: 8px 15px;
+  background: linear-gradient(135deg, var(--volt) 0%, #b6eb28 100%);
   color: var(--deep-black);
-  border: none;
-  border-radius: 20px;
+  border: 1px solid rgba(50, 60, 20, 0.08);
+  border-radius: 999px;
   font-size: 13px;
   font-weight: 700;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.45px;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 12px 24px rgba(92, 120, 22, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.35);
   transition: transform 0.15s, box-shadow 0.15s;
 }
 .new-message-fab:active {
@@ -412,7 +412,7 @@
 
 /* Messages search bar spacing */
 .search-bar-messages {
-  margin: 8px 16px 16px;
+  margin: 10px 16px 18px;
 }
 
 /* Modal search bar spacing */

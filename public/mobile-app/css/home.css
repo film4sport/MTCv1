@@ -159,33 +159,40 @@
 .booking-view-toggle {
   display: flex;
   gap: 4px;
-  padding: 4px;
+  padding: 5px;
   margin: 0 16px 16px;
-  background: var(--bg-card);
-  border-radius: 14px;
-  box-shadow: var(--card-shadow);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.88), rgba(239, 232, 214, 0.9));
+  border: 1px solid rgba(124, 97, 65, 0.12);
+  border-radius: 18px;
+  box-shadow:
+    0 16px 28px rgba(74, 56, 35, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
 }
 
 .booking-view-btn {
   flex: 1;
-  padding: 12px;
+  padding: 13px 12px;
   background: transparent;
   border: none;
-  border-radius: 10px;
-  font-size: 14px;
-  font-weight: 600;
+  border-radius: 14px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
   color: var(--text-secondary);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  transition: all 0.2s;
+  transition: all 0.22s ease;
 }
 
 .booking-view-btn.active {
-  background: var(--volt);
-  color: var(--color-black);
+  background: linear-gradient(135deg, var(--volt), #e6ff78);
+  color: #172100;
+  box-shadow:
+    0 10px 20px rgba(172, 214, 34, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55);
 }
 
 .booking-view-btn svg {
@@ -198,23 +205,30 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px;
-  margin-bottom: 16px;
+  gap: 12px;
+  padding: 14px 14px;
+  margin: 0 16px 16px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.84), rgba(239, 232, 214, 0.88));
+  border: 1px solid rgba(124, 97, 65, 0.12);
+  border-radius: 20px;
+  box-shadow:
+    0 16px 28px rgba(74, 56, 35, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.82);
 }
 
 .week-nav-btn {
   width: 40px;
   height: 40px;
-  background: var(--color-light-border);
+  background: rgba(255, 255, 255, 0.72);
   border: none;
-  border-radius: 12px;
+  border-radius: 14px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: 
-    4px 4px 8px rgba(0, 0, 0, 0.1),
-    -4px -4px 8px rgba(255, 255, 255, 0.9);
+    0 10px 18px rgba(74, 56, 35, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.82);
 }
 
 .week-nav-btn:active {
@@ -231,16 +245,20 @@
 
 .week-display {
   text-align: center;
+  flex: 1;
 }
 
 .week-label {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 20px;
+  font-size: 22px;
+  letter-spacing: 0.04em;
   color: var(--text-primary);
 }
 
 .week-dates {
-  font-size: 14px;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   color: var(--text-muted);
 }
 
@@ -258,20 +276,20 @@
 .booking-info-toggle {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   width: 100%;
-  padding: 10px 14px;
-  border: none;
-  border-radius: 12px;
-  background: var(--color-light-border);
-  color: var(--text-muted);
+  padding: 12px 15px;
+  border: 1px solid rgba(124, 97, 65, 0.12);
+  border-radius: 16px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.84), rgba(239, 232, 214, 0.9));
+  color: var(--text-secondary);
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 14px;
-  letter-spacing: 0.5px;
+  font-size: 15px;
+  letter-spacing: 0.06em;
   cursor: pointer;
   box-shadow:
-    3px 3px 6px rgba(0, 0, 0, 0.08),
-    -3px -3px 6px rgba(255, 255, 255, 0.8);
+    0 14px 24px rgba(74, 56, 35, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.82);
 }
 [data-theme="dark"] .booking-info-toggle {
   background: var(--color-dark-bg);
@@ -280,7 +298,7 @@
     -3px -3px 6px rgba(50, 50, 50, 0.2);
 }
 .booking-info-toggle[aria-expanded="true"] {
-  border-radius: 12px 12px 0 0;
+  border-radius: 16px 16px 0 0;
 }
 .booking-info-chevron {
   margin-left: auto;
@@ -293,12 +311,13 @@
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.3s ease, padding 0.3s ease;
-  background: var(--color-light-border);
-  border-radius: 0 0 12px 12px;
-  padding: 0 14px;
+  background: linear-gradient(180deg, rgba(252, 249, 242, 0.96), rgba(244, 238, 224, 0.95));
+  border: 1px solid rgba(124, 97, 65, 0.12);
+  border-top: none;
+  border-radius: 0 0 16px 16px;
+  padding: 0 15px;
   box-shadow:
-    3px 3px 6px rgba(0, 0, 0, 0.08),
-    -3px -3px 6px rgba(255, 255, 255, 0.8);
+    0 16px 24px rgba(74, 56, 35, 0.08);
 }
 [data-theme="dark"] .booking-info-content {
   background: var(--color-dark-bg);
@@ -308,16 +327,16 @@
 }
 .booking-info-content.open {
   max-height: 300px;
-  padding: 8px 14px 14px;
+  padding: 10px 15px 16px;
 }
 .booking-info-item {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
+  gap: 10px;
   font-size: 12px;
   color: var(--text-muted);
-  line-height: 1.5;
-  padding: 3px 0;
+  line-height: 1.55;
+  padding: 5px 0;
 }
 .booking-info-item strong {
   color: var(--text-primary);
@@ -333,30 +352,31 @@
 /* Week Day Tabs */
 .week-day-tabs {
   display: flex;
-  gap: 6px;
+  gap: 8px;
   padding: 0 16px 12px;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  scroll-padding-inline: 16px;
 }
 
 .week-day-tabs::-webkit-scrollbar { display: none; }
 
 .week-day-tab {
   flex: 1;
-  min-width: 44px;
-  padding: 8px 4px;
+  min-width: 56px;
+  padding: 10px 6px;
   border: none;
-  border-radius: 14px;
-  background: var(--bg-card);
+  border-radius: 16px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.86), rgba(239, 232, 214, 0.88));
   cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
-  transition: all 0.2s;
+  gap: 3px;
+  transition: all 0.22s ease;
   box-shadow: 
-    3px 3px 6px rgba(0, 0, 0, 0.08),
-    -3px -3px 6px rgba(255, 255, 255, 0.8);
+    0 12px 20px rgba(74, 56, 35, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.82);
 }
 
 [data-theme="dark"] .week-day-tab {
@@ -438,12 +458,13 @@
 /* Weekly Grid */
 .weekly-grid-container {
   margin: 0 16px 20px;
-  background: var(--color-light-border);
-  border-radius: 20px;
+  background: linear-gradient(180deg, rgba(252, 249, 242, 0.98), rgba(244, 238, 224, 0.96));
+  border: 1px solid rgba(124, 97, 65, 0.12);
+  border-radius: 24px;
   overflow: hidden;
   box-shadow: 
-    8px 8px 16px rgba(0, 0, 0, 0.1),
-    -8px -8px 16px rgba(255, 255, 255, 0.9);
+    0 24px 42px rgba(74, 56, 35, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.75);
 }
 
 [data-theme="dark"] .weekly-grid-container {
@@ -456,7 +477,7 @@
 .weekly-grid-header {
   display: grid;
   grid-template-columns: 60px repeat(4, 1fr);
-  background: rgba(0, 0, 0, 0.03);
+  background: linear-gradient(180deg, rgba(35, 42, 20, 0.06), rgba(35, 42, 20, 0.02));
   border-bottom: 1px solid var(--border-color);
 }
 
@@ -465,19 +486,20 @@
 }
 
 .weekly-grid-header-cell {
-  padding: 12px 8px;
+  padding: 13px 8px;
   text-align: center;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--text-muted);
   text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
 .weekly-grid-header-cell.court-header {
-  background: var(--volt);
-  color: var(--color-black);
+  background: linear-gradient(135deg, var(--volt), #ebff8e);
+  color: #172100;
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 14px;
+  font-size: 15px;
 }
 
 .weekly-grid-body {
@@ -498,18 +520,19 @@
 
 .weekly-time-cell {
   padding: 10px 8px;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--text-muted);
-  background: rgba(0, 0, 0, 0.02);
+  background: rgba(35, 42, 20, 0.04);
   display: flex;
   align-items: center;
   justify-content: center;
+  letter-spacing: 0.03em;
 }
 
 .weekly-slot {
   position: relative;
-  padding: 2px;
+  padding: 3px;
   min-height: var(--grid-row-height);
   display: flex;
   align-items: center;
@@ -522,18 +545,19 @@
 
 .weekly-slot-inner {
   width: 100%;
-  padding: 10px 6px;
-  border-radius: 10px;
+  padding: 11px 6px;
+  border-radius: 12px;
   text-align: center;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   transition: all 0.2s;
 }
 
 .weekly-slot.available .weekly-slot-inner {
-  background: rgba(200, 255, 0, 0.2);
+  background: linear-gradient(180deg, rgba(200, 255, 0, 0.18), rgba(200, 255, 0, 0.12));
   color: #4a7c00;
   border: 1px dashed rgba(200, 255, 0, 0.5);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
 }
 
 .weekly-slot.available:hover .weekly-slot-inner {
@@ -544,22 +568,24 @@
 }
 
 .weekly-slot.booked .weekly-slot-inner {
-  background: rgba(255, 90, 95, 0.15);
+  background: linear-gradient(180deg, rgba(255, 90, 95, 0.16), rgba(255, 90, 95, 0.11));
   color: var(--coral);
   border: 1px solid rgba(255, 90, 95, 0.3);
 }
 
 .weekly-slot.my-booking .weekly-slot-inner {
-  background: rgba(0, 180, 220, 0.2);
+  background: linear-gradient(180deg, rgba(0, 180, 220, 0.18), rgba(0, 180, 220, 0.12));
   color: var(--electric-blue);
   border: 1px solid rgba(0, 180, 220, 0.4);
 }
 
 .weekly-slot.selected .weekly-slot-inner {
-  background: var(--volt);
-  color: var(--color-black);
+  background: linear-gradient(135deg, var(--volt), #ecff95);
+  color: #172100;
   border: 2px solid #7ab800;
-  box-shadow: 0 0 10px rgba(200, 255, 0, 0.5);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.45),
+    0 10px 22px rgba(172, 214, 34, 0.28);
 }
 
 [data-theme="dark"] .weekly-slot.available .weekly-slot-inner {
@@ -1569,13 +1595,17 @@
   max-width: 380px;
   max-height: 80vh;
   overflow-y: auto;
-  background: var(--bg-primary);
-  border-radius: 20px;
-  padding: 20px 18px 20px;
+  background: linear-gradient(180deg, rgba(255, 253, 248, 0.98), rgba(244, 238, 224, 0.98));
+  border: 1px solid rgba(124, 97, 65, 0.14);
+  border-radius: 24px;
+  padding: 22px 18px 20px;
   transform: scale(0.95);
   opacity: 0;
   transition: transform 0.3s ease, opacity 0.3s ease;
   position: relative;
+  box-shadow:
+    0 28px 56px rgba(0, 0, 0, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.82);
 }
 
 .booking-modal-overlay.active .booking-modal {
@@ -1589,8 +1619,8 @@
   right: 16px;
   width: 32px;
   height: 32px;
-  border: none;
-  background: var(--bg-secondary);
+  border: 1px solid rgba(124, 97, 65, 0.1);
+  background: rgba(255, 255, 255, 0.74);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -1606,7 +1636,7 @@
 
 .booking-modal-header {
   text-align: center;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 .booking-modal-icon {
@@ -1634,13 +1664,13 @@
 }
 
 .booking-modal-details {
-  background: var(--bg-card);
-  border-radius: 14px;
-  padding: 10px 14px;
-  margin-bottom: 10px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(247, 242, 231, 0.96));
+  border: 1px solid rgba(124, 97, 65, 0.1);
+  border-radius: 16px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
   box-shadow:
-    4px 4px 8px rgba(0, 0, 0, 0.06),
-    -4px -4px 8px rgba(255, 255, 255, 0.7);
+    0 14px 24px rgba(74, 56, 35, 0.08);
 }
 
 [data-theme="dark"] .booking-modal-details {
@@ -1653,7 +1683,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 7px 0;
+  padding: 9px 0;
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
@@ -1682,10 +1712,11 @@
 
 .booking-modal-payment {
   background: linear-gradient(135deg, var(--deep-black), #2a2a2a);
-  border-radius: 14px;
-  padding: 12px 14px;
-  margin-bottom: 8px;
+  border-radius: 16px;
+  padding: 14px 14px;
+  margin-bottom: 10px;
   color: var(--color-white);
+  box-shadow: 0 18px 28px rgba(0, 0, 0, 0.24);
 }
 
 .booking-modal-fee-row {
@@ -1715,10 +1746,10 @@
 }
 
 .booking-modal-payment-info {
-  background: rgba(200, 255, 0, 0.08);
-  border: 1px solid rgba(200, 255, 0, 0.2);
-  border-radius: 12px;
-  padding: 10px 12px;
+  background: linear-gradient(180deg, rgba(200, 255, 0, 0.11), rgba(200, 255, 0, 0.06));
+  border: 1px solid rgba(200, 255, 0, 0.22);
+  border-radius: 14px;
+  padding: 12px 12px;
   margin-bottom: 14px;
 }
 

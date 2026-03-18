@@ -7,6 +7,7 @@
 .admin-content {
   padding: 16px;
   padding-bottom: 120px;
+  background: linear-gradient(180deg, rgba(247, 243, 235, 0.78), rgba(241, 237, 229, 0));
 }
 
 /* Admin section header spacing */
@@ -16,19 +17,24 @@
 
 /* Admin empty state */
 .admin-empty-state {
-  padding: 24px 16px;
+  padding: 30px 18px;
   text-align: center;
   color: var(--text-muted);
   font-size: 14px;
+  background: rgba(255, 252, 246, 0.56);
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 20px;
+  box-shadow: 0 14px 26px rgba(31, 39, 25, 0.05);
 }
 
 /* Admin info box */
 .admin-info-box {
   margin-top: 32px;
-  padding: 16px;
-  border-radius: 16px;
-  background: rgba(200, 255, 0, 0.08);
-  border: 1px solid rgba(200, 255, 0, 0.15);
+  padding: 18px;
+  border-radius: 20px;
+  background: linear-gradient(180deg, rgba(245, 251, 220, 0.72), rgba(255, 252, 246, 0.92));
+  border: 1px solid rgba(200, 255, 0, 0.18);
+  box-shadow: 0 16px 28px rgba(31, 39, 25, 0.05);
 }
 
 .admin-info-text {
