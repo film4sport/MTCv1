@@ -108,12 +108,30 @@ test.describe('Chromium Compatibility - Desktop Login', () => {
     test.skip((page.viewportSize()?.width || 0) < 1000, 'Desktop-only assertion');
 
     await page.goto('/login', { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForURL(/\/login/, { timeout: 10000 });
     await expect(page.locator('#email').or(page.locator('input[type="email"]')).first()).toBeVisible();
     await expect(page.locator('text=Book Courts').first()).toBeAttached();
+    await page.waitForLoadState('load').catch(() => {});
 
-    const bodyWidth = await page.evaluate(() => document.body.scrollWidth);
-    const viewportWidth = await page.evaluate(() => window.innerWidth);
-    expect(bodyWidth).toBeLessThanOrEqual(viewportWidth + 1);
+    await expect.poll(async () => {
+      try {
+        return await page.evaluate(() => ({
+          bodyWidth: document.body.scrollWidth,
+          viewportWidth: window.innerWidth,
+        }));
+      } catch {
+        return null;
+      }
+    }, { timeout: 10000 }).toEqual(expect.objectContaining({
+      bodyWidth: expect.any(Number),
+      viewportWidth: expect.any(Number),
+    }));
+
+    const widths = await page.evaluate(() => ({
+      bodyWidth: document.body.scrollWidth,
+      viewportWidth: window.innerWidth,
+    }));
+    expect(widths.bodyWidth).toBeLessThanOrEqual(widths.viewportWidth + 1);
   });
 });
 

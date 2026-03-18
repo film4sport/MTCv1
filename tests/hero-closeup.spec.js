@@ -20,8 +20,7 @@ test('Hero-wave transition closeup', async ({ page }) => {
 });
 
 test('Membership profile banner visible', async ({ page }) => {
-  await page.goto('/info?tab=membership');
-  await page.evaluate(() => {
+  await page.addInitScript(() => {
     localStorage.setItem('currentUser', JSON.stringify({
       name: 'Test Player',
       email: 'test@example.com',
@@ -31,7 +30,8 @@ test('Membership profile banner visible', async ({ page }) => {
       joinedDate: new Date().toISOString(),
     }));
   });
-  await page.reload();
+
+  await page.goto('/info?tab=membership', { waitUntil: 'domcontentloaded' });
   await page.waitForTimeout(2000);
   await page.screenshot({ path: 'test-results/membership-profile-banner.png', fullPage: false });
 
