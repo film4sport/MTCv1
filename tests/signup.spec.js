@@ -10,7 +10,8 @@ test.describe('Signup Flow — /info?tab=membership', () => {
   async function switchTab(page, name, expectedTab) {
     const tab = page.getByRole('tab', { name, exact: true });
     await expect(tab).toBeVisible();
-    await tab.click({ force: true });
+    await tab.scrollIntoViewIfNeeded();
+    await tab.dispatchEvent('click');
     await page.waitForFunction((tabName) => window.location.search.includes(`tab=${tabName}`), expectedTab);
     await expect(page.getByRole('tab', { name, exact: true })).toHaveAttribute('aria-selected', 'true');
   }
