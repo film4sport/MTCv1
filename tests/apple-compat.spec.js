@@ -18,13 +18,8 @@ async function switchInfoTab(page, name, expectedTab) {
   const tabId = `tab-${expectedTab}`;
   const tab = page.locator(`#${tabId}`);
   await expect(tab).toBeVisible();
-  await page.evaluate((id) => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.scrollIntoView({ block: 'nearest', inline: 'center' });
-      el.click();
-    }
-  }, tabId);
+  await tab.scrollIntoViewIfNeeded();
+  await tab.dispatchEvent('click');
   await expect(page.locator(`#${tabId}`)).toHaveAttribute('aria-selected', 'true');
   await expect(page.locator(`#tabpanel-${expectedTab}`)).toBeVisible();
 }
@@ -102,17 +97,13 @@ async function mockAuthenticatedPwa(page) {
 test.describe('Apple Compatibility - Info Tabs', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/info?tab=membership', { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForLoadState('load').catch(() => {});
     await expect(page.locator('#tab-membership')).toBeVisible();
     await page.waitForTimeout(500);
   });
 
   test('far-right tabs stay reachable on iPhone/iPad Safari', async ({ page }) => {
-    await page.evaluate(() => {
-      const tab = document.getElementById('tab-privacy');
-      if (tab) {
-        tab.scrollIntoView({ block: 'nearest', inline: 'center' });
-      }
-    });
+    await page.locator('#tab-privacy').scrollIntoViewIfNeeded();
     await expect(page.locator('#tab-privacy')).toBeVisible();
     await switchInfoTab(page, 'Privacy', 'privacy');
     await switchInfoTab(page, 'Terms', 'terms');
