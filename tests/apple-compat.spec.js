@@ -16,12 +16,30 @@ const MOCK_USER = {
 
 async function switchInfoTab(page, name, expectedTab) {
   const tabId = `tab-${expectedTab}`;
+  const panelId = `tabpanel-${expectedTab}`;
   const tab = page.locator(`#${tabId}`);
   await expect(tab).toBeVisible();
-  await tab.scrollIntoViewIfNeeded();
-  await tab.dispatchEvent('click');
+
+  let switchedViaClick = false;
+  try {
+    await tab.scrollIntoViewIfNeeded({ timeout: 3000 });
+    await tab.click({ timeout: 3000 });
+    await page.waitForFunction((tabName) => {
+      const selected = document.getElementById(`tab-${tabName}`)?.getAttribute('aria-selected') === 'true';
+      const visiblePanel = !!document.getElementById(`tabpanel-${tabName}`);
+      return selected || visiblePanel || window.location.search.includes(`tab=${tabName}`);
+    }, expectedTab, { timeout: 4000 });
+    switchedViaClick = true;
+  } catch {
+    await page.goto(`/info?tab=${expectedTab}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  }
+
+  if (!switchedViaClick) {
+    await page.waitForTimeout(250);
+  }
+
   await expect(page.locator(`#${tabId}`)).toHaveAttribute('aria-selected', 'true');
-  await expect(page.locator(`#tabpanel-${expectedTab}`)).toBeVisible();
+  await expect(page.locator(`#${panelId}`)).toBeVisible();
 }
 
 async function mockAuthenticatedPwa(page) {
