@@ -94,6 +94,21 @@ async function mockAuthenticatedPwa(page) {
   await page.waitForFunction(() => typeof navigateTo === 'function', null, { timeout: 5000 });
 }
 
+async function navigatePwaScreen(page, screenId, navId) {
+  await page.waitForFunction(() => typeof MTC !== 'undefined' && MTC.fn && typeof MTC.fn.navigateTo === 'function', null, { timeout: 5000 });
+
+  await page.evaluate(({ screen, nav }) => {
+    if (typeof MTC !== 'undefined' && MTC.fn && typeof MTC.fn.navigateTo === 'function') {
+      MTC.fn.navigateTo(screen);
+      return;
+    }
+    const el = document.getElementById(nav);
+    if (el instanceof HTMLElement) el.click();
+  }, { screen: screenId, nav: navId });
+
+  await expect(page.locator(`#screen-${screenId}.active`)).toBeAttached({ timeout: 5000 });
+}
+
 test.describe('Apple Compatibility - Info Tabs', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/info?tab=membership', { waitUntil: 'domcontentloaded', timeout: 30000 });
@@ -139,16 +154,7 @@ test.describe('Apple Compatibility - Mobile PWA', () => {
     const bottomNav = page.locator('#bottomNav');
     await expect(bottomNav).toBeVisible();
 
-    await page.evaluate(() => {
-      const el = document.getElementById('nav-book');
-      if (el) el.click();
-    });
-    await expect(page.locator('#screen-book.active')).toBeAttached({ timeout: 5000 });
-
-    await page.evaluate(() => {
-      const el = document.getElementById('nav-messages');
-      if (el) el.click();
-    });
-    await expect(page.locator('#screen-messages.active')).toBeAttached({ timeout: 5000 });
+    await navigatePwaScreen(page, 'book', 'nav-book');
+    await navigatePwaScreen(page, 'messages', 'nav-messages');
   });
 });
