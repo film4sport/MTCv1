@@ -1,10 +1,6 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 import { logEmailBatch } from '../lib/email-logger';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+import { createAdminClient, resolveSession } from '@/app/lib/session';
 
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || '';
 const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY || '';
@@ -19,19 +15,10 @@ let pushResetAt = Date.now() + 60000;
  * Returns the admin's user ID or null.
  */
 async function authenticateAdmin(request: Request): Promise<string | null> {
-  const authHeader = request.headers.get('authorization');
-  if (!authHeader?.startsWith('Bearer ')) return null;
-
-  const token = authHeader.slice(7);
-  const adminSupabase = createClient(supabaseUrl, supabaseServiceKey || supabaseAnonKey);
-
-  // Look up session token
-  const { data: session } = await adminSupabase
-    .from('sessions')
-    .select('user_id')
-    .eq('token', token)
-    .single();
+  const { session } = await resolveSession(request);
   if (!session) return null;
+
+  const adminSupabase = createAdminClient();
 
   // Check admin role in profiles
   const { data: profile } = await adminSupabase
@@ -71,7 +58,7 @@ export async function POST(request: Request) {
     }
 
     // Get user's push subscriptions from Supabase
-    const supabase = createClient(supabaseUrl, supabaseServiceKey || supabaseAnonKey);
+    const supabase = createAdminClient();
     const { data: subscriptions, error } = await supabase
       .from('push_subscriptions')
       .select('endpoint, p256dh, auth')

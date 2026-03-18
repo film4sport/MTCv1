@@ -60,14 +60,5 @@
       "url": "/info",
       "icons": [{ "src": "/tennis-ball-clean.png", "sizes": "192x192" }]
     }
-  ],
-  "screenshots": [
-    {
-      "src": "/screenshot-1.png",
-      "sizes": "750x1334",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Book tennis courts easily"
-    }
   ]
 }

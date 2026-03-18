@@ -211,15 +211,20 @@ export async function PATCH(request: Request) {
         type: 'partner', tag: `partner-match-${partnerId}`,
       });
       // Email to poster
-      const token = request.headers.get('authorization')?.slice(7);
-      if (token) {
+      const authHeader = request.headers.get('authorization');
+      const cookieHeader = request.headers.get('cookie');
+      if (authHeader || cookieHeader) {
         const { data: posterProfile } = await supabase
           .from('profiles').select('email, name').eq('id', partner.user_id).single();
         if (posterProfile?.email) {
           const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://monotennisclub.com';
           fetch(`${siteUrl}/api/notify-email`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            headers: {
+              'Content-Type': 'application/json',
+              ...(authHeader ? { 'Authorization': authHeader } : {}),
+              ...(cookieHeader ? { 'Cookie': cookieHeader } : {}),
+            },
             body: JSON.stringify({
               recipientEmail: posterProfile.email, recipientName: posterProfile.name || partner.name,
               recipientUserId: partner.user_id,

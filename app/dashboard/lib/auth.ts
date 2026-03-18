@@ -1,25 +1,14 @@
 import type { User, SkillLevel } from './types';
 
-// ── Session Token Management ─────────────────────────────
-// Session token is stored in localStorage. All API calls use it as Bearer token.
-
-const SESSION_KEY = 'mtc-session-token';
 const USER_KEY = 'mtc-current-user';
 
-export function getSessionToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  return localStorage.getItem(SESSION_KEY);
-}
-
-export function setSession(token: string, user: User): void {
+export function setSession(user: User): void {
   if (typeof window === 'undefined') return;
-  localStorage.setItem(SESSION_KEY, token);
   localStorage.setItem(USER_KEY, JSON.stringify(user));
 }
 
 export function clearSession(): void {
   if (typeof window === 'undefined') return;
-  localStorage.removeItem(SESSION_KEY);
   localStorage.removeItem(USER_KEY);
 }
 
@@ -33,21 +22,11 @@ export function getCachedUser(): User | null {
   }
 }
 
-/**
- * Helper for authenticated API calls.
- * Attaches the session token as Bearer header.
- */
 export async function authFetch(url: string, options: RequestInit = {}): Promise<Response> {
-  const token = getSessionToken();
   const headers = new Headers(options.headers);
-  if (token) {
-    headers.set('Authorization', `Bearer ${token}`);
-  }
-  return fetch(url, { ...options, headers });
+  return fetch(url, { ...options, headers, credentials: 'same-origin' });
 }
 
-// ── mapProfileToUser ─────────────────────────────────────
-// Maps API response shape to dashboard User type
 function mapProfileToUser(p: Record<string, unknown>): User {
   return {
     id: p.id as string,
@@ -69,12 +48,6 @@ function mapProfileToUser(p: Record<string, unknown>): User {
   };
 }
 
-// ── PIN Login ────────────────────────────────────────────
-
-/**
- * Login with email + 4-digit PIN.
- * Returns User on success, error message on failure.
- */
 export async function pinLogin(
   email: string,
   pin: string
@@ -83,6 +56,7 @@ export async function pinLogin(
     const res = await fetch('/api/auth/pin-login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
       body: JSON.stringify({ email: email.trim().toLowerCase(), pin }),
     });
     const data = await res.json();
@@ -97,18 +71,13 @@ export async function pinLogin(
     }
 
     const user = mapProfileToUser(data.user);
-    setSession(data.token, user);
+    setSession(user);
     return { user, error: null };
   } catch {
     return { user: null, error: 'Network error. Please try again.' };
   }
 }
 
-// ── PIN Setup (migration / first-time) ───────────────────
-
-/**
- * Set PIN for a user who doesn't have one yet (migration from old auth).
- */
 export async function pinSetup(
   email: string,
   pin: string
@@ -117,15 +86,16 @@ export async function pinSetup(
     const res = await fetch('/api/auth/pin-setup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
       body: JSON.stringify({ email: email.trim().toLowerCase(), pin }),
     });
     const data = await res.json();
 
     if (!res.ok) return { user: null, error: data.error || 'Failed to set PIN' };
 
-    if (data.token && data.user) {
+    if (data.user) {
       const user = mapProfileToUser(data.user);
-      setSession(data.token, user);
+      setSession(user);
       return { user, error: null };
     }
 
@@ -135,16 +105,12 @@ export async function pinSetup(
   }
 }
 
-// ── Forgot PIN ───────────────────────────────────────────
-
-/**
- * Request a PIN reset code be sent via email.
- */
 export async function forgotPin(email: string): Promise<{ error: string | null }> {
   try {
     const res = await fetch('/api/auth/forgot-pin', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
       body: JSON.stringify({ email: email.trim().toLowerCase() }),
     });
     const data = await res.json();
@@ -155,9 +121,6 @@ export async function forgotPin(email: string): Promise<{ error: string | null }
   }
 }
 
-/**
- * Verify the reset code and set a new PIN. Auto-logs in on success.
- */
 export async function verifyResetCode(
   email: string,
   code: string,
@@ -167,6 +130,7 @@ export async function verifyResetCode(
     const res = await fetch('/api/auth/verify-code', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
       body: JSON.stringify({
         email: email.trim().toLowerCase(),
         code,
@@ -177,9 +141,9 @@ export async function verifyResetCode(
 
     if (!res.ok) return { user: null, error: data.error || 'Invalid code' };
 
-    if (data.token && data.user) {
+    if (data.user) {
       const user = mapProfileToUser(data.user);
-      setSession(data.token, user);
+      setSession(user);
       return { user, error: null };
     }
 
@@ -189,11 +153,6 @@ export async function verifyResetCode(
   }
 }
 
-// ── Signup ───────────────────────────────────────────────
-
-/**
- * Create a new account with name + email + PIN.
- */
 export async function signUp(
   name: string,
   email: string,
@@ -206,6 +165,7 @@ export async function signUp(
     const res = await fetch('/api/auth/signup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
       body: JSON.stringify({
         name: name.trim(),
         email: email.trim().toLowerCase(),
@@ -219,9 +179,9 @@ export async function signUp(
 
     if (!res.ok) return { user: null, error: data.error || 'Signup failed' };
 
-    if (data.token && data.user) {
+    if (data.user) {
       const user = mapProfileToUser(data.user);
-      setSession(data.token, user);
+      setSession(user);
       return { user, error: null };
     }
 
@@ -231,23 +191,11 @@ export async function signUp(
   }
 }
 
-// ── Session Validation ───────────────────────────────────
-
-/**
- * Validate the current session and return the user profile.
- * Called on page load to check if still logged in.
- */
 export async function getCurrentUser(): Promise<User | null> {
-  const token = getSessionToken();
-  if (!token) return null;
-
   try {
-    const res = await fetch('/api/auth/session', {
-      headers: { 'Authorization': `Bearer ${token}` },
-    });
+    const res = await fetch('/api/auth/session', { credentials: 'same-origin' });
 
     if (!res.ok) {
-      // Token invalid or expired — clear local storage
       clearSession();
       return null;
     }
@@ -259,31 +207,21 @@ export async function getCurrentUser(): Promise<User | null> {
     }
 
     const user = mapProfileToUser(data.user);
-    // Update cached user data
     localStorage.setItem(USER_KEY, JSON.stringify(user));
     return user;
   } catch {
-    // Network error — return cached user if available (offline support)
     return getCachedUser();
   }
 }
 
-// ── Logout ───────────────────────────────────────────────
-
-/**
- * Sign out — delete session on server and clear local storage.
- */
 export async function signOut(): Promise<void> {
-  const token = getSessionToken();
-  if (token) {
-    try {
-      await fetch('/api/auth/session', {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` },
-      });
-    } catch {
-      // Server logout failed — still clear local
-    }
+  try {
+    await fetch('/api/auth/session', {
+      method: 'DELETE',
+      credentials: 'same-origin',
+    });
+  } catch {
+    // Server logout failed — still clear local
   }
   clearSession();
 }

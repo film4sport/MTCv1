@@ -76,8 +76,8 @@
     if (currentUser) {
       // Check if user has a valid PIN auth session (token starts with 'sess-')
       // Old users from Google OAuth / magic link have JWT tokens or no token — they need to set a PIN
-      var storedToken = MTC.storage.get('mtc-access-token', '');
-      if (!storedToken || (typeof storedToken === 'string' && storedToken.length > 0 && !storedToken.startsWith('sess-'))) {
+      var hasSession = !!MTC.storage.get('mtc-session-active', false);
+      if (!hasSession) {
         // Old auth session — show PIN setup screen so they can migrate seamlessly
         if (typeof showPinSetupScreen === 'function') {
           showPinSetupScreen(currentUser.email || '', currentUser.name || '');

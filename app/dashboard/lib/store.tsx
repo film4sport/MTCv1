@@ -201,11 +201,10 @@ function mergeEventsWithDefaults(supabaseEvents: ClubEvent[]): ClubEvent[] {
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function apiCall<T = any>(path: string, method: string, body?: Record<string, unknown>): Promise<T> {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('mtc-session-token') : null;
-  if (!token) throw new Error('No active session');
   const res = await fetch(path, {
     method,
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+    credentials: 'same-origin',
+    headers: { 'Content-Type': 'application/json' },
     ...(body ? { body: JSON.stringify(body) } : {}),
   });
   if (!res.ok) {
@@ -997,22 +996,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
       // Send confirmation email (fire and forget)
       if (currentUser.email) {
-        const sessionToken = typeof window !== 'undefined' ? localStorage.getItem('mtc-session-token') : null;
-        if (sessionToken) {
-          fetch('/api/notify-email', {
+        fetch('/api/notify-email', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${sessionToken}` },
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'same-origin',
             body: JSON.stringify({
               recipientEmail: currentUser.email, recipientName: currentUser.name,
               recipientUserId: currentUser.id,
               subject: 'Partner Request Posted — Mono Tennis Club',
               heading: 'Partner Request Posted',
-              body: `Your partner request is live! Looking for ${partner.matchType === 'any' ? 'any match type' : partner.matchType} on ${partner.date} at ${partner.time}. You'll be notified when someone responds.`,
+              body: `Your partner request is live. Looking for ${partner.matchType === 'any' ? 'any match type' : partner.matchType} on ${partner.date} at ${partner.time}. You'll be notified when someone responds.`,
               ctaText: 'View Requests', ctaUrl: 'https://www.monotennisclub.com/dashboard/partners',
               logType: 'partner_request',
             }),
-          }).catch(() => { /* email is best-effort */ });
-        }
+        }).catch(() => { /* email is best-effort */ });
       }
     }
   }, [currentUser]);

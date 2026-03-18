@@ -63,9 +63,10 @@ describe('Auth Module — auth.ts', () => {
     expect(content).toMatch(/export\s+(async\s+)?function\s+forgotPin/);
   });
 
-  it('uses PIN-based auth (no supabase.auth)', () => {
+  it('uses PIN-based auth with cookie-backed sessions', () => {
     expect(content).not.toContain('supabase.auth');
-    expect(content).toContain('mtc-session-token');
+    expect(content).not.toContain('mtc-session-token');
+    expect(content).toContain("credentials: 'same-origin'");
   });
 
   it('does not export CREDENTIALS constant', () => {

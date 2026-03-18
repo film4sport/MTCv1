@@ -49,8 +49,9 @@ describe('Dashboard → API Route Consistency', () => {
     expect(storeContent).toMatch(/async function apiCall/);
   });
 
-  it('apiCall sends Authorization header with Bearer token', () => {
-    expect(storeContent).toMatch(/Authorization.*Bearer/);
+  it('apiCall sends same-origin cookies for auth', () => {
+    expect(storeContent).toContain("credentials: 'same-origin'");
+    expect(storeContent).not.toMatch(/Authorization.*Bearer/);
   });
 
   it('Messages: Dashboard → /api/mobile/conversations POST', () => {

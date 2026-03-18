@@ -1,10 +1,6 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 import { sendPushToUser } from '../lib/push';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+import { createAdminClient, resolveSession } from '@/app/lib/session';
 
 // Rate limit: 30 pushes per minute per sender
 const pushLimits = new Map<string, { count: number; resetAt: number }>();
@@ -19,19 +15,7 @@ const pushLimits = new Map<string, { count: number; resetAt: number }>();
  */
 export async function POST(request: Request) {
   try {
-    // Authenticate the sender via JWT
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const token = authHeader.slice(7);
-    const supabase = createClient(supabaseUrl, supabaseServiceKey || supabaseAnonKey);
-    const { data: session } = await supabase
-      .from('sessions')
-      .select('user_id')
-      .eq('token', token)
-      .single();
+    const { session } = await resolveSession(request);
     if (!session) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
@@ -62,7 +46,7 @@ export async function POST(request: Request) {
     }
 
     // Use shared push utility (handles VAPID config, preferences, cleanup)
-    const adminSupabase = createClient(supabaseUrl, supabaseServiceKey || supabaseAnonKey);
+    const adminSupabase = createAdminClient();
     const result = await sendPushToUser(adminSupabase, recipientId, {
       title,
       body: (msgBody as string).slice(0, 200),

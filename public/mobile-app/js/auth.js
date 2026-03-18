@@ -558,33 +558,30 @@
       var betaKey = 'mtc-beta-notice-sent-' + currentUser.id;
       if (!MTC.storage.get(betaKey, null)) {
         MTC.storage.set(betaKey, true);
-        // Insert via API call (authenticated with session token)
-        var token = MTC.getToken();
-        if (token) {
-          var userId = currentUser.id;
-          fetch('/api/mobile/notifications', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        var userId = currentUser.id;
+        fetch('/api/mobile/notifications', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
             body: JSON.stringify({
               notifications: [
                 {
                   id: 'opening-day-' + userId,
                   type: 'event',
-                  title: 'Opening Day \u2014 May 9th!',
+                  title: 'Opening Day - May 9th!',
                   body: 'Mark your calendar! Mono Tennis Club opens for the 2026 season on May 9th. See you on the courts!'
                 },
                 {
                   id: 'beta-notice-' + userId,
                   type: 'info',
                   title: 'App Under Construction',
-                  body: 'Our app and website are still in development. If you find any bugs or have feedback, please email monotennisclub1@gmail.com \u2014 we appreciate your help!'
+                  body: 'Our app and website are still in development. If you find any bugs or have feedback, please email monotennisclub1@gmail.com - we appreciate your help!'
                 }
               ]
             })
-          }).then(function() {
-            if (typeof MTC.fn.updateUnreadCount === 'function') MTC.fn.updateUnreadCount();
-          }).catch(function() {});
-        }
+        }).then(function() {
+          if (typeof MTC.fn.updateUnreadCount === 'function') MTC.fn.updateUnreadCount();
+        }).catch(function() {});
       }
     }
   }
@@ -592,13 +589,10 @@
   // onclick handler (index.html)
   window.handleLogout = function() {
     // Delete session on server
-    var token = MTC.getToken();
-    if (token) {
-      fetch('/api/auth/session', {
-        method: 'DELETE',
-        headers: { 'Authorization': 'Bearer ' + token }
-      }).catch(function() {});
-    }
+    fetch('/api/auth/session', {
+      method: 'DELETE',
+      credentials: 'same-origin'
+    }).catch(function() {});
 
     currentUser = null;
     MTC.state.currentUser = null;
@@ -667,7 +661,7 @@
     window.navigateTo = function(screen) {
       if (currentUser && currentUser.isMember === false) {
         if (GUEST_ALLOWED_SCREENS.indexOf(screen) === -1) {
-          showToast('Members only \u2014 sign up as a member for full access');
+          showToast('Members only - sign up as a member for full access');
           return;
         }
       }
@@ -867,13 +861,12 @@
         userVisibleOnly: true,
         applicationServerKey: outputArray
       }).then(function(subscription) {
-        var token = MTC.getToken();
         fetch('/api/push-subscribe', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': token ? 'Bearer ' + token : ''
+            'Content-Type': 'application/json'
           },
+          credentials: 'same-origin',
           body: JSON.stringify({
             userId: currentUser.id,
             subscription: subscription.toJSON()

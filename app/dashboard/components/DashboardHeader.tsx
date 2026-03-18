@@ -72,13 +72,10 @@ export default function DashboardHeader({ title }: DashboardHeaderProps) {
           applicationServerKey: outputArray,
         });
 
-        // Register subscription with the server
-        const sessionToken = localStorage.getItem('mtc-session-token');
-        if (!sessionToken) return;
-
         await fetch('/api/push-subscribe', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${sessionToken}` },
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId: currentUser.id, subscription: subscription.toJSON() }),
         });
       } catch {

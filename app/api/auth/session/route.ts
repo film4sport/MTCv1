@@ -1,35 +1,21 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+import { SESSION_COOKIE_NAME, SESSION_TTL_SECONDS, createAdminClient, resolveSession } from '@/app/lib/session';
 
 /**
  * GET /api/auth/session
  * Validate a session token and return the user profile.
  * Used on page load to check if user is still logged in.
- * Authorization: Bearer <session-token>
+ * Auth: secure cookie preferred, Bearer token also supported for legacy clients
  */
 export async function GET(request: Request) {
   try {
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
-      return NextResponse.json({ error: 'Missing authorization' }, { status: 401 });
-    }
-
-    const token = authHeader.slice(7);
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-    // Find session
-    const { data: session } = await supabase
-      .from('sessions')
-      .select('user_id, created_at')
-      .eq('token', token)
-      .single();
+    const { token, session } = await resolveSession(request);
 
     if (!session) {
       return NextResponse.json({ error: 'Invalid or expired session' }, { status: 401 });
     }
+
+    const supabase = createAdminClient();
 
     // Update last_used timestamp
     await supabase
@@ -101,23 +87,22 @@ export async function GET(request: Request) {
 /**
  * DELETE /api/auth/session
  * Logout — delete the session.
- * Authorization: Bearer <session-token>
+ * Auth: secure cookie preferred, Bearer token also supported for legacy clients
  */
 export async function DELETE(request: Request) {
   try {
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
-      return NextResponse.json({ error: 'Missing authorization' }, { status: 401 });
+    const { token, session } = await resolveSession(request);
+    if (!token || !session) {
+      return NextResponse.json({ error: 'Missing or invalid session' }, { status: 401 });
     }
 
-    const token = authHeader.slice(7);
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const supabase = createAdminClient();
 
     await supabase.from('sessions').delete().eq('token', token);
 
     // Clear session cookie on logout
     const response = NextResponse.json({ success: true });
-    response.cookies.set('mtc-session', '', {
+    response.cookies.set(SESSION_COOKIE_NAME, '', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',

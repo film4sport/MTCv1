@@ -84,13 +84,13 @@ export default function AdminCourtsTab({
       }
 
       // Use the API route (triggers auto-cancel + user notifications)
-      const token = localStorage.getItem('mtc-session-token');
       let totalCancelled = 0;
 
       const promises = dates.map(async (d) => {
         const res = await fetch('/api/mobile/court-blocks', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', ...(token ? { 'Authorization': `Bearer ${token}` } : {}) },
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             court_id: courtId === 'all' ? null : parseInt(courtId),
             block_date: d,
@@ -130,10 +130,9 @@ export default function AdminCourtsTab({
   const handleDelete = async (id: string) => {
     setDeleting(id);
     try {
-      const token = localStorage.getItem('mtc-session-token');
       const res = await fetch(`/api/mobile/court-blocks?id=${encodeURIComponent(id)}`, {
         method: 'DELETE',
-        headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        credentials: 'same-origin',
       });
       if (!res.ok) throw new Error('Delete failed');
       showToast('Court block removed');
@@ -151,10 +150,10 @@ export default function AdminCourtsTab({
     setLoading(true);
     try {
       const ids = blocks.map(b => b.id);
-      const token = localStorage.getItem('mtc-session-token');
       const res = await fetch('/api/mobile/court-blocks', {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json', ...(token ? { 'Authorization': `Bearer ${token}` } : {}) },
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ids }),
       });
       const data = await res.json();

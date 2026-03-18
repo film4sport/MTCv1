@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { createAdminClient, resolveSession } from '@/app/lib/session';
 
 // Re-export shared constants & validators so existing route imports don't break
 export {
@@ -34,28 +35,16 @@ export interface AuthenticatedUser {
 export async function authenticateMobileRequest(
   request: Request
 ): Promise<AuthenticatedUser | NextResponse> {
-  const authHeader = request.headers.get('authorization');
-  if (!authHeader?.startsWith('Bearer ')) {
-    return NextResponse.json({ error: 'Missing authorization header' }, { status: 401 });
-  }
-
   if (!supabaseUrl || !supabaseServiceKey) {
     return NextResponse.json({ error: 'Supabase not configured' }, { status: 500 });
   }
 
-  const token = authHeader.slice(7);
-  const adminClient = createClient(supabaseUrl, supabaseServiceKey);
-
-  // Look up session token in our sessions table
-  const { data: session, error: sessionError } = await adminClient
-    .from('sessions')
-    .select('user_id')
-    .eq('token', token)
-    .single();
-
-  if (sessionError || !session) {
+  const { token, session } = await resolveSession(request);
+  if (!token || !session) {
     return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
   }
+
+  const adminClient = createClient(supabaseUrl, supabaseServiceKey);
 
   // Update last_used (fire-and-forget, don't block the request)
   adminClient
@@ -94,7 +83,7 @@ export async function authenticateMobileRequest(
  * Use this for server-side queries in mobile API endpoints.
  */
 export function getAdminClient() {
-  return createClient(supabaseUrl, supabaseServiceKey || supabaseAnonKey);
+  return createAdminClient();
 }
 
 /**

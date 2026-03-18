@@ -38,6 +38,13 @@ const WEBKIT_RESPONSIVE_TESTS = [
 ];
 
 const isCI = !!process.env.CI;
+const playwrightPort = Number(process.env.PLAYWRIGHT_PORT || '3000');
+const playwrightBaseURL = process.env.PLAYWRIGHT_BASE_URL || `http://127.0.0.1:${playwrightPort}`;
+const shouldReuseExistingServer = process.env.PLAYWRIGHT_REUSE_SERVER === 'true'
+  ? true
+  : process.env.PLAYWRIGHT_REUSE_SERVER === 'false'
+    ? false
+    : !isCI;
 
 module.exports = defineConfig({
   testDir: './tests',
@@ -47,7 +54,7 @@ module.exports = defineConfig({
   retries: isCI ? 0 : 1,
   reporter: 'list',
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL: playwrightBaseURL,
     actionTimeout: 15000,
     navigationTimeout: 30000,
   },
@@ -138,8 +145,8 @@ module.exports = defineConfig({
   ],
   webServer: {
     command: isCI ? 'npm start' : 'npm run dev',
-    port: 3000,
+    port: playwrightPort,
     timeout: 60000,
-    reuseExistingServer: !isCI,
+    reuseExistingServer: shouldReuseExistingServer,
   },
 });

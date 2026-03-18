@@ -123,10 +123,10 @@ export default function SettingsPage() {
     setNameSaving(true);
     try {
       // Use API route so name propagates to denormalized columns (bookings, messages, partners, etc.)
-      const token = localStorage.getItem('mtc-session-token');
       const res = await fetch('/api/mobile/members', {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', ...(token ? { 'Authorization': `Bearer ${token}` } : {}) },
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ memberId: currentUser.id, name: trimmed }),
       });
       if (!res.ok) {

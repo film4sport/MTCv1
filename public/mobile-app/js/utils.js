@@ -77,20 +77,21 @@ const MTC = {
   /** Get the current access token (memory-first for speed + security) */
   getToken: function() {
     if (MTC._cachedToken) return MTC._cachedToken;
-    MTC._cachedToken = MTC.storage ? MTC.storage.get('mtc-access-token', '') : '';
+    var hasSession = MTC.storage ? MTC.storage.get('mtc-session-active', false) : false;
+    MTC._cachedToken = hasSession ? '__cookie_session__' : '';
     return MTC._cachedToken;
   },
 
   /** Set the access token (both memory + localStorage for persistence) */
   setToken: function(token) {
     MTC._cachedToken = token || '';
-    if (MTC.storage) MTC.storage.set('mtc-access-token', MTC._cachedToken);
+    if (MTC.storage) MTC.storage.set('mtc-session-active', !!token);
   },
 
   /** Clear the access token from both memory + localStorage */
   clearToken: function() {
     MTC._cachedToken = null;
-    if (MTC.storage) MTC.storage.remove('mtc-access-token');
+    if (MTC.storage) MTC.storage.remove('mtc-session-active');
   }
 };
 
@@ -297,4 +298,3 @@ window.addEventListener('unhandledrejection', function(event) {
     showToast('An unexpected error occurred', 'error');
   }
 });
-

@@ -187,12 +187,17 @@ export async function POST(request: Request) {
             type: 'program', tag: `program-enroll-${programId}`,
           });
           // Email confirmation
-          const token = request.headers.get('authorization')?.slice(7);
-          if (token && authResult.email) {
+          const authHeader = request.headers.get('authorization');
+          const cookieHeader = request.headers.get('cookie');
+          if ((authHeader || cookieHeader) && authResult.email) {
             const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://monotennisclub.com';
             fetch(`${siteUrl}/api/notify-email`, {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+              headers: {
+                'Content-Type': 'application/json',
+                ...(authHeader ? { 'Authorization': authHeader } : {}),
+                ...(cookieHeader ? { 'Cookie': cookieHeader } : {}),
+              },
               body: JSON.stringify({
                 recipientEmail: authResult.email, recipientName: authResult.name,
                 recipientUserId: memberId,

@@ -236,9 +236,9 @@ describe('Session Route — /api/auth/session', () => {
     expect(content).toMatch(/export\s+async\s+function\s+DELETE/);
   });
 
-  it('validates Bearer token', () => {
-    expect(content).toContain('Bearer');
-    expect(content).toContain('authorization');
+  it('accepts cookie-backed sessions and optional Bearer tokens', () => {
+    expect(content).toContain('resolveSession');
+    expect(content).toContain('SESSION_COOKIE_NAME');
   });
 
   it('returns 401 for missing/invalid token', () => {
@@ -436,8 +436,10 @@ describe('Dashboard Auth Client — PIN Functions', () => {
     expect(content).toMatch(/export.*function\s+getCurrentUser/);
   });
 
-  it('uses session token in localStorage', () => {
-    expect(content).toContain('mtc-session-token');
+  it('uses cookie-backed auth and only caches the current user locally', () => {
+    expect(content).not.toContain('mtc-session-token');
+    expect(content).toContain("credentials: 'same-origin'");
+    expect(content).toContain('mtc-current-user');
   });
 
   it('does NOT reference any Supabase Auth functions', () => {

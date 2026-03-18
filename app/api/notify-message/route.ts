@@ -1,9 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+import { createAdminClient, resolveSession } from '@/app/lib/session';
 
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || '';
 const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY || '';
@@ -21,23 +17,12 @@ const msgLimits = new Map<string, { count: number; resetAt: number }>();
  */
 export async function POST(request: Request) {
   try {
-    // Authenticate the sender via JWT
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const token = authHeader.slice(7);
-    const supabase = createClient(supabaseUrl, supabaseServiceKey || supabaseAnonKey);
-    const { data: session } = await supabase
-      .from('sessions')
-      .select('user_id')
-      .eq('token', token)
-      .single();
+    const { session } = await resolveSession(request);
     if (!session) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
     const senderId = session.user_id;
+    const supabase = createAdminClient();
 
     const body = await request.json();
     const { recipientId, senderName, preview } = body;
@@ -75,7 +60,7 @@ export async function POST(request: Request) {
     }
 
     // Get recipient's push subscriptions
-    const adminSupabase = createClient(supabaseUrl, supabaseServiceKey || supabaseAnonKey);
+    const adminSupabase = createAdminClient();
     const { data: subscriptions } = await adminSupabase
       .from('push_subscriptions')
       .select('endpoint, p256dh, auth')

@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 import { logEmail, type EmailLogType } from '../lib/email-logger';
+import { createAdminClient, resolveSession } from '@/app/lib/session';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 const SMTP_FROM = process.env.SMTP_FROM || 'noreply@monotennisclub.com';
 
 // Rate limit: 20 emails per hour per sender
@@ -19,21 +17,11 @@ const emailLimits = new Map<string, { count: number; resetAt: number }>();
 export async function POST(request: Request) {
   try {
     // Authenticate sender
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const token = authHeader.slice(7);
-    const supabase = createClient(supabaseUrl, process.env.SUPABASE_SERVICE_ROLE_KEY || supabaseAnonKey);
-    const { data: session } = await supabase
-      .from('sessions')
-      .select('user_id')
-      .eq('token', token)
-      .single();
+    const { session } = await resolveSession(request);
     if (!session) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
+    const supabase = createAdminClient();
     const user = { id: session.user_id };
 
     const reqBody = await request.json();
