@@ -25,10 +25,10 @@ describe('Dead Code: payment notifications removed', () => {
     expect(DEFAULT_NOTIFICATION_PREFS).not.toHaveProperty('payments');
   });
 
-  it('NotificationPreferences should have exactly 5 keys', () => {
+  it('NotificationPreferences should have exactly 6 keys', () => {
     const keys = Object.keys(DEFAULT_NOTIFICATION_PREFS);
-    expect(keys).toHaveLength(5);
-    expect(keys).toEqual(expect.arrayContaining(['bookings', 'events', 'partners', 'messages', 'programs']));
+    expect(keys).toHaveLength(6);
+    expect(keys).toEqual(expect.arrayContaining(['bookings', 'events', 'partners', 'messages', 'programs', 'announcements']));
   });
 
   it('DashboardHeader prefMap should not contain payment', () => {
@@ -36,24 +36,26 @@ describe('Dead Code: payment notifications removed', () => {
     expect(headerFile).not.toContain('payment:');
   });
 
-  it('DashboardHeader prefMap should map all 5 valid types', () => {
+  it('DashboardHeader prefMap should map all valid types', () => {
     expect(headerFile).toContain("booking: 'bookings'");
     expect(headerFile).toContain("event: 'events'");
     expect(headerFile).toContain("partner: 'partners'");
     expect(headerFile).toContain("message: 'messages'");
     expect(headerFile).toContain("program: 'programs'");
+    expect(headerFile).toContain("announcement: 'announcements'");
   });
 
   it('db.ts fetchNotificationPreferences should not return payments', () => {
     const fnMatch = dbFile.match(/fetchNotificationPreferences[\s\S]*?return\s*\{([\s\S]*?)\};/);
     expect(fnMatch).toBeTruthy();
     expect(fnMatch[1]).not.toContain('payments');
-    // Should still return the 5 valid keys
+    // Should still return all valid keys
     expect(fnMatch[1]).toContain('bookings');
     expect(fnMatch[1]).toContain('events');
     expect(fnMatch[1]).toContain('partners');
     expect(fnMatch[1]).toContain('messages');
     expect(fnMatch[1]).toContain('programs');
+    expect(fnMatch[1]).toContain('announcements');
   });
 
   it('Settings page should not have Payments toggle', () => {

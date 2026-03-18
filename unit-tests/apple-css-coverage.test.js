@@ -225,20 +225,20 @@ describe('Playwright config — WebKit projects', () => {
 
 // ── CI WebKit Installation ──────────────────────────────────
 
-describe('CI workflows — WebKit browser installation', () => {
-  it('ci.yml installs webkit alongside chromium', () => {
-    expect(ciYml).toMatch(/playwright install.*webkit/);
+describe('CI workflows ??? WebKit browser installation', () => {
+  it('ci.yml uses the Playwright container for browser availability', () => {
+    expect(ciYml).toContain('container: mcr.microsoft.com/playwright:v1.58.0-noble');
   });
 
-  it('pr-check.yml installs webkit alongside chromium', () => {
-    expect(prCheckYml).toMatch(/playwright install.*webkit/);
+  it('pr-check.yml uses the Playwright container for browser availability', () => {
+    expect(prCheckYml).toContain('container: mcr.microsoft.com/playwright:v1.58.0-noble');
   });
 
-  it('ci.yml still installs chromium', () => {
-    expect(ciYml).toMatch(/playwright install.*chromium/);
+  it('ci.yml no longer reinstalls browsers in each shard', () => {
+    expect(ciYml).not.toMatch(/playwright install/i);
   });
 
-  it('pr-check.yml still installs chromium', () => {
-    expect(prCheckYml).toMatch(/playwright install.*chromium/);
+  it('pr-check.yml no longer reinstalls browsers in each shard', () => {
+    expect(prCheckYml).not.toMatch(/playwright install/i);
   });
 });

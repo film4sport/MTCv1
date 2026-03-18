@@ -6,8 +6,7 @@ const infoFile = readFileSync(join(__dirname, '..', 'app', 'info', 'page.tsx'), 
 const coachingFile = readFileSync(join(__dirname, '..', 'app', 'info', 'components', 'CoachingTab.tsx'), 'utf-8');
 const settingsFile = readFileSync(join(__dirname, '..', 'app', 'dashboard', 'settings', 'page.tsx'), 'utf-8');
 
-// ─── Coaching tab: contact section has real coach emails ───
-describe('Coaching tab — coach contact info', () => {
+describe('Coaching tab - coach contact info', () => {
   it('should contain Suzanne Taylor signup email', () => {
     expect(coachingFile).toContain('Taylor.suzanne.tennis@gmail.com');
   });
@@ -34,17 +33,15 @@ describe('Coaching tab — coach contact info', () => {
   });
 });
 
-// ─── Settings: Mobile App link ─────────────
-describe('Settings — Mobile App links to /mobile-app/', () => {
+describe('Settings - redundant mobile app promo removed', () => {
   it('should not use alert() anywhere in settings', () => {
-    // Match alert( but not aria-label or other valid uses
     const alertCalls = settingsFile.match(/\balert\s*\(/g);
     expect(alertCalls).toBeNull();
   });
 
-  it('should link to /mobile-app/ instead of PWA install prompt', () => {
-    expect(settingsFile).toContain('/mobile-app/');
-    expect(settingsFile).toContain('Open MTC Court App');
+  it('should not include the old mobile app promo card', () => {
+    expect(settingsFile).not.toContain('/mobile-app/');
+    expect(settingsFile).not.toContain('Open MTC Court App');
   });
 
   it('should not have old PWA install prompt logic', () => {
@@ -53,23 +50,28 @@ describe('Settings — Mobile App links to /mobile-app/', () => {
   });
 });
 
-// ─── Settings: no stale payment toggle ──────────────────
-describe('Settings — notification toggle integrity', () => {
-  it('should have exactly 4 notification toggle entries (programs removed)', () => {
-    // Count the key: '...' as const patterns in the toggles array
+describe('Settings - notification toggle integrity', () => {
+  it('should have exactly 6 notification toggle entries', () => {
     const toggleKeys = settingsFile.match(/key:\s*'[a-z]+'\s*as\s*const/g);
     expect(toggleKeys).toBeTruthy();
-    expect(toggleKeys).toHaveLength(4);
+    expect(toggleKeys).toHaveLength(6);
   });
 
-  it('toggle keys should be bookings, events, partners, messages', () => {
-    const toggleKeys = settingsFile.match(/key:\s*'([a-z]+)'\s*as\s*const/g)
+  it('toggle keys should include announcements and programs', () => {
+    const toggleKeys = settingsFile
+      .match(/key:\s*'([a-z]+)'\s*as\s*const/g)
       .map(m => m.match(/key:\s*'([a-z]+)'/)[1]);
-    expect(toggleKeys).toEqual(['bookings', 'events', 'partners', 'messages']);
+    expect(toggleKeys).toEqual(['bookings', 'events', 'partners', 'messages', 'announcements', 'programs']);
   });
 
   it('should not have a payments toggle', () => {
     expect(settingsFile).not.toContain("key: 'payments'");
     expect(settingsFile).not.toMatch(/Payments\s*&\s*Billing/);
+  });
+});
+
+describe('Info page wiring still exists', () => {
+  it('info page still includes coaching tab route support', () => {
+    expect(infoFile).toContain('coaching');
   });
 });
