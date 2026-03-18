@@ -551,3 +551,4 @@
  GET /api/auth/session 200 in 1281ms (compile: 3ms, render: 1278ms)
  PATCH /api/mobile/settings 200 in 342ms (compile: 3ms, render: 340ms)
 ✓ Compiled in 112ms
+✓ Compiled in 395ms
