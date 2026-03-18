@@ -9,9 +9,18 @@ import { readFileSync, existsSync } from 'fs';
 import { resolve } from 'path';
 
 const root = resolve(__dirname, '..');
+const ADMIN_JS_FILES = [
+  'public/mobile-app/js/admin-helpers.js',
+  'public/mobile-app/js/admin-dashboard.js',
+  'public/mobile-app/js/admin-members.js',
+  'public/mobile-app/js/admin-courts.js',
+  'public/mobile-app/js/admin-announcements.js',
+  'public/mobile-app/js/admin-events.js',
+];
 const storeContent = readFileSync(resolve(root, 'app/dashboard/lib/store.tsx'), 'utf-8');
 const sharedConstants = readFileSync(resolve(root, 'app/lib/shared-constants.ts'), 'utf-8');
 const authHelper = readFileSync(resolve(root, 'app/api/mobile/auth-helper.ts'), 'utf-8');
+const mobileAdminJs = ADMIN_JS_FILES.map((relPath) => readFileSync(resolve(root, relPath), 'utf-8')).join('\n\n');
 
 // ── Single Source of Truth ──────────────────────────────────────────────
 
@@ -96,8 +105,6 @@ describe('Dashboard → API Route Consistency', () => {
 // ── Mobile PWA → API Route Consistency ──────────────────────────────────
 
 describe('Mobile PWA → API Route Consistency', () => {
-  const mobileAdminJs = readFileSync(resolve(root, 'public/mobile-app/js/admin.js'), 'utf-8');
-
   it('Mobile admin.js calls /api/mobile/bookings', () => {
     expect(mobileAdminJs).toContain('/api/mobile/bookings');
   });

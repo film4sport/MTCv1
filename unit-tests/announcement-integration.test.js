@@ -13,12 +13,24 @@ import { readFileSync } from 'fs';
 import { resolve } from 'path';
 
 const root = resolve(__dirname, '..');
+const ADMIN_JS_FILES = [
+  'public/mobile-app/js/admin-helpers.js',
+  'public/mobile-app/js/admin-dashboard.js',
+  'public/mobile-app/js/admin-members.js',
+  'public/mobile-app/js/admin-courts.js',
+  'public/mobile-app/js/admin-announcements.js',
+  'public/mobile-app/js/admin-events.js',
+];
 
 function readFile(relPath) {
   return readFileSync(resolve(root, relPath), 'utf-8');
 }
 
-const adminJs = readFile('public/mobile-app/js/admin.js');
+function readAdminBundle() {
+  return ADMIN_JS_FILES.map(readFile).join('\n\n');
+}
+
+const adminJs = readAdminBundle();
 const routeTs = readFile('app/api/mobile/announcements/route.ts');
 
 describe('Announcement Client-Server Contract', () => {

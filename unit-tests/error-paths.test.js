@@ -12,11 +12,26 @@ import { readFileSync, existsSync } from 'fs';
 import { resolve } from 'path';
 
 const root = resolve(__dirname, '..');
+const ADMIN_JS_FILES = [
+  'public/mobile-app/js/admin-helpers.js',
+  'public/mobile-app/js/admin-dashboard.js',
+  'public/mobile-app/js/admin-members.js',
+  'public/mobile-app/js/admin-courts.js',
+  'public/mobile-app/js/admin-announcements.js',
+  'public/mobile-app/js/admin-events.js',
+];
 
 function readFile(relPath) {
   const full = resolve(root, relPath);
   if (!existsSync(full)) return null;
   return readFileSync(full, 'utf-8');
+}
+
+function readAdminBundle() {
+  return ADMIN_JS_FILES
+    .map((relPath) => readFile(relPath))
+    .filter(Boolean)
+    .join('\n\n');
 }
 
 // ==========================================================
@@ -113,7 +128,6 @@ describe('Mobile PWA — No Silent API Failures', () => {
     'public/mobile-app/js/events-registration.js',
     'public/mobile-app/js/partners.js',
     'public/mobile-app/js/messaging.js',
-    'public/mobile-app/js/admin.js',
     'public/mobile-app/js/booking.js',
     'public/mobile-app/js/api-client.js',
   ];
@@ -211,7 +225,7 @@ describe('Mobile PWA — Rollback Patterns', () => {
   });
 
   it('createEvent has rollback on API failure', () => {
-    const content = readFile('public/mobile-app/js/admin.js');
+    const content = readAdminBundle();
     // Must remove optimistic event on failure
     expect(content).toMatch(/createEvent[\s\S]*?delete clubEventsData\[eventId\]/);
     // Must show error toast
@@ -254,7 +268,7 @@ describe('Mobile PWA — All Mutations Persist to Server', () => {
   });
 
   it('createEvent calls /mobile/events PUT API', () => {
-    const content = readFile('public/mobile-app/js/admin.js');
+    const content = readAdminBundle();
     expect(content).toMatch(/createEvent[\s\S]*?apiRequest.*\/mobile\/events[\s\S]*?PUT/);
   });
 
