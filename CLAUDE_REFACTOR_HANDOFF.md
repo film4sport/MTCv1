@@ -7,6 +7,26 @@ You are refactoring a real production-bound tennis club app with 3 surfaces:
 
 This is a phased maintainability refactor, not a broad rewrite.
 
+Current project state:
+- a major visual polish pass has already been completed across the landing site, desktop dashboard, and mobile PWA
+- mobile login/session/logout behavior has already been hardened
+- announcement delivery now has protected behavior:
+  - audience filtering
+  - announcement opt-out via notification preferences
+  - bell notification delivery for opted-in members
+  - push delivery for opted-in members
+  - inbox message delivery for opted-in members
+- court blocks already have protected cancellation side effects:
+  - cancel conflicting bookings
+  - notify affected members
+  - send cancellation email flow
+
+Important design instruction:
+- do not redesign the app again
+- preserve the current visual system and polish direction
+- this refactor is now about structure, maintainability, and safer modularization
+- if you touch UI code, preserve current appearance unless a tiny parity fix is required
+
 Your mission:
 Make the codebase safer and easier to maintain in small controlled passes, while preserving current behavior.
 
@@ -15,6 +35,8 @@ Do not endanger launch-critical flows.
 
 Launch-critical flows:
 - PIN login
+- session recovery / stale-session handling
+- logout returning cleanly to login
 - dashboard access
 - booking a court
 - adding participants
@@ -24,6 +46,8 @@ Launch-critical flows:
 - partner finding
 - RSVP to events
 - admin announcements
+- admin announcements respecting announcement opt-out
+- admin announcements creating inbox messages for opted-in members
 - court blocking / booking auto-cancel
 - mobile PWA navigation and login shell
 
@@ -56,6 +80,9 @@ General constraints:
 - do not introduce a new architecture or state library
 - do not redesign
 - do not remove working logic without understanding all side effects
+- preserve current visual polish and premium surface styling
+- preserve current mobile login/logout/session handoff behavior
+- preserve current admin announcement preference logic
 
 High-risk files:
 - `public/mobile-app/index.html`
@@ -117,6 +144,8 @@ Not allowed:
 - changing booking semantics
 - changing admin feature semantics
 - changing current UI structure beyond what is necessary for modularization
+- weakening or removing the current announcement opt-out + inbox-message behavior
+- weakening or removing the current logout/session recovery behavior
 
 Specific targets:
 1. `public/mobile-app/js/admin.js`
@@ -160,10 +189,15 @@ Prioritize these tests when relevant:
 - `tests/signup.spec.js`
 - `tests/apple-compat.spec.js`
 - `tests/chromium-compat.spec.js`
+- `tests/mobile-pwa-session.spec.js`
 - mobile PWA tests
 - admin/court-block tests
 - notification-related unit tests
 - booking-related unit tests
+- `unit-tests/announcement-delivery-runtime.test.js`
+- `unit-tests/court-blocks-runtime.test.js`
+- `unit-tests/announcement-integration.test.js`
+- `unit-tests/notification-channels.test.js`
 
 If failures happen:
 - identify whether it is a regression or stale test
@@ -192,6 +226,7 @@ Deliverables for Phase 3:
 - Preserve route protection
 - Preserve current API interaction flow
 - Preserve notification and booking side effects
+- Preserve the current premium visual shell and hierarchy
 - If refactoring store/state logic, do it incrementally and preserve action order
 - Do not convert everything to a new state architecture
 
@@ -199,10 +234,13 @@ Deliverables for Phase 3:
 - Preserve HTML structure needed by existing JS
 - Preserve screen IDs, key DOM hooks, nav IDs, and selectors unless you also update every dependent script/test safely
 - Preserve login shell behavior
+- Preserve stale-session handling that routes legacy/saved users into PIN setup when no active PIN session exists
+- Preserve logout behavior that returns cleanly to the login screen and clears session-related local state
 - Preserve bottom nav behavior
 - Preserve install/app shell behavior
 - Preserve current screen activation logic
 - Preserve admin mobile paths
+- Preserve the current polished visual system across booking/messages/partners/settings/admin
 - For `public/mobile-app/index.html`, prefer splitting into partial-like sections/helpers only if safe
 - For `public/mobile-app/js/admin.js`, extract helpers carefully but preserve API calls, state mutations, and notification side effects exactly
 
@@ -226,12 +264,17 @@ Deliverables for Phase 3:
   - shared admin utilities
 - Preserve exact API endpoints and payload shapes
 - Preserve success/error toasts and side effects
+- Preserve announcement audience filtering
+- Preserve announcement opt-out checks
+- Preserve announcement inbox-message delivery for opted-in recipients
+- Preserve court-block cancellation side effects
 
 ### `app/dashboard/lib/store.tsx`
 - This is business-logic sensitive
 - Refactor with extreme care
 - Preserve current state shape unless there is a compelling reason not to
 - Preserve subscriptions, sync behavior, and auth/session interactions
+- Preserve the current upgraded visual hierarchy and shell assumptions used by the dashboard UI
 - Extract helper functions/selectors/actions before changing structure
 - Do not introduce a new global state library
 - Do not rewrite all state management patterns at once
@@ -263,6 +306,9 @@ Success criteria:
 - no launch-critical regressions
 - no broad redesign
 - no speculative architecture churn
+- no regression in announcement delivery preferences/channels
+- no regression in court-block cancellation side effects
+- no regression in mobile session recovery or logout cleanup
 
 When in doubt:
 choose safer over cleaner.

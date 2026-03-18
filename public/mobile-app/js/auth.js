@@ -607,7 +607,7 @@
     MTC.clearToken();
     MTC.clearAllTimers();
     if (typeof MTC.fn.stopRealtimeSync === 'function') MTC.fn.stopRealtimeSync();
-    ['mtc-user', 'mtc-session-time', 'mtc-session-hash',
+    ['mtc-user', 'mtc-session-time', 'mtc-session-hash', 'mtc-access-token',
      'mtc-bookings', 'mtc-conversations', 'mtc-notifications',
      'mtc-rsvps', 'mtc-profile', 'mtc-partner-joins', 'mtc-settings',
      'mtc-onboarding-done', 'mtc-api-events', 'mtc-api-members', 'mtc-api-partners',
