@@ -328,6 +328,21 @@ Note: Sections 3→4→5→6 meet flush (no wave dividers between them)
 - `playwright.config.js` - E2E test config
 - `vitest.config.js` - Unit test config
 
+## #29: ALWAYS USE QMD BEFORE READING FILES
+**Before reading files or exploring directories, always use qmd to search for information first.**
+- Available tools (via MCP):
+  - `qmd search "query"` — fast BM25 keyword search (use 80% of the time)
+  - `qmd vsearch "query"` — semantic vector search (finds conceptually related content)
+  - `qmd query "query"` — hybrid search with reranking (best quality, slower)
+  - `qmd get <file>` — retrieve a specific document by path
+- Use `qmd search` for quick lookups when you know the terms (e.g. "booking validation", "PIN auth")
+- Use `qmd query` for complex questions where you need the most relevant results
+- Use Read/Glob/Grep only if qmd doesn't return enough results
+- **Keep index updated**: Run `qmd update` at the START of every session (first command). Also run after any batch of file changes (new files, renames, deletions). This is fast (~1-2 seconds) and ensures search results are current.
+- **Windows note**: `qmd` runs via PowerShell alias (`bun` wrapper). MCP config uses bun directly (see `~\.claude\mcp.json`).
+- **Cowork VM resets every session** — qmd must be reinstalled each time. Run this as the very first Bash command in every Cowork session:
+  `export PATH="$HOME/.bun/bin:$PATH" && bun install -g https://github.com/tobi/qmd && cd ~/.bun/install/global/node_modules/@tobilu/qmd && bun install @types/node --no-save && bun run build && cd - && qmd update`
+
 ---
 
 *Keep this file SHORT. Don't add a new rule for every mistake - check if an existing rule covers it.*

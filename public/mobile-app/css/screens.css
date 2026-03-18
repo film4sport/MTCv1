@@ -91,6 +91,15 @@
   opacity: 0.4;
 }
 
+.calendar-grid .calendar-day.past {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.calendar-grid .calendar-day.past .cal-day-dots {
+  display: none;
+}
+
 .calendar-grid .calendar-day.today {
   background: var(--electric-blue);
   color: var(--color-black);

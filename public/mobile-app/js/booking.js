@@ -715,8 +715,8 @@
   }
 
   function openPlayerPicker() {
-    // Build member list from cached members data
-    var members = MTC.storage.get('mtc-members', []);
+    // Build member list from in-memory club members (populated by messaging.js)
+    var members = (MTC.state && MTC.state.clubMembers) ? MTC.state.clubMembers : [];
     var currentUser = MTC.storage.get('mtc-user', null) || MTC.storage.get('mtc-current-user', null);
     var currentId = currentUser ? currentUser.id : '';
 
