@@ -187,10 +187,37 @@ export default function AdminPage() {
     <div className="min-h-screen dashboard-gradient-bg">
       <DashboardHeader title="Admin Panel" />
 
-      <div className="p-6 lg:p-8 max-w-6xl mx-auto animate-slideUp">
+      <div className="p-6 lg:p-8 max-w-6xl mx-auto animate-slideUp space-y-5">
+        <div className="dashboard-panel rounded-[32px] border p-5 sm:p-6 shadow-[0_28px_72px_rgba(31,40,23,0.16)]">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-2xl">
+              <span className="dashboard-soft-pill mb-3 inline-flex">Club Operations</span>
+              <h2 className="text-2xl sm:text-3xl font-semibold tracking-[-0.03em]" style={{ color: '#24301c' }}>
+                Run the club with more clarity and less visual noise.
+              </h2>
+              <p className="mt-3 text-sm leading-6" style={{ color: '#6d685e' }}>
+                Member actions, court controls, and announcements should feel just as polished as the member-facing experience.
+              </p>
+            </div>
+            <div className="grid grid-cols-3 gap-3 lg:min-w-[360px]">
+              <div className="rounded-2xl px-4 py-3" style={{ background: 'rgba(107,122,61,0.08)', border: '1px solid rgba(107,122,61,0.12)' }}>
+                <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em]" style={{ color: '#8c866f' }}>Members</p>
+                <p className="mt-1 text-2xl font-semibold" style={{ color: '#24301c' }}>{members.length}</p>
+              </div>
+              <div className="rounded-2xl px-4 py-3" style={{ background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.55)' }}>
+                <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em]" style={{ color: '#8c866f' }}>Courts</p>
+                <p className="mt-1 text-2xl font-semibold" style={{ color: '#24301c' }}>{courts.length}</p>
+              </div>
+              <div className="rounded-2xl px-4 py-3" style={{ background: 'rgba(255,248,231,0.74)', border: '1px solid rgba(214,188,123,0.2)' }}>
+                <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em]" style={{ color: '#8c866f' }}>Live Tab</p>
+                <p className="mt-1 text-sm font-semibold capitalize" style={{ color: '#24301c' }}>{tab}</p>
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 mb-6 border-b" style={{ borderColor: '#e0dcd3' }} role="tablist">
+        <div className="dashboard-panel rounded-[28px] border p-2 flex gap-1 overflow-x-auto" role="tablist">
           {tabs.map(t => (
             <button
               key={t.key}
@@ -201,12 +228,14 @@ export default function AdminPage() {
               style={{
                 color: tab === t.key ? '#6b7a3d' : '#9a9689',
                 fontSize: '0.9375rem',
+                borderRadius: '18px',
+                background: tab === t.key ? 'rgba(107, 122, 61, 0.08)' : 'transparent',
               }}
             >
               <span style={{ opacity: tab === t.key ? 1 : 0.5 }}>{t.icon}</span>
               {t.label}
               {tab === t.key && (
-                <div className="absolute bottom-0 left-0 right-0 h-[3px] rounded-full" style={{ background: '#6b7a3d' }} />
+                <div className="absolute inset-x-4 bottom-1 h-[3px] rounded-full" style={{ background: '#6b7a3d' }} />
               )}
             </button>
           ))}

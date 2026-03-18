@@ -1,19 +1,27 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
 
-test.describe('Signup Flow — /info?tab=membership', () => {
+test.describe('Signup Flow - /info?tab=membership', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/info?tab=membership', { waitUntil: 'domcontentloaded', timeout: 30000 });
     await page.waitForTimeout(500);
   });
 
   async function switchTab(page, name, expectedTab) {
-    const tab = page.getByRole('tab', { name, exact: true });
-    await expect(tab).toBeVisible();
-    await tab.scrollIntoViewIfNeeded();
-    await tab.dispatchEvent('click');
+    const tabByRole = page.getByRole('tab', { name, exact: true });
+    await expect(tabByRole).toBeVisible();
+
+    const tabId = `tab-${expectedTab}`;
+    await page.evaluate((id) => {
+      const element = document.getElementById(id);
+      if (element) {
+        element.scrollIntoView({ block: 'nearest', inline: 'center' });
+      }
+    }, tabId);
+
+    await page.locator(`#${tabId}`).dispatchEvent('click');
     await page.waitForFunction((tabName) => window.location.search.includes(`tab=${tabName}`), expectedTab);
-    await expect(page.getByRole('tab', { name, exact: true })).toHaveAttribute('aria-selected', 'true');
+    await expect(page.locator(`#${tabId}`)).toHaveAttribute('aria-selected', 'true');
   }
 
   test('membership tab loads by default', async ({ page }) => {
@@ -51,22 +59,20 @@ test.describe('Signup Flow — /info?tab=membership', () => {
   });
 });
 
-test.describe('Info Page — About Tab', () => {
+test.describe('Info Page - About Tab', () => {
   test('about tab loads with club info', async ({ page }) => {
     await page.goto('/info?tab=about', { waitUntil: 'domcontentloaded', timeout: 30000 });
     await page.waitForTimeout(500);
-    // Should have some about content
     const pageText = await page.textContent('body');
     expect(pageText).toBeTruthy();
     expect(pageText.length).toBeGreaterThan(100);
   });
 });
 
-test.describe('Info Page — FAQ Tab', () => {
+test.describe('Info Page - FAQ Tab', () => {
   test('FAQ tab has accordion and map', async ({ page }) => {
     await page.goto('/info?tab=faq', { waitUntil: 'domcontentloaded', timeout: 30000 });
     await page.waitForTimeout(500);
-    // Should have FAQ content
     await expect(page.getByText('FAQ').first()).toBeAttached();
   });
 });

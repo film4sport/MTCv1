@@ -52,13 +52,40 @@ export default function PartnersPage() {
     <div className="min-h-screen dashboard-gradient-bg">
       <DashboardHeader title="Find a Partner" />
 
-      <div className="p-6 lg:p-8 max-w-5xl mx-auto animate-slideUp">
+      <div className="p-6 lg:p-8 max-w-5xl mx-auto animate-slideUp space-y-5">
+        <div className="dashboard-panel rounded-[32px] border p-5 sm:p-6 shadow-[0_28px_70px_rgba(31,40,23,0.14)]">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-2xl">
+              <span className="dashboard-soft-pill mb-3 inline-flex">Matchmaking</span>
+              <h2 className="text-2xl sm:text-3xl font-semibold tracking-[-0.03em]" style={{ color: '#24301c' }}>
+                Help members find the right game faster.
+              </h2>
+              <p className="mt-3 text-sm leading-6" style={{ color: '#6d685e' }}>
+                Surface the right partner requests quickly, then move straight into messaging or booking.
+              </p>
+            </div>
+            <div className="grid grid-cols-3 gap-3 lg:min-w-[320px]">
+              <div className="rounded-2xl px-4 py-3" style={{ background: 'rgba(107,122,61,0.08)', border: '1px solid rgba(107,122,61,0.12)' }}>
+                <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em]" style={{ color: '#8c866f' }}>Open Posts</p>
+                <p className="mt-1 text-2xl font-semibold" style={{ color: '#24301c' }}>{filtered.length}</p>
+              </div>
+              <div className="rounded-2xl px-4 py-3" style={{ background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.55)' }}>
+                <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em]" style={{ color: '#8c866f' }}>Format</p>
+                <p className="mt-1 text-sm font-semibold capitalize" style={{ color: '#24301c' }}>{filter === 'all' ? 'All types' : filter}</p>
+              </div>
+              <div className="rounded-2xl px-4 py-3" style={{ background: 'rgba(255,248,231,0.74)', border: '1px solid rgba(214,188,123,0.2)' }}>
+                <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em]" style={{ color: '#8c866f' }}>Level</p>
+                <p className="mt-1 text-sm font-semibold capitalize" style={{ color: '#24301c' }}>{skillFilter === 'all' ? 'Any level' : skillFilter}</p>
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Filters + Post Button */}
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
           <div className="flex flex-wrap items-center gap-3">
             {/* Match Type filters */}
-            <div className="glass-card flex items-center gap-1.5 p-1 rounded-xl" style={{ background: 'rgba(255, 255, 255, 0.5)', border: '1px solid rgba(255, 255, 255, 0.4)' }}>
+            <div className="dashboard-panel flex items-center gap-1.5 p-1.5 rounded-2xl">
               {(['all', 'singles', 'doubles', 'mixed'] as FilterType[]).map(f => (
                 <button
                   key={f}
@@ -74,7 +101,7 @@ export default function PartnersPage() {
               ))}
             </div>
             {/* Skill Level filters */}
-            <div className="glass-card flex items-center gap-1.5 p-1 rounded-xl" style={{ background: 'rgba(255, 255, 255, 0.5)', border: '1px solid rgba(255, 255, 255, 0.4)' }}>
+            <div className="dashboard-panel flex items-center gap-1.5 p-1.5 rounded-2xl">
               {(['all', 'beginner', 'intermediate', 'advanced', 'competitive'] as SkillFilter[]).map(s => (
                 <button
                   key={s}
@@ -101,7 +128,7 @@ export default function PartnersPage() {
 
         {/* Partner Cards */}
         {filtered.length === 0 ? (
-          <div className="glass-card text-center py-16 rounded-2xl border animate-scaleIn" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
+          <div className="dashboard-panel text-center py-16 rounded-[30px] border animate-scaleIn shadow-[0_24px_52px_rgba(31,40,23,0.12)]">
             <div className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center" style={{ background: 'rgba(107, 122, 61, 0.08)' }}>
               <svg className="w-8 h-8" fill="none" stroke="#6b7a3d" viewBox="0 0 24 24" strokeWidth="1.5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
@@ -118,7 +145,7 @@ export default function PartnersPage() {
             {filtered.map(p => {
               const badge = p.skillLevel ? SKILL_BADGES[p.skillLevel] : null;
               return (
-                <div key={p.id} className={`glass-card rounded-2xl border p-5 card-hover ${removingId === p.id ? 'animate-exit' : ''}`} style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
+                <div key={p.id} className={`dashboard-panel rounded-[28px] border p-5 card-hover ${removingId === p.id ? 'animate-exit' : ''}`} style={{ boxShadow: '0 18px 40px rgba(31, 40, 23, 0.1)' }}>
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-3">
                       <AvatarDisplay avatar={p.avatar} name={p.name} size={40} />

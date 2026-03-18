@@ -242,11 +242,34 @@ export default function SettingsPage() {
       <DashboardHeader title="Settings" />
 
       <div className="p-6 lg:p-8 max-w-3xl mx-auto space-y-6 animate-slideUp">
+        <div className="dashboard-panel rounded-[32px] border p-5 sm:p-6 shadow-[0_28px_70px_rgba(31,40,23,0.14)]">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div className="max-w-2xl">
+              <span className="dashboard-soft-pill mb-3 inline-flex">Account Control</span>
+              <h2 className="text-2xl sm:text-3xl font-semibold tracking-[-0.03em]" style={{ color: '#24301c' }}>
+                Keep your profile, notifications, and family setup in sync.
+              </h2>
+              <p className="mt-3 text-sm leading-6" style={{ color: '#6d685e' }}>
+                Everything important in one calm place, from profile details to member preferences and club access info.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-3 sm:w-[320px]">
+              <div className="rounded-2xl px-4 py-3" style={{ background: 'rgba(107,122,61,0.08)', border: '1px solid rgba(107,122,61,0.12)' }}>
+                <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em]" style={{ color: '#8c866f' }}>Membership</p>
+                <p className="mt-1 text-sm font-semibold capitalize" style={{ color: '#24301c' }}>{currentUser.membershipType}</p>
+              </div>
+              <div className="rounded-2xl px-4 py-3" style={{ background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.55)' }}>
+                <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em]" style={{ color: '#8c866f' }}>Alerts On</p>
+                <p className="mt-1 text-sm font-semibold" style={{ color: '#24301c' }}>{Object.values(notificationPreferences).filter(Boolean).length}</p>
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* ═══ PROFILE SECTION ═══ */}
 
         {/* Profile Card */}
-        <div className="glass-card rounded-2xl border p-6 section-card" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
+        <div className="dashboard-panel rounded-[28px] border p-6 section-card shadow-[0_22px_48px_rgba(31,40,23,0.12)]">
           <div className="flex items-center gap-5">
             <div className="relative group cursor-pointer" onClick={() => setShowAvatarPicker(true)}>
               <AvatarDisplay avatar={currentUser.avatar} name={currentUser.name} size={80} />
@@ -274,7 +297,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Personal Info */}
-        <div className="glass-card rounded-2xl border p-6 section-card" style={{ background: 'rgba(255, 255, 255, 0.6)', borderColor: 'rgba(255, 255, 255, 0.5)' }}>
+        <div className="dashboard-panel rounded-[28px] border p-6 section-card shadow-[0_22px_48px_rgba(31,40,23,0.1)]">
           <h3 className="font-semibold mb-4" style={{ color: '#2a2f1e' }}>Personal Info</h3>
           <div className="space-y-4">
             <div className="py-2 border-b" style={{ borderColor: '#f0ede6' }}>
