@@ -68,11 +68,11 @@ export default function DashboardHome() {
         style={{
           backgroundColor: 'transparent',
           backgroundImage: `url(${Math.random() > 0.5 ? '/tennis-silhouette-1.png' : '/tennis-silhouette-2.png'})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
+          backgroundSize: 'contain',
+          backgroundPosition: 'right center',
           backgroundRepeat: 'no-repeat',
           backgroundBlendMode: 'multiply',
-          opacity: 0.2,
+          opacity: 0.1,
           filter: 'sepia(1) hue-rotate(54deg) saturate(0.3) brightness(1.08)',
         }}
       />

@@ -7,7 +7,7 @@ test.describe('Signup Flow - /info?tab=membership', () => {
     await page.waitForTimeout(500);
   });
 
-  async function switchTab(page, name, expectedTab) {
+  async function switchTab(page, name, expectedTab, expectedText) {
     const tabByRole = page.getByRole('tab', { name, exact: true });
     await expect(tabByRole).toBeVisible();
 
@@ -33,8 +33,8 @@ test.describe('Signup Flow - /info?tab=membership', () => {
       const queryMatches = window.location.search.includes(`tab=${id.replace('tab-', '')}`);
       return (tabSelected || queryMatches) && panelVisible;
     }, { id: tabId, panel: panelId });
-    await expect(page.locator(`#${tabId}`)).toHaveAttribute('aria-selected', 'true');
     await expect(page.locator(`#${panelId}`)).toBeVisible();
+    await expect(page.getByText(expectedText, { exact: false }).first()).toBeVisible();
   }
 
   test('membership tab loads by default', async ({ page }) => {
@@ -51,13 +51,13 @@ test.describe('Signup Flow - /info?tab=membership', () => {
   });
 
   test('tab navigation works', async ({ page }) => {
-    await switchTab(page, 'About', 'about');
-    await switchTab(page, 'FAQ', 'faq');
-    await switchTab(page, 'Rules', 'rules');
+    await switchTab(page, 'About', 'about', 'Board of Directors');
+    await switchTab(page, 'FAQ', 'faq', 'Frequently Asked Questions');
+    await switchTab(page, 'Rules', 'rules', 'Club Constitution');
   });
 
   test('coaching tab has coach info', async ({ page }) => {
-    await switchTab(page, 'Coaching', 'coaching');
+    await switchTab(page, 'Coaching', 'coaching', 'Mark Taylor');
     await expect(page.getByRole('heading', { name: 'Mark Taylor' })).toBeAttached();
   });
 

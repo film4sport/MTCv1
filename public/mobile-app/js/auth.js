@@ -552,6 +552,11 @@
 
     // Register push notifications (best-effort, non-blocking)
     registerPushNotifications();
+    if (MTC.fn.checkOnboarding) {
+      setTimeout(function() {
+        MTC.fn.checkOnboarding();
+      }, 700);
+    }
 
     // ── One-time beta + opening day notifications for existing users ──
     if (currentUser && currentUser.id && new Date() < new Date('2026-05-09T00:00:00')) {
