@@ -79,7 +79,7 @@ const JS_FILES = [
 
 // Lazy-loaded bundles (only fetched when user navigates to admin/captain screens)
 const LAZY_BUNDLES = [
-  { name: 'admin', js: ['admin.js'], css: ['admin.css'] },
+  { name: 'admin', js: ['admin-helpers.js', 'admin-dashboard.js', 'admin-members.js', 'admin-courts.js', 'admin-announcements.js', 'admin-events.js'], css: ['admin.css'] },
   { name: 'captain', js: ['captain.js'], css: ['captain.css'] },
 ];
 

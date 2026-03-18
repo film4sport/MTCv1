@@ -10,6 +10,9 @@ import { useToast } from './toast';
 import { reportError } from '../../lib/errorReporter';
 import { supabase } from '../../lib/supabase';
 import * as db from './db';
+import { computeAnalytics } from './store-analytics';
+import { loadJSON, saveJSON, safeArray, mergeEventsWithDefaults, settledValue } from './store-helpers';
+import { parseWeatherData } from './store-weather';
 
 // ── Context interfaces (split for targeted re-renders) ──────────────
 
@@ -149,48 +152,7 @@ export function useApp() {
   return { ...useAuth(), ...useBookings(), ...useEvents(), ...useSocial(), ...useNotifications(), ...useFamily(), ...useDerived() };
 }
 
-// localStorage helpers
-function loadJSON<T>(key: string, fallback: T): T {
-  if (typeof window === 'undefined') return fallback;
-  try {
-    const saved = localStorage.getItem(key);
-    return saved ? JSON.parse(saved) : fallback;
-  } catch (err) {
-    reportError(err, `localStorage parse: ${key}`);
-    return fallback;
-  }
-}
-
-function safeLoadArray<T>(key: string, fallback: T[]): T[] {
-  const loaded = loadJSON(key, fallback);
-  return Array.isArray(loaded) ? loaded : fallback;
-}
-
-function saveJSON(key: string, value: unknown) {
-  if (typeof window === 'undefined') return;
-  try {
-    localStorage.setItem(key, JSON.stringify(value));
-  } catch (err) {
-    reportError(err, `localStorage quota: ${key}`);
-  }
-}
-
-/** Safely ensure data is always an array (defensive against corrupted data). */
-function safeArray<T>(data: T[]): T[] {
-  return Array.isArray(data) ? data : [];
-}
-
-/** Merge Supabase events with DEFAULT_EVENTS.
- *  Supabase rows win by ID; any defaults not in Supabase are preserved.
- *  This prevents losing hardcoded events (tournaments, specials) when
- *  Supabase only returns a partial set (e.g. just recurring events). */
-function mergeEventsWithDefaults(supabaseEvents: ClubEvent[]): ClubEvent[] {
-  const arr = safeArray(supabaseEvents);
-  if (arr.length === 0) return DEFAULT_EVENTS;
-  const supabaseIds = new Set(arr.map(e => e.id));
-  const defaultsNotInSupabase = DEFAULT_EVENTS.filter(e => !supabaseIds.has(e.id));
-  return [...arr, ...defaultsNotInSupabase];
-}
+// localStorage helpers, safeArray, mergeEventsWithDefaults → imported from store-helpers.ts
 
 /**
  * Authenticated API call helper.
@@ -264,128 +226,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return () => clearInterval(id);
   }, [analyticsDateKey]);
 
-  // ── Computed analytics (derived from real data) ──────────
-  const analytics = useMemo<AdminAnalytics>(() => {
-    const now = new Date();
-    const thisMonth = now.getMonth();
-    const thisYear = now.getFullYear();
-    const lastMonth = thisMonth === 0 ? 11 : thisMonth - 1;
-    const lastMonthYear = thisMonth === 0 ? thisYear - 1 : thisYear;
-    const today = now.toISOString().slice(0, 10);
-    const dayOfWeek = now.getDay(); // 0=Sun
-    const weekStart = new Date(now);
-    weekStart.setDate(now.getDate() - dayOfWeek);
-    const weekStartStr = weekStart.toISOString().slice(0, 10);
-
-    // Membership fee lookup
-    const FEES: Record<string, number> = { adult: 120, family: 240, junior: 55 };
-
-    // --- Bookings this month vs last month ---
-    const confirmedBookings = bookings.filter(b => b.status === 'confirmed');
-    const bookingsThisMonth = confirmedBookings.filter(b => {
-      const d = new Date(b.date);
-      return d.getMonth() === thisMonth && d.getFullYear() === thisYear;
-    });
-    const bookingsLastMonth = confirmedBookings.filter(b => {
-      const d = new Date(b.date);
-      return d.getMonth() === lastMonth && d.getFullYear() === lastMonthYear;
-    });
-    const bookingsChange = bookingsLastMonth.length > 0
-      ? Math.round(((bookingsThisMonth.length - bookingsLastMonth.length) / bookingsLastMonth.length) * 100)
-      : bookingsThisMonth.length > 0 ? 100 : 0;
-
-    // --- Court usage ---
-    const bookingsToday = confirmedBookings.filter(b => b.date === today).length;
-    const bookingsThisWeek = confirmedBookings.filter(b => b.date >= weekStartStr && b.date <= today).length;
-
-    // --- Peak times (top 5 day+time combos) ---
-    const dayTimeMap = new Map<string, number>();
-    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    for (const b of confirmedBookings) {
-      const d = new Date(b.date);
-      const key = `${dayNames[d.getDay()]}|${b.time}`;
-      dayTimeMap.set(key, (dayTimeMap.get(key) || 0) + 1);
-    }
-    const peakTimes = Array.from(dayTimeMap.entries())
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5)
-      .map(([key, count]) => {
-        const [day, time] = key.split('|');
-        return { day, time, bookings: count };
-      });
-
-    // --- Revenue breakdown (membership fees + program fees) ---
-    const membershipRevenue = members.reduce((sum, m) => {
-      const fee = FEES[(m.membershipType as string) || 'adult'] || FEES.adult;
-      return sum + fee;
-    }, 0);
-    const programRevenue = programs.reduce((sum, p) => sum + (p.fee * (p.enrolledMembers?.length || 0)), 0);
-    const totalRevenue = membershipRevenue + programRevenue;
-    const revenueBreakdown = [
-      { category: 'Memberships', amount: membershipRevenue, percentage: totalRevenue > 0 ? Math.round((membershipRevenue / totalRevenue) * 100) : 0 },
-      ...(programRevenue > 0 ? [{ category: 'Programs', amount: programRevenue, percentage: Math.round((programRevenue / totalRevenue) * 100) }] : []),
-    ];
-
-    // --- Revenue this month (from members who joined this month + program enrollments) ---
-    const newMembersThisMonth = members.filter(m => {
-      if (!m.memberSince) return false;
-      const d = new Date(m.memberSince);
-      return d.getMonth() === thisMonth && d.getFullYear() === thisYear;
-    });
-    const revenueThisMonth = newMembersThisMonth.reduce((sum, m) => sum + (FEES[(m.membershipType as string) || 'adult'] || FEES.adult), 0) + programRevenue;
-    const revenueLastMonth = 0; // Would need historical data to compute properly
-    const revenueChange = revenueLastMonth > 0
-      ? Math.round(((revenueThisMonth - revenueLastMonth) / revenueLastMonth) * 100)
-      : revenueThisMonth > 0 ? 100 : 0;
-
-    // --- Member activity ---
-    const bookingsPerMember = new Map<string, { name: string; count: number }>();
-    for (const b of confirmedBookings) {
-      const prev = bookingsPerMember.get(b.userId);
-      bookingsPerMember.set(b.userId, { name: b.userName, count: (prev?.count || 0) + 1 });
-    }
-    const mostActive = Array.from(bookingsPerMember.values())
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 5)
-      .map(m => ({ name: m.name, bookings: m.count }));
-
-    // --- Monthly trends (last 6 months) ---
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const monthlyTrends: AdminAnalytics['monthlyTrends'] = [];
-    for (let i = 5; i >= 0; i--) {
-      const m = new Date(thisYear, thisMonth - i, 1);
-      const mo = m.getMonth();
-      const yr = m.getFullYear();
-      const count = confirmedBookings.filter(b => {
-        const d = new Date(b.date);
-        return d.getMonth() === mo && d.getFullYear() === yr;
-      }).length;
-      const newMembers = members.filter(mem => {
-        if (!mem.memberSince) return false;
-        const d = new Date(mem.memberSince);
-        return d.getMonth() === mo && d.getFullYear() === yr;
-      });
-      const rev = newMembers.reduce((s, mem) => s + (FEES[(mem.membershipType as string) || 'adult'] || FEES.adult), 0);
-      monthlyTrends.push({ month: monthNames[mo], bookings: count, revenue: rev });
-    }
-
-    return {
-      totalBookingsThisMonth: bookingsThisMonth.length,
-      bookingsChange,
-      revenueThisMonth,
-      revenueChange,
-      peakTimes,
-      courtUsage: { today: bookingsToday, thisWeek: bookingsThisWeek, thisMonth: bookingsThisMonth.length },
-      revenueBreakdown,
-      memberActivity: {
-        mostActive,
-        newMembersThisMonth: newMembersThisMonth.length,
-        avgBookingsPerMember: members.length > 0 ? Math.round((confirmedBookings.length / members.length) * 10) / 10 : 0,
-      },
-      monthlyTrends,
-    };
+  // ── Computed analytics (pure function in store-analytics.ts) ──────────
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bookings, members, programs, analyticsDateKey]);
+  const analytics = useMemo<AdminAnalytics>(() => computeAnalytics(bookings, members, programs), [bookings, members, programs, analyticsDateKey]);
 
   // ── Notification preference gating ──────────────────────
   // Maps notification type → preference key. Returns true if the user allows this type.
@@ -463,23 +306,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
             db.fetchNotificationPreferences(user.id),
           ]);
 
-          const val = <T,>(r: PromiseSettledResult<T>, fallback: T): T =>
-            r.status === 'fulfilled' ? r.value : fallback;
-
           // Overwrite state with Supabase data (source of truth), keep defaults on failure
-          setMembers(safeArray(val(results[0], [])));
-          setBookings(safeArray(val(results[1], [])));
-          setEvents(mergeEventsWithDefaults(val(results[2], [])));
-          const courtsData = safeArray(val(results[3], []));
+          setMembers(safeArray(settledValue(results[0], [])));
+          setBookings(safeArray(settledValue(results[1], [])));
+          setEvents(mergeEventsWithDefaults(settledValue(results[2], [])));
+          const courtsData = safeArray(settledValue(results[3], []));
           if (courtsData.length > 0) setCourts(courtsData);
-          setPartners(safeArray(val(results[4], [])));
-          setConversations(safeArray(val(results[5], [])));
-          const anns = safeArray(val(results[6], []));
+          setPartners(safeArray(settledValue(results[4], [])));
+          setConversations(safeArray(settledValue(results[5], [])));
+          const anns = safeArray(settledValue(results[6], []));
           if (anns.length > 0) setAnnouncements(anns);
-          setNotifications(safeArray(val(results[7], [])));
-          const progs = safeArray(val(results[8], []));
+          setNotifications(safeArray(settledValue(results[7], [])));
+          const progs = safeArray(settledValue(results[8], []));
           if (progs.length > 0) setPrograms(progs);
-          const notifPrefs = val(results[9], null);
+          const notifPrefs = settledValue(results[9], null);
           if (notifPrefs) setNotificationPreferences(notifPrefs);
 
           // Log any failures for debugging
@@ -682,30 +522,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         const data = await res.json();
         if (data.current) {
           retryCount = 0; // Reset on success
-          const tempC = Math.round(data.current.temperature_2m);
-          const tempF = Math.round(tempC * 9 / 5 + 32);
-          const windKmh = Math.round(data.current.wind_speed_10m);
-          const code = data.current.weather_code;
-
-          let condition: WeatherData['condition'] = 'sunny';
-          let description = 'Clear sky';
-          if (code === 0) { condition = 'sunny'; description = 'Clear sky'; }
-          else if (code <= 3) { condition = 'cloudy'; description = 'Partly cloudy'; }
-          else if (code <= 49) { condition = 'cloudy'; description = 'Foggy'; }
-          else if (code <= 59) { condition = 'rainy'; description = 'Drizzle'; }
-          else if (code <= 69) { condition = 'rainy'; description = 'Rain'; }
-          else if (code <= 79) { condition = 'snowy'; description = 'Snow'; }
-          else if (code <= 84) { condition = 'rainy'; description = 'Rain showers'; }
-          else if (code <= 94) { condition = 'snowy'; description = 'Snow showers'; }
-          else if (code >= 95) { condition = 'rainy'; description = 'Thunderstorm'; }
-
-          if (condition === 'sunny' && tempC >= 15 && tempC <= 28 && windKmh < 20) description = 'Perfect tennis weather!';
-          else if (condition === 'rainy' || condition === 'snowy') description = 'Consider indoor courts';
-          else if (windKmh >= 30) description = 'Very windy — lobs affected';
-          else if (tempC < 5) description = 'Bundle up!';
-          else if (tempC > 30) description = 'Stay hydrated!';
-
-          setWeather({ tempC, tempF, condition, wind: windKmh, humidity: data.current.relative_humidity_2m, description, lastUpdated: new Date().toLocaleTimeString() });
+          setWeather(parseWeatherData(data.current));
         }
       } catch (err) {
         retryCount++;
@@ -1225,24 +1042,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
         db.fetchNotifications(currentUser.id), db.fetchPrograms(),
         db.fetchNotificationPreferences(currentUser.id),
       ]);
-      // Helper: extract value from settled result, or return fallback
-      const val = <T,>(r: PromiseSettledResult<T>, fallback: T): T =>
-        r.status === 'fulfilled' ? r.value : fallback;
       const [m, b, ev, ct, p, c, a, n, pr, np] = results;
 
-      setMembers(safeArray(val(m, [])));
-      setBookings(safeArray(val(b, [])));
-      setEvents(mergeEventsWithDefaults(val(ev, [])));
-      const courts_ = val(ct, []);
+      setMembers(safeArray(settledValue(m, [])));
+      setBookings(safeArray(settledValue(b, [])));
+      setEvents(mergeEventsWithDefaults(settledValue(ev, [])));
+      const courts_ = settledValue(ct, []);
       if (courts_.length > 0) setCourts(courts_);
-      setPartners(safeArray(val(p, [])));
-      setConversations(safeArray(val(c, [])));
-      const ann_ = safeArray(val(a, []));
+      setPartners(safeArray(settledValue(p, [])));
+      setConversations(safeArray(settledValue(c, [])));
+      const ann_ = safeArray(settledValue(a, []));
       if (ann_.length > 0) setAnnouncements(ann_);
-      setNotifications(safeArray(val(n, [])));
-      const prog_ = safeArray(val(pr, []));
+      setNotifications(safeArray(settledValue(n, [])));
+      const prog_ = safeArray(settledValue(pr, []));
       if (prog_.length > 0) setPrograms(prog_);
-      const np_ = val(np, null);
+      const np_ = settledValue(np, null);
       if (np_) setNotificationPreferences(np_);
 
       // Log any failed fetches (but don't block UI)

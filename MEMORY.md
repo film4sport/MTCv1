@@ -61,7 +61,7 @@
 6. **Visual verification in BDG** — mandatory, cannot skip. No screenshot = not done.
 7. Update MEMORY.md
 
-## Current Status (as of Mar 17, 2026)
+## Current Status (as of Mar 18, 2026)
 - **Production readiness**: 10/10. All platforms hardened.
 - **Test count**: ~1209 tests across 36 files (2 pre-existing CI failures unrelated to recent work).
 - **SMTP**: Resend SMTP live (noreply@monotennisclub.com).
@@ -69,6 +69,30 @@
 - **Coach's Panel**: REMOVED (Mar 16). Lessons tab visible to ALL users.
 - **Android splash**: Fixed (split any/maskable icons).
 - **DNS**: `www.monotennisclub.com` resolves (Railway CNAME). Root `@` needs A record.
+
+### Codex Refactor — Phase 1+2 (Mar 18, 2026)
+**Dashboard store.tsx split** (Phase 1 — safe extraction):
+- `store-helpers.ts`: loadJSON, saveJSON, safeArray, mergeEventsWithDefaults, settledValue
+- `store-analytics.ts`: computeAnalytics() + MEMBERSHIP_FEES constant
+- `store-weather.ts`: parseWeatherData() (Open-Meteo weather code mapping)
+- store.tsx imports all three; 0 type errors (`tsc --noEmit` clean)
+
+**Mobile admin.js split** (Phase 2 — controlled modularization):
+- `admin.js` (1892 lines) split into 6 IIFE modules:
+  - `admin-helpers.js` — MTC.admin namespace, shared state, tab switching, CSV exports
+  - `admin-dashboard.js` — dashboard widgets, stats, gate code
+  - `admin-members.js` — member CRUD, filtering, messaging
+  - `admin-courts.js` — court status, blocks CRUD
+  - `admin-announcements.js` — announcements CRUD, coach announcement modal
+  - `admin-events.js` — booking modify/cancel, event create, e-transfer, task manager
+- Build script updated: LAZY_BUNDLES now lists all 6 files (admin-helpers first)
+- `admin.js` renamed to `admin.js.bak` (kept as reference)
+- Build verified: `npm run build:mobile` passes, admin bundle = 71.0KB JS
+- Cross-IIFE calls work via `window.*` exports and `MTC.admin` shared namespace
+
+**Deferred to Phase 3**:
+- `index.html` (2823 lines) — too risky for modularization, per handoff guidance
+- Hardening: dead-code sweep, test additions for new modules
 
 ## Pending / TODO
 - Partner request broadcast push (not yet implemented — users only see new requests when they open Partners screen)

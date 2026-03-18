@@ -45,3 +45,4 @@ backups/
 # Misc
 *.tsbuildinfo
 next-env.d.ts
+tmp-dev-3000.log
