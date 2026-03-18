@@ -57,28 +57,39 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 48px 32px;
+  padding: 44px 28px;
   text-align: center;
   min-height: 200px;
+  margin: 8px 16px 16px;
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(255, 252, 246, 0.88), rgba(247, 242, 231, 0.96));
+  border: 1px solid rgba(124, 97, 65, 0.12);
+  box-shadow:
+    0 20px 34px rgba(31, 39, 25, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.82);
 }
 
 .empty-state-icon {
-  width: 80px;
-  height: 80px;
+  width: 84px;
+  height: 84px;
   border-radius: 50%;
-  background: var(--bg-secondary);
+  background: linear-gradient(180deg, rgba(200, 255, 0, 0.16), rgba(255, 255, 255, 0.9));
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 20px;
-  box-shadow: var(--shadow-sm);
+  margin-bottom: 18px;
+  border: 1px solid rgba(200, 255, 0, 0.18);
+  box-shadow:
+    0 16px 28px rgba(31, 39, 25, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 .empty-state-icon svg {
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
   color: var(--text-muted);
   stroke-width: 1.5;
+  opacity: 0.78;
 }
 
 .empty-state-icon .empty-emoji {
@@ -88,33 +99,35 @@
 
 .empty-state-title {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 20px;
-  letter-spacing: 1px;
+  font-size: 24px;
+  letter-spacing: 0.08em;
   color: var(--text-primary);
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .empty-state-text {
   font-size: 14px;
   color: var(--text-muted);
-  max-width: 260px;
-  line-height: 1.5;
-  margin-bottom: 20px;
+  max-width: 280px;
+  line-height: 1.6;
+  margin-bottom: 22px;
 }
 
 .empty-state-btn {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 24px;
-  background: var(--volt);
-  color: var(--deep-black);
+  padding: 13px 22px;
+  background: linear-gradient(135deg, var(--volt), #e6ff7d);
+  color: #182100;
   border: none;
-  border-radius: 14px;
-  font-weight: 600;
+  border-radius: 999px;
+  font-weight: 700;
   font-size: 14px;
   cursor: pointer;
-  box-shadow: var(--shadow-sm);
+  box-shadow:
+    0 14px 24px rgba(172, 214, 34, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
@@ -142,11 +155,14 @@
 }
 
 .skeleton-item {
-  background: var(--bg-card);
-  border-radius: 20px;
+  background: linear-gradient(180deg, rgba(255, 252, 246, 0.82), rgba(247, 242, 231, 0.96));
+  border-radius: 22px;
   padding: 20px;
   margin-bottom: 12px;
-  box-shadow: var(--shadow-sm);
+  border: 1px solid rgba(124, 97, 65, 0.1);
+  box-shadow:
+    0 16px 28px rgba(31, 39, 25, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.78);
   overflow: hidden;
 }
 
@@ -750,13 +766,13 @@ input.input-valid {
 
 /* Booking screen skeleton */
 .skeleton-booking-wrap {
-  padding: 16px;
+  padding: 12px 16px 20px;
 }
 
 .skeleton-date-bar {
-  height: 56px;
-  border-radius: 12px;
-  margin-bottom: 16px;
+  height: 62px;
+  border-radius: 18px;
+  margin-bottom: 18px;
 }
 
 .skeleton-slot-grid {
@@ -766,8 +782,8 @@ input.input-valid {
 }
 
 .skeleton-slot {
-  height: 44px;
-  border-radius: 8px;
+  height: 48px;
+  border-radius: 12px;
   margin-bottom: 0;
 }
 
@@ -799,14 +815,19 @@ input.input-valid {
 
 /* Messages screen skeleton */
 .skeleton-messages-wrap {
-  padding: 8px 0;
+  padding: 10px 0 18px;
 }
 
 .skeleton-message-item {
   display: flex;
   gap: 12px;
   align-items: center;
-  padding: 12px 16px;
+  padding: 14px 16px;
+  margin: 0 16px 10px;
+  border-radius: 20px;
+  background: linear-gradient(180deg, rgba(255, 252, 247, 0.72), rgba(247, 242, 231, 0.92));
+  border: 1px solid rgba(255, 255, 255, 0.74);
+  box-shadow: 0 16px 28px rgba(31, 39, 25, 0.06);
 }
 
 /* ============================================
@@ -1165,4 +1186,3 @@ body.offline .offline-banner {
   text-transform: uppercase;
   letter-spacing: 0.3px;
 }
-
