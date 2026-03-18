@@ -532,7 +532,6 @@
     }
 
     fetchWeather();
-    showToast('Welcome, ' + currentUser.name + '!');
     scheduleWelcomeNotifications();
 
     // Load data from Supabase API (non-blocking, falls back to cached data)
