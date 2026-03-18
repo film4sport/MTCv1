@@ -136,7 +136,6 @@ test.describe('Apple Compatibility - Info Tabs', () => {
   });
 
   test('far-right tabs stay reachable on iPhone/iPad Safari', async ({ page }) => {
-    await page.locator('#tab-privacy').scrollIntoViewIfNeeded();
     await expect(page.locator('#tab-privacy')).toBeVisible();
     await switchInfoTab(page, 'Privacy', 'privacy');
     await switchInfoTab(page, 'Terms', 'terms');

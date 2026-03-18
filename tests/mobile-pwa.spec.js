@@ -80,13 +80,29 @@ test.describe('Mobile PWA — Login Screen', () => {
     // WebKit's scrollWidth ignores overflow clipping — this is a known rendering quirk.
     // On WebKit: verify no VISIBLE overflow via clientWidth vs viewport.
     // On Chromium: scrollWidth correctly respects overflow:hidden.
+    await page.waitForURL('**/mobile-app/index.html', { timeout: 10000 });
+    await page.waitForLoadState('load').catch(() => {});
     if (browserName === 'webkit') {
-      const visibleWidth = await page.evaluate(() => document.body.clientWidth);
-      const viewportWidth = await page.evaluate(() => window.innerWidth);
+      await expect.poll(async () => {
+        return page.evaluate(() => ({
+          visibleWidth: document.body.clientWidth,
+          viewportWidth: window.innerWidth,
+        }));
+      }, { timeout: 5000 }).toEqual(expect.objectContaining({
+        visibleWidth: expect.any(Number),
+        viewportWidth: expect.any(Number),
+      }));
+
+      const { visibleWidth, viewportWidth } = await page.evaluate(() => ({
+        visibleWidth: document.body.clientWidth,
+        viewportWidth: window.innerWidth,
+      }));
       expect(visibleWidth).toBeLessThanOrEqual(viewportWidth + 1);
     } else {
-      const bodyWidth = await page.evaluate(() => document.body.scrollWidth);
-      const viewportWidth = await page.evaluate(() => window.innerWidth);
+      const { bodyWidth, viewportWidth } = await page.evaluate(() => ({
+        bodyWidth: document.body.scrollWidth,
+        viewportWidth: window.innerWidth,
+      }));
       expect(bodyWidth).toBeLessThanOrEqual(viewportWidth + 1);
     }
   });
