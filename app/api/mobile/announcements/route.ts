@@ -7,6 +7,61 @@ function withTimeout<T>(promise: Promise<T>, ms = 5000): Promise<T | undefined> 
   return Promise.race([promise, new Promise<undefined>(r => setTimeout(() => r(undefined), ms))]);
 }
 
+function generateId(prefix: string): string {
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+async function sendAnnouncementInboxMessage(
+  supabase: ReturnType<typeof getAdminClient>,
+  message: { fromId: string; fromName: string; toId: string; toName: string; text: string }
+) {
+  const timestamp = new Date().toISOString();
+  const { data: existingConversation } = await supabase
+    .from('conversations')
+    .select('id')
+    .or(`and(member_a.eq.${message.fromId},member_b.eq.${message.toId}),and(member_a.eq.${message.toId},member_b.eq.${message.fromId})`)
+    .single();
+
+  let conversationId: number;
+  if (existingConversation?.id) {
+    conversationId = existingConversation.id;
+  } else {
+    const { data: newConversation } = await supabase
+      .from('conversations')
+      .insert({
+        member_a: message.fromId,
+        member_b: message.toId,
+        last_message: message.text,
+        last_timestamp: timestamp,
+      })
+      .select('id')
+      .single();
+    if (!newConversation?.id) return;
+    conversationId = newConversation.id;
+  }
+
+  const { error: messageError } = await supabase.from('messages').insert({
+    id: generateId('msg-ann'),
+    conversation_id: conversationId,
+    from_id: message.fromId,
+    from_name: message.fromName,
+    to_id: message.toId,
+    to_name: message.toName,
+    text: message.text,
+    timestamp,
+    read: false,
+  });
+  if (messageError) {
+    console.error('Failed to create announcement inbox message:', messageError.message);
+    return;
+  }
+
+  await supabase
+    .from('conversations')
+    .update({ last_message: message.text, last_timestamp: timestamp })
+    .eq('id', conversationId);
+}
+
 export async function GET(request: Request) {
   const authResult = await authenticateMobileRequest(request);
   if (authResult instanceof NextResponse) return authResult;
@@ -102,7 +157,7 @@ export async function POST(request: Request) {
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
     // Create notifications — filter recipients by audience
-    const { data: allMembers } = await supabase.from('profiles').select('id, interclub_team');
+    const { data: allMembers } = await supabase.from('profiles').select('id, name, interclub_team');
     if (allMembers && allMembers.length > 0) {
       const targetMembers = allMembers.filter((m) => {
         if (announcementAudience === 'all') return true;
@@ -113,10 +168,19 @@ export async function POST(request: Request) {
         return true;
       });
 
+      const targetMemberIds = targetMembers.map(member => member.id);
+      const { data: preferenceRows } = await supabase
+        .from('notification_preferences')
+        .select('user_id, announcements')
+        .in('user_id', targetMemberIds.length > 0 ? targetMemberIds : ['__none__']);
+
+      const preferenceMap = new Map((preferenceRows || []).map(row => [row.user_id, row.announcements]));
+      const optedInMembers = targetMembers.filter(member => preferenceMap.get(member.id) !== false);
+
       const now = new Date().toISOString();
       const typeEmoji = announcementType === 'urgent' ? '🔴' : announcementType === 'warning' ? '⚠️' : '📢';
       const notifTitle = title ? sanitizeInput(title, 200) : `${typeEmoji} Club Announcement`;
-      const notifications = targetMembers.map(member => ({
+      const notifications = optedInMembers.map(member => ({
         id: `notif-ann-${id}-${member.id.slice(0, 8)}`,
         user_id: member.id,
         type: 'announcement',
@@ -126,22 +190,35 @@ export async function POST(request: Request) {
         read: false,
       }));
       // Batch insert (Supabase handles up to 1000 rows per insert)
-      const { error: notifErr } = await supabase.from('notifications').insert(notifications);
-      if (notifErr) {
-        // Log but don't fail the announcement creation
-        console.error('Failed to create announcement notifications:', notifErr.message);
+      if (notifications.length > 0) {
+        const { error: notifErr } = await supabase.from('notifications').insert(notifications);
+        if (notifErr) {
+          // Log but don't fail the announcement creation
+          console.error('Failed to create announcement notifications:', notifErr.message);
+        }
       }
 
-      // Send push notifications to all targeted members (fire-and-forget, with timeout)
+      const senderName = authResult.role === 'admin' ? 'Mono Tennis Club' : `${authResult.name || 'Team Captain'} - Mono Tennis Club`;
+      const inboxBody = `${notifTitle}\n\n${sanitizedText}\n\nOpen Notifications to view the latest club updates.`;
+
+      // Send push notifications and inbox messages to all opted-in targeted members (fire-and-forget, with timeout)
       withTimeout(Promise.allSettled(
-        targetMembers.map(member =>
-          sendPushToUser(supabase, member.id, {
+        optedInMembers.map(async member => {
+          await sendAnnouncementInboxMessage(supabase, {
+            fromId: authResult.id,
+            fromName: senderName,
+            toId: member.id,
+            toName: member.name || 'Member',
+            text: inboxBody,
+          });
+          return sendPushToUser(supabase, member.id, {
             title: notifTitle,
             body: sanitizedText.slice(0, 100),
             tag: `ann-${id}`,
             url: '/mobile-app/index.html#home',
+            type: 'announcement',
           })
-        )
+        })
       )).catch(() => { /* best-effort */ });
     }
 

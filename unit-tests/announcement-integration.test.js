@@ -137,10 +137,21 @@ describe('Notification pipeline completeness', () => {
     expect(routeTs).toContain('sendPushToUser');
   });
 
+  it('API POST route sends inbox messages for announcement recipients', () => {
+    expect(routeTs).toContain('sendAnnouncementInboxMessage');
+    expect(routeTs).toContain("from('messages').insert");
+  });
+
   it('API POST route filters recipients by audience', () => {
     expect(routeTs).toContain("announcementAudience === 'all'");
     expect(routeTs).toContain("announcementAudience === 'interclub_a'");
     expect(routeTs).toContain("announcementAudience === 'interclub_b'");
     expect(routeTs).toContain("announcementAudience === 'interclub_all'");
+  });
+
+  it('API POST route filters recipients by announcement preference opt-out', () => {
+    expect(routeTs).toContain("from('notification_preferences')");
+    expect(routeTs).toContain(".select('user_id, announcements')");
+    expect(routeTs).toContain("preferenceMap.get(member.id) !== false");
   });
 });

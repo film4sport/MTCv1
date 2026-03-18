@@ -18,6 +18,7 @@ const TYPE_TO_PREF: Record<string, string> = {
   booking: 'bookings',
   event: 'events',
   partner: 'partners',
+  announcement: 'announcements',
   message: 'messages',
   program: 'programs',
 };
@@ -39,7 +40,7 @@ export async function sendPushToUser(
     if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) return { sent: 0 };
 
     // Check notification preferences (announcements bypass preferences)
-    if (payload.type && payload.type !== 'announcement') {
+    if (payload.type) {
       const prefCol = TYPE_TO_PREF[payload.type];
       if (prefCol) {
         const { data: prefs } = await supabase

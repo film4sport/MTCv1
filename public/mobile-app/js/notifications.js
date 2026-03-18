@@ -487,7 +487,7 @@
     // Add to notifications screen (optimistic local UI)
     addAnnouncementNotification(title, message, recipientLabel);
 
-    // Announcements are notifications/banners only — not added to Messages
+    // Server delivery now fans announcements out to notifications plus inbox messages for opted-in members
 
     // Show push notification
     showPushNotification('\uD83D\uDCE2 ' + title, message, null, {

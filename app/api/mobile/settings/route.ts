@@ -38,14 +38,15 @@ export async function PATCH(request: Request) {
         .single();
 
       if (!data) {
-        return NextResponse.json({ bookings: true, events: true, partners: true, messages: true, programs: true });
+        return NextResponse.json({ bookings: true, events: true, partners: true, announcements: true, messages: true, programs: true });
       }
       return NextResponse.json({
-        bookings: data.bookings,
-        events: data.events,
-        partners: data.partners,
-        messages: data.messages,
-        programs: data.programs,
+        bookings: data.bookings ?? true,
+        events: data.events ?? true,
+        partners: data.partners ?? true,
+        announcements: data.announcements ?? true,
+        messages: data.messages ?? true,
+        programs: data.programs ?? true,
       });
     }
 
@@ -60,6 +61,7 @@ export async function PATCH(request: Request) {
         bookings: prefs.bookings !== undefined ? !!prefs.bookings : true,
         events: prefs.events !== undefined ? !!prefs.events : true,
         partners: prefs.partners !== undefined ? !!prefs.partners : true,
+        announcements: prefs.announcements !== undefined ? !!prefs.announcements : true,
         messages: prefs.messages !== undefined ? !!prefs.messages : true,
         programs: prefs.programs !== undefined ? !!prefs.programs : true,
       }, { onConflict: 'user_id' });

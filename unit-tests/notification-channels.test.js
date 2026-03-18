@@ -98,6 +98,27 @@ describe('Notification Channels — Court Blocks', () => {
   });
 });
 
+describe('Notification Channels — Announcements', () => {
+  const content = readRoute('announcements');
+
+  it('sends bell notification on announcement create', () => {
+    expect(content).toMatch(/notifications.*insert/);
+  });
+
+  it('sends push notification on announcement create', () => {
+    expect(content).toContain('sendPushToUser');
+  });
+
+  it('sends inbox message on announcement create', () => {
+    expect(content).toMatch(/messages.*insert|sendAnnouncementInboxMessage/);
+  });
+
+  it('respects announcement notification preferences', () => {
+    expect(content).toContain("announcements");
+    expect(content).toContain("preferenceMap.get(member.id) !== false");
+  });
+});
+
 describe('Notification Channels — Realtime Parity', () => {
   const realtimeContent = readFileSync(resolve(root, 'public/mobile-app/js/realtime-sync.js'), 'utf-8');
   const storeContent = readFileSync(resolve(root, 'app/dashboard/lib/store.tsx'), 'utf-8');
