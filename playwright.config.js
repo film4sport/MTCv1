@@ -19,6 +19,7 @@ const DESKTOP_ONLY_TESTS = [
 
 // All other tests run on all 3 Chromium viewports for responsive coverage
 const RESPONSIVE_TESTS = [
+  'chromium-compat.spec.js',
   'landing.spec.js',
   'landing-gallery.spec.js',
   'signup.spec.js',
