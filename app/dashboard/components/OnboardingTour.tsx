@@ -213,7 +213,8 @@ export default function OnboardingTour() {
       const key = `mtc-onboarding-done-${currentUser.id}`;
       if (localStorage.getItem(key) === 'true') return;
     } catch { /* ignore */ }
-    const timer = setTimeout(() => setVisible(true), 1200);
+    const delay = typeof window !== 'undefined' && window.innerWidth < 768 ? 1800 : 4200;
+    const timer = setTimeout(() => setVisible(true), delay);
     return () => clearTimeout(timer);
   }, [isLoaded, currentUser?.id, onboardingDone]);
 
@@ -287,9 +288,7 @@ export default function OnboardingTour() {
       <div
         style={{
           position: 'fixed', inset: 0, zIndex: 9998,
-          backgroundColor: 'rgba(26, 31, 18, 0.5)',
-          backdropFilter: 'blur(8px)',
-          WebkitBackdropFilter: 'blur(8px)',
+          backgroundColor: 'rgba(26, 31, 18, 0.18)',
           animation: 'obFadeIn 0.3s ease-out',
         }}
         onClick={finish}
