@@ -33,6 +33,7 @@ const RESPONSIVE_TESTS = [
 // Landing page doesn't need WebKit: it looks fine and rarely changes.
 // Focus WebKit budget on the mobile PWA (iPhone/iPad) where Safari bugs actually bite.
 const WEBKIT_RESPONSIVE_TESTS = [
+  'apple-compat.spec.js',
   'signup.spec.js',
   'verify-fixes.spec.js',
 ];
