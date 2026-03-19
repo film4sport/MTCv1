@@ -350,8 +350,9 @@
 
   /** Renders RSVP/event booking cards into the My Bookings screen */
   MTC.fn.renderEventBookings = function() {
+    let container = null;
     try {
-    const container = document.getElementById('upcomingBookings');
+    container = document.getElementById('upcomingBookings');
     if (!container) return;
 
     const oldCards = container.querySelectorAll('.event-booking-card');
@@ -409,7 +410,7 @@
           '</button>' +
         '</div>';
     }
-    } catch(e) { MTC.warn('renderEventBookings error:', e); MTC.fn.renderError(container, 'Could not load event bookings. Please try again.'); }
+    } catch(e) { MTC.warn('renderEventBookings error:', e); if (container && MTC.fn.renderError) MTC.fn.renderError(container, 'Could not load event bookings. Please try again.'); }
   };
   window.renderEventBookings = MTC.fn.renderEventBookings;
 

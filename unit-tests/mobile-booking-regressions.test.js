@@ -4,6 +4,7 @@ import { resolve } from 'path';
 
 const root = resolve(__dirname, '..');
 const booking = readFileSync(resolve(root, 'public/mobile-app/js/booking.js'), 'utf-8');
+const myBookings = readFileSync(resolve(root, 'public/mobile-app/js/mybookings.js'), 'utf-8');
 
 describe('Mobile booking regressions', () => {
   it('replaces stale booking state instead of merging old data forward', () => {
@@ -23,5 +24,10 @@ describe('Mobile booking regressions', () => {
 
   it('re-renders the booking system after booking or court-block updates', () => {
     expect(booking).toContain("try { initBookingSystem(); } catch(e) { /* may not be on booking screen */ }");
+  });
+
+  it('keeps the my bookings error fallback from crashing on a scoped container reference', () => {
+    expect(myBookings).toContain('let container = null;');
+    expect(myBookings).toContain("if (container && MTC.fn.renderError) MTC.fn.renderError(container, 'Could not load event bookings. Please try again.');");
   });
 });

@@ -221,18 +221,18 @@
           // Update card's data attribute
           var card = document.querySelector('[data-request-id="' + localId + '"]');
           if (card) card.setAttribute('data-server-id', result.data.id);
-          showToast('Partner request posted!');
+      showToast('Partner request sent');
         } else {
           showToast(result.data && result.data.error ? result.data.error : 'Failed to post request', 'error');
           // Remove optimistic card
           window.removePartnerRequest(localId);
         }
       }).catch(function() {
-        showToast('Request saved locally — will sync when online');
+      showToast('Partner request saved locally — it will sync when you’re back online');
       });
     } else {
       // Offline: keep in localStorage, will be visible only to this user
-      showToast('Partner request saved (offline)');
+      showToast('Partner request saved offline');
     }
   };
 
@@ -313,7 +313,7 @@
     if (serverId && typeof window.removeFromPartnerPool === 'function') {
       window.removeFromPartnerPool(serverId);
     }
-    showToast('Removing request...');
+    showToast('Removing partner request...');
 
     // Delete from Supabase with rollback
     if (serverId && MTC.fn.apiRequest && MTC.getToken()) {
@@ -322,7 +322,7 @@
         body: JSON.stringify({ partnerId: serverId })
       }).then(function(res) {
         if (!res.ok) throw new Error((res.data && res.data.error) || 'Delete failed');
-        showToast('Request removed');
+        showToast('Partner request removed');
       }).catch(function(err) {
         // Rollback: restore card + localStorage
         MTC.storage.set('mtc-partner-requests', prevRequests);
@@ -330,12 +330,12 @@
           if (cardNextSibling) cardParent.insertBefore(card, cardNextSibling);
           else cardParent.appendChild(card);
         }
-        showToast('Failed to remove request. Please try again.', 'error');
+        showToast('Failed to remove the partner request. Please try again.', 'error');
         MTC.warn('[MTC] removePartnerRequest failed:', err);
       });
     } else {
       // No server ID (local-only) — keep removal, no API needed
-      showToast('Request removed');
+      showToast('Partner request removed');
     }
   };
 

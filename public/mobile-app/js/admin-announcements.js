@@ -18,7 +18,7 @@
         var container = document.getElementById('adminAnnouncementHistory');
         if (!container) return;
         var anns = Array.isArray(data) ? data : (data.announcements || []);
-        if (!anns.length) { container.innerHTML = '<div class="admin-empty-state">No announcements sent yet</div>'; return; }
+        if (!anns.length) { container.innerHTML = '<div class="admin-empty-state">No announcements yet. Post one above when you need to update members.</div>'; return; }
         container.innerHTML = anns.map(function(a) {
           var icon = a.type === 'urgent' ? '<span style="color:#ef4444">URGENT</span>' : a.type === 'warning' ? '<span style="color:#f59e0b">WARNING</span>' : '<span style="color:#3b82f6">INFO</span>';
           var audience = a.audience && a.audience !== 'all' ? ' <span class="admin-badge admin-badge-team">' + a.audience + '</span>' : '';
@@ -39,7 +39,7 @@
     var msg = document.getElementById('adminAnnMessage');
     var type = document.getElementById('adminAnnType');
     var audience = document.getElementById('adminAnnAudience');
-    if (!msg || !msg.value.trim()) { showToast('Write an announcement message'); return; }
+    if (!msg || !msg.value.trim()) { showToast('Write an announcement message'); if (msg) msg.focus(); return; }
     var token = MTC.getToken();
     var title = document.getElementById('adminAnnTitle');
     fetch('/api/mobile/announcements', {
@@ -55,7 +55,7 @@
       if (!r.ok) return r.json().then(function(err) { throw new Error(err.error || 'Failed'); });
       msg.value = '';
       if (title) title.value = '';
-      showToast('Announcement posted');
+      showToast('Announcement sent');
       MTC.admin.dataLoaded.announcements = false;
       loadAnnouncementHistory();
     }).catch(function(e) { showToast(e.message || 'Failed to post announcement'); });
@@ -72,7 +72,7 @@
       if (!r.ok) return r.json().then(function(err) { throw new Error(err.error || 'Failed'); });
       MTC.admin.dataLoaded.announcements = false;
       loadAnnouncementHistory();
-      showToast('Announcement deleted');
+      showToast('Announcement removed');
     }).catch(function(e) { showToast(e.message || 'Failed to delete announcement'); });
   };
 
@@ -92,7 +92,7 @@
         body: JSON.stringify({ text: title + ': ' + message, type: 'info', title: title, audience: 'all' })
       }).then(function(res) {
         if (res.ok) {
-          showToast('Announcement posted!');
+          showToast('Announcement sent');
           document.getElementById('announcementTitle').value = '';
           document.getElementById('announcementMessage').value = '';
         } else {
@@ -240,7 +240,7 @@
       method: 'POST',
       body: JSON.stringify({ text: title + ': ' + message, type: 'coaching' })
     }).then(function() {
-      showToast('Announcement sent successfully!');
+      showToast('Announcement sent');
     }).catch(function(err) {
       MTC.warn(' sendCoachAnnouncement API error:', err);
       showToast('Announcement saved locally -- sync may be delayed', 'warning');

@@ -61,7 +61,7 @@
       return true;
     });
     if (!filtered.length) {
-      container.innerHTML = '<div class="admin-empty-state">No members found</div>';
+      container.innerHTML = '<div class="admin-empty-state">' + (MTC.admin.searchTerm || MTC.admin.teamFilter !== 'all' ? 'No members match this filter yet' : 'No members yet') + '</div>';
       return;
     }
     var currentUserId = MTC.state.currentUser && MTC.state.currentUser.userId;

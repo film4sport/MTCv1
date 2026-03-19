@@ -96,11 +96,22 @@ async function setupAuthenticatedMobile(page, apiOverrides = {}) {
 
 const eventsSource = readFileSync(resolve(__dirname, '../public/mobile-app/js/events.js'), 'utf8');
 const bookingSource = readFileSync(resolve(__dirname, '../public/mobile-app/js/booking.js'), 'utf8');
+const messagingSource = readFileSync(resolve(__dirname, '../public/mobile-app/js/messaging.js'), 'utf8');
 const toggleEventRsvpStart = eventsSource.indexOf('function toggleEventRsvp(eventId) {');
 const toggleEventRsvpEnd = eventsSource.indexOf('// Coach registration modal removed');
 const toggleEventRsvpSource = toggleEventRsvpStart >= 0 && toggleEventRsvpEnd > toggleEventRsvpStart
   ? eventsSource.slice(toggleEventRsvpStart, toggleEventRsvpEnd)
   : eventsSource;
+const registerForGridEventStart = bookingSource.indexOf('function registerForGridEvent(dateStr,startTime,court) {');
+const registerForGridEventEnd = bookingSource.indexOf('// ============================================\n  // CALENDAR VIEW - Enhanced');
+const registerForGridEventSource = registerForGridEventStart >= 0 && registerForGridEventEnd > registerForGridEventStart
+  ? bookingSource.slice(registerForGridEventStart, registerForGridEventEnd)
+  : bookingSource;
+const sendMessageStart = messagingSource.indexOf('window.sendMessage = function() {');
+const sendMessageEnd = messagingSource.indexOf('// simulateReply removed');
+const sendMessageSource = sendMessageStart >= 0 && sendMessageEnd > sendMessageStart
+  ? messagingSource.slice(sendMessageStart, sendMessageEnd)
+  : messagingSource;
 
 async function navigateToScreen(page, screen) {
   const resolvedScreen = screen === 'events'
@@ -130,6 +141,31 @@ async function navigateToScreen(page, screen) {
   throw lastError;
 }
 
+async function prepareAvailableBookingSlot(page) {
+  await page.evaluate(() => {
+    if (!(typeof MTC !== 'undefined' && MTC.config && Array.isArray(MTC.config.courts))) return;
+    if (typeof window.updateBookingsFromAPI === 'function') window.updateBookingsFromAPI([]);
+    if (typeof window.updateCourtBlocksFromAPI === 'function') window.updateCourtBlocksFromAPI([]);
+    if (typeof window.updateCourtsFromAPI === 'function') {
+      window.updateCourtsFromAPI(MTC.config.courts.map(function(court) {
+        return { id: court.id, status: 'available' };
+      }));
+    }
+    if (typeof window.selectWeekDay === 'function') window.selectWeekDay(1);
+    if (typeof window.initBookingSystem === 'function') window.initBookingSystem();
+  });
+
+  await page.waitForFunction(() => document.querySelectorAll('.weekly-slot.available').length > 0, null, { timeout: 5000 });
+  await page.evaluate(() => {
+    const slot = document.querySelector('.weekly-slot.available');
+    if (slot) slot.click();
+  });
+  await page.waitForFunction(() => {
+    const modal = document.getElementById('bookingModal');
+    return !!(modal && modal.classList.contains('active'));
+  }, null, { timeout: 5000 });
+}
+
 // ============================================
 // BOOKING FLOW TESTS
 // ============================================
@@ -153,54 +189,18 @@ test.describe('Core Flow — Booking', () => {
       }
     });
     await navigateToScreen(page, 'book');
-
-    await page.evaluate(() => {
-      if (typeof selectWeekDay === 'function') selectWeekDay(1);
-    });
-    await page.waitForTimeout(500);
-
-    const slotCount = await page.evaluate(() => document.querySelectorAll('.weekly-slot.available').length);
-    if (slotCount === 0) { test.skip(); return; }
-
-    // Click an available slot
-    await page.evaluate(() => {
-      const slot = document.querySelector('.weekly-slot.available');
-      if (slot) slot.click();
-    });
-    await page.waitForTimeout(500);
+    await prepareAvailableBookingSlot(page);
 
     const confirmBtn = page.locator('.booking-confirm-btn');
-    if (await confirmBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
-      await confirmBtn.click();
-      await page.waitForTimeout(2000);
-
-      // After failure, button should be re-enabled (not stuck in loading)
-      const isDisabled = await confirmBtn.evaluate(el => el.disabled).catch(() => true);
-      expect(isDisabled).toBe(false);
-
-      // Error toast should have appeared
-      const toastShown = await page.evaluate(() => {
-        const toasts = document.querySelectorAll('.toast, .toast-message');
-        return Array.from(toasts).some(t => t.textContent.toLowerCase().includes('fail') || t.textContent.toLowerCase().includes('error'));
-      });
-      // Toast may have auto-dismissed — just verify button recovered
-    }
+    await expect(confirmBtn).toBeVisible();
+    await confirmBtn.click();
+    await expect.poll(async () => confirmBtn.evaluate(el => el.disabled).catch(() => true), { timeout: 5000 }).toBe(false);
   });
 
   test('booking modal has all required fields', async ({ page }) => {
     await setupAuthenticatedMobile(page);
     await navigateToScreen(page, 'book');
-
-    await page.evaluate(() => {
-      if (typeof selectWeekDay === 'function') selectWeekDay(1);
-    });
-    await page.waitForTimeout(500);
-
-    await page.evaluate(() => {
-      const slot = document.querySelector('.weekly-slot.available');
-      if (slot) slot.click();
-    });
-    await page.waitForTimeout(500);
+    await prepareAvailableBookingSlot(page);
 
     // Verify modal content
     const modalContent = await page.evaluate(() => {
@@ -267,41 +267,10 @@ test.describe('Core Flow — Messaging', () => {
   });
 
   test('sendMessage captures server ID for later deletion', async ({ page }) => {
-    let capturedPostBody = null;
-    const serverMessageId = 'server-msg-' + Date.now();
-
-    await setupAuthenticatedMobile(page, {
-      '/conversations': (route, method) => {
-        if (method === 'POST') {
-          capturedPostBody = route.request().postDataJSON();
-          route.fulfill({
-            status: 200, contentType: 'application/json',
-            body: JSON.stringify({ success: true, messageId: serverMessageId }),
-          });
-        } else if (method === 'GET') {
-          route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
-        } else {
-          route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ success: true }) });
-        }
-      }
-    });
-    await navigateToScreen(page, 'messages');
-
-    // Send a message via JS (simulating the send flow)
-    const msgSent = await page.evaluate(() => {
-      if (typeof MTC === 'undefined' || !MTC.fn) return false;
-      // Set up a conversation context
-      var conversations = MTC.storage.get('mtc-conversations', {});
-      conversations['user-002'] = conversations['user-002'] || [];
-      MTC.fn.saveConversations && MTC.fn.saveConversations();
-      return true;
-    });
-
-    // Verify the sendMessage._sending flag exists (double-tap prevention)
-    const hasSendingFlag = await page.evaluate(() => {
-      return typeof sendMessage === 'function';
-    });
-    expect(hasSendingFlag).toBe(true);
+    expect(sendMessageSource).toContain("MTC.fn.apiRequest('/mobile/conversations'");
+    expect(sendMessageSource).toContain("body: JSON.stringify({ toId: currentConversation, text: text })");
+    expect(sendMessageSource).toContain('localMsg.id = res.data.messageId;');
+    expect(sendMessageSource).toContain('MTC.fn.saveConversations();');
   });
 
   test('sendMessage._sending prevents double-tap', async ({ page }) => {
@@ -544,18 +513,9 @@ test.describe('Core Flow — Grid Event Registration', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
   test('registerForGridEvent calls API to persist RSVP', async ({ page }) => {
-    await setupAuthenticatedMobile(page);
-    await navigateToScreen(page, 'book');
-
-    // Verify the function makes an API call
-    const callsApi = await page.evaluate(() => {
-      if (typeof registerForGridEvent === 'function') {
-        var src = registerForGridEvent.toString();
-        return src.includes('apiRequest') && src.includes('/mobile/events');
-      }
-      return false;
-    });
-    expect(callsApi).toBe(true);
+    expect(registerForGridEventSource).toContain("MTC.fn.apiRequest('/mobile/events'");
+    expect(registerForGridEventSource).toContain("method: 'POST'");
+    expect(registerForGridEventSource).toContain('body: JSON.stringify({ eventId: eventId })');
   });
 });
 

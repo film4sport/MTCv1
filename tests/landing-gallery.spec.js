@@ -6,15 +6,19 @@ const { test, expect } = require('@playwright/test');
  * Tests keyboard navigation, lightbox open/close, focus trap, Escape key
  */
 
+async function gotoGallery(page) {
+  await page.goto('/', { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await page.waitForLoadState('load').catch(() => {});
+  await expect(page.locator('#gallery')).toBeAttached();
+  await page.locator('#gallery').scrollIntoViewIfNeeded();
+}
+
 test.describe('Gallery & Lightbox', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
-    await page.waitForTimeout(2500); // Loader
+    await gotoGallery(page);
   });
 
   test('gallery section renders with slides and nav buttons', async ({ page }) => {
-    await page.locator('#gallery').scrollIntoViewIfNeeded();
-    await page.waitForTimeout(500);
     const slides = page.locator('.gallery-slide');
     const count = await slides.count();
     expect(count).toBeGreaterThanOrEqual(5);
@@ -23,8 +27,6 @@ test.describe('Gallery & Lightbox', () => {
   });
 
   test('gallery slides are keyboard accessible (Enter opens lightbox)', async ({ page }) => {
-    await page.locator('#gallery').scrollIntoViewIfNeeded();
-    await page.waitForTimeout(500);
     // Focus first slide
     const firstSlide = page.locator('.gallery-slide').first();
     await firstSlide.focus();
@@ -36,8 +38,6 @@ test.describe('Gallery & Lightbox', () => {
   });
 
   test('gallery slides are keyboard accessible (Space opens lightbox)', async ({ page }) => {
-    await page.locator('#gallery').scrollIntoViewIfNeeded();
-    await page.waitForTimeout(500);
     const firstSlide = page.locator('.gallery-slide').first();
     await firstSlide.focus();
     await page.keyboard.press('Space');
@@ -47,8 +47,6 @@ test.describe('Gallery & Lightbox', () => {
   });
 
   test('lightbox closes on Escape key', async ({ page }) => {
-    await page.locator('#gallery').scrollIntoViewIfNeeded();
-    await page.waitForTimeout(500);
     // Open lightbox by clicking first slide
     await page.locator('.gallery-slide').first().click();
     await page.waitForTimeout(300);
@@ -61,8 +59,6 @@ test.describe('Gallery & Lightbox', () => {
   });
 
   test('lightbox closes on backdrop click', async ({ page }) => {
-    await page.locator('#gallery').scrollIntoViewIfNeeded();
-    await page.waitForTimeout(500);
     await page.locator('.gallery-slide').first().click();
     await page.waitForTimeout(300);
     await expect(page.locator('.lightbox.active')).toBeVisible();
@@ -78,8 +74,6 @@ test.describe('Gallery & Lightbox', () => {
   });
 
   test('lightbox close button is focusable when lightbox opens', async ({ page }) => {
-    await page.locator('#gallery').scrollIntoViewIfNeeded();
-    await page.waitForTimeout(500);
     await page.locator('.gallery-slide').first().click();
     await page.waitForTimeout(600);
     // Close button should be visible in the open lightbox
@@ -92,8 +86,6 @@ test.describe('Gallery & Lightbox', () => {
   });
 
   test('lightbox has proper ARIA attributes', async ({ page }) => {
-    await page.locator('#gallery').scrollIntoViewIfNeeded();
-    await page.waitForTimeout(500);
     await page.locator('.gallery-slide').first().click();
     await page.waitForTimeout(300);
     const lightbox = page.locator('.lightbox.active');
@@ -102,8 +94,6 @@ test.describe('Gallery & Lightbox', () => {
   });
 
   test('gallery next/prev buttons navigate slides', async ({ page }) => {
-    await page.locator('#gallery').scrollIntoViewIfNeeded();
-    await page.waitForTimeout(500);
     const nextBtn = page.locator('.gallery-nav.next');
     // Get initial active dot index
     const initialIndex = await page.evaluate(() => {
@@ -122,8 +112,6 @@ test.describe('Gallery & Lightbox', () => {
   });
 
   test('gallery dots navigation works', async ({ page }) => {
-    await page.locator('#gallery').scrollIntoViewIfNeeded();
-    await page.waitForTimeout(500);
     const dots = page.locator('.gallery-dot');
     const dotCount = await dots.count();
     expect(dotCount).toBeGreaterThanOrEqual(2);

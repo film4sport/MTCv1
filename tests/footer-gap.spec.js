@@ -1,10 +1,15 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
 
+async function gotoLanding(page) {
+  await page.goto('/', { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await page.waitForLoadState('load').catch(() => {});
+  await expect(page.locator('footer')).toBeAttached();
+}
+
 test.describe('Footer bottom whitespace check', () => {
   test('no visible whitespace gap below footer', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
-    await page.waitForTimeout(2500); // wait for loader
+    await gotoLanding(page);
 
     // Scroll to the very bottom
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
@@ -24,8 +29,7 @@ test.describe('Footer bottom whitespace check', () => {
   });
 
   test('footer padding-bottom is not inflated by safe-area rule', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
-    await page.waitForTimeout(2500);
+    await gotoLanding(page);
 
     const paddingBottom = await page.evaluate(() => {
       const f = document.querySelector('footer');

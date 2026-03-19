@@ -106,8 +106,12 @@
   function refetchAnnouncements() {
     if (!MTC.fn.loadFromAPI) return;
     MTC.fn.loadFromAPI('/mobile/announcements', 'mtc-api-announcements', null).then(function(announcements) {
-      if (announcements && typeof window.renderAnnouncements === 'function') {
-        window.renderAnnouncements(announcements);
+      if (Array.isArray(announcements)) {
+        if (typeof window.updateAnnouncementsFromAPI === 'function') {
+          window.updateAnnouncementsFromAPI(announcements);
+        } else if (typeof window.renderAnnouncements === 'function') {
+          window.renderAnnouncements(announcements);
+        }
       }
       _lastSyncTimestamps.announcements = Date.now();
       updateStaleIndicators();

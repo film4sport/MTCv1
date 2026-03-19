@@ -27,6 +27,11 @@ describe('Mobile realtime sync regressions', () => {
     expect(eventsJs).toContain('delete clubEventsData[eventId];');
     expect(eventsJs).toContain('serverManagedEventIds = nextServerEventIds;');
   });
+
+  it('routes announcement realtime refresh through the live announcement updater', () => {
+    expect(realtimeSync).toContain("if (typeof window.updateAnnouncementsFromAPI === 'function') {");
+    expect(realtimeSync).toContain('window.updateAnnouncementsFromAPI(announcements);');
+  });
 });
 
 describe('Programs API response shape regressions', () => {

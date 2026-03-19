@@ -1,17 +1,26 @@
 const { test, expect } = require('@playwright/test');
 
+async function gotoLanding(page) {
+  await page.goto('/', { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await page.waitForLoadState('load').catch(() => {});
+  await expect(page.locator('.navbar')).toBeAttached();
+  await expect(page.locator('.hero-content').first()).toBeAttached();
+}
+
+async function gotoLandingSection(page, sectionSelector) {
+  await gotoLanding(page);
+  await page.locator(sectionSelector).scrollIntoViewIfNeeded();
+}
+
 test.describe('Landing Page - Load & Structure', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
-    // Wait for loader to finish
-    await page.waitForTimeout(2500);
+    await gotoLanding(page);
   });
 
   test('page loads without console errors', async ({ page }) => {
     const errors = [];
     page.on('pageerror', (err) => errors.push(err.message));
-    await page.goto('/', { waitUntil: 'networkidle' });
-    await page.waitForTimeout(2000);
+    await gotoLanding(page);
     expect(errors).toEqual([]);
   });
 
@@ -36,8 +45,7 @@ test.describe('Landing Page - Load & Structure', () => {
 
 test.describe('Navbar', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
-    await page.waitForTimeout(2500);
+    await gotoLanding(page);
   });
 
   test('navbar exists and is fixed', async ({ page }) => {
@@ -69,8 +77,7 @@ test.describe('Navbar', () => {
 
 test.describe('Hero Section', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
-    await page.waitForTimeout(2500);
+    await gotoLanding(page);
   });
 
   test('hero section renders with parallax background', async ({ page }) => {
@@ -108,10 +115,7 @@ test.describe('Hero Section', () => {
 
 test.describe('Events Section', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
-    await page.waitForTimeout(2500);
-    await page.locator('#events').scrollIntoViewIfNeeded();
-    await page.waitForTimeout(500);
+    await gotoLandingSection(page, '#events');
   });
 
   test('events section renders with cream background', async ({ page }) => {
@@ -136,10 +140,7 @@ test.describe('Events Section', () => {
 
 test.describe('Schedule / Calendar Section', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
-    await page.waitForTimeout(2500);
-    await page.locator('#schedule').scrollIntoViewIfNeeded();
-    await page.waitForTimeout(500);
+    await gotoLandingSection(page, '#schedule');
   });
 
   test('schedule section renders', async ({ page }) => {
@@ -183,8 +184,7 @@ test.describe('Schedule / Calendar Section', () => {
 
 test.describe('Partners Section', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
-    await page.waitForTimeout(2500);
+    await gotoLanding(page);
   });
 
   test('3 partner logos are displayed', async ({ page }) => {
@@ -202,10 +202,7 @@ test.describe('Partners Section', () => {
 
 test.describe('Gallery Section', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
-    await page.waitForTimeout(2500);
-    await page.locator('#gallery').scrollIntoViewIfNeeded();
-    await page.waitForTimeout(500);
+    await gotoLandingSection(page, '#gallery');
   });
 
   test('gallery section renders', async ({ page }) => {
@@ -240,8 +237,7 @@ test.describe('Gallery Section', () => {
 
 test.describe('Wave Dividers', () => {
   test('wave divider exists on the page', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
-    await page.waitForTimeout(2500);
+    await gotoLanding(page);
     const dividers = page.locator('.wave-divider');
     const count = await dividers.count();
     expect(count).toBeGreaterThanOrEqual(1);
@@ -250,10 +246,7 @@ test.describe('Wave Dividers', () => {
 
 test.describe('Footer', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
-    await page.waitForTimeout(2500);
-    await page.locator('footer').scrollIntoViewIfNeeded();
-    await page.waitForTimeout(500);
+    await gotoLandingSection(page, 'footer');
   });
 
   test('footer has watermark text', async ({ page }) => {
@@ -285,8 +278,7 @@ test.describe('Footer', () => {
 
 test.describe('No ClubSpark Links - Full Page', () => {
   test('zero ClubSpark links on entire page', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
-    await page.waitForTimeout(2500);
+    await gotoLanding(page);
     const clubsparkLinks = await page.locator('a[href*="clubspark"]').count();
     expect(clubsparkLinks).toBe(0);
   });
