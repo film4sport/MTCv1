@@ -62,6 +62,7 @@
       renderCourtUsage();
       renderPartnerStats(partners);
       renderRevenueBreakdown();
+      renderMemberActivity();
       renderMonthlyTrends();
 
       var exportPicker = document.getElementById('exportMonthPicker');
@@ -116,6 +117,9 @@
     el = document.getElementById('statPartnerRequests'); if (el) el.textContent = total;
     el = document.getElementById('statPartnerMatched'); if (el) el.textContent = matched;
     el = document.getElementById('statPartnerRate'); if (el) el.textContent = rate + '%';
+
+    el = document.getElementById('partnerStatsSummary');
+    if (el) el.textContent = 'Matched ' + matched + ' of ' + total + ' requests';
   }
 
   function renderPeakTimes() {
@@ -155,6 +159,9 @@
     el = document.getElementById('usageToday'); if (el) el.textContent = usageToday;
     el = document.getElementById('usageWeek'); if (el) el.textContent = usageWeek;
     el = document.getElementById('usageMonth'); if (el) el.textContent = usageMonth;
+
+    el = document.getElementById('courtUsageSummary');
+    if (el) el.textContent = 'Today ' + usageToday + ' • Week ' + usageWeek + ' • Month ' + usageMonth;
   }
 
   function renderRevenueBreakdown() {
@@ -174,7 +181,13 @@
 
     var total = 0;
     Object.keys(categories).forEach(function(k) { total += categories[k].amount; });
-    if (total === 0) { barEl.innerHTML = ''; legendEl.innerHTML = '<div class="admin-empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>No revenue data yet</div>'; return; }
+    if (total === 0) {
+      var emptySummaryEl = document.getElementById('revenueSummary');
+      if (emptySummaryEl) emptySummaryEl.textContent = 'No revenue data yet';
+      barEl.innerHTML = '';
+      legendEl.innerHTML = '<div class="admin-empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>No revenue data yet</div>';
+      return;
+    }
 
     var colors = { adult: '#00d4ff', family: '#c8ff00', junior: '#ff5a5f' };
     var barHtml = '';
@@ -189,6 +202,9 @@
 
     barEl.innerHTML = barHtml;
     legendEl.innerHTML = legendHtml;
+
+    var summaryEl = document.getElementById('revenueSummary');
+    if (summaryEl) summaryEl.textContent = 'Membership revenue total $' + total;
   }
 
   function renderMemberActivity() {
@@ -204,6 +220,9 @@
     var avg = MTC.admin.members.length > 0 ? Math.round((confirmed.length / MTC.admin.members.length) * 10) / 10 : 0;
     el = document.getElementById('statAvgBookings');
     if (el) el.textContent = avg;
+
+    var summaryEl = document.getElementById('memberActivitySummary');
+    if (summaryEl) summaryEl.textContent = 'New members ' + newMembers.length + ' • Avg bookings ' + avg;
 
     var container = document.getElementById('mostActiveList');
     if (!container) return;
@@ -248,6 +267,10 @@
       var heightPct = Math.round((t.bookings / maxBookings) * 100);
       return '<div class="admin-trend-col"><span class="admin-trend-count">' + t.bookings + '</span><div class="admin-trend-bar" style="height:' + Math.max(heightPct, 5) + '%"></div><span class="admin-trend-label">' + t.month + '</span></div>';
     }).join('') + '</div>';
+
+    var latest = trends[trends.length - 1];
+    var summaryEl = document.getElementById('monthlyTrendSummary');
+    if (summaryEl && latest) summaryEl.textContent = latest.month + ': ' + latest.bookings + ' bookings';
   }
 
   // Gate Code

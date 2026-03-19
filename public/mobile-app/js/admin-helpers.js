@@ -65,7 +65,7 @@
   MTC.admin.downloadCSV = downloadCSV;
 
   function getExportFromDate() {
-    var el = document.getElementById('adminExportFromDate');
+    var el = document.getElementById('adminExportFromDate') || document.getElementById('exportMonthPicker');
     return el && el.value ? el.value : '';
   }
   MTC.admin.getExportFromDate = getExportFromDate;

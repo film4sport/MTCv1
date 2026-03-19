@@ -16,6 +16,7 @@
   function getCalendarEvents() {
     const events = {};
     try {
+    const todayStr = new Date().toISOString().split('T')[0];
 
     // Helper to add an event to a date
     function addEvent(dateStr, ev) {
@@ -27,7 +28,7 @@
     if (typeof clubEventsData !== 'undefined' && typeof userRsvps !== 'undefined') {
       userRsvps.forEach(function(eventId) {
         const ev = clubEventsData[eventId];
-        if (!ev) return;
+        if (!ev || !ev.date || ev.date < todayStr) return;
         addEvent(ev.date, {
           title: ev.title,
           time: ev.time.split(' - ')[0],
@@ -48,7 +49,7 @@
         // Need a real date for the calendar
         const dateStr = ev.date;
         // If date looks like a real date (YYYY-MM-DD), add it
-        if (dateStr && /^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+        if (dateStr && dateStr >= todayStr && /^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
           addEvent(dateStr, {
             title: ev.title,
             time: (ev.time || 'TBD').split(' - ')[0],
@@ -376,29 +377,64 @@
   /** Renders upcoming/past booking items in the My Schedule screen */
   MTC.fn.renderScheduleBookings = function() {
     try {
-    const container = document.getElementById('scheduleEventBookings');
-    if (!container) return;
-    container.innerHTML = '';
+    const upcomingContainer = document.getElementById('scheduleEventBookings');
+    const pastContainer = document.getElementById('schedulePastBookings');
+    if (!upcomingContainer || !pastContainer) return;
+    upcomingContainer.innerHTML = '';
+    pastContainer.innerHTML = '';
 
-    if (typeof eventBookings === 'undefined' || eventBookings.length === 0) return;
+    if (typeof eventBookings === 'undefined' || eventBookings.length === 0) {
+      renderScheduleEmptyState(upcomingContainer, 'NO UPCOMING BOOKINGS', 'Book a court to see it in your schedule');
+      renderScheduleEmptyState(pastContainer, 'NO PAST EVENTS', 'Your completed bookings and programs will appear here');
+      return;
+    }
 
     // Filter out club events - schedule shows personal items only (bookings, partner matches, programs)
     const sorted = eventBookings.slice().filter(function(ev) {
-      return ev.type !== 'event' && ev.type !== 'interclub';
+      return ev.type !== 'event' && ev.type !== 'interclub' && ev.date && /^\d{4}-\d{2}-\d{2}$/.test(ev.date);
     }).sort(function(a, b) {
       return (a.date || '').localeCompare(b.date || '');
     });
 
     if (sorted.length === 0) {
-      container.innerHTML = '<div class="empty-state"><div class="empty-state-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></div><div class="empty-state-title">NO UPCOMING BOOKINGS</div><div class="empty-state-text">Book a court to see it in your schedule</div><button class="empty-state-btn" onclick="navigateTo(\'book\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>Book a Court</button></div>';
+      renderScheduleEmptyState(upcomingContainer, 'NO UPCOMING BOOKINGS', 'Book a court to see it in your schedule');
+      renderScheduleEmptyState(pastContainer, 'NO PAST EVENTS', 'Your completed bookings and programs will appear here');
       return;
     }
 
-    // Section header
-    container.insertAdjacentHTML('beforeend',
-      '<div class="section-header"><div class="section-title">MY BOOKINGS</div></div>');
+    const todayStr = new Date().toISOString().split('T')[0];
+    const upcoming = sorted.filter(function(ev) { return ev.date >= todayStr; });
+    const past = sorted.filter(function(ev) { return ev.date < todayStr; }).reverse();
 
-    sorted.forEach(function(ev) {
+    if (upcoming.length) {
+      upcomingContainer.insertAdjacentHTML('beforeend',
+        '<div class="section-header"><div class="section-title">UPCOMING</div></div>');
+    } else {
+      renderScheduleEmptyState(upcomingContainer, 'NO UPCOMING BOOKINGS', 'Book a court to see it in your schedule');
+    }
+
+    if (past.length) {
+      pastContainer.insertAdjacentHTML('beforeend',
+        '<div class="section-header"><div class="section-title">PAST</div></div>');
+    } else {
+      renderScheduleEmptyState(pastContainer, 'NO PAST EVENTS', 'Your completed bookings and programs will appear here');
+    }
+
+    upcoming.forEach(function(ev) {
+      renderScheduleItem(upcomingContainer, ev, false);
+    });
+    past.forEach(function(ev) {
+      renderScheduleItem(pastContainer, ev, true);
+    });
+    } catch(e) { MTC.warn('renderScheduleBookings error:', e); }
+  };
+  window.renderScheduleBookings = MTC.fn.renderScheduleBookings;
+
+  function renderScheduleEmptyState(container, title, text) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-state-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></div><div class="empty-state-title">' + title + '</div><div class="empty-state-text">' + text + '</div><button class="empty-state-btn" onclick="navigateTo(\'book\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>Book a Court</button></div>';
+  }
+
+  function renderScheduleItem(container, ev, isPast) {
       const timeStr = (ev.time || 'TBD');
       const timeParts = timeStr.match(/(\d+):?(\d*)\s*(AM|PM)?/i);
       let hour = timeParts ? timeParts[1] : '';
@@ -430,7 +466,7 @@
       const typeBadgeColor = ev.type === 'partner' ? 'var(--electric-blue)' :
                          ev.type === 'event' ? 'var(--volt)' : 'var(--coral)';
 
-      const itemHtml = '<div class="schedule-item stagger-item" data-event-booking-id="' + sanitizeHTML(ev.eventId || '') + '">' +
+      const itemHtml = '<div class="schedule-item stagger-item' + (isPast ? ' past' : '') + '" data-event-booking-id="' + sanitizeHTML(ev.eventId || '') + '">' +
         '<div class="schedule-time-block">' +
           '<div class="schedule-time">' + hour + minutes + '</div>' +
           '<div class="schedule-period">' + period + '</div>' +
@@ -450,9 +486,6 @@
         '</div>' +
       '</div>';
       container.insertAdjacentHTML('beforeend', itemHtml);
-    });
-    } catch(e) { MTC.warn('renderScheduleBookings error:', e); MTC.fn.renderError(container, 'Could not load your schedule. Please try again.'); }
-  };
-  window.renderScheduleBookings = MTC.fn.renderScheduleBookings;
+  }
 
 })();

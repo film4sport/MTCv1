@@ -47,6 +47,7 @@ export default function EventsPage() {
   };
   const filtered = events
     .filter(e => {
+      if (e.date < todayStr) return false;
       // Type filter
       if (filter !== 'all' && normalizeType(e.type) !== filter) return false;
       // Month filter — only show events for the displayed calendar month

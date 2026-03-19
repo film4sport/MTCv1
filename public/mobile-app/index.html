@@ -20,7 +20,7 @@
     if ('serviceWorker' in navigator) {
       caches.keys().then(function(names) {
         names.forEach(function(name) {
-          if (name.indexOf('mtc-court-c9bbc252') === -1) {
+          if (name.indexOf('mtc-court-24953c57') === -1) {
             caches.delete(name);
             console.log('[CacheBust] Deleted old cache:', name);
           }
@@ -35,6 +35,8 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="preload" as="image" href="https://cdn.jsdelivr.net/gh/film4sport/my-webapp-images@main/mtc-images/gallery-05-serve.png" fetchpriority="high">
   <link rel="preload" href="dist/app.bundle.css" as="style">
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
@@ -65,6 +67,7 @@
       min-height: 0;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
+      padding-bottom: calc(112px + env(safe-area-inset-bottom, 0px));
     }
     #bookingCalendarView .calendar-container {
       flex-shrink: 0;
@@ -73,6 +76,7 @@
       flex-shrink: 0;
       display: flex;
       flex-direction: column;
+      padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
     }
     #dayTimeSlotsContainer .weekly-grid-container {
       flex: 1;
@@ -81,12 +85,71 @@
       flex-direction: column;
       border-radius: 20px 20px 0 0;
       margin-bottom: 0;
+      max-height: min(calc(100vh - 320px), 420px);
     }
     #dayTimeSlotsContainer .weekly-grid-body {
       flex: 1;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
-      padding-bottom: 60px;
+      padding-bottom: calc(128px + env(safe-area-inset-bottom, 0px));
+    }
+    @media (max-width: 380px) and (max-height: 700px) {
+      #bookingCalendarView {
+        padding-bottom: calc(124px + env(safe-area-inset-bottom, 0px));
+      }
+      #bookingCalendarView .calendar-container {
+        margin: 0 12px 14px;
+        padding: 14px;
+        border-radius: 18px;
+      }
+      #bookingCalendarView .calendar-header {
+        margin-bottom: 12px;
+      }
+      #bookingCalendarView .calendar-month {
+        font-size: 20px;
+      }
+      #bookingCalendarView .calendar-weekdays {
+        margin-bottom: 6px;
+      }
+      #bookingCalendarView .calendar-weekday {
+        font-size: 11px;
+        padding: 5px 0;
+      }
+      #bookingCalendarView .calendar-days {
+        gap: 4px;
+      }
+      #bookingCalendarView .calendar-day-num {
+        font-size: 16px;
+      }
+      #bookingCalendarView .calendar-day-slots {
+        font-size: 8px;
+      }
+      #dayTimeSlotsContainer .section-header {
+        margin-bottom: 8px;
+      }
+      #dayTimeSlotsContainer .section-title {
+        font-size: 11px;
+      }
+      #dayTimeSlotsContainer .weekly-grid-header-cell {
+        padding: 10px 4px;
+        font-size: 10px;
+      }
+      #dayTimeSlotsContainer .weekly-grid-header-cell.court-header {
+        font-size: 12px;
+      }
+      #dayTimeSlotsContainer .weekly-grid-row {
+        grid-template-columns: 52px repeat(4, 1fr);
+      }
+      #dayTimeSlotsContainer .weekly-grid-container {
+        max-height: min(calc(100vh - 286px), 360px);
+      }
+      #dayTimeSlotsContainer .weekly-time-cell {
+        padding: 8px 4px;
+        font-size: 10px;
+      }
+      #dayTimeSlotsContainer .weekly-grid-body {
+        padding-bottom: calc(144px + env(safe-area-inset-bottom, 0px));
+      }
     }
     
     /* === FIX: Conversation — pinned layout === */
@@ -188,7 +251,7 @@
     <div class="install-screen" id="install-screen" style="display:none;">
       <!-- Same background as login -->
       <div class="login-bg">
-        <img src="https://cdn.jsdelivr.net/gh/film4sport/my-webapp-images@main/mtc-images/gallery-05-serve.png" alt="Mono Tennis Club">
+        <img src="https://cdn.jsdelivr.net/gh/film4sport/my-webapp-images@main/mtc-images/gallery-05-serve.png" alt="Mono Tennis Club" fetchpriority="high" loading="eager" decoding="sync">
       </div>
       <div class="liquid-orbs" aria-hidden="true">
         <div class="liquid-orb orb-1"></div>
@@ -263,7 +326,7 @@
     <div class="login-screen active" id="login-screen">
       <!-- Full-bleed Background Photo -->
       <div class="login-bg">
-        <img src="https://cdn.jsdelivr.net/gh/film4sport/my-webapp-images@main/mtc-images/gallery-05-serve.png" alt="Mono Tennis Club">
+        <img src="https://cdn.jsdelivr.net/gh/film4sport/my-webapp-images@main/mtc-images/gallery-05-serve.png" alt="Mono Tennis Club" fetchpriority="high" loading="eager" decoding="sync">
       </div>
       
       <!-- Floating ambient orbs -->
@@ -1368,81 +1431,7 @@
         
         <!-- Past Content -->
         <div class="schedule-content" id="pastContent">
-          <div class="section-header">
-            <h3 class="section-title">LAST WEEK</h3>
-          </div>
-          
-          <div class="schedule-item stagger-item past">
-            <div class="schedule-time-block">
-              <div class="schedule-time">JAN</div>
-              <div class="schedule-period">25</div>
-            </div>
-            <div class="schedule-details">
-              <div class="schedule-title">Singles Match</div>
-              <div class="schedule-subtitle">vs. —</div>
-              <div class="schedule-meta">
-                <div class="schedule-meta-item">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                  Won 6-4, 6-3
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div class="schedule-item stagger-item past">
-            <div class="schedule-time-block">
-              <div class="schedule-time">JAN</div>
-              <div class="schedule-period">22</div>
-            </div>
-            <div class="schedule-details">
-              <div class="schedule-title">Doubles Practice</div>
-              <div class="schedule-subtitle">with —</div>
-              <div class="schedule-meta">
-                <div class="schedule-meta-item">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                  2 hours • Court 2
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div class="section-header">
-            <h3 class="section-title">JANUARY</h3>
-          </div>
-          
-          <div class="schedule-item stagger-item past">
-            <div class="schedule-time-block">
-              <div class="schedule-time">JAN</div>
-              <div class="schedule-period">18</div>
-            </div>
-            <div class="schedule-details">
-              <div class="schedule-title">Club Lesson</div>
-              <div class="schedule-subtitle">Intermediate Group</div>
-              <div class="schedule-meta">
-                <div class="schedule-meta-item">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                  1 hour • Court 3
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div class="schedule-item stagger-item past">
-            <div class="schedule-time-block">
-              <div class="schedule-time">JAN</div>
-              <div class="schedule-period">15</div>
-            </div>
-            <div class="schedule-details">
-              <div class="schedule-title">Singles Match</div>
-              <div class="schedule-subtitle">vs. —</div>
-              <div class="schedule-meta">
-                <div class="schedule-meta-item">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
-                  Lost 4-6, 6-7
-                </div>
-              </div>
-            </div>
-          </div>
+          <div id="schedulePastBookings"></div>
         </div>
       </div>
       </div><!-- /scheduleMyView -->
@@ -2202,25 +2191,45 @@
       </div>
 
       <!-- ===== TAB 1: DASHBOARD ===== -->
-      <div id="adminTabDashboard" class="admin-tab-content active">
-        <!-- Quick Stats -->
+      <div id="adminTabDashboard" class="admin-tab-content active" data-tab="dashboard">
+        <div class="admin-card admin-overview-card">
+          <div class="admin-card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18"></path><path d="M12 3v18"></path></svg>
+            Overview
+          </div>
+          <div class="admin-overview-copy">
+            <div class="admin-overview-heading">Keep admin tasks fast and clear.</div>
+            <div class="admin-overview-text">Everything is still here, but reports stay tucked away until you need them.</div>
+          </div>
+          <div class="admin-actions-grid">
+            <button class="admin-quick-link" type="button" onclick="switchAdminTab('members')">Members</button>
+            <button class="admin-quick-link" type="button" onclick="switchAdminTab('courts')">Courts</button>
+            <button class="admin-quick-link" type="button" onclick="switchAdminTab('announcements')">Announcements</button>
+            <button class="admin-quick-link" type="button" onclick="document.getElementById('adminReportsAccordion').open = true;">Reports</button>
+          </div>
+        </div>
+
         <div class="admin-card">
-          <div class="admin-usage-grid" style="grid-template-columns:repeat(4,1fr);">
-            <div class="admin-usage-item">
-              <div class="admin-usage-value" id="statActiveMembers" style="font-size:20px;">--</div>
-              <div class="admin-usage-label">Members</div>
+          <div class="admin-card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19h16"></path><path d="M7 15V9"></path><path d="M12 15V5"></path><path d="M17 15v-3"></path></svg>
+            Key Stats
+          </div>
+          <div class="admin-stats-grid admin-stats-grid-compact">
+            <div class="admin-stat-card">
+              <div class="admin-stat-value" id="statActiveMembers">--</div>
+              <div class="admin-stat-label">Members</div>
             </div>
-            <div class="admin-usage-item">
-              <div class="admin-usage-value" id="statBookingsMonth" style="font-size:20px;">--</div>
-              <div class="admin-usage-label">Bookings</div>
+            <div class="admin-stat-card">
+              <div class="admin-stat-value" id="statBookingsMonth">--</div>
+              <div class="admin-stat-label">Bookings</div>
             </div>
-            <div class="admin-usage-item">
-              <div class="admin-usage-value" id="statCourtsOpen" style="font-size:20px;">--</div>
-              <div class="admin-usage-label">Courts</div>
+            <div class="admin-stat-card">
+              <div class="admin-stat-value" id="statCourtsOpen">--</div>
+              <div class="admin-stat-label">Courts Open</div>
             </div>
-            <div class="admin-usage-item">
-              <div class="admin-usage-value" id="statPartnerMatches" style="font-size:20px;">--</div>
-              <div class="admin-usage-label">Matches</div>
+            <div class="admin-stat-card">
+              <div class="admin-stat-value" id="statPartnerMatches">--</div>
+              <div class="admin-stat-label">Matches</div>
             </div>
           </div>
           <div class="admin-quick-stats-footer">
@@ -2229,83 +2238,164 @@
           </div>
         </div>
 
-        <!-- Gate Code -->
         <div class="admin-card">
           <div class="admin-card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>Gate Code</div>
           <div class="admin-gate-code-display">
             <span id="currentGateCode" class="admin-gate-code-value">----</span>
           </div>
+          <div class="admin-gate-code-note">Updating this messages all active non-admin members.</div>
           <div class="admin-gate-code-form">
             <input type="text" id="newGateCodeInput" class="admin-input" placeholder="New code" maxlength="10">
-            <button class="admin-btn admin-btn-primary" onclick="updateGateCodeAndNotify()">Update & Notify All</button>
+            <button class="admin-btn admin-btn-primary" onclick="updateGateCodeAndNotify()">Update & Notify</button>
           </div>
         </div>
 
-        <!-- Court Usage -->
-        <div class="admin-card">
-          <div class="admin-card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>Court Usage</div>
-          <div class="admin-usage-grid">
-            <div class="admin-usage-item">
-              <div class="admin-usage-label">Today</div>
-              <div class="admin-usage-value" id="usageToday">--</div>
+        <details id="adminReportsAccordion" class="admin-disclosure admin-disclosure-primary">
+          <summary class="admin-disclosure-summary">
+            <div>
+              <div class="admin-disclosure-title">Reports & exports</div>
+              <div class="admin-disclosure-subtitle">Detailed analytics, trends, and downloads when you need them.</div>
             </div>
-            <div class="admin-usage-item">
-              <div class="admin-usage-label">This Week</div>
-              <div class="admin-usage-value" id="usageWeek">--</div>
-            </div>
-            <div class="admin-usage-item">
-              <div class="admin-usage-label">This Month</div>
-              <div class="admin-usage-value" id="usageMonth">--</div>
-            </div>
-          </div>
-          <div id="peakTimesList" class="admin-peak-times" style="margin-top:12px;"></div>
-        </div>
+            <span class="admin-disclosure-chevron" aria-hidden="true"></span>
+          </summary>
+          <div class="admin-disclosure-body">
+            <details class="admin-disclosure admin-disclosure-nested">
+              <summary class="admin-disclosure-summary">
+                <div>
+                  <div class="admin-disclosure-title">Court usage</div>
+                  <div id="courtUsageSummary" class="admin-disclosure-subtitle">Today -- • Week -- • Month --</div>
+                </div>
+                <span class="admin-disclosure-chevron" aria-hidden="true"></span>
+              </summary>
+              <div class="admin-disclosure-body">
+                <div class="admin-card admin-card-embedded">
+                  <div class="admin-usage-grid">
+                    <div class="admin-usage-item">
+                      <div class="admin-usage-label">Today</div>
+                      <div class="admin-usage-value" id="usageToday">--</div>
+                    </div>
+                    <div class="admin-usage-item">
+                      <div class="admin-usage-label">This Week</div>
+                      <div class="admin-usage-value" id="usageWeek">--</div>
+                    </div>
+                    <div class="admin-usage-item">
+                      <div class="admin-usage-label">This Month</div>
+                      <div class="admin-usage-value" id="usageMonth">--</div>
+                    </div>
+                  </div>
+                  <div id="peakTimesList" class="admin-peak-times" style="margin-top:12px;"></div>
+                </div>
+              </div>
+            </details>
 
-        <!-- Partner Matching -->
-        <div class="admin-card">
-          <div class="admin-card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>Partner Matching</div>
-          <div class="admin-usage-grid">
-            <div class="admin-usage-item">
-              <div class="admin-usage-label">Requests</div>
-              <div class="admin-usage-value" id="statPartnerRequests">--</div>
-            </div>
-            <div class="admin-usage-item">
-              <div class="admin-usage-label">Matched</div>
-              <div class="admin-usage-value" id="statPartnerMatched">--</div>
-            </div>
-            <div class="admin-usage-item">
-              <div class="admin-usage-label">Match Rate</div>
-              <div class="admin-usage-value" id="statPartnerRate">--%</div>
-            </div>
-          </div>
-        </div>
+            <details class="admin-disclosure admin-disclosure-nested">
+              <summary class="admin-disclosure-summary">
+                <div>
+                  <div class="admin-disclosure-title">Partner matching</div>
+                  <div id="partnerStatsSummary" class="admin-disclosure-subtitle">Matched -- of -- requests</div>
+                </div>
+                <span class="admin-disclosure-chevron" aria-hidden="true"></span>
+              </summary>
+              <div class="admin-disclosure-body">
+                <div class="admin-card admin-card-embedded">
+                  <div class="admin-usage-grid">
+                    <div class="admin-usage-item">
+                      <div class="admin-usage-label">Requests</div>
+                      <div class="admin-usage-value" id="statPartnerRequests">--</div>
+                    </div>
+                    <div class="admin-usage-item">
+                      <div class="admin-usage-label">Matched</div>
+                      <div class="admin-usage-value" id="statPartnerMatched">--</div>
+                    </div>
+                    <div class="admin-usage-item">
+                      <div class="admin-usage-label">Match Rate</div>
+                      <div class="admin-usage-value" id="statPartnerRate">--%</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </details>
 
-        <!-- Monthly Trends -->
-        <div class="admin-card">
-          <div class="admin-card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>Monthly Trends</div>
-          <div id="monthlyTrendsChart" class="admin-monthly-chart"></div>
-        </div>
+            <details class="admin-disclosure admin-disclosure-nested">
+              <summary class="admin-disclosure-summary">
+                <div>
+                  <div class="admin-disclosure-title">Revenue</div>
+                  <div id="revenueSummary" class="admin-disclosure-subtitle">Membership revenue total --</div>
+                </div>
+                <span class="admin-disclosure-chevron" aria-hidden="true"></span>
+              </summary>
+              <div class="admin-disclosure-body">
+                <div class="admin-card admin-card-embedded">
+                  <div id="revenueBarContainer" class="admin-revenue-bar"></div>
+                  <div id="revenueLegend" class="admin-revenue-legend"></div>
+                </div>
+              </div>
+            </details>
 
-        <!-- Revenue -->
-        <div class="admin-card">
-          <div class="admin-card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>Revenue</div>
-          <div id="revenueBarContainer" class="admin-revenue-bar"></div>
-          <div id="revenueLegend" class="admin-revenue-legend"></div>
-        </div>
+            <details class="admin-disclosure admin-disclosure-nested">
+              <summary class="admin-disclosure-summary">
+                <div>
+                  <div class="admin-disclosure-title">Member activity</div>
+                  <div id="memberActivitySummary" class="admin-disclosure-subtitle">New members -- • Avg bookings --</div>
+                </div>
+                <span class="admin-disclosure-chevron" aria-hidden="true"></span>
+              </summary>
+              <div class="admin-disclosure-body">
+                <div class="admin-card admin-card-embedded">
+                  <div class="admin-usage-grid">
+                    <div class="admin-usage-item">
+                      <div class="admin-usage-label">New This Month</div>
+                      <div class="admin-usage-value" id="statNewMembers">--</div>
+                    </div>
+                    <div class="admin-usage-item">
+                      <div class="admin-usage-label">Avg / Member</div>
+                      <div class="admin-usage-value" id="statAvgBookings">--</div>
+                    </div>
+                  </div>
+                  <div id="mostActiveList" class="admin-peak-times" style="margin-top:12px;"></div>
+                </div>
+              </div>
+            </details>
 
-        <!-- Export -->
-        <div class="admin-card">
-          <div class="admin-card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>Export</div>
-          <div class="admin-export-month-picker">
-            <label class="admin-label">Month</label>
-            <input type="month" id="exportMonthPicker" class="admin-input" style="max-width:180px;">
+            <details class="admin-disclosure admin-disclosure-nested">
+              <summary class="admin-disclosure-summary">
+                <div>
+                  <div class="admin-disclosure-title">Monthly trends</div>
+                  <div id="monthlyTrendSummary" class="admin-disclosure-subtitle">Last 6 months booking trend</div>
+                </div>
+                <span class="admin-disclosure-chevron" aria-hidden="true"></span>
+              </summary>
+              <div class="admin-disclosure-body">
+                <div class="admin-card admin-card-embedded">
+                  <div id="monthlyTrendsChart" class="admin-monthly-chart"></div>
+                </div>
+              </div>
+            </details>
+
+            <details class="admin-disclosure admin-disclosure-nested">
+              <summary class="admin-disclosure-summary">
+                <div>
+                  <div class="admin-disclosure-title">Exports</div>
+                  <div class="admin-disclosure-subtitle">Download members, payments, and court usage snapshots.</div>
+                </div>
+                <span class="admin-disclosure-chevron" aria-hidden="true"></span>
+              </summary>
+              <div class="admin-disclosure-body">
+                <div class="admin-card admin-card-embedded">
+                  <div class="admin-export-month-picker">
+                    <label class="admin-label">From month</label>
+                    <input type="month" id="exportMonthPicker" class="admin-input" style="max-width:180px;">
+                  </div>
+                  <div class="admin-export-btns">
+                    <button class="admin-btn admin-btn-secondary" onclick="exportMembersCSV()">Members CSV</button>
+                    <button class="admin-btn admin-btn-secondary" onclick="exportPaymentsCSV()">Payments CSV</button>
+                    <button class="admin-btn admin-btn-secondary" onclick="exportCourtUsageCSV()">Usage CSV</button>
+                  </div>
+                </div>
+              </div>
+            </details>
           </div>
-          <div class="admin-export-btns">
-            <button class="admin-btn admin-btn-secondary" onclick="exportMembersCSV()">Members CSV</button>
-            <button class="admin-btn admin-btn-secondary" onclick="exportPaymentsCSV()">Payments CSV</button>
-            <button class="admin-btn admin-btn-secondary" onclick="exportCourtUsageCSV()">Usage CSV</button>
-          </div>
-        </div>
+        </details>
       </div>
 
       <!-- ===== TAB 2: MEMBERS ===== -->

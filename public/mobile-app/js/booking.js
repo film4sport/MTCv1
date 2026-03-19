@@ -1060,6 +1060,13 @@
     });
     grid.innerHTML=html;
     container.style.display='flex';
+    const calendarView = document.getElementById('bookingCalendarView');
+    if (calendarView && typeof calendarView.scrollTo === 'function') {
+      requestAnimationFrame(function() {
+        const targetTop = Math.max(container.offsetTop - 12, 0);
+        calendarView.scrollTo({ top: targetTop, behavior: 'smooth' });
+      });
+    }
 
     const headers=container.querySelectorAll('.court-header');
     headers.forEach(function(h,idx){const c=MTC.config.courts[idx];if(c) h.innerHTML=sanitizeHTML(c.name)+(c.floodlight?' <span class="floodlight-icon" title="Floodlights">\ud83d\udca1</span>':'');});

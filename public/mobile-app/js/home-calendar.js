@@ -20,9 +20,11 @@
     var map = {};
     if (typeof clubEventsData === 'undefined') return map;
     var evts = Object.values(clubEventsData);
+    var today = new Date();
+    var todayStr = toDateStr(today.getFullYear(), today.getMonth(), today.getDate());
     var seen = {};
     evts.forEach(function(ev) {
-      if (!ev.date) return;
+      if (!ev.date || ev.date < todayStr) return;
       // Deduplicate: API recurring expansions duplicate hardcoded base events
       var key = ev.title + '|' + ev.date;
       if (seen[key]) return;

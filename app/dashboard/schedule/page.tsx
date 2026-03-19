@@ -115,9 +115,9 @@ export default function SchedulePage() {
   const dateHasItems = (d: Date) => {
     const dateStr = d.toISOString().split('T')[0];
     return {
-      booking: myBookings.some(b => b.date === dateStr),
-      event: events.some(e => e.date === dateStr),
-      program: myPrograms.some(p => p.sessions.some(s => s.date === dateStr)),
+      booking: myBookings.some(b => b.date === dateStr && b.date >= todayStr),
+      event: myEvents.some(e => e.date === dateStr && e.date >= todayStr),
+      program: myPrograms.some(p => p.sessions.some(s => s.date === dateStr && s.date >= todayStr)),
     };
   };
 

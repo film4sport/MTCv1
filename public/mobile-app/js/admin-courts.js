@@ -98,33 +98,55 @@
 
     var today = new Date().toISOString().split('T')[0];
     var html = '<div class="modal-overlay active" id="blockCourtModal" onclick="closeBlockCourtModal()">' +
-      '<div class="modal modal-scrollable-tall" onclick="event.stopPropagation()" style="max-width:400px">' +
-        '<div class="modal-title">BLOCK COURT TIME</div>' +
-        '<label class="admin-label">Court</label>' +
-        '<select id="blockCourtSelect" class="admin-select"><option value="">All Courts</option>' + courts + '</select>' +
-        '<label class="admin-label">Date</label>' +
-        '<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">' +
-          '<input type="date" id="blockDate" class="admin-input" style="flex:1;margin-bottom:0" value="' + today + '" min="' + today + '">' +
-          '<span style="color:var(--text-muted);font-size:13px">to</span>' +
-          '<input type="date" id="blockDateEnd" class="admin-input" style="flex:1;margin-bottom:0" value="" min="' + today + '" placeholder="Same day">' +
+      '<div class="modal modal-scrollable-tall admin-block-modal" onclick="event.stopPropagation()">' +
+        '<div class="admin-block-modal-header">' +
+          '<div class="admin-block-modal-kicker">Admin Tools</div>' +
+          '<div class="admin-block-modal-title">Block Court Time</div>' +
+          '<div class="admin-block-modal-subtitle">Close one court or all courts for maintenance, events, weather, or private use.</div>' +
         '</div>' +
-        '<label style="display:flex;align-items:center;gap:8px;margin-bottom:8px;color:var(--text-primary);font-size:14px">' +
-          '<input type="checkbox" id="blockFullDay" onchange="toggleBlockTimeInputs()" checked> Full Day' +
-        '</label>' +
-        '<div id="blockTimeInputs" style="display:none;gap:8px;margin-bottom:8px">' +
-          '<select id="blockTimeStart" class="admin-select" style="flex:1">' + timeOptions + '</select>' +
-          '<select id="blockTimeEnd" class="admin-select" style="flex:1"><option value="">End Time</option>' + timeOptions + '</select>' +
-        '</div>' +
-        '<label class="admin-label">Reason</label>' +
-        '<select id="blockReason" class="admin-select">' +
-          '<option value="Maintenance">Maintenance</option><option value="Club Event">Club Event</option>' +
-          '<option value="Weather">Weather</option><option value="Tournament">Tournament</option>' +
-          '<option value="Coaching Session">Coaching Session</option><option value="Private Event">Private Event</option>' +
-          '<option value="Other">Other</option></select>' +
-        '<input type="text" id="blockNotes" class="admin-input" placeholder="Notes (optional)">' +
-        '<div style="display:flex;gap:8px;margin-top:8px">' +
-          '<button class="admin-btn admin-btn-secondary" style="flex:1" onclick="closeBlockCourtModal()">Cancel</button>' +
-          '<button class="admin-btn admin-btn-primary" style="flex:1" onclick="createCourtBlock()">Block</button>' +
+        '<div class="admin-block-modal-body">' +
+          '<div class="admin-block-field-grid">' +
+            '<div class="admin-block-field-card">' +
+              '<label class="admin-block-label" for="blockCourtSelect">Court</label>' +
+              '<select id="blockCourtSelect" class="admin-select"><option value="">All Courts</option>' + courts + '</select>' +
+            '</div>' +
+            '<div class="admin-block-field-card">' +
+              '<label class="admin-block-label">Date Range</label>' +
+              '<div class="admin-block-range-row">' +
+                '<input type="date" id="blockDate" class="admin-input" style="margin-bottom:0" value="' + today + '" min="' + today + '">' +
+                '<span class="admin-block-inline-divider">to</span>' +
+                '<input type="date" id="blockDateEnd" class="admin-input" style="margin-bottom:0" value="" min="' + today + '" placeholder="Same day">' +
+              '</div>' +
+            '</div>' +
+            '<div class="admin-block-field-card">' +
+              '<div class="admin-block-toggle-row">' +
+                '<div class="admin-block-toggle-copy">' +
+                  '<div class="admin-block-toggle-title">Full Day</div>' +
+                  '<div class="admin-block-toggle-subtitle">Leave on for an all-day block, or switch off to choose a time window.</div>' +
+                '</div>' +
+                '<input type="checkbox" id="blockFullDay" class="admin-block-checkbox" onchange="toggleBlockTimeInputs()" checked>' +
+              '</div>' +
+              '<div id="blockTimeInputs" class="admin-block-time-row" style="display:none">' +
+                '<select id="blockTimeStart" class="admin-select">' + timeOptions + '</select>' +
+                '<span class="admin-block-inline-divider">to</span>' +
+                '<select id="blockTimeEnd" class="admin-select"><option value="">End Time</option>' + timeOptions + '</select>' +
+              '</div>' +
+            '</div>' +
+            '<div class="admin-block-field-card">' +
+              '<label class="admin-block-label" for="blockReason">Reason</label>' +
+              '<select id="blockReason" class="admin-select">' +
+                '<option value="Maintenance">Maintenance</option><option value="Club Event">Club Event</option>' +
+                '<option value="Weather">Weather</option><option value="Tournament">Tournament</option>' +
+                '<option value="Coaching Session">Coaching Session</option><option value="Private Event">Private Event</option>' +
+                '<option value="Other">Other</option></select>' +
+              '<input type="text" id="blockNotes" class="admin-input" placeholder="Notes (optional)">' +
+              '<div class="admin-block-notice">If any confirmed bookings overlap this block, they will be cancelled and those members will be notified automatically.</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="admin-block-modal-actions">' +
+            '<button class="admin-btn admin-btn-secondary" onclick="closeBlockCourtModal()">Cancel</button>' +
+            '<button class="admin-btn admin-btn-primary" onclick="createCourtBlock()">Block Time</button>' +
+          '</div>' +
         '</div>' +
       '</div></div>';
     document.body.insertAdjacentHTML('beforeend', html);

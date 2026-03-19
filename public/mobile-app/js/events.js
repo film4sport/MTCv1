@@ -334,7 +334,10 @@
 
     // Build event dates lookup
     const eventDates = {};
-    Object.values(clubEventsData).forEach(function(ev) { eventDates[ev.date] = ev; });
+    Object.values(clubEventsData).forEach(function(ev) {
+      if (!ev.date || ev.date < todayStr) return;
+      eventDates[ev.date] = ev;
+    });
 
     let html = '';
     // Previous month days
@@ -374,7 +377,9 @@
     const titleEl = document.getElementById('eventsSelectedDateTitle');
     if (!container || !titleEl) return;
 
-    const eventsForDate = Object.values(clubEventsData).filter(function(e) { return e.date === dateStr; });
+    const today = new Date();
+    const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+    const eventsForDate = Object.values(clubEventsData).filter(function(e) { return e.date === dateStr && e.date >= todayStr; });
     const date = new Date(dateStr + 'T12:00:00');
     titleEl.textContent = date.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' }).toUpperCase();
 
