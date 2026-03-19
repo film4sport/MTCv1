@@ -15,6 +15,7 @@ const DESKTOP_ONLY_TESTS = [
   'mobile-pwa-offline.spec.js', // offline resilience tests (mocked network, 390x844)
   'mobile-pwa-rollback.spec.js', // rollback behavior tests (mocked API failures, 390x844)
   'mobile-pwa-session.spec.js', // session recovery + logout behavior tests
+  'core-flows.spec.js',      // shared booking, messaging, RSVP regression flows
   'visual-regression.spec.js',    // screenshot comparison tests
 ];
 

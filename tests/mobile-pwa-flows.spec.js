@@ -48,15 +48,35 @@ async function mockAuthenticatedState(page) {
   await page.route('**/api/mobile/**', (route) => {
     const url = route.request().url();
     if (url.includes('/bookings')) {
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: [] }) });
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
     } else if (url.includes('/events')) {
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: [] }) });
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
     } else if (url.includes('/partners')) {
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: [] }) });
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
+    } else if (url.includes('/members')) {
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
+    } else if (url.includes('/conversations')) {
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
+    } else if (url.includes('/courts')) {
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
+    } else if (url.includes('/court-blocks')) {
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
+    } else if (url.includes('/notifications')) {
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
+    } else if (url.includes('/announcements')) {
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
+    } else if (url.includes('/programs')) {
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
+    } else if (url.includes('/settings')) {
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ gate_code: '1234', bookings: true, events: true, partners: true, announcements: true, messages: true, programs: true }),
+      });
     } else if (url.includes('/profile')) {
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: MOCK_USER }) });
     } else {
-      route.fulfill({ status: 200, contentType: 'application/json', body: '{"data":[]}' });
+      route.fulfill({ status: 200, contentType: 'application/json', body: '[]' });
     }
   });
 

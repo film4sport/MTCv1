@@ -609,11 +609,9 @@
       }).catch(function(err) {
         MTC.warn('[MTC] RSVP sync error:', err);
         showToast('Network error — please try again', 'error');
-        setTimeout(function() { closeEventModal(); }, 900);
       });
     } else {
-      // No token / offline — close after animation (local-only)
-      setTimeout(function() { closeEventModal(); }, 900);
+      showToast('Please sign in again to RSVP', 'error');
     }
   }
 

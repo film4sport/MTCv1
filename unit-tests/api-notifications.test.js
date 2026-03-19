@@ -13,9 +13,10 @@ const root = resolve(__dirname, '..');
 describe('Notifications API Route — Structure', () => {
   const content = readFileSync(resolve(root, 'app/api/mobile/notifications/route.ts'), 'utf-8');
 
-  it('exports GET and PATCH handlers', () => {
+  it('exports GET, PATCH, and DELETE handlers', () => {
     expect(content).toMatch(/export\s+async\s+function\s+GET/);
     expect(content).toMatch(/export\s+async\s+function\s+PATCH/);
+    expect(content).toMatch(/export\s+async\s+function\s+DELETE/);
   });
 
   it('authenticates requests', () => {
@@ -53,6 +54,23 @@ describe('Notifications API — Mark Read', () => {
 
   it('only modifies notifications belonging to the authenticated user', () => {
     expect(content).toMatch(/user_id.*authResult|eq.*user_id/);
+  });
+});
+
+describe('Notifications API — Lifecycle', () => {
+  const content = readFileSync(resolve(root, 'app/api/mobile/notifications/route.ts'), 'utf-8');
+
+  it('GET returns the mobile fields used by notification clients', () => {
+    expect(content).toContain('title: n.title');
+    expect(content).toContain('body: n.body');
+    expect(content).toContain('timestamp: n.timestamp');
+    expect(content).toContain('read: n.read');
+  });
+
+  it('DELETE clears only read notifications for the authenticated user', () => {
+    expect(content).toMatch(/\.delete\(\)/);
+    expect(content).toMatch(/eq\('user_id',\s*authResult\.id\)/);
+    expect(content).toMatch(/eq\('read',\s*true\)/);
   });
 });
 

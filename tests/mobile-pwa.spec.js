@@ -9,6 +9,21 @@ const { test, expect } = require('@playwright/test');
 
 const MOBILE_URL = '/mobile-app/index.html';
 
+async function readLoginViewportMetrics(page) {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      await page.waitForLoadState('load').catch(() => {});
+      return await page.evaluate(() => ({
+        visibleWidth: document.body.clientWidth,
+        viewportWidth: window.innerWidth,
+      }));
+    } catch (error) {
+      if (attempt === 2) throw error;
+      await page.waitForTimeout(300);
+    }
+  }
+}
+
 /** Dismiss onboarding overlay unconditionally (don't check visibility — animation timing varies on CI) */
 async function dismissOnboarding(page) {
   // Wait for page to fully settle (avoids "execution context destroyed" from mid-load navigations)
@@ -84,19 +99,13 @@ test.describe('Mobile PWA — Login Screen', () => {
     await page.waitForLoadState('load').catch(() => {});
     if (browserName === 'webkit') {
       await expect.poll(async () => {
-        return page.evaluate(() => ({
-          visibleWidth: document.body.clientWidth,
-          viewportWidth: window.innerWidth,
-        }));
+        return readLoginViewportMetrics(page);
       }, { timeout: 5000 }).toEqual(expect.objectContaining({
         visibleWidth: expect.any(Number),
         viewportWidth: expect.any(Number),
       }));
 
-      const { visibleWidth, viewportWidth } = await page.evaluate(() => ({
-        visibleWidth: document.body.clientWidth,
-        viewportWidth: window.innerWidth,
-      }));
+      const { visibleWidth, viewportWidth } = await readLoginViewportMetrics(page);
       expect(visibleWidth).toBeLessThanOrEqual(viewportWidth + 1);
     } else {
       const { bodyWidth, viewportWidth } = await page.evaluate(() => ({
