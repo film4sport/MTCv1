@@ -21,3 +21,25 @@ describe('Dashboard announcement regressions', () => {
     expect(store).toContain('setAnnouncements(safeArray(a));');
   });
 });
+
+describe('Dashboard stale-state regressions', () => {
+  it('initial data load replaces courts even when the server returns an empty array', () => {
+    expect(store).toContain('const courtsData = safeArray(settledValue(results[3], []));');
+    expect(store).toContain('setCourts(courtsData);');
+  });
+
+  it('initial data load replaces programs even when the server returns an empty array', () => {
+    expect(store).toContain('const progs = safeArray(settledValue(results[8], []));');
+    expect(store).toContain('setPrograms(progs);');
+  });
+
+  it('refreshData replaces courts and programs instead of keeping stale values', () => {
+    expect(store).toContain('setCourts(safeArray(courts_));');
+    expect(store).toContain('setPrograms(prog_);');
+  });
+
+  it('realtime program updates reconcile to server truth instead of ignoring empty results', () => {
+    expect(store).toContain("db.fetchPrograms().then(p => { setPrograms(safeArray(p)); }).catch(err => reportError(err, 'Realtime programs'));");
+    expect(store).toContain("db.fetchPrograms().then(p => { setPrograms(safeArray(p)); }).catch(err => reportError(err, 'Realtime enrollments'));");
+  });
+});

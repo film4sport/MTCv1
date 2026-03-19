@@ -320,14 +320,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
           setBookings(safeArray(settledValue(results[1], [])));
           setEvents(mergeEventsWithDefaults(settledValue(results[2], [])));
           const courtsData = safeArray(settledValue(results[3], []));
-          if (courtsData.length > 0) setCourts(courtsData);
+          setCourts(courtsData);
           setPartners(safeArray(settledValue(results[4], [])));
           setConversations(safeArray(settledValue(results[5], [])));
           const anns = safeArray(settledValue(results[6], []));
           setAnnouncements(anns);
           setNotifications(safeArray(settledValue(results[7], [])));
           const progs = safeArray(settledValue(results[8], []));
-          if (progs.length > 0) setPrograms(progs);
+          setPrograms(progs);
           const notifPrefs = settledValue(results[9], null);
           if (notifPrefs) setNotificationPreferences(notifPrefs);
 
@@ -485,10 +485,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
         db.fetchCourts().then(c => setCourts(safeArray(c))).catch(err => reportError(err, 'Realtime courts'));
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'coaching_programs' }, () => {
-        db.fetchPrograms().then(p => { const arr = safeArray(p); if (arr.length > 0) setPrograms(arr); }).catch(err => reportError(err, 'Realtime programs'));
+        db.fetchPrograms().then(p => { setPrograms(safeArray(p)); }).catch(err => reportError(err, 'Realtime programs'));
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'program_enrollments' }, () => {
-        db.fetchPrograms().then(p => { const arr = safeArray(p); if (arr.length > 0) setPrograms(arr); }).catch(err => reportError(err, 'Realtime enrollments'));
+        db.fetchPrograms().then(p => { setPrograms(safeArray(p)); }).catch(err => reportError(err, 'Realtime enrollments'));
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'events' }, () => {
         fetchEventsViaApi().catch(err => reportError(err, 'Realtime events'));
@@ -1057,14 +1057,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setBookings(safeArray(settledValue(b, [])));
       setEvents(mergeEventsWithDefaults(settledValue(ev, [])));
       const courts_ = settledValue(ct, []);
-      if (courts_.length > 0) setCourts(courts_);
+      setCourts(safeArray(courts_));
       setPartners(safeArray(settledValue(p, [])));
       setConversations(safeArray(settledValue(c, [])));
       const ann_ = safeArray(settledValue(a, []));
       setAnnouncements(ann_);
       setNotifications(safeArray(settledValue(n, [])));
       const prog_ = safeArray(settledValue(pr, []));
-      if (prog_.length > 0) setPrograms(prog_);
+      setPrograms(prog_);
       const np_ = settledValue(np, null);
       if (np_) setNotificationPreferences(np_);
 

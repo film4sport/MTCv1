@@ -243,10 +243,27 @@
   // ============================================
   // NOTIFICATION MANAGEMENT
   // ============================================
+  function updateCachedNotification(id, updates) {
+    if (!id) return;
+    var cached = MTC.storage.get('mtc-api-notifications', []);
+    if (!Array.isArray(cached)) return;
+    MTC.storage.set('mtc-api-notifications', cached.map(function(n) {
+      return n.id === id ? Object.assign({}, n, updates) : n;
+    }));
+  }
+
   function markNotificationRead(element) {
     if (!element || element._dismissing) return;
+    var notifId = element.getAttribute('data-notif-id');
     if (element.classList.contains('unread')) {
       element.classList.remove('unread');
+      updateCachedNotification(notifId, { read: true });
+      if (typeof MTC !== 'undefined' && MTC.fn && MTC.fn.apiRequest && notifId) {
+        MTC.fn.apiRequest('/mobile/notifications', {
+          method: 'PATCH',
+          body: JSON.stringify({ id: notifId })
+        }).catch(function() { /* non-critical */ });
+      }
     }
     dismissNotification(element);
   }
@@ -286,11 +303,31 @@
       item.classList.remove('unread');
     });
 
+    var cached = MTC.storage.get('mtc-api-notifications', []);
+    if (Array.isArray(cached)) {
+      MTC.storage.set('mtc-api-notifications', cached.map(function(n) {
+        return Object.assign({}, n, { read: true });
+      }));
+    }
+
+    if (typeof MTC !== 'undefined' && MTC.fn && MTC.fn.apiRequest) {
+      MTC.fn.apiRequest('/mobile/notifications', {
+        method: 'PATCH',
+        body: JSON.stringify({ markAll: true })
+      }).catch(function() { /* non-critical */ });
+    }
+
     updateUnreadCount();
 
     const notifBadge = document.querySelector('.notification-badge');
     if (notifBadge) {
       notifBadge.style.display = 'none';
+    }
+
+    var clearBtn = document.getElementById('clearReadBtn');
+    if (clearBtn) {
+      var anyNotifications = document.querySelectorAll('.notification-item').length > 0;
+      clearBtn.style.display = anyNotifications ? '' : 'none';
     }
 
     showToast('All notifications marked as read');
@@ -313,6 +350,7 @@
       }).catch(function() { /* non-critical */ });
     }
     updateUnreadCount();
+    checkNotificationsEmpty();
     // Hide clear button if no read items left
     var clearBtn = document.getElementById('clearReadBtn');
     if (clearBtn) clearBtn.style.display = 'none';
@@ -635,6 +673,12 @@
     // Toggle empty state
     var emptyState = document.getElementById('noNotifications');
     if (emptyState) emptyState.style.display = apiNotifications.length > 0 ? 'none' : '';
+    var summary = document.getElementById('notificationsSummary');
+    if (summary) summary.style.display = apiNotifications.length > 0 ? '' : 'none';
+    var sectionHeaders = document.querySelectorAll('#screen-notifications .section-header');
+    sectionHeaders.forEach(function(header) {
+      header.style.display = apiNotifications.length > 0 ? '' : 'none';
+    });
 
     apiNotifications.slice(0, 30).forEach(function(n) {
 
@@ -643,13 +687,6 @@
       el.setAttribute('data-notif-id', n.id);
       el.onclick = function() {
         markNotificationRead(el);
-        // Mark read on server
-        if (typeof MTC !== 'undefined' && MTC.fn && MTC.fn.apiRequest) {
-          MTC.fn.apiRequest('/mobile/notifications', {
-            method: 'PATCH',
-            body: JSON.stringify({ id: n.id })
-          }).catch(function() { /* non-critical */ });
-        }
         // Navigate based on notification type
         var typeRoutes = { booking: 'mybookings', message: 'messages', event: 'events', partner: 'partners' };
         var target = typeRoutes[n.type];
