@@ -132,7 +132,11 @@
     if (!MTC.fn.loadFromAPI) return;
     MTC.fn.loadFromAPI('/mobile/members', 'mtc-api-members', null).then(function(members) {
       if (members) {
-        MTC.state.clubMembers = members;
+        if (typeof window.updateMembersFromAPI === 'function') {
+          window.updateMembersFromAPI(members);
+        } else {
+          MTC.state.clubMembers = members;
+        }
       }
       _lastSyncTimestamps.members = Date.now();
       updateStaleIndicators();

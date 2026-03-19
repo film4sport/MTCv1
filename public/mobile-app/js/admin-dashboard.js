@@ -8,6 +8,36 @@
   // ============================================
   // DASHBOARD TAB
   // ============================================
+  function normalizeMembersResponse(payload) {
+    var members = Array.isArray(payload) ? payload : (payload && payload.members) || [];
+    return members.map(function(m) {
+      return {
+        id: m.id,
+        name: m.name,
+        email: m.email,
+        role: m.role,
+        status: m.status,
+        membership_type: m.membership_type || m.membershipType || 'adult',
+        skill_level: m.skill_level || m.skillLevel || '',
+        interclub_team: m.interclub_team || m.interclubTeam || '',
+        interclub_captain: !!(m.interclub_captain || m.interclubCaptain),
+        created_at: m.created_at || m.createdAt || m.member_since || m.memberSince || null,
+      };
+    });
+  }
+
+  function normalizeArrayResponse(payload, key) {
+    if (Array.isArray(payload)) return payload;
+    if (payload && Array.isArray(payload[key])) return payload[key];
+    return [];
+  }
+
+  function normalizeSettingsResponse(payload) {
+    if (!payload || Array.isArray(payload)) return {};
+    if (payload.settings && !Array.isArray(payload.settings)) return payload.settings;
+    return payload;
+  }
+
   window.loadAdminDashboard = function() {
     MTC.admin.dataLoaded.dashboard = true;
     var token = MTC.getToken();
@@ -21,11 +51,11 @@
       fetch('/api/mobile/settings', { headers: headers }).then(function(r) { return r.ok ? r.json() : { settings: [] }; }),
       fetch('/api/mobile/partners', { headers: headers }).then(function(r) { return r.ok ? r.json() : { partners: [] }; }).catch(function() { return { partners: [] }; })
     ]).then(function(results) {
-      MTC.admin.bookings = results[0].bookings || [];
-      MTC.admin.members = results[1].members || [];
-      MTC.admin.courts = results[2].courts || [];
-      var settings = results[3].settings || [];
-      var partners = results[4].partners || [];
+      MTC.admin.bookings = normalizeArrayResponse(results[0], 'bookings');
+      MTC.admin.members = normalizeMembersResponse(results[1]);
+      MTC.admin.courts = normalizeArrayResponse(results[2], 'courts');
+      var settings = normalizeSettingsResponse(results[3]);
+      var partners = normalizeArrayResponse(results[4], 'partners');
 
       renderQuickStats(partners);
       renderPeakTimes();
@@ -40,9 +70,8 @@
         exportPicker.value = now2.getFullYear() + '-' + String(now2.getMonth() + 1).padStart(2, '0');
       }
 
-      var gateCodeSetting = settings.find(function(s) { return s.key === 'gate_code'; });
       var codeEl = document.getElementById('currentGateCode');
-      if (codeEl) codeEl.textContent = (gateCodeSetting && gateCodeSetting.value) || '----';
+      if (codeEl) codeEl.textContent = settings.gate_code || '----';
     }).catch(function(err) {
       console.error('[Admin] Dashboard load error:', err);
     });

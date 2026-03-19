@@ -213,6 +213,7 @@ export async function POST(request: Request) {
         body: truncatedPreview,
         tag: `msg-${fromId}-${Date.now()}`,
         url: '/mobile-app/index.html#messages',
+        type: 'message',
       }),
       createNotification(supabase, toId, {
         id: notifId,

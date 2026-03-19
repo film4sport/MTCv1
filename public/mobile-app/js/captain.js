@@ -70,13 +70,31 @@
   // ============================================
   // ROSTER
   // ============================================
+  function normalizeMembersResponse(payload) {
+    var members = Array.isArray(payload) ? payload : (payload && payload.members) || [];
+    return members.map(function(m) {
+      return {
+        id: m.id,
+        name: m.name,
+        role: m.role,
+        interclub_team: m.interclub_team || m.interclubTeam || 'none',
+        interclub_captain: !!(m.interclub_captain || m.interclubCaptain),
+        skill_level: m.skill_level || m.skillLevel || '',
+      };
+    });
+  }
+
+  function normalizeAnnouncementsResponse(payload) {
+    return Array.isArray(payload) ? payload : (payload && payload.announcements) || [];
+  }
+
   function loadCaptainRoster(team, canManage) {
     var container = document.getElementById('captainRosterList');
     if (!container) return;
 
     MTC.fn.apiRequest('/mobile/members').then(function(res) {
-      if (!res.ok) { container.innerHTML = '<div class="admin-empty-state">Failed to load roster</div>'; return; }
-      return res.json();
+      if (!res.ok) { container.innerHTML = '<div class="admin-empty-state">Failed to load roster</div>'; return null; }
+      return normalizeMembersResponse(res.data);
     }).then(function(members) {
       if (!members) return;
       var teamMembers = members.filter(function(m) { return m.interclub_team === team; });
@@ -144,7 +162,7 @@
         showToast('Member added to team');
         initCaptainScreen();
       } else {
-        return res.json().then(function(d) { showToast(d.error || 'Failed to add member'); });
+        showToast((res.data && res.data.error) || 'Failed to add member');
       }
     }).catch(function() { showToast('Failed to add member'); });
   };
@@ -160,7 +178,7 @@
         showToast(memberName + ' removed from team');
         initCaptainScreen();
       } else {
-        return res.json().then(function(d) { showToast(d.error || 'Failed to remove member'); });
+        showToast((res.data && res.data.error) || 'Failed to remove member');
       }
     }).catch(function() { showToast('Failed to remove member'); });
   };
@@ -173,12 +191,12 @@
     if (!container) return;
 
     MTC.fn.apiRequest('/mobile/announcements').then(function(res) {
-      if (!res.ok) { container.innerHTML = '<div class="admin-empty-state">Failed to load updates</div>'; return; }
-      return res.json();
-    }).then(function(data) {
-      if (!data || !data.announcements) return;
+      if (!res.ok) { container.innerHTML = '<div class="admin-empty-state">Failed to load updates</div>'; return null; }
+      return normalizeAnnouncementsResponse(res.data);
+    }).then(function(announcements) {
+      if (!announcements) return;
       var audience = 'interclub_' + team;
-      var teamUpdates = data.announcements.filter(function(a) {
+      var teamUpdates = announcements.filter(function(a) {
         return a.audience === audience || a.audience === 'interclub_all';
       });
       if (teamUpdates.length === 0) {
@@ -224,7 +242,7 @@
         textEl.value = '';
         loadCaptainUpdates(user.interclubTeam);
       } else {
-        return res.json().then(function(d) { showToast(d.error || 'Failed to post update'); });
+        showToast((res.data && res.data.error) || 'Failed to post update');
       }
     }).catch(function() { showToast('Failed to post update'); });
   };
@@ -237,8 +255,8 @@
     if (!container) return;
 
     MTC.fn.apiRequest('/mobile/lineups').then(function(res) {
-      if (!res.ok) { container.innerHTML = '<div class="admin-empty-state">Failed to load matches</div>'; return; }
-      return res.json();
+      if (!res.ok) { container.innerHTML = '<div class="admin-empty-state">Failed to load matches</div>'; return null; }
+      return res.data;
     }).then(function(lineups) {
       if (!lineups || lineups.length === 0) {
         container.innerHTML = '<div class="admin-empty-state">No upcoming matches</div>';
@@ -332,7 +350,7 @@
         var user = MTC.state.currentUser || window.currentUser;
         loadCaptainMatches(user.interclubTeam, true);
       } else {
-        return res.json().then(function(d) { showToast(d.error || 'Failed to create match'); });
+        showToast((res.data && res.data.error) || 'Failed to create match');
       }
     }).catch(function() { showToast('Failed to create match'); });
   };
@@ -348,7 +366,7 @@
         var user = MTC.state.currentUser || window.currentUser;
         loadCaptainMatches(user.interclubTeam, true);
       } else {
-        return res.json().then(function(d) { showToast(d.error || 'Failed to delete match'); });
+        showToast((res.data && res.data.error) || 'Failed to delete match');
       }
     }).catch(function() { showToast('Failed to delete match'); });
   };
@@ -364,7 +382,7 @@
         var canManage = user.interclubCaptain === true || user.role === 'admin';
         loadCaptainMatches(user.interclubTeam, canManage);
       } else {
-        return res.json().then(function(d) { showToast(d.error || 'Failed to update'); });
+        showToast((res.data && res.data.error) || 'Failed to update');
       }
     }).catch(function() { showToast('Failed to update availability'); });
   };

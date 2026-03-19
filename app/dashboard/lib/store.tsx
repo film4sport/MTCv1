@@ -201,6 +201,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // ── Debounce refs (prevent rapid duplicate calls) ──────────
   const pendingRsvps = useRef<Set<string>>(new Set());
 
+  const fetchMembersViaApi = useCallback(async (): Promise<User[]> => {
+    try {
+      return await apiCall<User[]>('/api/mobile/members', 'GET');
+    } catch (error) {
+      reportError(error instanceof Error ? error : new Error(String(error)), 'Fetch members API');
+      return await db.fetchMembers();
+    }
+  }, []);
+
   /** Deduplicate notifications: skip if same id OR same type+title within last 30s */
   const addNotification = useCallback((notif: Notification) => {
     setNotifications(prev => {
@@ -294,7 +303,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         // Fetch all data from Supabase in parallel (allSettled so one failure doesn't block others)
         try {
           const results = await Promise.allSettled([
-            db.fetchMembers(),
+            fetchMembersViaApi(),
             db.fetchBookings(),
             db.fetchEvents(),
             db.fetchCourts(),
@@ -470,7 +479,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }).catch(err => reportError(err, 'Realtime partners'));
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => {
-        db.fetchMembers().then(m => setMembers(safeArray(m))).catch(err => reportError(err, 'Realtime members'));
+        fetchMembersViaApi().then(m => setMembers(safeArray(m))).catch(err => reportError(err, 'Realtime members'));
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'courts' }, () => {
         db.fetchCourts().then(c => setCourts(safeArray(c))).catch(err => reportError(err, 'Realtime courts'));
@@ -507,7 +516,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return () => { supabase.removeChannel(channel); clearInterval(heartbeat); if (msgDebounce) clearTimeout(msgDebounce); };
     // Only re-subscribe when user logs in/out — not on every profile update
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoaded, currentUser?.id]);
+  }, [isLoaded, currentUser?.id, fetchMembersViaApi]);
 
   // Fetch weather (with retry on failure)
   useEffect(() => {
@@ -670,7 +679,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       // Participant notifications (bell, push, email, in-app message) are handled
       // server-side by /api/mobile/bookings POST — no client-side duplication needed
     }
-  }, [currentUser]);
+  }, [currentUser, fetchMembersViaApi]);
 
   const cancelBooking = useCallback((id: string) => {
     // Optimistic UI: mark booking as cancelled immediately
@@ -1037,7 +1046,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (!currentUser) return;
     try {
       const results = await Promise.allSettled([
-        db.fetchMembers(), db.fetchBookings(), db.fetchEvents(), db.fetchCourts(), db.fetchPartners(),
+        fetchMembersViaApi(), db.fetchBookings(), db.fetchEvents(), db.fetchCourts(), db.fetchPartners(),
         db.fetchConversations(currentUser.id), db.fetchAnnouncements(currentUser.id),
         db.fetchNotifications(currentUser.id), db.fetchPrograms(),
         db.fetchNotificationPreferences(currentUser.id),

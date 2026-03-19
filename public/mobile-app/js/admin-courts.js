@@ -8,6 +8,12 @@
   // ============================================
   // COURTS TAB
   // ============================================
+  function normalizeArrayResponse(payload, key) {
+    if (Array.isArray(payload)) return payload;
+    if (payload && Array.isArray(payload[key])) return payload[key];
+    return [];
+  }
+
   window.loadCourts = function() {
     MTC.admin.dataLoaded.courts = true;
     var token = MTC.getToken();
@@ -16,8 +22,8 @@
       fetch('/api/mobile/courts', { headers: { 'Authorization': 'Bearer ' + token } }).then(function(r) { return r.ok ? r.json() : { courts: [] }; }),
       fetch('/api/mobile/court-blocks', { headers: { 'Authorization': 'Bearer ' + token } }).then(function(r) { return r.ok ? r.json() : { blocks: [] }; }).catch(function() { return { blocks: [] }; })
     ]).then(function(results) {
-      MTC.admin.courts = results[0].courts || [];
-      MTC.admin.blocks = results[1].blocks || [];
+      MTC.admin.courts = normalizeArrayResponse(results[0], 'courts');
+      MTC.admin.blocks = normalizeArrayResponse(results[1], 'blocks');
       renderCourts();
       renderBlocksList();
     });

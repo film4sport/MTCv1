@@ -8,6 +8,25 @@
   // ============================================
   // MEMBERS TAB
   // ============================================
+  function normalizeMembersResponse(payload) {
+    var members = Array.isArray(payload) ? payload : (payload && payload.members) || [];
+    return members.map(function(m) {
+      return {
+        id: m.id,
+        name: m.name,
+        email: m.email,
+        role: m.role,
+        status: m.status,
+        membership_type: m.membership_type || m.membershipType || 'adult',
+        skill_level: m.skill_level || m.skillLevel || '',
+        interclub_team: m.interclub_team || m.interclubTeam || '',
+        interclub_captain: !!(m.interclub_captain || m.interclubCaptain),
+        residence: m.residence,
+        member_since: m.member_since || m.memberSince,
+      };
+    });
+  }
+
   window.loadMembersList = function() {
     MTC.admin.dataLoaded.members = true;
     var token = MTC.getToken();
@@ -15,7 +34,7 @@
     fetch('/api/mobile/members', { headers: { 'Authorization': 'Bearer ' + token } })
       .then(function(r) { return r.ok ? r.json() : { members: [] }; })
       .then(function(data) {
-        MTC.admin.members = data.members || [];
+        MTC.admin.members = normalizeMembersResponse(data);
         renderMembersList();
         var badge = document.getElementById('adminMemberCountBadge');
         if (badge) badge.textContent = MTC.admin.members.length;
