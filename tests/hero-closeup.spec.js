@@ -1,8 +1,13 @@
 const { test, expect } = require('@playwright/test');
 
+async function gotoLanding(page) {
+  await page.goto('/', { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await page.waitForLoadState('load').catch(() => {});
+  await expect(page.locator('.hero-content').first()).toBeAttached();
+}
+
 test('Hero-wave transition closeup', async ({ page }) => {
-  await page.goto('/');
-  await page.waitForTimeout(2500);
+  await gotoLanding(page);
 
   // Scroll to just where the hero bottom meets the wave
   const heroHeight = await page.evaluate(() => {
@@ -12,7 +17,7 @@ test('Hero-wave transition closeup', async ({ page }) => {
 
   // Scroll to show the bottom 200px of hero + wave area
   await page.evaluate((h) => window.scrollTo(0, h - 300), heroHeight);
-  await page.waitForTimeout(500);
+  await expect(page.locator('.wave-divider').first()).toBeAttached();
   await page.screenshot({ path: 'test-results/hero-wave-closeup.png', fullPage: false });
 
   // Also take a full page screenshot to see overall layout
@@ -32,7 +37,7 @@ test('Membership profile banner visible', async ({ page }) => {
   });
 
   await page.goto('/info?tab=membership', { waitUntil: 'domcontentloaded' });
-  await page.waitForTimeout(2000);
+  await expect(page.getByText('Why Join Mono Tennis Club').first()).toBeAttached();
   await page.screenshot({ path: 'test-results/membership-profile-banner.png', fullPage: false });
 
   // Clean up

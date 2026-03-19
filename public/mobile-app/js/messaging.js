@@ -806,7 +806,7 @@
     });
 
     if (results.length === 0) {
-      container.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-muted);">No members found</div>';
+      container.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-muted);">No members match your search yet</div>';
       return;
     }
 

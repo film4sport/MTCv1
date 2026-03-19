@@ -200,7 +200,7 @@
         return a.audience === audience || a.audience === 'interclub_all';
       });
       if (teamUpdates.length === 0) {
-        container.innerHTML = '<div class="admin-empty-state">No team updates yet</div>';
+        container.innerHTML = '<div class="admin-empty-state">No team updates yet. Post one above when your team needs details.</div>';
         return;
       }
       var html = '';
@@ -223,7 +223,7 @@
   window.captainPostUpdate = function() {
     var textEl = document.getElementById('captainUpdateText');
     var typeEl = document.getElementById('captainUpdateType');
-    if (!textEl || !textEl.value.trim()) { showToast('Please write a message'); return; }
+    if (!textEl || !textEl.value.trim()) { showToast('Please write a message'); if (textEl) textEl.focus(); return; }
 
     var user = MTC.state.currentUser || window.currentUser;
     var audience = 'interclub_' + user.interclubTeam;
@@ -238,7 +238,7 @@
       })
     }).then(function(res) {
       if (res.ok) {
-        showToast('Update posted!');
+        showToast('Update sent');
         textEl.value = '';
         loadCaptainUpdates(user.interclubTeam);
       } else {

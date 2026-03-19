@@ -1,8 +1,13 @@
-const { test } = require('@playwright/test');
+const { test, expect } = require('@playwright/test');
+
+async function gotoLanding(page) {
+  await page.goto('/', { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await page.waitForLoadState('load').catch(() => {});
+  await expect(page.locator('.hero-content').first()).toBeAttached();
+}
 
 test('Hero bottom + wave transition', async ({ page }) => {
-  await page.goto('/');
-  await page.waitForTimeout(2500);
+  await gotoLanding(page);
 
   // Scroll to show the hero bottom / wave overlap area
   const heroHeight = await page.evaluate(() => {
@@ -11,6 +16,6 @@ test('Hero bottom + wave transition', async ({ page }) => {
   });
 
   await page.evaluate((h) => window.scrollTo(0, h - 300), heroHeight);
-  await page.waitForTimeout(500);
+  await expect(page.locator('.wave-divider').first()).toBeAttached();
   await page.screenshot({ path: 'test-results/hero-bottom-check.png', fullPage: false });
 });

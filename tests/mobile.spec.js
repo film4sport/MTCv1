@@ -1,11 +1,17 @@
 const { test, expect } = require('@playwright/test');
 
+async function gotoLanding(page) {
+  await page.goto('/', { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await page.waitForLoadState('load').catch(() => {});
+  await expect(page.locator('.navbar')).toBeAttached();
+  await expect(page.locator('#schedule')).toBeAttached();
+}
+
 test.describe('Mobile Responsive', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
   test.beforeEach(async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
-    await page.waitForTimeout(2500);
+    await gotoLanding(page);
   });
 
   test('mobile menu button is visible', async ({ page }) => {
@@ -16,7 +22,6 @@ test.describe('Mobile Responsive', () => {
 
   test('calendar renders on mobile', async ({ page }) => {
     await page.locator('#schedule').scrollIntoViewIfNeeded();
-    await page.waitForTimeout(500);
     const calGrid = page.locator('.cal-grid');
     await expect(calGrid).toBeAttached();
   });

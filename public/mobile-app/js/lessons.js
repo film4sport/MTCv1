@@ -29,7 +29,7 @@
     if (!_programs.length) {
       container.innerHTML =
         '<div style="text-align:center;padding:32px 16px;color:var(--text-muted);font-size:13px;">' +
-        'No programs available right now. Check back soon!</div>';
+        'No programs available right now. Check back soon or contact the club for coaching details.</div>';
       return;
     }
 
@@ -154,7 +154,7 @@
         });
         renderPrograms();
         if (typeof MTC.fn.showToast === 'function') {
-          MTC.fn.showToast('Enrolled successfully!', 'success');
+          MTC.fn.showToast('Enrolled in program', 'success');
         }
       } else {
         var msg = (res.data && res.data.error) || 'Enrollment failed';
@@ -167,7 +167,7 @@
       _enrollingId = null;
       renderPrograms();
       if (typeof MTC.fn.showToast === 'function') {
-        MTC.fn.showToast('Network error — try again', 'error');
+        MTC.fn.showToast('Network error - please try again', 'error');
       }
     });
   };
@@ -221,7 +221,7 @@
       _enrollingId = null;
       renderPrograms();
       if (typeof MTC.fn.showToast === 'function') {
-        MTC.fn.showToast('Network error — try again', 'error');
+        MTC.fn.showToast('Network error - please try again', 'error');
       }
     });
   }
