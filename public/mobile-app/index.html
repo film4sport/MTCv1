@@ -20,7 +20,7 @@
     if ('serviceWorker' in navigator) {
       caches.keys().then(function(names) {
         names.forEach(function(name) {
-          if (name.indexOf('mtc-court-047716d6') === -1) {
+          if (name.indexOf('mtc-court-c9bbc252') === -1) {
             caches.delete(name);
             console.log('[CacheBust] Deleted old cache:', name);
           }
@@ -398,18 +398,12 @@
 
     </div>
     
-    <!-- Supabase JS for client-side OAuth + Magic Link (CDN primary, local fallback) -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <!-- Supabase JS for client-side Realtime -->
+    <script src="/mobile-app/js/vendor/supabase.min.js"></script>
     <script>
-      window._supabaseReady = false;
-      if (typeof supabase !== 'undefined') {
-        window._supabaseReady = true;
-      } else {
-        var s = document.createElement('script');
-        s.src = '/mobile-app/js/vendor/supabase.min.js';
-        s.onload = function() { window._supabaseReady = true; };
-        s.onerror = function() { console.error('[MTC] Supabase fallback failed to load'); };
-        document.head.appendChild(s);
+      window._supabaseReady = typeof supabase !== 'undefined';
+      if (!window._supabaseReady) {
+        console.error('[MTC] Local Supabase bundle failed to load');
       }
     </script>
     

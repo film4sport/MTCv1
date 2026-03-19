@@ -24,13 +24,18 @@
     // Auto-include auth token if available
     var headers = { 'Content-Type': 'application/json' };
     var token = MTC.getToken();
+    if (endpoint.indexOf('/mobile') === 0 && !token) {
+      clearTimeout(timer);
+      return Promise.resolve({ ok: false, data: { error: 'Not authenticated' }, status: 401 });
+    }
     if (token) {
       headers['Authorization'] = 'Bearer ' + token;
     }
 
     return fetch(API_BASE + endpoint, Object.assign({
       signal: controller.signal,
-      headers: headers
+      headers: headers,
+      credentials: 'same-origin'
     }, options))
     .then(function(res) {
       clearTimeout(timer);

@@ -527,6 +527,7 @@
   // Load maintenance mode state from server on init
   (async function() {
     try {
+      if (!MTC.getToken()) return;
       var res = await MTC.fn.apiRequest('/mobile/settings');
       if (res.ok) {
         var settings = res.data;

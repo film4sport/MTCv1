@@ -560,37 +560,6 @@
       }, 700);
     }
 
-    // ── One-time beta + opening day notifications for existing users ──
-    if (currentUser && currentUser.id && new Date() < new Date('2026-05-09T00:00:00')) {
-      var betaKey = 'mtc-beta-notice-sent-' + currentUser.id;
-      if (!MTC.storage.get(betaKey, null)) {
-        MTC.storage.set(betaKey, true);
-        var userId = currentUser.id;
-        fetch('/api/mobile/notifications', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'same-origin',
-            body: JSON.stringify({
-              notifications: [
-                {
-                  id: 'opening-day-' + userId,
-                  type: 'event',
-                  title: 'Opening Day - May 9th!',
-                  body: 'Mark your calendar! Mono Tennis Club opens for the 2026 season on May 9th. See you on the courts!'
-                },
-                {
-                  id: 'beta-notice-' + userId,
-                  type: 'info',
-                  title: 'App Under Construction',
-                  body: 'Our app and website are still in development. If you find any bugs or have feedback, please email monotennisclub1@gmail.com - we appreciate your help!'
-                }
-              ]
-            })
-        }).then(function() {
-          if (typeof MTC.fn.updateUnreadCount === 'function') MTC.fn.updateUnreadCount();
-        }).catch(function() {});
-      }
-    }
   }
 
   // onclick handler (index.html)

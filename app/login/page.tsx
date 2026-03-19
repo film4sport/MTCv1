@@ -564,7 +564,7 @@ function LoginContent() {
                     }} />
                     {/* Dashboard header bar */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 14px', background: 'rgba(250,248,243,0.88)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(224,220,211,0.7)', position: 'relative', height: 32, zIndex: 1 }}>
-                      <img src="/mono-logo-transparent.png" alt="" width={24} height={24} style={{ filter: 'brightness(0.2)' }} />
+                      <img src="/mono-logo-transparent.png" alt="" width={24} height={24} style={{ filter: 'brightness(0.2)', width: 'auto' }} />
                       <span style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', fontSize: 8, fontWeight: 600, color: '#2a2f1e' }}>HOME</span>
                       <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
                         <div style={{ width: 22, height: 22, background: 'rgba(107,122,61,0.1)', borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
