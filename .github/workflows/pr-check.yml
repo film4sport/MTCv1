@@ -35,12 +35,15 @@ jobs:
       - name: Build Next.js
         run: npm run build
 
-      # Cache the build for E2E shards to reuse
-      - name: Cache Next.js build
-        uses: actions/cache/save@v4
+      - name: Upload app build for E2E shards
+        uses: actions/upload-artifact@v4
         with:
-          path: .next
-          key: nextjs-build-pr-${{ github.event.pull_request.number }}-${{ github.sha }}
+          name: app-build-pr-${{ github.event.pull_request.number }}-${{ github.sha }}
+          path: |
+            .next
+            public/mobile-app/dist
+          include-hidden-files: true
+          retention-days: 1
 
       - name: Comment PR with status
         if: success()
@@ -63,7 +66,7 @@ jobs:
             | Mobile Build | ✅ Success |
             | Next.js Build | ✅ Success |
 
-            Build artifact cached for E2E shards.
+            Build artifact uploaded for E2E shards.
             `;
 
             if (botComment) {
@@ -102,11 +105,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Restore Next.js build
-        uses: actions/cache/restore@v4
+      - name: Download app build
+        uses: actions/download-artifact@v4
         with:
-          path: .next
-          key: nextjs-build-pr-${{ github.event.pull_request.number }}-${{ github.sha }}
+          name: app-build-pr-${{ github.event.pull_request.number }}-${{ github.sha }}
+          path: .
 
       - name: Run E2E tests (shard ${{ matrix.shard }}/2)
         run: npx playwright test --shard=${{ matrix.shard }}/2
