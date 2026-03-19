@@ -22,6 +22,16 @@ describe('Mobile realtime sync regressions', () => {
     expect(realtimeSync).toContain("if (Array.isArray(events) && typeof window.updateEventsFromAPI === 'function') {");
   });
 
+  it('applies shared mobile feed updates even when auth bootstrap gets empty arrays back', () => {
+    expect(authJs).toContain("if (Array.isArray(partners) && typeof window.updatePartnersFromAPI === 'function') {");
+    expect(authJs).toContain("if (Array.isArray(announcements) && typeof window.updateAnnouncementsFromAPI === 'function') {");
+    expect(authJs).toContain("if (Array.isArray(bookings) && typeof window.updateBookingsFromAPI === 'function') {");
+    expect(authJs).toContain("if (Array.isArray(courts) && typeof window.updateCourtsFromAPI === 'function') {");
+    expect(authJs).toContain("if (Array.isArray(blocks) && typeof window.updateCourtBlocksFromAPI === 'function') {");
+    expect(authJs).toContain("if (Array.isArray(notifications) && typeof window.updateNotificationsFromAPI === 'function') {");
+    expect(authJs).toContain("if (Array.isArray(programs) && typeof window.updateProgramsFromAPI === 'function') {");
+  });
+
   it('removes stale server-managed events when they disappear from the API', () => {
     expect(eventsJs).toContain('var serverManagedEventIds = [];');
     expect(eventsJs).toContain('delete clubEventsData[eventId];');

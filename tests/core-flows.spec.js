@@ -156,12 +156,16 @@ async function prepareAvailableBookingSlot(page) {
   });
 
   await page.waitForFunction(() => document.querySelectorAll('.weekly-slot.available').length > 0, null, { timeout: 5000 });
-  await page.evaluate(() => {
-    const slot = document.querySelector('.weekly-slot.available');
-    if (slot) slot.click();
-  });
   await page.waitForFunction(() => {
     const modal = document.getElementById('bookingModal');
+    if (modal && modal.classList.contains('active')) return true;
+    const slot = document.querySelector('.weekly-slot.available');
+    if (!slot) return false;
+    if (typeof window.selectSlot === 'function') {
+      window.selectSlot(slot);
+    } else {
+      slot.click();
+    }
     return !!(modal && modal.classList.contains('active'));
   }, null, { timeout: 5000 });
 }

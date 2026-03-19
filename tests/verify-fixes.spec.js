@@ -1,12 +1,16 @@
 const { test, expect } = require('@playwright/test');
 
+async function gotoLanding(page) {
+  await page.goto('/', { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await page.waitForLoadState('load').catch(() => {});
+  await expect(page.locator('.navbar')).toBeAttached();
+}
+
 test.describe('Latest Fix Verification', () => {
 
   test('Events section has "// Featured Events" label and correct heading', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForTimeout(2000);
+    await gotoLanding(page);
     await page.locator('#events').scrollIntoViewIfNeeded();
-    await page.waitForTimeout(500);
 
     const label = page.locator('.section-label', { hasText: 'Featured Events' });
     await expect(label).toBeVisible();
@@ -18,8 +22,7 @@ test.describe('Latest Fix Verification', () => {
   });
 
   test('Hero has scroll down text with bouncing arrow', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForTimeout(2000);
+    await gotoLanding(page);
 
     const scrollText = page.getByText('Scroll Down');
     await expect(scrollText).toBeVisible();
@@ -31,10 +34,8 @@ test.describe('Latest Fix Verification', () => {
   });
 
   test('Schedule section says "Club\'s Schedule" not "Events"', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForTimeout(2000);
+    await gotoLanding(page);
     await page.locator('#schedule').scrollIntoViewIfNeeded();
-    await page.waitForTimeout(500);
 
     const heading = page.locator('h2', { hasText: "Club's Calendar" });
     await expect(heading).toBeVisible();
@@ -43,8 +44,9 @@ test.describe('Latest Fix Verification', () => {
   });
 
   test('Login page Book Courts badge is visible', async ({ page }) => {
-    await page.goto('/login');
-    await page.waitForTimeout(3000);
+    await page.goto('/login', { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForLoadState('load').catch(() => {});
+    await expect(page.getByText('Book Courts').first()).toBeAttached();
     await page.screenshot({ path: 'test-results/login-badges-updated.png', fullPage: false });
   });
 

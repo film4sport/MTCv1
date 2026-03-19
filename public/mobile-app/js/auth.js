@@ -700,37 +700,37 @@
     });
 
     MTC.fn.loadFromAPI('/mobile/partners', 'mtc-api-partners', null).then(function(partners) {
-      if (partners && typeof window.updatePartnersFromAPI === 'function') {
+      if (Array.isArray(partners) && typeof window.updatePartnersFromAPI === 'function') {
         window.updatePartnersFromAPI(partners);
       }
     });
 
     MTC.fn.loadFromAPI('/mobile/announcements', 'mtc-api-announcements', null).then(function(announcements) {
-      if (announcements && typeof window.updateAnnouncementsFromAPI === 'function') {
+      if (Array.isArray(announcements) && typeof window.updateAnnouncementsFromAPI === 'function') {
         window.updateAnnouncementsFromAPI(announcements);
       }
     });
 
     MTC.fn.loadFromAPI('/mobile/bookings', 'mtc-api-bookings', null).then(function(bookings) {
-      if (bookings && typeof window.updateBookingsFromAPI === 'function') {
+      if (Array.isArray(bookings) && typeof window.updateBookingsFromAPI === 'function') {
         window.updateBookingsFromAPI(bookings);
       }
     });
 
     MTC.fn.loadFromAPI('/mobile/courts', 'mtc-api-courts', null).then(function(courts) {
-      if (courts && typeof window.updateCourtsFromAPI === 'function') {
+      if (Array.isArray(courts) && typeof window.updateCourtsFromAPI === 'function') {
         window.updateCourtsFromAPI(courts);
       }
     });
 
     MTC.fn.loadFromAPI('/mobile/court-blocks', 'mtc-api-court-blocks', null).then(function(blocks) {
-      if (blocks && typeof window.updateCourtBlocksFromAPI === 'function') {
+      if (Array.isArray(blocks) && typeof window.updateCourtBlocksFromAPI === 'function') {
         window.updateCourtBlocksFromAPI(blocks);
       }
     });
 
     MTC.fn.loadFromAPI('/mobile/notifications', 'mtc-api-notifications', null).then(function(notifications) {
-      if (notifications && typeof window.updateNotificationsFromAPI === 'function') {
+      if (Array.isArray(notifications) && typeof window.updateNotificationsFromAPI === 'function') {
         window.updateNotificationsFromAPI(notifications);
       }
     });
@@ -753,7 +753,7 @@
     }).catch(function() {});
 
     MTC.fn.loadFromAPI('/mobile/programs', 'mtc-api-programs', null).then(function(programs) {
-      if (programs && typeof window.updateProgramsFromAPI === 'function') {
+      if (Array.isArray(programs) && typeof window.updateProgramsFromAPI === 'function') {
         window.updateProgramsFromAPI(programs);
       }
     });

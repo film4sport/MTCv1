@@ -197,7 +197,7 @@ describe('Mobile PWA — Rollback Patterns', () => {
     // Must restore on error
     expect(content).toMatch(/MTC\.storage\.set.*mtc-partner-requests.*prevRequests/);
     // Must show error toast
-    expect(content).toMatch(/Failed to remove request.*error/);
+    expect(content).toMatch(/Failed to remove(?: the)? partner request.*error/);
   });
 
   it('enrollInProgram has rollback on API failure', () => {

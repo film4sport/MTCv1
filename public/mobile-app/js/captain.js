@@ -88,6 +88,10 @@
     return Array.isArray(payload) ? payload : (payload && payload.announcements) || [];
   }
 
+  function normalizeLineupsResponse(payload) {
+    return Array.isArray(payload) ? payload : (payload && payload.lineups) || [];
+  }
+
   function loadCaptainRoster(team, canManage) {
     var container = document.getElementById('captainRosterList');
     if (!container) return;
@@ -256,7 +260,7 @@
 
     MTC.fn.apiRequest('/mobile/lineups').then(function(res) {
       if (!res.ok) { container.innerHTML = '<div class="admin-empty-state">Failed to load matches</div>'; return null; }
-      return res.data;
+      return normalizeLineupsResponse(res.data);
     }).then(function(lineups) {
       if (!lineups || lineups.length === 0) {
         container.innerHTML = '<div class="admin-empty-state">No upcoming matches</div>';
