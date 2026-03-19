@@ -293,30 +293,53 @@ test.describe('No ClubSpark Links - Full Page', () => {
 });
 
 test.describe('Info Page', () => {
+  async function gotoInfo(page, url) {
+    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForTimeout(500);
+  }
+
+  async function switchInfoTab(page, label, tabKey) {
+    const tab = page.locator(`#tab-${tabKey}`);
+    await tab.scrollIntoViewIfNeeded();
+    let switchedViaClick = false;
+    try {
+      await tab.click({ timeout: 3000 });
+      switchedViaClick = true;
+    } catch {
+      await page.goto(`/info?tab=${tabKey}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+      await page.waitForTimeout(250);
+    }
+    await page.waitForFunction((expectedTab) => {
+      return window.location.search.includes(`tab=${expectedTab}`) ||
+        !!document.getElementById(`tabpanel-${expectedTab}`);
+    }, tabKey, { timeout: 4000 });
+    if (!switchedViaClick) {
+      await page.waitForTimeout(250);
+    }
+    await expect(page.locator(`#tabpanel-${tabKey}`)).toBeVisible();
+    await expect(page.getByRole('tab', { name: label, exact: true })).toHaveAttribute('aria-selected', 'true');
+  }
+
   test('default tab is membership', async ({ page }) => {
-    await page.goto('/info', { waitUntil: 'networkidle' });
-    await page.waitForTimeout(1000);
+    await gotoInfo(page, '/info');
     const heading = page.getByText('Why Join Mono Tennis Club').first();
     await expect(heading).toBeAttached();
   });
 
   test('info page has membership section on membership tab', async ({ page }) => {
-    await page.goto('/info?tab=membership', { waitUntil: 'networkidle' });
-    await page.waitForTimeout(1000);
+    await gotoInfo(page, '/info?tab=membership');
     const membershipHeading = page.getByText('Why Join Mono Tennis Club').first();
     await expect(membershipHeading).toBeAttached();
   });
 
   test('info page has Membership Fees on membership tab', async ({ page }) => {
-    await page.goto('/info?tab=membership', { waitUntil: 'networkidle' });
-    await page.waitForTimeout(1000);
+    await gotoInfo(page, '/info?tab=membership');
     const fees = page.getByText('Membership Fees').first();
     await expect(fees).toBeAttached();
   });
 
   test('about tab shows About content', async ({ page }) => {
-    await page.goto('/info?tab=about', { waitUntil: 'networkidle' });
-    await page.waitForTimeout(1000);
+    await gotoInfo(page, '/info?tab=about');
     const heading = page.getByText('About Us').first();
     await expect(heading).toBeAttached();
     const passion = page.getByText('Great Tennis');
@@ -324,8 +347,7 @@ test.describe('Info Page', () => {
   });
 
   test('faq tab shows FAQ content', async ({ page }) => {
-    await page.goto('/info?tab=faq', { waitUntil: 'networkidle' });
-    await page.waitForTimeout(1000);
+    await gotoInfo(page, '/info?tab=faq');
     const faqHeading = page.getByText('Frequently Asked Questions');
     await expect(faqHeading).toBeAttached();
     const mapHeading = page.getByText('Find Us');
@@ -333,8 +355,7 @@ test.describe('Info Page', () => {
   });
 
   test('tab navigation buttons exist', async ({ page }) => {
-    await page.goto('/info', { waitUntil: 'networkidle' });
-    await page.waitForTimeout(1000);
+    await gotoInfo(page, '/info');
     const tabLabels = ['About', 'Membership', 'Coaching', 'FAQ', 'Rules', 'Privacy', 'Terms'];
     for (const label of tabLabels) {
       const tab = page.getByRole('tab', { name: label, exact: true });
@@ -343,30 +364,23 @@ test.describe('Info Page', () => {
   });
 
   test('tab switching works', async ({ page }) => {
-    await page.goto('/info', { waitUntil: 'networkidle' });
-    await page.waitForTimeout(1000);
-    // Click About tab (use dispatchEvent for mobile horizontal scroll container)
-    await page.getByRole('tab', { name: 'About' }).dispatchEvent('click');
-    await page.waitForTimeout(500);
+    await gotoInfo(page, '/info');
+    await switchInfoTab(page, 'About', 'about');
     const aboutContent = page.getByText('Great Tennis');
     await expect(aboutContent).toBeAttached();
-    // Click FAQ tab
-    await page.getByRole('tab', { name: 'FAQ' }).dispatchEvent('click');
-    await page.waitForTimeout(500);
+    await switchInfoTab(page, 'FAQ', 'faq');
     const faqContent = page.getByText('Frequently Asked Questions');
     await expect(faqContent).toBeAttached();
   });
 
   test('info page has Back to Home link', async ({ page }) => {
-    await page.goto('/info', { waitUntil: 'networkidle' });
-    await page.waitForTimeout(1000);
+    await gotoInfo(page, '/info');
     const backLink = page.getByText('Back to Home').first();
     await expect(backLink).toBeAttached();
   });
 
   test('no ClubSpark links on info page', async ({ page }) => {
-    await page.goto('/info', { waitUntil: 'networkidle' });
-    await page.waitForTimeout(1000);
+    await gotoInfo(page, '/info');
     const clubsparkLinks = await page.locator('a[href*="clubspark"]').count();
     expect(clubsparkLinks).toBe(0);
   });

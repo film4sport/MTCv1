@@ -965,17 +965,20 @@
   window.updateConversationsFromAPI = function(apiConvos) {
     if (!Array.isArray(apiConvos)) return;
     var userId = MTC.state.currentUser ? MTC.state.currentUser.id : null;
+    var nextConversations = {};
+    var nextConversationIdMap = {};
+    var nextConversationMetaMap = {};
     apiConvos.forEach(function(conv) {
       var key = conv.otherUserId || conv.id;
-      if (conv.id) conversationIdMap[key] = conv.id;
+      if (conv.id) nextConversationIdMap[key] = conv.id;
       // Cache name + avatar from API response (fallback when clubMembers hasn't loaded yet)
       if (conv.otherUserName) {
-        conversationMetaMap[key] = {
+        nextConversationMetaMap[key] = {
           name: conv.otherUserName,
           avatar: conv.otherUserAvatar || 'man-1'
         };
       }
-      conversations[key] = (conv.messages || []).map(function(m) {
+      nextConversations[key] = (conv.messages || []).map(function(m) {
         return {
           id: m.id || null,
           text: m.text,
@@ -986,6 +989,9 @@
         };
       });
     });
+    conversations = nextConversations;
+    conversationIdMap = nextConversationIdMap;
+    conversationMetaMap = nextConversationMetaMap;
     MTC.fn.saveConversations();
     // Re-render conversation list if messages screen is visible
     if (typeof renderConversationsList === 'function') renderConversationsList();

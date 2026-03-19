@@ -63,7 +63,7 @@
   function refetchEvents() {
     if (!MTC.fn.loadFromAPI) return;
     MTC.fn.loadFromAPI('/mobile/events', 'mtc-api-events', null).then(function(events) {
-      if (events && events.length > 0 && typeof window.updateEventsFromAPI === 'function') {
+      if (Array.isArray(events) && typeof window.updateEventsFromAPI === 'function') {
         window.updateEventsFromAPI(events);
       }
       _lastSyncTimestamps.events = Date.now();

@@ -4,6 +4,8 @@ import { resolve } from 'path';
 
 const root = resolve(__dirname, '..');
 const realtimeSync = readFileSync(resolve(root, 'public/mobile-app/js/realtime-sync.js'), 'utf-8');
+const authJs = readFileSync(resolve(root, 'public/mobile-app/js/auth.js'), 'utf-8');
+const eventsJs = readFileSync(resolve(root, 'public/mobile-app/js/events.js'), 'utf-8');
 const programsRoute = readFileSync(resolve(root, 'app/api/mobile/programs/route.ts'), 'utf-8');
 
 describe('Mobile realtime sync regressions', () => {
@@ -13,6 +15,17 @@ describe('Mobile realtime sync regressions', () => {
 
   it('refetchAll includes courts so booking/admin views refresh after reconnect', () => {
     expect(realtimeSync).toMatch(/function refetchAll\(\)\s*{[\s\S]*refetchCourts\(\)/);
+  });
+
+  it('applies event sync updates even when the API returns an empty array', () => {
+    expect(authJs).toContain("if (Array.isArray(events) && typeof window.updateEventsFromAPI === 'function') {");
+    expect(realtimeSync).toContain("if (Array.isArray(events) && typeof window.updateEventsFromAPI === 'function') {");
+  });
+
+  it('removes stale server-managed events when they disappear from the API', () => {
+    expect(eventsJs).toContain('var serverManagedEventIds = [];');
+    expect(eventsJs).toContain('delete clubEventsData[eventId];');
+    expect(eventsJs).toContain('serverManagedEventIds = nextServerEventIds;');
   });
 });
 

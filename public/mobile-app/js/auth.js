@@ -676,13 +676,13 @@
     if (!token) return;
 
     MTC.fn.loadFromAPI('/mobile/events', 'mtc-api-events', null).then(function(events) {
-      if (events && events.length > 0 && typeof window.updateEventsFromAPI === 'function') {
+      if (Array.isArray(events) && typeof window.updateEventsFromAPI === 'function') {
         window.updateEventsFromAPI(events);
       }
     });
 
     MTC.fn.loadFromAPI('/mobile/members', 'mtc-api-members', null).then(function(members) {
-      if (members && members.length > 0 && typeof window.updateMembersFromAPI === 'function') {
+      if (Array.isArray(members) && typeof window.updateMembersFromAPI === 'function') {
         window.updateMembersFromAPI(members);
       }
       return MTC.fn.loadFromAPI('/mobile/conversations', 'mtc-api-conversations', null);

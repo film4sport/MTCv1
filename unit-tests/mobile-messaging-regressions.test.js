@@ -17,4 +17,13 @@ describe('Mobile messaging member search regressions', () => {
   it('guards display skill rendering for members without a skill label', () => {
     expect(messaging).toContain("var displaySkill = member.role === 'admin' ? 'Club Admin' : (member.skill || '');");
   });
+
+  it('reconciles conversation state to server truth instead of leaving stale threads behind', () => {
+    expect(messaging).toContain('var nextConversations = {};');
+    expect(messaging).toContain('var nextConversationIdMap = {};');
+    expect(messaging).toContain('var nextConversationMetaMap = {};');
+    expect(messaging).toContain('conversations = nextConversations;');
+    expect(messaging).toContain('conversationIdMap = nextConversationIdMap;');
+    expect(messaging).toContain('conversationMetaMap = nextConversationMetaMap;');
+  });
 });

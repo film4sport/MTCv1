@@ -6,6 +6,7 @@
   // ============================================
 
   const eventsCalendarDate = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+  var serverManagedEventIds = [];
 
   // Load persisted RSVPs or use defaults
   const userRsvps = (function() {
@@ -801,6 +802,13 @@
    */
   window.updateEventsFromAPI = function(apiEvents) {
     if (!Array.isArray(apiEvents)) return;
+    var nextServerEventIds = apiEvents.map(function(ev) { return ev.id; });
+    serverManagedEventIds.forEach(function(eventId) {
+      if (nextServerEventIds.indexOf(eventId) === -1) {
+        delete clubEventsData[eventId];
+      }
+    });
+    serverManagedEventIds = nextServerEventIds;
 
     // Get current user's name for RSVP matching
     var currentUser = MTC.storage.get('mtc-user', null) || MTC.storage.get('mtc-current-user', null);
