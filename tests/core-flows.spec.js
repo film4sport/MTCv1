@@ -110,12 +110,24 @@ async function navigateToScreen(page, screen) {
       : screen === 'profile'
         ? 'settings'
         : screen;
-  await page.waitForFunction(() => typeof MTC !== 'undefined' && MTC.fn && MTC.fn.navigateTo, null, { timeout: 5000 });
-  await page.evaluate((s) => { MTC.fn.navigateTo(s); }, screen);
-  await page.waitForFunction((target) => {
-    var el = document.getElementById('screen-' + target);
-    return !!(el && el.classList.contains('active'));
-  }, resolvedScreen, { timeout: 5000 });
+  let lastError = null;
+
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      await page.waitForFunction(() => typeof MTC !== 'undefined' && MTC.fn && MTC.fn.navigateTo, null, { timeout: 5000 });
+      await page.evaluate((s) => { MTC.fn.navigateTo(s); }, screen);
+      await page.waitForFunction((target) => {
+        var el = document.getElementById('screen-' + target);
+        return !!(el && el.classList.contains('active'));
+      }, resolvedScreen, { timeout: 5000 });
+      return;
+    } catch (error) {
+      lastError = error;
+      await page.waitForTimeout(300);
+    }
+  }
+
+  throw lastError;
 }
 
 // ============================================

@@ -324,7 +324,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           setPartners(safeArray(settledValue(results[4], [])));
           setConversations(safeArray(settledValue(results[5], [])));
           const anns = safeArray(settledValue(results[6], []));
-          if (anns.length > 0) setAnnouncements(anns);
+          setAnnouncements(anns);
           setNotifications(safeArray(settledValue(results[7], [])));
           const progs = safeArray(settledValue(results[8], []));
           if (progs.length > 0) setPrograms(progs);
@@ -470,7 +470,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'announcements' }, () => {
         db.fetchAnnouncements(userId).then(a => {
-          const arr = safeArray(a); if (arr.length > 0) setAnnouncements(arr);
+          setAnnouncements(safeArray(a));
         }).catch(err => reportError(err, 'Realtime announcements'));
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'partners' }, () => {
@@ -1061,7 +1061,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setPartners(safeArray(settledValue(p, [])));
       setConversations(safeArray(settledValue(c, [])));
       const ann_ = safeArray(settledValue(a, []));
-      if (ann_.length > 0) setAnnouncements(ann_);
+      setAnnouncements(ann_);
       setNotifications(safeArray(settledValue(n, [])));
       const prog_ = safeArray(settledValue(pr, []));
       if (prog_.length > 0) setPrograms(prog_);
