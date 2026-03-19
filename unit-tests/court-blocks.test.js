@@ -24,6 +24,11 @@ describe('Court Blocks API Route — Structure', () => {
   it('imports from auth-helper', () => {
     expect(content).toContain("from '../auth-helper'");
   });
+
+  it('GET returns a bare array for shared client compatibility', () => {
+    expect(content).toContain('return NextResponse.json(data || [])');
+    expect(content).not.toContain('return NextResponse.json({ blocks: data || [] })');
+  });
 });
 
 describe('Court Blocks API — Input Validation', () => {

@@ -25,6 +25,8 @@ export async function GET(request: Request) {
 
     if (error) return NextResponse.json({ error: 'Failed to fetch programs' }, { status: 500 });
 
+    const programIds = (programs || []).map(p => p.id);
+
     // Fetch enrollment counts per program
     const { data: enrollments } = await supabase
       .from('program_enrollments')
@@ -36,16 +38,41 @@ export async function GET(request: Request) {
       enrollmentsByProgram[e.program_id].push(e.member_id);
     });
 
+    const { data: sessions } = await supabase
+      .from('program_sessions')
+      .select('program_id, date, time, duration')
+      .in('program_id', programIds.length > 0 ? programIds : ['__none__'])
+      .order('date', { ascending: true });
+
+    const sessionsByProgram: Record<string, Array<{ date: string; time: string; duration: number }>> = {};
+    (sessions || []).forEach(session => {
+      if (!sessionsByProgram[session.program_id]) sessionsByProgram[session.program_id] = [];
+      sessionsByProgram[session.program_id].push({
+        date: session.date,
+        time: session.time,
+        duration: session.duration,
+      });
+    });
+
     const result = (programs || []).map(p => ({
       id: p.id,
       title: p.title,
       description: p.description,
-      coach: p.coach,
-      schedule: p.schedule,
+      type: p.type,
+      coachId: p.coach_id,
+      coachName: p.coach_name,
+      coach: p.coach_name,
+      courtId: p.court_id,
+      courtName: p.court_name,
+      sessions: sessionsByProgram[p.id] || [],
+      schedule: (sessionsByProgram[p.id] || []).map(session => `${session.date} ${session.time}`).join(' • '),
       spotsTotal: p.spots_total,
       spotsFilled: (enrollmentsByProgram[p.id] || []).length,
-      price: p.price,
-      level: p.level,
+      enrolledMembers: enrollmentsByProgram[p.id] || [],
+      fee: p.fee,
+      price: typeof p.fee === 'number' ? `$${p.fee}` : String(p.fee ?? ''),
+      level: p.type,
+      status: p.status,
       enrolled: (enrollmentsByProgram[p.id] || []).includes(userId),
     }));
 

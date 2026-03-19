@@ -151,7 +151,7 @@ export const GET = withAuth(async (user, request, supabase) => {
   if (error) {
     return NextResponse.json({ error: 'Failed to fetch court blocks' }, { status: 500 });
   }
-  return NextResponse.json({ blocks: data || [] });
+  return NextResponse.json(data || []);
 });
 
 // POST /api/mobile/court-blocks - create a new court block (admin only)

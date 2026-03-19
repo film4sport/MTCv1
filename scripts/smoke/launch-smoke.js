@@ -53,8 +53,20 @@ async function runMobileAdminChecks(browser) {
   const admin = await loginMobile(browser, 'iPhone 14', USERS.admin);
   const { page, context } = admin;
 
+  await page.waitForFunction(() => {
+    return !!(window.MTC && MTC.state && MTC.state.currentUser && MTC.state.currentUser.role === 'admin');
+  }, { timeout: 15000 });
   await page.evaluate(() => { if (window.navigateTo) window.navigateTo('admin'); });
-  await page.waitForTimeout(1200);
+  await page.waitForFunction(() => {
+    if (!(window.MTC && MTC.state && MTC.state.currentUser && MTC.state.currentUser.role === 'admin')) {
+      return false;
+    }
+    if (typeof window.switchAdminTab === 'function' && !document.querySelector('#adminTabDashboard .admin-overview-card')) {
+      window.switchAdminTab('dashboard');
+    }
+    return typeof window.switchAdminTab === 'function' &&
+      !!document.querySelector('#adminTabDashboard .admin-overview-card');
+  }, { timeout: 20000 });
 
   logResult('mobile_admin_dashboard_kiss_ok', await page.evaluate(() => {
     const overview = document.querySelector('#adminTabDashboard .admin-overview-card');
@@ -65,9 +77,11 @@ async function runMobileAdminChecks(browser) {
   }));
 
   await page.evaluate(() => { if (window.switchAdminTab) window.switchAdminTab('courts'); });
-  await page.waitForTimeout(1000);
+  await page.waitForFunction(() => {
+    return typeof window.showBlockCourtModal === 'function';
+  }, { timeout: 10000 });
   await page.evaluate(() => { if (window.showBlockCourtModal) window.showBlockCourtModal(); });
-  await page.waitForTimeout(500);
+  await page.locator('#blockCourtModal .admin-block-modal').waitFor({ state: 'visible', timeout: 10000 });
 
   logResult('mobile_admin_block_modal_ok', await page.evaluate(() => {
     const modal = document.querySelector('#blockCourtModal .admin-block-modal');
@@ -78,9 +92,9 @@ async function runMobileAdminChecks(browser) {
   }));
 
   await page.evaluate(() => { if (window.closeBlockCourtModal) window.closeBlockCourtModal(); });
-  await page.waitForTimeout(300);
+  await page.waitForTimeout(400);
   await page.evaluate(() => { if (window.switchAdminTab) window.switchAdminTab('members'); });
-  await page.waitForTimeout(1200);
+  await page.locator('#adminMemberSearch').waitFor({ state: 'visible', timeout: 10000 });
 
   logResult('mobile_admin_search_ok', await page.evaluate(() => {
     const input = document.getElementById('adminMemberSearch');
@@ -92,18 +106,12 @@ async function runMobileAdminChecks(browser) {
   }));
 
   await page.evaluate(() => { if (window.navigateTo) window.navigateTo('messages'); });
-  await page.waitForTimeout(1000);
+  await page.waitForFunction(() => typeof window.showNewMessageModal === 'function', { timeout: 10000 });
   await page.evaluate(() => { if (window.showNewMessageModal) window.showNewMessageModal(); });
-  await page.waitForTimeout(700);
-
-  logResult('mobile_message_search_ok', await page.evaluate(() => {
-    const input = document.getElementById('memberSearchInput');
-    if (!input) return false;
-    input.value = 'Test Member One';
-    if (window.searchMembers) window.searchMembers('Test Member One');
-    const results = document.getElementById('memberSearchResults');
-    return !!results && /Test Member One/.test(results.textContent || '');
-  }));
+  await page.locator('#memberSearchInput').waitFor({ state: 'visible', timeout: 10000 });
+  await page.locator('#memberSearchInput').fill('Test Member One');
+  await page.waitForTimeout(500);
+  logResult('mobile_message_search_ok', await page.locator('#memberSearchResults').getByText('Test Member One').first().isVisible());
 
   await context.close();
 }

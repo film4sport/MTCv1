@@ -759,7 +759,7 @@
   // Render a member item for the search results — admins show as "Mono Tennis Club"
   function renderMemberItem(member) {
     var displayName = member.role === 'admin' ? 'Mono Tennis Club' : member.name;
-    var displaySkill = member.role === 'admin' ? 'Club Admin' : member.skill;
+    var displaySkill = member.role === 'admin' ? 'Club Admin' : (member.skill || '');
     var badge = member.role === 'admin'
       ? ' <svg style="display:inline;vertical-align:middle;opacity:0.5;margin-left:4px" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>'
       : '';
@@ -802,7 +802,7 @@
       if (m.id === 'club') return false;
       // Match admin by "mono tennis club" too
       if (m.role === 'admin' && 'mono tennis club'.includes(query)) return true;
-      return m.name.toLowerCase().includes(query) || m.skill.toLowerCase().includes(query);
+      return (m.name || '').toLowerCase().includes(query) || (m.skill || '').toLowerCase().includes(query);
     });
 
     if (results.length === 0) {
@@ -847,6 +847,7 @@
       return {
         id: m.id,
         name: m.name,
+        role: m.role || 'member',
         skill: skillLabel,
         avatar: m.avatar || 'man-1'
       };

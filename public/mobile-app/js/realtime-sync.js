@@ -145,7 +145,9 @@
 
   /** Refetch all data types (used by heartbeat + pull-to-refresh) */
   function refetchAll() {
+    refetchMembers();
     refetchBookings();
+    refetchCourts();
     refetchPartners();
     refetchConversations();
     refetchEvents();
