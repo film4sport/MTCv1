@@ -50,6 +50,9 @@ jobs:
       - name: Run unit tests
         run: npm run test:unit
 
+      - name: Verify Next.js production build exists
+        run: test -f .next/BUILD_ID
+
       - name: Upload app build for E2E shards
         uses: actions/upload-artifact@v4
         with:
@@ -85,6 +88,11 @@ jobs:
         with:
           name: app-build-${{ github.sha }}
           path: .
+
+      - name: Verify downloaded build artifacts
+        run: |
+          test -f .next/BUILD_ID
+          test -f public/mobile-app/dist/app.bundle.js
 
       - name: Run E2E tests (shard ${{ matrix.shard }}/2)
         run: npx playwright test --shard=${{ matrix.shard }}/2
