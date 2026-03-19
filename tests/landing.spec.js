@@ -299,8 +299,8 @@ test.describe('Info Page', () => {
   }
 
   async function switchInfoTab(page, label, tabKey) {
-    const tab = page.locator(`#tab-${tabKey}`);
-    await tab.scrollIntoViewIfNeeded();
+    const tab = page.getByRole('tab', { name: label, exact: true }).first();
+    await expect(tab).toBeVisible();
     let switchedViaClick = false;
     try {
       await tab.click({ timeout: 3000 });

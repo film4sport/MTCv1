@@ -136,7 +136,7 @@ describe('Admin Pinned in Member Search — Mobile PWA', () => {
   });
 
   it('shows "Club Admin" skill for admin', () => {
-    expect(mobileMessagingSrc).toContain("member.role === 'admin' ? 'Club Admin' : member.skill");
+    expect(mobileMessagingSrc).toContain("member.role === 'admin' ? 'Club Admin' : (member.skill || '')");
   });
 
   it('shows verified badge SVG for admin', () => {
