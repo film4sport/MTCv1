@@ -70,17 +70,27 @@
   }
   MTC.admin.getExportFromDate = getExportFromDate;
 
+  function getMemberStartDate(member) {
+    if (!member) return '';
+    if (member.created_at) return String(member.created_at).split('T')[0];
+    if (member.memberSince) return String(member.memberSince).split('T')[0];
+    return '';
+  }
+  MTC.admin.getMemberStartDate = getMemberStartDate;
+
   window.exportMembersCSV = function() {
     if (!MTC.admin.members.length) { showToast('No member data loaded'); return; }
     var fromDate = getExportFromDate();
     var feeMap = MTC.admin.FEES;
     var filtered = fromDate ? MTC.admin.members.filter(function(m) {
-      return m.created_at && m.created_at.split('T')[0] >= fromDate;
+      var startDate = getMemberStartDate(m);
+      return startDate && startDate >= fromDate;
     }) : MTC.admin.members;
     var rows = [['Name','Email','Role','Membership','Fee','Skill Level','Status','Since']];
     filtered.forEach(function(m) {
+      var startDate = getMemberStartDate(m);
       rows.push([m.name || '', m.email || '', m.role || 'member', m.membership_type || 'adult',
-        '$' + (feeMap[m.membership_type] || 120), m.skill_level || '', m.status || 'active', m.created_at ? m.created_at.split('T')[0] : '']);
+        '$' + (feeMap[m.membership_type] || 120), m.skill_level || '', m.status || 'active', startDate]);
     });
     downloadCSV('mtc-members-' + new Date().toISOString().split('T')[0] + '.csv', rows.map(function(r) { return r.join(','); }).join('\n'));
     showToast(filtered.length + ' members exported');
@@ -91,14 +101,15 @@
     var fromDate = getExportFromDate();
     var feeMap = MTC.admin.FEES;
     var filtered = fromDate ? MTC.admin.members.filter(function(m) {
-      return m.created_at && m.created_at.split('T')[0] >= fromDate;
+      var startDate = getMemberStartDate(m);
+      return startDate && startDate >= fromDate;
     }) : MTC.admin.members;
     var rows = [['Name','Email','Membership','Annual Fee','Since','Status']];
     var total = 0;
     filtered.forEach(function(m) {
       var fee = feeMap[m.membership_type] || 120;
       total += fee;
-      rows.push([m.name || '', m.email || '', m.membership_type || 'adult', '$' + fee, m.created_at ? m.created_at.split('T')[0] : '', m.status || 'active']);
+      rows.push([m.name || '', m.email || '', m.membership_type || 'adult', '$' + fee, getMemberStartDate(m), m.status || 'active']);
     });
     rows.push(['TOTAL','','',('$' + total),'','']);
     downloadCSV('mtc-payments-' + new Date().toISOString().split('T')[0] + '.csv', rows.map(function(r) { return r.join(','); }).join('\n'));

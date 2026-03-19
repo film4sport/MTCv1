@@ -14,6 +14,7 @@ for (const vp of viewports) {
     async function gotoLanding(page) {
       await page.goto('/', { waitUntil: 'domcontentloaded', timeout: 30000 });
       await page.waitForLoadState('load').catch(() => {});
+      await page.waitForFunction(() => document.readyState === 'complete' && !!document.querySelector('#schedule') && !!document.querySelector('footer'), null, { timeout: 10000 }).catch(() => {});
     }
 
     test('Landing page full scroll', async ({ page }) => {
@@ -35,13 +36,15 @@ for (const vp of viewports) {
 
     test('Schedule section', async ({ page }) => {
       await gotoLanding(page);
-      await page.locator('#schedule').scrollIntoViewIfNeeded();
+      const schedule = page.locator('#schedule').first();
+      await expect(schedule).toBeAttached();
+      await schedule.scrollIntoViewIfNeeded();
       await page.screenshot({ path: `test-results/schedule-${vp.name}.png`, fullPage: false });
     });
 
     test('Footer section', async ({ page }) => {
       await gotoLanding(page);
-      await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+      await page.locator('footer').first().scrollIntoViewIfNeeded();
       await page.screenshot({ path: `test-results/footer-${vp.name}.png`, fullPage: false });
     });
 

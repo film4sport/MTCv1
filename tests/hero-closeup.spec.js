@@ -3,22 +3,16 @@ const { test, expect } = require('@playwright/test');
 async function gotoLanding(page) {
   await page.goto('/', { waitUntil: 'domcontentloaded', timeout: 30000 });
   await page.waitForLoadState('load').catch(() => {});
+  await page.waitForFunction(() => document.readyState === 'complete' && !!document.querySelector('.wave-divider'), null, { timeout: 10000 }).catch(() => {});
   await expect(page.locator('.hero-content').first()).toBeAttached();
 }
 
 test('Hero-wave transition closeup', async ({ page }) => {
   await gotoLanding(page);
 
-  // Scroll to just where the hero bottom meets the wave
-  const heroHeight = await page.evaluate(() => {
-    const hero = document.querySelector('section');
-    return hero ? hero.getBoundingClientRect().height : window.innerHeight;
-  });
-
-  // Scroll to show the bottom 200px of hero + wave area
-  await page.evaluate((h) => window.scrollTo(0, h - 300), heroHeight);
-  await expect(page.locator('.wave-divider').first()).toBeAttached();
-  await page.screenshot({ path: 'test-results/hero-wave-closeup.png', fullPage: false });
+  const wave = page.locator('.wave-divider').first();
+  await expect(wave).toBeAttached();
+  await wave.screenshot({ path: 'test-results/hero-wave-closeup.png' });
 
   // Also take a full page screenshot to see overall layout
   await page.screenshot({ path: 'test-results/landing-fullpage.png', fullPage: true });

@@ -442,8 +442,9 @@
   };
 
   window.addFamilyMember = function() {
-    var name = (document.getElementById('familyMemberNameInput').value || '').trim();
-    if (!name) { showToast('Please enter a name', 'error'); return; }
+    var nameInput = document.getElementById('familyMemberNameInput');
+    var name = (nameInput && nameInput.value || '').trim();
+    if (!name) { showToast('Please enter a name', 'error'); if (nameInput) nameInput.focus(); return; }
     var birthYear = _newFamilyType === 'junior' ? parseInt(document.getElementById('familyMemberBirthYear').value) || null : null;
 
     // Limits: max 2 adults, max 4 juniors
@@ -530,7 +531,7 @@
     }
     section.style.display = 'block';
     if (members.length === 0) {
-      list.innerHTML = '<div style="text-align:center;padding:16px 0;color:var(--text-muted);font-size:13px;">No family members added yet</div>';
+      list.innerHTML = '<div style="text-align:center;padding:16px 0;color:var(--text-muted);font-size:13px;">No family members added yet. Add one above to manage bookings for them here.</div>';
       return;
     }
     var html = '';

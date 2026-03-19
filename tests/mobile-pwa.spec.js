@@ -9,6 +9,12 @@ const { test, expect } = require('@playwright/test');
 
 const MOBILE_URL = '/mobile-app/index.html';
 
+async function waitForMobileAppReady(page) {
+  await page.waitForLoadState('load').catch(() => {});
+  await expect(page.locator('body')).toBeAttached();
+  await expect(page.locator('#app, #login-screen').first()).toBeAttached();
+}
+
 async function readLoginViewportMetrics(page) {
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
@@ -54,7 +60,7 @@ test.describe('Mobile PWA — Login Screen', () => {
       localStorage.setItem('mtc-bypass-install-gate', 'true');
     });
     await page.goto(MOBILE_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
-    await page.waitForTimeout(1000);
+    await waitForMobileAppReady(page);
     await dismissOnboarding(page);
   });
 
@@ -69,7 +75,6 @@ test.describe('Mobile PWA — Login Screen', () => {
   test('PIN login validates empty email', async ({ page }) => {
     // Click sign in with empty email — should show error
     await page.locator('#pinLoginBtn').click();
-    await page.waitForTimeout(500);
     const errors = page.locator('.field-error');
     await expect(errors.first()).toBeAttached();
   });
@@ -77,7 +82,6 @@ test.describe('Mobile PWA — Login Screen', () => {
   test('PIN login validates empty PIN', async ({ page }) => {
     await page.fill('#loginEmail', 'test@example.com');
     await page.locator('#pinLoginBtn').click();
-    await page.waitForTimeout(500);
     const pinError = page.locator('.field-error');
     await expect(pinError.first()).toBeAttached();
   });
@@ -122,7 +126,7 @@ test.describe('Mobile PWA — Page Structure', () => {
 
   test('all expected screens exist in DOM', async ({ page }) => {
     await page.goto(MOBILE_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
-    await page.waitForTimeout(1000);
+    await waitForMobileAppReady(page);
 
     const expectedScreens = [
       'screen-home', 'screen-notifications', 'screen-book',
@@ -137,7 +141,7 @@ test.describe('Mobile PWA — Page Structure', () => {
 
   test('screens have ARIA labels', async ({ page }) => {
     await page.goto(MOBILE_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
-    await page.waitForTimeout(1000);
+    await waitForMobileAppReady(page);
 
     const screens = page.locator('.screen[aria-label]');
     const count = await screens.count();
@@ -146,7 +150,7 @@ test.describe('Mobile PWA — Page Structure', () => {
 
   test('bottom navigation bar exists', async ({ page }) => {
     await page.goto(MOBILE_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
-    await page.waitForTimeout(1000);
+    await waitForMobileAppReady(page);
 
     const bottomNav = page.locator('.bottom-nav').or(page.locator('#bottomNav')).or(page.locator('nav[role="navigation"]'));
     await expect(bottomNav.first()).toBeAttached();
@@ -171,7 +175,7 @@ test.describe('Mobile PWA — Booking UI', () => {
 
   test('booking screen has required elements', async ({ page }) => {
     await page.goto(MOBILE_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
-    await page.waitForTimeout(1000);
+    await waitForMobileAppReady(page);
 
     const bookScreen = page.locator('#screen-book');
     await expect(bookScreen).toBeAttached();
@@ -183,7 +187,7 @@ test.describe('Mobile PWA — Booking UI', () => {
 
   test('partner screen has required elements', async ({ page }) => {
     await page.goto(MOBILE_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
-    await page.waitForTimeout(1000);
+    await waitForMobileAppReady(page);
 
     const partnerScreen = page.locator('#screen-partners');
     await expect(partnerScreen).toBeAttached();

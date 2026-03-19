@@ -28,7 +28,7 @@ function runCommand(command, args) {
 
 const commands = [
   ['npm', ['run', 'check']],
-  ['npm', ['run', 'test:unit', '--', 'unit-tests/api-notifications.test.js', 'unit-tests/mobile-notification-regressions.test.js', 'unit-tests/mobile-messaging-regressions.test.js', 'unit-tests/mobile-booking-regressions.test.js', 'unit-tests/mobile-polish-regressions.test.js', 'unit-tests/mobile-sync-regressions.test.js', 'unit-tests/mobile-captain-regressions.test.js', 'unit-tests/dashboard-announcement-regressions.test.js', 'unit-tests/api-conversations.test.js']],
+  ['npm', ['run', 'test:unit', '--', 'unit-tests/api-notifications.test.js', 'unit-tests/mobile-notification-regressions.test.js', 'unit-tests/mobile-messaging-regressions.test.js', 'unit-tests/mobile-booking-regressions.test.js', 'unit-tests/mobile-polish-regressions.test.js', 'unit-tests/mobile-sync-regressions.test.js', 'unit-tests/mobile-captain-regressions.test.js', 'unit-tests/mobile-admin-export-regressions.test.js', 'unit-tests/dashboard-announcement-regressions.test.js', 'unit-tests/api-conversations.test.js']],
   ['npm', ['run', 'test:shared-flows']],
 ];
 

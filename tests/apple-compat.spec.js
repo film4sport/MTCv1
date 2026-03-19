@@ -34,10 +34,6 @@ async function switchInfoTab(page, name, expectedTab) {
     await page.goto(`/info?tab=${expectedTab}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
   }
 
-  if (!switchedViaClick) {
-    await page.waitForTimeout(250);
-  }
-
   await expect(page.locator(`#${tabId}`)).toHaveAttribute('aria-selected', 'true');
   await expect(page.locator(`#${panelId}`)).toBeVisible();
 }
@@ -78,7 +74,7 @@ async function mockAuthenticatedPwa(page) {
 
   await page.goto(MOBILE_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
   await page.waitForLoadState('load');
-  await page.waitForTimeout(1200);
+  await page.waitForFunction(() => typeof navigateTo === 'function' || (typeof MTC !== 'undefined' && MTC.fn && typeof MTC.fn.navigateTo === 'function'), null, { timeout: 5000 });
 
   await page.evaluate((user) => {
     localStorage.setItem('mtc-user', JSON.stringify(user));
@@ -132,7 +128,6 @@ test.describe('Apple Compatibility - Info Tabs', () => {
     await page.goto('/info?tab=membership', { waitUntil: 'domcontentloaded', timeout: 30000 });
     await page.waitForLoadState('load').catch(() => {});
     await expect(page.locator('#tab-membership')).toBeVisible();
-    await page.waitForTimeout(500);
   });
 
   test('far-right tabs stay reachable on iPhone/iPad Safari', async ({ page }) => {
@@ -144,7 +139,6 @@ test.describe('Apple Compatibility - Info Tabs', () => {
   test('info page remains usable after landscape rotation', async ({ page }) => {
     await page.setViewportSize({ width: 812, height: 375 });
     await page.waitForLoadState('domcontentloaded').catch(() => {});
-    await page.waitForTimeout(400);
 
     const visibleWidth = await page.evaluate(() => document.documentElement.clientWidth);
     const viewportWidth = await page.evaluate(() => window.innerWidth);
@@ -166,7 +160,6 @@ test.describe('Apple Compatibility - Mobile PWA', () => {
     await mockAuthenticatedPwa(page);
 
     await page.setViewportSize({ width: 844, height: 390 });
-    await page.waitForTimeout(300);
 
     const bottomNav = page.locator('#bottomNav');
     await expect(bottomNav).toBeVisible();

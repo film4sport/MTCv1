@@ -20,12 +20,14 @@
 
   // onclick handler (index.html)
   window.sendResetEmail = function() {
-    const email = document.getElementById('resetEmail').value;
+    const emailInput = document.getElementById('resetEmail');
+    const email = emailInput ? emailInput.value : '';
     if (!email) {
       showToast('Please enter your email address');
+      if (emailInput) emailInput.focus();
       return;
     }
-    showToast('Password reset link sent to ' + email);
+    showToast('Password reset link sent');
     closeForgotPassword();
   };
 
@@ -119,7 +121,7 @@
         '<div><div style="font-weight:600;font-size:14px;color:var(--text-primary);">vs ' + m.opponent + '</div><div style="font-size:12px;color:var(--text-muted);">' + m.date + '</div></div>' +
         '<div style="text-align:right;"><span style="font-weight:700;color:' + color + ';">' + m.result + '</span> <span style="font-size:13px;color:var(--text-secondary);">' + m.score + '</span></div>' +
       '</div>';
-    }).join('');
+    }).join('') || '<div style="padding: 18px 0; text-align: center; color: var(--text-muted);">No recorded matches yet. Completed match results will show up here.</div>';
 
     modal.innerHTML =
       '<div class="modal" onclick="event.stopPropagation()" style="max-width: 400px; max-height: 80vh; overflow-y: auto;">' +
@@ -143,7 +145,7 @@
     if ('Notification' in window) {
       Notification.requestPermission().then(function(permission) {
         if (permission === 'granted') {
-          showToast('Push notifications enabled!');
+          showToast('Push notifications enabled');
           MTC.storage.set('mtc-push-enabled', true);
         } else {
           showToast('Notifications blocked. Enable in browser settings.');

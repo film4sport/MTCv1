@@ -3,6 +3,7 @@ const { test, expect } = require('@playwright/test');
 async function gotoLanding(page) {
   await page.goto('/', { waitUntil: 'domcontentloaded', timeout: 30000 });
   await page.waitForLoadState('load').catch(() => {});
+  await page.waitForFunction(() => document.readyState === 'complete' && !!document.querySelector('.navbar') && !!document.querySelector('#events') && !!document.querySelector('#schedule'), null, { timeout: 10000 }).catch(() => {});
   await expect(page.locator('.navbar')).toBeAttached();
 }
 
@@ -10,7 +11,8 @@ test.describe('Latest Fix Verification', () => {
 
   test('Events section has "// Featured Events" label and correct heading', async ({ page }) => {
     await gotoLanding(page);
-    await page.locator('#events').scrollIntoViewIfNeeded();
+    const events = page.locator('#events').first();
+    await expect(events).toBeAttached();
 
     const label = page.locator('.section-label', { hasText: 'Featured Events' });
     await expect(label).toBeVisible();
@@ -18,7 +20,7 @@ test.describe('Latest Fix Verification', () => {
     const heading = page.locator('h2', { hasText: 'Upcoming Events' });
     await expect(heading).toBeVisible();
 
-    await page.screenshot({ path: 'test-results/events-section.png', fullPage: false });
+    await events.screenshot({ path: 'test-results/events-section.png' });
   });
 
   test('Hero has scroll down text with bouncing arrow', async ({ page }) => {
@@ -35,12 +37,13 @@ test.describe('Latest Fix Verification', () => {
 
   test('Schedule section says "Club\'s Schedule" not "Events"', async ({ page }) => {
     await gotoLanding(page);
-    await page.locator('#schedule').scrollIntoViewIfNeeded();
+    const schedule = page.locator('#schedule').first();
+    await expect(schedule).toBeAttached();
 
     const heading = page.locator('h2', { hasText: "Club's Calendar" });
     await expect(heading).toBeVisible();
 
-    await page.screenshot({ path: 'test-results/schedule-heading.png', fullPage: false });
+    await schedule.screenshot({ path: 'test-results/schedule-heading.png' });
   });
 
   test('Login page Book Courts badge is visible', async ({ page }) => {

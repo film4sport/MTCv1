@@ -3,13 +3,26 @@ const { test, expect } = require('@playwright/test');
 async function gotoLanding(page) {
   await page.goto('/', { waitUntil: 'domcontentloaded', timeout: 30000 });
   await page.waitForLoadState('load').catch(() => {});
+  await page.waitForFunction(() => (
+    document.readyState === 'complete' &&
+    !!document.querySelector('.navbar') &&
+    !!document.querySelector('.hero-content') &&
+    !!document.querySelector('#events') &&
+    !!document.querySelector('#schedule') &&
+    !!document.querySelector('#gallery') &&
+    !!document.querySelector('footer')
+  ), null, { timeout: 10000 }).catch(() => {});
   await expect(page.locator('.navbar')).toBeAttached();
   await expect(page.locator('.hero-content').first()).toBeAttached();
 }
 
 async function gotoLandingSection(page, sectionSelector) {
   await gotoLanding(page);
-  await page.locator(sectionSelector).scrollIntoViewIfNeeded();
+}
+
+async function scrollWindow(page, y) {
+  await page.mouse.wheel(0, y);
+  await page.waitForLoadState('load').catch(() => {});
 }
 
 test.describe('Landing Page - Load & Structure', () => {
@@ -25,6 +38,7 @@ test.describe('Landing Page - Load & Structure', () => {
   });
 
   test('page title is set', async ({ page }) => {
+    await page.waitForLoadState('load').catch(() => {});
     const title = await page.title();
     expect(title).toBeTruthy();
   });
@@ -37,8 +51,7 @@ test.describe('Landing Page - Load & Structure', () => {
   test('back-to-top button appears on scroll', async ({ page }) => {
     const btn = page.locator('.back-to-top');
     await expect(btn).not.toHaveClass(/visible/);
-    await page.evaluate(() => window.scrollTo(0, 1000));
-    await page.waitForTimeout(300);
+    await scrollWindow(page, 1200);
     await expect(btn).toHaveClass(/visible/);
   });
 });
@@ -56,9 +69,8 @@ test.describe('Navbar', () => {
   test('navbar gets scrolled class on scroll', async ({ page }) => {
     const nav = page.locator('.navbar');
     await expect(nav).not.toHaveClass(/scrolled/);
-    await page.evaluate(() => window.scrollTo(0, 200));
-    await page.waitForTimeout(300);
-    await expect(nav).toHaveClass(/scrolled/);
+    await scrollWindow(page, 600);
+    await expect.poll(async () => await nav.getAttribute('class')).toMatch(/scrolled/);
   });
 
   test('nav links exist for key sections', async ({ page }) => {
@@ -176,7 +188,7 @@ test.describe('Schedule / Calendar Section', () => {
     // Click next month
     const nextBtn = page.locator('#schedule button').nth(1);
     await nextBtn.click();
-    await page.waitForTimeout(300);
+    await expect.poll(async () => await monthTitle.textContent()).not.toBe(initialText);
     const newText = await monthTitle.textContent();
     expect(newText).not.toBe(initialText);
   });
@@ -194,7 +206,9 @@ test.describe('Partners Section', () => {
   });
 
   test('partner logos have images', async ({ page }) => {
-    const imgs = page.locator('.partner-logo img');
+    await page.locator('.partner-logo').first().scrollIntoViewIfNeeded();
+    const imgs = page.locator('.partner-logo img, .partner-logo [data-nimg]');
+    await expect(imgs.first()).toBeAttached();
     const count = await imgs.count();
     expect(count).toBe(3);
   });

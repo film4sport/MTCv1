@@ -45,7 +45,7 @@ async function mockAuthenticatedPwa(page) {
 
   await page.goto(MOBILE_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
   await page.waitForLoadState('load');
-  await page.waitForTimeout(800);
+  await page.waitForFunction(() => typeof MTC !== 'undefined', null, { timeout: 5000 });
   await page.evaluate((user) => {
     if (typeof window !== 'undefined') window.currentUser = user;
     if (typeof MTC !== 'undefined') MTC.state.currentUser = user;
@@ -73,7 +73,6 @@ test.describe('Chromium Compatibility - Info Tabs', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/info?tab=membership', { waitUntil: 'domcontentloaded', timeout: 30000 });
     await expect(page.locator('#tab-membership')).toBeVisible();
-    await page.waitForTimeout(300);
   });
 
   test('far-right tabs stay reachable across Chromium breakpoints', async ({ page }) => {
@@ -94,7 +93,6 @@ test.describe('Chromium Compatibility - Info Tabs', () => {
 
     await page.setViewportSize({ width: resizedWidth, height: resizedHeight });
     await page.waitForLoadState('domcontentloaded').catch(() => {});
-    await page.waitForTimeout(300);
 
     const visibleWidth = await page.evaluate(() => document.documentElement.clientWidth);
     const viewportWidth = await page.evaluate(() => window.innerWidth);
@@ -141,7 +139,6 @@ test.describe('Chromium Compatibility - Mobile PWA', () => {
 
     await page.setViewportSize({ width: 844, height: 390 });
     await page.waitForLoadState('domcontentloaded').catch(() => {});
-    await page.waitForTimeout(300);
 
     const bottomNav = page.locator('#bottomNav');
     await expect(bottomNav).toBeVisible();

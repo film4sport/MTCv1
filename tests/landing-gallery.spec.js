@@ -9,8 +9,10 @@ const { test, expect } = require('@playwright/test');
 async function gotoGallery(page) {
   await page.goto('/', { waitUntil: 'domcontentloaded', timeout: 30000 });
   await page.waitForLoadState('load').catch(() => {});
-  await expect(page.locator('#gallery')).toBeAttached();
-  await page.locator('#gallery').scrollIntoViewIfNeeded();
+  await page.waitForFunction(() => document.readyState === 'complete' && !!document.querySelector('#gallery'), null, { timeout: 10000 }).catch(() => {});
+  const gallery = page.locator('#gallery').first();
+  await expect(gallery).toBeAttached();
+  await gallery.scrollIntoViewIfNeeded();
 }
 
 test.describe('Gallery & Lightbox', () => {
@@ -31,7 +33,6 @@ test.describe('Gallery & Lightbox', () => {
     const firstSlide = page.locator('.gallery-slide').first();
     await firstSlide.focus();
     await page.keyboard.press('Enter');
-    await page.waitForTimeout(300);
     // Lightbox should be open
     const lightbox = page.locator('.lightbox.active');
     await expect(lightbox).toBeVisible();
@@ -41,7 +42,6 @@ test.describe('Gallery & Lightbox', () => {
     const firstSlide = page.locator('.gallery-slide').first();
     await firstSlide.focus();
     await page.keyboard.press('Space');
-    await page.waitForTimeout(300);
     const lightbox = page.locator('.lightbox.active');
     await expect(lightbox).toBeVisible();
   });

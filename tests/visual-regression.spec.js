@@ -23,13 +23,12 @@ const INFO_URL = '/info';
 
 /** Wait for page to stabilize, inject animation freeze */
 async function cleanPage(page) {
-  // Use 'load' event (already waited by goto) + short delay instead of 'networkidle'
-  // which hangs on pages with SSE/long-polling connections
-  await page.waitForTimeout(1500);
+  await page.waitForLoadState('load').catch(() => {});
+  await page.waitForFunction(() => document.readyState === 'complete', null, { timeout: 5000 }).catch(() => {});
   await page.addStyleTag({
     content: '*, *::before, *::after { transition: none !important; animation-duration: 0s !important; }'
   });
-  await page.waitForTimeout(300);
+  await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
 }
 
 // ==========================================================
@@ -68,7 +67,7 @@ test.describe('Visual Regression — Landing Page', () => {
       const el = document.getElementById('events') || document.querySelector('[data-section="events"]');
       if (el) el.scrollIntoView({ behavior: 'instant' });
     });
-    await page.waitForTimeout(500);
+    await expect(page.locator('#events .event-card, [data-section="events"] [class*="card"]').first()).toBeAttached();
 
     // Events section has cards
     const cards = page.locator('#events .event-card, [data-section="events"] [class*="card"]');
@@ -82,7 +81,7 @@ test.describe('Visual Regression — Landing Page', () => {
     await cleanPage(page);
 
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-    await page.waitForTimeout(500);
+    await expect(page.locator('footer').first()).toBeVisible();
 
     // Footer exists
     const footer = page.locator('footer').first();

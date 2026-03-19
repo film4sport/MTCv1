@@ -141,7 +141,7 @@
   registerAction('cancelApiPartner', function(el, data) {
     var card = el.closest('.partner-card');
     if (card) card.remove();
-    showToast('Removing request...');
+    showToast('Removing partner request...');
     // Remove from in-memory pool so it doesn't reappear on re-render
     if (data.id && typeof window.removeFromPartnerPool === 'function') {
       window.removeFromPartnerPool(data.id);
@@ -152,9 +152,9 @@
         method: 'DELETE',
         body: JSON.stringify({ partnerId: data.id })
       }).then(function(res) {
-        if (res.ok) showToast('Request removed');
-        else showToast('Failed to remove request', 'error');
-      }).catch(function() { showToast('Failed to remove request', 'error'); });
+        if (res.ok) showToast('Partner request removed');
+        else showToast('Failed to remove the partner request. Please try again.', 'error');
+      }).catch(function() { showToast('Failed to remove the partner request. Please try again.', 'error'); });
     }
     // Also remove from local storage if exists
     var reqs = MTC.storage.get('mtc-partner-requests', []);

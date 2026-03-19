@@ -1,11 +1,26 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
 
+async function waitForLoginForm(page) {
+  await expect(page.locator('input[type="email"]')).toBeVisible();
+  await expect(page.locator('input[type="password"]')).toBeVisible();
+  await expect(page.locator('button[type="submit"]')).toBeVisible();
+}
+
+async function loginAsMember(page) {
+  await page.goto('/login', { waitUntil: 'domcontentloaded' });
+  await waitForLoginForm(page);
+  await page.locator('input[type="email"]').fill('member@mtc.ca');
+  await page.locator('input[type="password"]').fill('not-a-real-password');
+  await page.locator('button[type="submit"]').click();
+  await page.waitForURL('**/dashboard**', { timeout: 30000, waitUntil: 'commit' });
+  await expect(page.locator('header')).toBeAttached();
+}
+
 test.describe('Dashboard — Login Flow', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/login', { waitUntil: 'domcontentloaded' });
-    // Wait for React hydration to complete
-    await page.waitForTimeout(1000);
+    await waitForLoginForm(page);
   });
 
   test('login page loads with form elements', async ({ page }) => {
@@ -18,7 +33,6 @@ test.describe('Dashboard — Login Flow', () => {
 
   test('shows validation errors for empty fields', async ({ page }) => {
     await page.locator('button[type="submit"]').click();
-    await page.waitForTimeout(300);
     await expect(page.getByText('Please enter a valid email address')).toBeVisible();
     await expect(page.getByText('Password is required')).toBeVisible();
   });
@@ -31,9 +45,7 @@ test.describe('Dashboard — Login Flow', () => {
     await page.keyboard.type('bad@x', { delay: 30 }); // passes HTML5 email type but fails app regex (needs .tld)
     await passInput.click();
     await page.keyboard.type('somepass', { delay: 30 });
-    await page.waitForTimeout(200);
     await page.locator('button[type="submit"]').click();
-    await page.waitForTimeout(500);
     await expect(page.getByText('Please enter a valid email address')).toBeVisible();
   });
 
@@ -41,15 +53,12 @@ test.describe('Dashboard — Login Flow', () => {
   test('demo credential buttons fill in the form', async ({ page }) => {
     test.skip(process.env.CI === 'true', 'Demo buttons are dev-only');
     await page.getByText('Member', { exact: true }).click();
-    await page.waitForTimeout(300);
     await expect(page.locator('input[type="email"]')).toHaveValue('member@mtc.ca');
     await expect(page.locator('input[type="password"]')).toHaveValue('not-a-real-password');
   });
 
   test('forgot password button opens modal', async ({ page }) => {
-    await page.waitForTimeout(500);
     await page.getByText('Forgot password?').click();
-    await page.waitForTimeout(500);
     await expect(page.getByText('Reset Password')).toBeVisible();
     await expect(page.getByText("Enter your email and we'll send a reset link.")).toBeVisible();
     await expect(page.getByText('Send Reset Link')).toBeVisible();
@@ -57,12 +66,9 @@ test.describe('Dashboard — Login Flow', () => {
   });
 
   test('forgot password modal closes on cancel', async ({ page }) => {
-    await page.waitForTimeout(500);
     await page.getByText('Forgot password?').click();
-    await page.waitForTimeout(500);
     await expect(page.getByText('Reset Password')).toBeVisible();
     await page.getByRole('button', { name: 'Cancel' }).click();
-    await page.waitForTimeout(500);
     await expect(page.getByText('Reset Password')).not.toBeVisible();
   });
 
@@ -90,15 +96,7 @@ test.describe('Dashboard — Structure', () => {
   test.beforeEach(async ({ page }) => {
     // Login via real Supabase auth (member demo account)
     // Type credentials directly (demo buttons are dev-only, not available in CI production builds)
-    await page.goto('/login', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(500);
-    await page.locator('input[type="email"]').click();
-    await page.keyboard.type('member@mtc.ca', { delay: 20 });
-    await page.locator('input[type="password"]').click();
-    await page.keyboard.type('not-a-real-password', { delay: 20 });
-    await page.locator('button[type="submit"]').click();
-    await page.waitForURL('**/dashboard**', { timeout: 30000, waitUntil: 'commit' });
-    await page.waitForTimeout(1000);
+    await loginAsMember(page);
   });
 
   test('dashboard home page loads', async ({ page }) => {
@@ -129,17 +127,9 @@ test.describe('Dashboard — Profile Page', () => {
   test.beforeEach(async ({ page }) => {
     // Login via real Supabase auth (member demo account)
     // Type credentials directly (demo buttons are dev-only, not available in CI production builds)
-    await page.goto('/login', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(500);
-    await page.locator('input[type="email"]').click();
-    await page.keyboard.type('member@mtc.ca', { delay: 20 });
-    await page.locator('input[type="password"]').click();
-    await page.keyboard.type('not-a-real-password', { delay: 20 });
-    await page.locator('button[type="submit"]').click();
-    await page.waitForURL('**/dashboard**', { timeout: 30000, waitUntil: 'commit' });
-    await page.waitForTimeout(500);
+    await loginAsMember(page);
     await page.goto('/dashboard/profile', { waitUntil: 'domcontentloaded', timeout: 30000 });
-    await page.waitForTimeout(1000);
+    await expect(page.locator('main')).toBeVisible();
   });
 
   test('profile page shows user info', async ({ page }) => {

@@ -161,10 +161,13 @@
 
   window.createEvent = function() {
     try {
-    const title = document.getElementById('newEventTitle').value;
+    const titleInput = document.getElementById('newEventTitle');
+    const dateInput = document.getElementById('newEventDate');
+    const timeInput = document.getElementById('newEventTime');
+    const title = titleInput.value;
     const type = document.getElementById('newEventType').value;
-    const date = document.getElementById('newEventDate').value;
-    const time = document.getElementById('newEventTime').value;
+    const date = dateInput.value;
+    const time = timeInput.value;
     const location = document.getElementById('newEventLocation').value;
     const spots = document.getElementById('newEventSpots').value;
     const price = document.getElementById('newEventPrice').value || 'Free';
@@ -173,6 +176,9 @@
 
     if (!title || !date || !time) {
       showToast('Please fill in title, date, and time');
+      if (!title && titleInput) titleInput.focus();
+      else if (!date && dateInput) dateInput.focus();
+      else if (!time && timeInput) timeInput.focus();
       return;
     }
 
@@ -203,7 +209,7 @@
         clubEventsData[res.data.id].id = res.data.id;
         if (res.data.id !== eventId) delete clubEventsData[eventId];
       }
-      showToast('Event created!');
+      showToast('Event created');
     }).catch(function(err) {
       // Rollback: remove optimistic event
       delete clubEventsData[eventId];
@@ -220,12 +226,14 @@
   // E-TRANSFER SETTINGS
   // ============================================
   window.saveEtransferSettings = function() {
-    var email = document.getElementById('etransferEmail').value;
+    var emailInput = document.getElementById('etransferEmail');
+    var email = emailInput.value;
     var autoDeposit = document.getElementById('etransferAutoDeposit').classList.contains('active');
     var message = document.getElementById('etransferMessage').value;
 
     if (!email) {
       showToast('Please enter an e-transfer email');
+      if (emailInput) emailInput.focus();
       return;
     }
 
@@ -245,7 +253,7 @@
         }
       })
     }).then(function() {
-      showToast('E-transfer settings saved!');
+      showToast('E-transfer settings saved');
     }).catch(function(err) {
       MTC.warn(' saveEtransferSettings API error:', err);
       showToast('Settings saved locally — sync may be delayed', 'warning');
