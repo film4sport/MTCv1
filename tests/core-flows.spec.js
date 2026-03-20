@@ -229,7 +229,9 @@ test.describe('Core Flow — Messaging', () => {
         }
       }, { timeout: 10000 })
       .toBe(true);
-    await expect(page.locator('#conversationsList')).toContainText('Jane Smith', { timeout: 10000 });
+    await expect
+      .poll(async () => page.locator('#conversationsList').textContent().catch(() => ''), { timeout: 10000 })
+      .toContain('Jane Smith');
   });
 
   test('sendMessage captures server ID for later deletion', async ({ page }) => {

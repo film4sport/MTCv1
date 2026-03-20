@@ -36,9 +36,8 @@ for (const vp of viewports) {
 
     test('Schedule section', async ({ page }) => {
       await gotoLanding(page);
-      const schedule = page.locator('#schedule').first();
-      await expect(schedule).toBeAttached();
-      await schedule.scrollIntoViewIfNeeded();
+      await expect(page.locator('#schedule').first()).toBeAttached();
+      await page.locator('#schedule').first().evaluate((el) => el.scrollIntoView({ block: 'start', behavior: 'instant' }));
       await page.screenshot({ path: `test-results/schedule-${vp.name}.png`, fullPage: false });
     });
 

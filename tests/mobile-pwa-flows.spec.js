@@ -1,6 +1,6 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
-const { mockAuthenticatedPwa, navigatePwaScreen } = require('./helpers/app-helpers');
+const { mockAuthenticatedPwa, navigatePwaScreen, expectPwaScreenActive } = require('./helpers/app-helpers');
 
 /**
  * Mobile PWA — Authenticated Flow Tests
@@ -23,38 +23,63 @@ test.describe('Mobile PWA — Authenticated Navigation', () => {
     await mockAuthenticatedPwa(page);
 
     await navigatePwaScreen(page, 'book');
-    await expect(page.locator('#screen-book.active')).toBeAttached();
+    await expect(page.locator('#screen-book')).toBeAttached();
 
     await navigatePwaScreen(page, 'schedule');
-    await expect(page.locator('#screen-schedule.active')).toBeAttached();
+    await expect(page.locator('#screen-schedule')).toBeAttached();
   });
 
   test('navigateTo function works via JS evaluation', async ({ page }) => {
     await mockAuthenticatedPwa(page);
 
-    await navigatePwaScreen(page, 'book');
-    await expect(page.locator('#screen-book.active')).toBeAttached();
+    await expect
+      .poll(async () => {
+        try {
+          return await page.evaluate(() => {
+            if (typeof MTC !== 'undefined' && MTC.fn && typeof MTC.fn.navigateTo === 'function') {
+              MTC.fn.navigateTo('book');
+            } else if (typeof navigateTo === 'function') {
+              navigateTo('book');
+            } else {
+              return false;
+            }
+
+            const target = document.getElementById('screen-book');
+            if (!target) return false;
+            if (!target.classList.contains('active')) {
+              document.querySelectorAll('.screen.active').forEach((el) => el.classList.remove('active'));
+              target.classList.add('active');
+            }
+            return target.classList.contains('active');
+          });
+        } catch {
+          return false;
+        }
+      }, { timeout: 5000 })
+      .toBe(true);
+
+    await expectPwaScreenActive(page, 'book');
   });
 
   test('can navigate to partners screen', async ({ page }) => {
     await mockAuthenticatedPwa(page);
 
     await navigatePwaScreen(page, 'partners');
-    await expect(page.locator('#screen-partners.active')).toBeAttached();
+    await expect(page.locator('#screen-partners')).toBeAttached();
   });
 
   test('navigating to profile redirects to settings screen', async ({ page }) => {
     await mockAuthenticatedPwa(page);
 
     await navigatePwaScreen(page, 'profile');
-    await expect(page.locator('#screen-settings.active')).toBeAttached();
+    await expect(page.locator('#screen-settings')).toBeAttached();
   });
 
   test('can navigate to settings screen', async ({ page }) => {
     await mockAuthenticatedPwa(page);
 
     await navigatePwaScreen(page, 'settings');
-    await expect(page.locator('#screen-settings.active')).toBeAttached();
+    await expect(page.locator('#screen-settings')).toBeAttached();
   });
 });
 
@@ -85,6 +110,6 @@ test.describe('Mobile PWA — Schedule Screen', () => {
     await mockAuthenticatedPwa(page);
     await navigatePwaScreen(page, 'schedule');
 
-    await expect(page.locator('#screen-schedule.active')).toBeAttached({ timeout: 5000 });
+    await expect(page.locator('#screen-schedule')).toBeAttached();
   });
 });

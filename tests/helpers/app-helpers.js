@@ -253,6 +253,29 @@ async function navigatePwaScreen(page, screen) {
   await expect(page.locator(`#screen-${resolvedScreen}.active`)).toBeAttached({ timeout: 5000 });
 }
 
+async function expectPwaScreenActive(page, screen) {
+  const resolvedScreen = screen === 'events'
+    ? 'home'
+    : screen === 'mybookings' || screen === 'programs'
+      ? 'schedule'
+      : screen === 'profile'
+        ? 'settings'
+        : screen;
+
+  await expect
+    .poll(async () => {
+      try {
+        return await page.evaluate((targetScreen) => {
+          const target = document.getElementById(`screen-${targetScreen}`);
+          return !!target && target.classList.contains('active');
+        }, resolvedScreen);
+      } catch {
+        return false;
+      }
+    }, { timeout: 5000 })
+    .toBe(true);
+}
+
 async function activatePwaScreen(page, screenId, navId, activeScreenId = screenId) {
   let lastError = null;
 
@@ -307,5 +330,6 @@ module.exports = {
   gotoLanding,
   mockAuthenticatedPwa,
   navigatePwaScreen,
+  expectPwaScreenActive,
   switchInfoTab,
 };

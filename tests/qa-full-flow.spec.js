@@ -170,42 +170,7 @@ test.describe('Member Dashboard', () => {
 });
 
 // ============================================================
-// 2. COACH DASHBOARD FLOWS
-// ============================================================
-
-test.describe('Coach Dashboard', () => {
-  test.beforeEach(async ({ page }) => {
-    await loginAs(page, 'coach');
-  });
-
-  test('coach dashboard shows Club Events quick action', async ({ page }) => {
-    const main = page.locator('main');
-    await expect(main.getByText('Club Events')).toBeVisible();
-  });
-
-  test('coach dashboard does not show Find Partner', async ({ page }) => {
-    const findPartner = page.locator('a:has-text("Find Partner")');
-    await expect(findPartner).toHaveCount(0);
-  });
-
-  test('coaching route redirects to lessons', async ({ page }) => {
-    await goTo(page, '/dashboard/coaching');
-    await page.waitForURL('**/dashboard/lessons');
-  });
-
-  test('coach sidebar hides Partners but shows Lessons', async ({ page }) => {
-    const sidebar = page.locator('aside');
-    await expect(sidebar).toBeAttached();
-    // Coach should see Lessons
-    await expect(sidebar.getByText('Lessons')).toBeAttached();
-    // Partners should NOT appear for coach
-    const navText = await sidebar.locator('nav').textContent();
-    expect(navText).not.toContain('Partners');
-  });
-});
-
-// ============================================================
-// 3. ADMIN DASHBOARD FLOWS
+// 2. ADMIN DASHBOARD FLOWS
 // ============================================================
 
 test.describe('Admin Dashboard', () => {

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'fs';
+import { readFileSync, existsSync } from 'fs';
 import { resolve } from 'path';
 import {
   isValidUUID, isValidEnum, isValidDate, isInRange, isValidEmail,
@@ -167,16 +167,16 @@ describe('Mobile mutation routes include rate limiting or auth wrappers', () => 
   });
 });
 
-describe('Coaching routes redirect to lessons', () => {
-  it('coaching page redirects to lessons', () => {
-    const coachingPage = readFileSync(resolve(root, 'app/dashboard/coaching/page.tsx'), 'utf-8');
-    expect(coachingPage).toMatch(/redirect.*lessons/i);
+describe('Coaching panel remains removed', () => {
+  it('dashboard coaching route does not exist', () => {
+    expect(existsSync(resolve(root, 'app/dashboard/coaching/page.tsx'))).toBe(false);
   });
 
   it('sidebar does not reference coaching panel', () => {
     const sidebar = readFileSync(resolve(root, 'app/dashboard/components/Sidebar.tsx'), 'utf-8');
     expect(sidebar).not.toContain('coachItem');
     expect(sidebar).not.toContain("Coach's Panel");
+    expect(sidebar).not.toContain('/dashboard/coaching');
   });
 });
 
