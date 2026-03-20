@@ -121,9 +121,13 @@ test.describe('Gallery & Lightbox', () => {
   });
 
   test('gallery slides have unique descriptive alt text', async ({ page }) => {
-    const altTexts = await page.locator('.gallery-slide img').evaluateAll(
-      (imgs) => imgs.map((img) => img.getAttribute('alt'))
-    );
+    const images = page.locator('.gallery-slide img');
+    await expect(images.first()).toBeAttached({ timeout: 5000 });
+    const count = await images.count();
+    const altTexts = [];
+    for (let i = 0; i < count; i++) {
+      altTexts.push(await images.nth(i).getAttribute('alt'));
+    }
     // All should have alt text
     altTexts.forEach((alt) => expect(alt).toBeTruthy());
     // All should be unique

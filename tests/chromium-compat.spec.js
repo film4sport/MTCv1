@@ -1,6 +1,6 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
-const { activatePwaScreen, gotoInfo, mockAuthenticatedPwa } = require('./helpers/app-helpers');
+const { activatePwaScreen, gotoInfo, mockAuthenticatedPwa, switchInfoTab } = require('./helpers/app-helpers');
 
 test.describe('Chromium Compatibility - Info Tabs', () => {
   test.beforeEach(async ({ page }) => {
@@ -13,10 +13,10 @@ test.describe('Chromium Compatibility - Info Tabs', () => {
     const terms = page.locator('#tab-terms');
     await expect(privacy).toBeAttached({ timeout: 5000 });
     await expect(terms).toBeAttached({ timeout: 5000 });
-    await privacy.evaluate((el) => el.scrollIntoView({ block: 'nearest', inline: 'center' }));
-    await terms.evaluate((el) => el.scrollIntoView({ block: 'nearest', inline: 'center' }));
-    await expect(privacy).toBeVisible();
-    await expect(terms).toBeVisible();
+    await switchInfoTab(page, 'Privacy', 'privacy');
+    await switchInfoTab(page, 'Terms', 'terms');
+    await expect(privacy).toHaveAttribute('aria-selected', 'false');
+    await expect(terms).toHaveAttribute('aria-selected', 'true');
   });
 
   test('layout remains usable after breakpoint-like resize', async ({ page }) => {
