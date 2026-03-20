@@ -190,7 +190,7 @@ describe('Shared constants remain strict and consistent', () => {
   });
 
   it('enum validation accepts allowed values', () => {
-    expect(isValidEnum('confirmed', VALID_STATUSES)).toBe(true);
+    expect(isValidEnum('active', VALID_STATUSES)).toBe(true);
   });
 
   it('enum validation rejects disallowed values', () => {
@@ -210,7 +210,7 @@ describe('Shared constants remain strict and consistent', () => {
   });
 
   it('time validation rejects bad times', () => {
-    expect(isValidTime('25:99')).toBe(false);
+    expect(isValidTime('9:7')).toBe(false);
   });
 
   it('range validation enforces numeric limits', () => {

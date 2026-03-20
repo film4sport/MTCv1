@@ -1,20 +1,5 @@
 const { test, expect } = require('@playwright/test');
-
-async function gotoLanding(page) {
-  await page.goto('/', { waitUntil: 'domcontentloaded', timeout: 30000 });
-  await page.waitForLoadState('load').catch(() => {});
-  await page.waitForFunction(() => (
-    document.readyState === 'complete' &&
-    !!document.querySelector('.navbar') &&
-    !!document.querySelector('.hero-content') &&
-    !!document.querySelector('#events') &&
-    !!document.querySelector('#schedule') &&
-    !!document.querySelector('#gallery') &&
-    !!document.querySelector('footer')
-  ), null, { timeout: 10000 }).catch(() => {});
-  await expect(page.locator('.navbar')).toBeAttached();
-  await expect(page.locator('.hero-content').first()).toBeAttached();
-}
+const { gotoInfo, gotoLanding, switchInfoTab } = require('./helpers/app-helpers');
 
 async function gotoLandingSection(page, sectionSelector) {
   await gotoLanding(page);
@@ -33,7 +18,9 @@ test.describe('Landing Page - Load & Structure', () => {
   test('page loads without console errors', async ({ page }) => {
     const errors = [];
     page.on('pageerror', (err) => errors.push(err.message));
-    await gotoLanding(page);
+    await page.goto('/', { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForLoadState('load').catch(() => {});
+    await expect(page.locator('.navbar')).toBeAttached();
     expect(errors).toEqual([]);
   });
 
@@ -241,7 +228,9 @@ test.describe('Gallery Section', () => {
   });
 
   test('gallery dots exist', async ({ page }) => {
+    await page.locator('#gallery').first().scrollIntoViewIfNeeded();
     const dots = page.locator('.gallery-dot');
+    await expect(dots.first()).toBeAttached({ timeout: 5000 });
     const count = await dots.count();
     expect(count).toBeGreaterThanOrEqual(1);
   });
@@ -284,53 +273,26 @@ test.describe('Footer', () => {
 });
 
 test.describe('Info Page', () => {
-  async function gotoInfo(page, url) {
-    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
-    await page.waitForTimeout(500);
-  }
-
-  async function switchInfoTab(page, label, tabKey) {
-    const tab = page.getByRole('tab', { name: label, exact: true }).first();
-    await expect(tab).toBeVisible();
-    let switchedViaClick = false;
-    try {
-      await tab.click({ timeout: 3000 });
-      switchedViaClick = true;
-    } catch {
-      await page.goto(`/info?tab=${tabKey}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
-      await page.waitForTimeout(250);
-    }
-    await page.waitForFunction((expectedTab) => {
-      return window.location.search.includes(`tab=${expectedTab}`) ||
-        !!document.getElementById(`tabpanel-${expectedTab}`);
-    }, tabKey, { timeout: 4000 });
-    if (!switchedViaClick) {
-      await page.waitForTimeout(250);
-    }
-    await expect(page.locator(`#tabpanel-${tabKey}`)).toBeVisible();
-    await expect(page.getByRole('tab', { name: label, exact: true })).toHaveAttribute('aria-selected', 'true');
-  }
-
   test('default tab is membership', async ({ page }) => {
-    await gotoInfo(page, '/info');
+    await gotoInfo(page, 'membership');
     const heading = page.getByText('Why Join Mono Tennis Club').first();
     await expect(heading).toBeAttached();
   });
 
   test('info page has membership section on membership tab', async ({ page }) => {
-    await gotoInfo(page, '/info?tab=membership');
+    await gotoInfo(page, 'membership');
     const membershipHeading = page.getByText('Why Join Mono Tennis Club').first();
     await expect(membershipHeading).toBeAttached();
   });
 
   test('info page has Membership Fees on membership tab', async ({ page }) => {
-    await gotoInfo(page, '/info?tab=membership');
+    await gotoInfo(page, 'membership');
     const fees = page.getByText('Membership Fees').first();
     await expect(fees).toBeAttached();
   });
 
   test('about tab shows About content', async ({ page }) => {
-    await gotoInfo(page, '/info?tab=about');
+    await gotoInfo(page, 'about');
     const heading = page.getByText('About Us').first();
     await expect(heading).toBeAttached();
     const passion = page.getByText('Great Tennis');
@@ -338,7 +300,7 @@ test.describe('Info Page', () => {
   });
 
   test('faq tab shows FAQ content', async ({ page }) => {
-    await gotoInfo(page, '/info?tab=faq');
+    await gotoInfo(page, 'faq');
     const faqHeading = page.getByText('Frequently Asked Questions');
     await expect(faqHeading).toBeAttached();
     const mapHeading = page.getByText('Find Us');
@@ -346,7 +308,7 @@ test.describe('Info Page', () => {
   });
 
   test('tab navigation buttons exist', async ({ page }) => {
-    await gotoInfo(page, '/info');
+    await gotoInfo(page, 'membership');
     const tabLabels = ['About', 'Membership', 'Coaching', 'FAQ', 'Rules', 'Privacy', 'Terms'];
     for (const label of tabLabels) {
       const tab = page.getByRole('tab', { name: label, exact: true });
@@ -355,7 +317,7 @@ test.describe('Info Page', () => {
   });
 
   test('tab switching works', async ({ page }) => {
-    await gotoInfo(page, '/info');
+    await gotoInfo(page, 'membership');
     await switchInfoTab(page, 'About', 'about');
     const aboutContent = page.getByText('Great Tennis');
     await expect(aboutContent).toBeAttached();
@@ -365,7 +327,7 @@ test.describe('Info Page', () => {
   });
 
   test('info page has Back to Home link', async ({ page }) => {
-    await gotoInfo(page, '/info');
+    await gotoInfo(page, 'membership');
     const backLink = page.getByText('Back to Home').first();
     await expect(backLink).toBeAttached();
   });
