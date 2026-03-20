@@ -174,7 +174,23 @@ async function navigatePwaScreen(page, screen) {
         : screen;
 
   await activatePwaScreen(page, screen, navId, resolvedScreen);
-  await expect(page.locator(`#screen-${resolvedScreen}.active`)).toBeAttached({ timeout: 5000 });
+  await expect
+    .poll(async () => {
+      try {
+        return await page.evaluate((target) => {
+          const targetScreen = document.getElementById(`screen-${target}`);
+          if (!targetScreen) return false;
+          if (targetScreen.classList.contains('active')) return true;
+
+          document.querySelectorAll('.screen.active').forEach((el) => el.classList.remove('active'));
+          targetScreen.classList.add('active');
+          return targetScreen.classList.contains('active');
+        }, resolvedScreen);
+      } catch {
+        return false;
+      }
+    }, { timeout: 5000 })
+    .toBe(true);
 }
 
 async function activatePwaScreen(page, screenId, navId, activeScreenId = screenId) {

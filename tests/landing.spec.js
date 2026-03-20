@@ -184,14 +184,28 @@ test.describe('Schedule / Calendar Section', () => {
 
   test('calendar has day headers', async ({ page }) => {
     const headers = page.locator('.cal-header');
-    const count = await headers.count();
-    expect(count).toBe(7);
+    await expect
+      .poll(async () => {
+        try {
+          return await headers.count();
+        } catch {
+          return 0;
+        }
+      }, { timeout: 5000 })
+      .toBe(7);
   });
 
   test('calendar has day cells', async ({ page }) => {
     const days = page.locator('.cal-day:not(.empty)');
-    const count = await days.count();
-    expect(count).toBeGreaterThanOrEqual(28);
+    await expect
+      .poll(async () => {
+        try {
+          return await days.count();
+        } catch {
+          return 0;
+        }
+      }, { timeout: 5000 })
+      .toBeGreaterThanOrEqual(28);
   });
 
   test('today button exists', async ({ page }) => {
@@ -253,9 +267,15 @@ test.describe('Gallery Section', () => {
 
   test('gallery has slide images', async ({ page }) => {
     const slides = page.locator('.gallery-slide');
-    await expect(slides.first()).toBeAttached({ timeout: 5000 });
-    const count = await slides.count();
-    expect(count).toBeGreaterThanOrEqual(10);
+    await expect
+      .poll(async () => {
+        try {
+          return await slides.count();
+        } catch {
+          return 0;
+        }
+      }, { timeout: 5000 })
+      .toBeGreaterThanOrEqual(10);
   });
 
   test('gallery navigation buttons exist', async ({ page }) => {
