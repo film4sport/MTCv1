@@ -8,7 +8,7 @@ import { AvatarDisplay } from '../lib/avatars';
 import Link from 'next/link';
 import { generateId, useFocusTrap } from '../lib/utils';
 import type { SkillLevel } from '../lib/types';
-import { APP_COPY } from '../../lib/site';
+import { APP_COPY, APP_ROUTES } from '../../lib/site';
 
 type FilterType = 'all' | 'singles' | 'doubles' | 'mixed';
 type SkillFilter = 'all' | SkillLevel;
@@ -187,14 +187,14 @@ export default function PartnersPage() {
                   ) : (
                     <div className="flex gap-2">
                       <Link
-                        href={`/dashboard/messages?to=${p.userId}`}
+                        href={`${APP_ROUTES.dashboardMessages}?to=${p.userId}`}
                         className="flex-1 text-center py-2.5 rounded-xl text-sm font-medium transition-all duration-200 hover:shadow-md btn-press"
                         style={{ background: '#6b7a3d', color: '#fff' }}
                       >
                         Message
                       </Link>
                       <Link
-                        href={`/dashboard/book?partner=${p.userId}&partnerName=${encodeURIComponent(p.name)}`}
+                        href={`${APP_ROUTES.dashboardBook}?partner=${p.userId}&partnerName=${encodeURIComponent(p.name)}`}
                         className="flex-1 text-center py-2.5 rounded-xl text-sm font-medium transition-all duration-200 hover:shadow-md btn-press flex items-center justify-center gap-1"
                         style={{ background: 'rgba(107, 122, 61, 0.1)', color: '#6b7a3d', border: '1px solid rgba(107, 122, 61, 0.2)' }}
                       >

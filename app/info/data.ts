@@ -146,9 +146,9 @@ export const waiverText = `MONO TENNIS CLUB — WAIVER AND RELEASE OF LIABILITY,
 
 PLEASE READ CAREFULLY BEFORE SIGNING
 
-In consideration of being permitted to participate in the activities of the Mono Tennis Club ("the Club"), I hereby agree as follows:
+In consideration of being permitted to participate in the activities of the ${CLUB_NAME} ("the Club"), I hereby agree as follows:
 
-1. RELEASE OF LIABILITY: I hereby release, waive, discharge, and covenant not to sue the Mono Tennis Club, its officers, directors, employees, volunteers, agents, and representatives (collectively "the Releasees") from any and all liability, claims, demands, actions, or causes of action whatsoever arising out of or related to any loss, damage, or injury, including death, that may be sustained by me, or to any property belonging to me, while participating in any activity organized by the Club, or while on Club premises, regardless of whether such loss, damage, or injury is caused by the negligence of the Releasees or otherwise.
+1. RELEASE OF LIABILITY: I hereby release, waive, discharge, and covenant not to sue the ${CLUB_NAME}, its officers, directors, employees, volunteers, agents, and representatives (collectively "the Releasees") from any and all liability, claims, demands, actions, or causes of action whatsoever arising out of or related to any loss, damage, or injury, including death, that may be sustained by me, or to any property belonging to me, while participating in any activity organized by the Club, or while on Club premises, regardless of whether such loss, damage, or injury is caused by the negligence of the Releasees or otherwise.
 
 2. ASSUMPTION OF RISK: I am aware that participation in tennis and related activities involves risks and dangers, including but not limited to the risk of serious physical injury, permanent disability, and death. I hereby freely and voluntarily assume and accept any and all risks of injury or death while participating in Club activities. I acknowledge that tennis activities carry inherent risks including, but not limited to: falls, collisions with other players or fixed objects, injuries from tennis balls or racquets, muscle strains and sprains, heat-related illness, and cardiac events.
 
@@ -162,7 +162,7 @@ By clicking "I Agree" below, I acknowledge that I have read this Agreement, full
 
 export const acknowledgementText = `MONO TENNIS CLUB — ACKNOWLEDGEMENT AGREEMENT
 
-By becoming a member of the Mono Tennis Club, I acknowledge and agree to the following:
+By becoming a member of the ${CLUB_NAME}, I acknowledge and agree to the following:
 
 1. CLUB RULES: I have read, understood, and agree to abide by all Club rules and regulations as posted and as amended from time to time by the Board of Directors. I understand that failure to comply may result in suspension or termination of my membership.
 
@@ -178,9 +178,9 @@ By becoming a member of the Mono Tennis Club, I acknowledge and agree to the fol
 
 7. PRIVACY: I acknowledge that the Club collects and uses my personal information in accordance with its Privacy Policy and in compliance with PIPEDA. I consent to the collection and use of my information as described therein.
 
-8. CONSTITUTION: I have read and agree to be bound by the Club's Constitution, which governs the operation, membership, and administration of the Mono Tennis Club.
+8. CONSTITUTION: I have read and agree to be bound by the Club's Constitution, which governs the operation, membership, and administration of the ${CLUB_NAME}.
 
-By clicking "I Agree" below, I confirm that I have read and understood this Acknowledgement Agreement and voluntarily agree to its terms as a condition of my membership in the Mono Tennis Club.`;
+By clicking "I Agree" below, I confirm that I have read and understood this Acknowledgement Agreement and voluntarily agree to its terms as a condition of my membership in the ${CLUB_NAME}.`;
 
 export const membershipTypes = [
   { key: 'adult', label: 'Adult (Single)', price: 120, desc: 'Full season access for one adult' },

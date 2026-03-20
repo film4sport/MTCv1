@@ -8,6 +8,7 @@ import { generateId } from './utils';
 import { pinLogin, signOut, getCurrentUser } from './auth';
 import { useToast } from './toast';
 import { reportError } from '../../lib/errorReporter';
+import { CLUB_NAME, SUPPORT_EMAIL } from '../../lib/site';
 import { supabase } from '../../lib/supabase';
 import * as db from './db';
 import { computeAnalytics } from './store-analytics';
@@ -357,7 +358,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
               inserts.push({
                 id: `opening-day-${user.id}`, user_id: user.id, type: 'event',
                 title: 'Opening Day — May 9th!',
-                body: 'Mark your calendar! Mono Tennis Club opens for the 2026 season on May 9th. See you on the courts!',
+                body: `Mark your calendar! ${CLUB_NAME} opens for the 2026 season on May 9th. See you on the courts!`,
                 timestamp: now, read: false,
               });
             }
@@ -365,7 +366,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
               inserts.push({
                 id: `beta-notice-${user.id}`, user_id: user.id, type: 'info',
                 title: 'App Under Construction',
-                body: 'Our app and website are still in development. If you find any bugs or have feedback, please email monotennisclub1@gmail.com — we appreciate your help!',
+                body: `Our app and website are still in development. If you find any bugs or have feedback, please email ${SUPPORT_EMAIL} — we appreciate your help!`,
                 timestamp: new Date(Date.parse(now) + 1000).toISOString(), read: false,
               });
             }

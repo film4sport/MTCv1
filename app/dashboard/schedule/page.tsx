@@ -6,7 +6,7 @@ import { useToast } from '../lib/toast';
 import DashboardHeader from '../components/DashboardHeader';
 import { FEES } from '../lib/types';
 import Link from 'next/link';
-import { APP_COPY } from '../../lib/site';
+import { APP_COPY, APP_ROUTES } from '../../lib/site';
 
 export default function SchedulePage() {
   const { currentUser } = useAuth();
@@ -186,8 +186,8 @@ export default function SchedulePage() {
                 <p className="font-medium text-sm mb-1" style={{ color: '#2a2f1e' }}>{timeFilter === 'past' ? 'No past events' : 'Your schedule is clear!'}</p>
                 <p className="text-xs mb-4" style={{ color: '#6b7266' }}>{timeFilter === 'past' ? 'Your past bookings and events will appear here' : 'Book a court or RSVP to an event to get started'}</p>
                 <div className="flex items-center justify-center gap-3">
-                  <Link href="/dashboard/book" className="px-4 py-2 rounded-xl text-sm font-medium text-white btn-press" style={{ background: '#6b7a3d' }}>{APP_COPY.bookCourt}</Link>
-                  <Link href="/dashboard/events" className="px-4 py-2 rounded-xl text-sm font-medium btn-press" style={{ background: 'rgba(107, 122, 61, 0.1)', color: '#6b7a3d' }}>Browse Events</Link>
+                  <Link href={APP_ROUTES.dashboardBook} className="px-4 py-2 rounded-xl text-sm font-medium text-white btn-press" style={{ background: '#6b7a3d' }}>{APP_COPY.bookCourt}</Link>
+                  <Link href={APP_ROUTES.dashboardEvents} className="px-4 py-2 rounded-xl text-sm font-medium btn-press" style={{ background: 'rgba(107, 122, 61, 0.1)', color: '#6b7a3d' }}>Browse Events</Link>
                 </div>
               </div>
             ) : (

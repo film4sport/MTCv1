@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
+import { APP_ROUTES } from '../../lib/site';
 
 export default function ProfileRedirect() {
-  redirect('/dashboard/settings');
+  redirect(APP_ROUTES.dashboardSettings);
 }
