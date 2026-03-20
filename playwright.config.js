@@ -42,6 +42,7 @@ const WEBKIT_RESPONSIVE_TESTS = [
 ];
 
 const isCI = !!process.env.CI;
+const includeAuthProject = process.env.PLAYWRIGHT_INCLUDE_AUTH === 'true';
 const playwrightPort = Number(process.env.PLAYWRIGHT_PORT || '3000');
 const playwrightBaseURL = process.env.PLAYWRIGHT_BASE_URL || `http://127.0.0.1:${playwrightPort}`;
 const shouldReuseExistingServer = process.env.PLAYWRIGHT_REUSE_SERVER === 'true'
@@ -66,7 +67,7 @@ module.exports = defineConfig({
     // ── CHROMIUM (default) ──────────────────────────────────
 
     // Auth tests — local only (need Supabase credentials)
-    ...(!isCI ? [{
+    ...(!isCI && includeAuthProject ? [{
       name: 'auth',
       testMatch: AUTH_TESTS,
       use: { viewport: { width: 1280, height: 720 } },

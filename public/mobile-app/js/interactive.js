@@ -82,6 +82,7 @@
         if (typeof showPinSetupScreen === 'function') {
           showPinSetupScreen(currentUser.email || '', currentUser.name || '');
         }
+        window.dispatchEvent(new Event('mtc-app-ready'));
         // Don't proceed to main app — let them set their PIN first
         return;
       }
@@ -132,6 +133,7 @@
       }
 
       fetchWeather();
+      window.dispatchEvent(new Event('mtc-app-ready'));
     }
 
     // Initialize UI
@@ -166,6 +168,10 @@
 
     // Register service worker for offline support
     registerServiceWorker();
+
+    if (!currentUser) {
+      window.dispatchEvent(new Event('mtc-app-ready'));
+    }
 
   });
 

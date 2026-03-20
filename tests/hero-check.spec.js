@@ -12,8 +12,15 @@ test('Hero bottom + wave transition', async ({ page }) => {
 
   const wave = page.locator('.wave-divider').first();
   await expect(wave).toBeAttached();
-  await page.evaluate(() => {
-    document.querySelector('.wave-divider')?.scrollIntoView({ block: 'center' });
-  });
+  await expect
+    .poll(async () => {
+      try {
+        await wave.evaluate((el) => el.scrollIntoView({ block: 'center' }));
+        return true;
+      } catch {
+        return false;
+      }
+    }, { timeout: 5000 })
+    .toBe(true);
   await page.screenshot({ path: 'test-results/hero-bottom-check.png', fullPage: false });
 });

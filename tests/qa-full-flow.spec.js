@@ -2,15 +2,18 @@
 const { test, expect } = require('@playwright/test');
 
 const BASE = 'http://localhost:3000';
+const LOGIN_EMAIL = '#login-email';
+const LOGIN_PIN = '#login-pin';
+const LOGIN_SUBMIT_NAME = /^sign in$/i;
 
 // Helper: login as a specific role via the actual login form (sets Supabase session cookie)
 async function loginAs(page, role = 'member') {
   // Auth uses magic link (passwordless) — these are test-only placeholders for form fill
   const creds = {
-    member: { email: 'testmember@mtc.ca', pass: 'not-a-real-password' },
-    admin: { email: 'testadmin@mtc.ca', pass: 'not-a-real-password' },
+    member: { email: 'member@mtc.ca', pin: '1234' },
+    admin: { email: 'admin@mtc.ca', pin: '1234' },
   };
-  const { email, pass } = creds[role];
+  const { email, pin } = creds[role];
 
   // Clear cookies to avoid stale sessions from previous tests
   await page.context().clearCookies();
@@ -26,14 +29,18 @@ async function loginAs(page, role = 'member') {
     await page.waitForTimeout(500);
   }
 
-  // Type credentials directly (demo buttons are dev-only, not available in CI production builds)
-  await page.locator('input[type="email"]').click();
+  await expect(page.locator(LOGIN_EMAIL)).toBeVisible({ timeout: 15000 });
+  await expect(page.locator(LOGIN_PIN)).toBeVisible({ timeout: 15000 });
+  await expect(page.getByRole('button', { name: LOGIN_SUBMIT_NAME })).toBeVisible({ timeout: 15000 });
+
+  // Type credentials directly
+  await page.locator(LOGIN_EMAIL).click();
   await page.keyboard.type(email, { delay: 20 });
-  await page.locator('input[type="password"]').click();
-  await page.keyboard.type(pass, { delay: 20 });
+  await page.locator(LOGIN_PIN).click();
+  await page.keyboard.type(pin, { delay: 20 });
 
   // Submit the form
-  await page.locator('button[type="submit"]').click();
+  await page.getByRole('button', { name: LOGIN_SUBMIT_NAME }).click();
 
   // Wait for redirect to dashboard — use 'commit' (not default 'load') because
   // dashboard makes ongoing Supabase fetches that block the load event on slow CI runners

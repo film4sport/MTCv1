@@ -170,6 +170,33 @@ test.describe('Mobile PWA - Session Recovery', () => {
       }
     }
 
+    let finalState = await page.evaluate(() => {
+      const login = document.getElementById('login-screen');
+      const bottomNav = document.getElementById('bottomNav');
+      const loginStyle = login ? window.getComputedStyle(login) : null;
+      const bottomNavStyle = bottomNav ? window.getComputedStyle(bottomNav) : null;
+      return {
+        user: localStorage.getItem('mtc-user'),
+        token: localStorage.getItem('mtc-access-token'),
+        notifications: localStorage.getItem('mtc-notifications'),
+        conversations: localStorage.getItem('mtc-conversations'),
+        loginVisible: !!(loginStyle && loginStyle.display !== 'none' && loginStyle.visibility !== 'hidden'),
+        loginActive: !!(login && login.classList.contains('active')),
+        bottomNavHidden: !!(bottomNavStyle && bottomNavStyle.display === 'none'),
+      };
+    }).catch(() => null);
+
+    if (
+      !finalState ||
+      finalState.user !== null ||
+      finalState.token !== null ||
+      finalState.notifications !== null ||
+      finalState.conversations !== null ||
+      !finalState.bottomNavHidden
+    ) {
+      await runLogoutFallback();
+    }
+
     await expect
       .poll(async () => {
         try {

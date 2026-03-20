@@ -146,9 +146,14 @@ test.describe('Visual Regression — Landing Page (Mobile)', () => {
     await page.goto(LANDING_URL, { waitUntil: 'load', timeout: 30000 });
     await cleanPage(page);
 
-    // No horizontal overflow on mobile
-    const scrollWidth = await readBodyMetric(page, 'scrollWidth');
-    expect(scrollWidth).toBeLessThanOrEqual(376);
+    // Wait for the mobile viewport to settle before checking overflow; Chromium can
+    // briefly report a desktop-sized body during early layout.
+    await expect
+      .poll(async () => readBodyMetric(page, 'viewportWidth'), { timeout: 5000 })
+      .toBeLessThanOrEqual(376);
+    await expect
+      .poll(async () => readBodyMetric(page, 'scrollWidth'), { timeout: 5000 })
+      .toBeLessThanOrEqual(376);
 
     // Hero visible — first section with texture-overlay class
     const hero = page.locator('section.texture-overlay, section.overflow-hidden').first();

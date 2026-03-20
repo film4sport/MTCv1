@@ -31,6 +31,8 @@
     grid-template-columns: repeat(3, 1fr);
     gap: 16px;
     padding: 0 24px;
+    width: min(100%, 720px);
+    box-sizing: border-box;
     max-width: 720px;
     margin-left: auto;
     margin-right: auto;
@@ -41,9 +43,11 @@
   }
 
   .quick-actions {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 16px;
     padding: 0 24px;
+    width: min(100%, 720px);
+    box-sizing: border-box;
     max-width: 720px;
     margin-left: auto;
     margin-right: auto;
@@ -51,6 +55,15 @@
 
   .quick-action {
     height: 110px;
+  }
+
+  .quick-action-content {
+    padding: 18px;
+  }
+
+  .quick-action-label {
+    font-size: 20px;
+    line-height: 0.95;
   }
 
   /* ── Booking Screen ── */
@@ -71,6 +84,8 @@
   /* ── Time Slots Grid ── */
   .time-slots-container,
   .skeleton-slot-grid {
+    width: min(100%, 720px);
+    box-sizing: border-box;
     max-width: 720px;
     margin-left: auto;
     margin-right: auto;
@@ -79,6 +94,8 @@
   /* ── Events ── */
   .events-list,
   .event-cards {
+    width: min(100%, 720px);
+    box-sizing: border-box;
     max-width: 720px;
     margin-left: auto;
     margin-right: auto;
@@ -86,17 +103,26 @@
   }
 
   /* ── Messages ── */
+  #screen-messages .search-bar,
+  #screen-messages #conversationsList,
+  #screen-messages .empty-state,
+  #screen-conversation .chat-messages,
+  #screen-conversation .chat-input-area {
+    width: min(100%, 720px);
+    box-sizing: border-box;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
   .message-item {
-    max-width: 720px;
+    width: 100%;
+    max-width: none;
     margin-left: auto;
     margin-right: auto;
   }
 
   .chat-messages {
     padding: 20px 24px;
-    max-width: 720px;
-    margin-left: auto;
-    margin-right: auto;
   }
 
   .chat-bubble {
@@ -105,9 +131,6 @@
 
   .chat-input-area {
     padding: 12px 24px;
-    max-width: 720px;
-    margin-left: auto;
-    margin-right: auto;
   }
 
   /* ── Profile / Settings ── */
@@ -126,6 +149,8 @@
   /* ── Partners / Social ── */
   .partner-cards,
   .social-feed {
+    width: min(100%, 720px);
+    box-sizing: border-box;
     max-width: 720px;
     margin-left: auto;
     margin-right: auto;
@@ -136,6 +161,8 @@
     display: flex;
     gap: 12px;
     padding: 0 24px 16px;
+    width: min(100%, 720px);
+    box-sizing: border-box;
     max-width: 720px;
     margin-left: auto;
     margin-right: auto;
@@ -167,6 +194,8 @@
 
   /* ── Schedule ── */
   .schedule-container {
+    width: min(100%, 720px);
+    box-sizing: border-box;
     max-width: 720px;
     margin-left: auto;
     margin-right: auto;
@@ -175,6 +204,8 @@
 
   /* ── Admin Panel ── */
   .admin-tabs-bar {
+    width: min(100%, 720px);
+    box-sizing: border-box;
     max-width: 720px;
     margin-left: auto;
     margin-right: auto;
@@ -185,6 +216,8 @@
     font-size: 14px;
   }
   .admin-tab-content {
+    width: min(100%, 720px);
+    box-sizing: border-box;
     max-width: 720px;
     margin-left: auto;
     margin-right: auto;
@@ -235,6 +268,7 @@
 
   /* ── Navigation Bar ── */
   .nav-bar {
+    width: min(100%, 600px);
     max-width: 600px;
     margin-left: auto;
     margin-right: auto;
@@ -243,6 +277,7 @@
 
   /* ── Login Screen ── */
   .login-card {
+    width: min(100%, 420px);
     max-width: 420px;
     margin-left: auto;
     margin-right: auto;
@@ -251,6 +286,8 @@
   /* ── Modals ── */
   .modal-content,
   .action-sheet {
+    width: min(100%, 500px);
+    box-sizing: border-box;
     max-width: 500px;
     margin-left: auto;
     margin-right: auto;
@@ -258,6 +295,8 @@
 
   /* ── Notifications ── */
   .notifications-list {
+    width: min(100%, 720px);
+    box-sizing: border-box;
     max-width: 720px;
     margin-left: auto;
     margin-right: auto;
@@ -302,6 +341,35 @@
   .login-card {
     max-width: 480px;
   }
+
+  .court-status-grid,
+  .quick-actions,
+  .events-list,
+  .event-cards,
+  .partner-cards,
+  .social-feed,
+  .notifications-list,
+  .schedule-container,
+  .time-slots-container,
+  .skeleton-slot-grid,
+  .partner-requests,
+  .admin-tabs-bar,
+  .admin-tab-content {
+    width: min(100%, 900px);
+  }
+
+  .nav-bar {
+    width: min(100%, 720px);
+  }
+
+  .modal-content,
+  .action-sheet {
+    width: min(100%, 600px);
+  }
+
+  .login-card {
+    width: min(100%, 480px);
+  }
 }
 
 /* ── Landscape-specific (wider iPads) ── */
@@ -312,6 +380,7 @@
   }
 
   .quick-actions {
+    width: min(100%, 900px);
     max-width: 900px;
   }
 
@@ -328,8 +397,31 @@
     max-width: 900px;
   }
 
+  .court-status-grid,
+  .events-list,
+  .event-cards,
+  .partner-cards,
+  .social-feed,
+  .notifications-list,
+  .schedule-container,
+  .partner-requests,
+  .admin-tabs-bar,
+  .admin-tab-content,
+  .time-slots-container,
+  .skeleton-slot-grid {
+    width: min(100%, 900px);
+  }
+
   .chat-bubble {
     max-width: 50%;
+  }
+
+  #screen-messages .search-bar,
+  #screen-messages #conversationsList,
+  #screen-messages .empty-state,
+  #screen-conversation .chat-messages,
+  #screen-conversation .chat-input-area {
+    width: min(100%, 900px);
   }
 
   .admin-stats-grid {

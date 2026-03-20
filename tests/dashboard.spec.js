@@ -1,18 +1,22 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
 
+const LOGIN_EMAIL = '#login-email';
+const LOGIN_PIN = '#login-pin';
+const LOGIN_SUBMIT_NAME = /^sign in$/i;
+
 async function waitForLoginForm(page) {
-  await expect(page.locator('input[type="email"]')).toBeVisible();
-  await expect(page.locator('input[type="password"]')).toBeVisible();
-  await expect(page.locator('button[type="submit"]')).toBeVisible();
+  await expect(page.locator(LOGIN_EMAIL)).toBeVisible();
+  await expect(page.locator(LOGIN_PIN)).toBeVisible();
+  await expect(page.getByRole('button', { name: LOGIN_SUBMIT_NAME })).toBeVisible();
 }
 
 async function loginAsMember(page) {
   await page.goto('/login', { waitUntil: 'domcontentloaded' });
   await waitForLoginForm(page);
-  await page.locator('input[type="email"]').fill('member@mtc.ca');
-  await page.locator('input[type="password"]').fill('not-a-real-password');
-  await page.locator('button[type="submit"]').click();
+  await page.locator(LOGIN_EMAIL).fill('member@mtc.ca');
+  await page.locator(LOGIN_PIN).fill('1234');
+  await page.getByRole('button', { name: LOGIN_SUBMIT_NAME }).click();
   await page.waitForURL('**/dashboard**', { timeout: 30000, waitUntil: 'commit' });
   await expect(page.locator('header')).toBeAttached();
 }
@@ -24,28 +28,27 @@ test.describe('Dashboard — Login Flow', () => {
   });
 
   test('login page loads with form elements', async ({ page }) => {
-    await expect(page.locator('input[type="email"]')).toBeAttached();
-    await expect(page.locator('input[type="password"]')).toBeAttached();
-    await expect(page.locator('button[type="submit"]')).toBeAttached();
-    await expect(page.getByText('Welcome Back')).toBeVisible();
-    await expect(page.getByText('Sign in to your Mono Tennis Club account')).toBeVisible();
+    await expect(page.locator(LOGIN_EMAIL)).toBeAttached();
+    await expect(page.locator(LOGIN_PIN)).toBeAttached();
+    await expect(page.getByRole('button', { name: LOGIN_SUBMIT_NAME })).toBeAttached();
+    await expect(page.getByText('Your courts, your community.')).toBeVisible();
   });
 
   test('shows validation errors for empty fields', async ({ page }) => {
-    await page.locator('button[type="submit"]').click();
+    await page.getByRole('button', { name: LOGIN_SUBMIT_NAME }).click();
     await expect(page.getByText('Please enter a valid email address')).toBeVisible();
-    await expect(page.getByText('Password is required')).toBeVisible();
+    await expect(page.getByText('Please enter your 4-digit PIN.')).toBeVisible();
   });
 
   test('shows validation error for invalid email', async ({ page }) => {
     // Type an email that passes browser HTML5 validation but fails the app's stricter regex
-    const emailInput = page.locator('input[type="email"]');
-    const passInput = page.locator('input[type="password"]');
+    const emailInput = page.locator(LOGIN_EMAIL);
+    const passInput = page.locator(LOGIN_PIN);
     await emailInput.click();
     await page.keyboard.type('bad@x', { delay: 30 }); // passes HTML5 email type but fails app regex (needs .tld)
     await passInput.click();
-    await page.keyboard.type('somepass', { delay: 30 });
-    await page.locator('button[type="submit"]').click();
+    await page.keyboard.type('1234', { delay: 30 });
+    await page.getByRole('button', { name: LOGIN_SUBMIT_NAME }).click();
     await expect(page.getByText('Please enter a valid email address')).toBeVisible();
   });
 
@@ -58,18 +61,17 @@ test.describe('Dashboard — Login Flow', () => {
   });
 
   test('forgot password button opens modal', async ({ page }) => {
-    await page.getByText('Forgot password?').click();
-    await expect(page.getByText('Reset Password')).toBeVisible();
-    await expect(page.getByText("Enter your email and we'll send a reset link.")).toBeVisible();
-    await expect(page.getByText('Send Reset Link')).toBeVisible();
-    await expect(page.getByText('Cancel')).toBeVisible();
+    await page.getByText('Forgot PIN?').click();
+    await expect(page.getByText("Enter your email and we'll send a 4-digit code to reset your PIN.")).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Send Reset Code' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Back to sign in' })).toBeVisible();
   });
 
   test('forgot password modal closes on cancel', async ({ page }) => {
-    await page.getByText('Forgot password?').click();
-    await expect(page.getByText('Reset Password')).toBeVisible();
-    await page.getByRole('button', { name: 'Cancel' }).click();
-    await expect(page.getByText('Reset Password')).not.toBeVisible();
+    await page.getByText('Forgot PIN?').click();
+    await expect(page.getByRole('button', { name: 'Back to sign in' })).toBeVisible();
+    await page.getByRole('button', { name: 'Back to sign in' }).click();
+    await expect(page.locator(LOGIN_EMAIL)).toBeVisible();
   });
 
   test('has back to home link', async ({ page }) => {
@@ -77,7 +79,7 @@ test.describe('Dashboard — Login Flow', () => {
   });
 
   test('has become a member link', async ({ page }) => {
-    const link = page.getByText('Become a Member');
+    const link = page.getByText('Become a Member').first();
     await expect(link).toBeAttached();
     await expect(link).toHaveAttribute('href', '/info?tab=membership');
   });

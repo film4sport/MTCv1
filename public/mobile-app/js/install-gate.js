@@ -166,6 +166,8 @@
       loginScreen.style.display = 'none';
     }
 
+    window.dispatchEvent(new Event('mtc-app-ready'));
+
     return true; // gated — login blocked
   };
 })();

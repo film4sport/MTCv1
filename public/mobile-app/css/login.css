@@ -8,7 +8,10 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: var(--bg-primary);
+  background:
+    radial-gradient(circle at top left, rgba(200, 255, 0, 0.16), transparent 28%),
+    radial-gradient(circle at right 22%, rgba(0, 212, 255, 0.18), transparent 32%),
+    linear-gradient(180deg, #102013 0%, #0d1208 52%, #07110d 100%);
   display: none;
   flex-direction: column;
   align-items: center;
@@ -51,9 +54,13 @@
   inset: 0;
   z-index: 0;
   overflow: hidden;
+  background:
+    radial-gradient(circle at top center, rgba(200, 255, 0, 0.15), transparent 28%),
+    linear-gradient(180deg, #142218 0%, #0d1208 55%, #08110a 100%);
 }
 
 .login-bg img {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;

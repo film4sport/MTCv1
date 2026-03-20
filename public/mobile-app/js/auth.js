@@ -564,6 +564,9 @@
 
   // onclick handler (index.html)
   window.handleLogout = function() {
+    // Mark logout immediately so in-flight hydration callbacks cannot repopulate local state.
+    MTC.state._logoutInProgress = true;
+
     // Delete session on server
     fetch('/api/auth/session', {
       method: 'DELETE',
@@ -674,69 +677,77 @@
     if (!MTC.fn.loadFromAPI) return;
     var token = MTC.getToken();
     if (!token) return;
+    MTC.state._logoutInProgress = false;
+
+    function canApplyHydratedData() {
+      return !MTC.state._logoutInProgress &&
+        !!MTC.state.currentUser &&
+        !!MTC.getToken() &&
+        MTC.getToken() === token;
+    }
 
     MTC.fn.loadFromAPI('/mobile/events', 'mtc-api-events', null).then(function(events) {
-      if (Array.isArray(events) && typeof window.updateEventsFromAPI === 'function') {
+      if (canApplyHydratedData() && Array.isArray(events) && typeof window.updateEventsFromAPI === 'function') {
         window.updateEventsFromAPI(events);
       }
     });
 
     MTC.fn.loadFromAPI('/mobile/members', 'mtc-api-members', null).then(function(members) {
-      if (Array.isArray(members) && typeof window.updateMembersFromAPI === 'function') {
+      if (canApplyHydratedData() && Array.isArray(members) && typeof window.updateMembersFromAPI === 'function') {
         window.updateMembersFromAPI(members);
       }
       return MTC.fn.loadFromAPI('/mobile/conversations', 'mtc-api-conversations', null);
     }).then(function(conversations) {
-      if (conversations && typeof window.updateConversationsFromAPI === 'function') {
+      if (canApplyHydratedData() && conversations && typeof window.updateConversationsFromAPI === 'function') {
         window.updateConversationsFromAPI(conversations);
       }
     }).catch(function(err) {
       MTC.warn('[MTC] Members/conversations load error:', err);
       MTC.fn.loadFromAPI('/mobile/conversations', 'mtc-api-conversations', null).then(function(conversations) {
-        if (conversations && typeof window.updateConversationsFromAPI === 'function') {
+        if (canApplyHydratedData() && conversations && typeof window.updateConversationsFromAPI === 'function') {
           window.updateConversationsFromAPI(conversations);
         }
       });
     });
 
     MTC.fn.loadFromAPI('/mobile/partners', 'mtc-api-partners', null).then(function(partners) {
-      if (Array.isArray(partners) && typeof window.updatePartnersFromAPI === 'function') {
+      if (canApplyHydratedData() && Array.isArray(partners) && typeof window.updatePartnersFromAPI === 'function') {
         window.updatePartnersFromAPI(partners);
       }
     });
 
     MTC.fn.loadFromAPI('/mobile/announcements', 'mtc-api-announcements', null).then(function(announcements) {
-      if (Array.isArray(announcements) && typeof window.updateAnnouncementsFromAPI === 'function') {
+      if (canApplyHydratedData() && Array.isArray(announcements) && typeof window.updateAnnouncementsFromAPI === 'function') {
         window.updateAnnouncementsFromAPI(announcements);
       }
     });
 
     MTC.fn.loadFromAPI('/mobile/bookings', 'mtc-api-bookings', null).then(function(bookings) {
-      if (Array.isArray(bookings) && typeof window.updateBookingsFromAPI === 'function') {
+      if (canApplyHydratedData() && Array.isArray(bookings) && typeof window.updateBookingsFromAPI === 'function') {
         window.updateBookingsFromAPI(bookings);
       }
     });
 
     MTC.fn.loadFromAPI('/mobile/courts', 'mtc-api-courts', null).then(function(courts) {
-      if (Array.isArray(courts) && typeof window.updateCourtsFromAPI === 'function') {
+      if (canApplyHydratedData() && Array.isArray(courts) && typeof window.updateCourtsFromAPI === 'function') {
         window.updateCourtsFromAPI(courts);
       }
     });
 
     MTC.fn.loadFromAPI('/mobile/court-blocks', 'mtc-api-court-blocks', null).then(function(blocks) {
-      if (Array.isArray(blocks) && typeof window.updateCourtBlocksFromAPI === 'function') {
+      if (canApplyHydratedData() && Array.isArray(blocks) && typeof window.updateCourtBlocksFromAPI === 'function') {
         window.updateCourtBlocksFromAPI(blocks);
       }
     });
 
     MTC.fn.loadFromAPI('/mobile/notifications', 'mtc-api-notifications', null).then(function(notifications) {
-      if (Array.isArray(notifications) && typeof window.updateNotificationsFromAPI === 'function') {
+      if (canApplyHydratedData() && Array.isArray(notifications) && typeof window.updateNotificationsFromAPI === 'function') {
         window.updateNotificationsFromAPI(notifications);
       }
     });
 
     MTC.fn.loadFromAPI('/mobile/families', 'mtc-api-families', null).then(function(familyData) {
-      if (familyData && typeof window.updateFamiliesFromAPI === 'function') {
+      if (canApplyHydratedData() && familyData && typeof window.updateFamiliesFromAPI === 'function') {
         window.updateFamiliesFromAPI(familyData);
       }
     });
@@ -747,18 +758,19 @@
       method: 'PATCH',
       body: JSON.stringify({ action: 'getNotifPrefs' })
     }).then(function(prefs) {
-      if (prefs && typeof window.updateNotifPrefsFromAPI === 'function') {
+      if (canApplyHydratedData() && prefs && typeof window.updateNotifPrefsFromAPI === 'function') {
         window.updateNotifPrefsFromAPI(prefs);
       }
     }).catch(function() {});
 
     MTC.fn.loadFromAPI('/mobile/programs', 'mtc-api-programs', null).then(function(programs) {
-      if (Array.isArray(programs) && typeof window.updateProgramsFromAPI === 'function') {
+      if (canApplyHydratedData() && Array.isArray(programs) && typeof window.updateProgramsFromAPI === 'function') {
         window.updateProgramsFromAPI(programs);
       }
     });
 
     MTC.fn.loadFromAPI('/mobile/members', 'mtc-api-members', null).then(function(members) {
+      if (!canApplyHydratedData()) return;
       if (!members || !Array.isArray(members)) return;
       var userId = MTC.storage.get('mtc-user-id');
       var me = members.find(function(m) { return m.id === userId; });

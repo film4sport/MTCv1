@@ -142,6 +142,9 @@ test.describe('Gallery & Lightbox', () => {
     await openLightbox(page);
     await expect
       .poll(async () => {
+        const open = await page.locator('.lightbox.active').isVisible().catch(() => false);
+        if (open) return true;
+        await openLightbox(page);
         return await page.locator('.lightbox.active').isVisible().catch(() => false);
       }, { timeout: 5000 })
       .toBe(true);
@@ -152,19 +155,26 @@ test.describe('Gallery & Lightbox', () => {
 
   test('gallery next/prev buttons navigate slides', async ({ page }) => {
     const nextBtn = page.locator('.gallery-nav.next');
-    // Get initial active dot index
-    const initialIndex = await page.evaluate(() => {
-      const dots = document.querySelectorAll('.gallery-dot');
-      return Array.from(dots).findIndex((d) => d.classList.contains('active'));
-    });
+    const dots = page.locator('.gallery-dot');
+    await waitForCountAtLeast(dots, 2);
+    let initialIndex = -1;
+    await expect
+      .poll(async () => {
+        try {
+          initialIndex = await dots.evaluateAll((els) => els.findIndex((el) => el.classList.contains('active')));
+          return initialIndex;
+        } catch {
+          return -1;
+        }
+      }, { timeout: 5000 })
+      .not.toBe(-1);
     // Nav buttons may be CSS-hidden (hover-only) on tablet/mobile — use dispatchEvent
     await nextBtn.dispatchEvent('click');
     await expect
       .poll(async () => {
         try {
-          return await page.evaluate(() => {
-            const dots = document.querySelectorAll('.gallery-dot');
-            const activeIndex = Array.from(dots).findIndex((d) => d.classList.contains('active'));
+          return await dots.evaluateAll((els) => {
+            const activeIndex = els.findIndex((el) => el.classList.contains('active'));
             if (activeIndex >= 0) return activeIndex;
 
             const next = document.querySelector('.gallery-nav.next');
@@ -183,19 +193,11 @@ test.describe('Gallery & Lightbox', () => {
   test('gallery dots navigation works', async ({ page }) => {
     const dots = page.locator('.gallery-dot');
     await waitForCountAtLeast(dots, 2);
-    await page.evaluate(() => {
-      const dot = document.querySelectorAll('.gallery-dot')[1];
-      if (dot instanceof HTMLElement) {
-        dot.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
-      }
-    });
+    await dots.nth(1).dispatchEvent('click');
     await expect
       .poll(async () => {
         try {
-          return await page.evaluate(() => {
-            const dot = document.querySelectorAll('.gallery-dot')[1];
-            return dot?.getAttribute('class') || '';
-          });
+          return await dots.nth(1).getAttribute('class');
         } catch {
           return '';
         }

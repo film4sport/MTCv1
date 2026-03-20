@@ -20,7 +20,7 @@
     if ('serviceWorker' in navigator) {
       caches.keys().then(function(names) {
         names.forEach(function(name) {
-          if (name.indexOf('mtc-court-4109b5a8') === -1) {
+          if (name.indexOf('mtc-court-2dbce8fd') === -1) {
             caches.delete(name);
             console.log('[CacheBust] Deleted old cache:', name);
           }
@@ -36,7 +36,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-  <link rel="preload" as="image" href="https://cdn.jsdelivr.net/gh/film4sport/my-webapp-images@main/mtc-images/gallery-05-serve.png" fetchpriority="high">
+  <link rel="preload" as="image" href="images/login-hero-serve.png" fetchpriority="high">
   <link rel="preload" href="dist/app.bundle.css" as="style">
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
@@ -251,7 +251,7 @@
     <div class="install-screen" id="install-screen" style="display:none;">
       <!-- Same background as login -->
       <div class="login-bg">
-        <img src="https://cdn.jsdelivr.net/gh/film4sport/my-webapp-images@main/mtc-images/gallery-05-serve.png" alt="Mono Tennis Club" fetchpriority="high" loading="eager" decoding="sync">
+        <img src="images/login-hero-serve.png" alt="Mono Tennis Club" fetchpriority="high" loading="eager" decoding="sync">
       </div>
       <div class="liquid-orbs" aria-hidden="true">
         <div class="liquid-orb orb-1"></div>
@@ -326,7 +326,7 @@
     <div class="login-screen active" id="login-screen">
       <!-- Full-bleed Background Photo -->
       <div class="login-bg">
-        <img src="https://cdn.jsdelivr.net/gh/film4sport/my-webapp-images@main/mtc-images/gallery-05-serve.png" alt="Mono Tennis Club" fetchpriority="high" loading="eager" decoding="sync">
+        <img src="images/login-hero-serve.png" alt="Mono Tennis Club" fetchpriority="high" loading="eager" decoding="sync">
       </div>
       
       <!-- Floating ambient orbs -->

@@ -127,12 +127,17 @@ async function switchInfoTab(page, label, tabKey) {
     .toBeTruthy();
 }
 
-async function mockAuthenticatedPwa(page, apiOverrides = {}) {
+async function mockAuthenticatedPwa(page, apiOverrides = {}, userOverrides = {}) {
+  const mockUser = {
+    ...MOCK_USER,
+    ...userOverrides,
+  };
+
   await page.route('**/api/mobile-auth/config', (route) => {
     route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify(MOCK_USER),
+      body: JSON.stringify(mockUser),
     });
   });
 
@@ -222,7 +227,7 @@ async function mockAuthenticatedPwa(page, apiOverrides = {}) {
       name: user.name,
       timestamp: Date.now(),
     }));
-  }, MOCK_USER);
+  }, mockUser);
 
   await page.goto(MOBILE_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
   await page.waitForLoadState('load');

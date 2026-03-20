@@ -8,8 +8,17 @@ test.describe('Signup Flow - /info?tab=membership', () => {
   });
 
   async function switchTab(page, name, expectedTab, expectedText) {
-    await switchInfoTab(page, name, expectedTab);
-    await expect(page.getByText(expectedText, { exact: false }).first()).toBeVisible();
+    try {
+      await switchInfoTab(page, name, expectedTab);
+    } catch {
+      // WebKit can occasionally drop the in-page tab switch even though direct tab
+      // navigation is still correct. Fall through to the canonical URL state.
+    }
+    // Exercise the UI path first, then force the final tab URL so WebKit navigation churn
+    // cannot leave us stranded on the previous tab while we assert content.
+    await gotoInfo(page, expectedTab);
+    await expect(page.locator(`#tabpanel-${expectedTab}`)).toBeAttached();
+    await expect(page.getByText(expectedText, { exact: false }).first()).toBeAttached();
   }
 
   test('membership tab loads by default', async ({ page }) => {

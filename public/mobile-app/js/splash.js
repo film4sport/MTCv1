@@ -30,12 +30,29 @@
     return;
   }
 
+  var appReady = false;
+  var minDurationElapsed = false;
+  var dismissed = false;
+
   function dismissSplash() {
+    if (dismissed) return;
+    dismissed = true;
     splash.classList.add('dismissed');
     setTimeout(function() {
       splash.style.display = 'none';
     }, 400);
   }
+
+  function tryDismissSplash() {
+    if (appReady && minDurationElapsed) {
+      dismissSplash();
+    }
+  }
+
+  window.addEventListener('mtc-app-ready', function() {
+    appReady = true;
+    tryDismissSplash();
+  }, { once: true });
 
   if (isHoldMode) {
     splash.addEventListener('click', dismissSplash);
@@ -49,6 +66,16 @@
 
     // Warm return sessions should feel faster than a cold launch.
     var splashDuration = hasWarmSession ? 900 : 1400;
-    setTimeout(dismissSplash, splashDuration);
+    setTimeout(function() {
+      minDurationElapsed = true;
+      tryDismissSplash();
+    }, splashDuration);
+
+    // Failsafe so a broken init path cannot trap the splash forever.
+    setTimeout(function() {
+      appReady = true;
+      minDurationElapsed = true;
+      tryDismissSplash();
+    }, splashDuration + 2500);
   }
 })();
