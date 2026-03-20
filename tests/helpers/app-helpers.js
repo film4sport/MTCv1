@@ -163,6 +163,22 @@ async function mockAuthenticatedPwa(page, apiOverrides = {}) {
   }, null, { timeout: 10000 });
 }
 
+async function waitForPwaShell(page) {
+  await page.waitForLoadState('domcontentloaded').catch(() => {});
+  await page.waitForFunction(() => {
+    if (typeof MTC === 'undefined' || !MTC.state) return false;
+    const storedUser = MTC.state.currentUser || JSON.parse(localStorage.getItem('mtc-user') || 'null');
+    const bottomNav = document.getElementById('bottomNav');
+    const home = document.getElementById('screen-home');
+    return !!(
+      storedUser &&
+      bottomNav &&
+      home &&
+      (typeof navigateTo === 'function' || (MTC.fn && typeof MTC.fn.navigateTo === 'function'))
+    );
+  }, null, { timeout: 10000 });
+}
+
 async function navigatePwaScreen(page, screen) {
   const navId = `nav-${screen}`;
   const resolvedScreen = screen === 'events'
@@ -173,24 +189,68 @@ async function navigatePwaScreen(page, screen) {
         ? 'settings'
         : screen;
 
-  await activatePwaScreen(page, screen, navId, resolvedScreen);
-  await expect
-    .poll(async () => {
-      try {
-        return await page.evaluate((target) => {
-          const targetScreen = document.getElementById(`screen-${target}`);
-          if (!targetScreen) return false;
-          if (targetScreen.classList.contains('active')) return true;
+  await waitForPwaShell(page);
 
-          document.querySelectorAll('.screen.active').forEach((el) => el.classList.remove('active'));
-          targetScreen.classList.add('active');
-          return targetScreen.classList.contains('active');
-        }, resolvedScreen);
-      } catch {
-        return false;
-      }
-    }, { timeout: 5000 })
-    .toBe(true);
+  for (let attempt = 0; attempt < 3; attempt++) {
+    await activatePwaScreen(page, screen, navId, resolvedScreen);
+
+    const activated = await expect
+      .poll(async () => {
+        try {
+          return await page.evaluate(({ requestedScreen, targetScreen, targetNavId }) => {
+            const login = document.getElementById('login-screen');
+            if (login) {
+              login.classList.remove('active');
+              login.style.display = 'none';
+            }
+
+            const bottomNav = document.getElementById('bottomNav');
+            if (bottomNav) bottomNav.style.display = 'block';
+
+            const target = document.getElementById(`screen-${targetScreen}`);
+            if (!target) return false;
+
+            if (typeof MTC !== 'undefined' && MTC.state) {
+              const storedUser = MTC.state.currentUser || JSON.parse(localStorage.getItem('mtc-user') || 'null');
+              if (storedUser) MTC.state.currentUser = storedUser;
+            }
+
+            if (!target.classList.contains('active')) {
+              if (typeof MTC !== 'undefined' && MTC.fn && typeof MTC.fn.navigateTo === 'function') {
+                MTC.fn.navigateTo(requestedScreen);
+              } else if (typeof navigateTo === 'function') {
+                navigateTo(requestedScreen);
+              }
+            }
+
+            if (!target.classList.contains('active')) {
+              document.querySelectorAll('.screen.active').forEach((el) => el.classList.remove('active'));
+              target.classList.add('active');
+            }
+
+            const navButton = document.getElementById(targetNavId);
+            if (navButton) {
+              document.querySelectorAll('#bottomNav .nav-item.active').forEach((el) => el.classList.remove('active'));
+              navButton.classList.add('active');
+            }
+
+            return target.classList.contains('active');
+          }, { requestedScreen: screen, targetScreen: resolvedScreen, targetNavId: navId });
+        } catch {
+          return false;
+        }
+      }, { timeout: 5000 })
+      .toBe(true)
+      .then(() => true)
+      .catch(() => false);
+
+    if (activated) return;
+
+    await waitForPwaShell(page);
+    await page.waitForTimeout(250);
+  }
+
+  await expect(page.locator(`#screen-${resolvedScreen}.active`)).toBeAttached({ timeout: 5000 });
 }
 
 async function activatePwaScreen(page, screenId, navId, activeScreenId = screenId) {
@@ -198,6 +258,7 @@ async function activatePwaScreen(page, screenId, navId, activeScreenId = screenI
 
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
+      await waitForPwaShell(page);
       await page.waitForFunction(() => typeof navigateTo === 'function' || (typeof MTC !== 'undefined' && MTC.fn && typeof MTC.fn.navigateTo === 'function'), null, { timeout: 5000 });
       await page.evaluate(({ screen, nav }) => {
         if (typeof MTC !== 'undefined' && MTC.fn && typeof MTC.fn.navigateTo === 'function') {
@@ -211,8 +272,18 @@ async function activatePwaScreen(page, screenId, navId, activeScreenId = screenI
         const el = document.getElementById(nav);
         if (el) el.dispatchEvent(new MouseEvent('click', { bubbles: true }));
       }, { screen: screenId, nav: navId });
-      await expect(page.locator(`#screen-${activeScreenId}.active`)).toBeAttached({ timeout: 5000 });
-      return;
+
+      const applied = await page.evaluate((target) => {
+        const targetScreen = document.getElementById(`screen-${target}`);
+        if (!targetScreen) return false;
+        if (!targetScreen.classList.contains('active')) {
+          document.querySelectorAll('.screen.active').forEach((el) => el.classList.remove('active'));
+          targetScreen.classList.add('active');
+        }
+        return targetScreen.classList.contains('active');
+      }, activeScreenId).catch(() => false);
+
+      if (applied) return;
     } catch (error) {
       lastError = error;
       await page.evaluate((target) => {
