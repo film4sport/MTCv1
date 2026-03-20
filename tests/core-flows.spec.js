@@ -290,19 +290,15 @@ test.describe('Core Flow — Messaging', () => {
     });
     await navigatePwaScreen(page, 'messages');
 
-    // Verify the reply preservation logic exists in code
-    const hasReplyPreservation = await page.evaluate(() => {
-      // Check that sendMessage function captures savedReplyTo
-      if (typeof sendMessage === 'function') {
-        var src = sendMessage.toString();
-        return src.includes('savedReplyTo') || src.includes('_replyTo');
-      }
-      return false;
-    });
-    // The function is minified in bundle, so check the source differently
-    // Just verify the function exists and _sending flag is implemented
-    const sendExists = await page.evaluate(() => typeof sendMessage === 'function');
-    expect(sendExists).toBe(true);
+    const preservesReplyContext =
+      sendMessageSource.includes('var savedReplyTo = _replyTo') &&
+      sendMessageSource.includes('if (savedReplyTo) _replyTo = savedReplyTo;');
+    const hasSendingGuard =
+      sendMessageSource.includes('if (sendMessage._sending) return;') &&
+      sendMessageSource.includes('sendMessage._sending = false;');
+
+    expect(preservesReplyContext).toBe(true);
+    expect(hasSendingGuard).toBe(true);
   });
 });
 

@@ -22,9 +22,7 @@ test.describe('Apple Compatibility - Info Tabs', () => {
     await expect(tablist).toBeVisible();
     const terms = page.locator('#tab-terms').first();
     await expect(terms).toBeAttached();
-    await terms.evaluate((el) => {
-      el.scrollIntoView({ block: 'nearest', inline: 'center' });
-    });
+    await switchInfoTab(page, 'Terms', 'terms');
     await expect(terms).toBeVisible();
   });
 });
