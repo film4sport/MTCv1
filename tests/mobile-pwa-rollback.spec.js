@@ -89,33 +89,44 @@ async function setupAuthenticatedState(page) {
 
   // These tests care about rollback behavior, not auth boot timing.
   // Force the authenticated shell so the suite is resilient to login bootstrap changes.
-  await page.evaluate((user) => {
-    localStorage.setItem('mtc-user', JSON.stringify(user));
-    localStorage.setItem('mtc-session-active', 'true');
-    if (typeof window !== 'undefined') {
-      window.currentUser = user;
-    }
-    if (typeof MTC !== 'undefined') {
-      MTC.state.currentUser = user;
-    }
-    const login = document.getElementById('login-screen');
-    if (login) {
-      login.classList.remove('active');
-      login.style.display = 'none';
-    }
-    const bottomNav = document.getElementById('bottomNav');
-    if (bottomNav) bottomNav.style.display = 'block';
-    const home = document.getElementById('screen-home');
-    if (home && !document.querySelector('.screen.active')) {
-      home.classList.add('active');
-    }
-  }, {
+  const forcedUser = {
     id: 'test-user-id-123',
     role: 'member',
     name: 'Test User',
     email: 'test@mtc.ca',
     isMember: true,
-  });
+  };
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      await page.waitForFunction(() => document.readyState === 'complete' && !!document.getElementById('app'), null, { timeout: 5000 });
+      await page.evaluate((user) => {
+        localStorage.setItem('mtc-user', JSON.stringify(user));
+        localStorage.setItem('mtc-session-active', 'true');
+        if (typeof window !== 'undefined') {
+          window.currentUser = user;
+        }
+        if (typeof MTC !== 'undefined') {
+          MTC.state.currentUser = user;
+        }
+        const login = document.getElementById('login-screen');
+        if (login) {
+          login.classList.remove('active');
+          login.style.display = 'none';
+        }
+        const bottomNav = document.getElementById('bottomNav');
+        if (bottomNav) bottomNav.style.display = 'block';
+        const home = document.getElementById('screen-home');
+        if (home && !document.querySelector('.screen.active')) {
+          home.classList.add('active');
+        }
+      }, forcedUser);
+      break;
+    } catch (error) {
+      if (attempt === 2) throw error;
+      await page.waitForLoadState('domcontentloaded').catch(() => {});
+      await page.waitForTimeout(400);
+    }
+  }
 }
 
 /** Dismiss onboarding overlay */

@@ -1024,45 +1024,6 @@
 
 /* Role FAB + role switcher removed — roles set via login credentials */
 
-/* Coach Dashboard Styles */
-.coach-quick-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  padding: 0 16px;
-  margin-bottom: 20px;
-}
-
-.coach-action-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 20px 16px;
-  background: var(--bg-card);
-  border-radius: 16px;
-  border: none;
-  cursor: pointer;
-  box-shadow: var(--card-shadow);
-  transition: all 0.2s;
-}
-
-.coach-action-btn:active {
-  transform: scale(0.98);
-}
-
-.coach-action-btn svg {
-  width: 28px;
-  height: 28px;
-  stroke: var(--volt);
-}
-
-.coach-action-btn span {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
 /* E-transfer Settings */
 .etransfer-card {
   margin: 0 16px 16px;

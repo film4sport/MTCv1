@@ -8,7 +8,6 @@ async function loginAs(page, role = 'member') {
   // Auth uses magic link (passwordless) — these are test-only placeholders for form fill
   const creds = {
     member: { email: 'testmember@mtc.ca', pass: 'not-a-real-password' },
-    coach: { email: 'testcoach@mtc.ca', pass: 'not-a-real-password' },
     admin: { email: 'testadmin@mtc.ca', pass: 'not-a-real-password' },
   };
   const { email, pass } = creds[role];
@@ -245,7 +244,7 @@ test.describe('Messaging System', () => {
     await goTo(page, '/dashboard/messages');
 
     // Click first conversation if exists
-    const firstConvo = page.locator('[class*="cursor-pointer"]').filter({ hasText: /Mark|Sarah|David|Lisa|Coach/ }).first();
+    const firstConvo = page.locator('[class*="cursor-pointer"]').filter({ hasText: /Mark|Sarah|David|Lisa|Mono Tennis Club/ }).first();
     if (await firstConvo.isVisible({ timeout: 3000 }).catch(() => false)) {
       await firstConvo.click();
       await page.waitForTimeout(500);

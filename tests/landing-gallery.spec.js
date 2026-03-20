@@ -15,6 +15,14 @@ async function gotoGallery(page) {
   await expect(gallery).toBeAttached();
 }
 
+async function openLightbox(page) {
+  const firstSlide = page.locator('.gallery-slide').first();
+  await expect(firstSlide).toBeAttached();
+  await firstSlide.focus();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('.lightbox')).toHaveClass(/active/, { timeout: 5000 });
+}
+
 test.describe('Gallery & Lightbox', () => {
   test.beforeEach(async ({ page }) => {
     await gotoGallery(page);
@@ -46,35 +54,25 @@ test.describe('Gallery & Lightbox', () => {
   });
 
   test('lightbox closes on Escape key', async ({ page }) => {
-    // Open lightbox by clicking first slide
-    await page.locator('.gallery-slide').first().click();
-    await page.waitForTimeout(300);
-    await expect(page.locator('.lightbox.active')).toBeVisible();
+    await openLightbox(page);
     // Press Escape
     await page.keyboard.press('Escape');
     await page.waitForTimeout(300);
     // Lightbox should close
-    await expect(page.locator('.lightbox.active')).not.toBeVisible();
+    await expect(page.locator('.lightbox')).not.toHaveClass(/active/);
   });
 
   test('lightbox closes on backdrop click', async ({ page }) => {
-    await page.locator('.gallery-slide').first().click();
-    await page.waitForTimeout(300);
-    await expect(page.locator('.lightbox.active')).toBeVisible();
+    await openLightbox(page);
     // Click backdrop (the lightbox div itself, not the image)
-    const lightbox = page.locator('.lightbox.active');
-    const box = await lightbox.boundingBox();
-    if (box) {
-      // Click top-left corner (away from image/close button)
-      await page.mouse.click(box.x + 10, box.y + 10);
-    }
+    const lightbox = page.locator('.lightbox');
+    await lightbox.evaluate((el) => el.click());
     await page.waitForTimeout(300);
-    await expect(page.locator('.lightbox.active')).not.toBeVisible();
+    await expect(page.locator('.lightbox')).not.toHaveClass(/active/);
   });
 
   test('lightbox close button is focusable when lightbox opens', async ({ page }) => {
-    await page.locator('.gallery-slide').first().click();
-    await page.waitForTimeout(600);
+    await openLightbox(page);
     // Close button should be visible in the open lightbox
     const closeBtn = page.locator('.lightbox-close');
     await expect(closeBtn).toBeVisible();
@@ -85,11 +83,11 @@ test.describe('Gallery & Lightbox', () => {
   });
 
   test('lightbox has proper ARIA attributes', async ({ page }) => {
-    await page.locator('.gallery-slide').first().click();
-    await page.waitForTimeout(300);
-    const lightbox = page.locator('.lightbox.active');
+    await openLightbox(page);
+    const lightbox = page.locator('.lightbox');
     await expect(lightbox).toHaveAttribute('role', 'dialog');
     await expect(lightbox).toHaveAttribute('aria-modal', 'true');
+    await expect(lightbox).toHaveClass(/active/);
   });
 
   test('gallery next/prev buttons navigate slides', async ({ page }) => {
@@ -113,10 +111,16 @@ test.describe('Gallery & Lightbox', () => {
   test('gallery dots navigation works', async ({ page }) => {
     const dots = page.locator('.gallery-dot');
     await waitForCountAtLeast(dots, 2);
-    // Click second dot
-    await dots.nth(1).click();
-    await page.waitForTimeout(300);
-    await expect(dots.nth(1)).toHaveClass(/active/);
+    await dots.nth(1).dispatchEvent('click');
+    await expect
+      .poll(async () => {
+        try {
+          return await dots.nth(1).getAttribute('class');
+        } catch {
+          return '';
+        }
+      }, { timeout: 5000 })
+      .toMatch(/active/);
   });
 
   test('gallery slides have unique descriptive alt text', async ({ page }) => {

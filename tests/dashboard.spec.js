@@ -87,7 +87,6 @@ test.describe('Dashboard — Login Flow', () => {
     test.skip(process.env.CI === 'true', 'Test accounts section is dev-only');
     await expect(page.getByText('Test Accounts')).toBeVisible();
     await expect(page.getByText('member@mtc.ca')).toBeVisible();
-    await expect(page.getByText('coach@mtc.ca')).toBeVisible();
     await expect(page.getByText('admin@mtc.ca')).toBeVisible();
   });
 });

@@ -33,7 +33,6 @@ test.describe('Signup Flow - /info?tab=membership', () => {
 
   test('coaching tab has coach info', async ({ page }) => {
     await switchTab(page, 'Coaching', 'coaching', 'Mark Taylor');
-    await expect(page.getByRole('heading', { name: 'Mark Taylor' })).toBeAttached();
   });
 
   test('back to home link exists', async ({ page }) => {

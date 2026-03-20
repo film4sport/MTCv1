@@ -138,7 +138,7 @@ export default function DashboardHome() {
             { label: APP_COPY.bookCourt, href: APP_ROUTES.dashboardBook, icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z', bg: 'rgba(107, 122, 61, 0.85)', color: '#fff' },
             { label: APP_COPY.schedule, href: APP_ROUTES.dashboardSchedule, icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z', bg: 'rgba(232, 228, 217, 0.6)', color: '#2a2f1e' },
             { label: APP_COPY.clubEvents, href: APP_ROUTES.dashboardEvents, icon: 'M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z', bg: 'rgba(212, 225, 87, 0.7)', color: '#2a2f1e' },
-            // 4th action: Find Partner for member, Admin Panel for admin, Messages for coach
+            // 4th action: Find Partner for members, Admin Panel for admins
             ...(currentUser?.role === 'admin' ? [
               { label: APP_COPY.adminPanel, href: APP_ROUTES.dashboardAdmin, icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z', bg: 'rgba(200, 209, 160, 0.6)', color: '#2a2f1e' },
             ] : [

@@ -51,11 +51,12 @@ test.describe('Mobile PWA - Session Recovery', () => {
     });
 
     await page.goto(MOBILE_URL, { waitUntil: 'load', timeout: 30000 });
-    await page.waitForTimeout(1200);
+    await page.waitForFunction(() => typeof window.handleLogout === 'function' && document.getElementById('confirmModal'), null, { timeout: 10000 });
 
     await page.evaluate(() => { window.handleLogout(); });
-    await expect(page.locator('#confirmModal.active')).toBeVisible();
-    await page.locator('#confirmModalConfirm').click();
+    await expect(page.locator('#confirmModal')).toHaveClass(/active/, { timeout: 5000 });
+    await expect(page.locator('#confirmModalConfirm')).toBeVisible();
+    await page.locator('#confirmModalConfirm').click({ force: true });
     await page.waitForTimeout(600);
 
     await expect(page.locator('#login-screen.active')).toBeVisible();

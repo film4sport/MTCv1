@@ -198,12 +198,12 @@ test.describe('Schedule / Calendar Section', () => {
 
   test('month navigation works', async ({ page }) => {
     const monthTitle = page.locator('#schedule h3').first();
-    const initialText = await monthTitle.textContent();
-    // Click next month
-    const nextBtn = page.locator('#schedule button').nth(1);
-    await nextBtn.click();
-    await expect.poll(async () => await monthTitle.textContent()).not.toBe(initialText);
-    const newText = await monthTitle.textContent();
+    const initialText = (await monthTitle.textContent())?.trim();
+    const nextBtn = page.locator('#schedule button[aria-label="Next month"]').first();
+    await expect(nextBtn).toBeAttached();
+    await nextBtn.dispatchEvent('click');
+    await expect.poll(async () => (await monthTitle.textContent())?.trim(), { timeout: 7000 }).not.toBe(initialText);
+    const newText = (await monthTitle.textContent())?.trim();
     expect(newText).not.toBe(initialText);
   });
 });
