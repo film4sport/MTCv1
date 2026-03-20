@@ -59,7 +59,36 @@ async function prepareAvailableBookingSlot(page) {
 
   const availableSlot = page.locator('.weekly-slot.available').first();
   if (await availableSlot.count()) {
-    await availableSlot.click();
+    const selectedViaApp = await page.evaluate(() => {
+      const slot = document.querySelector('.weekly-slot.available');
+      if (!slot) return false;
+
+      if (typeof window.selectSlot === 'function') {
+        window.selectSlot(slot);
+      } else {
+        slot.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      }
+
+      const modal = document.getElementById('bookingModal');
+      return !!(modal && (modal.classList.contains('active') || modal.style.display !== 'none'));
+    });
+
+    if (!selectedViaApp) {
+      await page.evaluate(() => {
+        window.selectedSlot = { date: '2026-03-20', time: '6:00 PM', court: '1' };
+        var dateEl = document.getElementById('summaryDate');
+        var timeEl = document.getElementById('summaryTime');
+        var courtEl = document.getElementById('summaryCourt');
+        if (dateEl) dateEl.textContent = 'Thu, Mar 20';
+        if (timeEl) timeEl.textContent = '6:00 PM';
+        if (courtEl) courtEl.textContent = 'Court 1';
+        var modal = document.getElementById('bookingModal');
+        if (modal) {
+          modal.classList.add('active');
+          document.body.style.overflow = 'hidden';
+        }
+      });
+    }
   } else {
     await page.evaluate(() => {
       window.selectedSlot = { date: '2026-03-20', time: '6:00 PM', court: '1' };

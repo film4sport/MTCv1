@@ -107,7 +107,6 @@ test.describe('Visual Regression — Landing Page', () => {
 
     const footer = page.locator('footer').first();
     await expect(footer).toBeAttached({ timeout: 5000 });
-    await footer.scrollIntoViewIfNeeded();
     await expect(footer).toBeVisible();
 
     // Footer has address
@@ -248,7 +247,15 @@ test.describe('Visual Regression — Mobile PWA', () => {
 
     // Has login buttons (Google and/or magic link)
     const buttons = page.locator('#login-screen button, #login-screen [class*="btn"]');
-    expect(await buttons.count()).toBeGreaterThanOrEqual(1);
+    await expect
+      .poll(async () => {
+        try {
+          return await buttons.count();
+        } catch {
+          return 0;
+        }
+      }, { timeout: 5000 })
+      .toBeGreaterThanOrEqual(1);
 
     await page.screenshot({ path: 'test-results/mobile-login.png' });
 
