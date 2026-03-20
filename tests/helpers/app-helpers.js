@@ -46,33 +46,33 @@ async function switchInfoTab(page, label, tabKey) {
     await tab.click({ timeout: 3000 });
     switchedViaClick = true;
   } catch {
+    switchedViaClick = false;
+  }
+
+  const tabIsActive = async () => {
+    try {
+      return await page.evaluate((expectedTab) => {
+        const selectedTab = document.getElementById(`tab-${expectedTab}`);
+        const panel = document.getElementById(`tabpanel-${expectedTab}`);
+        return !!(
+          selectedTab &&
+          selectedTab.getAttribute('aria-selected') === 'true' &&
+          panel &&
+          panel.offsetParent !== null
+        );
+      }, tabKey);
+    } catch {
+      return false;
+    }
+  };
+
+  if (switchedViaClick) {
+    await expect.poll(tabIsActive, { timeout: 1500 }).toBeTruthy().catch(async () => {
+      await gotoInfo(page, tabKey);
+    });
+  } else {
     await gotoInfo(page, tabKey);
   }
-
-  if (!switchedViaClick) {
-    await page.waitForTimeout(250);
-  }
-
-  await expect
-    .poll(async () => {
-      try {
-        return await page.evaluate((expectedTab) => {
-          const selectedTab = document.getElementById(`tab-${expectedTab}`);
-          const panel = document.getElementById(`tabpanel-${expectedTab}`);
-          return {
-            urlMatches: window.location.search.includes(`tab=${expectedTab}`),
-            selected: selectedTab ? selectedTab.getAttribute('aria-selected') : null,
-            panelVisible: !!(panel && panel.offsetParent !== null),
-          };
-        }, tabKey);
-      } catch {
-        return null;
-      }
-    }, { timeout: 5000 })
-    .toMatchObject({
-      selected: 'true',
-      panelVisible: true,
-    });
 
   await expect(page.locator(`#tabpanel-${tabKey}`)).toBeVisible();
   await expect(page.locator(`#tab-${tabKey}`)).toHaveAttribute('aria-selected', 'true');

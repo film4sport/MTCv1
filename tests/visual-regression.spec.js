@@ -85,11 +85,18 @@ test.describe('Visual Regression — Landing Page', () => {
     const eventsSection = page.locator('#events, [data-section="events"]').first();
     await expect(eventsSection).toBeAttached({ timeout: 5000 });
     await eventsSection.scrollIntoViewIfNeeded();
-    await expect(page.locator('#events .event-card, [data-section="events"] [class*="card"]').first()).toBeAttached({ timeout: 5000 });
 
     // Events section has cards
     const cards = page.locator('#events .event-card, [data-section="events"] [class*="card"]');
-    expect(await cards.count()).toBeGreaterThanOrEqual(1);
+    await expect
+      .poll(async () => {
+        try {
+          return await cards.count();
+        } catch {
+          return 0;
+        }
+      }, { timeout: 5000 })
+      .toBeGreaterThan(0);
 
     await page.screenshot({ path: 'test-results/landing-events-desktop.png' });
   });
