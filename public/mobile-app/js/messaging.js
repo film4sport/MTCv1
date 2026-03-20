@@ -703,7 +703,7 @@
     if (token && typeof MTC.fn.apiRequest === 'function') {
       MTC.fn.apiRequest('/mobile/conversations', {
         method: 'POST',
-        body: JSON.stringify({ toId: currentConversation, text: text })
+        body: JSON.stringify({ toId: currentConversation, text: text, clientMessageId: tempId })
       }).then(function(res) {
         sendMessage._sending = false;
         if (!res.ok) {

@@ -7,6 +7,7 @@
 
   var SUPPORT_EMAIL = 'monotennisclub1@gmail.com';
   var SITE_HOST = 'monotennisclub.com';
+  var pendingPartnerPosts = new Set();
 
   // ============================================
   // PARTNER FILTER (unified pill-based)
@@ -170,6 +171,7 @@
 
   // onclick handler (index.html)
   window.submitPartnerRequest = function() {
+    if (submitPartnerRequest._posting) return;
     const typeBtn = document.querySelector('#postPartnerModal [data-type].active');
     const levelBtn = document.querySelector('#postPartnerModal [data-level].active');
     const whenBtn = document.querySelector('#postPartnerModal [data-when].active');
@@ -192,6 +194,8 @@
     const avatarHtml = (typeof avatarSVGs !== 'undefined' && avatarSVGs[avatarKey]) ? avatarSVGs[avatarKey] : avatarSVGs['default'];
 
     var localId = 'pr-' + Date.now();
+    submitPartnerRequest._posting = true;
+    pendingPartnerPosts.add(localId);
     var timeDisplay = preferredTime ? when + ' at ' + preferredTime : when;
     var reqData = { id: localId, type: type, typeLabel: typeLabel, level: level, when: timeDisplay, userName: userName };
 
@@ -210,9 +214,12 @@
           matchType: type,
           skillLevel: level === 'Any Level' ? undefined : level.toLowerCase(),
           availability: when,
-          message: null
+          message: null,
+          clientRequestId: localId
         })
       }).then(function(result) {
+        submitPartnerRequest._posting = false;
+        pendingPartnerPosts.delete(localId);
         if (result.ok && result.data && result.data.id) {
           // Update local storage with server-assigned ID
           reqData.serverId = result.data.id;
@@ -231,9 +238,13 @@
           window.removePartnerRequest(localId);
         }
       }).catch(function() {
+      submitPartnerRequest._posting = false;
+      pendingPartnerPosts.delete(localId);
       showToast('Partner request saved locally — it will sync when you’re back online');
       });
     } else {
+      submitPartnerRequest._posting = false;
+      pendingPartnerPosts.delete(localId);
       // Offline: keep in localStorage, will be visible only to this user
       showToast('Partner request saved offline');
     }

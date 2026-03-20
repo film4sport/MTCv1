@@ -56,6 +56,13 @@ describe('Partners API — Posting a Partner Request', () => {
   it('includes user profile data (name, skill level)', () => {
     expect(content).toMatch(/user_id|name|skill_level/);
   });
+
+  it('supports client request idempotency for retry-safe posting', () => {
+    expect(content).toContain('clientRequestId');
+    expect(content).toContain('client_request_id');
+    expect(content).toContain(".eq('client_request_id', requestKey)");
+    expect(content).toContain('deduped: true');
+  });
 });
 
 describe('Partners API — Deleting a Request', () => {
@@ -68,6 +75,20 @@ describe('Partners API — Deleting a Request', () => {
   it('verifies ownership before deletion', () => {
     // Should check user_id matches the authenticated user
     expect(content).toMatch(/user_id.*authResult\.id|eq\('user_id'/);
+  });
+});
+
+describe('Partners API — Join race protection', () => {
+  const content = readFileSync(resolve(root, 'app/api/mobile/partners/route.ts'), 'utf-8');
+
+  it('claims a partner request only while it is still available', () => {
+    expect(content).toContain(".eq('status', 'available')");
+    expect(content).toContain(".is('matched_by', null)");
+    expect(content).toContain("select('id')");
+  });
+
+  it('returns 409 when another member already matched the request first', () => {
+    expect(content).toContain("return NextResponse.json({ error: 'Already matched' }, { status: 409 });");
   });
 });
 

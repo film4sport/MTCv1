@@ -115,9 +115,11 @@ describe('Events API — Server-side Spot Limit (Bug Fix)', () => {
     expect(content).toContain('spots_total');
   });
 
-  it('counts existing attendees before insert', () => {
-    // Should do a count query on event_attendees
-    expect(content).toMatch(/count.*exact.*head.*true/s);
+  it('routes RSVP through the atomic database toggle function', () => {
+    expect(content).toContain("rpc('toggle_event_rsvp_atomic'");
+    expect(content).toContain('p_event_id: eventId');
+    expect(content).toContain('p_user_id: authResult.id');
+    expect(content).toContain('p_user_name: userName');
   });
 
   it('returns 409 when event is full', () => {
@@ -125,9 +127,8 @@ describe('Events API — Server-side Spot Limit (Bug Fix)', () => {
     expect(content).toContain('Event is full');
   });
 
-  it('allows RSVP when spots available (no spots_total = unlimited)', () => {
-    // If spots_total is null/0, the check is skipped
-    expect(content).toMatch(/spots_total\s*&&\s*evt\.spots_total\s*>\s*0/);
+  it('stores stable user identity for RSVP rows instead of relying on name only', () => {
+    expect(content).toContain('p_user_id: authResult.id');
   });
 });
 

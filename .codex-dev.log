@@ -1,0 +1,45 @@
+
+> mtc-website@1.0.0 dev
+> next dev
+
+▲ Next.js 16.1.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.0.18:3000
+- Environments: .env.local
+
+✓ Starting...
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+✓ Ready in 1013ms
+○ Compiling /info ...
+ GET /info?tab=membership 200 in 4.2s (compile: 3.9s, render: 242ms)
+⚠ Cross origin request detected from 127.0.0.1 to /_next/* resource. In a future major version of Next.js, you will need to explicitly configure "allowedDevOrigins" in next.config to allow this.
+Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+ GET /info?tab=coaching 200 in 46ms (compile: 6ms, render: 39ms)
+ GET /info?tab=coaching 200 in 62ms (compile: 15ms, render: 46ms)
+ GET /info?tab=membership 200 in 61ms (compile: 3ms, render: 58ms)
+ GET /info?tab=coaching 200 in 27ms (compile: 4ms, render: 22ms)
+ GET /info?tab=membership 200 in 334ms (compile: 6ms, render: 329ms)
+ GET /info?tab=membership 200 in 294ms (compile: 7ms, render: 288ms)
+ GET /info?tab=membership 200 in 255ms (compile: 5ms, render: 250ms)
+ GET /info?tab=membership 200 in 211ms (compile: 7ms, render: 205ms)
+ GET /info?tab=about 200 in 46ms (compile: 9ms, render: 37ms)
+ GET /info?tab=about 200 in 48ms (compile: 22ms, render: 27ms)
+ GET /info?tab=membership 200 in 484ms (compile: 5ms, render: 479ms)
+ GET /info?tab=membership 200 in 405ms (compile: 6ms, render: 399ms)
+ GET /info?tab=about 200 in 345ms (compile: 10ms, render: 334ms)
+ GET /info?tab=faq 200 in 267ms (compile: 21ms, render: 246ms)
+ GET /info?tab=faq 200 in 195ms (compile: 24ms, render: 171ms)
+ GET /info?tab=faq 200 in 55ms (compile: 7ms, render: 48ms)
+ GET /info?tab=coaching 200 in 95ms (compile: 16ms, render: 79ms)
+ GET /info?tab=coaching 200 in 89ms (compile: 8ms, render: 81ms)
+ GET /info?tab=rules 200 in 419ms (compile: 7ms, render: 412ms)
+ GET /info?tab=coaching 200 in 906ms (compile: 11ms, render: 895ms)
+ GET /info?tab=rules 200 in 846ms (compile: 34ms, render: 812ms)
+ GET /api/mobile/settings 401 in 1487ms (compile: 1477ms, render: 10ms)
+ GET /info?tab=rules 200 in 538ms (compile: 31ms, render: 507ms)
+ GET /info?tab=rules 200 in 414ms (compile: 9ms, render: 405ms)
+ GET /info?tab=membership 200 in 1085ms (compile: 14ms, render: 1072ms)
+ GET /info?tab=coaching 200 in 1094ms (compile: 152ms, render: 941ms)
+ GET /info?tab=membership 200 in 596ms (compile: 7ms, render: 589ms)
+ GET /info?tab=about 200 in 447ms (compile: 24ms, render: 424ms)
+ GET /info?tab=faq 200 in 124ms (compile: 4ms, render: 120ms)

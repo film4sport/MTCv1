@@ -105,7 +105,15 @@
       if (typeof showToast === 'function') showToast('Please log in to book a court');
       return;
     }
-    var payload = Object.assign({ userId: userId }, bookingData);
+    var clientRequestId = bookingData && bookingData.clientRequestId;
+    if (!clientRequestId) {
+      if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+        clientRequestId = 'booking-' + window.crypto.randomUUID();
+      } else {
+        clientRequestId = 'booking-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10);
+      }
+    }
+    var payload = Object.assign({ userId: userId, clientRequestId: clientRequestId }, bookingData);
 
     // If offline, queue immediately instead of attempting the request
     if (!navigator.onLine) {

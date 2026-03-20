@@ -20,6 +20,10 @@ function generateId(prefix: string): string {
   return `${prefix}-${crypto.randomUUID().slice(0, 8)}`;
 }
 
+function normalizeConversationMembers(a: string, b: string): { memberA: string; memberB: string } {
+  return a < b ? { memberA: a, memberB: b } : { memberA: b, memberB: a };
+}
+
 // createNotification imported from shared utility
 import { createNotification } from '../../lib/notifications';
 
@@ -31,12 +35,14 @@ async function sendMessage(
   msg: { id: string; fromId: string; fromName: string; toId: string; toName: string; text: string }
 ) {
   const timestamp = new Date().toISOString();
+  const { memberA, memberB } = normalizeConversationMembers(msg.fromId, msg.toId);
 
   // Find or create conversation
   const { data: conv } = await supabase
     .from('conversations')
     .select('id')
-    .or(`and(member_a.eq.${msg.fromId},member_b.eq.${msg.toId}),and(member_a.eq.${msg.toId},member_b.eq.${msg.fromId})`)
+    .eq('member_a', memberA)
+    .eq('member_b', memberB)
     .single();
 
   let conversationId: number;
@@ -45,7 +51,7 @@ async function sendMessage(
   } else {
     const { data: newConv } = await supabase
       .from('conversations')
-      .insert({ member_a: msg.fromId, member_b: msg.toId, last_message: msg.text, last_timestamp: timestamp })
+      .insert({ member_a: memberA, member_b: memberB, last_message: msg.text, last_timestamp: timestamp })
       .select('id')
       .single();
     if (!newConv) { console.error('[mobile-booking] Failed to create conversation'); return; }
@@ -290,7 +296,7 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { courtId, date, time, matchType, duration, isGuest, guestName, participants, bookedFor, userName } = body;
+    const { courtId, date, time, matchType, duration, isGuest, guestName, participants, bookedFor, userName, clientRequestId } = body;
 
     // ── Required fields ───────────────────────────────
     if (!courtId || !date || !time || !matchType || !duration) {
@@ -363,106 +369,94 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Guest name is required' }, { status: 400 });
     }
 
-    // ── Check for conflicts & create booking ──────────
-    const supabase = getAdminClient();
+    const bookingSupabase = getAdminClient();
+    const bookingCourtName = COURT_NAMES[courtId] || `Court ${courtId}`;
+    const bookingBookerName = userName ? sanitizeInput(userName, 200) : authResult.name || 'Member';
+    const bookingRequestId = typeof clientRequestId === 'string' && clientRequestId.trim()
+      ? sanitizeInput(clientRequestId, 120)
+      : null;
+    const generatedBookingId = generateId('b');
 
-    const { data: existing, error: fetchError } = await supabase
-      .from('bookings')
-      .select('id, time')
-      .eq('court_id', courtId)
-      .eq('date', date)
-      .eq('status', 'confirmed');
+    type CreatedBooking = {
+      id: string;
+      court_id: number;
+      court_name: string;
+      date: string;
+      time: string;
+      user_id: string;
+      user_name: string;
+      booked_for: string | null;
+      match_type: string | null;
+      duration: number | null;
+      type: string;
+      guest_name: string | null;
+      status: string;
+      client_request_id: string | null;
+    };
 
-    if (fetchError) {
-      return NextResponse.json({ error: 'Failed to check availability' }, { status: 500 });
-    }
-
-    if (existing && existing.length > 0) {
-      const conflict = existing.find((b: { time: string }) => b.time === time);
-      if (conflict) {
-        return NextResponse.json({ error: 'This time slot is already booked' }, { status: 409 });
-      }
-    }
-
-    // ── Check for court blocks (admin-scheduled closures) ──────────
-    const { data: blocks } = await supabase
-      .from('court_blocks')
-      .select('id, court_id, time_start, time_end, reason')
-      .eq('block_date', date)
-      .or(`court_id.eq.${courtId},court_id.is.null`);
-
-    if (blocks && blocks.length > 0) {
-      const blocked = blocks.find((b: { time_start: string | null; time_end: string | null }) => {
-        if (!b.time_start || !b.time_end) return true; // full-day block
-        // Check if requested time falls within block range
-        return time >= b.time_start && time < b.time_end;
-      });
-      if (blocked) {
-        return NextResponse.json({
-          error: `Court is blocked: ${(blocked as { reason?: string }).reason || 'Maintenance'}`
-        }, { status: 409 });
-      }
-    }
-
-    const courtName = COURT_NAMES[courtId] || `Court ${courtId}`;
-    const bookerName = userName ? sanitizeInput(userName, 200) : authResult.name || 'Member';
-    const bookingId = generateId('b');
-
-    const { data: newBooking, error: insertError } = await supabase
-      .from('bookings')
-      .insert({
-        id: bookingId,
-        court_id: courtId,
-        court_name: courtName,
-        date,
-        time,
-        user_id: authResult.id,
-        user_name: bookerName,
-        booked_for: bookedFor ? sanitizeInput(bookedFor, 200) : null,
-        match_type: matchType,
-        duration,
-        type: 'court',
-        guest_name: cleanGuestName,
-        status: 'confirmed',
+    const { data: createdBooking, error: bookingInsertError } = await bookingSupabase
+      .rpc('create_booking_atomic', {
+        p_booking_id: generatedBookingId,
+        p_court_id: courtId,
+        p_court_name: bookingCourtName,
+        p_date: date,
+        p_time: time,
+        p_user_id: authResult.id,
+        p_user_name: bookingBookerName,
+        p_booked_for: bookedFor ? sanitizeInput(bookedFor, 200) : null,
+        p_match_type: matchType,
+        p_duration: duration,
+        p_guest_name: cleanGuestName ?? null,
+        p_client_request_id: bookingRequestId,
       })
-      .select()
-      .single();
+      .single<CreatedBooking>();
 
-    if (insertError) {
-      if (insertError.code === '23505') {
+    if (bookingInsertError || !createdBooking) {
+      if (bookingInsertError?.message?.includes('BOOKING_CONFLICT')) {
         return NextResponse.json({ error: 'This slot was just booked by someone else' }, { status: 409 });
+      }
+      if (bookingInsertError?.message?.includes('COURT_BLOCKED')) {
+        return NextResponse.json({ error: 'Court is blocked' }, { status: 409 });
+      }
+      if (bookingInsertError?.code === '23505') {
+        return NextResponse.json({ error: 'This booking was already submitted' }, { status: 409 });
       }
       return NextResponse.json({ error: 'Failed to create booking' }, { status: 500 });
     }
 
-    // ── Insert participants into booking_participants ──
-    const participantRows: { participant_id: string; participant_name: string }[] = [];
+    const bookingParticipantRows: { participant_id: string; participant_name: string }[] = [];
     if (participants && Array.isArray(participants) && participants.length > 0) {
-      const validParticipants = participants.filter((p: { id: string; name: string }) => isValidUUID(p.id));
-      const rows = validParticipants.map((p: { id: string; name: string }) => ({
-        booking_id: newBooking.id,
+      const validParticipants = participants
+        .filter((p: { id: string; name: string }) => isValidUUID(p.id))
+        .filter((p: { id: string }) => p.id !== authResult.id);
+      const dedupedParticipants = Array.from(
+        new Map(validParticipants.map((p: { id: string; name: string }) => [p.id, p])).values()
+      );
+      const participantUpserts = dedupedParticipants.map((p: { id: string; name: string }) => ({
+        booking_id: createdBooking.id,
         participant_id: p.id,
         participant_name: sanitizeInput(p.name, 200),
       }));
-      const { error: pErr } = await supabase.from('booking_participants').insert(rows);
-      if (pErr) {
-        console.error('[mobile-booking] Failed to insert participants:', pErr.message);
+      const { error: bookingParticipantError } = await bookingSupabase
+        .from('booking_participants')
+        .upsert(participantUpserts, { onConflict: 'booking_id,participant_id', ignoreDuplicates: true });
+      if (bookingParticipantError) {
+        console.error('[mobile-booking] Failed to insert participants:', bookingParticipantError.message);
       } else {
-        rows.forEach(r => participantRows.push({ participant_id: r.participant_id, participant_name: r.participant_name }));
+        participantUpserts.forEach(r => bookingParticipantRows.push({ participant_id: r.participant_id, participant_name: r.participant_name }));
       }
     }
 
-    // ── Fire notifications (non-blocking) ─────────────
-    // Don't await — respond to client immediately, notifications fire in background
     fireBookingNotifications(
-      supabase,
-      { id: newBooking.id, courtName, date, time, matchType, duration },
-      { id: authResult.id, name: bookerName, email: authResult.email },
-      participantRows,
+      bookingSupabase,
+      { id: createdBooking.id, courtName: bookingCourtName, date, time, matchType, duration },
+      { id: authResult.id, name: bookingBookerName, email: authResult.email },
+      bookingParticipantRows,
       emailApiBaseUrl,
     ).catch(err => console.error('[mobile-booking] Notification error:', err));
 
-    return NextResponse.json({ success: true, booking: newBooking });
+    return NextResponse.json({ success: true, booking: createdBooking });
+
   } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }

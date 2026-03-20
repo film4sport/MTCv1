@@ -7,6 +7,7 @@
 
   const eventsCalendarDate = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
   var serverManagedEventIds = [];
+  var pendingEventRsvps = new Set();
 
   // Load persisted RSVPs or use defaults
   const userRsvps = (function() {
@@ -531,6 +532,9 @@
   function toggleEventRsvp(eventId) {
     const event = clubEventsData[eventId];
     if (!event) return;
+    if (pendingEventRsvps.has(eventId)) return;
+
+    pendingEventRsvps.add(eventId);
 
     const isRegistered = userRsvps.includes(eventId);
 
@@ -608,9 +612,48 @@
         }
       }).catch(function(err) {
         MTC.warn('[MTC] RSVP sync error:', err);
+        if (!isUnrsvp) {
+          var idx = userRsvps.indexOf(eventId);
+          if (idx !== -1) userRsvps.splice(idx, 1);
+          saveUserRsvps();
+          event.spotsTaken--;
+          var attendeeIdx = event.attendees.indexOf('You');
+          if (attendeeIdx !== -1) event.attendees.splice(attendeeIdx, 1);
+          removeEventFromMyBookings(eventId);
+        } else {
+          userRsvps.push(eventId);
+          saveUserRsvps();
+          event.spotsTaken++;
+          event.attendees.unshift('You');
+          addEventToMyBookings(eventId, 'event');
+        }
+        if (typeof MTC.fn.renderHomeCalendar === 'function') MTC.fn.renderHomeCalendar();
+        if (typeof generateCalendar === 'function') generateCalendar();
+        renderEventModal(event);
         showToast('Network error — please try again', 'error');
+      }).finally(function() {
+        pendingEventRsvps.delete(eventId);
       });
     } else {
+      if (!isUnrsvp) {
+        var missingTokenIdx = userRsvps.indexOf(eventId);
+        if (missingTokenIdx !== -1) userRsvps.splice(missingTokenIdx, 1);
+        saveUserRsvps();
+        event.spotsTaken--;
+        var missingTokenAttendeeIdx = event.attendees.indexOf('You');
+        if (missingTokenAttendeeIdx !== -1) event.attendees.splice(missingTokenAttendeeIdx, 1);
+        removeEventFromMyBookings(eventId);
+      } else {
+        userRsvps.push(eventId);
+        saveUserRsvps();
+        event.spotsTaken++;
+        event.attendees.unshift('You');
+        addEventToMyBookings(eventId, 'event');
+      }
+      if (typeof MTC.fn.renderHomeCalendar === 'function') MTC.fn.renderHomeCalendar();
+      if (typeof generateCalendar === 'function') generateCalendar();
+      renderEventModal(event);
+      pendingEventRsvps.delete(eventId);
       showToast('Please sign in again to RSVP', 'error');
     }
   }

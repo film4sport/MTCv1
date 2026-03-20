@@ -437,8 +437,11 @@
   // ============================================
   // Store matched partner for "Book Together" flow
   var _matchedPartner = null;
+  var _pendingPartnerMatches = new Set();
 
   window.joinPartner = function(name, time, btnEl, partnerId) {
+    if (partnerId && _pendingPartnerMatches.has(partnerId)) return;
+    if (partnerId) _pendingPartnerMatches.add(partnerId);
     _matchedPartner = { id: partnerId, name: name };
     showCelebrationModal('YOU\'RE IN!', 'Matched with ' + name + '. See you ' + time + '!');
     // Show "Book a Court Together" button
@@ -456,13 +459,18 @@
         method: 'PATCH',
         body: JSON.stringify({ partnerId: partnerId })
       }).then(function(result) {
-        if (result && result.ok === false && result.status === 409) {
-          showToast('This partner was already matched by someone else');
-        }
-      }).catch(function(err) {
-        MTC.warn('joinPartner API error:', err);
-      });
-    }
+          if (result && result.ok === false && result.status === 409) {
+            showToast('This partner was already matched by someone else');
+          }
+        }).catch(function(err) {
+          MTC.warn('joinPartner API error:', err);
+          showToast('Partner match failed. Please try again.', 'error');
+        }).finally(function() {
+          _pendingPartnerMatches.delete(partnerId);
+        });
+      } else if (partnerId) {
+        _pendingPartnerMatches.delete(partnerId);
+      }
 
     // Parse a date from the time string (e.g., "Tomorrow at 2pm", "Saturday Morning")
     let partnerDate = '';

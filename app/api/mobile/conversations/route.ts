@@ -119,7 +119,7 @@ export async function POST(request: Request) {
   if (authResult instanceof NextResponse) return authResult;
 
   try {
-    const { toId, text } = await request.json();
+    const { toId, text, clientMessageId } = await request.json();
     if (!toId || !text?.trim()) {
       return NextResponse.json({ error: 'Missing toId or text' }, { status: 400 });
     }
@@ -136,6 +136,11 @@ export async function POST(request: Request) {
     const fromId = authResult.id;
     const fromName = authResult.name;
     const timestamp = new Date().toISOString();
+    const normalizedMemberA = fromId < toId ? fromId : toId;
+    const normalizedMemberB = fromId < toId ? toId : fromId;
+    const requestMessageId = typeof clientMessageId === 'string' && clientMessageId.trim()
+      ? clientMessageId.trim().slice(0, 100)
+      : '';
 
     // Look up recipient — verify they exist
     const { data: toProfile } = await supabase.from('profiles').select('name').eq('id', toId).single();
@@ -146,7 +151,8 @@ export async function POST(request: Request) {
     const fetchConversation = () => supabase
       .from('conversations')
       .select('id')
-      .or(`and(member_a.eq.${fromId},member_b.eq.${toId}),and(member_a.eq.${toId},member_b.eq.${fromId})`)
+      .eq('member_a', normalizedMemberA)
+      .eq('member_b', normalizedMemberB)
       .single();
 
     const { data: existing } = await fetchConversation();
@@ -157,7 +163,7 @@ export async function POST(request: Request) {
     } else {
       const { data: newConv, error: convErr } = await supabase
         .from('conversations')
-        .insert({ member_a: fromId, member_b: toId, last_message: sanitizeInput(text, 200), last_timestamp: timestamp })
+        .insert({ member_a: normalizedMemberA, member_b: normalizedMemberB, last_message: sanitizeInput(text, 200), last_timestamp: timestamp })
         .select('id')
         .single();
       if (newConv) {
@@ -174,8 +180,20 @@ export async function POST(request: Request) {
     }
 
     // Insert message
-    const msgId = `m-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const msgId = requestMessageId || `m-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const sanitizedText = sanitizeInput(text, 2000);
+    if (requestMessageId) {
+      const { data: existingMessage } = await supabase
+        .from('messages')
+        .select('id, conversation_id')
+        .eq('id', requestMessageId)
+        .eq('from_id', fromId)
+        .single();
+      if (existingMessage) {
+        return NextResponse.json({ success: true, messageId: existingMessage.id, conversationId: existingMessage.conversation_id });
+      }
+    }
+
     const { error: msgErr } = await supabase.from('messages').insert({
       id: msgId,
       conversation_id: conversationId,
@@ -188,6 +206,17 @@ export async function POST(request: Request) {
       read: false,
     });
     if (msgErr) {
+      if (requestMessageId && isDuplicateError(msgErr)) {
+        const { data: duplicateMessage } = await supabase
+          .from('messages')
+          .select('id, conversation_id')
+          .eq('id', msgId)
+          .eq('from_id', fromId)
+          .single();
+        if (duplicateMessage) {
+          return NextResponse.json({ success: true, messageId: duplicateMessage.id, conversationId: duplicateMessage.conversation_id });
+        }
+      }
       return NextResponse.json({ error: msgErr.message }, { status: 500 });
     }
 

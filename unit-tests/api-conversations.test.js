@@ -52,6 +52,13 @@ describe('Conversations API — Message Sending', () => {
     expect(content).toMatch(/conversations.*insert|insert.*conversations/s);
   });
 
+  it('normalizes conversation member order to prevent mirrored duplicate threads', () => {
+    expect(content).toContain('const normalizedMemberA = fromId < toId ? fromId : toId;');
+    expect(content).toContain('const normalizedMemberB = fromId < toId ? toId : fromId;');
+    expect(content).toContain(".eq('member_a', normalizedMemberA)");
+    expect(content).toContain(".eq('member_b', normalizedMemberB)");
+  });
+
   it('inserts message into messages table', () => {
     expect(content).toMatch(/messages.*insert|from\('messages'\)/s);
   });
@@ -72,6 +79,13 @@ describe('Conversations API — Message Sending', () => {
   it('prevents sending messages to self', () => {
     // Should validate that toId !== authResult.id
     expect(content).toMatch(/yourself|self|toId.*===.*authResult\.id|authResult\.id.*===.*toId/);
+  });
+
+  it('supports client message idempotency for retry and double-tap safety', () => {
+    expect(content).toContain('clientMessageId');
+    expect(content).toContain('requestMessageId');
+    expect(content).toContain(".eq('id', requestMessageId)");
+    expect(content).toContain('return NextResponse.json({ success: true, messageId: existingMessage.id, conversationId: existingMessage.conversation_id });');
   });
 });
 

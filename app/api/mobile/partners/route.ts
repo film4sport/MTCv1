@@ -61,7 +61,7 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { matchType, skillLevel, availability, message } = body;
+    const { matchType, skillLevel, availability, message, clientRequestId } = body;
 
     const extendedMatchTypes = [...VALID_MATCH_TYPES, 'mixed', 'any'] as const;
     const type = extendedMatchTypes.includes(matchType) ? matchType : 'any';
@@ -70,9 +70,26 @@ export async function POST(request: Request) {
     const cleanMessage = message ? sanitizeInput(String(message), 500) : null;
 
     const supabase = getAdminClient();
-    const partnerId = `pr-${Date.now()}-${userId.slice(0, 8)}`;
+    const requestKey = typeof clientRequestId === 'string' && clientRequestId.trim()
+      ? clientRequestId.trim().slice(0, 100)
+      : null;
+    const partnerId = requestKey
+      ? `pr-${userId.slice(0, 8)}-${requestKey.replace(/[^a-zA-Z0-9-_]/g, '').slice(-40) || Date.now()}`
+      : `pr-${Date.now()}-${userId.slice(0, 8)}`;
     const todayStr = new Date().toISOString().split('T')[0];
     const timeStr = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+
+    if (requestKey) {
+      const { data: existingRequest } = await supabase
+        .from('partners')
+        .select('id, status')
+        .eq('user_id', userId)
+        .eq('client_request_id', requestKey)
+        .single();
+      if (existingRequest) {
+        return NextResponse.json({ success: true, id: existingRequest.id, deduped: true, status: existingRequest.status });
+      }
+    }
 
     // Fetch full profile for ntrp + avatar (auth-helper only returns name/role/email)
     const { data: fullProfile } = await supabase
@@ -84,6 +101,7 @@ export async function POST(request: Request) {
     const { error } = await supabase.from('partners').insert({
       id: partnerId,
       user_id: userId,
+      client_request_id: requestKey,
       name: authResult.name || 'Member',
       ntrp: fullProfile?.ntrp || 3.0,
       skill_level: cleanSkill || fullProfile?.skill_level || 'intermediate',
@@ -97,6 +115,17 @@ export async function POST(request: Request) {
     });
 
     if (error) {
+      if (requestKey) {
+        const { data: duplicateRequest } = await supabase
+          .from('partners')
+          .select('id, status')
+          .eq('user_id', userId)
+          .eq('client_request_id', requestKey)
+          .single();
+        if (duplicateRequest) {
+          return NextResponse.json({ success: true, id: duplicateRequest.id, deduped: true, status: duplicateRequest.status });
+        }
+      }
       return NextResponse.json({ error: 'Failed to create partner request' }, { status: 500 });
     }
 
@@ -171,16 +200,34 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: 'Already matched' }, { status: 409 });
     }
 
-    const { error } = await supabase
+    const { data: claimedPartner, error } = await supabase
       .from('partners')
       .update({
         status: 'matched',
         matched_by: userId,
         matched_at: new Date().toISOString(),
       })
-      .eq('id', partnerId);
+      .eq('id', partnerId)
+      .eq('status', 'available')
+      .is('matched_by', null)
+      .select('id')
+      .single();
 
-    if (error) {
+    if (!claimedPartner) {
+      if (error) {
+        return NextResponse.json({ error: 'Failed to join partner request' }, { status: 500 });
+      }
+      const { data: latestPartner } = await supabase
+        .from('partners')
+        .select('status')
+        .eq('id', partnerId)
+        .single();
+      if (!latestPartner) {
+        return NextResponse.json({ error: 'Partner request not found' }, { status: 404 });
+      }
+      if (latestPartner.status === 'matched') {
+        return NextResponse.json({ error: 'Already matched' }, { status: 409 });
+      }
       return NextResponse.json({ error: 'Failed to join partner request' }, { status: 500 });
     }
 

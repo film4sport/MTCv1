@@ -11,6 +11,14 @@ function withTimeout<T>(promise: Promise<T>, ms = 5000): Promise<T | undefined> 
   return Promise.race([promise, new Promise<undefined>(r => setTimeout(() => r(undefined), ms))]);
 }
 
+interface EventRsvpToggleResult {
+  action: 'added' | 'removed' | 'full';
+  title: string;
+  event_date: string;
+  spots_total: number | null;
+  spots_taken: number;
+}
+
 /** Get user IDs from attendee names (for push notifications) */
 async function getAttendeeUserIds(
   supabase: ReturnType<typeof getAdminClient>,
@@ -270,58 +278,39 @@ export async function POST(request: Request) {
     const supabase = getAdminClient();
     const userName = authResult.name;
 
-    // Check if already attending
-    const { data: existing } = await supabase
-      .from('event_attendees')
-      .select('id')
-      .eq('event_id', eventId)
-      .eq('user_name', userName)
-      .single();
+    const { data: toggleResult, error: toggleError } = await supabase
+      .rpc('toggle_event_rsvp_atomic', {
+        p_event_id: eventId,
+        p_user_id: authResult.id,
+        p_user_name: userName,
+      })
+      .single<EventRsvpToggleResult>();
 
-    if (existing) {
-      // Un-RSVP
-      const { error } = await supabase.from('event_attendees').delete().eq('id', existing.id);
-      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-      return NextResponse.json({ success: true, action: 'removed' });
-    } else {
-      // RSVP — enforce server-side spot limit
-      const { data: evt } = await supabase.from('events').select('title, date, spots_total').eq('id', eventId).single();
-      if (evt?.spots_total && evt.spots_total > 0) {
-        const { count } = await supabase
-          .from('event_attendees')
-          .select('id', { count: 'exact', head: true })
-          .eq('event_id', eventId);
-        if (count !== null && count >= evt.spots_total) {
-          return NextResponse.json({ error: 'Event is full' }, { status: 409 });
-        }
-      }
-
-      const { error } = await supabase.from('event_attendees').insert({ event_id: eventId, user_name: userName });
-      if (error) {
-        const duplicateRsvp = error.code === '23505'
-          || error.message?.includes('event_attendees_event_id_user_name_key')
-          || error.message?.includes('duplicate key value')
-          || error.message?.includes('unique constraint');
-        if (!duplicateRsvp) {
-          return NextResponse.json({ error: error.message }, { status: 500 });
-        }
-      }
-
-      // Bell notification on RSVP (fire-and-forget)
-      // No push notification — user already sees in-app "You're in!" toast.
-      // Sending push to the same user caused a duplicate notification.
-      if (evt) {
-        const now = new Date().toISOString();
-        const notifId = `notif-rsvp-${eventId}-${authResult.id.slice(0, 8)}`;
-        createNotification(supabase, authResult.id, {
-          id: notifId, type: 'event', title: 'RSVP Confirmed',
-          body: `You're going to "${evt.title}" on ${evt.date}`,
-          timestamp: now,
-        }).catch(() => { /* best-effort */ });
-      }
-
-      return NextResponse.json({ success: true, action: 'added' });
+    if (toggleError) {
+      return NextResponse.json({ error: toggleError.message }, { status: 500 });
     }
+    if (!toggleResult) {
+      return NextResponse.json({ error: 'Failed to update RSVP' }, { status: 500 });
+    }
+    if (toggleResult.action === 'full') {
+      return NextResponse.json({ error: 'Event is full' }, { status: 409 });
+    }
+    if (toggleResult.action === 'removed') {
+      return NextResponse.json({ success: true, action: 'removed' });
+    }
+
+    // Bell notification on RSVP (fire-and-forget)
+    // No push notification — user already sees in-app "You're in!" toast.
+    // Sending push to the same user caused a duplicate notification.
+    const now = new Date().toISOString();
+    const notifId = `notif-rsvp-${eventId}-${authResult.id.slice(0, 8)}`;
+    createNotification(supabase, authResult.id, {
+      id: notifId, type: 'event', title: 'RSVP Confirmed',
+      body: `You're going to "${toggleResult.title}" on ${toggleResult.event_date}`,
+      timestamp: now,
+    }).catch(() => { /* best-effort */ });
+
+    return NextResponse.json({ success: true, action: 'added' });
   } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }

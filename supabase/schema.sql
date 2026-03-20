@@ -92,6 +92,7 @@ create table if not exists bookings (
   user_id uuid not null references profiles(id) on delete cascade,
   user_name text not null,
   booked_for text,              -- family member name if booked by a family profile
+  client_request_id text,
   guest_name text,
   status text not null default 'confirmed' check (status in ('confirmed', 'cancelled')),
   type text not null default 'court' check (type in ('court', 'partner', 'program', 'lesson')),
@@ -121,6 +122,13 @@ create table if not exists booking_participants (
   confirmed_via text check (confirmed_via in ('email', 'dashboard', 'mobile'))
 );
 
+create unique index if not exists bookings_user_id_client_request_id_key
+  on bookings (user_id, client_request_id)
+  where client_request_id is not null;
+
+create unique index if not exists booking_participants_booking_id_participant_id_key
+  on booking_participants (booking_id, participant_id);
+
 -- ─── Events ─────────────────────────────────────────────
 create table if not exists events (
   id text primary key,
@@ -141,9 +149,17 @@ create table if not exists events (
 create table if not exists event_attendees (
   id serial primary key,
   event_id text not null references events(id) on delete cascade,
+  user_id uuid references profiles(id) on delete set null,
   user_name text not null,
   unique(event_id, user_name)
 );
+
+create unique index if not exists event_attendees_event_id_user_id_key
+  on event_attendees (event_id, user_id)
+  where user_id is not null;
+
+create index if not exists event_attendees_event_id_user_id_lookup
+  on event_attendees (event_id, user_id);
 
 -- RLS: authenticated users can read all, but only manage their own RSVPs
 -- [RLS DISABLED] alter table event_attendees enable row level security;
@@ -157,10 +173,107 @@ create table if not exists event_attendees (
 -- (dashboard subscribes to all these tables via supabase.channel)
 DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE event_attendees; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+create or replace function public.toggle_event_rsvp_atomic(
+  p_event_id text,
+  p_user_id uuid,
+  p_user_name text
+)
+returns table (
+  action text,
+  title text,
+  event_date date,
+  spots_total integer,
+  spots_taken integer
+) as $$
+declare
+  v_existing_id integer;
+  v_title text;
+  v_event_date date;
+  v_spots_total integer;
+  v_spots_taken integer;
+begin
+  if p_event_id is null or btrim(p_event_id) = '' then
+    raise exception 'Missing eventId';
+  end if;
+  if p_user_id is null then
+    raise exception 'Missing userId';
+  end if;
+  if p_user_name is null or btrim(p_user_name) = '' then
+    raise exception 'Missing userName';
+  end if;
+
+  perform pg_advisory_xact_lock(hashtext('event-rsvp:' || p_event_id));
+
+  select e.title, e.date, e.spots_total
+    into v_title, v_event_date, v_spots_total
+  from public.events e
+  where e.id = p_event_id
+  for update;
+
+  if not found then
+    raise exception 'Event not found';
+  end if;
+
+  select ea.id
+    into v_existing_id
+  from public.event_attendees ea
+  where ea.event_id = p_event_id
+    and (
+      ea.user_id = p_user_id
+      or (ea.user_id is null and ea.user_name = p_user_name)
+    )
+  order by case when ea.user_id = p_user_id then 0 else 1 end
+  limit 1
+  for update;
+
+  if found then
+    delete from public.event_attendees
+    where id = v_existing_id;
+
+    select count(*)
+      into v_spots_taken
+    from public.event_attendees
+    where event_id = p_event_id;
+
+    return query
+    select 'removed'::text, v_title, v_event_date, v_spots_total, v_spots_taken;
+    return;
+  end if;
+
+  if v_spots_total is not null and v_spots_total > 0 then
+    select count(*)
+      into v_spots_taken
+    from public.event_attendees
+    where event_id = p_event_id;
+
+    if v_spots_taken >= v_spots_total then
+      return query
+      select 'full'::text, v_title, v_event_date, v_spots_total, v_spots_taken;
+      return;
+    end if;
+  end if;
+
+  insert into public.event_attendees (event_id, user_id, user_name)
+  values (p_event_id, p_user_id, p_user_name)
+  on conflict (event_id, user_name) do update
+    set user_id = coalesce(public.event_attendees.user_id, excluded.user_id),
+        user_name = excluded.user_name;
+
+  select count(*)
+    into v_spots_taken
+  from public.event_attendees
+  where event_id = p_event_id;
+
+  return query
+  select 'added'::text, v_title, v_event_date, v_spots_total, v_spots_taken;
+end;
+$$ language plpgsql security definer set search_path = public;
+
 -- ─── Partners ───────────────────────────────────────────
 create table if not exists partners (
   id text primary key,
   user_id uuid not null references profiles(id) on delete cascade,
+  client_request_id text,
   name text not null,
   ntrp numeric(2,1) not null,
   skill_level text default 'intermediate' check (skill_level in ('beginner', 'intermediate', 'advanced', 'competitive')),
@@ -175,6 +288,10 @@ create table if not exists partners (
   matched_at timestamptz,
   created_at timestamptz default now()
 );
+
+create unique index if not exists partners_user_id_client_request_id_key
+  on partners (user_id, client_request_id)
+  where client_request_id is not null;
 
 -- ─── Conversations ──────────────────────────────────────
 create table if not exists conversations (
@@ -347,6 +464,128 @@ create index if not exists idx_bookings_status on bookings(status);
 create index if not exists idx_profiles_role on profiles(role);
 create index if not exists idx_profiles_family on profiles(family_id);
 create index if not exists idx_family_members_family on family_members(family_id);
+
+create or replace function create_booking_atomic(
+  p_booking_id text,
+  p_court_id integer,
+  p_court_name text,
+  p_date date,
+  p_time text,
+  p_user_id uuid,
+  p_user_name text,
+  p_booked_for text,
+  p_match_type text,
+  p_duration integer,
+  p_guest_name text,
+  p_client_request_id text
+)
+returns setof bookings
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  requested_start_minutes integer;
+  requested_end_minutes integer;
+  existing_booking bookings%rowtype;
+begin
+  perform pg_advisory_xact_lock(hashtext('booking:' || p_court_id::text || ':' || p_date::text));
+
+  if p_client_request_id is not null then
+    select *
+      into existing_booking
+      from bookings
+     where user_id = p_user_id
+       and client_request_id = p_client_request_id
+     limit 1;
+
+    if found then
+      return next existing_booking;
+      return;
+    end if;
+  end if;
+
+  requested_start_minutes :=
+    (extract(hour from to_timestamp(p_time, 'HH12:MI AM'))::integer * 60) +
+    extract(minute from to_timestamp(p_time, 'HH12:MI AM'))::integer;
+  requested_end_minutes := requested_start_minutes + (greatest(coalesce(p_duration, 1), 1) * 30);
+
+  if exists (
+    select 1
+      from court_blocks cb
+     where cb.block_date = p_date
+       and (cb.court_id = p_court_id or cb.court_id is null)
+       and (
+         cb.time_start is null
+         or cb.time_end is null
+         or (
+           requested_start_minutes <
+             ((extract(hour from to_timestamp(cb.time_end, 'HH12:MI AM'))::integer * 60) +
+              extract(minute from to_timestamp(cb.time_end, 'HH12:MI AM'))::integer)
+           and
+           ((extract(hour from to_timestamp(cb.time_start, 'HH12:MI AM'))::integer * 60) +
+            extract(minute from to_timestamp(cb.time_start, 'HH12:MI AM'))::integer) < requested_end_minutes
+         )
+       )
+  ) then
+    raise exception 'COURT_BLOCKED';
+  end if;
+
+  if exists (
+    select 1
+      from bookings b
+     where b.court_id = p_court_id
+       and b.date = p_date
+       and b.status = 'confirmed'
+       and requested_start_minutes <
+         (
+           ((extract(hour from to_timestamp(b.time, 'HH12:MI AM'))::integer * 60) +
+            extract(minute from to_timestamp(b.time, 'HH12:MI AM'))::integer)
+           + (greatest(coalesce(b.duration, 1), 1) * 30)
+         )
+       and
+         ((extract(hour from to_timestamp(b.time, 'HH12:MI AM'))::integer * 60) +
+          extract(minute from to_timestamp(b.time, 'HH12:MI AM'))::integer) < requested_end_minutes
+  ) then
+    raise exception 'BOOKING_CONFLICT';
+  end if;
+
+  insert into bookings (
+    id,
+    court_id,
+    court_name,
+    date,
+    time,
+    user_id,
+    user_name,
+    booked_for,
+    guest_name,
+    match_type,
+    duration,
+    type,
+    status,
+    client_request_id
+  ) values (
+    p_booking_id,
+    p_court_id,
+    p_court_name,
+    p_date,
+    p_time,
+    p_user_id,
+    p_user_name,
+    p_booked_for,
+    p_guest_name,
+    p_match_type,
+    p_duration,
+    'court',
+    'confirmed',
+    p_client_request_id
+  )
+  returning * into existing_booking;
+
+  return next existing_booking;
+end;
+$$;
 
 -- Deferred FK for families.primary_user_id
 do $$ begin

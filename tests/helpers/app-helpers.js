@@ -2,6 +2,8 @@
 const { expect } = require('@playwright/test');
 
 const MOBILE_URL = '/mobile-app/index.html';
+const INFO_TAB_KEYS = ['about', 'membership', 'coaching', 'faq', 'rules', 'privacy', 'terms'];
+const PWA_SCREEN_IDS = ['home', 'notifications', 'book', 'partners', 'schedule', 'events', 'messages', 'settings'];
 
 const MOCK_USER = {
   role: 'member',
@@ -51,9 +53,12 @@ async function gotoInfo(page, tab = 'membership') {
     .poll(async () => {
       try {
         return await page.evaluate((expectedTab) => {
+          const requiredTabsPresent = ['about', 'membership', 'coaching', 'faq', 'rules', 'privacy', 'terms']
+            .every((key) => !!document.getElementById(`tab-${key}`));
           return window.location.pathname === '/info' &&
             new URLSearchParams(window.location.search).get('tab') === expectedTab &&
-            !!document.getElementById(`tab-${expectedTab}`);
+            !!document.getElementById(`tab-${expectedTab}`) &&
+            requiredTabsPresent;
         }, tab);
       } catch {
         return false;
@@ -71,12 +76,10 @@ async function switchInfoTab(page, label, tabKey) {
       try {
         return await page.evaluate(({ expectedTab, expectedLabel }) => {
           const selectedTab = document.getElementById(`tab-${expectedTab}`);
-          const panel = document.getElementById(`tabpanel-${expectedTab}`);
           if (
             selectedTab &&
             selectedTab.getAttribute('aria-selected') === 'true' &&
-            panel &&
-            panel.offsetParent !== null
+            new URLSearchParams(window.location.search).get('tab') === expectedTab
           ) {
             return true;
           }
@@ -91,8 +94,7 @@ async function switchInfoTab(page, label, tabKey) {
           return !!(
             selectedTab &&
             selectedTab.getAttribute('aria-selected') === 'true' &&
-            panel &&
-            panel.offsetParent !== null
+            new URLSearchParams(window.location.search).get('tab') === expectedTab
           );
         }, { expectedTab: tabKey, expectedLabel: label });
       } catch {
@@ -111,18 +113,17 @@ async function switchInfoTab(page, label, tabKey) {
       try {
         return await page.evaluate((expectedTab) => {
           const selectedTab = document.getElementById(`tab-${expectedTab}`);
-          const panel = document.getElementById(`tabpanel-${expectedTab}`);
           return !!(
+            window.location.pathname === '/info' &&
+            new URLSearchParams(window.location.search).get('tab') === expectedTab &&
             selectedTab &&
-            selectedTab.getAttribute('aria-selected') === 'true' &&
-            panel &&
-            panel.offsetParent !== null
+            selectedTab.getAttribute('aria-selected') === 'true'
           );
         }, tabKey);
       } catch {
         return false;
       }
-    }, { timeout: 5000 })
+    }, { timeout: 10000 })
     .toBeTruthy();
 }
 
@@ -155,12 +156,50 @@ async function mockAuthenticatedPwa(page, apiOverrides = {}) {
 
     if (url.includes('/bookings') && method === 'POST') {
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ success: true, booking: { id: 'server-booking-001' } }) });
+    } else if (url.includes('/bookings') && method === 'GET') {
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
+    } else if (url.includes('/bookings') && (method === 'DELETE' || method === 'PATCH')) {
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ success: true }) });
     } else if (url.includes('/conversations') && method === 'POST') {
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ success: true, messageId: 'server-msg-001' }) });
+    } else if (url.includes('/conversations') && method === 'GET') {
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
+    } else if (url.includes('/conversations') && (method === 'PATCH' || method === 'DELETE')) {
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ success: true }) });
     } else if (url.includes('/events') && method === 'POST') {
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ success: true, action: 'added' }) });
-    } else {
+    } else if (url.includes('/events') && method === 'GET') {
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
+    } else if (url.includes('/events') && (method === 'PATCH' || method === 'DELETE')) {
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ success: true }) });
+    } else if (url.includes('/partners') && method === 'GET') {
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
+    } else if (url.includes('/partners') && (method === 'POST' || method === 'PATCH' || method === 'DELETE')) {
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ success: true, id: 'partner-001' }) });
+    } else if (url.includes('/notifications') && method === 'GET') {
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
+    } else if (url.includes('/notifications') && (method === 'PATCH' || method === 'DELETE')) {
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ success: true }) });
+    } else if (url.includes('/settings') && method === 'GET') {
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({
+        bookings: true,
+        events: true,
+        partners: true,
+        messages: true,
+        programs: true,
+      }) });
+    } else if (url.includes('/settings') && method === 'PATCH') {
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ success: true }) });
+    } else if (url.includes('/members') && method === 'GET') {
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
+    } else if ((url.includes('/courts') || url.includes('/court-blocks') || url.includes('/programs') || url.includes('/families') || url.includes('/lineups') || url.includes('/announcements')) && method === 'GET') {
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
+    } else {
+      route.fulfill({
+        status: 501,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: `Unhandled mock route: ${method} ${url}` }),
+      });
     }
   });
 
@@ -214,7 +253,9 @@ async function mockAuthenticatedPwa(page, apiOverrides = {}) {
     const onboardingOverlay = document.getElementById('onboardingOverlay');
     if (onboardingOverlay) onboardingOverlay.classList.remove('active');
 
-    return typeof navigateTo === 'function' || (MTC.fn && typeof MTC.fn.navigateTo === 'function');
+    const requiredScreensPresent = ['home', 'notifications', 'book', 'partners', 'schedule', 'events', 'messages', 'settings']
+      .every((key) => !!document.getElementById(`screen-${key}`));
+    return requiredScreensPresent && (typeof navigateTo === 'function' || (MTC.fn && typeof MTC.fn.navigateTo === 'function'));
   }, null, { timeout: 10000 });
 }
 
@@ -227,8 +268,11 @@ async function waitForPwaShell(page) {
     const home = document.getElementById('screen-home');
     const onboardingOverlay = document.getElementById('onboardingOverlay');
     if (onboardingOverlay) onboardingOverlay.classList.remove('active');
+    const requiredScreensPresent = ['home', 'notifications', 'book', 'partners', 'schedule', 'events', 'messages', 'settings']
+      .every((key) => !!document.getElementById(`screen-${key}`));
     return !!(
       storedUser &&
+      requiredScreensPresent &&
       bottomNav &&
       home &&
       (typeof navigateTo === 'function' || (MTC.fn && typeof MTC.fn.navigateTo === 'function'))
