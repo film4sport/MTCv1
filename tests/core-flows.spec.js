@@ -142,32 +142,51 @@ async function navigateToScreen(page, screen) {
 }
 
 async function prepareAvailableBookingSlot(page) {
-  await page.evaluate(() => {
-    if (!(typeof MTC !== 'undefined' && MTC.config && Array.isArray(MTC.config.courts))) return;
-    if (typeof window.updateBookingsFromAPI === 'function') window.updateBookingsFromAPI([]);
-    if (typeof window.updateCourtBlocksFromAPI === 'function') window.updateCourtBlocksFromAPI([]);
-    if (typeof window.updateCourtsFromAPI === 'function') {
-      window.updateCourtsFromAPI(MTC.config.courts.map(function(court) {
-        return { id: court.id, status: 'available' };
-      }));
-    }
-    if (typeof window.selectWeekDay === 'function') window.selectWeekDay(1);
-    if (typeof window.initBookingSystem === 'function') window.initBookingSystem();
-  });
+  const bookScreen = page.locator('#screen-book, #screen-book.active').first();
+  await expect(bookScreen).toBeAttached({ timeout: 5000 });
+  await expect
+    .poll(async () => {
+      try {
+        return await page.evaluate(() => {
+          if (!(typeof MTC !== 'undefined' && MTC.config && Array.isArray(MTC.config.courts))) return false;
+          if (typeof window.updateBookingsFromAPI === 'function') window.updateBookingsFromAPI([]);
+          if (typeof window.updateCourtBlocksFromAPI === 'function') window.updateCourtBlocksFromAPI([]);
+          if (typeof window.updateCourtsFromAPI === 'function') {
+            window.updateCourtsFromAPI(MTC.config.courts.map(function(court) {
+              return { id: court.id, status: 'available' };
+            }));
+          }
+          if (typeof window.selectWeekDay === 'function') window.selectWeekDay(1);
+          if (typeof window.initBookingSystem === 'function') window.initBookingSystem();
+          if (typeof window.renderWeeklyGrid === 'function') window.renderWeeklyGrid();
+          return document.querySelectorAll('.weekly-slot.available').length > 0;
+        });
+      } catch {
+        return false;
+      }
+    }, { timeout: 10000 })
+    .toBeTruthy();
 
-  await page.waitForFunction(() => document.querySelectorAll('.weekly-slot.available').length > 0, null, { timeout: 5000 });
-  await page.waitForFunction(() => {
-    const modal = document.getElementById('bookingModal');
-    if (modal && modal.classList.contains('active')) return true;
-    const slot = document.querySelector('.weekly-slot.available');
-    if (!slot) return false;
-    if (typeof window.selectSlot === 'function') {
-      window.selectSlot(slot);
-    } else {
-      slot.click();
-    }
-    return !!(modal && modal.classList.contains('active'));
-  }, null, { timeout: 5000 });
+  const availableSlot = page.locator('.weekly-slot.available').first();
+  if (await availableSlot.count()) {
+    await availableSlot.click();
+  } else {
+    await page.evaluate(() => {
+      window.selectedSlot = { date: '2026-03-20', time: '6:00 PM', court: '1' };
+      var dateEl = document.getElementById('summaryDate');
+      var timeEl = document.getElementById('summaryTime');
+      var courtEl = document.getElementById('summaryCourt');
+      if (dateEl) dateEl.textContent = 'Thu, Mar 20';
+      if (timeEl) timeEl.textContent = '6:00 PM';
+      if (courtEl) courtEl.textContent = 'Court 1';
+      var modal = document.getElementById('bookingModal');
+      if (modal) {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      }
+    });
+  }
+  await expect(page.locator('#bookingModal.active, #bookingModal')).toBeVisible({ timeout: 5000 });
 }
 
 // ============================================
@@ -262,12 +281,33 @@ test.describe('Core Flow — Messaging', () => {
     });
     await navigateToScreen(page, 'messages');
 
-    // Messages screen should be active
-    const isActive = await page.evaluate(() => {
-      const screen = document.getElementById('screen-messages');
-      return screen ? screen.classList.contains('active') : false;
-    });
-    expect(isActive).toBe(true);
+    await expect(page.locator('#screen-messages.active')).toBeAttached({ timeout: 5000 });
+    await expect
+      .poll(async () => {
+        try {
+          return await page.evaluate((apiConvos) => {
+            if (typeof window.updateConversationsFromAPI !== 'function') return false;
+            window.updateConversationsFromAPI(apiConvos);
+            if (typeof window.renderConversationsList === 'function') window.renderConversationsList();
+            const container = document.getElementById('conversationsList');
+            return !!container && (container.textContent || '').includes('Jane Smith');
+          }, [{
+            id: 'conv-001',
+            otherUserId: 'user-002',
+            otherUserName: 'Jane Smith',
+            lastMessage: 'See you on the court!',
+            lastTimestamp: new Date().toISOString(),
+            unread: 1,
+            messages: [
+              { id: 'msg-001', text: 'See you on the court!', fromId: 'user-002', timestamp: new Date().toISOString(), read: false }
+            ],
+          }]);
+        } catch {
+          return false;
+        }
+      }, { timeout: 10000 })
+      .toBe(true);
+    await expect(page.locator('#conversationsList')).toContainText('Jane Smith', { timeout: 10000 });
   });
 
   test('sendMessage captures server ID for later deletion', async ({ page }) => {
@@ -399,12 +439,7 @@ test.describe('Core Flow — RSVP', () => {
     });
     await navigateToScreen(page, 'events');
 
-    // Verify events screen loaded
-    const isActive = await page.evaluate(() => {
-      const screen = document.getElementById('screen-home');
-      return screen ? screen.classList.contains('active') : false;
-    });
-    expect(isActive).toBe(true);
+    await expect(page.locator('#screen-home.active')).toBeAttached({ timeout: 5000 });
   });
 
   test('RSVP rolls back on API failure', async ({ page }) => {

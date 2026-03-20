@@ -1,11 +1,5 @@
 const { test, expect } = require('@playwright/test');
-
-async function gotoLanding(page) {
-  await page.goto('/', { waitUntil: 'domcontentloaded', timeout: 30000 });
-  await page.waitForLoadState('load').catch(() => {});
-  await expect(page.locator('.navbar')).toBeAttached();
-  await expect(page.locator('#schedule')).toBeAttached();
-}
+const { gotoLanding } = require('./helpers/app-helpers');
 
 test.describe('Mobile Responsive', () => {
   test.use({ viewport: { width: 390, height: 844 } });
@@ -21,9 +15,11 @@ test.describe('Mobile Responsive', () => {
   });
 
   test('calendar renders on mobile', async ({ page }) => {
-    await page.locator('#schedule').scrollIntoViewIfNeeded();
+    const schedule = page.locator('#schedule').first();
+    await expect(schedule).toBeAttached({ timeout: 5000 });
+    await schedule.scrollIntoViewIfNeeded();
     const calGrid = page.locator('.cal-grid');
-    await expect(calGrid).toBeAttached();
+    await expect(calGrid).toBeAttached({ timeout: 5000 });
   });
 
   test('page scrolls smoothly without horizontal overflow', async ({ page }) => {

@@ -184,17 +184,22 @@ test.describe('Partners Section', () => {
   });
 
   test('3 partner logos are displayed', async ({ page }) => {
-    const logos = page.locator('.partner-logo');
-    const count = await logos.count();
-    expect(count).toBe(3);
+    const partners = page.locator('.partner-logo');
+    await expect(partners.first()).toBeAttached({ timeout: 5000 });
+    await expect
+      .poll(async () => await partners.count(), { timeout: 5000 })
+      .toBe(3);
   });
 
   test('partner logos have images', async ({ page }) => {
-    await page.locator('.partner-logo').first().scrollIntoViewIfNeeded();
+    const logos = page.locator('.partner-logo');
+    await expect(logos.first()).toBeAttached({ timeout: 5000 });
+    await logos.first().scrollIntoViewIfNeeded();
     const imgs = page.locator('.partner-logo img, .partner-logo [data-nimg]');
-    await expect(imgs.first()).toBeAttached();
-    const count = await imgs.count();
-    expect(count).toBe(3);
+    await expect(imgs.first()).toBeAttached({ timeout: 5000 });
+    await expect
+      .poll(async () => await imgs.count(), { timeout: 5000 })
+      .toBe(3);
   });
 });
 

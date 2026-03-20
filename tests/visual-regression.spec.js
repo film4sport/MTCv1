@@ -27,6 +27,29 @@ async function cleanPage(page) {
   await page.waitForFunction(() => document.readyState === 'complete', null, { timeout: 5000 }).catch(() => {});
 }
 
+async function readBodyMetric(page, metric) {
+  await expect(page.locator('body')).toBeAttached({ timeout: 5000 });
+  await expect
+    .poll(async () => {
+      try {
+        return await page.locator('body').evaluate((el, key) => {
+          if (key === 'innerTextLength') return document.body.innerText.length;
+          if (key === 'viewportWidth') return window.innerWidth;
+          return el[key];
+        }, metric);
+      } catch {
+        return null;
+      }
+    }, { timeout: 5000 })
+    .not.toBeNull();
+
+  return page.locator('body').evaluate((el, key) => {
+    if (key === 'innerTextLength') return document.body.innerText.length;
+    if (key === 'viewportWidth') return window.innerWidth;
+    return el[key];
+  }, metric);
+}
+
 // ==========================================================
 // Landing Page
 // ==========================================================
@@ -59,11 +82,10 @@ test.describe('Visual Regression — Landing Page', () => {
     await page.goto(LANDING_URL, { waitUntil: 'load', timeout: 30000 });
     await cleanPage(page);
 
-    await page.evaluate(() => {
-      const el = document.getElementById('events') || document.querySelector('[data-section="events"]');
-      if (el) el.scrollIntoView({ behavior: 'instant' });
-    });
-    await expect(page.locator('#events .event-card, [data-section="events"] [class*="card"]').first()).toBeAttached();
+    const eventsSection = page.locator('#events, [data-section="events"]').first();
+    await expect(eventsSection).toBeAttached({ timeout: 5000 });
+    await eventsSection.scrollIntoViewIfNeeded();
+    await expect(page.locator('#events .event-card, [data-section="events"] [class*="card"]').first()).toBeAttached({ timeout: 5000 });
 
     // Events section has cards
     const cards = page.locator('#events .event-card, [data-section="events"] [class*="card"]');
@@ -76,11 +98,9 @@ test.describe('Visual Regression — Landing Page', () => {
     await page.goto(LANDING_URL, { waitUntil: 'load', timeout: 30000 });
     await cleanPage(page);
 
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-    await expect(page.locator('footer').first()).toBeVisible();
-
-    // Footer exists
     const footer = page.locator('footer').first();
+    await expect(footer).toBeAttached({ timeout: 5000 });
+    await footer.scrollIntoViewIfNeeded();
     await expect(footer).toBeVisible();
 
     // Footer has address
@@ -105,7 +125,7 @@ test.describe('Visual Regression — Landing Page (Mobile)', () => {
     await cleanPage(page);
 
     // No horizontal overflow on mobile
-    const scrollWidth = await page.evaluate(() => document.body.scrollWidth);
+    const scrollWidth = await readBodyMetric(page, 'scrollWidth');
     expect(scrollWidth).toBeLessThanOrEqual(376);
 
     // Hero visible — first section with texture-overlay class
@@ -139,11 +159,11 @@ test.describe('Visual Regression — Info Page', () => {
       await expect(content).toBeAttached();
 
       // Page has visible text content
-      const bodyText = await page.evaluate(() => document.body.innerText.length);
+      const bodyText = await readBodyMetric(page, 'innerTextLength');
       expect(bodyText).toBeGreaterThan(100);
 
       // No horizontal overflow
-      const scrollWidth = await page.evaluate(() => document.body.scrollWidth);
+      const scrollWidth = await readBodyMetric(page, 'scrollWidth');
       expect(scrollWidth).toBeLessThanOrEqual(1281);
 
       await page.screenshot({ path: `test-results/info-${tab}-desktop.png` });
@@ -214,15 +234,10 @@ test.describe('Visual Regression — Mobile PWA', () => {
     await page.goto(MOBILE_URL, { waitUntil: 'load', timeout: 30000 });
     await cleanPage(page);
 
-    // Dismiss onboarding overlay if still visible
-    await page.evaluate(() => {
-      const el = document.getElementById('onboardingOverlay');
-      if (el) { el.classList.remove('active'); el.style.display = 'none'; }
-    });
-
     // Login screen exists
     const loginScreen = page.locator('#login-screen').first();
-    await expect(loginScreen).toBeAttached();
+    await expect(loginScreen).toBeAttached({ timeout: 5000 });
+    await expect(loginScreen).toBeVisible();
 
     // Has login buttons (Google and/or magic link)
     const buttons = page.locator('#login-screen button, #login-screen [class*="btn"]');
@@ -274,14 +289,6 @@ test.describe('Visual Regression — Mobile PWA', () => {
     await page.goto(MOBILE_URL, { waitUntil: 'load', timeout: 30000 });
     await cleanPage(page);
 
-    await page.evaluate(() => {
-      const el = document.getElementById('onboardingOverlay');
-      if (el) { el.classList.remove('active'); el.style.display = 'none'; }
-      const login = document.getElementById('login-screen');
-      if (login) login.style.display = 'none';
-    });
-    await page.waitForTimeout(500);
-
     // App container exists
     const app = page.locator('#app').first();
     await expect(app).toBeAttached();
@@ -304,7 +311,7 @@ test.describe('Visual Regression — Full Page Layout', () => {
     await page.goto(LANDING_URL, { waitUntil: 'load', timeout: 30000 });
     await cleanPage(page);
 
-    const scrollWidth = await page.evaluate(() => document.body.scrollWidth);
+    const scrollWidth = await readBodyMetric(page, 'scrollWidth');
     expect(scrollWidth).toBeLessThanOrEqual(1281);
   });
 
@@ -312,7 +319,7 @@ test.describe('Visual Regression — Full Page Layout', () => {
     await page.goto(INFO_URL, { waitUntil: 'load', timeout: 30000 });
     await cleanPage(page);
 
-    const scrollWidth = await page.evaluate(() => document.body.scrollWidth);
+    const scrollWidth = await readBodyMetric(page, 'scrollWidth');
     expect(scrollWidth).toBeLessThanOrEqual(1281);
   });
 });
