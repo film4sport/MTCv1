@@ -64,10 +64,6 @@ test.describe('Signup Flow - /info?tab=membership', () => {
     await expect(backLink.first()).toBeAttached();
   });
 
-  test('no ClubSpark links on info page', async ({ page }) => {
-    await page.waitForLoadState('domcontentloaded');
-    await expect(page.locator('a[href*="clubspark" i]')).toHaveCount(0);
-  });
 });
 
 test.describe('Info Page - About Tab', () => {

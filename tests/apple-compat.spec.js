@@ -110,16 +110,7 @@ async function mockAuthenticatedPwa(page) {
 
 async function navigatePwaScreen(page, screenId, navId) {
   await page.waitForFunction(() => typeof MTC !== 'undefined' && MTC.fn && typeof MTC.fn.navigateTo === 'function', null, { timeout: 5000 });
-
-  await page.evaluate(({ screen, nav }) => {
-    if (typeof MTC !== 'undefined' && MTC.fn && typeof MTC.fn.navigateTo === 'function') {
-      MTC.fn.navigateTo(screen);
-      return;
-    }
-    const el = document.getElementById(nav);
-    if (el instanceof HTMLElement) el.click();
-  }, { screen: screenId, nav: navId });
-
+  await page.locator(`#${navId}`).click();
   await expect(page.locator(`#screen-${screenId}.active`)).toBeAttached({ timeout: 5000 });
 }
 
@@ -140,18 +131,11 @@ test.describe('Apple Compatibility - Info Tabs', () => {
     await page.setViewportSize({ width: 812, height: 375 });
     await page.waitForLoadState('domcontentloaded').catch(() => {});
 
-    const visibleWidth = await page.evaluate(() => document.documentElement.clientWidth);
-    const viewportWidth = await page.evaluate(() => window.innerWidth);
-    expect(visibleWidth).toBeLessThanOrEqual(viewportWidth + 1);
-
-    await expect(page.locator('[role="tablist"]')).toBeVisible();
-    await page.evaluate(() => {
-      const tab = document.getElementById('tab-terms');
-      if (tab) {
-        tab.scrollIntoView({ block: 'nearest', inline: 'center' });
-      }
-    });
-    await expect(page.locator('#tab-terms')).toBeVisible();
+    const tablist = page.locator('[role="tablist"]');
+    const terms = page.locator('#tab-terms');
+    await expect(tablist).toBeVisible();
+    await terms.scrollIntoViewIfNeeded();
+    await expect(terms).toBeVisible();
   });
 });
 

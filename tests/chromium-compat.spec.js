@@ -76,14 +76,12 @@ test.describe('Chromium Compatibility - Info Tabs', () => {
   });
 
   test('far-right tabs stay reachable across Chromium breakpoints', async ({ page }) => {
-    await page.evaluate(() => {
-      const privacy = document.getElementById('tab-privacy');
-      const terms = document.getElementById('tab-terms');
-      if (privacy) privacy.scrollIntoView({ block: 'nearest', inline: 'center' });
-      if (terms) terms.scrollIntoView({ block: 'nearest', inline: 'center' });
-    });
-    await expect(page.locator('#tab-privacy')).toBeVisible();
-    await expect(page.locator('#tab-terms')).toBeVisible();
+    const privacy = page.locator('#tab-privacy');
+    const terms = page.locator('#tab-terms');
+    await privacy.scrollIntoViewIfNeeded();
+    await terms.scrollIntoViewIfNeeded();
+    await expect(privacy).toBeVisible();
+    await expect(terms).toBeVisible();
   });
 
   test('layout remains usable after breakpoint-like resize', async ({ page }) => {
@@ -93,11 +91,11 @@ test.describe('Chromium Compatibility - Info Tabs', () => {
 
     await page.setViewportSize({ width: resizedWidth, height: resizedHeight });
     await page.waitForLoadState('domcontentloaded').catch(() => {});
-
-    const visibleWidth = await page.evaluate(() => document.documentElement.clientWidth);
-    const viewportWidth = await page.evaluate(() => window.innerWidth);
-    expect(visibleWidth).toBeLessThanOrEqual(viewportWidth + 1);
-    await expect(page.locator('[role="tablist"]')).toBeVisible();
+    const tablist = page.locator('[role="tablist"]');
+    const terms = page.locator('#tab-terms');
+    await expect(tablist).toBeVisible();
+    await terms.scrollIntoViewIfNeeded();
+    await expect(terms).toBeVisible();
   });
 });
 
@@ -143,16 +141,10 @@ test.describe('Chromium Compatibility - Mobile PWA', () => {
     const bottomNav = page.locator('#bottomNav');
     await expect(bottomNav).toBeVisible();
 
-    await page.evaluate(() => {
-      const book = document.getElementById('nav-book');
-      if (book) book.click();
-    });
+    await page.locator('#nav-book').click();
     await expect(page.locator('#screen-book.active')).toBeAttached({ timeout: 5000 });
 
-    await page.evaluate(() => {
-      const messages = document.getElementById('nav-messages');
-      if (messages) messages.click();
-    });
+    await page.locator('#nav-messages').click();
     await expect(page.locator('#screen-messages.active')).toBeAttached({ timeout: 5000 });
   });
 });

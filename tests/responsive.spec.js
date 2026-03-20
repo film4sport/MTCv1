@@ -1,4 +1,4 @@
-const { test } = require('@playwright/test');
+const { test, expect } = require('@playwright/test');
 
 const viewports = [
   { name: 'mobile', width: 375, height: 812 },

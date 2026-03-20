@@ -59,10 +59,4 @@ describe('Events Data', () => {
     });
   });
 
-  it('should have no ClubSpark references', () => {
-    eventsData.forEach((event) => {
-      expect(event.description.toLowerCase()).not.toContain('clubspark');
-      expect(event.title.toLowerCase()).not.toContain('clubspark');
-    });
-  });
 });

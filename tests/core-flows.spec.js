@@ -422,15 +422,11 @@ test.describe('Core Flow — RSVP', () => {
     });
     await navigateToScreen(page, 'events');
 
-    // Verify the rollback logic exists in toggleEventRsvp
-    const hasRollback = await page.evaluate(() => {
-      if (typeof toggleEventRsvp === 'function') {
-        var src = toggleEventRsvp.toString();
-        // Check for rollback keywords in the function
-        return src.includes('Rollback') || src.includes('rollback') || src.includes('splice') || src.includes('spotsTaken--');
-      }
-      return false;
-    });
+    const hasRollback =
+      toggleEventRsvpSource.includes('rollback') ||
+      toggleEventRsvpSource.includes('Rollback') ||
+      toggleEventRsvpSource.includes('splice') ||
+      toggleEventRsvpSource.includes('spotsTaken--');
     expect(hasRollback).toBe(true);
   });
 
@@ -446,14 +442,7 @@ test.describe('Core Flow — RSVP', () => {
     });
     await navigateToScreen(page, 'events');
 
-    // Verify the 409 handling exists
-    const handles409 = await page.evaluate(() => {
-      if (typeof toggleEventRsvp === 'function') {
-        var src = toggleEventRsvp.toString();
-        return src.includes('409') || src.includes('full');
-      }
-      return false;
-    });
+    const handles409 = toggleEventRsvpSource.includes('409') || toggleEventRsvpSource.includes('full');
     expect(handles409).toBe(true);
   });
 
@@ -497,14 +486,7 @@ test.describe('Core Flow — Server-side Spot Limit', () => {
     });
     await navigateToScreen(page, 'events');
 
-    // The 409 handling is tested via source inspection (can't trigger real RSVP without full event state)
-    const handlesFull = await page.evaluate(() => {
-      if (typeof toggleEventRsvp === 'function') {
-        var src = toggleEventRsvp.toString();
-        return src.includes('409') && src.includes('full');
-      }
-      return false;
-    });
+    const handlesFull = toggleEventRsvpSource.includes('409') && toggleEventRsvpSource.includes('full');
     expect(handlesFull).toBe(true);
   });
 });

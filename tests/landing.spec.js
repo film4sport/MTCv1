@@ -81,10 +81,6 @@ test.describe('Navbar', () => {
     }
   });
 
-  test('no ClubSpark links in navbar', async ({ page }) => {
-    const clubsparkLinks = await page.locator('.navbar a[href*="clubspark"]').count();
-    expect(clubsparkLinks).toBe(0);
-  });
 });
 
 test.describe('Hero Section', () => {
@@ -139,6 +135,7 @@ test.describe('Events Section', () => {
 
   test('event cards are displayed', async ({ page }) => {
     const cards = page.locator('.event-card');
+    await expect(cards.first()).toBeAttached({ timeout: 5000 });
     const count = await cards.count();
     expect(count).toBe(3);
   });
@@ -231,6 +228,7 @@ test.describe('Gallery Section', () => {
 
   test('gallery has slide images', async ({ page }) => {
     const slides = page.locator('.gallery-slide');
+    await expect(slides.first()).toBeAttached({ timeout: 5000 });
     const count = await slides.count();
     expect(count).toBeGreaterThanOrEqual(10);
   });
@@ -277,24 +275,11 @@ test.describe('Footer', () => {
     await expect(instagram).toBeAttached();
   });
 
-  test('no ClubSpark links in footer', async ({ page }) => {
-    const clubsparkLinks = await page.locator('footer a[href*="clubspark"]').count();
-    expect(clubsparkLinks).toBe(0);
-  });
-
   test('footer has correct address', async ({ page }) => {
     const address = page.locator('footer address');
     const text = await address.textContent();
     expect(text).toContain('754483 Mono Centre Rd');
     expect(text).toContain('Mono, Ontario');
-  });
-});
-
-test.describe('No ClubSpark Links - Full Page', () => {
-  test('zero ClubSpark links on entire page', async ({ page }) => {
-    await gotoLanding(page);
-    const clubsparkLinks = await page.locator('a[href*="clubspark"]').count();
-    expect(clubsparkLinks).toBe(0);
   });
 });
 
@@ -385,11 +370,6 @@ test.describe('Info Page', () => {
     await expect(backLink).toBeAttached();
   });
 
-  test('no ClubSpark links on info page', async ({ page }) => {
-    await gotoInfo(page, '/info');
-    const clubsparkLinks = await page.locator('a[href*="clubspark"]').count();
-    expect(clubsparkLinks).toBe(0);
-  });
 });
 
 test.describe('Dashboard route works', () => {

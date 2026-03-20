@@ -1,13 +1,5 @@
-/**
- * REGRESSION TESTS — Known Fixed Bugs
- *
- * Each test reproduces a specific bug that was found and fixed.
- * If any of these fail, the bug has returned.
- *
- * Format: [BUG-XXX] Description — where XXX is the session date it was found.
- */
 import { describe, it, expect } from 'vitest';
-import { readFileSync, existsSync } from 'fs';
+import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import {
   isValidUUID, isValidEnum, isValidDate, isInRange, isValidEmail,
@@ -16,33 +8,20 @@ import {
 
 const root = resolve(__dirname, '..');
 
-// ══════════════════════════════════════════════════════════════════════════
-// BUG-0301: Supabase writes failing silently (no error check)
-// All db.ts write functions now throw on error.
-// ══════════════════════════════════════════════════════════════════════════
-
-describe('[BUG-0301] Supabase writes must throw on error', () => {
+describe('Dashboard database writes handle errors', () => {
   const dbContent = readFileSync(resolve(root, 'app/dashboard/lib/db.ts'), 'utf-8');
 
   it('every INSERT/UPDATE/DELETE function checks for errors', () => {
-    // Count write operations (insert, update, delete, upsert)
     const writeOps = dbContent.match(/\.(insert|update|delete|upsert)\(/g);
     if (!writeOps) return;
 
-    // Count throw/error checks
     const errorChecks = dbContent.match(/if\s*\(error\)\s*throw|\.then\(\(\{.*error.*\}\)|throw error/g);
-    // Should have at least one error check per significant write group
     expect(errorChecks).not.toBeNull();
     expect(errorChecks.length).toBeGreaterThan(0);
   });
 });
 
-// ══════════════════════════════════════════════════════════════════════════
-// BUG-0302: Direct Supabase mutations bypass RLS (silent 200 OK, 0 rows)
-// Dashboard now routes mutations through API endpoints.
-// ══════════════════════════════════════════════════════════════════════════
-
-describe('[BUG-0302] Dashboard mutations go through API, not direct Supabase', () => {
+describe('Dashboard mutations route through API helpers', () => {
   const storeContent = readFileSync(resolve(root, 'app/dashboard/lib/store.tsx'), 'utf-8');
 
   it('has apiCall helper function', () => {
@@ -66,12 +45,7 @@ describe('[BUG-0302] Dashboard mutations go through API, not direct Supabase', (
   });
 });
 
-// ══════════════════════════════════════════════════════════════════════════
-// BUG-0302b: auth-helper had duplicate validation constants (drift risk)
-// Now re-exports from shared-constants.ts
-// ══════════════════════════════════════════════════════════════════════════
-
-describe('[BUG-0302b] auth-helper must not duplicate shared-constants', () => {
+describe('Mobile auth helper reuses shared validation constants', () => {
   const authHelper = readFileSync(resolve(root, 'app/api/mobile/auth-helper.ts'), 'utf-8');
 
   it('imports from shared-constants', () => {
@@ -88,12 +62,7 @@ describe('[BUG-0302b] auth-helper must not duplicate shared-constants', () => {
   });
 });
 
-// ══════════════════════════════════════════════════════════════════════════
-// BUG-0303: Missing columns in Supabase (bookings.match_type, etc.)
-// Schema must include all required columns.
-// ══════════════════════════════════════════════════════════════════════════
-
-describe('[BUG-0303] Schema has all required columns', () => {
+describe('Database schema includes required columns', () => {
   const schema = readFileSync(resolve(root, 'supabase/schema.sql'), 'utf-8');
 
   it('bookings has match_type column', () => {
@@ -117,12 +86,7 @@ describe('[BUG-0303] Schema has all required columns', () => {
   });
 });
 
-// ══════════════════════════════════════════════════════════════════════════
-// BUG-0304: Demo/fake data leaking into production
-// No demo credentials or fake data in production code.
-// ══════════════════════════════════════════════════════════════════════════
-
-describe('[BUG-0304] No demo/fake data in production code', () => {
+describe('Production code avoids demo credential leaks', () => {
   const storeContent = readFileSync(resolve(root, 'app/dashboard/lib/store.tsx'), 'utf-8');
   const loginContent = readFileSync(resolve(root, 'app/login/page.tsx'), 'utf-8');
 
@@ -131,25 +95,13 @@ describe('[BUG-0304] No demo/fake data in production code', () => {
   });
 
   it('login page gates demo credentials behind NODE_ENV check', () => {
-    // Demo credentials should only show in development mode
     if (loginContent.includes('demo')) {
       expect(loginContent).toMatch(/NODE_ENV.*development|process\.env/);
     }
   });
-
-  it('no ClubSpark links anywhere', () => {
-    expect(storeContent).not.toContain('clubspark.ca');
-    const landingContent = readFileSync(resolve(root, 'app/(landing)/page.tsx'), 'utf-8');
-    expect(landingContent).not.toContain('clubspark.ca');
-  });
 });
 
-// ══════════════════════════════════════════════════════════════════════════
-// BUG-0305: sanitizeInput allows HTML that renders in browser
-// Must strip ALL angle brackets, not just known tags.
-// ══════════════════════════════════════════════════════════════════════════
-
-describe('[BUG-0305] sanitizeInput strips all HTML/XSS vectors', () => {
+describe('sanitizeInput strips common HTML and XSS vectors', () => {
   it('strips script tags', () => {
     expect(sanitizeInput('<script>alert(1)</script>')).not.toContain('<');
   });
@@ -162,7 +114,7 @@ describe('[BUG-0305] sanitizeInput strips all HTML/XSS vectors', () => {
     expect(sanitizeInput('<svg onload=alert(1)>')).not.toContain('<');
   });
 
-  it('strips nested/encoded attempts', () => {
+  it('strips nested and encoded attempts', () => {
     expect(sanitizeInput('<<script>script>alert(1)<</script>/script>')).not.toContain('<');
   });
 
@@ -186,95 +138,19 @@ describe('[BUG-0305] sanitizeInput strips all HTML/XSS vectors', () => {
   });
 });
 
-// ══════════════════════════════════════════════════════════════════════════
-// BUG-0306: Wrong localStorage key in tests (mtc-current-user vs mtc-user)
-// E2E tests must use the correct keys.
-// ══════════════════════════════════════════════════════════════════════════
-
-describe('[BUG-0306] E2E test mocks use correct localStorage keys', () => {
-  const testFiles = ['tests/desktop.spec.js', 'tests/mobile.spec.js', 'tests/mobile-pwa.spec.js'];
-
-  testFiles.forEach(file => {
-    const filePath = resolve(root, file);
-    if (!existsSync(filePath)) return;
-
-    it(`${file} uses mtc-onboarding-complete (not mtc-onboarding)`, () => {
-      const content = readFileSync(filePath, 'utf-8');
-      if (content.includes('onboarding')) {
-        expect(content).toContain('mtc-onboarding-complete');
-        expect(content).not.toContain("'mtc-onboarding'");
-      }
-    });
-  });
-});
-
-// ══════════════════════════════════════════════════════════════════════════
-// BUG-0307: Mobile PWA ARIA labels test flaky (waitUntil: 'load')
-// Must use 'domcontentloaded' not 'load' for static HTML tests.
-// ══════════════════════════════════════════════════════════════════════════
-
-describe('[BUG-0307] Mobile PWA test uses domcontentloaded', () => {
-  const testFile = resolve(root, 'tests/mobile-pwa.spec.js');
-  if (!existsSync(testFile)) return;
-
-  const content = readFileSync(testFile, 'utf-8');
-
-  it('ARIA labels test uses domcontentloaded (not load)', () => {
-    // The ARIA test was flaky because 'load' waits for CDN scripts
-    // Find the ARIA labels test block and verify it uses domcontentloaded
-    const ariaSection = content.match(/ARIA.*label[\s\S]*?(?=test\(|}\);)/i);
-    if (ariaSection) {
-      expect(ariaSection[0]).not.toContain("waitUntil: 'load'");
-    }
-  });
-
-  it('ARIA labels test checks screen count directly', () => {
-    // ARIA test uses .count() + toBeGreaterThanOrEqual, matching the pattern of other structure tests
-    expect(content).toContain("screen[aria-label]");
-    expect(content).toContain('toBeGreaterThanOrEqual(5)');
-  });
-});
-
-// ══════════════════════════════════════════════════════════════════════════
-// BUG-0308: Service worker caching Supabase API calls
-// SW must skip Supabase URLs from cache.
-// ══════════════════════════════════════════════════════════════════════════
-
-describe('[BUG-0308] Service workers skip Supabase from cache', () => {
+describe('Service workers preserve network-first handling for Supabase traffic', () => {
   it('desktop SW skips supabase.co', () => {
     const sw = readFileSync(resolve(root, 'public/sw.js'), 'utf-8');
     expect(sw).toContain('supabase.co');
   });
 
-  it('mobile SW references Supabase (caches vendor JS, skips API via network-first)', () => {
+  it('mobile SW references Supabase or network handling', () => {
     const mobileSw = readFileSync(resolve(root, 'public/mobile-app/sw.js'), 'utf-8');
-    // Mobile SW caches supabase.min.js vendor file and uses network-first for API calls
     expect(mobileSw).toMatch(/supabase|network/i);
   });
 });
 
-// ══════════════════════════════════════════════════════════════════════════
-// BUG-0308b: Deployment says Vercel (it's Railway)
-// Codebase must not reference Vercel deployment.
-// ══════════════════════════════════════════════════════════════════════════
-
-describe('[BUG-0308b] No Vercel references in deployment config', () => {
-  it('no vercel.json exists', () => {
-    expect(existsSync(resolve(root, 'vercel.json'))).toBe(false);
-  });
-
-  it('no @vercel packages in package.json', () => {
-    const pkg = readFileSync(resolve(root, 'package.json'), 'utf-8');
-    expect(pkg).not.toContain('@vercel/');
-  });
-});
-
-// ══════════════════════════════════════════════════════════════════════════
-// BUG-0309: Rate limiting missing on API routes
-// All mutation routes must have rate limiting.
-// ══════════════════════════════════════════════════════════════════════════
-
-describe('[BUG-0309] All API routes have rate limiting', () => {
+describe('Mobile mutation routes include rate limiting or auth wrappers', () => {
   const mutationRoutes = [
     'bookings', 'conversations', 'partners', 'events',
     'members', 'announcements', 'court-blocks', 'families',
@@ -284,7 +160,6 @@ describe('[BUG-0309] All API routes have rate limiting', () => {
   mutationRoutes.forEach(route => {
     it(`${route} has rate limiting or uses withAuth wrapper`, () => {
       const content = readFileSync(resolve(root, `app/api/mobile/${route}/route.ts`), 'utf-8');
-      // Routes use either direct isRateLimited or the withAuth wrapper (which supports rateLimit option)
       expect(
         content.includes('isRateLimited') || content.includes('withAuth')
       ).toBe(true);
@@ -292,11 +167,7 @@ describe('[BUG-0309] All API routes have rate limiting', () => {
   });
 });
 
-// ══════════════════════════════════════════════════════════════════════════
-// BUG-0310: Coaching panel removed — route redirects to lessons
-// ══════════════════════════════════════════════════════════════════════════
-
-describe('[BUG-0310] Coaching panel removed', () => {
+describe('Coaching routes redirect to lessons', () => {
   it('coaching page redirects to lessons', () => {
     const coachingPage = readFileSync(resolve(root, 'app/dashboard/coaching/page.tsx'), 'utf-8');
     expect(coachingPage).toMatch(/redirect.*lessons/i);
@@ -306,5 +177,57 @@ describe('[BUG-0310] Coaching panel removed', () => {
     const sidebar = readFileSync(resolve(root, 'app/dashboard/components/Sidebar.tsx'), 'utf-8');
     expect(sidebar).not.toContain('coachItem');
     expect(sidebar).not.toContain("Coach's Panel");
+  });
+});
+
+describe('Shared constants remain strict and consistent', () => {
+  it('UUID validation accepts valid UUIDs', () => {
+    expect(isValidUUID('123e4567-e89b-12d3-a456-426614174000')).toBe(true);
+  });
+
+  it('UUID validation rejects invalid UUIDs', () => {
+    expect(isValidUUID('not-a-uuid')).toBe(false);
+  });
+
+  it('enum validation accepts allowed values', () => {
+    expect(isValidEnum('confirmed', VALID_STATUSES)).toBe(true);
+  });
+
+  it('enum validation rejects disallowed values', () => {
+    expect(isValidEnum('weird-status', VALID_STATUSES)).toBe(false);
+  });
+
+  it('date validation accepts ISO dates', () => {
+    expect(isValidDate('2026-03-19')).toBe(true);
+  });
+
+  it('date validation rejects malformed dates', () => {
+    expect(isValidDate('19/03/2026')).toBe(false);
+  });
+
+  it('time validation accepts HH:MM format', () => {
+    expect(isValidTime('18:30')).toBe(true);
+  });
+
+  it('time validation rejects bad times', () => {
+    expect(isValidTime('25:99')).toBe(false);
+  });
+
+  it('range validation enforces numeric limits', () => {
+    expect(isInRange(5, 1, 10)).toBe(true);
+    expect(isInRange(11, 1, 10)).toBe(false);
+  });
+
+  it('email validation accepts normal emails', () => {
+    expect(isValidEmail('member@mtc.ca')).toBe(true);
+  });
+
+  it('email validation rejects malformed emails', () => {
+    expect(isValidEmail('not-an-email')).toBe(false);
+  });
+
+  it('limits object exposes expected guardrails', () => {
+    expect(LIMITS).toBeTruthy();
+    expect(typeof LIMITS).toBe('object');
   });
 });

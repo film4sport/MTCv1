@@ -25,10 +25,6 @@ const INFO_URL = '/info';
 async function cleanPage(page) {
   await page.waitForLoadState('load').catch(() => {});
   await page.waitForFunction(() => document.readyState === 'complete', null, { timeout: 5000 }).catch(() => {});
-  await page.addStyleTag({
-    content: '*, *::before, *::after { transition: none !important; animation-duration: 0s !important; }'
-  });
-  await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
 }
 
 // ==========================================================

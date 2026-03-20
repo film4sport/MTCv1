@@ -34,6 +34,4 @@ test('Membership profile banner visible', async ({ page }) => {
   await expect(page.getByText('Why Join Mono Tennis Club').first()).toBeAttached();
   await page.screenshot({ path: 'test-results/membership-profile-banner.png', fullPage: false });
 
-  // Clean up
-  await page.evaluate(() => localStorage.removeItem('currentUser'));
 });
