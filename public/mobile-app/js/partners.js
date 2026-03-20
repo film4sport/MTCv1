@@ -5,6 +5,9 @@
 (function() {
   'use strict';
 
+  var SUPPORT_EMAIL = 'monotennisclub1@gmail.com';
+  var SITE_HOST = 'monotennisclub.com';
+
   // ============================================
   // PARTNER FILTER (unified pill-based)
   // ============================================
@@ -573,11 +576,11 @@
         '<div style="margin: 20px 0;">' +
           '<div class="settings-item" onclick="showToast(\'Opening email client...\'); document.getElementById(\'helpModal\').remove();" style="cursor: pointer; padding: 14px 0; border-bottom: 1px solid var(--border-color);">' +
             '<div style="font-weight: 600; font-size: 14px; color: var(--text-primary);">\uD83D\uDCE7 Email Us</div>' +
-            '<div style="font-size: 12px; color: var(--text-muted);">info@mtctennis.ca</div>' +
+            '<div style="font-size: 12px; color: var(--text-muted);">' + SUPPORT_EMAIL + '</div>' +
           '</div>' +
-          '<div class="settings-item" onclick="showToast(\'Opening phone...\'); document.getElementById(\'helpModal\').remove();" style="cursor: pointer; padding: 14px 0; border-bottom: 1px solid var(--border-color);">' +
-            '<div style="font-weight: 600; font-size: 14px; color: var(--text-primary);">\uD83D\uDCDE Call the Club</div>' +
-            '<div style="font-size: 12px; color: var(--text-muted);">(519) 555-0123</div>' +
+          '<div class="settings-item" onclick="showToast(\'Visit ' + SITE_HOST + ' for club updates\'); document.getElementById(\'helpModal\').remove();" style="cursor: pointer; padding: 14px 0; border-bottom: 1px solid var(--border-color);">' +
+            '<div style="font-weight: 600; font-size: 14px; color: var(--text-primary);">\uD83C\uDF10 Club Website</div>' +
+            '<div style="font-size: 12px; color: var(--text-muted);">' + SITE_HOST + '</div>' +
           '</div>' +
           '<div class="settings-item" onclick="showToast(\'FAQ loaded\'); document.getElementById(\'helpModal\').remove();" style="cursor: pointer; padding: 14px 0; border-bottom: 1px solid var(--border-color);">' +
             '<div style="font-weight: 600; font-size: 14px; color: var(--text-primary);">\u2753 FAQs</div>' +

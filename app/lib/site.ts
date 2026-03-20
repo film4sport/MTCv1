@@ -8,6 +8,10 @@ export const PAYMENT_EMAIL_MAILTO = `mailto:${PAYMENT_EMAIL}`;
 export const MEMBERSHIP_SEASON_YEAR = siteContent.membershipSeasonYear;
 export const SITE_URL = siteContent.siteUrl;
 export const CDN_IMAGE_BASE = siteContent.cdnImageBase;
+export const CLUB_LOCATION_SHORT = CLUB_NAME;
+export const CLUB_LOCATION_CITY = 'Mono, Ontario';
+export const CLUB_LOCATION_FULL = `${CLUB_NAME}, ${CLUB_LOCATION_CITY}`;
+export const ICS_PRODID = `-//${CLUB_NAME}//MTC//EN`;
 
 export const APP_ROUTES = {
   home: '/',
