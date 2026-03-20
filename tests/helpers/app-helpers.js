@@ -52,14 +52,14 @@ async function gotoInfo(page, tab = 'membership') {
   await expect
     .poll(async () => {
       try {
-        return await page.evaluate((expectedTab) => {
-          const requiredTabsPresent = INFO_TAB_KEYS
+        return await page.evaluate(({ expectedTab, infoTabKeys }) => {
+          const requiredTabsPresent = infoTabKeys
             .every((key) => !!document.getElementById(`tab-${key}`));
           return window.location.pathname === '/info' &&
             new URLSearchParams(window.location.search).get('tab') === expectedTab &&
             !!document.getElementById(`tab-${expectedTab}`) &&
             requiredTabsPresent;
-        }, tab);
+        }, { expectedTab: tab, infoTabKeys: INFO_TAB_KEYS });
       } catch {
         return false;
       }
@@ -226,7 +226,7 @@ async function mockAuthenticatedPwa(page, apiOverrides = {}) {
 
   await page.goto(MOBILE_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
   await page.waitForLoadState('load');
-  await page.waitForFunction(() => {
+  await page.waitForFunction((screenIds) => {
     if (typeof MTC === 'undefined' || !MTC.state) return false;
     const storedUser = MTC.state.currentUser || JSON.parse(localStorage.getItem('mtc-user') || 'null');
     if (!storedUser) return false;
@@ -253,22 +253,22 @@ async function mockAuthenticatedPwa(page, apiOverrides = {}) {
     const onboardingOverlay = document.getElementById('onboardingOverlay');
     if (onboardingOverlay) onboardingOverlay.classList.remove('active');
 
-    const requiredScreensPresent = PWA_SCREEN_IDS
+    const requiredScreensPresent = screenIds
       .every((key) => !!document.getElementById(`screen-${key}`));
     return requiredScreensPresent && (typeof navigateTo === 'function' || (MTC.fn && typeof MTC.fn.navigateTo === 'function'));
-  }, null, { timeout: 10000 });
+  }, PWA_SCREEN_IDS, { timeout: 10000 });
 }
 
 async function waitForPwaShell(page) {
   await page.waitForLoadState('domcontentloaded').catch(() => {});
-  await page.waitForFunction(() => {
+  await page.waitForFunction((screenIds) => {
     if (typeof MTC === 'undefined' || !MTC.state) return false;
     const storedUser = MTC.state.currentUser || JSON.parse(localStorage.getItem('mtc-user') || 'null');
     const bottomNav = document.getElementById('bottomNav');
     const home = document.getElementById('screen-home');
     const onboardingOverlay = document.getElementById('onboardingOverlay');
     if (onboardingOverlay) onboardingOverlay.classList.remove('active');
-    const requiredScreensPresent = PWA_SCREEN_IDS
+    const requiredScreensPresent = screenIds
       .every((key) => !!document.getElementById(`screen-${key}`));
     return !!(
       storedUser &&
@@ -277,7 +277,7 @@ async function waitForPwaShell(page) {
       home &&
       (typeof navigateTo === 'function' || (MTC.fn && typeof MTC.fn.navigateTo === 'function'))
     );
-  }, null, { timeout: 10000 });
+  }, PWA_SCREEN_IDS, { timeout: 10000 });
 }
 
 async function navigatePwaScreen(page, screen) {
