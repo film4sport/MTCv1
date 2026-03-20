@@ -510,7 +510,7 @@
           '<span class="reg-avatar-name">'+sanitizeHTML(displayName)+'</span></div>';
       });
       if (regList.length > 8) {
-        regHtml += '<div class="reg-avatar-item"><div class="reg-avatar-circle" style="background:#d4e157;color:#2a2f1e">+' + (regList.length - 8) + '</div><span class="reg-avatar-name">more</span></div>';
+      regHtml += '<div class="reg-avatar-item"><div class="reg-avatar-circle" style="background:#c8ff00;color:#172100">+' + (regList.length - 8) + '</div><span class="reg-avatar-name">more</span></div>';
       }
       regHtml += '</div></div>';
     }

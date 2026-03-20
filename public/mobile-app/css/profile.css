@@ -552,7 +552,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: #008faa;
+  color: var(--electric-blue);
   margin-bottom: 8px;
 }
 
@@ -670,7 +670,7 @@
 .family-add-btn:active {
   background: rgba(0, 212, 255, 0.08);
   border-color: var(--electric-blue);
-  color: #008faa;
+  color: var(--electric-blue);
 }
 .family-type-toggle {
   display: flex;

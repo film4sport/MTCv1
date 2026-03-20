@@ -21,8 +21,8 @@
 
 /* Light mode focus - darker outline for better contrast */
 [data-theme="light"] *:focus-visible {
-  outline-color: #008faa;
-  box-shadow: 0 0 0 6px rgba(0, 143, 170, 0.15);
+  outline-color: var(--electric-blue);
+  box-shadow: 0 0 0 6px rgba(0, 212, 255, 0.18);
 }
 
 /* Remove default outline for mouse/touch users */
@@ -130,8 +130,8 @@ button, .menu-item, .nav-item,
 body {
   font-family: 'Inter', -apple-system, sans-serif;
   background:
-    radial-gradient(circle at top left, rgba(212, 225, 87, 0.18), transparent 24%),
-    radial-gradient(circle at 82% 12%, rgba(27, 167, 201, 0.12), transparent 20%),
+    radial-gradient(circle at top left, rgba(200, 255, 0, 0.22), transparent 24%),
+    radial-gradient(circle at 82% 12%, rgba(0, 212, 255, 0.16), transparent 20%),
     linear-gradient(180deg, #e9e1d1 0%, #f4efe5 100%);
   min-height: 100vh;
   margin: 0;

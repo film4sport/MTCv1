@@ -404,7 +404,7 @@
 [data-theme="light"] .modal .admin-input:focus,
 [data-theme="light"] .modal .admin-select:focus,
 [data-theme="light"] .modal .admin-textarea:focus {
-  border-color: #008faa;
+  border-color: var(--electric-blue);
   box-shadow: 0 0 0 2px rgba(0, 143, 170, 0.12);
 }
 

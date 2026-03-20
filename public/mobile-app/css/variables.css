@@ -13,12 +13,12 @@
   --card-shadow: 0 16px 42px rgba(31, 34, 22, 0.12);
   
   /* Brand Colors - Always Same */
-  --volt: #d4e157;
-  --coral: #de6a4f;
-  --electric-blue: #1ba7c9;
+  --volt: #c8ff00;
+  --coral: #ff5a5f;
+  --electric-blue: #00d4ff;
   --deep-black: #1a1f12;
   --gradient-primary: linear-gradient(135deg, #1a1f12 0%, #2f3921 100%);
-  --gradient-accent: linear-gradient(135deg, #d4e157 0%, #b7c84f 100%);
+  --gradient-accent: linear-gradient(135deg, #c8ff00 0%, #e6ff78 100%);
   --gradient-hero: linear-gradient(180deg, rgba(26,31,18,0) 0%, rgba(26,31,18,0.82) 100%);
   --premium-tint: linear-gradient(180deg, rgba(255,255,255,0.56), rgba(255,255,255,0.1));
   

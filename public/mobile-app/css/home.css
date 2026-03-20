@@ -2868,7 +2868,7 @@ body.offline #app {
 }
 .hce-badge.free { background: rgba(0, 212, 255, 0.12); color: #00a8cc; }
 .hce-badge.paid { background: rgba(212, 175, 55, 0.12); color: #b8860b; }
-.hce-badge.members { background: rgba(0, 212, 255, 0.12); color: #008faa; }
+.hce-badge.members { background: rgba(0, 212, 255, 0.16); color: var(--electric-blue); }
 .hce-title {
   font-size: 15px;
   font-weight: 700;
@@ -2956,7 +2956,7 @@ body.offline #app {
 .hce-rsvp-btn:active { transform: scale(0.95); }
 .hce-rsvp-btn.registered {
   background: rgba(0, 212, 255, 0.12);
-  color: #008faa;
+  color: var(--electric-blue);
 }
 .hce-details-btn {
   padding: 6px 12px;
