@@ -2,11 +2,12 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import DashboardLayoutClient from './DashboardLayoutClient';
 import { SESSION_COOKIE_NAME, createAdminClient, isSessionExpired } from '@/app/lib/session';
+import { APP_ROUTES } from '../lib/site';
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const token = (await cookies()).get(SESSION_COOKIE_NAME)?.value;
   if (!token) {
-    redirect('/login');
+    redirect(APP_ROUTES.login);
   }
 
   const supabase = createAdminClient();
@@ -20,7 +21,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
     if (session) {
       await supabase.from('sessions').delete().eq('token', token);
     }
-    redirect('/login');
+    redirect(APP_ROUTES.login);
   }
 
   return <DashboardLayoutClient>{children}</DashboardLayoutClient>;

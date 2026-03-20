@@ -1,5 +1,6 @@
 const { test, expect } = require('@playwright/test');
 const { gotoInfo, gotoLanding, switchInfoTab } = require('./helpers/app-helpers');
+const { waitForCountAtLeast, waitForCountExact } = require('./helpers/dom-helpers');
 
 async function gotoLandingSection(page, sectionSelector) {
   await gotoLanding(page);
@@ -155,15 +156,7 @@ test.describe('Events Section', () => {
 
   test('event cards are displayed', async ({ page }) => {
     const cards = page.locator('.event-card');
-    await expect
-      .poll(async () => {
-        try {
-          return await cards.count();
-        } catch {
-          return 0;
-        }
-      }, { timeout: 5000 })
-      .toBe(3);
+    await waitForCountExact(cards, 3);
   });
 
   test('event cards have warm background', async ({ page }) => {
@@ -190,28 +183,12 @@ test.describe('Schedule / Calendar Section', () => {
 
   test('calendar has day headers', async ({ page }) => {
     const headers = page.locator('.cal-header');
-    await expect
-      .poll(async () => {
-        try {
-          return await headers.count();
-        } catch {
-          return 0;
-        }
-      }, { timeout: 5000 })
-      .toBe(7);
+    await waitForCountExact(headers, 7);
   });
 
   test('calendar has day cells', async ({ page }) => {
     const days = page.locator('.cal-day:not(.empty)');
-    await expect
-      .poll(async () => {
-        try {
-          return await days.count();
-        } catch {
-          return 0;
-        }
-      }, { timeout: 5000 })
-      .toBeGreaterThanOrEqual(28);
+    await waitForCountAtLeast(days, 28);
   });
 
   test('today button exists', async ({ page }) => {
@@ -273,15 +250,7 @@ test.describe('Gallery Section', () => {
 
   test('gallery has slide images', async ({ page }) => {
     const slides = page.locator('.gallery-slide');
-    await expect
-      .poll(async () => {
-        try {
-          return await slides.count();
-        } catch {
-          return 0;
-        }
-      }, { timeout: 5000 })
-      .toBeGreaterThanOrEqual(10);
+    await waitForCountAtLeast(slides, 10);
   });
 
   test('gallery navigation buttons exist', async ({ page }) => {
@@ -294,9 +263,7 @@ test.describe('Gallery Section', () => {
   test('gallery dots exist', async ({ page }) => {
     await page.locator('#gallery').first().scrollIntoViewIfNeeded();
     const dots = page.locator('.gallery-dot');
-    await expect(dots.first()).toBeAttached({ timeout: 5000 });
-    const count = await dots.count();
-    expect(count).toBeGreaterThanOrEqual(1);
+    await waitForCountAtLeast(dots, 1);
   });
 });
 
@@ -304,8 +271,7 @@ test.describe('Wave Dividers', () => {
   test('wave divider exists on the page', async ({ page }) => {
     await gotoLanding(page);
     const dividers = page.locator('.wave-divider');
-    const count = await dividers.count();
-    expect(count).toBeGreaterThanOrEqual(1);
+    await waitForCountAtLeast(dividers, 1);
   });
 });
 

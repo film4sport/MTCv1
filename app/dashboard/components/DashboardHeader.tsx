@@ -7,6 +7,7 @@ import Image from 'next/image';
 import { useAuth, useNotifications, useFamily } from '../lib/store';
 import { useToast } from '../lib/toast';
 import WeatherWidget from './WeatherWidget';
+import { APP_COPY, APP_ROUTES } from '../../lib/site';
 
 interface DashboardHeaderProps {
   title: string;
@@ -199,13 +200,13 @@ export default function DashboardHeader({ title }: DashboardHeaderProps) {
                             markNotificationRead(n.id);
                             setNotifOpen(false);
                             const typeRoutes: Record<string, string> = {
-                              booking: '/dashboard/book',
-                              message: '/dashboard/messages',
-                              event: '/dashboard',
-                              partner: '/dashboard',
-                              announcement: '/dashboard',
+                              booking: APP_ROUTES.dashboardBook,
+                              message: APP_ROUTES.dashboardMessages,
+                              event: APP_ROUTES.dashboard,
+                              partner: APP_ROUTES.dashboard,
+                              announcement: APP_ROUTES.dashboard,
                             };
-                            const route = typeRoutes[n.type] || '/dashboard';
+                            const route = typeRoutes[n.type] || APP_ROUTES.dashboard;
                             router.push(route);
                           }}
                           className={`w-full text-left p-4 border-b transition-colors hover:bg-black/[0.02] ${!n.read ? 'bg-[#d4e157]/10' : ''}`}
@@ -297,13 +298,13 @@ export default function DashboardHeader({ title }: DashboardHeaderProps) {
                 </div>
 
                 <div className="p-2">
-                  <Link href="/dashboard/settings" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm hover:bg-black/5 transition-colors" style={{ color: '#1a1f12' }}>
+                  <Link href={APP_ROUTES.dashboardSettings} onClick={() => setMenuOpen(false)} className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm hover:bg-black/5 transition-colors" style={{ color: '#1a1f12' }}>
                     <svg className="w-4 h-4" style={{ color: '#6b7a3d' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                    Settings / Profile
+                    {APP_COPY.settings} / Profile
                   </Link>
                   <div className="my-1 border-t" style={{ borderColor: '#e0dcd3' }} />
                   <button
-                    onClick={() => { logout(); router.push('/login'); }}
+                    onClick={() => { logout(); router.push(APP_ROUTES.login); }}
                     className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm hover:bg-red-50 transition-colors text-red-600"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>

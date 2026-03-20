@@ -5,6 +5,8 @@ import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { signUp } from '../dashboard/lib/auth';
 import { createFamily, addFamilyMember } from '../dashboard/lib/db';
 import { membershipTypes, signupMembershipTypes, waiverText, acknowledgementText } from '../info/data';
+import { BOOKING_RULES } from '../lib/shared-constants';
+import { APP_COPY, APP_ROUTES, MEMBERSHIP_SEASON_YEAR, SUPPORT_EMAIL, SUPPORT_EMAIL_MAILTO } from '../lib/site';
 
 export default function SignupPage() {
   return (
@@ -189,13 +191,13 @@ function SignupContent() {
       `}</style>
       {/* Header */}
       <header className="px-6 py-4 flex items-center justify-between" style={{ backgroundColor: '#1a1f12' }}>
-        <a href="/" className="flex items-center gap-2 text-sm font-medium" style={{ color: '#e8e4d9' }}>
+        <a href={APP_ROUTES.home} className="flex items-center gap-2 text-sm font-medium" style={{ color: '#e8e4d9' }}>
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          Back to Home
+          {APP_COPY.backToHome}
         </a>
-        <a href="/login" className="text-sm font-medium hover:underline" style={{ color: 'rgba(232, 228, 217, 0.7)' }}>
+        <a href={APP_ROUTES.login} className="text-sm font-medium hover:underline" style={{ color: 'rgba(232, 228, 217, 0.7)' }}>
           Already a member? Log in
         </a>
       </header>
@@ -268,15 +270,15 @@ function SignupContent() {
                   </div>
                   <div>
                     <p className="text-sm font-semibold" style={{ color: '#2a2f1e' }}>Apps in development</p>
-                    <p className="text-xs mt-0.5 leading-relaxed" style={{ color: '#6b7266' }}>Court booking, messaging, and partner matching are being built. We&apos;d love testers! Feedback: <a href="mailto:monotennisclub1@gmail.com" style={{ color: '#6b7a3d', textDecoration: 'underline' }}>monotennisclub1@gmail.com</a></p>
+                    <p className="text-xs mt-0.5 leading-relaxed" style={{ color: '#6b7266' }}>Court booking, messaging, and partner matching are being built. We&apos;d love testers! Feedback: <a href={SUPPORT_EMAIL_MAILTO} style={{ color: '#6b7a3d', textDecoration: 'underline' }}>{SUPPORT_EMAIL}</a></p>
                   </div>
                 </div>
               </div>
 
               {/* Action buttons */}
               <div className="fade-up-4 mt-8 flex flex-col sm:flex-row items-center gap-3">
-                <a href="/dashboard" className="w-full sm:flex-1 inline-block text-center px-8 py-3.5 rounded-full text-sm font-semibold transition-all hover:opacity-90" style={{ background: 'linear-gradient(135deg, #6b7a3d, #8a9f4d)', color: '#fff', boxShadow: '0 4px 16px rgba(107, 122, 61, 0.25)' }}>Go to Dashboard</a>
-                <a href="/" className="w-full sm:flex-1 inline-block text-center px-8 py-3.5 rounded-full text-sm font-semibold transition-all hover:opacity-90" style={{ backgroundColor: '#faf8f3', color: '#6b7a3d', border: '1px solid #e0dcd3' }}>Back to Home</a>
+                <a href={APP_ROUTES.dashboard} className="w-full sm:flex-1 inline-block text-center px-8 py-3.5 rounded-full text-sm font-semibold transition-all hover:opacity-90" style={{ background: 'linear-gradient(135deg, #6b7a3d, #8a9f4d)', color: '#fff', boxShadow: '0 4px 16px rgba(107, 122, 61, 0.25)' }}>{APP_COPY.goToDashboard}</a>
+                <a href={APP_ROUTES.home} className="w-full sm:flex-1 inline-block text-center px-8 py-3.5 rounded-full text-sm font-semibold transition-all hover:opacity-90" style={{ backgroundColor: '#faf8f3', color: '#6b7a3d', border: '1px solid #e0dcd3' }}>{APP_COPY.backToHome}</a>
               </div>
             </div>
           </div>
@@ -289,7 +291,7 @@ function SignupContent() {
         {/* Branding */}
         <div className="text-center mb-10">
           <h1 className="headline-font text-3xl sm:text-4xl mb-2" style={{ color: '#2a2f1e' }}>Become a Member</h1>
-          <p className="text-sm" style={{ color: '#6b7266' }}>Join Mono Tennis Club for the 2026 season</p>
+          <p className="text-sm" style={{ color: '#6b7266' }}>Join Mono Tennis Club for the {MEMBERSHIP_SEASON_YEAR} season</p>
         </div>
 
         {/* Existing Member Warning */}
@@ -300,7 +302,7 @@ function SignupContent() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-semibold text-sm" style={{ color: '#2a2f1e' }}>Already signed in as {existingProfile.name}</p>
-              <a href="/dashboard" className="text-xs hover:underline" style={{ color: '#6b7a3d' }}>Go to Dashboard →</a>
+              <a href={APP_ROUTES.dashboard} className="text-xs hover:underline" style={{ color: '#6b7a3d' }}>{APP_COPY.goToDashboard} →</a>
             </div>
           </div>
         )}
@@ -803,10 +805,10 @@ function SignupContent() {
               <div className="rounded-lg p-5 mb-4" style={{ backgroundColor: '#edeae3', border: '1px solid #e0dcd3' }}>
                 <div className="text-sm mb-1" style={{ color: '#6b7266' }}>Send Interac e-transfer to:</div>
                 <div className="flex items-center justify-center gap-2 mt-2">
-                  <span className="font-bold text-lg" style={{ color: '#2a2f1e' }}>monotennis.payment@gmail.com</span>
+                  <span className="font-bold text-lg" style={{ color: '#2a2f1e' }}>{BOOKING_RULES.GUEST_FEE_EMAIL}</span>
                   <button
                     onClick={() => {
-                      navigator.clipboard.writeText('monotennis.payment@gmail.com');
+                      navigator.clipboard.writeText(BOOKING_RULES.GUEST_FEE_EMAIL);
                       const btn = document.getElementById('copy-email-btn');
                       if (btn) { btn.textContent = 'Copied!'; setTimeout(() => { btn.textContent = 'Copy'; }, 2000); }
                     }}

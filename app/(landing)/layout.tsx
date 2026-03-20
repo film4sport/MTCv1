@@ -1,16 +1,17 @@
 import { Metadata } from 'next';
 import { ErrorBoundary } from '../dashboard/components/ErrorBoundary';
 import { getJsonLdEvents } from '../lib/events';
+import { SITE_METADATA } from '../lib/site-metadata';
+import { SUPPORT_EMAIL } from '../lib/site';
 
-const SITE_URL = 'https://www.monotennisclub.com';
-const CDN = 'https://cdn.jsdelivr.net/gh/film4sport/my-webapp-images@main/mtc-images';
+const SITE_URL = SITE_METADATA.siteUrl;
+const CDN = SITE_METADATA.cdnImageBase;
 
 export const metadata: Metadata = {
   title: {
-    absolute: 'Mono Tennis Club | Premier Tennis in Caledon, Dufferin & Mono, Ontario',
+    absolute: SITE_METADATA.landingTitle,
   },
-  description:
-    'Mono Tennis Club is a not-for-profit community tennis club in Mono, Ontario — serving Orangeville, Caledon, Shelburne, Bolton, Brampton, Dufferin County, and the GTA since 1980. 4 outdoor courts, tournaments, summer camps, coaching, and social round robins for all skill levels.',
+  description: SITE_METADATA.landingDescription,
   keywords: [
     'Mono Tennis Club',
     'tennis Mono Ontario',
@@ -47,9 +48,9 @@ export const metadata: Metadata = {
     'tennis Caledon Village',
     'tennis Palgrave Ontario',
   ],
-  authors: [{ name: 'Mono Tennis Club' }],
-  creator: 'Mono Tennis Club',
-  publisher: 'Mono Tennis Club',
+  authors: [{ name: SITE_METADATA.organizationName }],
+  creator: SITE_METADATA.organizationName,
+  publisher: SITE_METADATA.organizationName,
   metadataBase: new URL(SITE_URL),
   alternates: {
     canonical: '/',
@@ -58,25 +59,23 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_CA',
     url: SITE_URL,
-    siteName: 'Mono Tennis Club',
-    title: 'Mono Tennis Club | Premier Tennis in Caledon, Dufferin & Mono, Ontario',
-    description:
-      'Join Mono Tennis Club — the heart of community tennis in Mono, Caledon, and Dufferin County since 1980. Tournaments, camps, social events, and beautiful courts in an amazing natural setting.',
+    siteName: SITE_METADATA.organizationName,
+    title: SITE_METADATA.landingTitle,
+    description: SITE_METADATA.landingOgDescription,
     images: [
       {
-        url: `${CDN}/hero-aerial-court.png`,
+        url: SITE_METADATA.heroImage,
         width: 1200,
         height: 630,
-        alt: 'Aerial view of Mono Tennis Club courts surrounded by nature in Mono, Ontario',
+        alt: `Aerial view of ${SITE_METADATA.organizationName} courts surrounded by nature in Mono, Ontario`,
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Mono Tennis Club | Premier Tennis in Caledon, Dufferin & Mono, Ontario',
-    description:
-      'Join Mono Tennis Club — the heart of community tennis in Mono, Caledon, and Dufferin County since 1980.',
-    images: [`${CDN}/hero-aerial-court.png`],
+    title: SITE_METADATA.landingTitle,
+    description: SITE_METADATA.landingOgDescription,
+    images: [SITE_METADATA.heroImage],
   },
   robots: {
     index: true,
@@ -97,22 +96,20 @@ export const metadata: Metadata = {
   },
 };
 
-// JSON-LD Structured Data
 const jsonLd = {
   '@context': 'https://schema.org',
   '@graph': [
     {
       '@type': 'SportsActivityLocation',
       '@id': `${SITE_URL}/#organization`,
-      name: 'Mono Tennis Club',
+      name: SITE_METADATA.organizationName,
       alternateName: 'MTC',
       url: SITE_URL,
       logo: `${SITE_URL}/favicon.png`,
-      image: `${CDN}/hero-aerial-court.png`,
-      description:
-        'A not-for-profit community tennis club located in Mono, Ontario, serving Orangeville, Caledon, Bolton, Shelburne, Brampton, Dufferin County, the Headwaters region, and the GTA since 1980. 4 outdoor courts with lights, tournaments, summer camps, coaching, and social round robins.',
+      image: SITE_METADATA.heroImage,
+      description: SITE_METADATA.landingDescription,
       telephone: '',
-      email: 'info@monotennisclub.com',
+      email: SUPPORT_EMAIL,
       address: {
         '@type': 'PostalAddress',
         streetAddress: '754483 Mono Centre Rd',
@@ -154,8 +151,14 @@ const jsonLd = {
       ],
       numberOfCourts: 4,
       openingHoursSpecification: [
-        // Season: May through October, daily
-        { '@type': 'OpeningHoursSpecification', dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], opens: '09:30', closes: '22:00', validFrom: '2026-05-01', validThrough: '2026-10-31' },
+        {
+          '@type': 'OpeningHoursSpecification',
+          dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+          opens: '09:30',
+          closes: '22:00',
+          validFrom: '2026-05-01',
+          validThrough: '2026-10-31',
+        },
       ],
       hasMap: 'https://www.google.com/maps?q=754483+Mono+Centre+Rd,+Mono,+ON',
       priceRange: '$',
@@ -170,7 +173,7 @@ const jsonLd = {
       '@type': 'WebSite',
       '@id': `${SITE_URL}/#website`,
       url: SITE_URL,
-      name: 'Mono Tennis Club',
+      name: SITE_METADATA.organizationName,
       publisher: { '@id': `${SITE_URL}/#organization` },
       inLanguage: 'en-CA',
     },
@@ -178,14 +181,12 @@ const jsonLd = {
       '@type': 'WebPage',
       '@id': `${SITE_URL}/#webpage`,
       url: SITE_URL,
-      name: 'Mono Tennis Club | Premier Tennis in Caledon, Dufferin & Mono, Ontario',
+      name: SITE_METADATA.landingTitle,
       isPartOf: { '@id': `${SITE_URL}/#website` },
       about: { '@id': `${SITE_URL}/#organization` },
-      description:
-        'Mono Tennis Club is a not-for-profit community tennis club in Mono, Ontario — serving Orangeville, Caledon, Bolton, Shelburne, Brampton, Dufferin County, and the GTA since 1980.',
+      description: SITE_METADATA.landingDescription,
       inLanguage: 'en-CA',
     },
-    // BreadcrumbList — improves search result snippets
     {
       '@type': 'BreadcrumbList',
       '@id': `${SITE_URL}/#breadcrumb`,
@@ -198,7 +199,6 @@ const jsonLd = {
         },
       ],
     },
-    // Events generated from shared data source (app/lib/events.ts)
     ...getJsonLdEvents(),
   ],
 };

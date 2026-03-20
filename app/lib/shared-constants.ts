@@ -1,3 +1,5 @@
+import { PAYMENT_EMAIL } from './site';
+
 /**
  * shared-constants.ts
  *
@@ -76,7 +78,7 @@ export const BOOKING_RULES = {
   /** Guest fee in dollars */
   GUEST_FEE: 10,
   /** E-transfer email for guest fees */
-  GUEST_FEE_EMAIL: 'monotennis.payment@gmail.com',
+  GUEST_FEE_EMAIL: PAYMENT_EMAIL,
   /** Max days in advance a member can book */
   MAX_ADVANCE_DAYS: 14,
   /** Number of courts */

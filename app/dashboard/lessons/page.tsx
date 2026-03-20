@@ -1,6 +1,7 @@
 'use client';
 
 import DashboardHeader from '../components/DashboardHeader';
+import { APP_COPY } from '../../lib/site';
 
 const coaches = [
   {
@@ -44,7 +45,7 @@ const adultPrograms = [
 export default function LessonsPage() {
   return (
     <div className="min-h-screen dashboard-gradient-bg">
-      <DashboardHeader title="Lessons" />
+      <DashboardHeader title={APP_COPY.lessons} />
 
       <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-6 animate-slideUp">
 

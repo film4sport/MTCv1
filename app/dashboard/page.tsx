@@ -4,6 +4,7 @@ import { useAuth, useBookings, useEvents, useNotifications } from './lib/store';
 import DashboardHeader from './components/DashboardHeader';
 import OnboardingTour from './components/OnboardingTour';
 import Link from 'next/link';
+import { APP_COPY, APP_ROUTES } from '../lib/site';
 
 
 export default function DashboardHome() {
@@ -122,7 +123,7 @@ export default function DashboardHome() {
               </p>
             </div>
             <Link
-              href="/dashboard/profile"
+              href={APP_ROUTES.dashboardProfile}
               className="text-xs font-semibold px-4 py-2 rounded-lg whitespace-nowrap transition-all hover:opacity-90"
               style={{ backgroundColor: '#6b7a3d', color: '#fff' }}
             >
@@ -133,21 +134,21 @@ export default function DashboardHome() {
 
         {/* Quick Actions */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 stagger-children">
-          {[
-            { label: 'Book Court', href: '/dashboard/book', icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z', bg: 'rgba(107, 122, 61, 0.85)', color: '#fff' },
-            { label: 'View Schedule', href: '/dashboard/schedule', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z', bg: 'rgba(232, 228, 217, 0.6)', color: '#2a2f1e' },
-            { label: 'Club Events', href: '/dashboard/events', icon: 'M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z', bg: 'rgba(212, 225, 87, 0.7)', color: '#2a2f1e' },
+          {[ 
+            { label: APP_COPY.bookCourt, href: APP_ROUTES.dashboardBook, icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z', bg: 'rgba(107, 122, 61, 0.85)', color: '#fff' },
+            { label: APP_COPY.schedule, href: APP_ROUTES.dashboardSchedule, icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z', bg: 'rgba(232, 228, 217, 0.6)', color: '#2a2f1e' },
+            { label: APP_COPY.clubEvents, href: APP_ROUTES.dashboardEvents, icon: 'M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z', bg: 'rgba(212, 225, 87, 0.7)', color: '#2a2f1e' },
             // 4th action: Find Partner for member, Admin Panel for admin, Messages for coach
             ...(currentUser?.role === 'admin' ? [
-              { label: 'Admin Panel', href: '/dashboard/admin', icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z', bg: 'rgba(200, 209, 160, 0.6)', color: '#2a2f1e' },
+              { label: APP_COPY.adminPanel, href: APP_ROUTES.dashboardAdmin, icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z', bg: 'rgba(200, 209, 160, 0.6)', color: '#2a2f1e' },
             ] : [
-              { label: 'Find Partner', href: '/dashboard/partners', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z', bg: 'rgba(200, 209, 160, 0.6)', color: '#2a2f1e' },
+              { label: APP_COPY.findPartners, href: APP_ROUTES.dashboardPartners, icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z', bg: 'rgba(200, 209, 160, 0.6)', color: '#2a2f1e' },
             ]),
           ].map(action => (
             <Link
               key={action.label}
               href={action.href}
-              data-tour={action.label === 'Book Court' ? 'book-court' : action.label === 'Find Partner' ? 'find-partner' : undefined}
+              data-tour={action.href === APP_ROUTES.dashboardBook ? 'book-court' : action.href === APP_ROUTES.dashboardPartners ? 'find-partner' : undefined}
               className="dashboard-panel rounded-[28px] p-5 flex flex-col gap-3 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-xl active:translate-y-0 active:duration-100"
               style={{
                 background: action.bg,
@@ -198,7 +199,7 @@ export default function DashboardHome() {
           <div className="dashboard-panel rounded-[28px] border p-5 section-card">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold" style={{ color: '#2a2f1e' }}>Upcoming Bookings</h3>
-              <Link href="/dashboard/schedule" className="text-xs font-medium hover:underline" style={{ color: '#6b7a3d' }}>View All</Link>
+              <Link href={APP_ROUTES.dashboardSchedule} className="text-xs font-medium hover:underline" style={{ color: '#6b7a3d' }}>View All</Link>
             </div>
             {myBookings.length === 0 ? (
               <div className="text-center py-8 animate-fadeIn">
@@ -208,7 +209,7 @@ export default function DashboardHome() {
                   </svg>
                 </div>
                 <p className="text-sm mb-1" style={{ color: '#6b7266' }}>No upcoming bookings</p>
-                <Link href="/dashboard/book" className="inline-block mt-2 px-4 py-2 rounded-xl text-xs font-medium text-white btn-press" style={{ background: '#6b7a3d' }}>
+                <Link href={APP_ROUTES.dashboardBook} className="inline-block mt-2 px-4 py-2 rounded-xl text-xs font-medium text-white btn-press" style={{ background: '#6b7a3d' }}>
                   Book a Court
                 </Link>
               </div>
@@ -241,7 +242,7 @@ export default function DashboardHome() {
           <div className="dashboard-panel rounded-[28px] border p-5 section-card">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold" style={{ color: '#2a2f1e' }}>Upcoming Events</h3>
-              <Link href="/dashboard/events" className="text-xs font-medium hover:underline" style={{ color: '#6b7a3d' }}>View All</Link>
+              <Link href={APP_ROUTES.dashboardEvents} className="text-xs font-medium hover:underline" style={{ color: '#6b7a3d' }}>View All</Link>
             </div>
             {upcomingEvents.length === 0 ? (
               <div className="text-center py-8 animate-fadeIn">
@@ -251,7 +252,7 @@ export default function DashboardHome() {
                   </svg>
                 </div>
                 <p className="text-sm mb-1" style={{ color: '#6b7266' }}>No upcoming events</p>
-                <Link href="/dashboard/events" className="inline-block mt-2 px-4 py-2 rounded-xl text-xs font-medium text-white btn-press" style={{ background: '#6b7a3d' }}>
+                <Link href={APP_ROUTES.dashboardEvents} className="inline-block mt-2 px-4 py-2 rounded-xl text-xs font-medium text-white btn-press" style={{ background: '#6b7a3d' }}>
                   View Events
                 </Link>
               </div>
@@ -262,7 +263,7 @@ export default function DashboardHome() {
                 const spotsLeft = ev.spotsTotal != null && ev.spotsTaken != null ? ev.spotsTotal - ev.spotsTaken : null;
                 const attending = ev.attendees.includes(currentUser?.name || '');
                 return (
-                  <Link key={ev.id} href={`/dashboard/events?event=${ev.id}`} className="flex items-start gap-4 rounded-xl p-3 border card-hover cursor-pointer transition-all hover:shadow-sm" style={{ borderColor: '#f0ede6', textDecoration: 'none' }}>
+                  <Link key={ev.id} href={`${APP_ROUTES.dashboardEvents}?event=${ev.id}`} className="flex items-start gap-4 rounded-xl p-3 border card-hover cursor-pointer transition-all hover:shadow-sm" style={{ borderColor: '#f0ede6', textDecoration: 'none' }}>
                     <div className="w-12 h-12 rounded-xl flex flex-col items-center justify-center" style={{ background: '#f5f2eb' }}>
                       <span className="text-[0.6rem] font-semibold uppercase" style={{ color: '#6b7266' }}>
                         {new Date(ev.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short' })}

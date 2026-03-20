@@ -16,6 +16,7 @@ import {
 } from './components/booking-utils';
 import BookingLegend from './components/BookingLegend';
 import BookingSidebar from './components/BookingSidebar';
+import { APP_COPY } from '../../lib/site';
 
 const BookingModal = dynamic(() => import('./components/BookingModal'), { ssr: false });
 const SuccessModal = dynamic(() => import('./components/SuccessModal'), { ssr: false });
@@ -275,7 +276,7 @@ export default function BookCourtPage() {
 
   return (
     <div className="min-h-screen dashboard-gradient-bg">
-      <DashboardHeader title="Book Court" />
+      <DashboardHeader title={APP_COPY.bookCourt} />
 
       <div className="p-4 sm:p-6 lg:p-8 max-w-[1400px] mx-auto animate-slideUp">
         <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

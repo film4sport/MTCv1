@@ -1,5 +1,6 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
+const { waitForCountAtLeast } = require('./helpers/dom-helpers');
 
 /**
  * Visual Regression Tests
@@ -69,15 +70,7 @@ test.describe('Visual Regression — Landing Page', () => {
 
     // Hero has CTA buttons
     const buttons = page.locator('section.texture-overlay a, section.overflow-hidden a');
-    await expect
-      .poll(async () => {
-        try {
-          return await buttons.count();
-        } catch {
-          return 0;
-        }
-      }, { timeout: 5000 })
-      .toBeGreaterThanOrEqual(1);
+    await waitForCountAtLeast(buttons, 1);
 
     // Take screenshot to force full render
     await page.screenshot({ path: 'test-results/landing-hero-desktop.png' });
@@ -96,15 +89,7 @@ test.describe('Visual Regression — Landing Page', () => {
 
     // Events section has cards
     const cards = page.locator('#events .event-card, [data-section="events"] [class*="card"]');
-    await expect
-      .poll(async () => {
-        try {
-          return await cards.count();
-        } catch {
-          return 0;
-        }
-      }, { timeout: 5000 })
-      .toBeGreaterThan(0);
+    await waitForCountAtLeast(cards, 1);
 
     await page.screenshot({ path: 'test-results/landing-events-desktop.png' });
   });
@@ -255,15 +240,7 @@ test.describe('Visual Regression — Mobile PWA', () => {
 
     // Has login buttons (Google and/or magic link)
     const buttons = page.locator('#login-screen button, #login-screen [class*="btn"]');
-    await expect
-      .poll(async () => {
-        try {
-          return await buttons.count();
-        } catch {
-          return 0;
-        }
-      }, { timeout: 5000 })
-      .toBeGreaterThanOrEqual(1);
+    await waitForCountAtLeast(buttons, 1);
 
     await page.screenshot({ path: 'test-results/mobile-login.png' });
 

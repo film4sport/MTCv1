@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import Image from 'next/image';
+import { APP_ROUTES } from '../../lib/site';
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -84,15 +85,15 @@ export default function Navbar() {
         <div className="hidden lg:flex items-center gap-8">
           <a href="#" className="nav-link text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9' }}>.Home</a>
           <div className="nav-dropdown">
-            <a href="/info?tab=about" className="nav-link text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9' }}>.About</a>
+            <a href={APP_ROUTES.infoTab('about')} className="nav-link text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9' }}>.About</a>
             <div className="nav-dropdown-menu">
-              <a href="/info?tab=about">About Us</a>
-              <a href="/info?tab=about#news">News</a>
+              <a href={APP_ROUTES.infoTab('about')}>About Us</a>
+              <a href={APP_ROUTES.infoTab('about', 'news')}>News</a>
             </div>
           </div>
-          <a href="/info?tab=membership" className="nav-link text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9' }}>.Membership</a>
-          <a href="/info?tab=faq" className="nav-link text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9' }}>.FAQ</a>
-          <a href="/login" className="login-btn ml-2">
+          <a href={APP_ROUTES.infoTab('membership')} className="nav-link text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9' }}>.Membership</a>
+          <a href={APP_ROUTES.infoTab('faq')} className="nav-link text-sm hover:opacity-80 transition-opacity" style={{ color: '#e8e4d9' }}>.FAQ</a>
+          <a href={APP_ROUTES.login} className="login-btn ml-2">
             Login
           </a>
         </div>
@@ -128,11 +129,11 @@ export default function Navbar() {
             </svg>
           </button>
           <a href="#" className="mobile-menu-link" onClick={closeMobileMenu}>.Home</a>
-          <a href="/info?tab=about" className="mobile-menu-link" onClick={closeMobileMenu}>.About</a>
-          <a href="/info?tab=about#news" className="mobile-menu-link text-sm" onClick={closeMobileMenu} style={{ opacity: 0.6, paddingLeft: '2rem' }}>.News</a>
-          <a href="/info?tab=membership" className="mobile-menu-link" onClick={closeMobileMenu}>.Membership</a>
-          <a href="/info?tab=faq" className="mobile-menu-link" onClick={closeMobileMenu}>.FAQ</a>
-          <a href="/login" className="mobile-menu-link" onClick={closeMobileMenu}>.LOGIN</a>
+          <a href={APP_ROUTES.infoTab('about')} className="mobile-menu-link" onClick={closeMobileMenu}>.About</a>
+          <a href={APP_ROUTES.infoTab('about', 'news')} className="mobile-menu-link text-sm" onClick={closeMobileMenu} style={{ opacity: 0.6, paddingLeft: '2rem' }}>.News</a>
+          <a href={APP_ROUTES.infoTab('membership')} className="mobile-menu-link" onClick={closeMobileMenu}>.Membership</a>
+          <a href={APP_ROUTES.infoTab('faq')} className="mobile-menu-link" onClick={closeMobileMenu}>.FAQ</a>
+          <a href={APP_ROUTES.login} className="mobile-menu-link" onClick={closeMobileMenu}>.LOGIN</a>
         </div>
       </div>
     </>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth, apiCall } from '../lib/store';
+import { APP_COPY, APP_ROUTES } from '../../lib/site';
 
 interface TourStep {
   title: string;
@@ -24,10 +25,10 @@ const STEPS: TourStep[] = [
     preview: (
       <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
         {[
-          { label: 'Book', bg: '#d4e157', fg: '#0a0a0a', icon: <><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></> },
-          { label: 'Partners', bg: '#6b7a3d', fg: '#fff', icon: <><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></> },
-          { label: 'Events', bg: '#8b9a5e', fg: '#fff', icon: <><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></> },
-          { label: 'Schedule', bg: '#1a1f12', fg: '#e8e4d9', icon: <><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></> },
+          { label: APP_COPY.bookCourt, bg: '#d4e157', fg: '#0a0a0a', icon: <><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></> },
+          { label: APP_COPY.partners, bg: '#6b7a3d', fg: '#fff', icon: <><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></> },
+          { label: APP_COPY.clubEvents, bg: '#8b9a5e', fg: '#fff', icon: <><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></> },
+          { label: APP_COPY.schedule, bg: '#1a1f12', fg: '#e8e4d9', icon: <><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></> },
         ].map(a => (
           <div key={a.label} style={{
             flex: 1, background: a.bg, borderRadius: 12, padding: '10px 8px', textAlign: 'center',
@@ -180,7 +181,7 @@ const STEPS: TourStep[] = [
     ),
     preview: (
       <a
-        href="/dashboard/book"
+        href={APP_ROUTES.dashboard + '/book'}
         style={{
           display: 'inline-flex', alignItems: 'center', gap: 8,
           padding: '12px 24px', background: '#6b7a3d', color: '#faf8f3',

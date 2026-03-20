@@ -10,6 +10,7 @@ import { AvatarDisplay, AVATAR_OPTIONS, AVATAR_SVGS } from '../lib/avatars';
 import type { SkillLevel, FamilyMember, User } from '../lib/types';
 import * as db from '../lib/db';
 import { reportError } from '../../lib/errorReporter';
+import { APP_COPY } from '../../lib/site';
 
 const INTERCLUB_TEAMS: { value: User['interclubTeam']; label: string; color: string; bg: string }[] = [
   { value: 'none', label: 'Not on a team', color: '#6b7266', bg: 'rgba(107, 114, 102, 0.08)' },
@@ -239,7 +240,7 @@ export default function SettingsPage() {
 
   return (
     <div className="min-h-screen dashboard-gradient-bg">
-      <DashboardHeader title="Settings" />
+      <DashboardHeader title={APP_COPY.settings} />
 
       <div className="p-6 lg:p-8 max-w-3xl mx-auto space-y-6 animate-slideUp">
 

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { APP_COPY, APP_ROUTES } from '../../lib/site';
 
 
 export default function Hero() {
@@ -96,16 +97,16 @@ export default function Hero() {
           {/* Buttons */}
           <div className="hero-buttons flex items-center gap-4 mb-10">
             <a
-              href="/signup"
+              href={APP_ROUTES.signup}
               className="glass-btn hero-cta-pulse px-8 py-3 rounded-full text-sm font-medium"
             >
-              Become a Member
+              {APP_COPY.becomeMember}
             </a>
             <a
-              href="/login"
+              href={APP_ROUTES.login}
               className="glass-btn-solid px-5 py-3 rounded-full text-sm font-medium flex items-center gap-2"
             >
-              Member Login
+              {APP_COPY.memberLogin}
               <span className="glass-icon w-6 h-6 rounded-full flex items-center justify-center">
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M7 17L17 7M17 7H7M17 7V17" />
@@ -116,7 +117,7 @@ export default function Hero() {
 
           {/* Spring Programs CTA — visible on all screens */}
           <a
-            href="/info?tab=coaching"
+            href={APP_ROUTES.infoTab('coaching')}
             className="hero-subtext inline-flex items-center gap-3 px-5 py-3 rounded-xl text-sm no-underline transition-all duration-200 hover:scale-[1.02]"
             style={{
               background: 'rgba(255, 255, 255, 0.08)',

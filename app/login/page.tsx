@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, Suspense } from 'react';
 import { pinLogin, pinSetup, forgotPin, verifyResetCode } from '../dashboard/lib/auth';
+import { APP_COPY, APP_ROUTES, SUPPORT_EMAIL, SUPPORT_EMAIL_MAILTO } from '../lib/site';
 
 export default function LoginPage() {
   return (
@@ -187,9 +188,9 @@ function LoginContent() {
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
                       {[
                         { bg: '#c8ff00', label: 'BOOK COURT', fg: '#000', icon: <><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></> },
-                        { bg: '#ff5a5f', label: 'FIND PARTNER', fg: '#fff', icon: <><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></> },
+                        { bg: '#ff5a5f', label: 'FIND PARTNERS', fg: '#fff', icon: <><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></> },
                         { bg: '#00d4ff', label: 'CLUB EVENTS', fg: '#000', icon: <><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></> },
-                        { bg: '#1a1a1a', label: 'MY SCHEDULE', fg: '#c8ff00', border: '1px solid rgba(200,255,0,0.2)', icon: <><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></> },
+                        { bg: '#1a1a1a', label: 'SCHEDULE', fg: '#c8ff00', border: '1px solid rgba(200,255,0,0.2)', icon: <><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></> },
                       ].map(a => (
                         <div key={a.label} style={{
                           background: a.bg, borderRadius: 18, height: 85, padding: '12px 14px',
@@ -528,7 +529,7 @@ function LoginContent() {
                     {[
                       { label: 'Home', active: true, icon: <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /> },
                       { label: 'Book Court', icon: <><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></> },
-                      { label: 'My Schedule', icon: <><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></> },
+                      { label: 'Schedule', icon: <><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></> },
                       { label: 'Partners', icon: <path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /> },
                       { label: 'Events', icon: <><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></> },
                       { label: 'Messages', badge: 2, icon: <path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /> },
@@ -585,7 +586,7 @@ function LoginContent() {
                       <div style={{ display: 'flex', gap: 5, marginBottom: 8 }}>
                         {[
                           { label: 'Book Court', bg: 'rgba(107,122,61,0.85)', fg: '#fff', icon: <><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></> },
-                          { label: 'View Schedule', bg: 'rgba(232,228,217,0.65)', fg: '#2a2f1e', icon: <><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></> },
+                          { label: 'Schedule', bg: 'rgba(232,228,217,0.65)', fg: '#2a2f1e', icon: <><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></> },
                           { label: 'Club Events', bg: 'rgba(212,225,87,0.7)', fg: '#2a2f1e', icon: <><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></> },
                           { label: 'Admin Panel', bg: 'rgba(200,209,160,0.6)', fg: '#2a2f1e', icon: <><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></> },
                         ].map(a => (
@@ -669,11 +670,11 @@ function LoginContent() {
           <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noise\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noise)\' opacity=\'0.04\'/%3E%3C/svg%3E")', backgroundRepeat: 'repeat', backgroundSize: '200px 200px' }} />
 
           {/* Back Link — outside card */}
-          <a href="/" className="relative z-10 inline-flex items-center gap-2 text-sm font-medium mb-5 transition-all hover:gap-3 self-start group" style={{ color: '#6b7a3d', textDecoration: 'none' }}>
+          <a href={APP_ROUTES.home} className="relative z-10 inline-flex items-center gap-2 text-sm font-medium mb-5 transition-all hover:gap-3 self-start group" style={{ color: '#6b7a3d', textDecoration: 'none' }}>
             <svg className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
             </svg>
-            Back to Home
+            {APP_COPY.backToHome}
           </a>
 
           {/* Glass morphism card */}
@@ -710,7 +711,7 @@ function LoginContent() {
                     </div>
                     <div style={{ background: '#ff5a5f', borderRadius: 8, padding: '6px 6px 5px', height: 38 }}>
                       <svg width="10" height="10" fill="none" stroke="#fff" viewBox="0 0 24 24" strokeWidth="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-                      <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 7.5, letterSpacing: 0.5, color: '#fff', marginTop: 2 }}>FIND PARTNER</p>
+                      <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 7.5, letterSpacing: 0.5, color: '#fff', marginTop: 2 }}>FIND PARTNERS</p>
                     </div>
                     <div style={{ background: '#00d4ff', borderRadius: 8, padding: '6px 6px 5px', height: 38 }}>
                       <svg width="10" height="10" fill="none" stroke="#0a0a0a" viewBox="0 0 24 24" strokeWidth="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
@@ -718,7 +719,7 @@ function LoginContent() {
                     </div>
                     <div style={{ background: '#0a0a0a', borderRadius: 8, padding: '6px 6px 5px', height: 38 }}>
                       <svg width="10" height="10" fill="none" stroke="#fff" viewBox="0 0 24 24" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                      <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 7.5, letterSpacing: 0.5, color: '#fff', marginTop: 2 }}>MY SCHEDULE</p>
+                      <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 7.5, letterSpacing: 0.5, color: '#fff', marginTop: 2 }}>SCHEDULE</p>
                     </div>
                   </div>
                   {/* Event preview */}
@@ -1033,7 +1034,7 @@ function LoginContent() {
                       }
                       if (result.user) {
                         localStorage.setItem('mtc-current-user', JSON.stringify(result.user));
-                        window.location.href = '/dashboard';
+                        window.location.href = APP_ROUTES.dashboard;
                       }
                     }}
                     disabled={loading}
@@ -1098,7 +1099,7 @@ function LoginContent() {
                       if (result.error) { setLoginError(result.error); return; }
                       if (result.user) {
                         localStorage.setItem('mtc-current-user', JSON.stringify(result.user));
-                        window.location.href = '/dashboard';
+                        window.location.href = APP_ROUTES.dashboard;
                       } else {
                         // PIN was set but no user returned — try logging in with the new PIN
                         setLoading(true);
@@ -1106,7 +1107,7 @@ function LoginContent() {
                         setLoading(false);
                         if (loginResult.user) {
                           localStorage.setItem('mtc-current-user', JSON.stringify(loginResult.user));
-                          window.location.href = '/dashboard';
+                          window.location.href = APP_ROUTES.dashboard;
                         } else {
                           setLoginError('PIN was set. Please sign in with your new PIN.');
                           setPin('');
@@ -1215,7 +1216,7 @@ function LoginContent() {
                       if (result.error) { setLoginError(result.error); return; }
                       if (result.user) {
                         localStorage.setItem('mtc-current-user', JSON.stringify(result.user));
-                        window.location.href = '/dashboard';
+                        window.location.href = APP_ROUTES.dashboard;
                       }
                     }}
                     disabled={loading}
@@ -1245,14 +1246,14 @@ function LoginContent() {
           <div className="mt-8 max-w-lg text-center">
             <p className="text-xs" style={{ color: '#8a8578' }}>
               Don&apos;t have an account?{' '}
-              <a href="/signup" className="font-semibold hover:underline" style={{ color: '#6b7a3d' }}>
-                Become a Member
+              <a href={APP_ROUTES.signup} className="font-semibold hover:underline" style={{ color: '#6b7a3d' }}>
+                {APP_COPY.becomeMember}
               </a>
             </p>
             <p className="text-xs mt-3" style={{ color: '#b0ab9f', lineHeight: 1.5 }}>
               &#x1F6A7; Still in development. Bugs? Email{' '}
-              <a href="mailto:monotennisclub1@gmail.com" style={{ color: '#6b7a3d', textDecoration: 'none', fontWeight: 600 }}>
-                monotennisclub1@gmail.com
+              <a href={SUPPORT_EMAIL_MAILTO} style={{ color: '#6b7a3d', textDecoration: 'none', fontWeight: 600 }}>
+                {SUPPORT_EMAIL}
               </a>
             </p>
           </div>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { calendarSpecialEvents, calendarRecurringEvents } from '../../lib/events';
+import { APP_ROUTES } from '../../lib/site';
 
 const MONTH_NAMES = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -299,7 +300,7 @@ export default function Schedule() {
                       </p>
                     </div>
                     <a
-                      href="/login"
+                      href={APP_ROUTES.login}
                       className="text-xs px-4 py-2 rounded-full font-semibold transition-all hover:scale-105 flex-shrink-0"
                       style={{ background: 'rgba(212,225,87,0.2)', color: '#d4e157', border: '1px solid rgba(212,225,87,0.3)', boxShadow: '0 0 12px rgba(212,225,87,0.1)' }}
                     >

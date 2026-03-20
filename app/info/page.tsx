@@ -12,16 +12,8 @@ import CoachingTab from './components/CoachingTab';
 import FaqTab from './components/FAQTab';
 import PrivacyTab from './components/PrivacyTab';
 import TermsTab from './components/TermsTab';
-
-const heroTitles: Record<string, { title: string; subtitle: string }> = {
-  about: { title: 'About Us', subtitle: 'Learn about Mono Tennis Club, our mission, facilities, news, and community.' },
-  membership: { title: 'Membership', subtitle: 'Everything you need to know about joining Mono Tennis Club, fees, and how to register.' },
-  rules: { title: 'Rules & Constitution', subtitle: 'Club rules, regulations, and our constitution governing the operation of Mono Tennis Club.' },
-  coaching: { title: 'Coaching & Camps', subtitle: 'Meet our coaching staff and learn about programs for players of all ages and skill levels.' },
-  faq: { title: 'FAQ & Directions', subtitle: 'All the A\'s to Your Q\'s' },
-  privacy: { title: 'Privacy Policy', subtitle: 'How Mono Tennis Club collects, uses, and protects your personal information.' },
-  terms: { title: 'Terms of Service', subtitle: 'The terms and conditions governing your use of Mono Tennis Club services.' },
-};
+import { APP_COPY, APP_ROUTES, CLUB_NAME } from '../lib/site';
+import { INFO_TAB_METADATA } from '../lib/site-metadata';
 
 const tabs = [
   { key: 'about', label: 'About' },
@@ -42,7 +34,6 @@ function InfoPageContent() {
 
   useEffect(() => { setActiveTab(tab); }, [tab]);
 
-  // Scroll to hash anchor after tab content renders (e.g. /info?tab=about#news)
   useEffect(() => {
     const hash = window.location.hash;
     if (!hash) return;
@@ -60,7 +51,6 @@ function InfoPageContent() {
     return () => clearTimeout(timer);
   }, [activeTab]);
 
-  // IntersectionObserver for fade-in animations
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => entries.forEach((entry) => { if (entry.isIntersecting) entry.target.classList.add('visible'); }),
@@ -72,68 +62,46 @@ function InfoPageContent() {
     return () => { clearTimeout(timer); observer.disconnect(); };
   }, [activeTab]);
 
-  // Tab-specific document titles for SEO
   useEffect(() => {
-    const titles: Record<string, string> = {
-      about: 'About Us — History, Facilities & Board | Mono Tennis Club',
-      membership: 'Membership — Fees, Benefits & How to Join | Mono Tennis Club',
-      coaching: 'Coaching — Lessons, Camps & Programs | Mono Tennis Club',
-      faq: 'FAQ & Directions — Find Us | Mono Tennis Club',
-      rules: 'Club Rules & Constitution | Mono Tennis Club',
-      privacy: 'Privacy Policy | Mono Tennis Club',
-      terms: 'Terms of Service | Mono Tennis Club',
-    };
-    document.title = titles[activeTab] || 'Club Info | Mono Tennis Club';
+    const tabMetadata = INFO_TAB_METADATA[activeTab as keyof typeof INFO_TAB_METADATA];
+    document.title = tabMetadata?.documentTitle || `Club Info | ${CLUB_NAME}`;
 
-    const descriptions: Record<string, string> = {
-      about: 'Learn about Mono Tennis Club — our history since 1980, 4 courts, clubhouse facilities, and volunteer Board of Directors in Mono, Ontario.',
-      membership: 'Join Mono Tennis Club — membership fees from $55/year, family plans, guest passes, and online registration for the Caledon-Dufferin tennis community.',
-      coaching: 'Tennis coaching at Mono Tennis Club — lessons with Mark Taylor, summer camps for juniors, clinics for all levels in Mono, Ontario.',
-      faq: 'Frequently asked questions about Mono Tennis Club — hours, equipment, booking, guest policy, and directions to 754483 Mono Centre Rd.',
-      rules: 'Mono Tennis Club constitution, court rules, regulations, and member code of conduct.',
-      privacy: 'Mono Tennis Club privacy policy — how we collect, use, and protect your personal information under PIPEDA.',
-      terms: 'Mono Tennis Club terms of service — membership agreement, liability, and usage policies.',
-    };
     const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute('content', descriptions[activeTab] || '');
+    if (meta) meta.setAttribute('content', tabMetadata?.description || '');
   }, [activeTab]);
 
   const switchTab = (newTab: string) => {
     setActiveTab(newTab);
-    router.push(`/info?tab=${newTab}`, { scroll: false });
+    router.push(APP_ROUTES.infoTab(newTab), { scroll: false });
   };
 
-  const currentHero = heroTitles[activeTab] || heroTitles.membership;
+  const currentHero = INFO_TAB_METADATA[activeTab as keyof typeof INFO_TAB_METADATA] || INFO_TAB_METADATA.membership;
 
   return (
     <div ref={pageRef} style={{ backgroundColor: '#f5f2eb', minHeight: '100vh' }}>
-      {/* Header / Nav Bar */}
       <nav className="sticky top-0 z-50 flex items-center justify-between px-8 lg:px-16 py-4" style={{ backgroundColor: 'rgba(26, 31, 18, 0.95)', backdropFilter: 'blur(10px)', borderBottom: '1px solid rgba(232, 228, 217, 0.08)' }}>
-        <a href="/">
-          <Image src="/mono-logo-transparent.png" alt="Mono Tennis Club" width={48} height={48} className="h-10 w-auto" style={{ filter: 'brightness(0) invert(1)' }} />
+        <a href={APP_ROUTES.home}>
+          <Image src="/mono-logo-transparent.png" alt={CLUB_NAME} width={48} height={48} className="h-10 w-auto" style={{ filter: 'brightness(0) invert(1)' }} />
         </a>
-        <a href="/" className="inline-flex items-center gap-2 text-sm font-medium hover:opacity-80 transition-opacity" style={{ color: '#d4e157' }}>
+        <a href={APP_ROUTES.home} className="inline-flex items-center gap-2 text-sm font-medium hover:opacity-80 transition-opacity" style={{ color: '#d4e157' }}>
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          Back to Home
+          {APP_COPY.backToHome}
         </a>
       </nav>
 
-      {/* Hero Banner */}
       <section className="py-16 lg:py-24 px-8 lg:px-16 text-center fade-in" style={{ backgroundColor: '#f5f2eb' }}>
         <span className="section-label">// Club Information</span>
         <h1 className="headline-font text-3xl md:text-4xl lg:text-[2.75rem] leading-tight mt-4 mb-6" style={{ color: '#2a2f1e' }}>
-          {currentHero.title}
+          {currentHero.heroTitle}
         </h1>
         <p className="max-w-2xl mx-auto text-sm leading-relaxed" style={{ color: '#6b7266' }}>
-          {currentHero.subtitle}
+          {currentHero.heroSubtitle}
         </p>
       </section>
 
-      {/* Tab Navigation */}
       <div className="sticky top-[61px] z-40 px-8 lg:px-16 py-3 relative" style={{ backgroundColor: '#f5f2eb', borderBottom: '1px solid #e0dcd3' }}>
-        {/* Right fade indicator for horizontal scroll on mobile */}
         <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-12 lg:hidden z-10" style={{ background: 'linear-gradient(to right, transparent, #f5f2eb)' }} />
         <div className="max-w-7xl mx-auto flex justify-center gap-3 overflow-x-auto" role="tablist" aria-label="Info page sections" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}>
           {tabs.map((t) => (
@@ -157,7 +125,6 @@ function InfoPageContent() {
         </div>
       </div>
 
-      {/* Tab Panels */}
       {activeTab === 'about' && <div role="tabpanel" id="tabpanel-about" aria-labelledby="tab-about" className="animate-fadeIn"><AboutTab /></div>}
       {activeTab === 'membership' && <div role="tabpanel" id="tabpanel-membership" aria-labelledby="tab-membership" className="animate-fadeIn"><MembershipTab /></div>}
       {activeTab === 'rules' && <div role="tabpanel" id="tabpanel-rules" aria-labelledby="tab-rules" className="animate-fadeIn"><RulesTab /></div>}
@@ -166,27 +133,25 @@ function InfoPageContent() {
       {activeTab === 'privacy' && <div role="tabpanel" id="tabpanel-privacy" aria-labelledby="tab-privacy" className="animate-fadeIn"><PrivacyTab /></div>}
       {activeTab === 'terms' && <div role="tabpanel" id="tabpanel-terms" aria-labelledby="tab-terms" className="animate-fadeIn"><TermsTab /></div>}
 
-      {/* Back to Home CTA — hidden on membership tab (has its own Join Now) */}
       {activeTab !== 'membership' && <section className="py-12 lg:py-16 px-8 lg:px-16 text-center fade-in" style={{ backgroundColor: '#1a1f12' }}>
         <h2 className="headline-font text-2xl md:text-3xl" style={{ color: '#e8e4d9' }}>
           Ready to Play?
         </h2>
         <p className="mt-3 text-sm max-w-md mx-auto" style={{ color: 'rgba(232, 228, 217, 0.6)' }}>
-          Join Mono Tennis Club and get access to courts, events, and a community that loves the game.
+          Join the club and get access to courts, events, and a community that loves the game.
         </p>
         <a
-          href="/signup"
+          href={APP_ROUTES.signup}
           className="inline-block mt-6 px-8 py-3 rounded-full text-sm font-semibold transition-all hover:-translate-y-0.5 hover:shadow-xl"
           style={{ backgroundColor: '#d4e157', color: '#2a2f1e' }}
         >
-          Become a Member
+          {APP_COPY.becomeMember}
         </a>
       </section>}
 
-      {/* Footer */}
       <footer className="py-8 px-8 lg:px-16 text-center" style={{ backgroundColor: '#1a1f12', borderTop: '1px solid rgba(232, 228, 217, 0.08)' }}>
         <p className="text-sm" style={{ color: 'rgba(232, 228, 217, 0.4)' }}>
-          &copy; Mono Tennis Club 2026
+          &copy; {CLUB_NAME} 2026
         </p>
       </footer>
     </div>

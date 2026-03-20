@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { allCardEvents, eventFilters, type MTCEvent } from '../../lib/events';
+import { APP_ROUTES } from '../../lib/site';
 
 // Rotating palette: cards cycle through these 3 colors by position, not category
 const cardPalette: Array<{ accent: string; bg: string; text: string }> = [
@@ -176,7 +177,7 @@ export default function Events() {
                       {event.highlight}
                     </span>
                     <a
-                      href={event.category === 'coaching' ? '/info?tab=coaching' : '/login'}
+                      href={event.category === 'coaching' ? APP_ROUTES.infoTab('coaching') : APP_ROUTES.login}
                       className="text-xs font-medium transition-opacity hover:opacity-80"
                       style={{ color: '#6b7a3d' }}
                     >

@@ -10,6 +10,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const { transformSync } = require('esbuild');
+const siteContent = require('../app/lib/site-content.json');
 
 const MOBILE_DIR = path.join(__dirname, '..', 'public', 'mobile-app');
 const DIST_DIR = path.join(MOBILE_DIR, 'dist');
@@ -185,6 +186,9 @@ htmlContent = htmlContent.replace(
   /name\.indexOf\('[^']+'\)/,
   `name.indexOf('${newCacheName}')`
 );
+htmlContent = htmlContent
+  .replace(/monotennisclub1@gmail\.com/g, siteContent.supportEmail)
+  .replace(/monotennis\.payment@gmail\.com/g, siteContent.paymentEmail);
 fs.writeFileSync(htmlPath, htmlContent);
 
 // ── Report ──────────────────────────────────────────────────

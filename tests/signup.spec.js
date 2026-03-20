@@ -1,37 +1,14 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
+const { gotoInfo, switchInfoTab } = require('./helpers/app-helpers');
 
 test.describe('Signup Flow - /info?tab=membership', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/info?tab=membership', { waitUntil: 'domcontentloaded', timeout: 30000 });
-    await page.waitForTimeout(500);
+    await gotoInfo(page, 'membership');
   });
 
   async function switchTab(page, name, expectedTab, expectedText) {
-    const tabByRole = page.getByRole('tab', { name, exact: true });
-    await expect(tabByRole).toBeVisible();
-
-    const tabId = `tab-${expectedTab}`;
-    const panelId = `tabpanel-${expectedTab}`;
-
-    let switchedViaClick = false;
-    try {
-      const tab = page.locator(`#${tabId}`);
-      await tab.scrollIntoViewIfNeeded({ timeout: 3000 });
-      await tab.click({ timeout: 3000 });
-      await page.waitForFunction((tabName) => {
-        return window.location.search.includes(`tab=${tabName}`) || !!document.getElementById(`tabpanel-${tabName}`);
-      }, expectedTab, { timeout: 4000 });
-      switchedViaClick = true;
-    } catch {
-      await page.goto(`/info?tab=${expectedTab}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
-    }
-
-    if (!switchedViaClick) {
-      await page.waitForTimeout(250);
-    }
-
-    await expect(page.locator(`#${panelId}`)).toBeVisible();
+    await switchInfoTab(page, name, expectedTab);
     await expect(page.getByText(expectedText, { exact: false }).first()).toBeVisible();
   }
 
@@ -68,8 +45,7 @@ test.describe('Signup Flow - /info?tab=membership', () => {
 
 test.describe('Info Page - About Tab', () => {
   test('about tab loads with club info', async ({ page }) => {
-    await page.goto('/info?tab=about', { waitUntil: 'domcontentloaded', timeout: 30000 });
-    await page.waitForTimeout(500);
+    await gotoInfo(page, 'about');
     const pageText = await page.textContent('body');
     expect(pageText).toBeTruthy();
     expect(pageText.length).toBeGreaterThan(100);
@@ -78,8 +54,7 @@ test.describe('Info Page - About Tab', () => {
 
 test.describe('Info Page - FAQ Tab', () => {
   test('FAQ tab has accordion and map', async ({ page }) => {
-    await page.goto('/info?tab=faq', { waitUntil: 'domcontentloaded', timeout: 30000 });
-    await page.waitForTimeout(500);
+    await gotoInfo(page, 'faq');
     await expect(page.getByText('FAQ').first()).toBeAttached();
   });
 });

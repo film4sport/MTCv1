@@ -5,6 +5,7 @@ import { useAuth, useNotifications, useDerived, apiCall } from '../lib/store';
 import DashboardHeader from '../components/DashboardHeader';
 import type { AnnouncementAudience } from '../lib/types';
 import { reportError } from '../../lib/errorReporter';
+import { APP_COPY } from '../../lib/site';
 
 const SKILL_COLORS: Record<string, { bg: string; text: string }> = {
   beginner: { bg: 'rgba(34, 197, 94, 0.1)', text: '#16a34a' },
@@ -112,7 +113,7 @@ export default function CaptainPage() {
   if (!currentUser || !isOnTeam) {
     return (
       <div className="min-h-screen dashboard-gradient-bg">
-        <DashboardHeader title="My Team" />
+        <DashboardHeader title={APP_COPY.myTeam} />
         <div style={{ padding: '40px 24px', textAlign: 'center', color: '#2a2f1e' }}>
           <h2 style={{ fontSize: 20, marginBottom: 8 }}>No Team Assigned</h2>
           <p style={{ color: '#6b7266' }}>Join an interclub team from your settings page to access team management.</p>
@@ -125,7 +126,7 @@ export default function CaptainPage() {
 
   return (
     <div className="min-h-screen dashboard-gradient-bg">
-      <DashboardHeader title="My Team" />
+      <DashboardHeader title={APP_COPY.myTeam} />
       <div style={{ maxWidth: 900, margin: '0 auto', padding: '24px 16px' }}>
         {/* Admin team selector */}
         {isAdmin && (!userTeam || userTeam === 'none') && (

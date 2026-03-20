@@ -1,0 +1,8 @@
+{
+  "clubName": "Mono Tennis Club",
+  "supportEmail": "monotennisclub1@gmail.com",
+  "paymentEmail": "monotennis.payment@gmail.com",
+  "membershipSeasonYear": 2026,
+  "siteUrl": "https://www.monotennisclub.com",
+  "cdnImageBase": "https://cdn.jsdelivr.net/gh/film4sport/my-webapp-images@main/mtc-images"
+}

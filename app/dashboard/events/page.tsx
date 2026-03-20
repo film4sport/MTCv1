@@ -7,6 +7,7 @@ import { useToast } from '../lib/toast';
 import DashboardHeader from '../components/DashboardHeader';
 import { downloadICS } from '../lib/calendar';
 import { useFocusTrap } from '../lib/utils';
+import { APP_COPY } from '../../lib/site';
 
 type EventFilter = 'all' | 'social' | 'match' | 'tournament' | 'camp' | 'programs';
 type ViewMode = 'calendar' | 'list';
@@ -137,7 +138,7 @@ export default function EventsPage() {
 
   return (
     <div className="min-h-screen dashboard-gradient-bg">
-      <DashboardHeader title="Club Events" />
+      <DashboardHeader title={APP_COPY.clubEvents} />
 
       <div className="p-6 lg:p-8 max-w-5xl mx-auto animate-slideUp">
 

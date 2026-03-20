@@ -8,6 +8,7 @@ import { AvatarDisplay } from '../lib/avatars';
 import Link from 'next/link';
 import { generateId, useFocusTrap } from '../lib/utils';
 import type { SkillLevel } from '../lib/types';
+import { APP_COPY } from '../../lib/site';
 
 type FilterType = 'all' | 'singles' | 'doubles' | 'mixed';
 type SkillFilter = 'all' | SkillLevel;
@@ -50,7 +51,7 @@ export default function PartnersPage() {
 
   return (
     <div className="min-h-screen dashboard-gradient-bg">
-      <DashboardHeader title="Find a Partner" />
+      <DashboardHeader title={APP_COPY.partners} />
 
       <div className="p-6 lg:p-8 max-w-5xl mx-auto animate-slideUp space-y-5">
         {/* Filters + Post Button */}

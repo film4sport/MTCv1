@@ -1,5 +1,6 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
+const { waitForCountAtLeast } = require('./helpers/dom-helpers');
 
 /**
  * Landing Page — Gallery + Lightbox E2E Tests
@@ -21,8 +22,7 @@ test.describe('Gallery & Lightbox', () => {
 
   test('gallery section renders with slides and nav buttons', async ({ page }) => {
     const slides = page.locator('.gallery-slide');
-    const count = await slides.count();
-    expect(count).toBeGreaterThanOrEqual(5);
+    await waitForCountAtLeast(slides, 5);
     await expect(page.locator('.gallery-nav.prev')).toBeAttached();
     await expect(page.locator('.gallery-nav.next')).toBeAttached();
   });
@@ -112,8 +112,7 @@ test.describe('Gallery & Lightbox', () => {
 
   test('gallery dots navigation works', async ({ page }) => {
     const dots = page.locator('.gallery-dot');
-    const dotCount = await dots.count();
-    expect(dotCount).toBeGreaterThanOrEqual(2);
+    await waitForCountAtLeast(dots, 2);
     // Click second dot
     await dots.nth(1).click();
     await page.waitForTimeout(300);
@@ -122,7 +121,7 @@ test.describe('Gallery & Lightbox', () => {
 
   test('gallery slides have unique descriptive alt text', async ({ page }) => {
     const images = page.locator('.gallery-slide img');
-    await expect(images.first()).toBeAttached({ timeout: 5000 });
+    await waitForCountAtLeast(images, 1);
     const count = await images.count();
     const altTexts = [];
     for (let i = 0; i < count; i++) {

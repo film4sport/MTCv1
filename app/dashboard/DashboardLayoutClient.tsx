@@ -8,6 +8,7 @@ import { UIProvider, useUI } from './lib/ui';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import Sidebar from './components/Sidebar';
 import Toast from './components/Toast';
+import { APP_ROUTES } from '../lib/site';
 
 function DashboardGuard({ children }: { children: React.ReactNode }) {
   const { currentUser, isLoaded, logout } = useAuth();
@@ -20,13 +21,13 @@ function DashboardGuard({ children }: { children: React.ReactNode }) {
     const isAndroidTablet = /Android/.test(ua) && !/Mobile/.test(ua);
     const isMobilePhone = /iPhone|iPod/.test(ua) || (/Android/.test(ua) && /Mobile/.test(ua));
     if (isIPad || isAndroidTablet || isMobilePhone) {
-      window.location.replace('/mobile-app/index.html');
+      window.location.replace(APP_ROUTES.mobileApp);
     }
   }, []);
 
   useEffect(() => {
     if (isLoaded && !currentUser) {
-      router.replace('/login');
+      router.replace(APP_ROUTES.login);
     }
   }, [isLoaded, currentUser, router]);
 

@@ -7,6 +7,7 @@ import DashboardHeader from '../components/DashboardHeader';
 import { generateId, useFocusTrap } from '../lib/utils';
 import * as db from '../lib/db';
 import { reportError } from '../../lib/errorReporter';
+import { APP_COPY } from '../../lib/site';
 import AdminDashboardTab from './components/AdminDashboardTab';
 import AdminMembersTab from './components/AdminMembersTab';
 import AdminCourtsTab from './components/AdminCourtsTab';
@@ -185,7 +186,7 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen dashboard-gradient-bg">
-      <DashboardHeader title="Admin Panel" />
+      <DashboardHeader title={APP_COPY.adminPanel} />
 
       <div className="p-6 lg:p-8 max-w-6xl mx-auto animate-slideUp space-y-5">
         <div className="dashboard-panel rounded-[32px] border p-5 sm:p-6 shadow-[0_28px_72px_rgba(31,40,23,0.16)]">

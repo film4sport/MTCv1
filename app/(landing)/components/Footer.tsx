@@ -1,5 +1,7 @@
 'use client';
 
+import { APP_ROUTES, SUPPORT_EMAIL, SUPPORT_EMAIL_MAILTO } from '../../lib/site';
+
 export default function Footer() {
   return (
     <footer id="contact" className="text-white py-16 fade-in texture-overlay" style={{ backgroundColor: '#1a1f12' }}>
@@ -23,27 +25,27 @@ export default function Footer() {
             </h5>
             <ul className="space-y-3">
               <li>
-                <a href="/info?tab=about" className="footer-link text-base" style={{ color: 'rgba(232, 228, 217, 0.7)' }}>
+                <a href={APP_ROUTES.infoTab('about')} className="footer-link text-base" style={{ color: 'rgba(232, 228, 217, 0.7)' }}>
                   About
                 </a>
               </li>
               <li>
-                <a href="/info?tab=membership" className="footer-link text-base" style={{ color: 'rgba(232, 228, 217, 0.7)' }}>
+                <a href={APP_ROUTES.infoTab('membership')} className="footer-link text-base" style={{ color: 'rgba(232, 228, 217, 0.7)' }}>
                   Membership
                 </a>
               </li>
               <li>
-                <a href="/info?tab=faq" className="footer-link text-base" style={{ color: 'rgba(232, 228, 217, 0.7)' }}>
+                <a href={APP_ROUTES.infoTab('faq')} className="footer-link text-base" style={{ color: 'rgba(232, 228, 217, 0.7)' }}>
                   FAQ
                 </a>
               </li>
               <li>
-                <a href="/info?tab=coaching" className="footer-link text-base" style={{ color: 'rgba(232, 228, 217, 0.7)' }}>
+                <a href={APP_ROUTES.infoTab('coaching')} className="footer-link text-base" style={{ color: 'rgba(232, 228, 217, 0.7)' }}>
                   Coaching
                 </a>
               </li>
               <li>
-                <a href="/signup" className="footer-link text-base" style={{ color: 'rgba(232, 228, 217, 0.7)' }}>
+                <a href={APP_ROUTES.signup} className="footer-link text-base" style={{ color: 'rgba(232, 228, 217, 0.7)' }}>
                   Sign Up
                 </a>
               </li>
@@ -63,11 +65,11 @@ export default function Footer() {
               L9W 5W9
             </address>
             <a
-              href="mailto:monotennisclub1@gmail.com"
+              href={SUPPORT_EMAIL_MAILTO}
               className="footer-link text-base block mt-4 break-all"
               style={{ color: 'rgba(232, 228, 217, 0.7)' }}
             >
-              monotennisclub1@gmail.com
+              {SUPPORT_EMAIL}
             </a>
           </div>
         </div>
@@ -83,10 +85,10 @@ export default function Footer() {
             </p>
             <span className="hidden sm:inline text-sm" style={{ color: 'rgba(232, 228, 217, 0.2)' }}>|</span>
             <div className="flex items-center gap-4">
-              <a href="/info?tab=privacy" className="footer-link text-sm" style={{ color: 'rgba(232, 228, 217, 0.4)' }}>
+              <a href={APP_ROUTES.infoTab('privacy')} className="footer-link text-sm" style={{ color: 'rgba(232, 228, 217, 0.4)' }}>
                 Privacy Policy
               </a>
-              <a href="/info?tab=terms" className="footer-link text-sm" style={{ color: 'rgba(232, 228, 217, 0.4)' }}>
+              <a href={APP_ROUTES.infoTab('terms')} className="footer-link text-sm" style={{ color: 'rgba(232, 228, 217, 0.4)' }}>
                 Terms of Service
               </a>
             </div>

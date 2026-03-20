@@ -1,3 +1,5 @@
+import { CLUB_NAME, SUPPORT_EMAIL } from '../lib/site';
+
 export const privacySections = [
   {
     title: 'What We Collect',
@@ -13,7 +15,7 @@ export const privacySections = [
   },
   {
     title: 'Your Rights Under PIPEDA',
-    content: 'Under Canada\'s Personal Information Protection and Electronic Documents Act (PIPEDA), you have the right to access your personal information, request corrections, and withdraw consent for its use. To exercise these rights, contact us at info@monotennisclub.com.',
+    content: `Under Canada's Personal Information Protection and Electronic Documents Act (PIPEDA), you have the right to access your personal information, request corrections, and withdraw consent for its use. To exercise these rights, contact us at ${SUPPORT_EMAIL}.`,
   },
   {
     title: 'Data Security',
@@ -25,14 +27,14 @@ export const privacySections = [
   },
   {
     title: 'Contact Us',
-    content: 'For privacy-related questions or concerns, contact our Privacy Officer at info@monotennisclub.com or write to: Mono Tennis Club, 754483 Mono Centre Rd, Mono, Ontario, L9W 5W9.',
+    content: `For privacy-related questions or concerns, contact our Privacy Officer at ${SUPPORT_EMAIL} or write to: ${CLUB_NAME}, 754483 Mono Centre Rd, Mono, Ontario, L9W 5W9.`,
   },
 ];
 
 export const termsSections = [
   {
     title: 'Acceptance of Terms',
-    content: 'By accessing or using the Mono Tennis Club website and services, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.',
+    content: `By accessing or using the ${CLUB_NAME} website and services, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.`,
   },
   {
     title: 'Account Responsibilities',
@@ -48,11 +50,11 @@ export const termsSections = [
   },
   {
     title: 'Intellectual Property',
-    content: 'All content on the Mono Tennis Club website, including text, graphics, logos, and software, is the property of Mono Tennis Club and is protected by Canadian copyright law. You may not reproduce or distribute this content without permission.',
+    content: `All content on the ${CLUB_NAME} website, including text, graphics, logos, and software, is the property of ${CLUB_NAME} and is protected by Canadian copyright law. You may not reproduce or distribute this content without permission.`,
   },
   {
     title: 'Limitation of Liability',
-    content: 'Mono Tennis Club shall not be liable for any indirect, incidental, or consequential damages arising from your use of our facilities or services. All members must sign a waiver of liability before participating in club activities.',
+    content: `${CLUB_NAME} shall not be liable for any indirect, incidental, or consequential damages arising from your use of our facilities or services. All members must sign a waiver of liability before participating in club activities.`,
   },
   {
     title: 'Governing Law',
@@ -108,7 +110,7 @@ export const clubRules = [
 export const constitutionArticles = [
   {
     title: 'Article 1 — Name',
-    content: 'The organization is called the Mono Tennis Club, located at 754483 Mono Centre Road, Mono, Ontario L9W 5W9, beside the Mono Community Centre.',
+    content: `The organization is called the ${CLUB_NAME}, located at 754483 Mono Centre Road, Mono, Ontario L9W 5W9, beside the Mono Community Centre.`,
   },
   {
     title: 'Article 2 — Purpose',
