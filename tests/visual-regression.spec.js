@@ -69,7 +69,15 @@ test.describe('Visual Regression — Landing Page', () => {
 
     // Hero has CTA buttons
     const buttons = page.locator('section.texture-overlay a, section.overflow-hidden a');
-    expect(await buttons.count()).toBeGreaterThanOrEqual(1);
+    await expect
+      .poll(async () => {
+        try {
+          return await buttons.count();
+        } catch {
+          return 0;
+        }
+      }, { timeout: 5000 })
+      .toBeGreaterThanOrEqual(1);
 
     // Take screenshot to force full render
     await page.screenshot({ path: 'test-results/landing-hero-desktop.png' });
