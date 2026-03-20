@@ -18,7 +18,9 @@ async function gotoGallery(page) {
 async function openLightbox(page) {
   const firstSlide = page.locator('.gallery-slide[role="button"]').first();
   await expect(firstSlide).toBeAttached();
-  await firstSlide.scrollIntoViewIfNeeded().catch(() => {});
+  await page.evaluate(() => {
+    document.querySelector('.gallery-slide[role="button"]')?.scrollIntoView({ block: 'center' });
+  }).catch(() => {});
   await expect
     .poll(async () => {
       try {

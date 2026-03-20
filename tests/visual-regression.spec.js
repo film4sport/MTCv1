@@ -106,7 +106,9 @@ test.describe('Visual Regression — Landing Page', () => {
 
     const eventsSection = page.locator('#events, [data-section="events"]').first();
     await expect(eventsSection).toBeAttached({ timeout: 5000 });
-    await eventsSection.scrollIntoViewIfNeeded();
+    await page.evaluate(() => {
+      document.querySelector('#events, [data-section="events"]')?.scrollIntoView({ block: 'start' });
+    }).catch(() => {});
 
     // Events section has cards
     const cards = page.locator('#events .event-card, [data-section="events"] [class*="card"]');
@@ -286,7 +288,7 @@ test.describe('Visual Regression — Mobile PWA', () => {
     await skipOnboarding(page);
 
     // Mock auth
-    await page.route('**/api/mobile-auth', (route) => {
+    await page.route('**/api/mobile-auth/config', (route) => {
       route.fulfill({
         status: 200,
         contentType: 'application/json',

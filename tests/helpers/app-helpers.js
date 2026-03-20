@@ -66,7 +66,46 @@ async function gotoInfo(page, tab = 'membership') {
 async function switchInfoTab(page, label, tabKey) {
   const tab = page.getByRole('tab', { name: label, exact: true }).first();
   await expect(tab).toBeVisible();
-  await gotoInfo(page, tabKey);
+  const switchedViaUi = await expect
+    .poll(async () => {
+      try {
+        return await page.evaluate(({ expectedTab, expectedLabel }) => {
+          const selectedTab = document.getElementById(`tab-${expectedTab}`);
+          const panel = document.getElementById(`tabpanel-${expectedTab}`);
+          if (
+            selectedTab &&
+            selectedTab.getAttribute('aria-selected') === 'true' &&
+            panel &&
+            panel.offsetParent !== null
+          ) {
+            return true;
+          }
+
+          const candidates = Array.from(document.querySelectorAll('[role="tab"]'));
+          const matchingTab = candidates.find((candidate) => candidate.textContent?.trim() === expectedLabel);
+          if (matchingTab instanceof HTMLElement) {
+            matchingTab.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+            matchingTab.click();
+          }
+
+          return !!(
+            selectedTab &&
+            selectedTab.getAttribute('aria-selected') === 'true' &&
+            panel &&
+            panel.offsetParent !== null
+          );
+        }, { expectedTab: tabKey, expectedLabel: label });
+      } catch {
+        return false;
+      }
+    }, { timeout: 2500 })
+    .toBeTruthy()
+    .then(() => true)
+    .catch(() => false);
+
+  if (!switchedViaUi) {
+    await gotoInfo(page, tabKey);
+  }
   await expect
     .poll(async () => {
       try {
@@ -88,7 +127,7 @@ async function switchInfoTab(page, label, tabKey) {
 }
 
 async function mockAuthenticatedPwa(page, apiOverrides = {}) {
-  await page.route('**/api/mobile-auth', (route) => {
+  await page.route('**/api/mobile-auth/config', (route) => {
     route.fulfill({
       status: 200,
       contentType: 'application/json',

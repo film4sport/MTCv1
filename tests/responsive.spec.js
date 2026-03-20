@@ -43,7 +43,9 @@ for (const vp of viewports) {
 
     test('Footer section', async ({ page }) => {
       await gotoLanding(page);
-      await page.locator('footer').first().scrollIntoViewIfNeeded();
+      await page.evaluate(() => {
+        document.querySelector('footer')?.scrollIntoView({ block: 'end' });
+      }).catch(() => {});
       await page.screenshot({ path: `test-results/footer-${vp.name}.png`, fullPage: false });
     });
 

@@ -53,7 +53,9 @@ test.describe('Landing Page - Load & Structure', () => {
     const footer = page.locator('footer').first();
     await expect(btn).not.toHaveClass(/visible/);
     await expect(footer).toBeAttached({ timeout: 5000 });
-    await footer.scrollIntoViewIfNeeded();
+    await page.evaluate(() => {
+      document.querySelector('footer')?.scrollIntoView({ block: 'end' });
+    }).catch(() => {});
     await scrollWindow(page, 400);
     await expect
       .poll(async () => {

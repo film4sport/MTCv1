@@ -44,7 +44,7 @@ const MOCK_EVENTS = [
 
 /** Set up authenticated state with mocked APIs */
 async function setupAuthenticatedState(page) {
-  await page.route('**/api/mobile-auth', (route) => {
+  await page.route('**/api/mobile-auth/config', (route) => {
     route.fulfill({
       status: 200,
       contentType: 'application/json',

@@ -108,7 +108,6 @@ const jsonLd = {
       logo: `${SITE_URL}/favicon.png`,
       image: SITE_METADATA.heroImage,
       description: SITE_METADATA.landingDescription,
-      telephone: '',
       email: SUPPORT_EMAIL,
       address: {
         '@type': 'PostalAddress',
