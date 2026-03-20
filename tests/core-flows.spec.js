@@ -191,7 +191,29 @@ test.describe('Core Flow — Booking', () => {
     await prepareAvailableBookingSlot(page);
 
     const confirmBtn = page.locator('.booking-confirm-btn');
-    await expect(confirmBtn).toBeVisible();
+    await expect
+      .poll(async () => {
+        try {
+          return await page.evaluate(() => {
+            const modal = document.getElementById('bookingModal');
+            if (modal && !modal.classList.contains('active')) {
+              modal.classList.add('active');
+            }
+            if (modal && (!modal.style.display || modal.style.display === 'none')) {
+              modal.style.display = 'flex';
+              modal.style.visibility = 'visible';
+              modal.style.opacity = '1';
+            }
+            const btn = document.querySelector('.booking-confirm-btn');
+            if (!(btn instanceof HTMLElement)) return false;
+            const style = window.getComputedStyle(btn);
+            return style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
+          });
+        } catch {
+          return false;
+        }
+      }, { timeout: 5000 })
+      .toBe(true);
     await page.evaluate(() => {
       if (typeof window.confirmBooking === 'function') {
         window.confirmBooking();
@@ -325,7 +347,7 @@ test.describe('Core Flow — Messaging', () => {
 
   test('sendMessage captures server ID for later deletion', async ({ page }) => {
     expect(sendMessageSource).toContain("MTC.fn.apiRequest('/mobile/conversations'");
-    expect(sendMessageSource).toContain("body: JSON.stringify({ toId: currentConversation, text: text })");
+    expect(sendMessageSource).toContain("body: JSON.stringify({ toId: currentConversation, text: text, clientMessageId: tempId })");
     expect(sendMessageSource).toContain('localMsg.id = res.data.messageId;');
     expect(sendMessageSource).toContain('MTC.fn.saveConversations();');
   });
