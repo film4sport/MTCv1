@@ -29,7 +29,9 @@ test.describe('Chromium Compatibility - Info Tabs', () => {
     const tablist = page.locator('[role="tablist"]');
     const terms = page.locator('#tab-terms');
     await expect(tablist).toBeVisible();
-    await terms.scrollIntoViewIfNeeded();
+    await page.evaluate(() => {
+      document.getElementById('tab-terms')?.scrollIntoView({ inline: 'nearest', block: 'nearest' });
+    });
     await expect(terms).toBeVisible();
   });
 });
@@ -61,7 +63,13 @@ test.describe('Chromium Compatibility - Desktop Login', () => {
     const widths = await page.evaluate(() => ({
       bodyWidth: document.body.scrollWidth,
       viewportWidth: window.innerWidth,
-    }));
+    })).catch(async () => {
+      await page.waitForLoadState('load').catch(() => {});
+      return await page.evaluate(() => ({
+        bodyWidth: document.body.scrollWidth,
+        viewportWidth: window.innerWidth,
+      }));
+    });
     expect(widths.bodyWidth).toBeLessThanOrEqual(widths.viewportWidth + 1);
   });
 });

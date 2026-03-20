@@ -10,9 +10,41 @@ async function gotoLanding(page) {
 test('Hero-wave transition closeup', async ({ page }) => {
   await gotoLanding(page);
 
-  const wave = page.locator('.wave-divider').first();
-  await expect(wave).toBeAttached();
-  await wave.screenshot({ path: 'test-results/hero-wave-closeup.png' });
+  await page.evaluate(() => {
+    document.querySelector('.wave-divider')?.scrollIntoView({ block: 'center' });
+  }).catch(() => {});
+  const box = await expect
+    .poll(async () => {
+      try {
+        return await page.locator('.wave-divider').first().boundingBox();
+      } catch {
+        return null;
+      }
+    }, { timeout: 5000 })
+    .not.toBeNull()
+    .then(async () => page.locator('.wave-divider').first().boundingBox());
+  if (box) {
+    const viewport = page.viewportSize() || { width: 1280, height: 720 };
+    const clip = {
+      x: Math.max(0, box.x),
+      y: Math.max(0, box.y),
+      width: Math.max(1, Math.min(box.width, viewport.width - Math.max(0, box.x))),
+      height: Math.max(1, Math.min(box.height, viewport.height - Math.max(0, box.y))),
+    };
+
+    if (clip.width > 0 && clip.height > 0) {
+      try {
+        await page.screenshot({
+          path: 'test-results/hero-wave-closeup.png',
+          clip,
+        });
+      } catch {
+        await page.screenshot({ path: 'test-results/hero-wave-closeup.png', fullPage: false });
+      }
+    } else {
+      await page.screenshot({ path: 'test-results/hero-wave-closeup.png', fullPage: false });
+    }
+  }
 
   // Also take a full page screenshot to see overall layout
   await page.screenshot({ path: 'test-results/landing-fullpage.png', fullPage: true });

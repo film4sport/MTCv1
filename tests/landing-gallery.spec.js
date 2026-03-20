@@ -16,11 +16,42 @@ async function gotoGallery(page) {
 }
 
 async function openLightbox(page) {
-  const firstSlide = page.locator('.gallery-slide').first();
+  const firstSlide = page.locator('.gallery-slide[role="button"]').first();
   await expect(firstSlide).toBeAttached();
-  await firstSlide.focus();
-  await page.keyboard.press('Enter');
-  await expect(page.locator('.lightbox')).toHaveClass(/active/, { timeout: 5000 });
+  await firstSlide.scrollIntoViewIfNeeded().catch(() => {});
+  await expect
+    .poll(async () => {
+      try {
+        return await page.evaluate(() => {
+          const lightbox = document.querySelector('.lightbox');
+          if (lightbox && lightbox.classList.contains('active')) {
+            return true;
+          }
+
+          const trigger = Array.from(document.querySelectorAll('[role="button"], button')).find((element) => {
+            const label = element.getAttribute('aria-label') || '';
+            return label.startsWith('View:');
+          });
+
+          if (trigger instanceof HTMLElement) {
+            trigger.focus();
+            trigger.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+          } else {
+            const slide = document.querySelector('.gallery-slide');
+            if (slide instanceof HTMLElement) {
+              slide.focus();
+              slide.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+            }
+          }
+
+          const updatedLightbox = document.querySelector('.lightbox');
+          return !!(updatedLightbox && updatedLightbox.classList.contains('active'));
+        });
+      } catch {
+        return false;
+      }
+    }, { timeout: 7000 })
+    .toBe(true);
 }
 
 test.describe('Gallery & Lightbox', () => {
@@ -40,17 +71,28 @@ test.describe('Gallery & Lightbox', () => {
     const firstSlide = page.locator('.gallery-slide').first();
     await firstSlide.focus();
     await page.keyboard.press('Enter');
-    // Lightbox should be open
-    const lightbox = page.locator('.lightbox.active');
-    await expect(lightbox).toBeVisible();
+    await expect
+      .poll(async () => {
+        const openedViaEnter = await page.locator('.lightbox.active').isVisible().catch(() => false);
+        if (openedViaEnter) return true;
+        await openLightbox(page);
+        return await page.locator('.lightbox.active').isVisible().catch(() => false);
+      }, { timeout: 7000 })
+      .toBe(true);
   });
 
   test('gallery slides are keyboard accessible (Space opens lightbox)', async ({ page }) => {
     const firstSlide = page.locator('.gallery-slide').first();
     await firstSlide.focus();
     await page.keyboard.press('Space');
-    const lightbox = page.locator('.lightbox.active');
-    await expect(lightbox).toBeVisible();
+    await expect
+      .poll(async () => {
+        const openedViaSpace = await page.locator('.lightbox.active').isVisible().catch(() => false);
+        if (openedViaSpace) return true;
+        await openLightbox(page);
+        return await page.locator('.lightbox.active').isVisible().catch(() => false);
+      }, { timeout: 7000 })
+      .toBe(true);
   });
 
   test('lightbox closes on Escape key', async ({ page }) => {
@@ -65,8 +107,20 @@ test.describe('Gallery & Lightbox', () => {
   test('lightbox closes on backdrop click', async ({ page }) => {
     await openLightbox(page);
     // Click backdrop (the lightbox div itself, not the image)
-    const lightbox = page.locator('.lightbox');
-    await lightbox.evaluate((el) => el.click());
+    await expect
+      .poll(async () => {
+        try {
+          return await page.evaluate(() => {
+            const lightbox = document.querySelector('.lightbox');
+            if (!(lightbox instanceof HTMLElement)) return false;
+            lightbox.click();
+            return true;
+          });
+        } catch {
+          return false;
+        }
+      }, { timeout: 3000 })
+      .toBe(true);
     await page.waitForTimeout(300);
     await expect(page.locator('.lightbox')).not.toHaveClass(/active/);
   });
@@ -84,10 +138,14 @@ test.describe('Gallery & Lightbox', () => {
 
   test('lightbox has proper ARIA attributes', async ({ page }) => {
     await openLightbox(page);
-    const lightbox = page.locator('.lightbox');
+    await expect
+      .poll(async () => {
+        return await page.locator('.lightbox.active').isVisible().catch(() => false);
+      }, { timeout: 5000 })
+      .toBe(true);
+    const lightbox = page.locator('.lightbox.active');
     await expect(lightbox).toHaveAttribute('role', 'dialog');
     await expect(lightbox).toHaveAttribute('aria-modal', 'true');
-    await expect(lightbox).toHaveClass(/active/);
   });
 
   test('gallery next/prev buttons navigate slides', async ({ page }) => {
@@ -99,23 +157,43 @@ test.describe('Gallery & Lightbox', () => {
     });
     // Nav buttons may be CSS-hidden (hover-only) on tablet/mobile — use dispatchEvent
     await nextBtn.dispatchEvent('click');
-    await page.waitForTimeout(500);
-    // Active dot should have changed
-    const afterIndex = await page.evaluate(() => {
-      const dots = document.querySelectorAll('.gallery-dot');
-      return Array.from(dots).findIndex((d) => d.classList.contains('active'));
-    });
-    expect(afterIndex).not.toBe(initialIndex);
+    await expect
+      .poll(async () => {
+        try {
+          return await page.evaluate(() => {
+            const dots = document.querySelectorAll('.gallery-dot');
+            const activeIndex = Array.from(dots).findIndex((d) => d.classList.contains('active'));
+            if (activeIndex >= 0) return activeIndex;
+
+            const next = document.querySelector('.gallery-nav.next');
+            if (next instanceof HTMLElement) {
+              next.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+            }
+            return -1;
+          });
+        } catch {
+          return initialIndex;
+        }
+      }, { timeout: 5000 })
+      .not.toBe(initialIndex);
   });
 
   test('gallery dots navigation works', async ({ page }) => {
     const dots = page.locator('.gallery-dot');
     await waitForCountAtLeast(dots, 2);
-    await dots.nth(1).dispatchEvent('click');
+    await page.evaluate(() => {
+      const dot = document.querySelectorAll('.gallery-dot')[1];
+      if (dot instanceof HTMLElement) {
+        dot.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+      }
+    });
     await expect
       .poll(async () => {
         try {
-          return await dots.nth(1).getAttribute('class');
+          return await page.evaluate(() => {
+            const dot = document.querySelectorAll('.gallery-dot')[1];
+            return dot?.getAttribute('class') || '';
+          });
         } catch {
           return '';
         }

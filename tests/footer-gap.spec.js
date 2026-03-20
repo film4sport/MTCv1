@@ -13,8 +13,10 @@ test.describe('Footer bottom whitespace check', () => {
     await gotoLanding(page);
 
     const footer = page.locator('footer');
-    await footer.scrollIntoViewIfNeeded();
     await expect(footer).toBeAttached();
+    await page.evaluate(() => {
+      document.querySelector('footer')?.scrollIntoView({ block: 'end' });
+    });
 
     // The body bg color should match the footer bg (#1a1f12), so any overflow
     // area is invisible (dark green on dark green). No visible whitespace.

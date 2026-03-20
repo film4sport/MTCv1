@@ -44,11 +44,32 @@ async function readBodyMetric(page, metric) {
     }, { timeout: 5000 })
     .not.toBeNull();
 
-  return page.locator('body').evaluate((el, key) => {
-    if (key === 'innerTextLength') return document.body.innerText.length;
-    if (key === 'viewportWidth') return window.innerWidth;
-    return el[key];
-  }, metric);
+  try {
+    return await page.locator('body').evaluate((el, key) => {
+      if (key === 'innerTextLength') return document.body.innerText.length;
+      if (key === 'viewportWidth') return window.innerWidth;
+      return el[key];
+    }, metric);
+  } catch {
+    return await expect
+      .poll(async () => {
+        try {
+          return await page.locator('body').evaluate((el, key) => {
+            if (key === 'innerTextLength') return document.body.innerText.length;
+            if (key === 'viewportWidth') return window.innerWidth;
+            return el[key];
+          }, metric);
+        } catch {
+          return null;
+        }
+      }, { timeout: 5000 })
+      .not.toBeNull()
+      .then(() => page.locator('body').evaluate((el, key) => {
+        if (key === 'innerTextLength') return document.body.innerText.length;
+        if (key === 'viewportWidth') return window.innerWidth;
+        return el[key];
+      }, metric));
+  }
 }
 
 // ==========================================================
@@ -154,12 +175,20 @@ test.describe('Visual Regression — Info Page', () => {
       await cleanPage(page);
 
       // Tab content area exists
-      const content = page.locator('[class*="tab"], [role="tabpanel"], main').first();
-      await expect(content).toBeAttached();
+      const tabPanel = page.locator(`#tabpanel-${tab}`).first();
+      await expect(tabPanel).toBeAttached({ timeout: 5000 });
+      await expect(tabPanel).toBeVisible({ timeout: 5000 });
 
       // Page has visible text content
-      const bodyText = await readBodyMetric(page, 'innerTextLength');
-      expect(bodyText).toBeGreaterThan(100);
+      await expect
+        .poll(async () => {
+          try {
+            return await tabPanel.evaluate((el) => (el.textContent || '').trim().length);
+          } catch {
+            return 0;
+          }
+        }, { timeout: 5000 })
+        .toBeGreaterThan(100);
 
       // No horizontal overflow
       const scrollWidth = await readBodyMetric(page, 'scrollWidth');

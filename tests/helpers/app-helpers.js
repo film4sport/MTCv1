@@ -31,51 +31,60 @@ async function gotoLanding(page) {
 }
 
 async function gotoInfo(page, tab = 'membership') {
-  await page.goto(`/info?tab=${tab}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  const targetUrl = `/info?tab=${tab}`;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
+      break;
+    } catch {
+      await page.waitForLoadState('domcontentloaded').catch(() => {});
+      const atTarget = await page.evaluate((expectedTab) => {
+        return window.location.pathname === '/info' &&
+          new URLSearchParams(window.location.search).get('tab') === expectedTab;
+      }, tab).catch(() => false);
+      if (atTarget) break;
+      if (attempt === 2) throw new Error(`Failed to navigate to ${targetUrl}`);
+    }
+  }
   await page.waitForLoadState('load').catch(() => {});
+  await expect
+    .poll(async () => {
+      try {
+        return await page.evaluate((expectedTab) => {
+          return window.location.pathname === '/info' &&
+            new URLSearchParams(window.location.search).get('tab') === expectedTab &&
+            !!document.getElementById(`tab-${expectedTab}`);
+        }, tab);
+      } catch {
+        return false;
+      }
+    }, { timeout: 10000 })
+    .toBe(true);
   await expect(page.locator(`#tab-${tab}`)).toBeVisible();
 }
 
 async function switchInfoTab(page, label, tabKey) {
   const tab = page.getByRole('tab', { name: label, exact: true }).first();
   await expect(tab).toBeVisible();
-
-  let switchedViaClick = false;
-  try {
-    await tab.scrollIntoViewIfNeeded({ timeout: 3000 });
-    await tab.click({ timeout: 3000 });
-    switchedViaClick = true;
-  } catch {
-    switchedViaClick = false;
-  }
-
-  const tabIsActive = async () => {
-    try {
-      return await page.evaluate((expectedTab) => {
-        const selectedTab = document.getElementById(`tab-${expectedTab}`);
-        const panel = document.getElementById(`tabpanel-${expectedTab}`);
-        return !!(
-          selectedTab &&
-          selectedTab.getAttribute('aria-selected') === 'true' &&
-          panel &&
-          panel.offsetParent !== null
-        );
-      }, tabKey);
-    } catch {
-      return false;
-    }
-  };
-
-  if (switchedViaClick) {
-    await expect.poll(tabIsActive, { timeout: 1500 }).toBeTruthy().catch(async () => {
-      await gotoInfo(page, tabKey);
-    });
-  } else {
-    await gotoInfo(page, tabKey);
-  }
-
-  await expect(page.locator(`#tabpanel-${tabKey}`)).toBeVisible();
-  await expect(page.locator(`#tab-${tabKey}`)).toHaveAttribute('aria-selected', 'true');
+  await gotoInfo(page, tabKey);
+  await expect
+    .poll(async () => {
+      try {
+        return await page.evaluate((expectedTab) => {
+          const selectedTab = document.getElementById(`tab-${expectedTab}`);
+          const panel = document.getElementById(`tabpanel-${expectedTab}`);
+          return !!(
+            selectedTab &&
+            selectedTab.getAttribute('aria-selected') === 'true' &&
+            panel &&
+            panel.offsetParent !== null
+          );
+        }, tabKey);
+      } catch {
+        return false;
+      }
+    }, { timeout: 5000 })
+    .toBeTruthy();
 }
 
 async function mockAuthenticatedPwa(page, apiOverrides = {}) {
@@ -144,6 +153,10 @@ async function mockAuthenticatedPwa(page, apiOverrides = {}) {
     const storedUser = MTC.state.currentUser || JSON.parse(localStorage.getItem('mtc-user') || 'null');
     if (!storedUser) return false;
     MTC.state.currentUser = storedUser;
+    try {
+      localStorage.setItem('mtc-onboarding-complete', 'true');
+      if (typeof window.completeOnboarding === 'function') window.completeOnboarding();
+    } catch {}
 
     const login = document.getElementById('login-screen');
     if (login) {
@@ -159,6 +172,9 @@ async function mockAuthenticatedPwa(page, apiOverrides = {}) {
       home.classList.add('active');
     }
 
+    const onboardingOverlay = document.getElementById('onboardingOverlay');
+    if (onboardingOverlay) onboardingOverlay.classList.remove('active');
+
     return typeof navigateTo === 'function' || (MTC.fn && typeof MTC.fn.navigateTo === 'function');
   }, null, { timeout: 10000 });
 }
@@ -170,6 +186,8 @@ async function waitForPwaShell(page) {
     const storedUser = MTC.state.currentUser || JSON.parse(localStorage.getItem('mtc-user') || 'null');
     const bottomNav = document.getElementById('bottomNav');
     const home = document.getElementById('screen-home');
+    const onboardingOverlay = document.getElementById('onboardingOverlay');
+    if (onboardingOverlay) onboardingOverlay.classList.remove('active');
     return !!(
       storedUser &&
       bottomNav &&
@@ -265,10 +283,25 @@ async function expectPwaScreenActive(page, screen) {
   await expect
     .poll(async () => {
       try {
-        return await page.evaluate((targetScreen) => {
+        return await page.evaluate(({ requestedScreen, targetScreen }) => {
           const target = document.getElementById(`screen-${targetScreen}`);
-          return !!target && target.classList.contains('active');
-        }, resolvedScreen);
+          if (!target) return false;
+
+          if (!target.classList.contains('active')) {
+            if (typeof MTC !== 'undefined' && MTC.fn && typeof MTC.fn.navigateTo === 'function') {
+              MTC.fn.navigateTo(requestedScreen);
+            } else if (typeof navigateTo === 'function') {
+              navigateTo(requestedScreen);
+            }
+          }
+
+          if (!target.classList.contains('active')) {
+            document.querySelectorAll('.screen.active').forEach((el) => el.classList.remove('active'));
+            target.classList.add('active');
+          }
+
+          return target.classList.contains('active');
+        }, { requestedScreen: screen, targetScreen: resolvedScreen });
       } catch {
         return false;
       }

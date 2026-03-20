@@ -11,7 +11,9 @@ test('Hero bottom + wave transition', async ({ page }) => {
   await gotoLanding(page);
 
   const wave = page.locator('.wave-divider').first();
-  await wave.scrollIntoViewIfNeeded();
   await expect(wave).toBeAttached();
+  await page.evaluate(() => {
+    document.querySelector('.wave-divider')?.scrollIntoView({ block: 'center' });
+  });
   await page.screenshot({ path: 'test-results/hero-bottom-check.png', fullPage: false });
 });

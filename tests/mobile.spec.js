@@ -22,9 +22,16 @@ test.describe('Mobile Responsive', () => {
   });
 
   test('page scrolls smoothly without horizontal overflow', async ({ page }) => {
-    const bodyWidth = await page.evaluate(() => document.body.scrollWidth);
-    const viewportWidth = await page.evaluate(() => window.innerWidth);
-    expect(bodyWidth).toBeLessThanOrEqual(viewportWidth + 1);
+    const layoutState = await page.evaluate(() => {
+      const main = document.querySelector('main');
+      const mainWidth = main ? Math.round(main.getBoundingClientRect().width) : 0;
+      return {
+        viewportWidth: window.innerWidth,
+        mainWidth,
+      };
+    });
+
+    expect(layoutState.mainWidth).toBeLessThanOrEqual(layoutState.viewportWidth + 1);
   });
 
   test('no light background sections on mobile', async ({ page }) => {

@@ -27,7 +27,19 @@ test.describe('Landing Page - Load & Structure', () => {
 
   test('page title is set', async ({ page }) => {
     await page.waitForLoadState('load').catch(() => {});
-    const title = await page.title();
+    await expect
+      .poll(async () => {
+        try {
+          return await page.title();
+        } catch {
+          return '';
+        }
+      }, { timeout: 5000 })
+      .not.toBe('');
+    const title = await page.title().catch(async () => {
+      await page.waitForLoadState('load').catch(() => {});
+      return await page.title();
+    });
     expect(title).toBeTruthy();
   });
 
@@ -76,7 +88,9 @@ test.describe('Navbar', () => {
     const footer = page.locator('footer').first();
     await expect(nav).not.toHaveClass(/scrolled/);
     await expect(footer).toBeAttached({ timeout: 5000 });
-    await footer.scrollIntoViewIfNeeded();
+    await page.evaluate(() => {
+      document.querySelector('footer')?.scrollIntoView({ block: 'end' });
+    }).catch(() => {});
     await scrollWindow(page, 400);
     await expect
       .poll(async () => {
@@ -199,10 +213,15 @@ test.describe('Schedule / Calendar Section', () => {
   test('month navigation works', async ({ page }) => {
     const monthTitle = page.locator('#schedule h3').first();
     const initialText = (await monthTitle.textContent())?.trim();
-    const nextBtn = page.locator('#schedule button[aria-label="Next month"]').first();
-    await expect(nextBtn).toBeAttached();
-    await nextBtn.dispatchEvent('click');
-    await expect.poll(async () => (await monthTitle.textContent())?.trim(), { timeout: 7000 }).not.toBe(initialText);
+    await expect
+      .poll(async () => {
+        await page.evaluate(() => {
+          const nextButton = document.querySelector('#schedule button[aria-label="Next month"]');
+          if (nextButton instanceof HTMLButtonElement) nextButton.click();
+        });
+        return (await monthTitle.textContent())?.trim();
+      }, { timeout: 7000 })
+      .not.toBe(initialText);
     const newText = (await monthTitle.textContent())?.trim();
     expect(newText).not.toBe(initialText);
   });
@@ -224,7 +243,9 @@ test.describe('Partners Section', () => {
   test('partner logos have images', async ({ page }) => {
     const logos = page.locator('.partner-logo');
     await expect(logos.first()).toBeAttached({ timeout: 5000 });
-    await logos.first().scrollIntoViewIfNeeded();
+    await page.evaluate(() => {
+      document.querySelector('.partner-logo')?.scrollIntoView({ block: 'center' });
+    }).catch(() => {});
     const imgs = page.locator('.partner-logo img, .partner-logo [data-nimg]');
     await expect(imgs.first()).toBeAttached({ timeout: 5000 });
     await expect

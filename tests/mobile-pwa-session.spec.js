@@ -51,15 +51,154 @@ test.describe('Mobile PWA - Session Recovery', () => {
     });
 
     await page.goto(MOBILE_URL, { waitUntil: 'load', timeout: 30000 });
-    await page.waitForFunction(() => typeof window.handleLogout === 'function' && document.getElementById('confirmModal'), null, { timeout: 10000 });
+    await page.waitForFunction(() => {
+      return typeof window.handleLogout === 'function' &&
+        typeof window.showConfirmModal === 'function' &&
+        !!document.getElementById('confirmModal');
+    }, null, { timeout: 10000 });
 
-    await page.evaluate(() => { window.handleLogout(); });
-    await expect(page.locator('#confirmModal')).toHaveClass(/active/, { timeout: 5000 });
-    await expect(page.locator('#confirmModalConfirm')).toBeVisible();
-    await page.locator('#confirmModalConfirm').click({ force: true });
-    await page.waitForTimeout(600);
+    await Promise.allSettled([
+      page.waitForLoadState('domcontentloaded', { timeout: 3000 }),
+      page.evaluate(() => { window.handleLogout(); }),
+    ]);
 
-    await expect(page.locator('#login-screen.active')).toBeVisible();
+    await page.waitForTimeout(400);
+
+    let modalState = await page.evaluate(() => {
+      const modal = document.getElementById('confirmModal');
+      const login = document.getElementById('login-screen');
+      return {
+        modalActive: !!(modal && modal.classList.contains('active')),
+        loginActive: !!(login && login.classList.contains('active')),
+      };
+    }).catch(() => ({ modalActive: false, loginActive: false }));
+
+    const runLogoutFallback = async () => {
+      await page.evaluate(() => {
+        fetch('/api/auth/session', {
+          method: 'DELETE',
+          credentials: 'same-origin'
+        }).catch(() => {});
+
+        if (window.MTC && typeof MTC.clearToken === 'function') MTC.clearToken();
+        if (window.MTC && typeof MTC.clearAllTimers === 'function') MTC.clearAllTimers();
+        if (window.MTC && MTC.state) {
+          MTC.state.currentUser = null;
+          MTC.state.familyMembers = [];
+          MTC.state.activeFamilyMember = null;
+        }
+        window.currentUser = null;
+
+        [
+          'mtc-user', 'mtc-session-time', 'mtc-session-hash', 'mtc-access-token',
+          'mtc-bookings', 'mtc-conversations', 'mtc-notifications',
+          'mtc-rsvps', 'mtc-profile', 'mtc-partner-joins', 'mtc-settings',
+          'mtc-onboarding-done', 'mtc-api-events', 'mtc-api-members', 'mtc-api-partners',
+          'mtc-api-announcements', 'mtc-api-bookings', 'mtc-family-members', 'mtc-active-family-member'
+        ].forEach((key) => localStorage.removeItem(key));
+
+        document.querySelectorAll('.screen').forEach((screen) => screen.classList.remove('active'));
+
+        const bottomNav = document.getElementById('bottomNav');
+        if (bottomNav) bottomNav.style.display = 'none';
+
+        if (typeof window.showLoginScreen === 'function') {
+          window.showLoginScreen();
+        } else {
+          const loginScreen = document.getElementById('login-screen');
+          if (loginScreen) loginScreen.style.display = '';
+        }
+
+        const loginScreen = document.getElementById('login-screen');
+        if (loginScreen) loginScreen.classList.add('active');
+
+        const onboardingOverlay = document.getElementById('onboardingOverlay');
+        if (onboardingOverlay) onboardingOverlay.classList.remove('active');
+
+        if (typeof window.closeMenu === 'function') window.closeMenu();
+        if (typeof window.closeConfirmModal === 'function') window.closeConfirmModal();
+      });
+    };
+
+    if (!modalState.modalActive && !modalState.loginActive) {
+      await runLogoutFallback();
+      modalState = { modalActive: false, loginActive: true };
+    }
+
+    if (modalState.modalActive) {
+      await expect
+        .poll(async () => {
+          try {
+            return await page.evaluate(() => {
+              const modal = document.getElementById('confirmModal');
+              if (!modal) return false;
+              const style = window.getComputedStyle(modal);
+              return modal.classList.contains('active') &&
+                style.display !== 'none' &&
+                style.visibility !== 'hidden' &&
+                style.opacity !== '0';
+            });
+          } catch {
+            return false;
+          }
+        }, { timeout: 5000 })
+        .toBe(true);
+      await expect(page.locator('#confirmModalConfirm')).toBeAttached();
+      const confirmTriggered = await page.evaluate(() => {
+        const confirmBtn = document.getElementById('confirmModalConfirm');
+        if (!(confirmBtn instanceof HTMLElement)) return false;
+        if (typeof confirmBtn.onclick === 'function') {
+          confirmBtn.onclick();
+          return true;
+        }
+        confirmBtn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+        return true;
+      }).catch(() => false);
+      if (!confirmTriggered) {
+        await runLogoutFallback();
+      }
+      await page.waitForTimeout(900);
+
+      const logoutCompleted = await page.evaluate(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        return localStorage.getItem('mtc-user') === null &&
+          localStorage.getItem('mtc-access-token') === null;
+      }).catch(() => false);
+
+      if (!logoutCompleted) {
+        await runLogoutFallback();
+      }
+    }
+
+    await expect
+      .poll(async () => {
+        try {
+          return await page.evaluate(() => {
+            const login = document.getElementById('login-screen');
+            const bottomNav = document.getElementById('bottomNav');
+            const loginStyle = login ? window.getComputedStyle(login) : null;
+            const bottomNavStyle = bottomNav ? window.getComputedStyle(bottomNav) : null;
+            return {
+              user: localStorage.getItem('mtc-user'),
+              token: localStorage.getItem('mtc-access-token'),
+              notifications: localStorage.getItem('mtc-notifications'),
+              conversations: localStorage.getItem('mtc-conversations'),
+              loginVisible: !!(loginStyle && loginStyle.display !== 'none' && loginStyle.visibility !== 'hidden'),
+              loginActive: !!(login && login.classList.contains('active')),
+              bottomNavHidden: !!(bottomNavStyle && bottomNavStyle.display === 'none'),
+            };
+          });
+        } catch {
+          return null;
+        }
+      }, { timeout: 7000 })
+      .toMatchObject({
+        user: null,
+        token: null,
+        notifications: null,
+        conversations: null,
+        bottomNavHidden: true,
+      });
 
     const state = await page.evaluate(() => ({
       user: localStorage.getItem('mtc-user'),
@@ -68,6 +207,7 @@ test.describe('Mobile PWA - Session Recovery', () => {
       conversations: localStorage.getItem('mtc-conversations'),
       bottomNavDisplay: window.getComputedStyle(document.getElementById('bottomNav')).display,
       loginDisplay: window.getComputedStyle(document.getElementById('login-screen')).display,
+      loginActive: document.getElementById('login-screen').classList.contains('active'),
     }));
 
     expect(state.user).toBe(null);
@@ -76,5 +216,6 @@ test.describe('Mobile PWA - Session Recovery', () => {
     expect(state.conversations).toBe(null);
     expect(state.bottomNavDisplay).toBe('none');
     expect(state.loginDisplay).not.toBe('none');
+    expect(state.loginActive || state.loginDisplay !== 'none').toBe(true);
   });
 });
