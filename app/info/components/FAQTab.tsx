@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { faqItems } from '../data';
+import { CLUB_NAME, SUPPORT_EMAIL, SUPPORT_EMAIL_MAILTO } from '../../lib/site';
 
 export default function FaqTab() {
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
@@ -86,8 +87,8 @@ export default function FaqTab() {
               <p className="text-sm font-medium mb-1" style={{ color: '#2a2f1e' }}>Still have questions?</p>
               <p className="text-sm" style={{ color: '#555' }}>
                 Drop us a line at{' '}
-                <a href="mailto:monotennisclub1@gmail.com" className="font-semibold hover:underline" style={{ color: '#6b7a3d' }}>
-                  monotennisclub1@gmail.com
+                <a href={SUPPORT_EMAIL_MAILTO} className="font-semibold hover:underline" style={{ color: '#6b7a3d' }}>
+                  {SUPPORT_EMAIL}
                 </a>
                 {' '}and we&apos;ll get back to you.
               </p>
@@ -100,7 +101,7 @@ export default function FaqTab() {
               <iframe
                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2868.6773368225654!2d-80.074593724488!3d44.028061871086685!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x882aff3ec22e5bbd%3A0x512ba1b014b14562!2s754883%20Mono%20Centre%20Rd%2C%20Orangeville%2C%20ON%20L9W%202Y8!5e0!3m2!1sen!2sca!4v1772075563936!5m2!1sen!2sca"
                 width="100%" height="100%" style={{ border: 0 }} allowFullScreen loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade" title="Mono Tennis Club Location"
+                referrerPolicy="no-referrer-when-downgrade" title={`${CLUB_NAME} Location`}
               />
             </div>
             <div className="mt-4 p-4 rounded-xl" style={{ backgroundColor: 'rgba(107, 122, 61, 0.1)' }}>
@@ -108,8 +109,8 @@ export default function FaqTab() {
                 <strong style={{ color: '#2a2f1e' }}>754483 Mono Centre Rd</strong>
                 <br />Mono, Ontario L9W 5W9
                 <br />
-                <a href="mailto:info@monotennisclub.com" className="hover:underline" style={{ color: '#6b7a3d' }}>
-                  info@monotennisclub.com
+                <a href={SUPPORT_EMAIL_MAILTO} className="hover:underline" style={{ color: '#6b7a3d' }}>
+                  {SUPPORT_EMAIL}
                 </a>
               </p>
               <p className="text-sm mt-3 flex items-center gap-2" style={{ color: '#6b7a3d' }}>

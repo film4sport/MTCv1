@@ -8,7 +8,7 @@ import { generateId } from './utils';
 import { pinLogin, signOut, getCurrentUser } from './auth';
 import { useToast } from './toast';
 import { reportError } from '../../lib/errorReporter';
-import { CLUB_NAME, SUPPORT_EMAIL } from '../../lib/site';
+import { APP_ROUTES, CLUB_NAME, SITE_URL, SUPPORT_EMAIL } from '../../lib/site';
 import { supabase } from '../../lib/supabase';
 import * as db from './db';
 import { computeAnalytics } from './store-analytics';
@@ -833,7 +833,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
               subject: 'Partner Request Posted — Mono Tennis Club',
               heading: 'Partner Request Posted',
               body: `Your partner request is live. Looking for ${partner.matchType === 'any' ? 'any match type' : partner.matchType} on ${partner.date} at ${partner.time}. You'll be notified when someone responds.`,
-              ctaText: 'View Requests', ctaUrl: 'https://www.monotennisclub.com/dashboard/partners',
+              ctaText: 'View Requests', ctaUrl: `${SITE_URL}${APP_ROUTES.dashboardPartners}`,
               logType: 'partner_request',
             }),
         }).catch(() => { /* email is best-effort */ });

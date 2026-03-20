@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createAdminClient, resolveSession } from '@/app/lib/session';
+import { APP_ROUTES } from '@/app/lib/site';
 
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || '';
 const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY || '';
@@ -88,7 +89,7 @@ export async function POST(request: Request) {
         body: truncatedPreview,
         icon: '/mobile-app/icons/icon-192x192.png',
         badge: '/mobile-app/icons/icon-72x72.png',
-        url: '/dashboard/messages',
+        url: APP_ROUTES.dashboardMessages,
         tag: `msg-${senderId}-${Date.now()}`,
       });
 

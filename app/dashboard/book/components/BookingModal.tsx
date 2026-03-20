@@ -3,6 +3,7 @@ import { FEES, BOOKING_RULES } from '../../lib/types';
 import type { User, Booking } from '../../lib/types';
 import { getTimeRange, formatDuration, areSlotsAvailable } from './booking-utils';
 import { useFocusTrap } from '../../lib/utils';
+import { PAYMENT_EMAIL } from '../../../lib/site';
 
 interface ModalData {
   courtId: number;
@@ -185,7 +186,7 @@ export default function BookingModal({ modalData, members, currentUser, bookings
             />
             <div>
               <p className="text-sm font-medium" style={{ color: '#2a2f1e' }}>Bringing a guest?</p>
-              <p className="text-xs" style={{ color: '#6b7266' }}>Guest fee: ${FEES.guest} — e-transfer to monotennis.payment@gmail.com</p>
+          <p className="text-xs" style={{ color: '#6b7266' }}>Guest fee: ${FEES.guest} — e-transfer to {PAYMENT_EMAIL}</p>
             </div>
           </label>
           {isGuest && (

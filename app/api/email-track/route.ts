@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { getSiteUrl } from '../lib/request-url';
+import { APP_ROUTES } from '@/app/lib/site';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
@@ -25,7 +26,7 @@ export async function GET(request: Request) {
   const logId = searchParams.get('id');
   const bookingId = searchParams.get('booking');
   const email = searchParams.get('email');
-  const redirect = searchParams.get('redirect') || '/dashboard/schedule';
+  const redirect = searchParams.get('redirect') || APP_ROUTES.dashboardSchedule;
 
   const key = supabaseServiceKey || supabaseAnonKey;
   if (supabaseUrl && key) {

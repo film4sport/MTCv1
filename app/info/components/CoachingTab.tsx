@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { APP_ROUTES } from '../../lib/site';
 
 /* ─── Coach Card — premium hero-style with large photo ─── */
 function CoachCard({ name, title, photo, bio, highlights, email }: {
@@ -286,7 +287,7 @@ export default function CoachingTab() {
         <div className="max-w-4xl mx-auto">
           {/* Dashboard CTA — more prominent with olive tint */}
           <a
-            href="/dashboard/lessons"
+                  href={APP_ROUTES.dashboardLessons}
             className="block rounded-xl px-4 py-3.5 text-center text-xs font-semibold mb-10 transition-all hover:shadow-sm"
             style={{ background: 'rgba(107, 122, 61, 0.12)', border: '1px solid rgba(107, 122, 61, 0.22)', color: '#4a5528', textDecoration: 'none' }}
           >

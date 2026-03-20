@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, Suspense } from 'react';
 import { pinLogin, pinSetup, forgotPin, verifyResetCode } from '../dashboard/lib/auth';
-import { APP_COPY, APP_ROUTES, SUPPORT_EMAIL, SUPPORT_EMAIL_MAILTO } from '../lib/site';
+import { APP_COPY, APP_ROUTES, CLUB_NAME, SUPPORT_EMAIL, SUPPORT_EMAIL_MAILTO } from '../lib/site';
 
 export default function LoginPage() {
   return (
@@ -25,6 +25,28 @@ function LoginContent() {
   const [resetCode, setResetCode] = useState('');
   const [newPin, setNewPin] = useState('');
   const [newPinConfirm, setNewPinConfirm] = useState('');
+  const appTitle = 'MTC COURT';
+  const dashboardLabels = {
+    home: APP_COPY.home,
+    bookCourt: APP_COPY.bookCourt,
+    schedule: APP_COPY.schedule,
+    partners: APP_COPY.partners,
+    findPartners: APP_COPY.findPartners,
+    messages: APP_COPY.messages,
+    settings: APP_COPY.settings,
+    adminPanel: APP_COPY.adminPanel,
+    clubEvents: APP_COPY.clubEvents,
+  } as const;
+  const dashboardLabelsUpper = {
+    home: dashboardLabels.home.toUpperCase(),
+    bookCourt: dashboardLabels.bookCourt.toUpperCase(),
+    schedule: dashboardLabels.schedule.toUpperCase(),
+    partners: dashboardLabels.partners.toUpperCase(),
+    findPartners: dashboardLabels.findPartners.toUpperCase(),
+    messages: dashboardLabels.messages.toUpperCase(),
+    clubEvents: dashboardLabels.clubEvents.toUpperCase(),
+    adminPanel: dashboardLabels.adminPanel.toUpperCase(),
+  } as const;
 
   // Ref to persist the verified email across screen changes — immune to autofill/re-renders
   const verifiedEmailRef = useRef('');
@@ -168,7 +190,7 @@ function LoginContent() {
                       </div>
                     </div>
                     <div style={{ textAlign: 'center' }}>
-                      <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 20, letterSpacing: 3, color: '#e8e4d9' }}>MTC COURT</div>
+                      <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 20, letterSpacing: 3, color: '#e8e4d9' }}>{appTitle}</div>
                       <div style={{ height: 2.5, borderRadius: 2, background: 'linear-gradient(90deg, #c8ff00, #00d4ff, #ff5a5f, #c8ff00)', backgroundSize: '200% 100%', animation: 'accentShimmer 8s linear infinite' }} />
                     </div>
                     <div style={{ display: 'flex', gap: 6 }}>
@@ -187,10 +209,10 @@ function LoginContent() {
                     <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 15, letterSpacing: 1.5, color: '#e8e4d9', marginBottom: 8 }}>QUICK ACTIONS</p>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
                       {[
-                        { bg: '#c8ff00', label: 'BOOK COURT', fg: '#000', icon: <><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></> },
-                        { bg: '#ff5a5f', label: 'FIND PARTNERS', fg: '#fff', icon: <><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></> },
-                        { bg: '#00d4ff', label: 'CLUB EVENTS', fg: '#000', icon: <><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></> },
-                        { bg: '#1a1a1a', label: 'SCHEDULE', fg: '#c8ff00', border: '1px solid rgba(200,255,0,0.2)', icon: <><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></> },
+                        { bg: '#c8ff00', label: dashboardLabelsUpper.bookCourt, fg: '#000', icon: <><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></> },
+                        { bg: '#ff5a5f', label: dashboardLabelsUpper.findPartners, fg: '#fff', icon: <><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></> },
+                        { bg: '#00d4ff', label: dashboardLabelsUpper.clubEvents, fg: '#000', icon: <><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></> },
+                        { bg: '#1a1a1a', label: dashboardLabelsUpper.schedule, fg: '#c8ff00', border: '1px solid rgba(200,255,0,0.2)', icon: <><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></> },
                       ].map(a => (
                         <div key={a.label} style={{
                           background: a.bg, borderRadius: 18, height: 85, padding: '12px 14px',
@@ -269,8 +291,8 @@ function LoginContent() {
                     boxShadow: '0 4px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06)',
                   }}>
                     {[
-                      { label: 'HOME', active: true, d: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
-                      { label: 'SCHEDULE', d: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
+                      { label: dashboardLabelsUpper.home, active: true, d: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
+                      { label: dashboardLabelsUpper.schedule, d: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
                     ].map(n => (
                       <div key={n.label} style={{ display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: 2, color: n.active ? '#e8e4d9' : '#666', fontSize: 7, fontWeight: 600, letterSpacing: 0.3 }}>
                         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d={n.d}/></svg>
@@ -285,8 +307,8 @@ function LoginContent() {
                       <svg width="18" height="18" fill="none" stroke="#0d1208" viewBox="0 0 24 24" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                     </div>
                     {[
-                      { label: 'PARTNERS', d: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z', badge: 0 },
-                      { label: 'MESSAGES', d: 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z', badge: 1 },
+                      { label: dashboardLabelsUpper.partners, d: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z', badge: 0 },
+                      { label: dashboardLabelsUpper.messages, d: 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z', badge: 1 },
                     ].map(n => (
                       <div key={n.label} style={{ display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: 2, color: '#666', fontSize: 7, fontWeight: 600, letterSpacing: 0.3 }}>
                         <div style={{ position: 'relative' }}>
@@ -330,7 +352,7 @@ function LoginContent() {
                       </div>
                     </div>
                     <div style={{ textAlign: 'center' }}>
-                      <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 17, letterSpacing: 3, color: '#1a1f12' }}>MTC COURT</div>
+                      <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 17, letterSpacing: 3, color: '#1a1f12' }}>{appTitle}</div>
                       <div style={{ height: 2, borderRadius: 2, background: 'linear-gradient(90deg, #c8ff00, #00d4ff, #ff5a5f, #c8ff00)', backgroundSize: '200% 100%', animation: 'accentShimmer 8s linear infinite' }} />
                     </div>
                     <div style={{ display: 'flex', gap: 5 }}>
@@ -356,7 +378,7 @@ function LoginContent() {
                             { bg: '#c8ff00', label: 'BOOK', fg: '#0a0a0a', icon: <><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></> },
                             { bg: '#ff5a5f', label: 'PARTNER', fg: '#fff', icon: <><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></> },
                             { bg: '#00d4ff', label: 'EVENTS', fg: '#0a0a0a', icon: <><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></> },
-                            { bg: '#1a1f12', label: 'SCHEDULE', fg: '#e8e4d9', icon: <><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></> },
+                            { bg: '#1a1f12', label: dashboardLabelsUpper.schedule, fg: '#e8e4d9', icon: <><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></> },
                           ].map(a => (
                             <div key={a.label} style={{
                               background: a.bg, borderRadius: 14, height: 62, padding: '8px 10px',
@@ -467,7 +489,7 @@ function LoginContent() {
                     border: '1px solid rgba(255,255,255,0.6)', borderRadius: 24,
                     boxShadow: '0 4px 20px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.8)',
                   }}>
-                    {['HOME', 'SCHEDULE'].map((l, i) => (
+                    {[dashboardLabelsUpper.home, dashboardLabelsUpper.schedule].map((l, i) => (
                       <div key={l} style={{ display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: 2, color: i === 0 ? '#1a1f12' : '#999', fontSize: 6, fontWeight: 600, letterSpacing: 0.3 }}>
                         <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d={i === 0 ? 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' : 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'} /></svg>
                         {l}
@@ -477,8 +499,8 @@ function LoginContent() {
                       <svg width="14" height="14" fill="none" stroke="#1a1f12" viewBox="0 0 24 24" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                     </div>
                     {[
-                      { label: 'PARTNERS', d: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z', badge: 0 },
-                      { label: 'MESSAGES', d: 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z', badge: 1 },
+                      { label: dashboardLabelsUpper.partners, d: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z', badge: 0 },
+                      { label: dashboardLabelsUpper.messages, d: 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z', badge: 1 },
                     ].map(n => (
                       <div key={n.label} style={{ display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: 2, color: '#999', fontSize: 6, fontWeight: 600, letterSpacing: 0.3 }}>
                         <div style={{ position: 'relative' }}>
@@ -524,16 +546,16 @@ function LoginContent() {
                   {/* Sidebar */}
                   <div style={{ width: 140, background: '#1a1f12', display: 'flex', flexDirection: 'column' as const, padding: '10px 8px', gap: 1, flexShrink: 0 }}>
                     <div style={{ padding: '2px 6px', marginBottom: 10 }}>
-                      <span style={{ fontSize: 9, color: '#e8e4d9', fontWeight: 500 }}>Mono Tennis Club</span>
+                      <span style={{ fontSize: 9, color: '#e8e4d9', fontWeight: 500 }}>{CLUB_NAME}</span>
                     </div>
                     {[
-                      { label: 'Home', active: true, icon: <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /> },
-                      { label: 'Book Court', icon: <><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></> },
-                      { label: 'Schedule', icon: <><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></> },
-                      { label: 'Partners', icon: <path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /> },
-                      { label: 'Events', icon: <><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></> },
-                      { label: 'Messages', badge: 2, icon: <path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /> },
-                      { label: 'Settings', icon: <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /> },
+                      { label: dashboardLabels.home, active: true, icon: <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /> },
+                      { label: dashboardLabels.bookCourt, icon: <><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></> },
+                      { label: dashboardLabels.schedule, icon: <><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></> },
+                      { label: dashboardLabels.partners, icon: <path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /> },
+                      { label: dashboardLabels.clubEvents, icon: <><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></> },
+                      { label: dashboardLabels.messages, badge: 2, icon: <path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /> },
+                      { label: dashboardLabels.settings, icon: <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /> },
                     ].map(item => (
                       <div key={item.label} style={{
                         display: 'flex', alignItems: 'center', gap: 6, padding: '4px 8px', borderRadius: 7,
@@ -566,7 +588,7 @@ function LoginContent() {
                     {/* Dashboard header bar */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 14px', background: 'rgba(250,248,243,0.88)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(224,220,211,0.7)', position: 'relative', height: 32, zIndex: 1 }}>
                       <img src="/mono-logo-transparent.png" alt="" width={24} height={24} style={{ filter: 'brightness(0.2)', width: 'auto' }} />
-                      <span style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', fontSize: 8, fontWeight: 600, color: '#2a2f1e' }}>HOME</span>
+                      <span style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', fontSize: 8, fontWeight: 600, color: '#2a2f1e' }}>{dashboardLabelsUpper.home}</span>
                       <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
                         <div style={{ width: 22, height: 22, background: 'rgba(107,122,61,0.1)', borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           <svg width="11" height="11" fill="none" stroke="#1a1f12" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
@@ -585,10 +607,10 @@ function LoginContent() {
                       {/* Quick Actions — glass cards over player bg */}
                       <div style={{ display: 'flex', gap: 5, marginBottom: 8 }}>
                         {[
-                          { label: 'Book Court', bg: 'rgba(107,122,61,0.85)', fg: '#fff', icon: <><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></> },
-                          { label: 'Schedule', bg: 'rgba(232,228,217,0.65)', fg: '#2a2f1e', icon: <><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></> },
-                          { label: 'Club Events', bg: 'rgba(212,225,87,0.7)', fg: '#2a2f1e', icon: <><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></> },
-                          { label: 'Admin Panel', bg: 'rgba(200,209,160,0.6)', fg: '#2a2f1e', icon: <><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></> },
+                          { label: dashboardLabels.bookCourt, bg: 'rgba(107,122,61,0.85)', fg: '#fff', icon: <><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></> },
+                          { label: dashboardLabels.schedule, bg: 'rgba(232,228,217,0.65)', fg: '#2a2f1e', icon: <><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></> },
+                          { label: dashboardLabels.clubEvents, bg: 'rgba(212,225,87,0.7)', fg: '#2a2f1e', icon: <><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></> },
+                          { label: dashboardLabels.adminPanel, bg: 'rgba(200,209,160,0.6)', fg: '#2a2f1e', icon: <><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></> },
                         ].map(a => (
                           <div key={a.label} style={{
                             flex: 1, background: a.bg, borderRadius: 12, padding: '8px 6px',
@@ -696,7 +718,7 @@ function LoginContent() {
                       <div style={{ width: 14, height: 14, borderRadius: '50%', background: 'linear-gradient(135deg, #c8ff00, #6b7a3d)', border: '1px solid rgba(200,255,0,0.3)' }} />
                       <div style={{ width: 14, height: 14, borderRadius: '50%', background: 'rgba(88,68,150,0.25)', border: '1px solid rgba(88,68,150,0.2)' }} />
                     </div>
-                    <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 11, letterSpacing: 1.5, color: '#e8e4d9' }}>MTC COURT</p>
+                    <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 11, letterSpacing: 1.5, color: '#e8e4d9' }}>{appTitle}</p>
                     <div style={{ display: 'flex', gap: 4 }}>
                       <div style={{ width: 14, height: 14, borderRadius: '50%', background: 'rgba(232,228,217,0.08)' }} />
                       <div style={{ width: 14, height: 14, borderRadius: '50%', background: 'rgba(232,228,217,0.08)' }} />
@@ -707,19 +729,19 @@ function LoginContent() {
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4, marginBottom: 8 }}>
                     <div style={{ background: '#c8ff00', borderRadius: 8, padding: '6px 6px 5px', height: 38 }}>
                       <svg width="10" height="10" fill="none" stroke="#0a0a0a" viewBox="0 0 24 24" strokeWidth="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                      <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 7.5, letterSpacing: 0.5, color: '#0a0a0a', marginTop: 2 }}>BOOK COURT</p>
+                      <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 7.5, letterSpacing: 0.5, color: '#0a0a0a', marginTop: 2 }}>{dashboardLabelsUpper.bookCourt}</p>
                     </div>
                     <div style={{ background: '#ff5a5f', borderRadius: 8, padding: '6px 6px 5px', height: 38 }}>
                       <svg width="10" height="10" fill="none" stroke="#fff" viewBox="0 0 24 24" strokeWidth="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-                      <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 7.5, letterSpacing: 0.5, color: '#fff', marginTop: 2 }}>FIND PARTNERS</p>
+                      <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 7.5, letterSpacing: 0.5, color: '#fff', marginTop: 2 }}>{dashboardLabelsUpper.findPartners}</p>
                     </div>
                     <div style={{ background: '#00d4ff', borderRadius: 8, padding: '6px 6px 5px', height: 38 }}>
                       <svg width="10" height="10" fill="none" stroke="#0a0a0a" viewBox="0 0 24 24" strokeWidth="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                      <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 7.5, letterSpacing: 0.5, color: '#0a0a0a', marginTop: 2 }}>CLUB EVENTS</p>
+                      <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 7.5, letterSpacing: 0.5, color: '#0a0a0a', marginTop: 2 }}>{dashboardLabelsUpper.clubEvents}</p>
                     </div>
                     <div style={{ background: '#0a0a0a', borderRadius: 8, padding: '6px 6px 5px', height: 38 }}>
                       <svg width="10" height="10" fill="none" stroke="#fff" viewBox="0 0 24 24" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                      <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 7.5, letterSpacing: 0.5, color: '#fff', marginTop: 2 }}>SCHEDULE</p>
+                      <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 7.5, letterSpacing: 0.5, color: '#fff', marginTop: 2 }}>{dashboardLabelsUpper.schedule}</p>
                     </div>
                   </div>
                   {/* Event preview */}
@@ -743,23 +765,23 @@ function LoginContent() {
                 <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', padding: '6px 0 8px', borderTop: '1px solid rgba(232,228,217,0.06)' }}>
                   <div style={{ textAlign: 'center' }}>
                     <svg width="10" height="10" fill="none" stroke="#e8e4d9" viewBox="0 0 24 24" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
-                    <p style={{ fontSize: 5, color: '#e8e4d9', marginTop: 1 }}>HOME</p>
+                    <p style={{ fontSize: 5, color: '#e8e4d9', marginTop: 1 }}>{dashboardLabelsUpper.home}</p>
                   </div>
                   <div style={{ textAlign: 'center' }}>
                     <svg width="10" height="10" fill="none" stroke="#8a8578" viewBox="0 0 24 24" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                    <p style={{ fontSize: 5, color: '#8a8578', marginTop: 1 }}>SCHEDULE</p>
+                    <p style={{ fontSize: 5, color: '#8a8578', marginTop: 1 }}>{dashboardLabelsUpper.schedule}</p>
                   </div>
                   <div style={{ width: 22, height: 22, borderRadius: '50%', background: '#c8ff00', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <svg width="12" height="12" fill="none" stroke="#0a0a0a" viewBox="0 0 24 24" strokeWidth="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                   </div>
                   <div style={{ textAlign: 'center' }}>
                     <svg width="10" height="10" fill="none" stroke="#8a8578" viewBox="0 0 24 24" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-                    <p style={{ fontSize: 5, color: '#8a8578', marginTop: 1 }}>PARTNERS</p>
+                    <p style={{ fontSize: 5, color: '#8a8578', marginTop: 1 }}>{dashboardLabelsUpper.partners}</p>
                   </div>
                   <div style={{ textAlign: 'center', position: 'relative' }}>
                     <svg width="10" height="10" fill="none" stroke="#8a8578" viewBox="0 0 24 24" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                     <div style={{ position: 'absolute', top: -2, right: -2, width: 7, height: 7, borderRadius: '50%', background: '#ff5a5f', border: '1px solid #0d1208' }} />
-                    <p style={{ fontSize: 5, color: '#8a8578', marginTop: 1 }}>MESSAGES</p>
+                    <p style={{ fontSize: 5, color: '#8a8578', marginTop: 1 }}>{dashboardLabelsUpper.messages}</p>
                   </div>
                 </div>
               </div>
@@ -791,7 +813,7 @@ function LoginContent() {
                       </div>
                     </div>
                     <div style={{ textAlign: 'center' }}>
-                      <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 17, letterSpacing: 3, color: '#1a1f12' }}>MTC COURT</div>
+                      <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 17, letterSpacing: 3, color: '#1a1f12' }}>{appTitle}</div>
                       <div style={{ height: 2, borderRadius: 2, background: 'linear-gradient(90deg, #c8ff00, #00d4ff, #ff5a5f, #c8ff00)', backgroundSize: '200% 100%', animation: 'accentShimmer 8s linear infinite' }} />
                     </div>
                     <div style={{ display: 'flex', gap: 5 }}>
@@ -924,7 +946,7 @@ function LoginContent() {
                     border: '1px solid rgba(255,255,255,0.6)', borderRadius: 24,
                     boxShadow: '0 4px 20px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.8)',
                   }}>
-                    {['HOME', 'SCHEDULE'].map((l, i) => (
+                    {[dashboardLabelsUpper.home, dashboardLabelsUpper.schedule].map((l, i) => (
                       <div key={l} style={{ display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: 2, color: i === 0 ? '#1a1f12' : '#999', fontSize: 6, fontWeight: 600, letterSpacing: 0.3 }}>
                         <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d={i === 0 ? 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' : 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'} /></svg>
                         {l}
@@ -934,8 +956,8 @@ function LoginContent() {
                       <svg width="14" height="14" fill="none" stroke="#1a1f12" viewBox="0 0 24 24" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                     </div>
                     {[
-                      { label: 'PARTNERS', d: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z', badge: 0 },
-                      { label: 'MESSAGES', d: 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z', badge: 1 },
+                      { label: dashboardLabelsUpper.partners, d: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z', badge: 0 },
+                      { label: dashboardLabelsUpper.messages, d: 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z', badge: 1 },
                     ].map(n => (
                       <div key={n.label} style={{ display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: 2, color: '#999', fontSize: 6, fontWeight: 600, letterSpacing: 0.3 }}>
                         <div style={{ position: 'relative' }}>
@@ -955,7 +977,7 @@ function LoginContent() {
           <div className="mb-8 lg:mb-10 text-center">
             <img
               src="/mono-logo-black.png"
-              alt="Mono Tennis Club"
+              alt={CLUB_NAME}
               className="mx-auto"
               style={{ height: 72, width: 'auto', marginBottom: 14, opacity: 0.88 }}
             />

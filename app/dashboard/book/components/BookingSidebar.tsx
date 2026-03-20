@@ -2,6 +2,7 @@ import type { Booking } from '../../lib/types';
 import { FEES, BOOKING_RULES } from '../../lib/types';
 import { useToast } from '../../lib/toast';
 import { canCancel, getTimeRange } from './booking-utils';
+import { PAYMENT_EMAIL } from '../../../lib/site';
 
 interface BookingSidebarProps {
   myUpcoming: Booking[];
@@ -31,7 +32,7 @@ export default function BookingSidebar({ myUpcoming, onCancelBooking }: BookingS
             <div className="flex items-start gap-2.5">
               <span className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" style={{ background: '#6b7a3d' }} />
               <p className="text-[0.7rem] leading-relaxed" style={{ color: '#6b7266' }}>
-                Guest fee: <span className="font-medium" style={{ color: '#2a2f1e' }}>${FEES.guest}/visit</span> - e-transfer to <span className="font-medium" style={{ color: '#2a2f1e' }}>monotennis.payment@gmail.com</span>
+                Guest fee: <span className="font-medium" style={{ color: '#2a2f1e' }}>${FEES.guest}/visit</span> - e-transfer to <span className="font-medium" style={{ color: '#2a2f1e' }}>{PAYMENT_EMAIL}</span>
               </p>
             </div>
             <div className="flex items-start gap-2.5">

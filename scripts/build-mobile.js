@@ -187,6 +187,11 @@ htmlContent = htmlContent.replace(
   `name.indexOf('${newCacheName}')`
 );
 htmlContent = htmlContent
+  .replace(/MTC COURT - Mono Tennis Club/g, `MTC COURT - ${siteContent.clubName}`)
+  .replace(/role="application" aria-label="Mono Tennis Club App"/g, `role="application" aria-label="${siteContent.clubName} App"`)
+  .replace(/alt="Mono Tennis Club"/g, `alt="${siteContent.clubName}"`)
+  .replace(/MONO TENNIS CLUB/g, siteContent.clubName.toUpperCase())
+  .replace(/Mono Tennis Club/g, siteContent.clubName)
   .replace(/monotennisclub1@gmail\.com/g, siteContent.supportEmail)
   .replace(/monotennis\.payment@gmail\.com/g, siteContent.paymentEmail);
 fs.writeFileSync(htmlPath, htmlContent);

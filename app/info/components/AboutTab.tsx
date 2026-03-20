@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import { specialEvents } from '../../lib/events';
+import { CLUB_NAME, SUPPORT_EMAIL, SUPPORT_EMAIL_MAILTO } from '../../lib/site';
 
 export default function AboutTab() {
   const today = new Date().toISOString().slice(0, 10);
@@ -30,17 +31,17 @@ export default function AboutTab() {
             <div className="fade-in-right">
               <span className="section-label">// About Us</span>
               <h2 className="headline-font text-3xl md:text-4xl lg:text-[2.75rem] leading-tight mt-4 mb-6" style={{ color: '#2a2f1e' }}>
-                Mono Tennis Club — Where{' '}
+                {CLUB_NAME} — Where{' '}
                 <span style={{ color: '#6b7a3d' }}>Great Tennis</span> and Good Neighbours Come Together.
               </h2>
               <p className="leading-relaxed mb-6" style={{ color: '#6b7266' }}>
-                Welcome to Mono Tennis Club, a not-for-profit community tennis club located in the heart of Mono, Ontario.
+                Welcome to {CLUB_NAME}, a not-for-profit community tennis club located in the heart of Mono, Ontario.
                 We promote the game of tennis by organizing tournaments, clinic round robins, competitive teams, coaching,
                 kids camps, house leagues and more.
               </p>
               <p className="leading-relaxed mb-8" style={{ color: '#6b7266' }}>
                 Whether you&apos;re a beginner picking up a racket for the first time or a seasoned player looking for
-                competitive matches, Mono Tennis Club is your trusted partner in achieving your full potential and making
+                competitive matches, {CLUB_NAME} is your trusted partner in achieving your full potential and making
                 lasting memories on the court.
               </p>
               <div className="flex flex-wrap gap-3">
@@ -111,8 +112,8 @@ export default function AboutTab() {
                 </div>
                 <div>
                   <h4 className="font-bold text-lg mb-1" style={{ color: '#2a2f1e' }}>Contact Us</h4>
-                  <a href="mailto:monotennisclub1@gmail.com" className="text-sm hover:underline" style={{ color: '#6b7a3d' }}>
-                    monotennisclub1@gmail.com
+                  <a href={SUPPORT_EMAIL_MAILTO} className="text-sm hover:underline" style={{ color: '#6b7a3d' }}>
+                    {SUPPORT_EMAIL}
                   </a>
                   <p className="text-xs mt-1" style={{ color: '#6b7266' }}>
                     Questions, feedback, or bug reports — we&apos;d love to hear from you.

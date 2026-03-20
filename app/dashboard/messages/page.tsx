@@ -6,7 +6,6 @@ import { useAuth, useSocial, useBookings, useDerived } from '../lib/store';
 import { useToast } from '../lib/toast';
 import DashboardHeader from '../components/DashboardHeader';
 import { downloadICS } from '../lib/calendar';
-import { CLUB_NAME } from '../../lib/site';
 import { supabase } from '../../lib/supabase';
 
 export default function MessagesPage() {
@@ -158,7 +157,7 @@ function MessagesContent() {
     .filter(m =>
       m.id !== currentUser?.id &&
       (!searchQuery || m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (m.role === 'admin' && CLUB_NAME.toLowerCase().includes(searchQuery.toLowerCase())))
+        (m.role === 'admin' && 'mono tennis club'.includes(searchQuery.toLowerCase())))
     )
     .sort((a, b) => {
       // Pin admins (club account) to the top
@@ -271,7 +270,7 @@ function MessagesContent() {
                   <div role="listbox" id="member-search-listbox" className="mt-1 max-h-40 overflow-y-auto rounded-lg border" style={{ borderColor: '#e0dcd3' }}>
                     {filteredMembers.map((m, i) => {
                       const hasConvo = conversations.some(c => c.memberId === m.id);
-                      const displayName = m.role === 'admin' ? CLUB_NAME : m.name;
+                      const displayName = m.role === 'admin' ? 'Mono Tennis Club' : m.name;
                       return (
                         <button
                           key={m.id}
