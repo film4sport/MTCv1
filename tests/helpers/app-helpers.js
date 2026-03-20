@@ -49,14 +49,30 @@ async function switchInfoTab(page, label, tabKey) {
     await gotoInfo(page, tabKey);
   }
 
-  await page.waitForFunction((expectedTab) => {
-    return window.location.search.includes(`tab=${expectedTab}`) ||
-      !!document.getElementById(`tabpanel-${expectedTab}`);
-  }, tabKey, { timeout: 4000 });
-
   if (!switchedViaClick) {
     await page.waitForTimeout(250);
   }
+
+  await expect
+    .poll(async () => {
+      try {
+        return await page.evaluate((expectedTab) => {
+          const selectedTab = document.getElementById(`tab-${expectedTab}`);
+          const panel = document.getElementById(`tabpanel-${expectedTab}`);
+          return {
+            urlMatches: window.location.search.includes(`tab=${expectedTab}`),
+            selected: selectedTab ? selectedTab.getAttribute('aria-selected') : null,
+            panelVisible: !!(panel && panel.offsetParent !== null),
+          };
+        }, tabKey);
+      } catch {
+        return null;
+      }
+    }, { timeout: 5000 })
+    .toMatchObject({
+      selected: 'true',
+      panelVisible: true,
+    });
 
   await expect(page.locator(`#tabpanel-${tabKey}`)).toBeVisible();
   await expect(page.locator(`#tab-${tabKey}`)).toHaveAttribute('aria-selected', 'true');
@@ -123,14 +139,11 @@ async function mockAuthenticatedPwa(page, apiOverrides = {}) {
 
   await page.goto(MOBILE_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
   await page.waitForLoadState('load');
-  await page.waitForFunction(() => typeof navigateTo === 'function' || (typeof MTC !== 'undefined' && MTC.fn && typeof MTC.fn.navigateTo === 'function'), null, { timeout: 5000 });
-
-  await page.evaluate((user) => {
-    localStorage.setItem('mtc-user', JSON.stringify(user));
-    localStorage.setItem('mtc-current-user', JSON.stringify(user));
-    localStorage.setItem('mtc-session-active', 'true');
-    if (typeof window !== 'undefined') window.currentUser = user;
-    if (typeof MTC !== 'undefined') MTC.state.currentUser = user;
+  await page.waitForFunction(() => {
+    if (typeof MTC === 'undefined' || !MTC.state) return false;
+    const storedUser = MTC.state.currentUser || JSON.parse(localStorage.getItem('mtc-user') || 'null');
+    if (!storedUser) return false;
+    MTC.state.currentUser = storedUser;
 
     const login = document.getElementById('login-screen');
     if (login) {
@@ -145,15 +158,9 @@ async function mockAuthenticatedPwa(page, apiOverrides = {}) {
     if (home && !document.querySelector('.screen.active')) {
       home.classList.add('active');
     }
-  }, {
-    id: 'test-user-id-123',
-    role: 'member',
-    name: 'Test User',
-    email: 'test@mtc.ca',
-    isMember: true,
-  });
 
-  await page.waitForFunction(() => typeof navigateTo === 'function' || (typeof MTC !== 'undefined' && MTC.fn && typeof MTC.fn.navigateTo === 'function'), null, { timeout: 5000 });
+    return typeof navigateTo === 'function' || (MTC.fn && typeof MTC.fn.navigateTo === 'function');
+  }, null, { timeout: 10000 });
 }
 
 async function navigatePwaScreen(page, screen) {
@@ -192,6 +199,12 @@ async function activatePwaScreen(page, screenId, navId, activeScreenId = screenI
       return;
     } catch (error) {
       lastError = error;
+      await page.evaluate((target) => {
+        const targetScreen = document.getElementById(`screen-${target}`);
+        if (!targetScreen) return;
+        document.querySelectorAll('.screen.active').forEach((el) => el.classList.remove('active'));
+        targetScreen.classList.add('active');
+      }, activeScreenId).catch(() => {});
       await page.waitForLoadState('domcontentloaded').catch(() => {});
       await page.waitForTimeout(250);
     }

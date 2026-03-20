@@ -11,8 +11,10 @@ test.describe('Chromium Compatibility - Info Tabs', () => {
   test('far-right tabs stay reachable across Chromium breakpoints', async ({ page }) => {
     const privacy = page.locator('#tab-privacy');
     const terms = page.locator('#tab-terms');
-    await privacy.scrollIntoViewIfNeeded();
-    await terms.scrollIntoViewIfNeeded();
+    await expect(privacy).toBeAttached({ timeout: 5000 });
+    await expect(terms).toBeAttached({ timeout: 5000 });
+    await privacy.evaluate((el) => el.scrollIntoView({ block: 'nearest', inline: 'center' }));
+    await terms.evaluate((el) => el.scrollIntoView({ block: 'nearest', inline: 'center' }));
     await expect(privacy).toBeVisible();
     await expect(terms).toBeVisible();
   });

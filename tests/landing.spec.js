@@ -72,9 +72,25 @@ test.describe('Navbar', () => {
 
   test('navbar gets scrolled class on scroll', async ({ page }) => {
     const nav = page.locator('.navbar');
+    const footer = page.locator('footer').first();
     await expect(nav).not.toHaveClass(/scrolled/);
-    await scrollWindow(page, 600);
-    await expect.poll(async () => await nav.getAttribute('class')).toMatch(/scrolled/);
+    await expect(footer).toBeAttached({ timeout: 5000 });
+    await footer.scrollIntoViewIfNeeded();
+    await scrollWindow(page, 400);
+    await expect
+      .poll(async () => {
+        try {
+          return await nav.evaluate((el) => ({
+            className: el.className,
+            backgroundColor: getComputedStyle(el).backgroundColor,
+          }));
+        } catch {
+          return null;
+        }
+      }, { timeout: 5000 })
+      .toMatchObject({
+        className: expect.stringMatching(/scrolled/),
+      });
   });
 
   test('nav links exist for key sections', async ({ page }) => {

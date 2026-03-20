@@ -375,9 +375,6 @@ test.describe('Core Flow — RSVP', () => {
   });
 
   test('event modal only closes after API success', async ({ page }) => {
-    await mockAuthenticatedPwa(page);
-    await navigatePwaScreen(page, 'events');
-
     const closeMatches = toggleEventRsvpSource.match(/closeEventModal\(\)/g) || [];
     const closesOnSuccess =
       toggleEventRsvpSource.includes("if (!res.ok)") &&

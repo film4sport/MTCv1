@@ -12,7 +12,6 @@ async function gotoGallery(page) {
   await page.waitForFunction(() => document.readyState === 'complete' && !!document.querySelector('#gallery'), null, { timeout: 10000 }).catch(() => {});
   const gallery = page.locator('#gallery').first();
   await expect(gallery).toBeAttached();
-  await gallery.scrollIntoViewIfNeeded();
 }
 
 test.describe('Gallery & Lightbox', () => {

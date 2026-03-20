@@ -17,7 +17,6 @@ test.describe('Mobile Responsive', () => {
   test('calendar renders on mobile', async ({ page }) => {
     const schedule = page.locator('#schedule').first();
     await expect(schedule).toBeAttached({ timeout: 5000 });
-    await schedule.scrollIntoViewIfNeeded();
     const calGrid = page.locator('.cal-grid');
     await expect(calGrid).toBeAttached({ timeout: 5000 });
   });
