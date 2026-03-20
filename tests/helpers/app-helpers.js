@@ -53,7 +53,7 @@ async function gotoInfo(page, tab = 'membership') {
     .poll(async () => {
       try {
         return await page.evaluate((expectedTab) => {
-          const requiredTabsPresent = ['about', 'membership', 'coaching', 'faq', 'rules', 'privacy', 'terms']
+          const requiredTabsPresent = INFO_TAB_KEYS
             .every((key) => !!document.getElementById(`tab-${key}`));
           return window.location.pathname === '/info' &&
             new URLSearchParams(window.location.search).get('tab') === expectedTab &&
@@ -253,7 +253,7 @@ async function mockAuthenticatedPwa(page, apiOverrides = {}) {
     const onboardingOverlay = document.getElementById('onboardingOverlay');
     if (onboardingOverlay) onboardingOverlay.classList.remove('active');
 
-    const requiredScreensPresent = ['home', 'notifications', 'book', 'partners', 'schedule', 'events', 'messages', 'settings']
+    const requiredScreensPresent = PWA_SCREEN_IDS
       .every((key) => !!document.getElementById(`screen-${key}`));
     return requiredScreensPresent && (typeof navigateTo === 'function' || (MTC.fn && typeof MTC.fn.navigateTo === 'function'));
   }, null, { timeout: 10000 });
@@ -268,7 +268,7 @@ async function waitForPwaShell(page) {
     const home = document.getElementById('screen-home');
     const onboardingOverlay = document.getElementById('onboardingOverlay');
     if (onboardingOverlay) onboardingOverlay.classList.remove('active');
-    const requiredScreensPresent = ['home', 'notifications', 'book', 'partners', 'schedule', 'events', 'messages', 'settings']
+    const requiredScreensPresent = PWA_SCREEN_IDS
       .every((key) => !!document.getElementById(`screen-${key}`));
     return !!(
       storedUser &&
@@ -440,7 +440,9 @@ async function activatePwaScreen(page, screenId, navId, activeScreenId = screenI
 }
 
 module.exports = {
+  INFO_TAB_KEYS,
   MOCK_USER,
+  PWA_SCREEN_IDS,
   activatePwaScreen,
   gotoInfo,
   gotoLanding,
