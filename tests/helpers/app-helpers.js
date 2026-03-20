@@ -89,7 +89,15 @@ async function mockAuthenticatedPwa(page, apiOverrides = {}) {
       }
     }
 
-    route.fulfill({ status: 200, contentType: 'application/json', body: '{"data":[]}' });
+    if (url.includes('/bookings') && method === 'POST') {
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ success: true, booking: { id: 'server-booking-001' } }) });
+    } else if (url.includes('/conversations') && method === 'POST') {
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ success: true, messageId: 'server-msg-001' }) });
+    } else if (url.includes('/events') && method === 'POST') {
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ success: true, action: 'added' }) });
+    } else {
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
+    }
   });
 
   await page.route('**/api/auth/**', (route) => {
@@ -148,7 +156,21 @@ async function mockAuthenticatedPwa(page, apiOverrides = {}) {
   await page.waitForFunction(() => typeof navigateTo === 'function' || (typeof MTC !== 'undefined' && MTC.fn && typeof MTC.fn.navigateTo === 'function'), null, { timeout: 5000 });
 }
 
-async function activatePwaScreen(page, screenId, navId) {
+async function navigatePwaScreen(page, screen) {
+  const navId = `nav-${screen}`;
+  const resolvedScreen = screen === 'events'
+    ? 'home'
+    : screen === 'mybookings' || screen === 'programs'
+      ? 'schedule'
+      : screen === 'profile'
+        ? 'settings'
+        : screen;
+
+  await activatePwaScreen(page, screen, navId, resolvedScreen);
+  await expect(page.locator(`#screen-${resolvedScreen}.active`)).toBeAttached({ timeout: 5000 });
+}
+
+async function activatePwaScreen(page, screenId, navId, activeScreenId = screenId) {
   let lastError = null;
 
   for (let attempt = 0; attempt < 3; attempt++) {
@@ -166,7 +188,7 @@ async function activatePwaScreen(page, screenId, navId) {
         const el = document.getElementById(nav);
         if (el) el.dispatchEvent(new MouseEvent('click', { bubbles: true }));
       }, { screen: screenId, nav: navId });
-      await expect(page.locator(`#screen-${screenId}.active`)).toBeAttached({ timeout: 5000 });
+      await expect(page.locator(`#screen-${activeScreenId}.active`)).toBeAttached({ timeout: 5000 });
       return;
     } catch (error) {
       lastError = error;
@@ -184,5 +206,6 @@ module.exports = {
   gotoInfo,
   gotoLanding,
   mockAuthenticatedPwa,
+  navigatePwaScreen,
   switchInfoTab,
 };

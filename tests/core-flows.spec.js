@@ -2,6 +2,7 @@
 const { test, expect } = require('@playwright/test');
 const { readFileSync } = require('fs');
 const { resolve } = require('path');
+const { mockAuthenticatedPwa, navigatePwaScreen } = require('./helpers/app-helpers');
 
 /**
  * Core Flow Tests — Booking, Messaging, RSVP
@@ -10,89 +11,6 @@ const { resolve } = require('path');
  * 2. Messaging: ID capture from API, double-tap prevention, reply context on failure
  * 3. RSVP: rollback on failure, server-side spot limit (409), modal close on success only
  */
-
-const MOBILE_URL = '/mobile-app/index.html';
-
-const MOCK_USER = {
-  role: 'member',
-  name: 'Test User',
-  email: 'test@mtc.ca',
-  userId: 'test-user-id-123',
-  accessToken: 'mock-access-token-xyz',
-  membershipType: 'adult',
-  familyId: null,
-  familyMembers: [],
-};
-
-// Reusable mock setup — matches mobile-pwa-flows.spec.js pattern
-async function setupAuthenticatedMobile(page, apiOverrides = {}) {
-  await page.route('**/api/mobile-auth', (route) => {
-    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(MOCK_USER) });
-  });
-
-  await page.route('**supabase.co**', (route) => {
-    if (route.request().url().includes('/auth/')) {
-      route.fulfill({ status: 200, contentType: 'application/json', body: '{"data":{"user":null}}' });
-    } else {
-      route.fulfill({ status: 200, contentType: 'application/json', body: '{"data":[]}' });
-    }
-  });
-
-  // Default API mock — can be overridden per-test
-  await page.route('**/api/mobile/**', (route) => {
-    const url = route.request().url();
-    const method = route.request().method();
-
-    // Check for test-specific overrides
-    for (const [pattern, handler] of Object.entries(apiOverrides)) {
-      if (url.includes(pattern)) {
-        return handler(route, method);
-      }
-    }
-
-    // Default: return empty success
-    if (url.includes('/bookings') && method === 'POST') {
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ success: true, booking: { id: 'server-booking-001' } }) });
-    } else if (url.includes('/conversations') && method === 'POST') {
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ success: true, messageId: 'server-msg-001' }) });
-    } else if (url.includes('/events') && method === 'POST') {
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ success: true, action: 'added' }) });
-    } else {
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
-    }
-  });
-
-  // Auth PIN routes
-  await page.route('**/api/auth/**', (route) => {
-    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ success: true }) });
-  });
-
-  await page.addInitScript((user) => {
-    localStorage.setItem('mtc-user', JSON.stringify(user));
-    localStorage.setItem('mtc-current-user', JSON.stringify(user));
-    localStorage.setItem('mtc-access-token', user.accessToken);
-    localStorage.setItem('mtc-user-id', user.userId);
-    localStorage.setItem('mtc-user-email', user.email);
-    localStorage.setItem('mtc-user-name', user.name);
-    localStorage.setItem('mtc-onboarding-complete', 'true');
-    localStorage.setItem('mtc-bypass-install-gate', 'true');
-    localStorage.setItem('mtc-session-active', 'true');
-    localStorage.setItem('mtc-session', JSON.stringify({
-      email: user.email,
-      name: user.name,
-      timestamp: Date.now(),
-    }));
-  }, MOCK_USER);
-
-  await page.goto(MOBILE_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
-  await page.waitForLoadState('load');
-  await page.waitForFunction(() => {
-    if (typeof MTC === 'undefined' || !MTC.state || !MTC.state.currentUser) return false;
-    var loginScreen = document.getElementById('login-screen');
-    if (!loginScreen) return true;
-    return !loginScreen.classList.contains('active') && getComputedStyle(loginScreen).display === 'none';
-  }, null, { timeout: 10000 });
-}
 
 const eventsSource = readFileSync(resolve(__dirname, '../public/mobile-app/js/events.js'), 'utf8');
 const bookingSource = readFileSync(resolve(__dirname, '../public/mobile-app/js/booking.js'), 'utf8');
@@ -112,34 +30,6 @@ const sendMessageEnd = messagingSource.indexOf('// simulateReply removed');
 const sendMessageSource = sendMessageStart >= 0 && sendMessageEnd > sendMessageStart
   ? messagingSource.slice(sendMessageStart, sendMessageEnd)
   : messagingSource;
-
-async function navigateToScreen(page, screen) {
-  const resolvedScreen = screen === 'events'
-    ? 'home'
-    : screen === 'mybookings' || screen === 'programs'
-      ? 'schedule'
-      : screen === 'profile'
-        ? 'settings'
-        : screen;
-  let lastError = null;
-
-  for (let attempt = 0; attempt < 2; attempt++) {
-    try {
-      await page.waitForFunction(() => typeof MTC !== 'undefined' && MTC.fn && MTC.fn.navigateTo, null, { timeout: 5000 });
-      await page.evaluate((s) => { MTC.fn.navigateTo(s); }, screen);
-      await page.waitForFunction((target) => {
-        var el = document.getElementById('screen-' + target);
-        return !!(el && el.classList.contains('active'));
-      }, resolvedScreen, { timeout: 5000 });
-      return;
-    } catch (error) {
-      lastError = error;
-      await page.waitForTimeout(300);
-    }
-  }
-
-  throw lastError;
-}
 
 async function prepareAvailableBookingSlot(page) {
   const bookScreen = page.locator('#screen-book, #screen-book.active').first();
@@ -202,7 +92,7 @@ test.describe('Core Flow — Booking', () => {
   });
 
   test('booking rolls back on API failure', async ({ page }) => {
-    await setupAuthenticatedMobile(page, {
+    await mockAuthenticatedPwa(page, {
       '/bookings': (route, method) => {
         if (method === 'POST') {
           route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({ error: 'Server error' }) });
@@ -211,7 +101,7 @@ test.describe('Core Flow — Booking', () => {
         }
       }
     });
-    await navigateToScreen(page, 'book');
+    await navigatePwaScreen(page, 'book');
     await prepareAvailableBookingSlot(page);
 
     const confirmBtn = page.locator('.booking-confirm-btn');
@@ -221,8 +111,8 @@ test.describe('Core Flow — Booking', () => {
   });
 
   test('booking modal has all required fields', async ({ page }) => {
-    await setupAuthenticatedMobile(page);
-    await navigateToScreen(page, 'book');
+    await mockAuthenticatedPwa(page);
+    await navigatePwaScreen(page, 'book');
     await prepareAvailableBookingSlot(page);
 
     // Verify modal content
@@ -257,7 +147,7 @@ test.describe('Core Flow — Messaging', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
   test('message screen loads and shows conversation list', async ({ page }) => {
-    await setupAuthenticatedMobile(page, {
+    await mockAuthenticatedPwa(page, {
       '/conversations': (route, method) => {
         if (method === 'GET') {
           route.fulfill({
@@ -279,13 +169,16 @@ test.describe('Core Flow — Messaging', () => {
         }
       }
     });
-    await navigateToScreen(page, 'messages');
-
-    await expect(page.locator('#screen-messages.active')).toBeAttached({ timeout: 5000 });
+    await navigatePwaScreen(page, 'messages');
     await expect
       .poll(async () => {
         try {
           return await page.evaluate((apiConvos) => {
+            if (typeof MTC !== 'undefined' && MTC.fn && typeof MTC.fn.navigateTo === 'function') {
+              MTC.fn.navigateTo('messages');
+            } else if (typeof navigateTo === 'function') {
+              navigateTo('messages');
+            }
             if (typeof window.updateConversationsFromAPI !== 'function') return false;
             window.updateConversationsFromAPI(apiConvos);
             if (typeof window.renderConversationsList === 'function') window.renderConversationsList();
@@ -319,7 +212,7 @@ test.describe('Core Flow — Messaging', () => {
 
   test('sendMessage._sending prevents double-tap', async ({ page }) => {
     let postCount = 0;
-    await setupAuthenticatedMobile(page, {
+    await mockAuthenticatedPwa(page, {
       '/conversations': (route, method) => {
         if (method === 'POST') {
           postCount++;
@@ -335,7 +228,7 @@ test.describe('Core Flow — Messaging', () => {
         }
       }
     });
-    await navigateToScreen(page, 'messages');
+    await navigatePwaScreen(page, 'messages');
 
     // Open a conversation and try double-sending
     const doubleSendResult = await page.evaluate(() => {
@@ -373,7 +266,7 @@ test.describe('Core Flow — Messaging', () => {
   });
 
   test('reply context preserved on send failure', async ({ page }) => {
-    await setupAuthenticatedMobile(page, {
+    await mockAuthenticatedPwa(page, {
       '/conversations': (route, method) => {
         if (method === 'POST') {
           route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({ error: 'Server error' }) });
@@ -395,7 +288,7 @@ test.describe('Core Flow — Messaging', () => {
         }
       }
     });
-    await navigateToScreen(page, 'messages');
+    await navigatePwaScreen(page, 'messages');
 
     // Verify the reply preservation logic exists in code
     const hasReplyPreservation = await page.evaluate(() => {
@@ -421,7 +314,7 @@ test.describe('Core Flow — RSVP', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
   test('RSVP to event shows success toast', async ({ page }) => {
-    await setupAuthenticatedMobile(page, {
+    await mockAuthenticatedPwa(page, {
       '/events': (route, method) => {
         if (method === 'POST') {
           route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ success: true, action: 'added' }) });
@@ -437,13 +330,13 @@ test.describe('Core Flow — RSVP', () => {
         }
       }
     });
-    await navigateToScreen(page, 'events');
+    await navigatePwaScreen(page, 'events');
 
     await expect(page.locator('#screen-home.active')).toBeAttached({ timeout: 5000 });
   });
 
   test('RSVP rolls back on API failure', async ({ page }) => {
-    await setupAuthenticatedMobile(page, {
+    await mockAuthenticatedPwa(page, {
       '/events': (route, method) => {
         if (method === 'POST') {
           route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({ error: 'Server error' }) });
@@ -455,7 +348,7 @@ test.describe('Core Flow — RSVP', () => {
         }
       }
     });
-    await navigateToScreen(page, 'events');
+    await navigatePwaScreen(page, 'events');
 
     const hasRollback =
       toggleEventRsvpSource.includes('rollback') ||
@@ -466,7 +359,7 @@ test.describe('Core Flow — RSVP', () => {
   });
 
   test('RSVP handles 409 "Event is full" response', async ({ page }) => {
-    await setupAuthenticatedMobile(page, {
+    await mockAuthenticatedPwa(page, {
       '/events': (route, method) => {
         if (method === 'POST') {
           route.fulfill({ status: 409, contentType: 'application/json', body: JSON.stringify({ error: 'Event is full' }) });
@@ -475,15 +368,15 @@ test.describe('Core Flow — RSVP', () => {
         }
       }
     });
-    await navigateToScreen(page, 'events');
+    await navigatePwaScreen(page, 'events');
 
     const handles409 = toggleEventRsvpSource.includes('409') || toggleEventRsvpSource.includes('full');
     expect(handles409).toBe(true);
   });
 
   test('event modal only closes after API success', async ({ page }) => {
-    await setupAuthenticatedMobile(page);
-    await navigateToScreen(page, 'events');
+    await mockAuthenticatedPwa(page);
+    await navigatePwaScreen(page, 'events');
 
     const closeMatches = toggleEventRsvpSource.match(/closeEventModal\(\)/g) || [];
     const closesOnSuccess =
@@ -505,7 +398,7 @@ test.describe('Core Flow — Server-side Spot Limit', () => {
     // This tests client handling of 409 — server-side logic tested in unit tests
     let rsvpStatus = null;
 
-    await setupAuthenticatedMobile(page, {
+    await mockAuthenticatedPwa(page, {
       '/events': (route, method) => {
         if (method === 'POST') {
           rsvpStatus = 409;
@@ -519,7 +412,7 @@ test.describe('Core Flow — Server-side Spot Limit', () => {
         }
       }
     });
-    await navigateToScreen(page, 'events');
+    await navigatePwaScreen(page, 'events');
 
     const handlesFull = toggleEventRsvpSource.includes('409') && toggleEventRsvpSource.includes('full');
     expect(handlesFull).toBe(true);

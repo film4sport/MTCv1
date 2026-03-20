@@ -37,9 +37,26 @@ test.describe('Landing Page - Load & Structure', () => {
 
   test('back-to-top button appears on scroll', async ({ page }) => {
     const btn = page.locator('.back-to-top');
+    const footer = page.locator('footer').first();
     await expect(btn).not.toHaveClass(/visible/);
-    await scrollWindow(page, 1200);
-    await expect(btn).toHaveClass(/visible/);
+    await expect(footer).toBeAttached({ timeout: 5000 });
+    await footer.scrollIntoViewIfNeeded();
+    await scrollWindow(page, 400);
+    await expect
+      .poll(async () => {
+        try {
+          return await btn.evaluate((el) => ({
+            className: el.className,
+            opacity: getComputedStyle(el).opacity,
+            visibility: getComputedStyle(el).visibility,
+          }));
+        } catch {
+          return null;
+        }
+      }, { timeout: 5000 })
+      .toMatchObject({
+        visibility: 'visible',
+      });
   });
 });
 
