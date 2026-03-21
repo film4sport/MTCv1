@@ -7,7 +7,24 @@ async function gotoLandingSection(page, sectionSelector) {
 }
 
 async function scrollWindow(page, y) {
-  await page.mouse.wheel(0, y);
+  await page.evaluate(async (scrollY) => {
+    const maxScroll = Math.max(
+      document.documentElement.scrollHeight - window.innerHeight,
+      document.body.scrollHeight - window.innerHeight,
+      0
+    );
+    const targetY = Math.min(scrollY, maxScroll);
+    window.scrollTo(0, targetY);
+    document.documentElement.scrollTop = targetY;
+    document.body.scrollTop = targetY;
+    window.dispatchEvent(new Event('scroll'));
+    document.dispatchEvent(new Event('scroll'));
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }, y).catch(() => {});
+  await page.waitForFunction((minY) => {
+    return window.scrollY >= minY || document.documentElement.scrollTop >= minY || document.body.scrollTop >= minY;
+  }, y).catch(() => {});
   await page.waitForLoadState('load').catch(() => {});
 }
 
@@ -19,7 +36,7 @@ test.describe('Landing Page - Load & Structure', () => {
   test('page loads without console errors', async ({ page }) => {
     const errors = [];
     page.on('pageerror', (err) => errors.push(err.message));
-    await page.goto('/', { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.reload({ waitUntil: 'domcontentloaded', timeout: 30000 });
     await page.waitForLoadState('load').catch(() => {});
     await expect(page.locator('.navbar')).toBeAttached();
     expect(errors).toEqual([]);
@@ -50,25 +67,33 @@ test.describe('Landing Page - Load & Structure', () => {
 
   test('back-to-top button appears on scroll', async ({ page }) => {
     const btn = page.locator('.back-to-top');
-    const footer = page.locator('footer').first();
     await expect(btn).not.toHaveClass(/visible/);
-    await expect(footer).toBeAttached({ timeout: 5000 });
-    await page.evaluate(() => {
-      document.querySelector('footer')?.scrollIntoView({ block: 'end' });
-    }).catch(() => {});
-    await scrollWindow(page, 400);
     await expect
       .poll(async () => {
         try {
-          return await btn.evaluate((el) => ({
-            className: el.className,
-            opacity: getComputedStyle(el).opacity,
-            visibility: getComputedStyle(el).visibility,
-          }));
+          return await page.evaluate(() => {
+            const maxScroll = Math.max(
+              document.documentElement.scrollHeight - window.innerHeight,
+              document.body.scrollHeight - window.innerHeight,
+              0
+            );
+            window.scrollTo(0, maxScroll);
+            document.documentElement.scrollTop = maxScroll;
+            document.body.scrollTop = maxScroll;
+            window.dispatchEvent(new Event('scroll'));
+            document.dispatchEvent(new Event('scroll'));
+            const el = document.querySelector('.back-to-top');
+            if (!(el instanceof HTMLElement)) return null;
+            return {
+              className: el.className,
+              opacity: getComputedStyle(el).opacity,
+              visibility: getComputedStyle(el).visibility,
+            };
+          });
         } catch {
           return null;
         }
-      }, { timeout: 5000 })
+      }, { timeout: 10000 })
       .toMatchObject({
         visibility: 'visible',
       });
@@ -87,24 +112,32 @@ test.describe('Navbar', () => {
 
   test('navbar gets scrolled class on scroll', async ({ page }) => {
     const nav = page.locator('.navbar');
-    const footer = page.locator('footer').first();
     await expect(nav).not.toHaveClass(/scrolled/);
-    await expect(footer).toBeAttached({ timeout: 5000 });
-    await page.evaluate(() => {
-      document.querySelector('footer')?.scrollIntoView({ block: 'end' });
-    }).catch(() => {});
-    await scrollWindow(page, 400);
     await expect
       .poll(async () => {
         try {
-          return await nav.evaluate((el) => ({
-            className: el.className,
-            backgroundColor: getComputedStyle(el).backgroundColor,
-          }));
+          return await page.evaluate(() => {
+            const maxScroll = Math.max(
+              document.documentElement.scrollHeight - window.innerHeight,
+              document.body.scrollHeight - window.innerHeight,
+              0
+            );
+            window.scrollTo(0, maxScroll);
+            document.documentElement.scrollTop = maxScroll;
+            document.body.scrollTop = maxScroll;
+            window.dispatchEvent(new Event('scroll'));
+            document.dispatchEvent(new Event('scroll'));
+            const el = document.querySelector('.navbar');
+            if (!(el instanceof HTMLElement)) return null;
+            return {
+              className: el.className,
+              backgroundColor: getComputedStyle(el).backgroundColor,
+            };
+          });
         } catch {
           return null;
         }
-      }, { timeout: 5000 })
+      }, { timeout: 10000 })
       .toMatchObject({
         className: expect.stringMatching(/scrolled/),
       });

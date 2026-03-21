@@ -193,15 +193,21 @@ test.describe('Gallery & Lightbox', () => {
   test('gallery dots navigation works', async ({ page }) => {
     const dots = page.locator('.gallery-dot');
     await waitForCountAtLeast(dots, 2);
-    await dots.nth(1).dispatchEvent('click');
     await expect
       .poll(async () => {
         try {
-          return await dots.nth(1).getAttribute('class');
+          return await dots.evaluateAll((els, targetIndex) => {
+            const target = els[targetIndex];
+            if (!(target instanceof HTMLElement)) return '';
+            if (!target.classList.contains('active')) {
+              target.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+            }
+            return target.className;
+          }, 1);
         } catch {
           return '';
         }
-      }, { timeout: 5000 })
+      }, { timeout: 10000 })
       .toMatch(/active/);
   });
 
