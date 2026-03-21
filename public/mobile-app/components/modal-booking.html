@@ -1,0 +1,101 @@
+<div class="booking-modal-overlay" id="bookingModal" onclick="closeBookingModal(event)" role="dialog" aria-modal="true" aria-label="Book court">
+        <div class="booking-modal" onclick="event.stopPropagation()">
+          <button class="booking-modal-close" onclick="closeBookingModal()" aria-label="Close">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+          
+          <div class="booking-modal-header">
+            <div class="booking-modal-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            </div>
+            <div class="booking-modal-title">CONFIRM BOOKING</div>
+          </div>
+          
+          <div class="booking-modal-details">
+            <div class="booking-modal-row">
+              <span class="booking-modal-label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line></svg>
+                Date
+              </span>
+              <span class="booking-modal-value" id="summaryDate">--</span>
+            </div>
+            <div class="booking-modal-row">
+              <span class="booking-modal-label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                Time
+              </span>
+              <span class="booking-modal-value" id="summaryTime">--</span>
+            </div>
+            <div class="booking-modal-row">
+              <span class="booking-modal-label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><rect x="2" y="2" width="20" height="20" rx="2"></rect><line x1="2" y1="12" x2="22" y2="12"></line><line x1="12" y1="2" x2="12" y2="22"></line></svg>
+                Court
+              </span>
+              <span class="booking-modal-value" id="summaryCourt">--</span>
+            </div>
+            <div class="booking-modal-row">
+              <span class="booking-modal-label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 8 14"></polyline></svg>
+                Duration
+              </span>
+              <span class="booking-modal-value">1 Hour</span>
+            </div>
+          </div>
+          
+          <!-- Match Type Toggle -->
+          <div class="booking-modal-option-group">
+            <span class="booking-modal-option-label" style="color: var(--coral);">Match Type</span>
+            <div class="booking-match-type-toggle" id="matchTypeToggle">
+              <button class="match-type-btn active" data-type="singles" onclick="selectMatchType('singles')">Singles</button>
+              <button class="match-type-btn" data-type="doubles" onclick="selectMatchType('doubles')">Doubles</button>
+            </div>
+          </div>
+
+          <!-- Duration Picker -->
+          <div class="booking-modal-option-group">
+            <span class="booking-modal-option-label">Duration</span>
+            <div class="booking-duration-toggle" id="durationToggle">
+              <button class="duration-btn active" data-slots="2" onclick="selectDuration(2)">1h</button>
+              <button class="duration-btn" data-slots="3" onclick="selectDuration(3)">1.5h</button>
+              <button class="duration-btn" data-slots="4" onclick="selectDuration(4)" style="display:none;">2h</button>
+            </div>
+          </div>
+
+          <!-- Guest Toggle + Name -->
+          <div class="booking-modal-option-group">
+            <div class="booking-guest-row">
+              <span class="booking-modal-option-label">Bringing a Guest?</span>
+              <div class="toggle" id="guestToggle" role="switch" aria-checked="false" tabindex="0" onclick="toggleGuestField()"></div>
+            </div>
+            <div class="booking-guest-fields" id="guestFields" style="display:none;">
+              <input type="text" id="guestNameInput" class="booking-input" placeholder="Guest name" maxlength="100" autocomplete="off">
+              <div class="booking-guest-fee">$10 guest fee — e-transfer to monotennis.payment@gmail.com</div>
+            </div>
+          </div>
+
+          <!-- Add Players (participants) -->
+          <div class="booking-modal-option-group">
+            <div class="booking-guest-row">
+              <span class="booking-modal-option-label">Add Players</span>
+              <button class="booking-add-player-btn" id="addPlayerBtn" onclick="openPlayerPicker()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              </button>
+            </div>
+            <div class="booking-participants-list" id="participantsList"></div>
+          </div>
+
+          <!-- Cancellation Reminder -->
+          <div class="booking-cancel-reminder">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            <span>Cancel 24+ hrs in advance to free up the slot for others.</span>
+          </div>
+
+          <div class="booking-modal-actions">
+            <button class="booking-modal-cancel-btn" onclick="closeBookingModal()">CANCEL</button>
+            <button class="booking-confirm-btn" aria-label="Book court" onclick="confirmBooking()">
+              CONFIRM & BOOK
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </button>
+          </div>
+        </div>
+      </div>

@@ -84,7 +84,7 @@ describe('Public calendar route', () => {
 
 describe('Mobile auth config + deprecated bridge routes', () => {
   const mobileAuthConfig = readRoute('mobile-auth/config');
-  const mobileAuthJs = readFile('public/mobile-app/js/auth.js');
+  const mobileAuthJs = readFile('public/mobile-app/js/auth.ts');
   const mobileBooking = readRoute('mobile-booking');
 
   it('mobile auth config returns public Supabase keys with cache control', () => {
@@ -190,7 +190,7 @@ describe('Push + notification routes', () => {
   const pushLib = readFile('app/api/lib/push.ts');
   const dashboardStore = readFile('app/dashboard/lib/store.tsx');
   const dashboardHeader = readFile('app/dashboard/components/DashboardHeader.tsx');
-  const mobileAuthJs = readFile('public/mobile-app/js/auth.js');
+  const mobileAuthJs = readFile('public/mobile-app/js/auth.ts');
 
   it('notify-email enforces session auth, rate limits, and handles missing SMTP safely', () => {
     expect(notifyEmail).toContain('resolveSession');

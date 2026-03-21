@@ -1,0 +1,201 @@
+/* interactive.js - MTC Court */
+(function() {
+  'use strict';
+
+  // ============================================
+  // UI INTERACTIVE ELEMENTS
+  // ============================================
+  document.querySelectorAll('.date-item').forEach(function(item) {
+    item.addEventListener('click', function() {
+      document.querySelectorAll('.date-item').forEach(function(i) { i.classList.remove('active'); });
+      item.classList.add('active');
+    });
+  });
+
+  document.querySelectorAll('.court-select-item').forEach(function(item) {
+    item.addEventListener('click', function() {
+      document.querySelectorAll('.court-select-item').forEach(function(i) { i.classList.remove('active'); });
+      item.classList.add('active');
+    });
+  });
+
+  document.querySelectorAll('.time-slot:not(.unavailable)').forEach(function(item) {
+    item.addEventListener('click', function() {
+      document.querySelectorAll('.time-slot').forEach(function(i) { i.classList.remove('active'); });
+      item.classList.add('active');
+    });
+  });
+
+  document.querySelectorAll('.filter-pill').forEach(function(item) {
+    item.addEventListener('click', function() {
+      item.parentElement.querySelectorAll('.filter-pill').forEach(function(i) { i.classList.remove('active'); });
+      item.classList.add('active');
+    });
+  });
+
+  document.querySelectorAll('.schedule-tab').forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      document.querySelectorAll('.schedule-tab').forEach(function(t) { t.classList.remove('active'); });
+      tab.classList.add('active');
+    });
+  });
+
+  document.querySelectorAll('.stat-item').forEach(function(item) {
+    item.addEventListener('click', function() {
+      document.querySelectorAll('.stat-item').forEach(function(i) { i.classList.remove('active'); });
+      item.classList.add('active');
+    });
+  });
+
+  // ============================================
+  // APP INITIALIZATION (DOMContentLoaded)
+  // ============================================
+  document.addEventListener('DOMContentLoaded', function() {
+    // PWA install gate — block login if running in browser (not installed as PWA)
+    if (MTC.fn.checkInstallGate && MTC.fn.checkInstallGate()) {
+      return; // Install screen is showing, don't initialize the app
+    }
+
+    // Restore saved theme preference
+    const savedTheme = MTC.storage.get('mtc-theme', null);
+    if (savedTheme) {
+      document.getElementById('app').setAttribute('data-theme', savedTheme);
+      const toggle = document.getElementById('darkModeToggle');
+      if (toggle) {
+        if (savedTheme === 'dark') toggle.classList.add('active');
+        else toggle.classList.remove('active');
+      }
+      MTC.fn.updateWeatherCardColors(savedTheme === 'dark');
+      // Sync status bar color
+      const metaColor = document.querySelector('meta[name="theme-color"]');
+      if (metaColor) metaColor.setAttribute('content', savedTheme === 'dark' ? '#0b0a09' : '#c8ff00');
+    }
+
+    // Check for saved login
+    currentUser = MTC.storage.get('mtc-user', null);
+    if (currentUser) {
+      // Check if user has a valid PIN auth session (token starts with 'sess-')
+      // Old users from Google OAuth / magic link have JWT tokens or no token — they need to set a PIN
+      var hasSession = !!MTC.storage.get('mtc-session-active', false);
+      if (!hasSession) {
+        // Old auth session — show PIN setup screen so they can migrate seamlessly
+        if (typeof showPinSetupScreen === 'function') {
+          showPinSetupScreen(currentUser.email || '', currentUser.name || '');
+        }
+        window.dispatchEvent(new Event('mtc-app-ready'));
+        // Don't proceed to main app — let them set their PIN first
+        return;
+      }
+
+      // Populate MTC.state so all modules (profile switcher, booking, etc.) have user data
+      MTC.state.currentUser = currentUser;
+      window.currentUser = currentUser;
+
+      // Restore family members for family membership profiles
+      var storedFamily = MTC.storage.get('mtc-family-members', []);
+      if (storedFamily && storedFamily.length > 0) {
+        MTC.state.familyMembers = storedFamily;
+      }
+      var storedActiveMember = MTC.storage.get('mtc-active-family-member', null);
+      if (storedActiveMember) {
+        MTC.state.activeFamilyMember = storedActiveMember;
+      }
+
+      document.getElementById('login-screen').classList.remove('active');
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('bottomNav').style.display = 'block';
+
+      // Show/hide admin & captain menu items based on role (mirrors completeLogin() in auth.js)
+      var adminMenuItem = document.getElementById('menuAdminItem');
+      if (adminMenuItem) {
+        if (currentUser.role === 'admin' || currentUser.role === 'coach') {
+          adminMenuItem.classList.remove('admin-hidden');
+        } else {
+          adminMenuItem.classList.add('admin-hidden');
+        }
+      }
+      var captainMenuItem = document.getElementById('menuCaptainItem');
+      if (captainMenuItem) {
+        if (currentUser.interclubTeam && currentUser.interclubTeam !== 'none') {
+          captainMenuItem.classList.remove('admin-hidden');
+        } else {
+          captainMenuItem.classList.add('admin-hidden');
+        }
+      }
+
+      // Apply guest restrictions and route to correct screen
+      if (typeof applyGuestRestrictions === 'function') applyGuestRestrictions();
+
+      if (currentUser.isMember === false) {
+        document.getElementById('screen-book').classList.add('active');
+      } else {
+        document.getElementById('screen-home').classList.add('active');
+      }
+
+      fetchWeather();
+      window.dispatchEvent(new Event('mtc-app-ready'));
+    }
+
+    // Initialize UI
+    animateCountUp();
+
+    // Check for first-time user onboarding
+    MTC.fn.checkOnboarding();
+
+    // Setup pull to refresh
+    MTC.fn.setupPullToRefresh();
+
+    // Load saved avatar
+    loadSavedAvatar();
+
+    // Initialize notification badge count from DOM
+    if (typeof updateUnreadCount === 'function') updateUnreadCount();
+
+    // Restore saved settings toggles
+    if (typeof restoreSettingsToggles === 'function') restoreSettingsToggles();
+
+    // Restore saved messages from localStorage
+    if (typeof loadSavedConversations === 'function') loadSavedConversations();
+
+    // Populate dynamic home screen event dates
+    if (typeof populateHomeEventDates === 'function') populateHomeEventDates();
+
+    // Hide partner cards that were already joined
+    if (typeof hideJoinedPartnerCards === 'function') hideJoinedPartnerCards();
+
+    // Setup offline indicator
+    setupOfflineIndicator();
+
+    // Register service worker for offline support
+    registerServiceWorker();
+
+    if (!currentUser) {
+      window.dispatchEvent(new Event('mtc-app-ready'));
+    }
+
+  });
+
+  // ============================================
+  // SERVICE WORKER REGISTRATION
+  // ============================================
+  function registerServiceWorker() {
+    if ('serviceWorker' in navigator) {
+      // Old cache cleanup is now handled by the service worker's activate event.
+      // Removed hardcoded cache name that would fall out of sync with auto-bumped SW cache.
+
+      navigator.serviceWorker.register('/mobile-app/sw.js', { scope: '/mobile-app/' })
+        .then(function(registration) {
+          // ServiceWorker registered successfully
+          registration.update();
+        })
+        .catch(function(error) {
+          MTC.warn('ServiceWorker registration failed:', error);
+        });
+
+      // Auto-reload when new service worker takes control
+      navigator.serviceWorker.addEventListener('controllerchange', function() {
+        window.location.reload();
+      });
+    }
+  }
+})();

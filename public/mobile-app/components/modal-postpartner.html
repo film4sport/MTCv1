@@ -1,0 +1,73 @@
+<div class="modal-overlay" id="postPartnerModal" onclick="closePostPartnerModal()" role="dialog" aria-modal="true" aria-label="Post partner request">
+        <div class="modal modal-scrollable-tall partner-post-modal" onclick="event.stopPropagation()">
+          <div class="partner-post-header">
+            <div class="partner-post-bar"></div>
+            <div class="modal-title" style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:0.5px;margin-bottom:4px;">POST PARTNER REQUEST</div>
+            <div class="modal-desc">Let other members know you're looking for a match</div>
+          </div>
+
+          <div class="modal-form-group">
+            <label class="modal-form-label" style="color: var(--coral);">Match Type</label>
+            <div class="partner-post-types modal-pill-group">
+              <button class="partner-type-btn active" data-type="singles" onclick="selectPartnerType(this)">Singles</button>
+              <button class="partner-type-btn" data-type="mixed" onclick="selectPartnerType(this)">Mixed Doubles</button>
+              <button class="partner-type-btn" data-type="mens" onclick="selectPartnerType(this)">Men's Doubles</button>
+              <button class="partner-type-btn" data-type="womens" onclick="selectPartnerType(this)">Women's Doubles</button>
+            </div>
+
+            <label class="modal-form-label" style="color: var(--electric-blue);">Preferred Skill Level</label>
+            <div class="partner-post-types modal-pill-group">
+              <button class="partner-type-btn active" data-level="any" onclick="selectPartnerLevel(this)">Any Level</button>
+              <button class="partner-type-btn" data-level="beginner" onclick="selectPartnerLevel(this)">Beginner</button>
+              <button class="partner-type-btn" data-level="intermediate" onclick="selectPartnerLevel(this)">Intermediate</button>
+              <button class="partner-type-btn" data-level="advanced" onclick="selectPartnerLevel(this)">Advanced</button>
+            </div>
+
+            <label class="modal-form-label" style="color: var(--coral);">When</label>
+            <div class="partner-post-types modal-pill-group">
+              <button class="partner-type-btn active" data-when="anytime" onclick="selectPartnerWhen(this)">Anytime</button>
+              <button class="partner-type-btn" data-when="today" onclick="selectPartnerWhen(this)">Today</button>
+              <button class="partner-type-btn" data-when="tomorrow" onclick="selectPartnerWhen(this)">Tomorrow</button>
+              <button class="partner-type-btn" data-when="weekend" onclick="selectPartnerWhen(this)">This Weekend</button>
+            </div>
+
+            <!-- Time section: hidden when "Anytime" is selected -->
+            <div id="partnerTimeSection" style="display:none;">
+              <label class="modal-form-label">Preferred Time</label>
+              <div class="partner-time-picker-wrap">
+                <input type="time" id="partnerTimeInput" class="partner-time-input" onchange="onPartnerTimeInput(this)">
+              </div>
+              <div class="partner-time-period-label">Morning</div>
+              <div class="partner-time-grid" id="partnerTimeGrid">
+                <button class="partner-time-btn" data-time="8:00 AM" onclick="selectPartnerTime(this)">8 AM</button>
+                <button class="partner-time-btn" data-time="9:00 AM" onclick="selectPartnerTime(this)">9 AM</button>
+                <button class="partner-time-btn" data-time="10:00 AM" onclick="selectPartnerTime(this)">10 AM</button>
+                <button class="partner-time-btn" data-time="11:00 AM" onclick="selectPartnerTime(this)">11 AM</button>
+              </div>
+              <div class="partner-time-period-label">Afternoon</div>
+              <div class="partner-time-grid">
+                <button class="partner-time-btn" data-time="12:00 PM" onclick="selectPartnerTime(this)">12 PM</button>
+                <button class="partner-time-btn" data-time="1:00 PM" onclick="selectPartnerTime(this)">1 PM</button>
+                <button class="partner-time-btn" data-time="2:00 PM" onclick="selectPartnerTime(this)">2 PM</button>
+                <button class="partner-time-btn" data-time="3:00 PM" onclick="selectPartnerTime(this)">3 PM</button>
+              </div>
+              <div class="partner-time-period-label">Evening</div>
+              <div class="partner-time-grid">
+                <button class="partner-time-btn" data-time="4:00 PM" onclick="selectPartnerTime(this)">4 PM</button>
+                <button class="partner-time-btn" data-time="5:00 PM" onclick="selectPartnerTime(this)">5 PM</button>
+                <button class="partner-time-btn" data-time="6:00 PM" onclick="selectPartnerTime(this)">6 PM</button>
+                <button class="partner-time-btn" data-time="7:00 PM" onclick="selectPartnerTime(this)">7 PM</button>
+              </div>
+            </div>
+
+            <label class="modal-form-label" style="color: var(--electric-blue);">Message (optional)</label>
+            <textarea id="partnerPostMessage" class="modal-textarea" aria-label="Partner request message" placeholder="Looking for a rally partner..."></textarea>
+          </div>
+
+          <button class="modal-btn-primary-full" onclick="submitPartnerRequest()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" style="vertical-align:-3px;margin-right:6px;"><path d="M22 2L11 13"></path><path d="M22 2l-7 20-4-9-9-4 20-7z"></path></svg>
+            POST REQUEST
+          </button>
+          <button class="modal-btn-secondary" onclick="closePostPartnerModal()">Cancel</button>
+        </div>
+      </div>

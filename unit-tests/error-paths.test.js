@@ -13,12 +13,12 @@ import { resolve } from 'path';
 
 const root = resolve(__dirname, '..');
 const ADMIN_JS_FILES = [
-  'public/mobile-app/js/admin-helpers.js',
-  'public/mobile-app/js/admin-dashboard.js',
-  'public/mobile-app/js/admin-members.js',
-  'public/mobile-app/js/admin-courts.js',
-  'public/mobile-app/js/admin-announcements.js',
-  'public/mobile-app/js/admin-events.js',
+  'public/mobile-app/js/admin-helpers.ts',
+  'public/mobile-app/js/admin-dashboard.ts',
+  'public/mobile-app/js/admin-members.ts',
+  'public/mobile-app/js/admin-courts.ts',
+  'public/mobile-app/js/admin-announcements.ts',
+  'public/mobile-app/js/admin-events.ts',
 ];
 
 function readFile(relPath) {
@@ -124,23 +124,23 @@ describe('Dashboard store.tsx — Error Handling on Every Mutation', () => {
 // ==========================================================
 describe('Mobile PWA — No Silent API Failures', () => {
   const files = [
-    'public/mobile-app/js/mybookings.js',
-    'public/mobile-app/js/events-registration.js',
-    'public/mobile-app/js/partners.js',
-    'public/mobile-app/js/messaging.js',
-    'public/mobile-app/js/booking.js',
-    'public/mobile-app/js/api-client.js',
+    'public/mobile-app/js/mybookings.ts',
+    'public/mobile-app/js/events-registration.ts',
+    'public/mobile-app/js/partners.ts',
+    'public/mobile-app/js/messaging.ts',
+    'public/mobile-app/js/booking.ts',
+    'public/mobile-app/js/api-client.ts',
   ];
 
   // Allowed silent catches: fire-and-forget operations like notification delivery,
   // mark-as-read, push notification sends. We check user-facing mutation functions only.
   const mutationFunctions = {
-    'mybookings.js': ['cancelEventRsvp', 'confirmCancelBooking'],
-    'events-registration.js': ['rsvpInterclub'],
-    'partners.js': ['submitPartnerRequest', 'removePartnerRequest', 'enrollInProgram'],
-    'messaging.js': ['deleteConversation'],
-    'booking.js': ['confirmBooking'],
-    'api-client.js': ['createBooking', 'cancelBooking'],
+    'mybookings.ts': ['cancelEventRsvp', 'confirmCancelBooking'],
+    'events-registration.ts': ['rsvpInterclub'],
+    'partners.ts': ['submitPartnerRequest', 'removePartnerRequest', 'enrollInProgram'],
+    'messaging.ts': ['deleteConversation'],
+    'booking.ts': ['confirmBooking'],
+    'api-client.ts': ['createBooking', 'cancelBooking'],
   };
 
   for (const file of files) {
@@ -171,7 +171,7 @@ describe('Mobile PWA — No Silent API Failures', () => {
 // ==========================================================
 describe('Mobile PWA — Rollback Patterns', () => {
   it('cancelEventRsvp has API call + rollback', () => {
-    const content = readFile('public/mobile-app/js/mybookings.js');
+    const content = readFile('public/mobile-app/js/mybookings.ts');
     // Must call API
     expect(content).toMatch(/cancelEventRsvp[\s\S]*?apiRequest.*\/mobile\/events/);
     // Must have rollback (restore prevEventBookings)
@@ -181,7 +181,7 @@ describe('Mobile PWA — Rollback Patterns', () => {
   });
 
   it('rsvpInterclub has rollback on API failure', () => {
-    const content = readFile('public/mobile-app/js/events-registration.js');
+    const content = readFile('public/mobile-app/js/events-registration.ts');
     // Must save previous state
     expect(content).toContain('prevRsvpList');
     // Must restore on error
@@ -191,7 +191,7 @@ describe('Mobile PWA — Rollback Patterns', () => {
   });
 
   it('removePartnerRequest has rollback on API failure', () => {
-    const content = readFile('public/mobile-app/js/partners.js');
+    const content = readFile('public/mobile-app/js/partners.ts');
     // Must save previous state
     expect(content).toMatch(/removePartnerRequest[\s\S]*?prevRequests/);
     // Must restore on error
@@ -201,7 +201,7 @@ describe('Mobile PWA — Rollback Patterns', () => {
   });
 
   it('enrollInProgram has rollback on API failure', () => {
-    const content = readFile('public/mobile-app/js/partners.js');
+    const content = readFile('public/mobile-app/js/partners.ts');
     // Enrollment should roll back button state
     expect(content).toMatch(/enrollInProgram[\s\S]*?classList\.remove.*enrolled/);
     // Should show error toast
@@ -209,13 +209,13 @@ describe('Mobile PWA — Rollback Patterns', () => {
   });
 
   it('withdrawFromProgram has rollback on API failure', () => {
-    const content = readFile('public/mobile-app/js/partners.js');
+    const content = readFile('public/mobile-app/js/partners.ts');
     // Withdrawal should restore enrolled state
     expect(content).toMatch(/classList\.add.*enrolled[\s\S]*?Failed to withdraw/);
   });
 
   it('deleteConversation has rollback on API failure', () => {
-    const content = readFile('public/mobile-app/js/messaging.js');
+    const content = readFile('public/mobile-app/js/messaging.ts');
     // Must save previous conversation
     expect(content).toMatch(/deleteConversation[\s\S]*?prevConv/);
     // Must restore on error
@@ -238,32 +238,32 @@ describe('Mobile PWA — Rollback Patterns', () => {
 // ==========================================================
 describe('Mobile PWA — All Mutations Persist to Server', () => {
   it('cancelEventRsvp calls /mobile/events API', () => {
-    const content = readFile('public/mobile-app/js/mybookings.js');
+    const content = readFile('public/mobile-app/js/mybookings.ts');
     expect(content).toMatch(/cancelEventRsvp[\s\S]*?apiRequest.*\/mobile\/events/);
   });
 
   it('rsvpInterclub calls /mobile/events API', () => {
-    const content = readFile('public/mobile-app/js/events-registration.js');
+    const content = readFile('public/mobile-app/js/events-registration.ts');
     expect(content).toMatch(/rsvpInterclub[\s\S]*?apiRequest.*\/mobile\/events/);
   });
 
   it('submitPartnerRequest calls /mobile/partners API', () => {
-    const content = readFile('public/mobile-app/js/partners.js');
+    const content = readFile('public/mobile-app/js/partners.ts');
     expect(content).toMatch(/submitPartnerRequest[\s\S]*?apiRequest.*\/mobile\/partners/);
   });
 
   it('removePartnerRequest calls /mobile/partners DELETE API', () => {
-    const content = readFile('public/mobile-app/js/partners.js');
+    const content = readFile('public/mobile-app/js/partners.ts');
     expect(content).toMatch(/removePartnerRequest[\s\S]*?apiRequest.*\/mobile\/partners[\s\S]*?DELETE/);
   });
 
   it('enrollInProgram calls /mobile/programs API', () => {
-    const content = readFile('public/mobile-app/js/partners.js');
+    const content = readFile('public/mobile-app/js/partners.ts');
     expect(content).toMatch(/enrollInProgram[\s\S]*?apiRequest.*\/mobile\/programs/);
   });
 
   it('deleteConversation calls /mobile/conversations DELETE API', () => {
-    const content = readFile('public/mobile-app/js/messaging.js');
+    const content = readFile('public/mobile-app/js/messaging.ts');
     expect(content).toMatch(/deleteConversation[\s\S]*?apiRequest.*\/mobile\/conversations[\s\S]*?DELETE/);
   });
 
@@ -273,12 +273,12 @@ describe('Mobile PWA — All Mutations Persist to Server', () => {
   });
 
   it('confirmBooking calls createBooking API (via api-client)', () => {
-    const content = readFile('public/mobile-app/js/api-client.js');
+    const content = readFile('public/mobile-app/js/api-client.ts');
     expect(content).toMatch(/createBooking[\s\S]*?\/mobile\/bookings[\s\S]*?POST/);
   });
 
   it('cancelBooking calls API DELETE (via api-client)', () => {
-    const content = readFile('public/mobile-app/js/api-client.js');
+    const content = readFile('public/mobile-app/js/api-client.ts');
     expect(content).toMatch(/cancelBooking[\s\S]*?\/mobile\/bookings[\s\S]*?DELETE/);
   });
 });

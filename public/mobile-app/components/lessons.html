@@ -1,0 +1,142 @@
+<div class="screen" id="screen-lessons" aria-label="Lessons & Coaching">
+      <div class="screen-header">
+        <button class="back-btn" onclick="navigateTo('home')" aria-label="Go back to home">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+        <h2 class="screen-title">LESSONS</h2>
+      </div>
+
+      <div style="padding: 0 16px 100px;">
+
+        <!-- Spring 2026 Banner -->
+        <div style="background: linear-gradient(135deg, rgba(200,255,0,0.12), rgba(200,255,0,0.04)); border: 1px solid rgba(200,255,0,0.2); border-radius: 14px; padding: 14px; margin-bottom: 12px;">
+          <div style="font-weight: 700; font-size: 14px; color: var(--volt); margin-bottom: 4px;">Spring 2026 Programs Now Open</div>
+          <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.5;">9-week programs starting the week of May 11. Junior and adult classes for all skill levels.</div>
+        </div>
+
+        <!-- Head Pro Card -->
+        <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 16px; padding: 20px; margin-bottom: 12px;">
+          <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 12px;">
+            <div style="width: 56px; height: 56px; border-radius: 50%; background: var(--volt); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 20px; color: #1a1a1a; flex-shrink: 0;">MT</div>
+            <div>
+              <div style="font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--text-primary); line-height: 1.1;">Mark Taylor</div>
+              <div style="font-size: 12px; color: var(--text-muted);">Head Professional</div>
+            </div>
+          </div>
+          <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 14px;">
+            Tennis Canada certified professional. Competitive player in NCTA, OTA, FTQ tournaments and Circuit Canada Series. Competed in ITF Futures events. Trained with Bob Brett in San Remo, Italy. Coaches juniors through adults, beginner to elite level.
+          </p>
+          <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px;">
+            <span class="coaching-link" style="font-size: 10px; padding: 4px 10px; border-radius: 20px; background: rgba(200,255,0,0.15);">Tennis Instructor (2007)</span>
+            <span class="coaching-link" style="font-size: 10px; padding: 4px 10px; border-radius: 20px; background: rgba(200,255,0,0.15);">Club Professional 1</span>
+            <span class="coaching-link" style="font-size: 10px; padding: 4px 10px; border-radius: 20px; background: rgba(200,255,0,0.15);">Coach 2 (2011)</span>
+            <span class="coaching-link" style="font-size: 10px; padding: 4px 10px; border-radius: 20px; background: rgba(200,255,0,0.15);">TPA Member</span>
+          </div>
+          <a href="mailto:Taylor.mark.tennis@gmail.com" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 12px; background: var(--volt); color: #1a1a1a; font-weight: 700; font-size: 13px; text-decoration: none;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+            Private Lessons with Mark
+          </a>
+        </div>
+
+        <!-- Coach Card — Adrian -->
+        <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 16px; padding: 20px; margin-bottom: 20px;">
+          <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 12px;">
+            <div style="width: 48px; height: 48px; border-radius: 50%; background: #6366F1; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; color: #fff; flex-shrink: 0;">AS</div>
+            <div>
+              <div style="font-weight: 700; font-size: 16px; color: var(--text-primary);">Adrian Shelley</div>
+              <div style="font-size: 12px; color: var(--text-muted);">Tennis Professional</div>
+            </div>
+          </div>
+          <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 14px;">
+            Over 40 years of experience as a player, instructor, and coach. Provincially ranked junior who reached the junior nationals, then played Varsity Tennis at Brock University for 5 years. Tennis Coach at North Park S.S. for 23+ years, advancing his team to OFSAA 5 times. Enjoys helping players of all abilities improve their skills, fitness, and most importantly have fun.
+          </p>
+          <a href="mailto:Shelley.Adrian.Tennis@gmail.com" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 12px; background: #6366F1; color: #fff; font-weight: 700; font-size: 13px; text-decoration: none;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+            Private Lessons with Adrian
+          </a>
+        </div>
+
+        <!-- Dynamic Programs (rendered by lessons.js from API) -->
+        <div id="lessons-programs-container">
+          <div style="text-align:center;padding:24px 16px;color:var(--text-muted);font-size:13px;">Loading programs...</div>
+        </div>
+
+        <!-- Weekly Schedule Grid -->
+        <div class="section-header"><h3 class="section-title">WEEKLY SCHEDULE</h3></div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
+          <div style="background: var(--bg-secondary); border-radius: 14px; padding: 14px;">
+            <div style="font-weight: 700; font-size: 13px; color: var(--volt); margin-bottom: 4px; display: flex; align-items: center; gap: 6px;"><span style="width: 6px; height: 6px; border-radius: 50%; background: var(--volt);"></span>Monday</div>
+            <div style="font-size:10px;color:var(--text-muted);margin-bottom:8px;">Starts May 11</div>
+            <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.8;">
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Live Ball</span><span>9:30–11 AM</span></div>
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Team Practice</span><span>11 AM–1 PM</span></div>
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Teen Tennis</span><span>5–6 PM</span></div>
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Live Ball</span><span>6–7:30 PM</span></div>
+            </div>
+          </div>
+          <div style="background: var(--bg-secondary); border-radius: 14px; padding: 14px;">
+            <div style="font-weight: 700; font-size: 13px; color: var(--volt); margin-bottom: 4px; display: flex; align-items: center; gap: 6px;"><span style="width: 6px; height: 6px; border-radius: 50%; background: var(--volt);"></span>Tuesday</div>
+            <div style="font-size:10px;color:var(--text-muted);margin-bottom:8px;">Starts May 12</div>
+            <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.8;">
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Orange Ball</span><span>4–5 PM</span></div>
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Green Ball</span><span>5–6 PM</span></div>
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Teen Tennis</span><span>6–7 PM</span></div>
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Live Ball</span><span>7–8:30 PM</span></div>
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Adult 101/102</span><span>8:30–9:30 PM</span></div>
+            </div>
+          </div>
+          <div style="background: var(--bg-secondary); border-radius: 14px; padding: 14px;">
+            <div style="font-weight: 700; font-size: 13px; color: var(--volt); margin-bottom: 4px; display: flex; align-items: center; gap: 6px;"><span style="width: 6px; height: 6px; border-radius: 50%; background: var(--volt);"></span>Thursday</div>
+            <div style="font-size:10px;color:var(--text-muted);margin-bottom:8px;">Starts May 14</div>
+            <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.8;">
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Munchkin Stars</span><span>4:30–5 PM</span></div>
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Red Ball</span><span>5–6 PM</span></div>
+            </div>
+          </div>
+          <div style="background: var(--bg-secondary); border-radius: 14px; padding: 14px;">
+            <div style="font-weight: 700; font-size: 13px; color: var(--volt); margin-bottom: 4px; display: flex; align-items: center; gap: 6px;"><span style="width: 6px; height: 6px; border-radius: 50%; background: var(--volt);"></span>Friday</div>
+            <div style="font-size:10px;color:var(--text-muted);margin-bottom:8px;">Starts May 15</div>
+            <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.8;">
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Teen Tennis</span><span>4:30–5:30 PM</span></div>
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">Live Ball</span><span>5:30–7 PM</span></div>
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-primary);font-weight:600;">House League</span><span>7–9 PM</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Summer Camp -->
+        <div class="section-header"><h3 class="section-title">SUMMER CAMP</h3></div>
+
+        <div style="background: var(--bg-secondary); border-radius: 14px; padding: 16px; margin-bottom: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+            <div>
+              <div style="font-weight: 700; font-size: 15px; color: var(--text-primary);">Summer Tennis Camp</div>
+              <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Ages 5+ &bull; Dates coming soon</div>
+            </div>
+            <div style="font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--volt); white-space: nowrap;">TBC</div>
+          </div>
+          <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.4; margin-bottom: 10px;">Camp is about fun! Running, hitting, building friendships and memories. Games and activities help build tennis skills and on-court confidence.</p>
+          <a href="mailto:Taylor.suzanne.tennis@gmail.com?subject=Summer%20Tennis%20Camp%20Registration" class="modal-btn ripple" style="font-size: 13px; padding: 10px; text-decoration: none; display: block; text-align: center;">EMAIL TO REGISTER →</a>
+        </div>
+
+        <!-- Sign Up & Contact -->
+        <div style="background: linear-gradient(135deg, rgba(200,255,0,0.08), rgba(200,255,0,0.02)); border: 1px solid rgba(200,255,0,0.15); border-radius: 14px; padding: 16px; margin-bottom: 12px;">
+          <div style="font-weight: 700; font-size: 14px; color: var(--text-primary); margin-bottom: 10px;">Sign Up & Contact</div>
+          <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 8px;">
+            To register for any program, email
+            <a href="mailto:Taylor.suzanne.tennis@gmail.com" class="coaching-link" style="font-weight: 600; text-decoration: none;">Suzanne Taylor</a>
+            (Program Coordinator) at <a href="mailto:Taylor.suzanne.tennis@gmail.com" class="coaching-link" style="text-decoration: none;">Taylor.suzanne.tennis@gmail.com</a>
+          </p>
+          <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 8px;">
+            Private lessons with Mark:
+            <a href="mailto:Taylor.mark.tennis@gmail.com" class="coaching-link" style="text-decoration: none;">Taylor.mark.tennis@gmail.com</a>
+          </p>
+          <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;">
+            Private lessons with Adrian:
+            <a href="mailto:Shelley.Adrian.Tennis@gmail.com" class="coaching-link" style="text-decoration: none;">Shelley.Adrian.Tennis@gmail.com</a>
+          </p>
+        </div>
+
+      </div>
+    </div>

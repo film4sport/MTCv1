@@ -14,12 +14,12 @@ import { resolve } from 'path';
 
 const root = resolve(__dirname, '..');
 const ADMIN_JS_FILES = [
-  'public/mobile-app/js/admin-helpers.js',
-  'public/mobile-app/js/admin-dashboard.js',
-  'public/mobile-app/js/admin-members.js',
-  'public/mobile-app/js/admin-courts.js',
-  'public/mobile-app/js/admin-announcements.js',
-  'public/mobile-app/js/admin-events.js',
+  'public/mobile-app/js/admin-helpers.ts',
+  'public/mobile-app/js/admin-dashboard.ts',
+  'public/mobile-app/js/admin-members.ts',
+  'public/mobile-app/js/admin-courts.ts',
+  'public/mobile-app/js/admin-announcements.ts',
+  'public/mobile-app/js/admin-events.ts',
 ];
 
 function readFile(relPath) {

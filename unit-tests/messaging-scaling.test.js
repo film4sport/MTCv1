@@ -10,7 +10,7 @@ function read(path) {
 
 describe('Messaging surge hardening', () => {
   const route = read('app/api/mobile/conversations/route.ts');
-  const mobileMessaging = read('public/mobile-app/js/messaging.js');
+  const mobileMessaging = read('public/mobile-app/js/messaging.ts');
   const schema = read('supabase/schema.sql');
 
   it('keeps conversations unique at the schema level', () => {

@@ -133,7 +133,7 @@ describe('Events API — Server-side Spot Limit (Bug Fix)', () => {
 });
 
 describe('Events API — RSVP Rollback (Mobile PWA Bug Fix)', () => {
-  const mobileEvents = readFileSync(resolve(root, 'public/mobile-app/js/events.js'), 'utf-8');
+  const mobileEvents = readFileSync(resolve(root, 'public/mobile-app/js/events.ts'), 'utf-8');
 
   it('waits for API response before closing modal', () => {
     // Modal close should be inside .then() success handler, not unconditional
@@ -156,7 +156,7 @@ describe('Events API — RSVP Rollback (Mobile PWA Bug Fix)', () => {
 });
 
 describe('Messaging — Double-tap Prevention (Bug Fix)', () => {
-  const mobileMsg = readFileSync(resolve(root, 'public/mobile-app/js/messaging.js'), 'utf-8');
+  const mobileMsg = readFileSync(resolve(root, 'public/mobile-app/js/messaging.ts'), 'utf-8');
   const dashboardMsg = readFileSync(resolve(root, 'app/dashboard/messages/page.tsx'), 'utf-8');
   const storeContent = readFileSync(resolve(root, 'app/dashboard/lib/store.tsx'), 'utf-8');
 
@@ -183,7 +183,7 @@ describe('Messaging — Double-tap Prevention (Bug Fix)', () => {
 });
 
 describe('Messaging — Message ID Capture (Bug Fix)', () => {
-  const mobileMsg = readFileSync(resolve(root, 'public/mobile-app/js/messaging.js'), 'utf-8');
+  const mobileMsg = readFileSync(resolve(root, 'public/mobile-app/js/messaging.ts'), 'utf-8');
 
   it('assigns temp ID to local message', () => {
     expect(mobileMsg).toContain('tempId');
@@ -202,7 +202,7 @@ describe('Messaging — Message ID Capture (Bug Fix)', () => {
 });
 
 describe('Messaging — Reply Context Preserved on Failure (Bug Fix)', () => {
-  const mobileMsg = readFileSync(resolve(root, 'public/mobile-app/js/messaging.js'), 'utf-8');
+  const mobileMsg = readFileSync(resolve(root, 'public/mobile-app/js/messaging.ts'), 'utf-8');
   const dashboardMsg = readFileSync(resolve(root, 'app/dashboard/messages/page.tsx'), 'utf-8');
 
   it('mobile PWA saves reply context before send', () => {
@@ -261,7 +261,7 @@ describe('Booking — Dashboard Await Pattern (Bug Fix)', () => {
 });
 
 describe('Grid Event Registration — API Persistence (Bug Fix)', () => {
-  const booking = readFileSync(resolve(root, 'public/mobile-app/js/booking.js'), 'utf-8');
+  const booking = readFileSync(resolve(root, 'public/mobile-app/js/booking.ts'), 'utf-8');
 
   it('registerForGridEvent calls events API', () => {
     const fn = booking.slice(booking.indexOf('function registerForGridEvent'));

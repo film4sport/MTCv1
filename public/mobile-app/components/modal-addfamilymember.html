@@ -1,0 +1,25 @@
+<div class="modal-overlay" id="addFamilyMemberModal" style="display:none;" onclick="closeAddFamilyMemberModal()">
+        <div class="modal" onclick="event.stopPropagation()">
+          <div class="modal-title">ADD FAMILY MEMBER</div>
+          <div class="modal-desc">Add a family member to book courts and play under your account.</div>
+          <div class="profile-edit-field">
+            <label class="profile-edit-label">Name</label>
+            <input type="text" id="familyMemberNameInput" class="profile-edit-input" placeholder="Full name">
+          </div>
+          <div class="profile-edit-field">
+            <label class="profile-edit-label">Type</label>
+            <div class="family-type-toggle">
+              <button class="family-type-btn active" data-type="adult" onclick="selectFamilyType('adult',this)">Adult</button>
+              <button class="family-type-btn" data-type="junior" onclick="selectFamilyType('junior',this)">Junior</button>
+            </div>
+          </div>
+          <div class="profile-edit-field" id="familyBirthYearField" style="display:none;">
+            <label class="profile-edit-label">Birth Year</label>
+            <input type="number" id="familyMemberBirthYear" class="profile-edit-input" placeholder="e.g. 2015" min="1950" max="2025">
+          </div>
+          <div style="display:flex;gap:10px;margin-top:16px;">
+            <button class="modal-btn" style="flex:1;background:var(--bg-secondary);color:var(--text-primary)" onclick="closeAddFamilyMemberModal()">Cancel</button>
+            <button class="modal-btn" style="flex:1;" onclick="addFamilyMember()">Add</button>
+          </div>
+        </div>
+      </div>

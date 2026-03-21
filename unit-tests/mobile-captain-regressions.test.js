@@ -3,7 +3,7 @@ import { readFileSync } from 'fs';
 import { resolve } from 'path';
 
 const root = resolve(__dirname, '..');
-const captain = readFileSync(resolve(root, 'public/mobile-app/js/captain.js'), 'utf-8');
+const captain = readFileSync(resolve(root, 'public/mobile-app/js/captain.ts'), 'utf-8');
 
 describe('Mobile captain regressions', () => {
   it('normalizes lineups responses so wrapped or bare arrays both render', () => {

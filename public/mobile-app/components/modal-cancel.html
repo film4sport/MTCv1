@@ -1,0 +1,18 @@
+<div class="modal-overlay" id="cancelModal" onclick="closeCancelModal()" role="dialog" aria-modal="true" aria-label="Cancel booking">
+      <div class="action-modal" id="cancelModalContent" onclick="event.stopPropagation()">
+        <div class="action-modal-handle"></div>
+        <div class="action-modal-title">CANCEL BOOKING?</div>
+        <div class="action-modal-subtitle">This action cannot be undone. Are you sure you want to cancel this booking?</div>
+        
+        <div class="action-modal-options">
+          <button class="action-modal-btn danger" onclick="confirmCancelBooking()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+            Yes, Cancel Booking
+          </button>
+          <button class="action-modal-btn neutral" onclick="closeCancelModal()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            Keep Booking
+          </button>
+        </div>
+      </div>
+    </div>

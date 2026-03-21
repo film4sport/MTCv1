@@ -1,0 +1,206 @@
+<div id="adminTabDashboard" class="admin-tab-content active" data-tab="dashboard">
+        <div class="admin-card admin-overview-card">
+          <div class="admin-card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18"></path><path d="M12 3v18"></path></svg>
+            Overview
+          </div>
+          <div class="admin-overview-copy">
+            <div class="admin-overview-heading">Keep admin tasks fast and clear.</div>
+            <div class="admin-overview-text">Everything is still here, but reports stay tucked away until you need them.</div>
+          </div>
+          <div class="admin-actions-grid">
+            <button class="admin-quick-link" type="button" onclick="switchAdminTab('members')">Members</button>
+            <button class="admin-quick-link" type="button" onclick="switchAdminTab('courts')">Courts</button>
+            <button class="admin-quick-link" type="button" onclick="switchAdminTab('announcements')">Announcements</button>
+            <button class="admin-quick-link" type="button" onclick="document.getElementById('adminReportsAccordion').open = true;">Reports</button>
+          </div>
+        </div>
+
+        <div class="admin-card">
+          <div class="admin-card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19h16"></path><path d="M7 15V9"></path><path d="M12 15V5"></path><path d="M17 15v-3"></path></svg>
+            Key Stats
+          </div>
+          <div class="admin-stats-grid admin-stats-grid-compact">
+            <div class="admin-stat-card">
+              <div class="admin-stat-value" id="statActiveMembers">--</div>
+              <div class="admin-stat-label">Members</div>
+            </div>
+            <div class="admin-stat-card">
+              <div class="admin-stat-value" id="statBookingsMonth">--</div>
+              <div class="admin-stat-label">Bookings</div>
+            </div>
+            <div class="admin-stat-card">
+              <div class="admin-stat-value" id="statCourtsOpen">--</div>
+              <div class="admin-stat-label">Courts Open</div>
+            </div>
+            <div class="admin-stat-card">
+              <div class="admin-stat-value" id="statPartnerMatches">--</div>
+              <div class="admin-stat-label">Matches</div>
+            </div>
+          </div>
+          <div class="admin-quick-stats-footer">
+            <span id="statEngagement" class="admin-engagement-pill">--% active this week</span>
+            <span id="statLastUpdated" class="admin-last-updated">Updated just now</span>
+          </div>
+        </div>
+
+        <div class="admin-card">
+          <div class="admin-card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>Gate Code</div>
+          <div class="admin-gate-code-display">
+            <span id="currentGateCode" class="admin-gate-code-value">----</span>
+          </div>
+          <div class="admin-gate-code-note">Updating this messages all active non-admin members.</div>
+          <div class="admin-gate-code-form">
+            <input type="text" id="newGateCodeInput" class="admin-input" placeholder="New code" maxlength="10">
+            <button class="admin-btn admin-btn-primary" onclick="updateGateCodeAndNotify()">Update & Notify</button>
+          </div>
+        </div>
+
+        <details id="adminReportsAccordion" class="admin-disclosure admin-disclosure-primary">
+          <summary class="admin-disclosure-summary">
+            <div>
+              <div class="admin-disclosure-title">Reports & exports</div>
+              <div class="admin-disclosure-subtitle">Detailed analytics, trends, and downloads when you need them.</div>
+            </div>
+            <span class="admin-disclosure-chevron" aria-hidden="true"></span>
+          </summary>
+          <div class="admin-disclosure-body">
+            <details class="admin-disclosure admin-disclosure-nested">
+              <summary class="admin-disclosure-summary">
+                <div>
+                  <div class="admin-disclosure-title">Court usage</div>
+                  <div id="courtUsageSummary" class="admin-disclosure-subtitle">Today -- • Week -- • Month --</div>
+                </div>
+                <span class="admin-disclosure-chevron" aria-hidden="true"></span>
+              </summary>
+              <div class="admin-disclosure-body">
+                <div class="admin-card admin-card-embedded">
+                  <div class="admin-usage-grid">
+                    <div class="admin-usage-item">
+                      <div class="admin-usage-label">Today</div>
+                      <div class="admin-usage-value" id="usageToday">--</div>
+                    </div>
+                    <div class="admin-usage-item">
+                      <div class="admin-usage-label">This Week</div>
+                      <div class="admin-usage-value" id="usageWeek">--</div>
+                    </div>
+                    <div class="admin-usage-item">
+                      <div class="admin-usage-label">This Month</div>
+                      <div class="admin-usage-value" id="usageMonth">--</div>
+                    </div>
+                  </div>
+                  <div id="peakTimesList" class="admin-peak-times" style="margin-top:12px;"></div>
+                </div>
+              </div>
+            </details>
+
+            <details class="admin-disclosure admin-disclosure-nested">
+              <summary class="admin-disclosure-summary">
+                <div>
+                  <div class="admin-disclosure-title">Partner matching</div>
+                  <div id="partnerStatsSummary" class="admin-disclosure-subtitle">Matched -- of -- requests</div>
+                </div>
+                <span class="admin-disclosure-chevron" aria-hidden="true"></span>
+              </summary>
+              <div class="admin-disclosure-body">
+                <div class="admin-card admin-card-embedded">
+                  <div class="admin-usage-grid">
+                    <div class="admin-usage-item">
+                      <div class="admin-usage-label">Requests</div>
+                      <div class="admin-usage-value" id="statPartnerRequests">--</div>
+                    </div>
+                    <div class="admin-usage-item">
+                      <div class="admin-usage-label">Matched</div>
+                      <div class="admin-usage-value" id="statPartnerMatched">--</div>
+                    </div>
+                    <div class="admin-usage-item">
+                      <div class="admin-usage-label">Match Rate</div>
+                      <div class="admin-usage-value" id="statPartnerRate">--%</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </details>
+
+            <details class="admin-disclosure admin-disclosure-nested">
+              <summary class="admin-disclosure-summary">
+                <div>
+                  <div class="admin-disclosure-title">Revenue</div>
+                  <div id="revenueSummary" class="admin-disclosure-subtitle">Membership revenue total --</div>
+                </div>
+                <span class="admin-disclosure-chevron" aria-hidden="true"></span>
+              </summary>
+              <div class="admin-disclosure-body">
+                <div class="admin-card admin-card-embedded">
+                  <div id="revenueBarContainer" class="admin-revenue-bar"></div>
+                  <div id="revenueLegend" class="admin-revenue-legend"></div>
+                </div>
+              </div>
+            </details>
+
+            <details class="admin-disclosure admin-disclosure-nested">
+              <summary class="admin-disclosure-summary">
+                <div>
+                  <div class="admin-disclosure-title">Member activity</div>
+                  <div id="memberActivitySummary" class="admin-disclosure-subtitle">New members -- • Avg bookings --</div>
+                </div>
+                <span class="admin-disclosure-chevron" aria-hidden="true"></span>
+              </summary>
+              <div class="admin-disclosure-body">
+                <div class="admin-card admin-card-embedded">
+                  <div class="admin-usage-grid">
+                    <div class="admin-usage-item">
+                      <div class="admin-usage-label">New This Month</div>
+                      <div class="admin-usage-value" id="statNewMembers">--</div>
+                    </div>
+                    <div class="admin-usage-item">
+                      <div class="admin-usage-label">Avg / Member</div>
+                      <div class="admin-usage-value" id="statAvgBookings">--</div>
+                    </div>
+                  </div>
+                  <div id="mostActiveList" class="admin-peak-times" style="margin-top:12px;"></div>
+                </div>
+              </div>
+            </details>
+
+            <details class="admin-disclosure admin-disclosure-nested">
+              <summary class="admin-disclosure-summary">
+                <div>
+                  <div class="admin-disclosure-title">Monthly trends</div>
+                  <div id="monthlyTrendSummary" class="admin-disclosure-subtitle">Last 6 months booking trend</div>
+                </div>
+                <span class="admin-disclosure-chevron" aria-hidden="true"></span>
+              </summary>
+              <div class="admin-disclosure-body">
+                <div class="admin-card admin-card-embedded">
+                  <div id="monthlyTrendsChart" class="admin-monthly-chart"></div>
+                </div>
+              </div>
+            </details>
+
+            <details class="admin-disclosure admin-disclosure-nested">
+              <summary class="admin-disclosure-summary">
+                <div>
+                  <div class="admin-disclosure-title">Exports</div>
+                  <div class="admin-disclosure-subtitle">Download members, payments, and court usage snapshots.</div>
+                </div>
+                <span class="admin-disclosure-chevron" aria-hidden="true"></span>
+              </summary>
+              <div class="admin-disclosure-body">
+                <div class="admin-card admin-card-embedded">
+                  <div class="admin-export-month-picker">
+                    <label class="admin-label">From month</label>
+                    <input type="month" id="exportMonthPicker" class="admin-input" style="max-width:180px;">
+                  </div>
+                  <div class="admin-export-btns">
+                    <button class="admin-btn admin-btn-secondary" onclick="exportMembersCSV()">Members CSV</button>
+                    <button class="admin-btn admin-btn-secondary" onclick="exportPaymentsCSV()">Payments CSV</button>
+                    <button class="admin-btn admin-btn-secondary" onclick="exportCourtUsageCSV()">Usage CSV</button>
+                  </div>
+                </div>
+              </div>
+            </details>
+          </div>
+        </details>
+      </div>

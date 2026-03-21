@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0a0a0a">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>MTC COURT - Mono Tennis Club</title>
+  <script>
+    // Force clear ALL old service worker caches and re-register
+    if ('serviceWorker' in navigator) {
+      caches.keys().then(function(names) {
+        names.forEach(function(name) {
+          if (name.indexOf('mtc-court-5d7b1668') === -1) {
+            caches.delete(name);
+            console.log('[CacheBust] Deleted old cache:', name);
+          }
+        });
+      });
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        registrations.forEach(function(reg) {
+          reg.update();
+        });
+      });
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="preload" as="image" href="images/login-hero-serve.png" fetchpriority="high">
+  <link rel="preload" href="dist/app.bundle.css" as="style">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- CSS Bundle (22 files concatenated + minified by scripts/build-mobile.js) -->
+  <link rel="stylesheet" href="dist/app.bundle.css">
+  
+  <!-- Critical overrides - loads LAST, wins cascade -->
+  <style>
+    /* === FIX: Dark flash on login === */
+    body { background: #e8e8e8; }
+    @media (min-width: 501px) { body { background: #1a1a1a; } }
+    
+    /* === Booking layout: scrollable screen, tall grid === */
+    #screen-book {
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    #weekView .weekly-grid-body {
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      min-height: min(calc(100vh - 340px), 500px);
+    }
+    /* Calendar day view — same treatment */
+    #bookingCalendarView {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: calc(112px + env(safe-area-inset-bottom, 0px));
+    }
+    #bookingCalendarView .calendar-container {
+      flex-shrink: 0;
+    }
+    #dayTimeSlotsContainer {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    }
+    #dayTimeSlotsContainer .weekly-grid-container {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      border-radius: 20px 20px 0 0;
+      margin-bottom: 0;
+      max-height: min(calc(100vh - 320px), 420px);
+    }
+    #dayTimeSlotsContainer .weekly-grid-body {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: calc(128px + env(safe-area-inset-bottom, 0px));
+    }
+    @media (max-width: 380px) and (max-height: 700px) {
+      #bookingCalendarView {
+        padding-bottom: calc(124px + env(safe-area-inset-bottom, 0px));
+      }
+      #bookingCalendarView .calendar-container {
+        margin: 0 12px 14px;
+        padding: 14px;
+        border-radius: 18px;
+      }
+      #bookingCalendarView .calendar-header {
+        margin-bottom: 12px;
+      }
+      #bookingCalendarView .calendar-month {
+        font-size: 20px;
+      }
+      #bookingCalendarView .calendar-weekdays {
+        margin-bottom: 6px;
+      }
+      #bookingCalendarView .calendar-weekday {
+        font-size: 11px;
+        padding: 5px 0;
+      }
+      #bookingCalendarView .calendar-days {
+        gap: 4px;
+      }
+      #bookingCalendarView .calendar-day-num {
+        font-size: 16px;
+      }
+      #bookingCalendarView .calendar-day-slots {
+        font-size: 8px;
+      }
+      #dayTimeSlotsContainer .section-header {
+        margin-bottom: 8px;
+      }
+      #dayTimeSlotsContainer .section-title {
+        font-size: 11px;
+      }
+      #dayTimeSlotsContainer .weekly-grid-header-cell {
+        padding: 10px 4px;
+        font-size: 10px;
+      }
+      #dayTimeSlotsContainer .weekly-grid-header-cell.court-header {
+        font-size: 12px;
+      }
+      #dayTimeSlotsContainer .weekly-grid-row {
+        grid-template-columns: 52px repeat(4, 1fr);
+      }
+      #dayTimeSlotsContainer .weekly-grid-container {
+        max-height: min(calc(100vh - 286px), 360px);
+      }
+      #dayTimeSlotsContainer .weekly-time-cell {
+        padding: 8px 4px;
+        font-size: 10px;
+      }
+      #dayTimeSlotsContainer .weekly-grid-body {
+        padding-bottom: calc(144px + env(safe-area-inset-bottom, 0px));
+      }
+    }
+    
+    /* === FIX: Conversation — pinned layout === */
+    #screen-conversation {
+      overflow: hidden;
+      padding-bottom: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    #screen-conversation .screen-header {
+      flex-shrink: 0;
+    }
+    #screen-conversation .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      min-height: 0;
+      padding-bottom: 16px;
+    }
+    #screen-conversation .chat-input-area {
+      flex-shrink: 0;
+    }
+    
+    /* === FIX: Messages screen scroll === */
+    #screen-messages .screen-header {
+      flex-shrink: 0;
+    }
+    #screen-messages #conversationsList {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      min-height: 0;
+    }
+    
+    /* === FIX: Push notification — true liquid glass === */
+    [data-theme="dark"] .push-notification {
+      background: rgba(30, 30, 30, 0.25);
+      backdrop-filter: blur(40px) saturate(180%);
+      -webkit-backdrop-filter: blur(40px) saturate(180%);
+    }
+    [data-theme="dark"] .push-notification-title {
+      color: #fff;
+    }
+    [data-theme="dark"] .push-notification-message {
+      color: rgba(255, 255, 255, 0.85);
+    }
+    [data-theme="light"] .push-notification {
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(40px) saturate(180%);
+      -webkit-backdrop-filter: blur(40px) saturate(180%);
+      border: 1.5px solid rgba(255, 255, 255, 0.4);
+    }
+    [data-theme="light"] .push-notification-title {
+      color: #0a0a0a;
+    }
+    [data-theme="light"] .push-notification-message {
+      color: #444444;
+    }
+  </style>
+  <!-- Liquid glass overrides - MUST BE LAST -->
+</head>
+<body style="background:#0a0a0a;">
+  <!-- Skip Navigation Link -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  
+  <!-- ARIA Live Region for Screen Reader Announcements -->
+  <div id="a11yAnnouncer" class="a11y-announcer" aria-live="polite" aria-atomic="true"></div>
+  
+  <!-- Offline Banner -->
+  <div class="offline-banner" role="alert">📡 You're offline - Some features unavailable</div>
+  
+  <!-- Splash Screen — shows on app launch, dismisses after animation -->
+  <div id="splashScreen" class="splash-screen" aria-hidden="true" style="position:fixed;inset:0;z-index:99999;background:#0a0a0a;display:flex;align-items:center;justify-content:center;">
+    <div class="splash-content">
+      <div class="splash-logo">
+        <div class="splash-mtc">MTC</div>
+        <div class="splash-court">COURT</div>
+      </div>
+      <div class="splash-tagline">YOUR GAME, ELEVATED</div>
+    </div>
+    <div class="splash-glow"></div>
+  </div>
+
+  <div id="app" data-theme="light" role="application" aria-label="Mono Tennis Club App">
+    <!-- Pull to Refresh Indicator -->
+    <div id="ptrIndicator" class="ptr-indicator"><svg class="ptr-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg></div>
+    <!-- Dynamic Island - Shows on desktop phone frame -->
+    <!-- App content starts here -->
+
+    <!-- Offline banner - shown when body has .offline class -->
+    <div class="offline-banner" role="status" aria-live="polite">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="1" y1="1" x2="23" y2="23"></line><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"></path><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"></path><path d="M10.71 5.05A16 16 0 0 1 22.56 9"></path><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg>
+      You're offline
+    </div>
+
+    <!-- ============================================
+         INSTALL REQUIRED SCREEN — shown when running in browser, not as installed PWA
+    ============================================ -->
+    <div class="install-screen" id="install-screen" style="display:none;">
+      <!-- Same background as login -->
+      <div class="login-bg">
+        <img src="images/login-hero-serve.png" alt="Mono Tennis Club" fetchpriority="high" loading="eager" decoding="sync">
+      </div>
+      <div class="liquid-orbs" aria-hidden="true">
+        <div class="liquid-orb orb-1"></div>
+        <div class="liquid-orb orb-2"></div>
+        <div class="liquid-orb orb-3"></div>
+      </div>
+
+      <!-- MTC Badge -->
+      <div class="mtc-badge">
+        <span class="badge-text">MONO TENNIS CLUB</span>
+      </div>
+
+      <!-- Install Card -->
+      <div class="login-card install-card" id="installCard">
+        <div class="liquid-highlight" aria-hidden="true"></div>
+        <div class="refraction-orb refraction-orb-1" aria-hidden="true"></div>
+        <div class="refraction-orb refraction-orb-2" aria-hidden="true"></div>
+        <div class="card-accent"></div>
+
+        <!-- Device icon -->
+        <div class="install-icon-wrap">
+          <svg id="installDeviceIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="40" height="40">
+            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+            <line x1="12" y1="18" x2="12.01" y2="18"/>
+          </svg>
+        </div>
+
+        <p class="install-title" id="installTitle">Install MTC Court</p>
+        <p class="install-subtitle">To use MTC Court, add it to your home screen first. It takes 10 seconds!</p>
+
+        <!-- Browser toggle — Safari vs Chrome -->
+        <div class="install-browser-toggle" id="installBrowserToggle">
+          <button class="install-toggle-btn active" id="installToggleSafari" onclick="MTC.fn.switchInstallBrowser('safari')">Safari</button>
+          <button class="install-toggle-btn" id="installToggleChrome" onclick="MTC.fn.switchInstallBrowser('chrome')">Chrome</button>
+        </div>
+
+        <!-- Steps — customized per device by JS -->
+        <div class="install-steps" id="installSteps">
+          <!-- iOS steps (default) -->
+          <div class="install-step">
+            <div class="install-step-num">1</div>
+            <div class="install-step-content">
+              <span class="install-step-label" id="installStep1">Tap <strong>Share</strong></span>
+              <span class="install-step-hint" id="installStep1Hint">Bottom of screen (iPhone) or top-right (iPad)</span>
+            </div>
+          </div>
+          <div class="install-step">
+            <div class="install-step-num">2</div>
+            <div class="install-step-content">
+              <span class="install-step-label" id="installStep2">Tap <strong>&quot;Add to Home Screen&quot;</strong></span>
+              <span class="install-step-hint" id="installStep2Hint">Scroll down if you don&rsquo;t see it</span>
+            </div>
+          </div>
+          <div class="install-step">
+            <div class="install-step-num">3</div>
+            <div class="install-step-content">
+              <span class="install-step-label" id="installStep3">Tap <strong>&quot;Add&quot;</strong></span>
+              <span class="install-step-hint" id="installStep3Hint">MTC Court will appear on your home screen</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="install-footer-note" id="installFooterNote">
+          After installing, open the MTC Court app from your home screen to sign in.
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================
+         LOGIN SCREEN - Light COURT Themed
+    ============================================ -->
+    <div class="login-screen active" id="login-screen">
+      <!-- Full-bleed Background Photo -->
+      <div class="login-bg">
+        <img src="images/login-hero-serve.png" alt="Mono Tennis Club" fetchpriority="high" loading="eager" decoding="sync">
+      </div>
+      
+      <!-- Floating ambient orbs -->
+      <div class="liquid-orbs" aria-hidden="true">
+        <div class="liquid-orb orb-1"></div>
+        <div class="liquid-orb orb-2"></div>
+        <div class="liquid-orb orb-3"></div>
+        <div class="liquid-orb orb-4"></div>
+        <div class="liquid-orb orb-5"></div>
+      </div>
+      
+      <!-- Tennis court lines decoration -->
+      <div class="court-lines-bg" aria-hidden="true">
+        <div class="court-line-h"></div>
+        <div class="court-line-v"></div>
+        <div class="court-line-circle"></div>
+      </div>
+      
+      <!-- Floating Tennis Ball - Original PNG -->
+      <div class="floating-tennis-ball">
+        <img src="icons/tennis-ball.png" alt="Tennis Ball">
+      </div>
+      
+      <!-- MTC Badge -->
+      <div class="mtc-badge">
+        <span class="badge-text">MONO TENNIS CLUB</span>
+      </div>
+      
+      <!-- Animated Hero Title -->
+      <div class="login-hero-title">
+        <h1>
+          <span>M</span><span>T</span><span>C</span><span class="space">&nbsp;</span><span class="volt">C</span><span class="volt">O</span><span class="volt">U</span><span class="volt">R</span><span class="volt">T</span>
+        </h1>
+        <p>Your Game, Elevated</p>
+      </div>
+      
+      <!-- Colorful Feature Pills (Dashboard Style) -->
+      <div class="feature-pills">
+        <div class="feature-pill purple">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Book
+        </div>
+        <div class="feature-pill orange">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Partners
+        </div>
+        <div class="feature-pill pink">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Messages
+        </div>
+      </div>
+      
+      <!-- LOGIN CARD — Email + PIN -->
+      <div class="login-card" id="loginCard">
+        <div class="liquid-highlight" aria-hidden="true"></div>
+        <div class="refraction-orb refraction-orb-1" aria-hidden="true"></div>
+        <div class="refraction-orb refraction-orb-2" aria-hidden="true"></div>
+
+        <div class="card-accent"></div>
+
+        <input type="email" class="login-input" placeholder="your@email.com" id="loginEmail" aria-label="Email address" autocomplete="email" style="text-align: center; margin-top: 8px;">
+        <input type="tel" class="login-input" placeholder="4-digit PIN" id="loginPin" maxlength="4" inputmode="numeric" pattern="[0-9]*" aria-label="PIN" autocomplete="off" style="letter-spacing: 6px; text-align: center; font-size: 18px; font-weight: 600;">
+        <button type="button" class="login-btn" id="pinLoginBtn" onclick="handlePinLogin()" aria-label="Sign in">Sign In</button>
+
+        <div style="text-align: center; margin: 8px 0;">
+          <a href="#" onclick="showForgotPinScreen(); return false;" style="font-size: 13px; color: var(--volt); text-decoration: none; font-weight: 500; text-shadow: 0 0 16px rgba(200,255,0,0.4), 0 1px 4px rgba(0,0,0,0.6);">Forgot PIN?</a>
+        </div>
+
+        <div style="margin: 16px 0 8px; padding: 10px 14px; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; text-align: center; font-size: 13px; color: rgba(255, 255, 255, 0.75); line-height: 1.5; text-shadow: 0 1px 4px rgba(0,0,0,0.5);">
+          App in beta — bugs? Email <a href="mailto:monotennisclub1@gmail.com" style="color: var(--volt); text-decoration: none; font-weight: 600;">monotennisclub1@gmail.com</a>
+        </div>
+
+      </div>
+
+      <!-- PIN SETUP CARD — for migrating users who have no PIN yet -->
+      <div class="login-card" id="pinSetupCard" style="display:none;">
+        <div class="liquid-highlight" aria-hidden="true"></div>
+        <div class="refraction-orb refraction-orb-1" aria-hidden="true"></div>
+        <div class="refraction-orb refraction-orb-2" aria-hidden="true"></div>
+
+        <div class="card-accent"></div>
+        <p class="card-welcome">Set Your PIN</p>
+        <p style="font-size: 13px; color: var(--text-secondary); margin: 0 0 6px; text-align: center; line-height: 1.4; text-shadow: 0 1px 4px rgba(0,0,0,0.5);">Choose a 4-digit PIN to secure your account. You'll use this to sign in from now on.</p>
+        <p style="font-size: 12px; color: #b45309; margin: 0 0 12px; text-align: center; line-height: 1.4; padding: 6px 12px; background: rgba(180, 83, 9, 0.06); border: 1px solid rgba(180, 83, 9, 0.12); border-radius: 10px; text-shadow: 0 1px 3px rgba(0,0,0,0.3);">Avoid easy PINs like 1234. Anyone who knows your email and PIN can access your profile and messages.</p>
+
+        <input type="tel" class="login-input" placeholder="New 4-digit PIN" id="setupPin" maxlength="4" inputmode="numeric" pattern="[0-9]*" aria-label="New PIN" autocomplete="off" style="letter-spacing: 6px; text-align: center; font-size: 18px; font-weight: 600;">
+        <input type="tel" class="login-input" placeholder="Confirm PIN" id="setupPinConfirm" maxlength="4" inputmode="numeric" pattern="[0-9]*" aria-label="Confirm PIN" autocomplete="off" style="letter-spacing: 6px; text-align: center; font-size: 18px; font-weight: 600;">
+        <button type="button" class="login-btn" id="pinSetupBtn" onclick="handlePinSetup()" aria-label="Set PIN">Set PIN &amp; Sign In</button>
+
+        <div class="login-footer">
+          <a href="#" onclick="showLoginScreen()">Back to sign in</a>
+        </div>
+      </div>
+
+      <!-- FORGOT PIN CARD — enter email to receive reset code -->
+      <div class="login-card" id="forgotPinCard" style="display:none;">
+        <div class="liquid-highlight" aria-hidden="true"></div>
+        <div class="refraction-orb refraction-orb-1" aria-hidden="true"></div>
+        <div class="refraction-orb refraction-orb-2" aria-hidden="true"></div>
+
+        <div class="card-accent"></div>
+        <p class="card-welcome">Reset PIN</p>
+        <p style="font-size: 13px; color: var(--text-secondary); margin: 0 0 12px; text-align: center; line-height: 1.4; text-shadow: 0 1px 4px rgba(0,0,0,0.5);">Enter your email and we'll send a 4-digit code to reset your PIN.</p>
+
+        <input type="email" class="login-input" placeholder="your@email.com" id="forgotPinEmail" aria-label="Email address" autocomplete="email">
+        <button type="button" class="login-btn" id="forgotPinBtn" onclick="handleForgotPin()" aria-label="Send reset code">Send Reset Code</button>
+
+        <div class="login-footer">
+          <a href="#" onclick="showLoginScreen()">Back to sign in</a>
+        </div>
+      </div>
+
+      <!-- VERIFY CODE CARD — enter code + new PIN -->
+      <div class="login-card" id="verifyCodeCard" style="display:none;">
+        <div class="liquid-highlight" aria-hidden="true"></div>
+        <div class="refraction-orb refraction-orb-1" aria-hidden="true"></div>
+        <div class="refraction-orb refraction-orb-2" aria-hidden="true"></div>
+
+        <div class="card-accent"></div>
+        <p class="card-welcome">Enter Code</p>
+        <p style="font-size: 13px; color: var(--text-secondary); margin: 0 0 12px; text-align: center; line-height: 1.4; text-shadow: 0 1px 4px rgba(0,0,0,0.5);">Check your email for a 4-digit code, then choose a new PIN.</p>
+
+        <input type="tel" class="login-input" placeholder="4-digit code" id="resetCode" maxlength="4" inputmode="numeric" pattern="[0-9]*" aria-label="Reset code" autocomplete="off" style="letter-spacing: 6px; text-align: center; font-size: 18px; font-weight: 600;">
+        <input type="tel" class="login-input" placeholder="New 4-digit PIN" id="newPin" maxlength="4" inputmode="numeric" pattern="[0-9]*" aria-label="New PIN" autocomplete="off" style="letter-spacing: 6px; text-align: center; font-size: 18px; font-weight: 600;">
+        <input type="tel" class="login-input" placeholder="Confirm PIN" id="newPinConfirm" maxlength="4" inputmode="numeric" pattern="[0-9]*" aria-label="Confirm PIN" autocomplete="off" style="letter-spacing: 6px; text-align: center; font-size: 18px; font-weight: 600;">
+        <button type="button" class="login-btn" id="verifyCodeBtn" onclick="handleVerifyCode()" aria-label="Reset PIN">Reset PIN &amp; Sign In</button>
+
+        <div class="login-footer">
+          <a href="#" onclick="showForgotPinScreen()">Didn't get a code? Resend</a> | <a href="#" onclick="showLoginScreen()">Back to sign in</a>
+        </div>
+      </div>
+
+    </div>
+    
+    <!-- Supabase JS for client-side Realtime -->
+    <script src="/mobile-app/js/vendor/supabase.min.js"></script>
+    <script>
+      window._supabaseReady = typeof supabase !== 'undefined';
+      if (!window._supabaseReady) {
+        console.error('[MTC] Local Supabase bundle failed to load');
+      }
+    </script>
+    
+    <!-- Avatar Picker Modal -->
+    <div class="modal-overlay" id="avatarPickerModal" role="dialog" aria-label="Choose avatar" aria-modal="true" onclick="closeAvatarPicker()">
+      <div class="modal avatar-picker-modal" onclick="event.stopPropagation()">
+        <div class="modal-title">CHOOSE YOUR AVATAR</div>
+        <div class="modal-desc">Pick a tennis player that represents you!</div>
+        
+        <div class="avatar-category">
+          <div class="avatar-category-title">Tennis Players</div>
+          <div class="avatar-grid">
+            <!-- Male Tennis Player - Light Skin -->
+            <div class="avatar-option illustrated" onclick="selectAvatar('tennis-male-1')" data-avatar="tennis-male-1">
+              <svg viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="45" fill="#FFE0BD"/>
+                <path d="M30 38 Q35 20 55 22 Q75 24 72 42 L68 38 Q60 30 45 32 Q35 34 30 38 Z" fill="#6B4423"/>
+                <rect x="28" y="36" width="44" height="6" rx="2" fill="#2563EB"/>
+                <ellipse cx="50" cy="52" rx="22" ry="20" fill="#FFE0BD"/>
+                <circle cx="42" cy="50" r="3" fill="#333"/>
+                <circle cx="58" cy="50" r="3" fill="#333"/>
+                <path d="M42 60 Q50 68 58 60" stroke="#333" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                <path d="M30 78 Q50 72 70 78 L72 100 L28 100 Z" fill="#3BAFDA"/>
+                <ellipse cx="82" cy="35" rx="12" ry="15" fill="#fff" stroke="#333" stroke-width="2.5"/>
+                <line x1="74" y1="26" x2="90" y2="26" stroke="#333" stroke-width="1"/>
+                <line x1="73" y1="31" x2="91" y2="31" stroke="#333" stroke-width="1"/>
+                <line x1="73" y1="36" x2="91" y2="36" stroke="#333" stroke-width="1"/>
+                <line x1="73" y1="41" x2="91" y2="41" stroke="#333" stroke-width="1"/>
+                <line x1="74" y1="46" x2="90" y2="46" stroke="#333" stroke-width="1"/>
+                <line x1="76" y1="22" x2="76" y2="48" stroke="#333" stroke-width="1"/>
+                <line x1="80" y1="21" x2="80" y2="49" stroke="#333" stroke-width="1"/>
+                <line x1="84" y1="21" x2="84" y2="49" stroke="#333" stroke-width="1"/>
+                <line x1="88" y1="22" x2="88" y2="48" stroke="#333" stroke-width="1"/>
+                <line x1="82" y1="50" x2="82" y2="65" stroke="#333" stroke-width="4"/>
+              </svg>
+            </div>
+            <!-- Male Tennis Player - Dark Skin -->
+            <div class="avatar-option illustrated" onclick="selectAvatar('tennis-male-2')" data-avatar="tennis-male-2">
+              <svg viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="45" fill="#8D5524"/>
+                <path d="M30 38 Q35 20 55 22 Q75 24 72 42 L68 38 Q60 30 45 32 Q35 34 30 38 Z" fill="#1a1a1a"/>
+                <rect x="28" y="36" width="44" height="6" rx="2" fill="#c8ff00"/>
+                <ellipse cx="50" cy="52" rx="22" ry="20" fill="#8D5524"/>
+                <circle cx="42" cy="50" r="3" fill="#222"/>
+                <circle cx="58" cy="50" r="3" fill="#222"/>
+                <path d="M42 60 Q50 68 58 60" stroke="#222" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                <path d="M30 78 Q50 72 70 78 L72 100 L28 100 Z" fill="#3BAFDA"/>
+                <ellipse cx="82" cy="35" rx="12" ry="15" fill="#fff" stroke="#333" stroke-width="2.5"/>
+                <line x1="74" y1="26" x2="90" y2="26" stroke="#333" stroke-width="1"/>
+                <line x1="73" y1="31" x2="91" y2="31" stroke="#333" stroke-width="1"/>
+                <line x1="73" y1="36" x2="91" y2="36" stroke="#333" stroke-width="1"/>
+                <line x1="73" y1="41" x2="91" y2="41" stroke="#333" stroke-width="1"/>
+                <line x1="74" y1="46" x2="90" y2="46" stroke="#333" stroke-width="1"/>
+                <line x1="76" y1="22" x2="76" y2="48" stroke="#333" stroke-width="1"/>
+                <line x1="80" y1="21" x2="80" y2="49" stroke="#333" stroke-width="1"/>
+                <line x1="84" y1="21" x2="84" y2="49" stroke="#333" stroke-width="1"/>
+                <line x1="88" y1="22" x2="88" y2="48" stroke="#333" stroke-width="1"/>
+                <line x1="82" y1="50" x2="82" y2="65" stroke="#333" stroke-width="4"/>
+              </svg>
+            </div>
+            <!-- Female Tennis Player - Light Skin -->
+            <div class="avatar-option illustrated" onclick="selectAvatar('tennis-female-1')" data-avatar="tennis-female-1">
+              <svg viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="45" fill="#FFE0BD"/>
+                <path d="M68 30 Q85 35 80 55 Q78 65 72 60 Q75 45 68 38 Z" fill="#8B4513"/>
+                <path d="M28 40 Q30 25 50 24 Q70 25 72 40 L68 42 Q60 32 40 34 Q32 36 28 40 Z" fill="#8B4513"/>
+                <rect x="26" y="36" width="48" height="7" rx="2" fill="#3BAFDA"/>
+                <rect x="26" y="38" width="48" height="2" fill="#fff"/>
+                <ellipse cx="50" cy="52" rx="21" ry="19" fill="#FFE0BD"/>
+                <circle cx="42" cy="50" r="2.5" fill="#333"/>
+                <circle cx="58" cy="50" r="2.5" fill="#333"/>
+                <path d="M43 59 Q50 66 57 59" stroke="#333" stroke-width="2" fill="none" stroke-linecap="round"/>
+                <path d="M32 78 Q50 72 68 78 L70 100 L30 100 Z" fill="#3BAFDA"/>
+                <ellipse cx="82" cy="38" rx="11" ry="14" fill="#fff" stroke="#333" stroke-width="2.5"/>
+                <line x1="74" y1="29" x2="90" y2="29" stroke="#333" stroke-width="1"/>
+                <line x1="73" y1="34" x2="91" y2="34" stroke="#333" stroke-width="1"/>
+                <line x1="73" y1="39" x2="91" y2="39" stroke="#333" stroke-width="1"/>
+                <line x1="73" y1="44" x2="91" y2="44" stroke="#333" stroke-width="1"/>
+                <line x1="74" y1="49" x2="90" y2="49" stroke="#333" stroke-width="1"/>
+                <line x1="76" y1="25" x2="76" y2="51" stroke="#333" stroke-width="1"/>
+                <line x1="80" y1="24" x2="80" y2="52" stroke="#333" stroke-width="1"/>
+                <line x1="84" y1="24" x2="84" y2="52" stroke="#333" stroke-width="1"/>
+                <line x1="88" y1="25" x2="88" y2="51" stroke="#333" stroke-width="1"/>
+                <line x1="82" y1="52" x2="82" y2="68" stroke="#333" stroke-width="4"/>
+              </svg>
+            </div>
+            <!-- Female Tennis Player - Dark Skin -->
+            <div class="avatar-option illustrated" onclick="selectAvatar('tennis-female-2')" data-avatar="tennis-female-2">
+              <svg viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="45" fill="#8D5524"/>
+                <path d="M68 30 Q85 35 80 55 Q78 65 72 60 Q75 45 68 38 Z" fill="#1a1a1a"/>
+                <path d="M28 40 Q30 25 50 24 Q70 25 72 40 L68 42 Q60 32 40 34 Q32 36 28 40 Z" fill="#1a1a1a"/>
+                <rect x="26" y="36" width="48" height="7" rx="2" fill="#c8ff00"/>
+                <rect x="26" y="38" width="48" height="2" fill="#fff"/>
+                <ellipse cx="50" cy="52" rx="21" ry="19" fill="#8D5524"/>
+                <circle cx="42" cy="50" r="2.5" fill="#222"/>
+                <circle cx="58" cy="50" r="2.5" fill="#222"/>
+                <path d="M43 59 Q50 66 57 59" stroke="#222" stroke-width="2" fill="none" stroke-linecap="round"/>
+                <path d="M32 78 Q50 72 68 78 L70 100 L30 100 Z" fill="#3BAFDA"/>
+                <ellipse cx="82" cy="38" rx="11" ry="14" fill="#fff" stroke="#333" stroke-width="2.5"/>
+                <line x1="74" y1="29" x2="90" y2="29" stroke="#333" stroke-width="1"/>
+                <line x1="73" y1="34" x2="91" y2="34" stroke="#333" stroke-width="1"/>
+                <line x1="73" y1="39" x2="91" y2="39" stroke="#333" stroke-width="1"/>
+                <line x1="73" y1="44" x2="91" y2="44" stroke="#333" stroke-width="1"/>
+                <line x1="74" y1="49" x2="90" y2="49" stroke="#333" stroke-width="1"/>
+                <line x1="76" y1="25" x2="76" y2="51" stroke="#333" stroke-width="1"/>
+                <line x1="80" y1="24" x2="80" y2="52" stroke="#333" stroke-width="1"/>
+                <line x1="84" y1="24" x2="84" y2="52" stroke="#333" stroke-width="1"/>
+                <line x1="88" y1="25" x2="88" y2="51" stroke="#333" stroke-width="1"/>
+                <line x1="82" y1="52" x2="82" y2="68" stroke="#333" stroke-width="4"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="avatar-category">
+          <div class="avatar-category-title">Simple Avatars</div>
+          <div class="avatar-grid">
+            <div class="avatar-option illustrated" onclick="selectAvatar('simple-1')" data-avatar="simple-1">
+              <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#f5e6d0"/><circle cx="50" cy="38" r="16" fill="#d4a030"/><ellipse cx="50" cy="80" rx="24" ry="20" fill="#4a90d9"/></svg>
+            </div>
+            <div class="avatar-option illustrated" onclick="selectAvatar('simple-2')" data-avatar="simple-2">
+              <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#e8d5c4"/><circle cx="50" cy="38" r="16" fill="#8B4513"/><ellipse cx="50" cy="80" rx="24" ry="20" fill="#2d8659"/></svg>
+            </div>
+            <div class="avatar-option illustrated" onclick="selectAvatar('simple-3')" data-avatar="simple-3">
+              <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#fce4ec"/><circle cx="50" cy="38" r="16" fill="#d4a574"/><ellipse cx="50" cy="80" rx="24" ry="20" fill="#e91e63"/></svg>
+            </div>
+            <div class="avatar-option illustrated" onclick="selectAvatar('simple-4')" data-avatar="simple-4">
+              <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#8D5524"/><circle cx="50" cy="38" r="16" fill="#1a1a1a"/><ellipse cx="50" cy="80" rx="24" ry="20" fill="#c8ff00"/></svg>
+            </div>
+            <div class="avatar-option illustrated" onclick="selectAvatar('simple-5')" data-avatar="simple-5">
+              <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#FFE0BD"/><circle cx="50" cy="38" r="16" fill="#c0392b"/><ellipse cx="50" cy="80" rx="24" ry="20" fill="#8e44ad"/></svg>
+            </div>
+            <div class="avatar-option illustrated" onclick="selectAvatar('simple-6')" data-avatar="simple-6">
+              <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#d4a574"/><circle cx="50" cy="38" r="16" fill="#2c3e50"/><ellipse cx="50" cy="80" rx="24" ry="20" fill="#e67e22"/></svg>
+            </div>
+            <div class="avatar-option illustrated" onclick="selectAvatar('simple-7')" data-avatar="simple-7">
+              <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#f0dcc8"/><circle cx="50" cy="38" r="16" fill="#5d4037"/><ellipse cx="50" cy="80" rx="24" ry="20" fill="#ff5a5f"/></svg>
+            </div>
+            <div class="avatar-option illustrated" onclick="selectAvatar('simple-8')" data-avatar="simple-8">
+              <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#c68642"/><circle cx="50" cy="38" r="16" fill="#1a1a1a"/><ellipse cx="50" cy="80" rx="24" ry="20" fill="#00d4ff"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <button class="modal-btn-secondary" onclick="closeAvatarPicker()" aria-label="Cancel">
+          Cancel
+        </button>
+      </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast" role="alert" aria-live="assertive" aria-atomic="true" style="opacity: 0; visibility: hidden;">
+      <div class="toast-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      </div>
+      <span id="toastText"></span>
+    </div>
+    
+    <!-- Menu Backdrop -->
+    <div class="menu-backdrop" id="menuBackdrop" onclick="closeMenu()" aria-hidden="true"></div>
+    
+    <!-- Menu Drawer -->
+    <div class="menu-drawer" id="menuDrawer" role="dialog" aria-label="Navigation menu" aria-modal="true">
+      <button class="menu-close" onclick="closeMenu()" aria-label="Close menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+      
+      <div class="menu-scroll-container">
+        <div class="menu-header">
+          <div class="menu-title">MENU</div>
+          <div class="menu-subtitle">Mono Tennis Club</div>
+        </div>
+        
+        <div class="menu-items">
+          <div class="menu-item" role="button" tabindex="0" onclick="navigateTo('settings'); closeMenu();">
+            <div class="menu-item-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            </div>
+            <span class="menu-item-text">Settings</span>
+          </div>
+          <div class="menu-item" role="button" tabindex="0" onclick="navigateTo('schedule'); closeMenu();">
+            <div class="menu-item-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            </div>
+            <span class="menu-item-text">Schedule</span>
+          </div>
+          <div class="menu-item" role="button" tabindex="0" onclick="navigateTo('lessons'); closeMenu();">
+            <div class="menu-item-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+            </div>
+            <span class="menu-item-text">Lessons</span>
+          </div>
+          <div class="menu-item admin-hidden" id="menuCaptainItem" role="button" tabindex="0" onclick="navigateTo('captain'); closeMenu();">
+            <div class="menu-item-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            </div>
+            <span class="menu-item-text">My Team</span>
+          </div>
+          <div class="menu-item admin-hidden" id="menuAdminItem" role="button" tabindex="0" onclick="navigateTo('admin'); closeMenu();">
+            <div class="menu-item-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            </div>
+            <span class="menu-item-text">Admin Panel</span>
+          </div>
+        </div>
+
+        <!-- Weather Card Footer -->
+        <div class="menu-footer-section">
+          <div class="menu-weather-card">
+            <div class="menu-weather-card-top">
+              <span class="menu-weather-icon-lg" id="menuWeatherIcon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></span>
+              <span class="menu-weather-temp-lg" id="menuWeatherTemp">--°C</span>
+              <span class="menu-weather-loc-lg">Mono Centre, ON</span>
+            </div>
+            <div class="menu-weather-card-address">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+              754483 Mono Centre Rd
+            </div>
+          </div>
+          <div class="menu-item logout" onclick="handleLogout()">
+            <div class="menu-item-icon logout-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+            </div>
+            <span class="menu-item-text">Logout</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- ============================================
+         HOME SCREEN
+    ============================================ -->
+    <!-- [[COMPONENT:home]] -->
+    
+    <!-- ============================================
+         NOTIFICATIONS SCREEN
+    ============================================ -->
+    <!-- [[COMPONENT:notifications]] -->
+    
+    <!-- ============================================
+         BOOKING SCREEN
+    ============================================ -->
+    <!-- [[COMPONENT:book]] -->
+    
+    <!-- ============================================
+         PARTNERS SCREEN
+    ============================================ -->
+    <!-- [[COMPONENT:partners]] -->
+    
+    <!-- ============================================
+         SCHEDULE SCREEN
+    ============================================ -->
+    <!-- [[COMPONENT:schedule]] -->
+
+    <!-- Profile screen removed — merged into Settings screen above -->
+<!-- ============================================
+         SEARCH SCREEN
+    ============================================ -->
+    <!-- [[COMPONENT:search]] -->
+    
+    <!-- ============================================
+         EVENTS SCREEN (content moved to schedule screen)
+    ============================================ -->
+    <!-- [[COMPONENT:events]] -->
+
+    <!-- ============================================
+         LESSONS SCREEN
+    ============================================ -->
+    <!-- [[COMPONENT:lessons]] -->
+
+    <!-- ============================================
+         SETTINGS SCREEN (merged Profile + Settings)
+    ============================================ -->
+    <!-- [[COMPONENT:settings]] -->
+<!-- ============================================
+         ADMIN PANEL SCREEN
+    ============================================ -->
+    <!-- ============================================
+         CAPTAIN / MY TEAM SCREEN
+    ============================================ -->
+    <!-- [[COMPONENT:captain]] -->
+
+    <!-- [[COMPONENT:admin]] -->
+<!-- Gear Exchange screen removed -->
+    
+    <!-- ============================================
+         MESSAGES SCREEN
+    ============================================ -->
+    <!-- [[COMPONENT:messages]] -->
+    
+    <!-- Conversation View Screen -->
+    <!-- [[COMPONENT:conversation]] -->
+    
+    <!-- New Message Modal -->
+    <div class="modal-overlay" id="newMessageModal" onclick="closeNewMessageModal()" role="dialog" aria-modal="true" aria-label="New message">
+      <div class="modal modal-scrollable" onclick="event.stopPropagation()">
+        <div class="modal-title">NEW MESSAGE</div>
+        <div class="modal-desc">Search for a member to start chatting</div>
+
+        <div class="search-bar search-bar-modal">
+          <svg class="icon-muted" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="text" placeholder="Search members..." id="memberSearchInput" aria-label="Search members" oninput="debouncedSearchMembers(this.value)">
+        </div>
+
+        <div id="memberSearchResults">
+          <!-- Default: show all members -->
+        </div>
+
+        <button class="modal-btn-secondary" onclick="closeNewMessageModal()">
+          Cancel
+        </button>
+      </div>
+    </div>
+    
+    <!-- ============================================
+         TENNIS PROGRAMS SCREEN
+    ============================================ -->
+<!-- Role Switcher FAB -->
+<!-- Role Switcher Modal -->
+<!-- Bottom Navigation - Floating -->
+    <nav class="bottom-nav" id="bottomNav" style="display: none;" role="navigation" aria-label="Main navigation">
+      <div class="nav-container">
+        <button class="nav-item active" id="nav-home" onclick="navigateTo('home');" aria-label="Home" aria-current="page">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+          <span class="nav-label">Home</span>
+        </button>
+        <button class="nav-item" id="nav-schedule" onclick="navigateTo('schedule');" style="position:relative;" aria-label="Schedule">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          <span class="nav-label">Schedule</span>
+          <span class="message-badge" id="navScheduleBadge" aria-hidden="true" style="display:none">0</span>
+        </button>
+        <button class="nav-item book-btn pulse-animate ripple" id="nav-book" onclick="navigateTo('book');" aria-label="Book a court">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </button>
+        <button class="nav-item" id="nav-partners" onclick="navigateTo('partners');" style="position:relative;" aria-label="Find partners">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          <span class="nav-label">Partners</span>
+        </button>
+        <button class="nav-item" id="nav-messages" onclick="navigateTo('messages');" style="position: relative;" aria-label="Messages">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+          <span class="nav-label">Messages</span>
+          <span class="message-badge" id="navMessageBadge" aria-hidden="true" style="display:none">0</span>
+        </button>
+      </div>
+    </nav>
+    
+    <!-- Confirmation Modal -->
+    <div class="modal-overlay" id="modal" role="dialog" aria-modal="true" aria-label="Booking confirmed">
+      <canvas id="confettiCanvas"></canvas>
+      <div class="modal">
+        <div class="modal-icon modal-icon-success">
+          <svg viewBox="0 0 56 56" width="56" height="56" fill="none"><circle cx="28" cy="28" r="28" fill="#1a1a1a"/><polyline points="18 28 25 35 38 22" fill="none" stroke="#c8ff00" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="modal-title" id="modalTitle">BOOKING CONFIRMED!</div>
+        <div class="modal-desc" id="modalDesc">Court 1 is booked for Tuesday, Jan 28 at 11:00 AM. See you on the court!</div>
+        <button class="modal-btn-secondary" id="modalAddCalBtn" onclick="addBookingToCalendar()" style="display:none;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Add to Calendar
+        </button>
+        <button class="modal-btn-primary-full" id="modalBookTogetherBtn" onclick="bookWithPartner()" style="display:none;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+          BOOK A COURT TOGETHER
+        </button>
+        <button class="modal-btn ripple" onclick="closeModal()">LET'S GO!</button>
+      </div>
+    </div>
+    
+    <!-- Booking Confirmation Screen -->
+    <div class="confirmation-screen" id="confirmationScreen">
+      <div class="confirmation-checkmark">
+        <svg viewBox="0 0 100 100" width="80" height="80">
+          <circle cx="50" cy="50" r="46" fill="#c8ff00" stroke="#a8d600" stroke-width="3"/>
+          <path d="M 18 22 Q 50 48 18 78" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+          <path d="M 82 22 Q 50 48 82 78" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+          <polyline points="35 50 45 60 65 40" fill="none" stroke="#1a1a1a" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="confirmation-title">BOOKING CONFIRMED!</div>
+      <div class="confirmation-subtitle">Your court has been booked</div>
+      
+      <div class="confirmation-details">
+        <div class="confirmation-row">
+          <span class="confirmation-label">Date</span>
+          <span class="confirmation-value" id="confirmDate">Saturday, Feb 1</span>
+        </div>
+        <div class="confirmation-row">
+          <span class="confirmation-label">Time</span>
+          <span class="confirmation-value" id="confirmTime">2:00 PM - 3:00 PM</span>
+        </div>
+        <div class="confirmation-row">
+          <span class="confirmation-label">Court</span>
+          <span class="confirmation-value" id="confirmCourt">Court 2</span>
+        </div>
+        <div class="confirmation-row">
+          <span class="confirmation-label">Confirmation #</span>
+          <span class="confirmation-value" id="confirmNumber">MTC-2026-0201</span>
+        </div>
+      </div>
+      
+      <div class="confirmation-actions">
+        <button class="confirmation-btn primary" onclick="addToCalendar()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          Add to Calendar
+        </button>
+        <button class="confirmation-btn secondary" onclick="closeConfirmation()">
+          Done
+        </button>
+      </div>
+    </div>
+    
+    <!-- Cancel Booking Modal -->
+    <div class="modal-overlay" id="cancelModal" onclick="closeCancelModal()" role="dialog" aria-modal="true" aria-label="Cancel booking">
+      <div class="action-modal" id="cancelModalContent" onclick="event.stopPropagation()">
+        <div class="action-modal-handle"></div>
+        <div class="action-modal-title">CANCEL BOOKING?</div>
+        <div class="action-modal-subtitle">This action cannot be undone. Are you sure you want to cancel this booking?</div>
+        
+        <div class="action-modal-options">
+          <button class="action-modal-btn danger" onclick="confirmCancelBooking()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+            Yes, Cancel Booking
+          </button>
+          <button class="action-modal-btn neutral" onclick="closeCancelModal()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            Keep Booking
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Modify Booking Modal -->
+    <div class="modal-overlay" id="modifyModal" onclick="closeModifyModal()" role="dialog" aria-modal="true" aria-label="Modify booking">
+      <div class="action-modal" id="modifyModalContent" onclick="event.stopPropagation()">
+        <div class="action-modal-handle"></div>
+        <div class="action-modal-title">MODIFY BOOKING</div>
+        <div class="action-modal-subtitle">Choose how you'd like to change this booking</div>
+        
+        <div class="action-modal-options">
+          <button class="action-modal-btn neutral" onclick="changeBookingTime()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            Change Time
+          </button>
+          <button class="action-modal-btn neutral" onclick="changeBookingCourt()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+            Change Court
+          </button>
+          <button class="action-modal-btn danger" onclick="showCancelFromModify()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+            Cancel Booking
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Profile Edit Modal -->
+    <div class="profile-edit-overlay" id="profileEditModal" role="dialog" aria-modal="true" aria-label="Edit profile">
+      <div class="profile-edit-modal">
+        <div class="profile-edit-header">
+          <button class="profile-edit-close" onclick="closeProfileEdit()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+          <div class="profile-edit-title" id="profileEditTitle">EDIT FIELD</div>
+          <button class="profile-edit-save" onclick="saveProfileEdit()">SAVE</button>
+        </div>
+        <div class="profile-edit-body" id="profileEditBody">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Reusable Confirmation Modal -->
+    <div class="confirm-modal-overlay" id="confirmModal" onclick="closeConfirmModal(event)" role="dialog" aria-modal="true" aria-label="Confirm action">
+      <div class="confirm-modal" onclick="event.stopPropagation()">
+        <div class="confirm-modal-handle"></div>
+        <div class="confirm-modal-icon" id="confirmModalIcon"></div>
+        <div class="confirm-modal-title" id="confirmModalTitle"></div>
+        <div class="confirm-modal-message" id="confirmModalMessage"></div>
+        <div class="confirm-modal-detail" id="confirmModalDetail"></div>
+        <div class="confirm-modal-actions">
+          <button class="confirm-modal-btn secondary" id="confirmModalCancel" onclick="closeConfirmModal()">CANCEL</button>
+          <button class="confirm-modal-btn primary" id="confirmModalConfirm">CONFIRM</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Onboarding Overlay -->
+    <div class="onboarding-overlay" id="onboardingOverlay">
+      <div class="onboarding-slides" id="onboardingSlides">
+        <!-- Slide 0: Welcome -->
+        <div class="onboarding-slide" data-slide="0">
+          <div class="onboarding-card">
+            <div class="onboarding-icon onboarding-icon-transparent onboarding-tennis-ball">
+              <img src="icons/tennis-ball.png" alt="Tennis Ball" class="onboarding-tennis-ball-img" loading="lazy">
+            </div>
+            <div class="onboarding-title">WELCOME TO MTC COURT</div>
+            <div class="onboarding-text">Your tennis club in your pocket. Let's show you around.</div>
+            <div class="onboarding-preview">
+              <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+                <div style="background:rgba(200,255,0,0.15);border:1px solid rgba(200,255,0,0.3);border-radius:10px;padding:8px 12px;font-size:11px;color:rgba(255,255,255,0.85);display:flex;align-items:center;gap:6px;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                  Book
+                </div>
+                <div style="background:rgba(255,90,95,0.12);border:1px solid rgba(255,90,95,0.25);border-radius:10px;padding:8px 12px;font-size:11px;color:rgba(255,255,255,0.85);display:flex;align-items:center;gap:6px;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                  Partners
+                </div>
+                <div style="background:rgba(0,212,255,0.12);border:1px solid rgba(0,212,255,0.25);border-radius:10px;padding:8px 12px;font-size:11px;color:rgba(255,255,255,0.85);display:flex;align-items:center;gap:6px;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                  Messages
+                </div>
+                <div style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:10px;padding:8px 12px;font-size:11px;color:rgba(255,255,255,0.85);display:flex;align-items:center;gap:6px;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                  Events
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Slide 1: Book Courts -->
+        <div class="onboarding-slide" data-slide="1">
+          <div class="onboarding-card">
+            <div class="onboarding-icon onboarding-icon-blue">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01" stroke-linecap="round"/></svg>
+            </div>
+            <div class="onboarding-title">BOOK COURTS</div>
+            <div class="onboarding-text">Tap a time slot, pick your court, and you're booked. Cancellations free up the slot instantly.</div>
+            <div class="onboarding-preview">
+              <div style="display:flex;flex-direction:column;gap:6px;">
+                <div style="display:flex;align-items:center;gap:8px;background:rgba(0,212,255,0.12);border:1px solid rgba(0,212,255,0.25);border-radius:8px;padding:8px 10px;">
+                  <span style="font-size:11px;color:rgba(255,255,255,0.6);width:44px;">9:00</span>
+                  <span style="flex:1;font-size:11px;color:rgba(255,255,255,0.9);">Court 1</span>
+                  <span style="font-size:9px;color:rgba(0,212,255,0.9);background:rgba(0,212,255,0.15);padding:2px 8px;border-radius:6px;">OPEN</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px 10px;">
+                  <span style="font-size:11px;color:rgba(255,255,255,0.6);width:44px;">9:00</span>
+                  <span style="flex:1;font-size:11px;color:rgba(255,255,255,0.5);">Court 2</span>
+                  <span style="font-size:9px;color:rgba(255,90,95,0.8);background:rgba(255,90,95,0.12);padding:2px 8px;border-radius:6px;">BOOKED</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;background:rgba(200,255,0,0.08);border:1px solid rgba(200,255,0,0.2);border-radius:8px;padding:8px 10px;">
+                  <span style="font-size:11px;color:rgba(255,255,255,0.6);width:44px;">10:00</span>
+                  <span style="flex:1;font-size:11px;color:rgba(255,255,255,0.9);">Court 1</span>
+                  <span style="font-size:9px;color:rgba(200,255,0,0.9);background:rgba(200,255,0,0.12);padding:2px 8px;border-radius:6px;">OPEN</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Slide 2: Messages -->
+        <div class="onboarding-slide" data-slide="2">
+          <div class="onboarding-card">
+            <div class="onboarding-icon onboarding-icon-coral">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <div class="onboarding-title">MESSAGES</div>
+            <div class="onboarding-text">Chat with any club member directly. Coordinate matches, ask questions, or just say hi.</div>
+            <div class="onboarding-preview">
+              <div style="display:flex;flex-direction:column;gap:6px;">
+                <div style="display:flex;align-items:flex-start;gap:8px;">
+                  <div style="width:24px;height:24px;border-radius:50%;background:rgba(0,212,255,0.25);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;color:rgba(0,212,255,0.9);">S</div>
+                  <div style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:10px 10px 10px 2px;padding:8px 10px;font-size:11px;color:rgba(255,255,255,0.8);line-height:1.4;">Want to hit tomorrow at 9?</div>
+                </div>
+                <div style="display:flex;align-items:flex-start;gap:8px;justify-content:flex-end;">
+                  <div style="background:rgba(200,255,0,0.15);border:1px solid rgba(200,255,0,0.25);border-radius:10px 10px 2px 10px;padding:8px 10px;font-size:11px;color:rgba(255,255,255,0.9);line-height:1.4;">I'm in! Court 1?</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Slide 3: Partners & Events -->
+        <div class="onboarding-slide" data-slide="3">
+          <div class="onboarding-card">
+            <div class="onboarding-icon onboarding-icon-volt">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div class="onboarding-title">PARTNERS & EVENTS</div>
+            <div class="onboarding-text">Post a partner request or RSVP to club events, tournaments, and clinics with one tap.</div>
+            <div class="onboarding-preview">
+              <div style="display:flex;flex-direction:column;gap:6px;">
+                <div style="display:flex;align-items:center;gap:8px;background:rgba(200,255,0,0.08);border:1px solid rgba(200,255,0,0.2);border-radius:8px;padding:8px 10px;">
+                  <span style="font-size:11px;color:rgba(255,255,255,0.9);flex:1;">Mixed Doubles — Sat 2pm</span>
+                  <span style="font-size:9px;color:rgba(200,255,0,0.9);background:rgba(200,255,0,0.15);padding:2px 8px;border-radius:6px;">RSVP</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.2);border-radius:8px;padding:8px 10px;">
+                  <span style="font-size:11px;color:rgba(255,255,255,0.9);flex:1;">Looking for singles partner</span>
+                  <span style="font-size:9px;color:rgba(0,212,255,0.9);background:rgba(0,212,255,0.15);padding:2px 8px;border-radius:6px;">JOIN</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;background:rgba(255,90,95,0.08);border:1px solid rgba(255,90,95,0.2);border-radius:8px;padding:8px 10px;">
+                  <span style="font-size:11px;color:rgba(255,255,255,0.9);flex:1;">Summer Tournament</span>
+                  <span style="font-size:9px;color:rgba(255,90,95,0.8);background:rgba(255,90,95,0.12);padding:2px 8px;border-radius:6px;">6 SPOTS</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Slide 4: Profile & Avatar -->
+        <div class="onboarding-slide" data-slide="4">
+          <div class="onboarding-card">
+            <div class="onboarding-icon onboarding-icon-coral">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <div class="onboarding-title">YOUR PROFILE</div>
+            <div class="onboarding-text">Head to Settings to set your avatar, skill level, and preferences. Other members will see your profile when you book or message.</div>
+            <div class="onboarding-preview">
+              <div style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:14px;padding:12px;">
+                <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,rgba(200,255,0,0.3),rgba(0,212,255,0.3));display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,0.2);">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </div>
+                <div style="flex:1;">
+                  <div style="font-size:13px;color:rgba(255,255,255,0.9);font-weight:600;">Your Name</div>
+                  <div style="font-size:11px;color:rgba(255,255,255,0.5);">Tap to customize avatar</div>
+                </div>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Slide 5: All Set -->
+        <div class="onboarding-slide" data-slide="5">
+          <div class="onboarding-card">
+            <div class="onboarding-icon onboarding-icon-blue">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <div class="onboarding-title">YOU'RE ALL SET!</div>
+            <div class="onboarding-text">Start by booking a court or setting up your profile.</div>
+            <div style="display:flex;gap:10px;justify-content:center;margin-top:16px;">
+              <button class="onboarding-cta-book" onclick="completeOnboarding(); setTimeout(function(){ MTC.fn.navigateTo('book'); }, 300);">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                Book a Court
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="onboarding-dots" id="onboardingDots">
+        <div class="onboarding-dot active" data-dot="0"></div>
+        <div class="onboarding-dot" data-dot="1"></div>
+        <div class="onboarding-dot" data-dot="2"></div>
+        <div class="onboarding-dot" data-dot="3"></div>
+        <div class="onboarding-dot" data-dot="4"></div>
+        <div class="onboarding-dot" data-dot="5"></div>
+      </div>
+
+      <div class="onboarding-actions">
+        <button class="onboarding-btn" id="onboardingBtn" onclick="nextOnboardingSlide()">NEXT</button>
+        <button class="onboarding-skip" onclick="skipOnboarding()">Skip Tour</button>
+      </div>
+    </div>
+    
+    <!-- Role Switcher FAB removed — roles set via login credentials -->
+    
+    <!-- Pull to Refresh Indicator -->
+    <div class="pull-indicator" id="pullIndicator">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" width="24" height="24"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+    </div>
+  </div>
+  
+
+  <!-- JS Bundle (24 files concatenated + minified by scripts/build-mobile.js) -->
+  <script src="dist/app.bundle.js"></script>
+</body>
+</html>

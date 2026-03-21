@@ -3,13 +3,13 @@ import { readFileSync } from 'fs';
 import { resolve } from 'path';
 
 const root = resolve(__dirname, '..');
-const captain = readFileSync(resolve(root, 'public/mobile-app/js/captain.js'), 'utf-8');
-const lessons = readFileSync(resolve(root, 'public/mobile-app/js/lessons.js'), 'utf-8');
-const messaging = readFileSync(resolve(root, 'public/mobile-app/js/messaging.js'), 'utf-8');
-const profile = readFileSync(resolve(root, 'public/mobile-app/js/profile.js'), 'utf-8');
-const eventDelegation = readFileSync(resolve(root, 'public/mobile-app/js/event-delegation.js'), 'utf-8');
-const account = readFileSync(resolve(root, 'public/mobile-app/js/account.js'), 'utf-8');
-const adminEvents = readFileSync(resolve(root, 'public/mobile-app/js/admin-events.js'), 'utf-8');
+const captain = readFileSync(resolve(root, 'public/mobile-app/js/captain.ts'), 'utf-8');
+const lessons = readFileSync(resolve(root, 'public/mobile-app/js/lessons.ts'), 'utf-8');
+const messaging = readFileSync(resolve(root, 'public/mobile-app/js/messaging.ts'), 'utf-8');
+const profile = readFileSync(resolve(root, 'public/mobile-app/js/profile.ts'), 'utf-8');
+const eventDelegation = readFileSync(resolve(root, 'public/mobile-app/js/event-delegation.ts'), 'utf-8');
+const account = readFileSync(resolve(root, 'public/mobile-app/js/account.ts'), 'utf-8');
+const adminEvents = readFileSync(resolve(root, 'public/mobile-app/js/admin-events.ts'), 'utf-8');
 
 describe('Mobile polish regressions', () => {
   it('keeps captain updates empty state instructional instead of abrupt', () => {

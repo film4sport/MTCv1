@@ -1,0 +1,36 @@
+<div class="screen" id="screen-notifications" aria-label="Notifications">
+      <div class="screen-header">
+        <button class="back-btn" onclick="navigateTo('home')" aria-label="Go back to home">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+        <h2 class="screen-title">NOTIFICATIONS</h2>
+        <button class="header-btn clear-read-btn" aria-label="Clear read notifications" onclick="deleteReadNotifications()" id="clearReadBtn" style="display:none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+        <button class="header-btn mark-read-btn" aria-label="Mark all notifications as read" onclick="markAllNotificationsRead()" id="markAllReadBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline><polyline points="20 12 9 23 4 18" opacity="0.5"></polyline></svg>
+        </button>
+      </div>
+      
+      <!-- Unread count banner (hidden by default — shown when real notifications arrive) -->
+      <div class="notifications-summary" id="notificationsSummary" style="display: none;">
+        <span id="unreadCount">0 unread notifications</span>
+        <button onclick="markAllNotificationsRead()" aria-label="Mark all notifications as read">Mark all read</button>
+      </div>
+
+      <div class="section-header">
+        <h3 class="section-title">TODAY</h3>
+      </div>
+
+      <!-- Container for dynamically-rendered notifications -->
+      <div class="notifications-list"></div>
+
+      <!-- Empty state (shown when no notifications exist) -->
+      <div class="empty-state" id="noNotifications">
+        <div class="empty-state-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+        </div>
+        <div class="empty-state-title">ALL CAUGHT UP</div>
+        <div class="empty-state-text">No new notifications. Check back later for updates on bookings and club activity.</div>
+      </div>
+    </div>

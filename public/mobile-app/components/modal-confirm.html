@@ -1,0 +1,13 @@
+<div class="confirm-modal-overlay" id="confirmModal" onclick="closeConfirmModal(event)" role="dialog" aria-modal="true" aria-label="Confirm action">
+      <div class="confirm-modal" onclick="event.stopPropagation()">
+        <div class="confirm-modal-handle"></div>
+        <div class="confirm-modal-icon" id="confirmModalIcon"></div>
+        <div class="confirm-modal-title" id="confirmModalTitle"></div>
+        <div class="confirm-modal-message" id="confirmModalMessage"></div>
+        <div class="confirm-modal-detail" id="confirmModalDetail"></div>
+        <div class="confirm-modal-actions">
+          <button class="confirm-modal-btn secondary" id="confirmModalCancel" onclick="closeConfirmModal()">CANCEL</button>
+          <button class="confirm-modal-btn primary" id="confirmModalConfirm">CONFIRM</button>
+        </div>
+      </div>
+    </div>

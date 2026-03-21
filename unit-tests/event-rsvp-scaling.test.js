@@ -10,7 +10,7 @@ function read(path) {
 
 describe('Event RSVP surge hardening', () => {
   const route = read('app/api/mobile/events/route.ts');
-  const mobileEvents = read('public/mobile-app/js/events.js');
+  const mobileEvents = read('public/mobile-app/js/events.ts');
   const migration = read('supabase/migrations/20260320_atomic_event_rsvp.sql');
   const schema = read('supabase/schema.sql');
 

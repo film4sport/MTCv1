@@ -3,7 +3,7 @@ import { readFileSync } from 'fs';
 import { resolve } from 'path';
 
 const root = resolve(__dirname, '..');
-const notifications = readFileSync(resolve(root, 'public/mobile-app/js/notifications.js'), 'utf-8');
+const notifications = readFileSync(resolve(root, 'public/mobile-app/js/notifications.ts'), 'utf-8');
 
 describe('Mobile notification regressions', () => {
   it('marks individual notifications read in the local cache before dismissing', () => {

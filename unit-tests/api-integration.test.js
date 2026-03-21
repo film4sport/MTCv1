@@ -231,7 +231,7 @@ describe('Client ↔ Server Field Name Consistency', () => {
 
   it('mobile PWA cancelEventRsvp sends eventId that events POST expects', () => {
     const events = readRoute('events');
-    const mybookings = readFile('public/mobile-app/js/mybookings.js');
+    const mybookings = readFile('public/mobile-app/js/mybookings.ts');
     expect(mybookings).toMatch(/apiRequest.*\/mobile\/events.*POST.*eventId/s);
     expect(events).toContain('eventId');
   });

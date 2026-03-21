@@ -10,12 +10,12 @@ import { resolve } from 'path';
 
 const root = resolve(__dirname, '..');
 const ADMIN_JS_FILES = [
-  'public/mobile-app/js/admin-helpers.js',
-  'public/mobile-app/js/admin-dashboard.js',
-  'public/mobile-app/js/admin-members.js',
-  'public/mobile-app/js/admin-courts.js',
-  'public/mobile-app/js/admin-announcements.js',
-  'public/mobile-app/js/admin-events.js',
+  'public/mobile-app/js/admin-helpers.ts',
+  'public/mobile-app/js/admin-dashboard.ts',
+  'public/mobile-app/js/admin-members.ts',
+  'public/mobile-app/js/admin-courts.ts',
+  'public/mobile-app/js/admin-announcements.ts',
+  'public/mobile-app/js/admin-events.ts',
 ];
 const storeContent = readFileSync(resolve(root, 'app/dashboard/lib/store.tsx'), 'utf-8');
 const sharedConstants = readFileSync(resolve(root, 'app/lib/shared-constants.ts'), 'utf-8');
@@ -130,11 +130,11 @@ describe('Supabase Realtime — Both platforms subscribe', () => {
   });
 
   it('Mobile PWA has realtime-sync.js', () => {
-    expect(existsSync(resolve(root, 'public/mobile-app/js/realtime-sync.js'))).toBe(true);
+    expect(existsSync(resolve(root, 'public/mobile-app/js/realtime-sync.ts'))).toBe(true);
   });
 
   it('Mobile PWA subscribes to Supabase Realtime', () => {
-    const realtimeJs = readFileSync(resolve(root, 'public/mobile-app/js/realtime-sync.js'), 'utf-8');
+    const realtimeJs = readFileSync(resolve(root, 'public/mobile-app/js/realtime-sync.ts'), 'utf-8');
     expect(realtimeJs).toMatch(/channel|subscribe|postgres_changes/);
   });
 });

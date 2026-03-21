@@ -3,8 +3,8 @@ import { readFileSync } from 'fs';
 import { resolve } from 'path';
 
 const root = resolve(__dirname, '..');
-const booking = readFileSync(resolve(root, 'public/mobile-app/js/booking.js'), 'utf-8');
-const myBookings = readFileSync(resolve(root, 'public/mobile-app/js/mybookings.js'), 'utf-8');
+const booking = readFileSync(resolve(root, 'public/mobile-app/js/booking.ts'), 'utf-8');
+const myBookings = readFileSync(resolve(root, 'public/mobile-app/js/mybookings.ts'), 'utf-8');
 
 describe('Mobile booking regressions', () => {
   it('replaces stale booking state instead of merging old data forward', () => {

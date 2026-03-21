@@ -1,0 +1,276 @@
+<div class="screen" id="screen-schedule" aria-label="Schedule">
+      <div class="screen-header">
+        <button class="back-btn" onclick="navigateTo('home')" aria-label="Go back to home">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+        <h2 class="screen-title">SCHEDULE</h2>
+      </div>
+
+      <!-- Personal schedule (bookings, RSVPs, programs) -->
+      <div id="scheduleMyView" class="schedule-sub-view">
+
+      <!-- Weekly List View -->
+      <div class="schedule-view active" id="listView">
+        <div class="schedule-tabs">
+          <button class="schedule-tab active" onclick="switchScheduleTab('upcoming')" id="upcomingTab">Upcoming</button>
+          <button class="schedule-tab" onclick="switchScheduleTab('past')" id="pastTab">Past</button>
+        </div>
+        
+        <!-- Upcoming Content -->
+        <div class="schedule-content active" id="upcomingContent">
+          <!-- Dynamic bookings (RSVPs, court bookings, partner matches) -->
+          <div id="scheduleEventBookings"></div>
+        </div>
+        
+        <!-- Past Content -->
+        <div class="schedule-content" id="pastContent">
+          <div id="schedulePastBookings"></div>
+        </div>
+      </div>
+      </div><!-- /scheduleMyView -->
+
+        <!-- Club Events sub-view removed — club events are on the Home screen calendar.
+             Users can view full events list via the Events nav icon.
+             Hidden container preserved for JS compatibility. -->
+        <div style="display:none" id="eventsListView">
+          <div class="event-card" onclick="showEventModal('euchre-tournament')" tabindex="0" role="button">
+            <div class="event-card-header">
+              <div class="event-card-date">
+                <div class="event-card-month">MAR</div>
+                <div class="event-card-day">14</div>
+              </div>
+              <div class="event-card-info">
+                <div class="event-card-title">Euchre Tournament</div>
+                <div class="event-card-meta">Saturday Evening • Clubhouse</div>
+              </div>
+              <div class="event-card-badge free">Free</div>
+            </div>
+            <div class="event-card-body">
+              <p class="event-card-desc">Pre-season Euchre tournament! Open to members and guests. Prizes for top teams.</p>
+              <div class="event-card-footer">
+                <div class="event-card-action">
+                  <span class="action-text">Details →</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Featured Event -->
+          <div class="section-header">
+            <h3 class="section-title">SEASON OPENER</h3>
+          </div>
+
+          <div class="event-card featured" onclick="showEventModal('opening-day-bbq')" tabindex="0" role="button">
+            <div class="event-card-header">
+              <div class="event-card-date">
+                <div class="event-card-month">MAY</div>
+                <div class="event-card-day">9</div>
+              </div>
+              <div class="event-card-info">
+                <div class="event-card-title">Opening Day BBQ &amp; Round Robin</div>
+                <div class="event-card-meta">Saturday 12:30 - 3:00 PM • All Courts</div>
+              </div>
+              <div class="event-card-badge free">Free</div>
+            </div>
+            <div class="event-card-body">
+              <p class="event-card-desc">Kick off the season! BBQ, music, and meet our coaching staff. All members, families, and guests welcome.</p>
+              <div class="event-card-footer">
+                <div class="event-card-spots">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                  <span>All welcome</span>
+                </div>
+                <div class="event-card-action">
+                  <span>View Details</span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="event-card" onclick="showEventModal('french-open-rr')" tabindex="0" role="button">
+            <div class="event-card-header">
+              <div class="event-card-date">
+                <div class="event-card-month">JUN</div>
+                <div class="event-card-day">7</div>
+              </div>
+              <div class="event-card-info">
+                <div class="event-card-title">French Open Round Robin Social</div>
+                <div class="event-card-meta">Saturday 1:00 - 4:00 PM • All Courts</div>
+              </div>
+              <div class="event-card-badge free">Free</div>
+            </div>
+            <div class="event-card-footer-mini">
+              <span class="event-card-spots-mini">All skill levels welcome</span>
+              <span class="event-card-tap">Tap for details →</span>
+            </div>
+          </div>
+
+          <div class="event-card" onclick="showEventModal('wimbledon-rr')" tabindex="0" role="button">
+            <div class="event-card-header">
+              <div class="event-card-date">
+                <div class="event-card-month">JUL</div>
+                <div class="event-card-day">12</div>
+              </div>
+              <div class="event-card-info">
+                <div class="event-card-title">Wimbledon Open Round Robin</div>
+                <div class="event-card-meta">Saturday 1:00 - 4:00 PM • All Courts</div>
+              </div>
+              <div class="event-card-badge free">Free</div>
+            </div>
+            <div class="event-card-footer-mini">
+              <span class="event-card-spots-mini">Whites encouraged!</span>
+              <span class="event-card-tap">Tap for details →</span>
+            </div>
+          </div>
+
+          <div class="section-header">
+            <h3 class="section-title">WEEKLY PROGRAMS</h3>
+          </div>
+
+          <div class="event-card" onclick="showEventModal('mens-round-robin')" tabindex="0" role="button">
+            <div class="event-card-header">
+              <div class="event-card-date">
+                <div class="event-card-month">TUE</div>
+                <div class="event-card-day">9AM</div>
+              </div>
+              <div class="event-card-info">
+                <div class="event-card-title">Men's Round Robin</div>
+                <div class="event-card-meta">Tuesdays 9:00 - 11:00 AM • All Courts</div>
+              </div>
+              <div class="event-card-badge members">Members</div>
+            </div>
+            <div class="event-card-footer-mini">
+              <span class="event-card-spots-mini">All skill levels welcome</span>
+              <span class="event-card-tap">Tap for details →</span>
+            </div>
+          </div>
+
+          <div class="event-card" onclick="showEventModal('freedom-55')" tabindex="0" role="button">
+            <div class="event-card-header">
+              <div class="event-card-date">
+                <div class="event-card-month">THU</div>
+                <div class="event-card-day">9AM</div>
+              </div>
+              <div class="event-card-info">
+                <div class="event-card-title">Freedom 55 League</div>
+                <div class="event-card-meta">Thursdays 9:00 - 11:00 AM • All Courts</div>
+              </div>
+              <div class="event-card-badge members">Members</div>
+            </div>
+            <div class="event-card-footer-mini">
+              <span class="event-card-spots-mini">Fun and social morning league</span>
+              <span class="event-card-tap">Tap for details →</span>
+            </div>
+          </div>
+
+          <div class="event-card" onclick="showEventModal('interclub-league')" tabindex="0" role="button">
+            <div class="event-card-header">
+              <div class="event-card-date">
+                <div class="event-card-month">THU</div>
+                <div class="event-card-day">7PM</div>
+              </div>
+              <div class="event-card-info">
+                <div class="event-card-title">Interclub Competitive League</div>
+                <div class="event-card-meta">Thursdays 7:00 - 9:30 PM • All Courts</div>
+              </div>
+              <div class="event-card-badge members">Team</div>
+            </div>
+            <div class="event-card-footer-mini">
+              <span class="event-card-spots-mini">A &amp; B Teams • RSVP required</span>
+              <span class="event-card-tap">Tap for details →</span>
+            </div>
+          </div>
+
+          <div class="event-card" onclick="showEventModal('ladies-round-robin')" tabindex="0" role="button">
+            <div class="event-card-header">
+              <div class="event-card-date">
+                <div class="event-card-month">FRI</div>
+                <div class="event-card-day">9AM</div>
+              </div>
+              <div class="event-card-info">
+                <div class="event-card-title">Ladies Round Robin</div>
+                <div class="event-card-meta">Fridays 9:00 - 11:00 AM • All Courts</div>
+              </div>
+              <div class="event-card-badge members">Members</div>
+            </div>
+            <div class="event-card-footer-mini">
+              <span class="event-card-spots-mini">All skill levels welcome</span>
+              <span class="event-card-tap">Tap for details →</span>
+            </div>
+          </div>
+
+          <div class="event-card" onclick="showEventModal('friday-mixed')" tabindex="0" role="button">
+            <div class="event-card-header">
+              <div class="event-card-date">
+                <div class="event-card-month">FRI</div>
+                <div class="event-card-day">6PM</div>
+              </div>
+              <div class="event-card-info">
+                <div class="event-card-title">Friday Night Mixed Round Robin</div>
+                <div class="event-card-meta">Fridays 6:00 - 9:00 PM • All Courts</div>
+              </div>
+              <div class="event-card-badge members">Members</div>
+            </div>
+            <div class="event-card-footer-mini">
+              <span class="event-card-spots-mini">Bring a partner or get matched!</span>
+              <span class="event-card-tap">Tap for details →</span>
+            </div>
+          </div>
+
+          <div class="section-header">
+            <h3 class="section-title">COACHING &amp; CAMPS</h3>
+          </div>
+
+          <div class="event-card" onclick="navigateTo('lessons')" tabindex="0" role="button">
+            <div class="event-card-header">
+              <div class="event-card-date event-card-date-volt">
+                <div class="event-card-month">PRO</div>
+                <div class="event-card-day">PRO</div>
+              </div>
+              <div class="event-card-info">
+                <div class="event-card-title">Classes &amp; Summer Camps</div>
+                <div class="event-card-meta">Mark Taylor &bull; Full schedule &amp; registration</div>
+              </div>
+              <div class="event-card-badge free">View</div>
+            </div>
+            <div class="event-card-footer-mini">
+              <span class="event-card-spots-mini">Classes, clinics &amp; junior camps</span>
+              <span class="event-card-tap">Open Schedule →</span>
+            </div>
+          </div>
+
+        <!-- Calendar View -->
+        <div class="events-view" id="eventsCalendarView">
+          <div class="calendar-header" style="display:flex;justify-content:space-between;align-items:center;padding:0 16px 16px;">
+            <button class="calendar-nav-btn" onclick="changeEventsMonth(-1)" aria-label="Previous month">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </button>
+            <div class="calendar-month-label" id="eventsCalendarMonth">February 2026</div>
+            <button class="calendar-nav-btn" onclick="changeEventsMonth(1)" aria-label="Next month">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
+          </div>
+          <div class="calendar-weekdays" style="display:grid;grid-template-columns:repeat(7,1fr);padding:0 16px 8px;text-align:center;">
+            <div class="calendar-weekday">S</div>
+            <div class="calendar-weekday">M</div>
+            <div class="calendar-weekday">T</div>
+            <div class="calendar-weekday">W</div>
+            <div class="calendar-weekday">T</div>
+            <div class="calendar-weekday">F</div>
+            <div class="calendar-weekday">S</div>
+          </div>
+          <div class="calendar-grid" id="eventsCalendarGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;padding:0 16px 16px;"></div>
+          <div class="calendar-events" style="padding:0 16px;">
+            <div class="section-header">
+              <h3 class="section-title" id="eventsSelectedDateTitle">SELECT A DATE</h3>
+            </div>
+            <div id="eventsCalendarEventsList">
+              <div class="calendar-event-item-empty" style="text-align:center;padding:20px;color:var(--text-muted);">
+                Tap a date to see events
+              </div>
+            </div>
+          </div>
+        </div>
+      </div><!-- /eventsListView (hidden) -->
+
+    </div>

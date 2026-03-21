@@ -12,9 +12,9 @@ const { mockAuthenticatedPwa, navigatePwaScreen } = require('./helpers/app-helpe
  * 3. RSVP: rollback on failure, server-side spot limit (409), modal close on success only
  */
 
-const eventsSource = readFileSync(resolve(__dirname, '../public/mobile-app/js/events.js'), 'utf8');
-const bookingSource = readFileSync(resolve(__dirname, '../public/mobile-app/js/booking.js'), 'utf8');
-const messagingSource = readFileSync(resolve(__dirname, '../public/mobile-app/js/messaging.js'), 'utf8');
+const eventsSource = readFileSync(resolve(__dirname, '../public/mobile-app/js/events.ts'), 'utf8');
+const bookingSource = readFileSync(resolve(__dirname, '../public/mobile-app/js/booking.ts'), 'utf8');
+const messagingSource = readFileSync(resolve(__dirname, '../public/mobile-app/js/messaging.ts'), 'utf8');
 const toggleEventRsvpStart = eventsSource.indexOf('function toggleEventRsvp(eventId) {');
 const toggleEventRsvpEnd = eventsSource.indexOf('// Coach registration modal removed');
 const toggleEventRsvpSource = toggleEventRsvpStart >= 0 && toggleEventRsvpEnd > toggleEventRsvpStart

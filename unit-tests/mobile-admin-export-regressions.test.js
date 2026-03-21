@@ -3,8 +3,8 @@ import { readFileSync } from 'fs';
 import { resolve } from 'path';
 
 const root = resolve(__dirname, '..');
-const adminHelpers = readFileSync(resolve(root, 'public/mobile-app/js/admin-helpers.js'), 'utf-8');
-const profile = readFileSync(resolve(root, 'public/mobile-app/js/profile.js'), 'utf-8');
+const adminHelpers = readFileSync(resolve(root, 'public/mobile-app/js/admin-helpers.ts'), 'utf-8');
+const profile = readFileSync(resolve(root, 'public/mobile-app/js/profile.ts'), 'utf-8');
 
 describe('Mobile admin export regressions', () => {
   it('falls back to memberSince when created_at is unavailable in member exports', () => {

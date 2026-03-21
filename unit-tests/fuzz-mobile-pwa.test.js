@@ -14,7 +14,7 @@ const root = resolve(__dirname, '..');
 
 // ── Helper: read a mobile JS file ───────────────────────────────────────
 function readMobile(name) {
-  return readFileSync(resolve(root, `public/mobile-app/js/${name}.js`), 'utf-8');
+  return readFileSync(resolve(root, `public/mobile-app/js/${name}.ts`), 'utf-8');
 }
 
 // ══════════════════════════════════════════════════════════════════════════

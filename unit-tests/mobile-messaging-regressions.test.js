@@ -3,7 +3,7 @@ import { readFileSync } from 'fs';
 import { resolve } from 'path';
 
 const root = resolve(__dirname, '..');
-const messaging = readFileSync(resolve(root, 'public/mobile-app/js/messaging.js'), 'utf-8');
+const messaging = readFileSync(resolve(root, 'public/mobile-app/js/messaging.ts'), 'utf-8');
 
 describe('Mobile messaging member search regressions', () => {
   it('preserves member role during API normalization so admin pin/search logic still works', () => {

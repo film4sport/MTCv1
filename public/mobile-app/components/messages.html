@@ -1,0 +1,32 @@
+<div class="screen" id="screen-messages" aria-label="Messages">
+      <div class="screen-header">
+        <button class="back-btn" onclick="navigateTo('home')" aria-label="Go back to home">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+        <h2 class="screen-title">MESSAGES</h2>
+        <button class="new-message-fab" onclick="showNewMessageModal()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          New
+        </button>
+      </div>
+      
+      <div class="search-bar search-bar-messages">
+        <svg class="icon-muted" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" placeholder="Search conversations..." id="messageSearchInput" aria-label="Search conversations" oninput="debouncedFilterConversations(this.value)">
+      </div>
+
+      <!-- Conversations rendered dynamically by renderConversationsList() -->
+      <div id="conversationsList"></div>
+      
+      <div class="empty-state" id="noConversations">
+        <div class="empty-state-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+        </div>
+        <div class="empty-state-title">NO CONVERSATIONS FOUND</div>
+        <div class="empty-state-text">Try a different search term or start a new conversation with a club member.</div>
+        <button class="empty-state-btn" onclick="showNewMessageModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          New Message
+        </button>
+      </div>
+    </div>

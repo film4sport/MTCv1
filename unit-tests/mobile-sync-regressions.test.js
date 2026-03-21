@@ -3,9 +3,9 @@ import { readFileSync } from 'fs';
 import { resolve } from 'path';
 
 const root = resolve(__dirname, '..');
-const realtimeSync = readFileSync(resolve(root, 'public/mobile-app/js/realtime-sync.js'), 'utf-8');
-const authJs = readFileSync(resolve(root, 'public/mobile-app/js/auth.js'), 'utf-8');
-const eventsJs = readFileSync(resolve(root, 'public/mobile-app/js/events.js'), 'utf-8');
+const realtimeSync = readFileSync(resolve(root, 'public/mobile-app/js/realtime-sync.ts'), 'utf-8');
+const authJs = readFileSync(resolve(root, 'public/mobile-app/js/auth.ts'), 'utf-8');
+const eventsJs = readFileSync(resolve(root, 'public/mobile-app/js/events.ts'), 'utf-8');
 const programsRoute = readFileSync(resolve(root, 'app/api/mobile/programs/route.ts'), 'utf-8');
 
 describe('Mobile realtime sync regressions', () => {

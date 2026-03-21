@@ -120,7 +120,7 @@ describe('Notification Channels — Announcements', () => {
 });
 
 describe('Notification Channels — Realtime Parity', () => {
-  const realtimeContent = readFileSync(resolve(root, 'public/mobile-app/js/realtime-sync.js'), 'utf-8');
+  const realtimeContent = readFileSync(resolve(root, 'public/mobile-app/js/realtime-sync.ts'), 'utf-8');
   const storeContent = readFileSync(resolve(root, 'app/dashboard/lib/store.tsx'), 'utf-8');
 
   it('mobile PWA subscribes to notifications table', () => {

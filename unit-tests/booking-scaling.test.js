@@ -7,7 +7,7 @@ const root = resolve(__dirname, '..');
 const route = readFileSync(resolve(root, 'app/api/mobile/bookings/route.ts'), 'utf-8');
 const schema = readFileSync(resolve(root, 'supabase/schema.sql'), 'utf-8');
 const migration = readFileSync(resolve(root, 'supabase/migrations/20260320_booking_request_hardening.sql'), 'utf-8');
-const apiClient = readFileSync(resolve(root, 'public/mobile-app/js/api-client.js'), 'utf-8');
+const apiClient = readFileSync(resolve(root, 'public/mobile-app/js/api-client.ts'), 'utf-8');
 
 describe('Booking Surge Hardening', () => {
   it('adds client request id dedupe to bookings schema', () => {

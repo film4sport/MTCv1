@@ -10,8 +10,8 @@ function read(path) {
 
 describe('Partner surge hardening', () => {
   const route = read('app/api/mobile/partners/route.ts');
-  const partnersJs = read('public/mobile-app/js/partners.js');
-  const navigationJs = read('public/mobile-app/js/navigation.js');
+  const partnersJs = read('public/mobile-app/js/partners.ts');
+  const navigationJs = read('public/mobile-app/js/navigation.ts');
   const schema = read('supabase/schema.sql');
   const migration = read('supabase/migrations/20260320_partner_request_hardening.sql');
 

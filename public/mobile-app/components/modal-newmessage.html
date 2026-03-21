@@ -1,0 +1,19 @@
+<div class="modal-overlay" id="newMessageModal" onclick="closeNewMessageModal()" role="dialog" aria-modal="true" aria-label="New message">
+      <div class="modal modal-scrollable" onclick="event.stopPropagation()">
+        <div class="modal-title">NEW MESSAGE</div>
+        <div class="modal-desc">Search for a member to start chatting</div>
+
+        <div class="search-bar search-bar-modal">
+          <svg class="icon-muted" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="text" placeholder="Search members..." id="memberSearchInput" aria-label="Search members" oninput="debouncedSearchMembers(this.value)">
+        </div>
+
+        <div id="memberSearchResults">
+          <!-- Default: show all members -->
+        </div>
+
+        <button class="modal-btn-secondary" onclick="closeNewMessageModal()">
+          Cancel
+        </button>
+      </div>
+    </div>

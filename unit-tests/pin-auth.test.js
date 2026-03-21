@@ -454,7 +454,7 @@ describe('Dashboard Auth Client — PIN Functions', () => {
 // MOBILE PWA — auth.js uses PIN functions
 // ============================================================
 describe('Mobile PWA auth.js — PIN Functions', () => {
-  const content = readFileSync(resolve(root, 'public/mobile-app/js/auth.js'), 'utf-8');
+  const content = readFileSync(resolve(root, 'public/mobile-app/js/auth.ts'), 'utf-8');
 
   it('defines handlePinLogin', () => {
     expect(content).toContain('handlePinLogin');

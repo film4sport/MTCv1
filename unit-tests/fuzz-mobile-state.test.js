@@ -5,7 +5,7 @@ import { resolve } from 'path';
 const root = resolve(__dirname, '..');
 
 function readMobile(name) {
-  return readFileSync(resolve(root, `public/mobile-app/js/${name}.js`), 'utf-8');
+  return readFileSync(resolve(root, `public/mobile-app/js/${name}.ts`), 'utf-8');
 }
 
 describe('FUZZ: Mobile PWA state corruption resilience', () => {

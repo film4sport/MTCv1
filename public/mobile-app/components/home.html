@@ -1,0 +1,268 @@
+<div class="screen" id="screen-home" role="main" aria-label="Home screen">
+      <div id="main-content"></div>
+      <!-- Top Header -->
+      <div class="top-header">
+        <div class="header-left">
+          <div class="theme-pill" onclick="toggleTheme()" role="switch" aria-label="Toggle dark/light mode" tabindex="0">
+            <div class="theme-pill-sun">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+            </div>
+            <div class="theme-pill-moon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            </div>
+          </div>
+        </div>
+        
+        <div class="header-center">
+          <div class="header-logo">MTC <span>COURT</span></div>
+        </div>
+        
+        <div class="header-right">
+          <button class="header-btn ripple" onclick="navigateTo('notifications')" aria-label="Notifications">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+            <div class="notification-badge" aria-hidden="true" style="display:none"></div>
+          </button>
+          <button class="header-btn ripple" onclick="openMenu()" aria-label="Open menu" aria-expanded="false" aria-controls="menuDrawer">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Quick Actions - Moved above events -->
+      <div class="section-header">
+        <h3 class="section-title">QUICK ACTIONS</h3>
+      </div>
+      <div class="quick-actions">
+        <div class="quick-action volt ripple" onclick="navigateTo('book')">
+          <div class="quick-action-content">
+            <svg class="quick-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            <span class="quick-action-label">BOOK COURT</span>
+          </div>
+        </div>
+        <div class="quick-action coral ripple" onclick="navigateTo('partners')">
+          <div class="quick-action-content">
+            <svg class="quick-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            <span class="quick-action-label">FIND PARTNERS</span>
+          </div>
+        </div>
+        <div class="quick-action electric ripple" onclick="navigateTo('events')">
+          <div class="quick-action-content">
+            <svg class="quick-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+            <span class="quick-action-label">CLUB EVENTS</span>
+          </div>
+        </div>
+        <div class="quick-action dark ripple" onclick="navigateTo('schedule')">
+          <div class="quick-action-content">
+            <svg class="quick-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+            <span class="quick-action-label">SCHEDULE</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Upcoming Club Events - Moved below quick actions -->
+      <div class="events-card stagger-item">
+        <div class="events-header">
+          <div class="events-title">UPCOMING EVENTS</div>
+          <div class="events-see-all" onclick="var s=document.getElementById('screen-home'),c=document.getElementById('homeCalendarSection');if(s&&c){s.scrollTop=c.offsetTop-s.offsetTop;}">SEE ALL ↓</div>
+        </div>
+        <div class="event-item event-item-wrap" id="homeEvent-euchre" onclick="showRsvpListModal('euchre')" style="cursor:pointer;">
+          <div class="event-date-box">
+            <div class="event-date-month" data-home-event-month="euchre">MAR</div>
+            <div class="event-date-day" data-home-event-day="euchre">14</div>
+          </div>
+          <div class="event-info event-info-flex">
+            <div class="event-name">Euchre Tournament</div>
+            <div class="event-details">Saturday Evening • Clubhouse</div>
+          </div>
+          <button class="event-rsvp-btn" aria-label="RSVP to event" onclick="event.stopPropagation(); rsvpToEvent('euchre', this)">RSVP</button>
+        </div>
+        <div class="event-item event-item-wrap" id="homeEvent-bbq" onclick="showRsvpListModal('bbq')" style="cursor:pointer;">
+          <div class="event-date-box">
+            <div class="event-date-month" data-home-event-month="bbq">MAY</div>
+            <div class="event-date-day" data-home-event-day="bbq">9</div>
+          </div>
+          <div class="event-info event-info-flex">
+            <div class="event-name">Opening Day BBQ</div>
+            <div class="event-details">12:30 PM • All Courts • Free</div>
+          </div>
+          <button class="event-rsvp-btn" aria-label="RSVP to event" onclick="event.stopPropagation(); rsvpToEvent('bbq', this)">RSVP</button>
+        </div>
+        <div class="event-item event-item-wrap" id="homeEvent-mensrr" onclick="showRsvpListModal('mensrr')" style="cursor:pointer;">
+          <div class="event-date-box">
+            <div class="event-date-month" data-home-event-month="mensrr">MAY</div>
+            <div class="event-date-day" data-home-event-day="mensrr">12</div>
+          </div>
+          <div class="event-info event-info-flex">
+            <div class="event-name">Men's Round Robin</div>
+            <div class="event-details">Tue 9:00 AM • All Courts</div>
+          </div>
+          <button class="event-rsvp-btn" aria-label="RSVP to event" onclick="event.stopPropagation(); rsvpToEvent('mensrr', this)">RSVP</button>
+        </div>
+      </div>
+      
+      
+      <!-- Club Calendar / Weekly Schedule Toggle -->
+      <div class="section-header" style="display:flex;justify-content:space-between;align-items:center;">
+        <h3 class="section-title" id="homeCalSchedTitle">CLUB CALENDAR</h3>
+        <div class="home-cal-toggle" id="homeCalToggle">
+          <button class="home-cal-toggle-btn active" id="homeCalBtn" onclick="switchHomeCalView('calendar')">Calendar</button>
+          <button class="home-cal-toggle-btn" id="homeSchedBtn" onclick="switchHomeCalView('schedule')">Weekly</button>
+        </div>
+      </div>
+
+      <!-- Calendar View (default) -->
+      <div class="home-calendar-wrap" id="homeCalendarSection">
+        <div class="calendar-header" style="display:flex;justify-content:space-between;align-items:center;padding:0 16px 12px;">
+          <button class="calendar-nav-btn" onclick="MTC.fn.changeHomeMonth(-1)" aria-label="Previous month">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          </button>
+          <div class="calendar-month-label" id="homeCalendarMonth">—</div>
+          <button class="calendar-nav-btn" onclick="MTC.fn.changeHomeMonth(1)" aria-label="Next month">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </button>
+        </div>
+        <div class="calendar-weekdays" style="display:grid;grid-template-columns:repeat(7,1fr);padding:0 16px 8px;text-align:center;">
+          <div class="calendar-weekday">S</div>
+          <div class="calendar-weekday">M</div>
+          <div class="calendar-weekday">T</div>
+          <div class="calendar-weekday">W</div>
+          <div class="calendar-weekday">T</div>
+          <div class="calendar-weekday">F</div>
+          <div class="calendar-weekday">S</div>
+        </div>
+        <div class="calendar-grid" id="homeCalendarGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;padding:0 16px 16px;"></div>
+
+        <!-- Event cards for selected date (rendered by home-calendar.js) -->
+        <div class="home-calendar-events-section" style="padding:0 16px 16px;">
+          <div class="section-header" style="margin-bottom:8px;">
+            <h3 class="section-title" id="homeCalendarDateTitle" style="font-size:11px;">SELECT A DATE</h3>
+          </div>
+          <div id="homeCalendarEvents">
+            <div class="calendar-event-item-empty" style="text-align:center;padding:16px;color:var(--text-muted);font-size:13px;">Tap a date to see events</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Weekly Schedule View (hidden by default) -->
+      <div id="homeWeeklySchedule" style="display:none;">
+          <!-- Dynamic events happening this week (populated by JS) -->
+          <div id="homeWeeklyDynamic"></div>
+
+          <div class="section-header">
+            <h3 class="section-title">TUESDAY</h3>
+          </div>
+
+          <div class="schedule-item stagger-item" onclick="showEventModal('mens-round-robin','var(--coral)')" style="cursor:pointer">
+            <div class="schedule-time-block">
+              <div class="schedule-time">9:00</div>
+              <div class="schedule-period">AM</div>
+            </div>
+            <div class="schedule-details">
+              <div class="schedule-title">Men's Round Robin</div>
+              <div class="schedule-subtitle">Weekly morning session</div>
+              <div class="schedule-meta">
+                <div class="schedule-meta-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                  All Courts
+                </div>
+                <div class="schedule-meta-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                  2 hours
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-header">
+            <h3 class="section-title">THURSDAY</h3>
+          </div>
+
+          <div class="schedule-item stagger-item" onclick="showEventModal('freedom-55','var(--electric-blue)')" style="cursor:pointer">
+            <div class="schedule-time-block">
+              <div class="schedule-time">9:00</div>
+              <div class="schedule-period">AM</div>
+            </div>
+            <div class="schedule-details">
+              <div class="schedule-title">Freedom 55 League</div>
+              <div class="schedule-subtitle">Weekday morning league</div>
+              <div class="schedule-meta">
+                <div class="schedule-meta-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                  All Courts
+                </div>
+                <div class="schedule-meta-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                  2 hours
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="schedule-item stagger-item" onclick="showEventModal('interclub-league','var(--deep-black)')" style="cursor:pointer">
+            <div class="schedule-time-block">
+              <div class="schedule-time">7:00</div>
+              <div class="schedule-period">PM</div>
+            </div>
+            <div class="schedule-details">
+              <div class="schedule-title">Interclub Competitive League</div>
+              <div class="schedule-subtitle">A &amp; B Teams</div>
+              <div class="schedule-meta">
+                <div class="schedule-meta-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                  All Courts
+                </div>
+                <div class="schedule-meta-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path></svg>
+                  2.5 hours
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-header">
+            <h3 class="section-title">FRIDAY</h3>
+          </div>
+
+          <div class="schedule-item stagger-item" onclick="showEventModal('ladies-round-robin','var(--coral)')" style="cursor:pointer">
+            <div class="schedule-time-block">
+              <div class="schedule-time">9:00</div>
+              <div class="schedule-period">AM</div>
+            </div>
+            <div class="schedule-details">
+              <div class="schedule-title">Ladies Round Robin</div>
+              <div class="schedule-subtitle">Weekly morning session</div>
+              <div class="schedule-meta">
+                <div class="schedule-meta-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                  All Courts
+                </div>
+                <div class="schedule-meta-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                  2 hours
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="schedule-item stagger-item" onclick="showEventModal('friday-mixed','var(--electric-blue)')" style="cursor:pointer">
+            <div class="schedule-time-block">
+              <div class="schedule-time">6:00</div>
+              <div class="schedule-period">PM</div>
+            </div>
+            <div class="schedule-details">
+              <div class="schedule-title">Friday Night Mixed Round Robin</div>
+              <div class="schedule-subtitle">Mixed doubles under the lights</div>
+              <div class="schedule-meta">
+                <div class="schedule-meta-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                  All Courts
+                </div>
+                <div class="schedule-meta-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                  3 hours
+                </div>
+              </div>
+            </div>
+          </div>
+      </div>
+    </div>

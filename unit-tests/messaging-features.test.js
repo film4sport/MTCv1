@@ -16,7 +16,7 @@ const convRouteSrc = readSource('app/api/mobile/conversations/route.ts');
 const schemaSQL = readSource('supabase/schema.sql');
 const welcomeGuardsMigration = readSource('supabase/migrations/20260309_fix_welcome_message_guards.sql');
 const cleanupMigration = readSource('supabase/migrations/20260309_cleanup_stale_welcomes_rpc.sql');
-const mobileMessagingSrc = readSource('public/mobile-app/js/messaging.js');
+const mobileMessagingSrc = readSource('public/mobile-app/js/messaging.ts');
 const dbSrc = readSource('app/dashboard/lib/db.ts');
 
 // ─── Welcome Message Guards (RPC) ────────────────────────

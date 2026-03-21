@@ -8,12 +8,12 @@ function read(relPath) {
   return readFileSync(resolve(root, relPath), 'utf-8');
 }
 
-const authJs = read('public/mobile-app/js/auth.js');
-const realtimeSync = read('public/mobile-app/js/realtime-sync.js');
-const bookingJs = read('public/mobile-app/js/booking.js');
-const navigationJs = read('public/mobile-app/js/navigation.js');
-const notificationsJs = read('public/mobile-app/js/notifications.js');
-const lessonsJs = read('public/mobile-app/js/lessons.js');
+const authJs = read('public/mobile-app/js/auth.ts');
+const realtimeSync = read('public/mobile-app/js/realtime-sync.ts');
+const bookingJs = read('public/mobile-app/js/booking.ts');
+const navigationJs = read('public/mobile-app/js/navigation.ts');
+const notificationsJs = read('public/mobile-app/js/notifications.ts');
+const lessonsJs = read('public/mobile-app/js/lessons.ts');
 const courtBlocksRoute = read('app/api/mobile/court-blocks/route.ts');
 const programsRoute = read('app/api/mobile/programs/route.ts');
 const membersRoute = read('app/api/mobile/members/route.ts');
