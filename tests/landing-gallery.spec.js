@@ -131,7 +131,22 @@ test.describe('Gallery & Lightbox', () => {
     await openLightbox(page);
     // Close button should be visible in the open lightbox
     const closeBtn = page.locator('.lightbox-close');
-    await expect(closeBtn).toBeVisible();
+    await expect
+      .poll(async () => {
+        try {
+          return await page.evaluate(() => {
+            const lightbox = document.querySelector('.lightbox');
+            const close = document.querySelector('.lightbox-close');
+            if (!(lightbox instanceof HTMLElement) || !(close instanceof HTMLElement)) return false;
+            const lightboxVisible = lightbox.classList.contains('active') && getComputedStyle(lightbox).visibility === 'visible';
+            const closeVisible = getComputedStyle(close).visibility === 'visible' && close.getBoundingClientRect().width > 0;
+            return lightboxVisible && closeVisible;
+          });
+        } catch {
+          return false;
+        }
+      }, { timeout: 7000 })
+      .toBe(true);
     // Auto-focus via setTimeout(100ms) may not work in headless CI (window inactive).
     // Verify the button IS focusable — explicitly focus and confirm.
     await closeBtn.focus();

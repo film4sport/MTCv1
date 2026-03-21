@@ -104,7 +104,7 @@ export async function POST(request: Request) {
     if (unknownFields.length > 0) {
       return apiError(`Unknown field(s): ${unknownFields.join(', ')}`, 400, 'unknown_fields');
     }
-    if (!body.matchDate || !isValidDate(body.matchDate)) {
+    if (typeof body.matchDate !== 'string' || !isValidDate(body.matchDate)) {
       return apiError('Valid match date required (YYYY-MM-DD)', 400, 'invalid_match_date');
     }
 
@@ -114,10 +114,10 @@ export async function POST(request: Request) {
       .insert({
         team,
         match_date: body.matchDate,
-        match_time: body.matchTime ? sanitizeInput(body.matchTime, 20) : null,
-        opponent: body.opponent ? sanitizeInput(body.opponent, 100) : null,
-        location: body.location ? sanitizeInput(body.location, 100) : null,
-        notes: body.notes ? sanitizeInput(body.notes, 500) : null,
+        match_time: typeof body.matchTime === 'string' && body.matchTime ? sanitizeInput(body.matchTime, 20) : null,
+        opponent: typeof body.opponent === 'string' && body.opponent ? sanitizeInput(body.opponent, 100) : null,
+        location: typeof body.location === 'string' && body.location ? sanitizeInput(body.location, 100) : null,
+        notes: typeof body.notes === 'string' && body.notes ? sanitizeInput(body.notes, 500) : null,
         created_by: authResult.id,
       })
       .select('id')
@@ -153,7 +153,7 @@ export async function PATCH(request: Request) {
     }
     const { lineupId, memberId, status, position, notes } = body;
 
-    if (!lineupId || !memberId) {
+    if (typeof lineupId !== 'string' || typeof memberId !== 'string') {
       return apiError('lineupId and memberId required', 400, 'missing_required_fields');
     }
     if (!isValidUUID(lineupId)) {
@@ -164,7 +164,7 @@ export async function PATCH(request: Request) {
     }
 
     const validStatuses = ['available', 'unavailable', 'maybe', 'pending'];
-    if (status && !validStatuses.includes(status)) {
+    if (status !== undefined && (typeof status !== 'string' || !validStatuses.includes(status))) {
       return apiError('Invalid status', 400, 'invalid_status');
     }
 
@@ -177,8 +177,12 @@ export async function PATCH(request: Request) {
     const supabase = getAdminClient();
     const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
     if (status) updates.status = status;
-    if (position !== undefined) updates.position = position ? sanitizeInput(position, 50) : null;
-    if (notes !== undefined) updates.notes = notes ? sanitizeInput(notes, 200) : null;
+    if (position !== undefined) {
+      updates.position = typeof position === 'string' && position ? sanitizeInput(position, 50) : null;
+    }
+    if (notes !== undefined) {
+      updates.notes = typeof notes === 'string' && notes ? sanitizeInput(notes, 200) : null;
+    }
 
     const { error } = await supabase
       .from('lineup_entries')

@@ -126,7 +126,8 @@ export async function POST(request: Request) {
       if (!isValidUUID(familyId)) return validationError('familyId', 'invalid UUID format');
       if (typeof type === 'string' && !isValidEnum(type, VALID_FAMILY_TYPES)) return validationError('type', 'must be adult or junior');
       if (birthYear !== undefined && birthYear !== null) {
-        const yr = parseInt(birthYear);
+        const birthYearValue = typeof birthYear === 'string' || typeof birthYear === 'number' ? String(birthYear) : '';
+        const yr = parseInt(birthYearValue, 10);
         if (!isInRange(yr, 1930, new Date().getFullYear())) return validationError('birthYear', 'must be reasonable year');
       }
 
@@ -150,7 +151,10 @@ export async function POST(request: Request) {
           family_id: familyId,
           name: sanitizeInput(name, 100),
           type: type === 'junior' ? 'junior' : 'adult',
-          birth_year: birthYear ? parseInt(birthYear) : null,
+          birth_year:
+            birthYear !== undefined && birthYear !== null && (typeof birthYear === 'string' || typeof birthYear === 'number')
+              ? parseInt(String(birthYear), 10)
+              : null,
         })
         .select('*')
         .single();
@@ -188,8 +192,10 @@ export async function PATCH(request: Request) {
       return apiError(`Unknown field(s): ${unknownFields.join(', ')}`, 400, 'unknown_fields');
     }
     const { memberId, name, skillLevel, skillLevelSet, avatar } = body;
-    if (!memberId || !isValidUUID(memberId)) return validationError('memberId', 'required, valid UUID');
-    if (skillLevel !== undefined && !isValidEnum(skillLevel, VALID_SKILL_LEVELS)) return validationError('skillLevel', 'invalid skill level');
+    if (typeof memberId !== 'string' || !isValidUUID(memberId)) return validationError('memberId', 'required, valid UUID');
+    if (skillLevel !== undefined && (typeof skillLevel !== 'string' || !isValidEnum(skillLevel, VALID_SKILL_LEVELS))) {
+      return validationError('skillLevel', 'invalid skill level');
+    }
 
     const supabase = getAdminClient();
 
@@ -201,10 +207,10 @@ export async function PATCH(request: Request) {
 
     // Build update object — only include provided fields
     const updates: Record<string, unknown> = {};
-    if (name !== undefined) updates.name = sanitizeInput(name, 100);
+    if (name !== undefined) updates.name = sanitizeInput(typeof name === 'string' ? name : String(name), 100);
     if (skillLevel !== undefined) updates.skill_level = skillLevel;
     if (skillLevelSet !== undefined) updates.skill_level_set = skillLevelSet;
-    if (avatar !== undefined) updates.avatar = sanitizeInput(avatar, 50);
+    if (avatar !== undefined) updates.avatar = sanitizeInput(typeof avatar === 'string' ? avatar : String(avatar), 50);
 
     if (Object.keys(updates).length === 0) {
       return apiError('No fields to update', 400, 'no_fields_to_update');
@@ -232,7 +238,7 @@ export async function DELETE(request: Request) {
       return apiError(`Unknown field(s): ${unknownFields.join(', ')}`, 400, 'unknown_fields');
     }
     const { memberId } = body;
-    if (!memberId || !isValidUUID(memberId)) return validationError('memberId', 'required, valid UUID');
+    if (typeof memberId !== 'string' || !isValidUUID(memberId)) return validationError('memberId', 'required, valid UUID');
 
     const supabase = getAdminClient();
 
