@@ -687,61 +687,71 @@
     }
 
     MTC.fn.loadFromAPI('/mobile/events', 'mtc-api-events', null).then(function(events) {
-      if (canApplyHydratedData() && Array.isArray(events) && typeof window.updateEventsFromAPI === 'function') {
+      if (Array.isArray(events) && typeof window.updateEventsFromAPI === 'function') {
+        if (!canApplyHydratedData()) return;
         window.updateEventsFromAPI(events);
       }
     });
 
     MTC.fn.loadFromAPI('/mobile/members', 'mtc-api-members', null).then(function(members) {
-      if (canApplyHydratedData() && Array.isArray(members) && typeof window.updateMembersFromAPI === 'function') {
+      if (Array.isArray(members) && typeof window.updateMembersFromAPI === 'function') {
+        if (!canApplyHydratedData()) return;
         window.updateMembersFromAPI(members);
       }
       return MTC.fn.loadFromAPI('/mobile/conversations', 'mtc-api-conversations', null);
     }).then(function(conversations) {
-      if (canApplyHydratedData() && conversations && typeof window.updateConversationsFromAPI === 'function') {
+      if (conversations && typeof window.updateConversationsFromAPI === 'function') {
+        if (!canApplyHydratedData()) return;
         window.updateConversationsFromAPI(conversations);
       }
     }).catch(function(err) {
       MTC.warn('[MTC] Members/conversations load error:', err);
       MTC.fn.loadFromAPI('/mobile/conversations', 'mtc-api-conversations', null).then(function(conversations) {
-        if (canApplyHydratedData() && conversations && typeof window.updateConversationsFromAPI === 'function') {
+        if (conversations && typeof window.updateConversationsFromAPI === 'function') {
+          if (!canApplyHydratedData()) return;
           window.updateConversationsFromAPI(conversations);
         }
       });
     });
 
     MTC.fn.loadFromAPI('/mobile/partners', 'mtc-api-partners', null).then(function(partners) {
-      if (canApplyHydratedData() && Array.isArray(partners) && typeof window.updatePartnersFromAPI === 'function') {
+      if (Array.isArray(partners) && typeof window.updatePartnersFromAPI === 'function') {
+        if (!canApplyHydratedData()) return;
         window.updatePartnersFromAPI(partners);
       }
     });
 
     MTC.fn.loadFromAPI('/mobile/announcements', 'mtc-api-announcements', null).then(function(announcements) {
-      if (canApplyHydratedData() && Array.isArray(announcements) && typeof window.updateAnnouncementsFromAPI === 'function') {
+      if (Array.isArray(announcements) && typeof window.updateAnnouncementsFromAPI === 'function') {
+        if (!canApplyHydratedData()) return;
         window.updateAnnouncementsFromAPI(announcements);
       }
     });
 
     MTC.fn.loadFromAPI('/mobile/bookings', 'mtc-api-bookings', null).then(function(bookings) {
-      if (canApplyHydratedData() && Array.isArray(bookings) && typeof window.updateBookingsFromAPI === 'function') {
+      if (Array.isArray(bookings) && typeof window.updateBookingsFromAPI === 'function') {
+        if (!canApplyHydratedData()) return;
         window.updateBookingsFromAPI(bookings);
       }
     });
 
     MTC.fn.loadFromAPI('/mobile/courts', 'mtc-api-courts', null).then(function(courts) {
-      if (canApplyHydratedData() && Array.isArray(courts) && typeof window.updateCourtsFromAPI === 'function') {
+      if (Array.isArray(courts) && typeof window.updateCourtsFromAPI === 'function') {
+        if (!canApplyHydratedData()) return;
         window.updateCourtsFromAPI(courts);
       }
     });
 
     MTC.fn.loadFromAPI('/mobile/court-blocks', 'mtc-api-court-blocks', null).then(function(blocks) {
-      if (canApplyHydratedData() && Array.isArray(blocks) && typeof window.updateCourtBlocksFromAPI === 'function') {
+      if (Array.isArray(blocks) && typeof window.updateCourtBlocksFromAPI === 'function') {
+        if (!canApplyHydratedData()) return;
         window.updateCourtBlocksFromAPI(blocks);
       }
     });
 
     MTC.fn.loadFromAPI('/mobile/notifications', 'mtc-api-notifications', null).then(function(notifications) {
-      if (canApplyHydratedData() && Array.isArray(notifications) && typeof window.updateNotificationsFromAPI === 'function') {
+      if (Array.isArray(notifications) && typeof window.updateNotificationsFromAPI === 'function') {
+        if (!canApplyHydratedData()) return;
         window.updateNotificationsFromAPI(notifications);
       }
     });
@@ -758,13 +768,15 @@
       method: 'PATCH',
       body: JSON.stringify({ action: 'getNotifPrefs' })
     }).then(function(prefs) {
-      if (canApplyHydratedData() && prefs && typeof window.updateNotifPrefsFromAPI === 'function') {
+      if (prefs && typeof window.updateNotifPrefsFromAPI === 'function') {
+        if (!canApplyHydratedData()) return;
         window.updateNotifPrefsFromAPI(prefs);
       }
     }).catch(function() {});
 
     MTC.fn.loadFromAPI('/mobile/programs', 'mtc-api-programs', null).then(function(programs) {
-      if (canApplyHydratedData() && Array.isArray(programs) && typeof window.updateProgramsFromAPI === 'function') {
+      if (Array.isArray(programs) && typeof window.updateProgramsFromAPI === 'function') {
+        if (!canApplyHydratedData()) return;
         window.updateProgramsFromAPI(programs);
       }
     });

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { authenticateMobileRequest, getAdminClient } from '../auth-helper';
+import { authenticateMobileRequest, getAdminClient, apiError, readJsonObject, successResponse, findUnknownFields } from '../auth-helper';
 
 /** Fetch all notifications for the authenticated user */
 export async function GET(request: Request) {
@@ -16,7 +16,7 @@ export async function GET(request: Request) {
       .limit(100);
 
     if (error) {
-      return NextResponse.json({ error: 'Failed to fetch notifications' }, { status: 500 });
+      return apiError('Failed to fetch notifications', 500, 'notifications_fetch_failed');
     }
 
     const result = (data || []).map(n => ({
@@ -30,7 +30,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(result);
   } catch {
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+    return apiError('Server error', 500, 'server_error');
   }
 }
 
@@ -40,7 +40,13 @@ export async function PATCH(request: Request) {
   if (authResult instanceof NextResponse) return authResult;
 
   try {
-    const { id, markAll } = await request.json();
+    const body = await readJsonObject(request);
+    if (body instanceof NextResponse) return body;
+    const unknownFields = findUnknownFields(body, ['id', 'markAll']);
+    if (unknownFields.length > 0) {
+      return apiError(`Unknown field(s): ${unknownFields.join(', ')}`, 400, 'unknown_fields');
+    }
+    const { id, markAll } = body;
     const supabase = getAdminClient();
 
     if (markAll) {
@@ -50,7 +56,7 @@ export async function PATCH(request: Request) {
         .update({ read: true })
         .eq('user_id', authResult.id)
         .eq('read', false);
-      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      if (error) return apiError(error.message, 500, 'notifications_mark_all_failed');
     } else if (id) {
       // Mark a single notification as read
       const { error } = await supabase
@@ -58,14 +64,14 @@ export async function PATCH(request: Request) {
         .update({ read: true })
         .eq('id', id)
         .eq('user_id', authResult.id);
-      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      if (error) return apiError(error.message, 500, 'notifications_mark_failed');
     } else {
-      return NextResponse.json({ error: 'Provide id or markAll' }, { status: 400 });
+      return apiError('Provide id or markAll', 400, 'missing_action');
     }
 
-    return NextResponse.json({ success: true });
+    return successResponse({ action: markAll ? 'markAllRead' : 'markRead' });
   } catch {
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+    return apiError('Server error', 500, 'server_error');
   }
 }
 
@@ -75,6 +81,21 @@ export async function DELETE(request: Request) {
   if (authResult instanceof NextResponse) return authResult;
 
   try {
+    let body: Record<string, unknown> = {};
+    const contentLength = request.headers.get('content-length');
+    if (contentLength && contentLength !== '0') {
+      const parsedBody = await readJsonObject(request);
+      if (parsedBody instanceof NextResponse) return parsedBody;
+      body = parsedBody;
+    }
+    const unknownFields = findUnknownFields(body, ['readOnly']);
+    if (unknownFields.length > 0) {
+      return apiError(`Unknown field(s): ${unknownFields.join(', ')}`, 400, 'unknown_fields');
+    }
+    if (body.readOnly !== undefined && body.readOnly !== true) {
+      return apiError('readOnly must be true when provided', 400, 'invalid_read_only');
+    }
+
     const supabase = getAdminClient();
     const { error } = await supabase
       .from('notifications')
@@ -82,9 +103,9 @@ export async function DELETE(request: Request) {
       .eq('user_id', authResult.id)
       .eq('read', true);
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    return NextResponse.json({ success: true });
+    if (error) return apiError(error.message, 500, 'notifications_delete_failed');
+    return successResponse({ action: 'deleteRead' });
   } catch {
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+    return apiError('Server error', 500, 'server_error');
   }
 }

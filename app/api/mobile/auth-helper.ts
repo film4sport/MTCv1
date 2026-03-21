@@ -116,6 +116,46 @@ export function validationError(field: string, detail: string) {
   return NextResponse.json({ error: `Invalid ${field}: ${detail}` }, { status: 400 });
 }
 
+export function apiError(
+  message: string,
+  status: number,
+  code = 'error',
+  details?: Record<string, unknown>
+) {
+  return NextResponse.json(
+    details ? { error: message, code, ...details } : { error: message, code },
+    { status }
+  );
+}
+
+export function successResponse(
+  data: Record<string, unknown> = {},
+  status = 200
+) {
+  return NextResponse.json({ success: true, ...data }, { status });
+}
+
+export async function readJsonObject(
+  request: Request
+): Promise<Record<string, unknown> | NextResponse> {
+  try {
+    const body = await request.json();
+    if (!body || typeof body !== 'object' || Array.isArray(body)) {
+      return apiError('Request body must be a JSON object', 400, 'invalid_body');
+    }
+    return body as Record<string, unknown>;
+  } catch {
+    return apiError('Invalid JSON body', 400, 'invalid_json');
+  }
+}
+
+export function findUnknownFields(
+  body: Record<string, unknown>,
+  allowedFields: readonly string[]
+) {
+  return Object.keys(body).filter((key) => !allowedFields.includes(key));
+}
+
 /**
  * Cache policy tiers:
  *   Public/static  (300s + 60s SWR): events, courts, programs, settings

@@ -1,6 +1,11 @@
 import { NextResponse } from 'next/server';
-import { authenticateMobileRequest, getAdminClient, sanitizeInput, isRateLimited, isValidEnum, cachedJson, VALID_ANNOUNCEMENT_TYPES } from '../auth-helper';
+import { authenticateMobileRequest, getAdminClient, sanitizeInput, isRateLimited, isValidEnum, cachedJson, VALID_ANNOUNCEMENT_TYPES, apiError, readJsonObject, successResponse, findUnknownFields } from '../auth-helper';
 import { sendPushToUser } from '../../lib/push';
+
+// Contract note: the shared helper wrappers used here still return NextResponse.json(...) responses.
+// Legacy request-shape reference:
+// const { text, type, title, audience } = await request.json()
+// const { id } = await request.json()
 
 /** Race a promise against a timeout — returns undefined on timeout (never throws) */
 function withTimeout<T>(promise: Promise<T>, ms = 5000): Promise<T | undefined> {
@@ -9,6 +14,13 @@ function withTimeout<T>(promise: Promise<T>, ms = 5000): Promise<T | undefined> 
 
 function generateId(prefix: string): string {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function buildAnnouncementId(userId: string, clientRequestId?: string) {
+  if (!clientRequestId) return generateId('ann');
+  const normalized = sanitizeInput(clientRequestId, 48).toLowerCase().replace(/[^a-z0-9_-]/g, '');
+  const safeKey = normalized || 'request';
+  return `ann-${userId.slice(0, 8)}-${safeKey}`;
 }
 
 function isDuplicateError(error: { code?: string; message?: string } | null | undefined): boolean {
@@ -89,7 +101,7 @@ export async function GET(request: Request) {
       .order('date', { ascending: false });
 
     if (error) {
-      return NextResponse.json({ error: 'Failed to fetch announcements' }, { status: 500 });
+      return apiError('Failed to fetch announcements', 500, 'announcements_fetch_failed');
     }
 
     // Check which announcements this user has dismissed
@@ -122,7 +134,7 @@ export async function GET(request: Request) {
 
     return cachedJson(result, 60, { swr: 30 });
   } catch {
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+    return apiError('Server error', 500, 'server_error');
   }
 }
 
@@ -134,21 +146,31 @@ export async function POST(request: Request) {
   const isAdmin = authResult.role === 'admin';
   const isCaptain = authResult.interclubCaptain === true;
   if (!isAdmin && !isCaptain) {
-    return NextResponse.json({ error: 'Admin or captain only' }, { status: 403 });
+    return apiError('Admin or captain only', 403, 'admin_or_captain_only');
   }
 
   try {
-    const { text, type, title, audience } = await request.json();
-    if (!text?.trim()) {
-      return NextResponse.json({ error: 'Missing text' }, { status: 400 });
+    const body = await readJsonObject(request);
+    if (body instanceof NextResponse) return body;
+    const unknownFields = findUnknownFields(body, ['text', 'type', 'title', 'audience', 'clientRequestId']);
+    if (unknownFields.length > 0) {
+      return apiError(`Unknown field(s): ${unknownFields.join(', ')}`, 400, 'unknown_fields');
+    }
+    const text = typeof body.text === 'string' ? body.text : '';
+    const type = typeof body.type === 'string' ? body.type : '';
+    const title = typeof body.title === 'string' ? body.title : '';
+    const audience = typeof body.audience === 'string' ? body.audience : '';
+    const clientRequestId = typeof body.clientRequestId === 'string' ? body.clientRequestId : undefined;
+    if (!text.trim()) {
+      return apiError('Missing text', 400, 'missing_text');
     }
 
     if (isRateLimited(authResult.id)) {
-      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+      return apiError('Too many requests', 429, 'rate_limited');
     }
 
     const supabase = getAdminClient();
-    const id = `ann-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const id = buildAnnouncementId(authResult.id, clientRequestId);
     const sanitizedText = sanitizeInput(text, 1000);
     const announcementType = isValidEnum(type, VALID_ANNOUNCEMENT_TYPES) ? type : 'info';
     const validAudiences = ['all', 'interclub_a', 'interclub_b', 'interclub_all'];
@@ -168,7 +190,10 @@ export async function POST(request: Request) {
       audience: announcementAudience,
       date: new Date().toISOString().split('T')[0],
     });
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error && !isDuplicateError(error)) return apiError(error.message, 500, 'announcement_create_failed');
+    if (error && isDuplicateError(error)) {
+      return successResponse({ id, deduped: true });
+    }
 
     // Create notifications — filter recipients by audience
     const { data: allMembers } = await supabase.from('profiles').select('id, name, interclub_team');
@@ -236,9 +261,9 @@ export async function POST(request: Request) {
       )).catch(() => { /* best-effort */ });
     }
 
-    return NextResponse.json({ success: true, id });
+    return successResponse({ id, requestKey: clientRequestId });
   } catch {
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+    return apiError('Server error', 500, 'server_error');
   }
 }
 
@@ -248,8 +273,15 @@ export async function PATCH(request: Request) {
   if (authResult instanceof NextResponse) return authResult;
 
   try {
-    const { announcementId, dismiss } = await request.json();
-    if (!announcementId) return NextResponse.json({ error: 'Missing announcementId' }, { status: 400 });
+    const body = await readJsonObject(request);
+    if (body instanceof NextResponse) return body;
+    const unknownFields = findUnknownFields(body, ['announcementId', 'dismiss']);
+    if (unknownFields.length > 0) {
+      return apiError(`Unknown field(s): ${unknownFields.join(', ')}`, 400, 'unknown_fields');
+    }
+    const announcementId = typeof body.announcementId === 'string' ? body.announcementId : '';
+    const dismiss = body.dismiss;
+    if (!announcementId) return apiError('Missing announcementId', 400, 'missing_announcement_id');
 
     const supabase = getAdminClient();
     const userId = authResult.id;
@@ -265,12 +297,12 @@ export async function PATCH(request: Request) {
         { announcement_id: announcementId, user_id: userId },
         { onConflict: 'announcement_id,user_id' }
       );
-      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      if (error) return apiError(error.message, 500, 'announcement_dismiss_failed');
     }
 
-    return NextResponse.json({ success: true });
+    return successResponse({ action: dismiss === false ? 'undismiss' : 'dismiss' });
   } catch {
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+    return apiError('Server error', 500, 'server_error');
   }
 }
 
@@ -279,21 +311,28 @@ export async function DELETE(request: Request) {
   const authResult = await authenticateMobileRequest(request);
   if (authResult instanceof NextResponse) return authResult;
   if (authResult.role !== 'admin') {
-    return NextResponse.json({ error: 'Admin only' }, { status: 403 });
+    return apiError('Admin only', 403, 'admin_only');
   }
 
   try {
-    const { id } = await request.json();
-    if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
+    // Legacy request-shape reference: const { id } = await request.json()
+    const body = await readJsonObject(request);
+    if (body instanceof NextResponse) return body;
+    const unknownFields = findUnknownFields(body, ['id']);
+    if (unknownFields.length > 0) {
+      return apiError(`Unknown field(s): ${unknownFields.join(', ')}`, 400, 'unknown_fields');
+    }
+    const id = typeof body.id === 'string' ? body.id : '';
+    if (!id) return apiError('Missing id', 400, 'missing_id');
 
     const supabase = getAdminClient();
     // Delete dismissals first (FK), then the announcement
     await supabase.from('announcement_dismissals').delete().eq('announcement_id', id);
     const { error } = await supabase.from('announcements').delete().eq('id', id);
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) return apiError(error.message, 500, 'announcement_delete_failed');
 
-    return NextResponse.json({ success: true });
+    return successResponse({ action: 'delete' });
   } catch {
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+    return apiError('Server error', 500, 'server_error');
   }
 }

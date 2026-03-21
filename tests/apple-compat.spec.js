@@ -66,20 +66,35 @@ test.describe('Apple Compatibility - Mobile PWA', () => {
 
     await activatePwaScreen(page, 'messages', 'nav-messages');
     await expectPwaScreenActive(page, 'messages');
+    const metrics = await expect
+      .poll(async () => {
+        try {
+          return await page.evaluate(() => {
+            const screen = document.getElementById('screen-messages');
+            const list = document.querySelector('#screen-messages #conversationsList');
+            const search = document.querySelector('#screen-messages .search-bar');
+            return {
+              active: !!screen?.classList.contains('active'),
+              listWidth: Math.round(list?.getBoundingClientRect().width || 0),
+              searchWidth: Math.round(search?.getBoundingClientRect().width || 0),
+            };
+          });
+        } catch {
+          return { active: false, listWidth: 0, searchWidth: 0 };
+        }
+      }, { timeout: 5000 })
+      .toMatchObject({ active: true })
+      .then(async () => page.evaluate(() => {
+        const list = document.querySelector('#screen-messages #conversationsList');
+        const search = document.querySelector('#screen-messages .search-bar');
+        return {
+          listWidth: Math.round(list?.getBoundingClientRect().width || 0),
+          searchWidth: Math.round(search?.getBoundingClientRect().width || 0),
+        };
+      }));
 
-    const conversationList = page.locator('#screen-messages #conversationsList');
-    await expect(page.locator('#screen-messages')).toHaveClass(/active/);
-    const listMetrics = await conversationList.evaluate((element) => {
-      const rect = element.getBoundingClientRect();
-      return Math.round(rect.width);
-    });
-    const searchBarWidth = await page.locator('#screen-messages .search-bar').evaluate((element) => {
-      const rect = element.getBoundingClientRect();
-      return Math.round(rect.width);
-    });
-
-    expect(listMetrics).toBeGreaterThanOrEqual(640);
-    expect(searchBarWidth).toBeGreaterThanOrEqual(640);
+    expect(metrics.listWidth).toBeGreaterThanOrEqual(640);
+    expect(metrics.searchWidth).toBeGreaterThanOrEqual(640);
   });
 
   test('iPad booking and notifications stay wide instead of collapsing', async ({ page }) => {
@@ -102,19 +117,37 @@ test.describe('Apple Compatibility - Mobile PWA', () => {
 
     await activatePwaScreen(page, 'book', 'nav-book');
     await expectPwaScreenActive(page, 'book');
-    const bookingWidth = await page.locator('#screen-book').evaluate((element) => Math.round(element.getBoundingClientRect().width));
+    const bookingWidth = await expect
+      .poll(async () => {
+        try {
+          return await page.locator('#screen-book').evaluate((element) => Math.round(element.getBoundingClientRect().width));
+        } catch {
+          return 0;
+        }
+      }, { timeout: 5000 })
+      .toBeGreaterThan(0)
+      .then(async () => page.locator('#screen-book').evaluate((element) => Math.round(element.getBoundingClientRect().width)));
     expect(bookingWidth).toBeGreaterThanOrEqual(640);
 
-    await page.evaluate(() => {
-      if (window.MTC?.fn?.navigateTo) window.MTC.fn.navigateTo('notifications');
-      else if (typeof window.navigateTo === 'function') window.navigateTo('notifications');
-      if (typeof window.updateNotificationsFromAPI === 'function') {
-        window.updateNotificationsFromAPI([
-          { id: 'notif-1', title: 'Court Reminder', message: 'Court 2 at 3:00 PM', type: 'booking', read: false, created_at: '2026-03-20T14:00:00.000Z' },
-          { id: 'notif-2', title: 'Partner Match', message: 'A new player matched your request', type: 'partner', read: true, created_at: '2026-03-20T13:00:00.000Z' }
-        ]);
-      }
-    });
+    await expect
+      .poll(async () => {
+        try {
+          return await page.evaluate(() => {
+            if (window.MTC?.fn?.navigateTo) window.MTC.fn.navigateTo('notifications');
+            else if (typeof window.navigateTo === 'function') window.navigateTo('notifications');
+            if (typeof window.updateNotificationsFromAPI === 'function') {
+              window.updateNotificationsFromAPI([
+                { id: 'notif-1', title: 'Court Reminder', message: 'Court 2 at 3:00 PM', type: 'booking', read: false, created_at: '2026-03-20T14:00:00.000Z' },
+                { id: 'notif-2', title: 'Partner Match', message: 'A new player matched your request', type: 'partner', read: true, created_at: '2026-03-20T13:00:00.000Z' }
+              ]);
+            }
+            return true;
+          });
+        } catch {
+          return false;
+        }
+      }, { timeout: 10000 })
+      .toBe(true);
     await expectPwaScreenActive(page, 'notifications');
     const notificationsList = page.locator('#screen-notifications .notifications-list');
     await expect
@@ -148,6 +181,174 @@ test.describe('Apple Compatibility - Mobile PWA', () => {
     await expect(page.locator('#screen-partners')).toHaveClass(/active/);
     const partnersWidth = await partnersContainer.evaluate((element) => Math.round(element.getBoundingClientRect().width));
     expect(partnersWidth).toBeGreaterThanOrEqual(640);
+  });
+
+  test('iPad settings and empty states stay centered and readable', async ({ page }) => {
+    await mockAuthenticatedPwa(page);
+
+    await activatePwaScreen(page, 'settings', 'nav-settings', 'settings');
+    await expectPwaScreenActive(page, 'settings');
+    const settingsWidth = await expect
+      .poll(async () => {
+        try {
+          return await page.evaluate(() => {
+            const section = document.querySelector('#screen-settings .profile-header-card');
+            return Math.round(section?.getBoundingClientRect().width || 0);
+          });
+        } catch {
+          return 0;
+        }
+      }, { timeout: 5000 })
+      .toBeGreaterThan(0)
+      .then(async () => page.evaluate(() => {
+        const section = document.querySelector('#screen-settings .profile-header-card');
+        return Math.round(section?.getBoundingClientRect().width || 0);
+      }));
+    expect(settingsWidth).toBeGreaterThanOrEqual(560);
+
+    await page.evaluate(() => {
+      if (window.MTC?.fn?.navigateTo) window.MTC.fn.navigateTo('partners');
+      else if (typeof window.navigateTo === 'function') window.navigateTo('partners');
+      if (typeof window.renderPartnersScreen === 'function') window.renderPartnersScreen();
+    });
+    await expectPwaScreenActive(page, 'partners');
+    const emptyWidth = await expect
+      .poll(async () => {
+        try {
+          return await page.evaluate(() => {
+            const emptyState = document.querySelector('#screen-partners #noPartners');
+            return Math.round(emptyState?.getBoundingClientRect().width || 0);
+          });
+        } catch {
+          return 0;
+        }
+      }, { timeout: 5000 })
+      .toBeGreaterThan(0)
+      .then(async () => page.evaluate(() => {
+        const emptyState = document.querySelector('#screen-partners #noPartners');
+        return Math.round(emptyState?.getBoundingClientRect().width || 0);
+      }));
+    expect(emptyWidth).toBeGreaterThanOrEqual(560);
+  });
+
+  test('iPad admin tabs and modals stay wide without collapsing', async ({ page }) => {
+    await mockAuthenticatedPwa(page, {
+      '/members': (route) => {
+        route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([{ id: 'admin-user-id', name: 'Admin User', email: 'admin@mtc.ca', role: 'admin' }]) });
+      },
+      '/courts': (route) => {
+        route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([{ id: 1, name: 'Court 1', status: 'available', floodlight: true }]) });
+      },
+      '/court-blocks': (route) => {
+        route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
+      },
+      '/announcements': (route) => {
+        route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
+      }
+    }, {
+      role: 'admin',
+      name: 'Admin User',
+      email: 'admin@mtc.ca',
+      userId: 'admin-user-id',
+      accessToken: 'admin-access-token',
+    });
+
+    await page.evaluate(() => {
+      const adminUser = {
+        role: 'admin',
+        name: 'Admin User',
+        email: 'admin@mtc.ca',
+        id: 'admin-user-id',
+        userId: 'admin-user-id',
+        accessToken: 'admin-access-token',
+      };
+      if (window.MTC?.state) {
+        window.MTC.state.currentUser = adminUser;
+        window.MTC.state.currentRole = 'admin';
+      }
+      window.currentUser = adminUser;
+      window.currentRole = 'admin';
+      document.getElementById('menuAdminItem')?.classList.remove('admin-hidden');
+      if (window.MTC?.fn?.navigateTo) window.MTC.fn.navigateTo('admin');
+      else if (typeof window.navigateTo === 'function') window.navigateTo('admin');
+    });
+
+    await expect
+      .poll(async () => {
+        try {
+          return await page.evaluate(() => {
+            const tabs = document.querySelector('#screen-admin .admin-tabs-bar');
+            const screen = document.getElementById('screen-admin');
+            return !!(screen?.classList.contains('active') && tabs && tabs.getBoundingClientRect().width >= 640);
+          });
+        } catch {
+          return false;
+        }
+      }, { timeout: 10000 })
+      .toBe(true);
+
+    await expect
+      .poll(async () => {
+        try {
+          return await page.evaluate(() => {
+            if (typeof window.switchAdminTab === 'function') window.switchAdminTab('members');
+            return document.getElementById('adminTabMembers')?.classList.contains('active') === true;
+          });
+        } catch {
+          return false;
+        }
+      }, { timeout: 10000 })
+      .toBe(true);
+    await expect
+      .poll(async () => {
+        try {
+          return await page.evaluate(() => {
+            if (typeof window.switchAdminTab === 'function') window.switchAdminTab('courts');
+            return document.getElementById('adminTabCourts')?.classList.contains('active') === true;
+          });
+        } catch {
+          return false;
+        }
+      }, { timeout: 10000 })
+      .toBe(true);
+    await expect
+      .poll(async () => {
+        try {
+          return await page.evaluate(() => {
+            if (typeof window.switchAdminTab === 'function') window.switchAdminTab('announcements');
+            return document.getElementById('adminTabAnnouncements')?.classList.contains('active') === true;
+          });
+        } catch {
+          return false;
+        }
+      }, { timeout: 5000 })
+      .toBe(true);
+
+    const modalWidth = await expect
+      .poll(async () => {
+        try {
+          return await page.evaluate(() => {
+            document.getElementById('ipadTestModal')?.remove();
+            const modal = document.createElement('div');
+            modal.id = 'ipadTestModal';
+            modal.className = 'modal-overlay active';
+            modal.innerHTML = '<div class="modal-content"><div style="height:40px">Test modal</div></div>';
+            document.body.appendChild(modal);
+            const content = modal.querySelector('.modal-content');
+            return Math.round(content?.getBoundingClientRect().width || 0);
+          });
+        } catch {
+          return 0;
+        }
+      }, { timeout: 5000 })
+      .toBeGreaterThan(0)
+      .then(async () => page.evaluate(() => {
+        const content = document.querySelector('#ipadTestModal .modal-content');
+        const width = Math.round(content?.getBoundingClientRect().width || 0);
+        document.getElementById('ipadTestModal')?.remove();
+        return width;
+      }));
+    expect(modalWidth).toBeGreaterThanOrEqual(420);
   });
 
   test('iPad hamburger menu routes stay usable, including admin entry', async ({ page }) => {
