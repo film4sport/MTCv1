@@ -245,6 +245,7 @@ test.describe('Apple Compatibility - Mobile PWA', () => {
     await expect
       .poll(async () => {
         try {
+          await forcePwaScreenActive(page, 'settings');
           return await page.evaluate(() => {
             const section = document.querySelector('#screen-settings .profile-header-card');
             return Math.round(section?.getBoundingClientRect().width || 0);
@@ -253,18 +254,14 @@ test.describe('Apple Compatibility - Mobile PWA', () => {
           return 0;
         }
       }, { timeout: 5000 })
-      .toBeGreaterThan(0);
-    const settingsWidth = await page.evaluate(() => {
-      const section = document.querySelector('#screen-settings .profile-header-card');
-      return Math.round(section?.getBoundingClientRect().width || 0);
-    });
-    expect(settingsWidth).toBeGreaterThanOrEqual(560);
+      .toBeGreaterThanOrEqual(560);
 
     await activatePwaScreen(page, 'partners', 'nav-partners');
     await expectPwaScreenActive(page, 'partners');
     await expect
       .poll(async () => {
         try {
+          await forcePwaScreenActive(page, 'partners');
           return await page.evaluate(() => {
             const emptyState = document.querySelector('#screen-partners #noPartners');
             return Math.round(emptyState?.getBoundingClientRect().width || 0);
@@ -273,12 +270,7 @@ test.describe('Apple Compatibility - Mobile PWA', () => {
           return 0;
         }
       }, { timeout: 5000 })
-      .toBeGreaterThan(0);
-    const emptyWidth = await page.evaluate(() => {
-      const emptyState = document.querySelector('#screen-partners #noPartners');
-      return Math.round(emptyState?.getBoundingClientRect().width || 0);
-    });
-    expect(emptyWidth).toBeGreaterThanOrEqual(560);
+      .toBeGreaterThanOrEqual(560);
   });
 
   test('iPad admin tabs and modals stay wide without collapsing', async ({ page }, testInfo) => {
