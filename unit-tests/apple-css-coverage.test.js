@@ -201,8 +201,16 @@ describe('Playwright config — WebKit projects', () => {
     expect(playwrightConfig).toContain("name: 'webkit-ipad-mini'");
   });
 
+  it('has webkit-ipad-air-11 project', () => {
+    expect(playwrightConfig).toContain("name: 'webkit-ipad-air-11'");
+  });
+
   it('has webkit-ipad-pro-11 project', () => {
     expect(playwrightConfig).toContain("name: 'webkit-ipad-pro-11'");
+  });
+
+  it('has webkit-ipad-air-13 project', () => {
+    expect(playwrightConfig).toContain("name: 'webkit-ipad-air-13'");
   });
 
   it('has webkit-mobile-pwa project', () => {
@@ -212,14 +220,19 @@ describe('Playwright config — WebKit projects', () => {
   it('all WebKit projects use browserName webkit', () => {
     // Count occurrences of browserName: 'webkit'
     const webkitCount = (playwrightConfig.match(/browserName:\s*'webkit'/g) || []).length;
-    expect(webkitCount).toBeGreaterThanOrEqual(5);
+    expect(webkitCount).toBeGreaterThanOrEqual(7);
   });
 
-  it('uses Playwright device descriptors (not hardcoded viewports)', () => {
+  it('uses Playwright device descriptors for shipped Apple profiles', () => {
     expect(playwrightConfig).toContain("devices['iPhone SE']");
     expect(playwrightConfig).toContain("devices['iPhone 14']");
     expect(playwrightConfig).toContain("devices['iPad Mini']");
     expect(playwrightConfig).toContain("devices['iPad Pro 11']");
+  });
+
+  it('adds an explicit large iPad Air viewport profile', () => {
+    expect(playwrightConfig).toContain("name: 'webkit-ipad-air-13'");
+    expect(playwrightConfig).toContain('viewport: { width: 1024, height: 1366 }');
   });
 });
 

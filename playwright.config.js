@@ -135,6 +135,23 @@ module.exports = defineConfig({
         browserName: 'webkit',
       },
     },
+    {
+      name: 'webkit-ipad-air-11',
+      testMatch: WEBKIT_RESPONSIVE_TESTS,
+      use: {
+        ...devices['iPad Pro 11'],
+        browserName: 'webkit',
+      },
+    },
+    {
+      name: 'webkit-ipad-air-13',
+      testMatch: WEBKIT_RESPONSIVE_TESTS,
+      use: {
+        ...devices['iPad Pro 11'],
+        viewport: { width: 1024, height: 1366 },
+        browserName: 'webkit',
+      },
+    },
     // Mobile PWA tests on WebKit (catches Safari-specific JS/layout bugs)
     {
       name: 'webkit-mobile-pwa',
