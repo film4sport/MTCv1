@@ -247,18 +247,15 @@ test.describe('Schedule / Calendar Section', () => {
 
   test('month navigation works', async ({ page }) => {
     const monthTitle = page.locator('#schedule h3').first();
+    const nextMonthButton = page.locator('#schedule button[aria-label="Next month"]');
     const initialText = (await monthTitle.textContent())?.trim();
+    await expect(nextMonthButton).toBeAttached();
     await expect
       .poll(async () => {
-        await page.evaluate(() => {
-          const nextButton = document.querySelector('#schedule button[aria-label="Next month"]');
-          if (nextButton instanceof HTMLButtonElement) nextButton.click();
-        });
+        await nextMonthButton.click().catch(() => {});
         return (await monthTitle.textContent())?.trim();
       }, { timeout: 7000 })
       .not.toBe(initialText);
-    const newText = (await monthTitle.textContent())?.trim();
-    expect(newText).not.toBe(initialText);
   });
 });
 

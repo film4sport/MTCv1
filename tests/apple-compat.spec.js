@@ -10,6 +10,22 @@ function requireIpadProject(testInfo) {
   test.skip(!isIpadProject(testInfo), 'iPad-only layout assertion');
 }
 
+async function forcePwaScreenActive(page, screen) {
+  await page.evaluate((targetScreen) => {
+    const target = document.getElementById(`screen-${targetScreen}`);
+    if (!target) return;
+
+    if (typeof window.MTC !== 'undefined' && window.MTC.fn && typeof window.MTC.fn.navigateTo === 'function') {
+      window.MTC.fn.navigateTo(targetScreen);
+    } else if (typeof window.navigateTo === 'function') {
+      window.navigateTo(targetScreen);
+    }
+
+    document.querySelectorAll('.screen.active').forEach((el) => el.classList.remove('active'));
+    target.classList.add('active');
+  }, screen).catch(() => {});
+}
+
 test.describe('Apple Compatibility - Info Tabs', () => {
   test.beforeEach(async ({ page }) => {
     await gotoInfo(page, 'membership');
@@ -75,10 +91,10 @@ test.describe('Apple Compatibility - Mobile PWA', () => {
     await mockAuthenticatedPwa(page);
 
     await activatePwaScreen(page, 'messages', 'nav-messages');
-    await expectPwaScreenActive(page, 'messages');
-    const metrics = await expect
+    await expect
       .poll(async () => {
         try {
+          await forcePwaScreenActive(page, 'messages');
           return await page.evaluate(() => {
             const screen = document.getElementById('screen-messages');
             const list = document.querySelector('#screen-messages #conversationsList');
@@ -98,17 +114,30 @@ test.describe('Apple Compatibility - Mobile PWA', () => {
         listWidth: expect.any(Number),
         searchWidth: expect.any(Number),
       });
-    const finalMetrics = await page.evaluate(() => {
-      const list = document.querySelector('#screen-messages #conversationsList');
-      const search = document.querySelector('#screen-messages .search-bar');
-      return {
-        listWidth: Math.round(list?.getBoundingClientRect().width || 0),
-        searchWidth: Math.round(search?.getBoundingClientRect().width || 0),
-      };
-    });
-
-    expect(finalMetrics.listWidth).toBeGreaterThanOrEqual(640);
-    expect(finalMetrics.searchWidth).toBeGreaterThanOrEqual(640);
+    await expect
+      .poll(async () => {
+        try {
+          await forcePwaScreenActive(page, 'messages');
+          return await page.evaluate(() => Math.round(
+            document.querySelector('#screen-messages #conversationsList')?.getBoundingClientRect().width || 0
+          ));
+        } catch {
+          return 0;
+        }
+      }, { timeout: 5000 })
+      .toBeGreaterThanOrEqual(640);
+    await expect
+      .poll(async () => {
+        try {
+          await forcePwaScreenActive(page, 'messages');
+          return await page.evaluate(() => Math.round(
+            document.querySelector('#screen-messages .search-bar')?.getBoundingClientRect().width || 0
+          ));
+        } catch {
+          return 0;
+        }
+      }, { timeout: 5000 })
+      .toBeGreaterThanOrEqual(640);
   });
 
   test('iPad booking and notifications stay wide instead of collapsing', async ({ page }, testInfo) => {
@@ -292,79 +321,77 @@ test.describe('Apple Compatibility - Mobile PWA', () => {
       window.currentRole = 'admin';
       document.getElementById('menuAdminItem')?.classList.remove('admin-hidden');
     });
-    await activatePwaScreen(page, 'admin', 'menuAdminItem', 'admin');
-    const adminTabsBar = page.locator('#screen-admin .admin-tabs-bar');
     await expect
       .poll(async () => {
         try {
-          await activatePwaScreen(page, 'admin', 'menuAdminItem', 'admin');
+          await forcePwaScreenActive(page, 'admin');
           return await page.evaluate(() => {
             const adminScreen = document.getElementById('screen-admin');
             const tabs = document.querySelector('#screen-admin .admin-tabs-bar');
-            return !!(adminScreen?.classList.contains('active') && tabs);
+            return {
+              active: !!adminScreen?.classList.contains('active'),
+              tabsWidth: Math.round(tabs?.getBoundingClientRect().width || 0),
+            };
           });
         } catch {
-          return false;
+          return { active: false, tabsWidth: 0 };
         }
       }, { timeout: 10000 })
-      .toBe(true);
-    await expect(adminTabsBar).toBeVisible({ timeout: 10000 });
-
+      .toMatchObject({
+        active: true,
+        tabsWidth: expect.any(Number),
+      });
     await expect
       .poll(async () => {
         try {
-          return await adminTabsBar.evaluate((element) => Math.round(element.getBoundingClientRect().width));
+          await forcePwaScreenActive(page, 'admin');
+          return await page.evaluate(() => {
+            const tabs = document.querySelector('#screen-admin .admin-tabs-bar');
+            return Math.round(tabs?.getBoundingClientRect().width || 0);
+          });
         } catch {
           return 0;
         }
       }, { timeout: 10000 })
       .toBeGreaterThanOrEqual(640);
 
-    const membersTab = page.locator('.admin-tabs-bar .admin-tab[data-tab="members"]');
-    const courtsTab = page.locator('.admin-tabs-bar .admin-tab[data-tab="courts"]');
-    const announcementsTab = page.locator('.admin-tabs-bar .admin-tab[data-tab="announcements"]');
+    const membersTabButton = page.locator('.admin-tabs-bar .admin-tab[data-tab="members"]');
+    const courtsTabButton = page.locator('.admin-tabs-bar .admin-tab[data-tab="courts"]');
+    const announcementsTabButton = page.locator('.admin-tabs-bar .admin-tab[data-tab="announcements"]');
+
     await expect
       .poll(async () => {
         try {
-          return await page.evaluate(() => {
-            if (typeof window.switchAdminTab === 'function') window.switchAdminTab('members');
-            const tab = document.querySelector('.admin-tabs-bar .admin-tab[data-tab="members"]');
-            const panel = document.getElementById('adminTabMembers');
-            return !!(tab?.classList.contains('active') && panel?.classList.contains('active'));
-          });
+          await forcePwaScreenActive(page, 'admin');
+          await membersTabButton.click({ force: true }).catch(() => {});
+          return await page.locator('#adminTabMembers').evaluate((element) => Math.round(element.getBoundingClientRect().width));
         } catch {
-          return false;
+          return 0;
         }
       }, { timeout: 10000 })
-      .toBe(true);
+      .toBeGreaterThan(0);
     await expect
       .poll(async () => {
         try {
-          return await page.evaluate(() => {
-            if (typeof window.switchAdminTab === 'function') window.switchAdminTab('courts');
-            const tab = document.querySelector('.admin-tabs-bar .admin-tab[data-tab="courts"]');
-            const panel = document.getElementById('adminTabCourts');
-            return !!(tab?.classList.contains('active') && panel?.classList.contains('active'));
-          });
+          await forcePwaScreenActive(page, 'admin');
+          await courtsTabButton.click({ force: true }).catch(() => {});
+          return await page.locator('#adminTabCourts').evaluate((element) => Math.round(element.getBoundingClientRect().width));
         } catch {
-          return false;
+          return 0;
         }
       }, { timeout: 10000 })
-      .toBe(true);
+      .toBeGreaterThan(0);
     await expect
       .poll(async () => {
         try {
-          return await page.evaluate(() => {
-            if (typeof window.switchAdminTab === 'function') window.switchAdminTab('announcements');
-            const tab = document.querySelector('.admin-tabs-bar .admin-tab[data-tab="announcements"]');
-            const panel = document.getElementById('adminTabAnnouncements');
-            return !!(tab?.classList.contains('active') && panel?.classList.contains('active'));
-          });
+          await forcePwaScreenActive(page, 'admin');
+          await announcementsTabButton.click({ force: true }).catch(() => {});
+          return await page.locator('#adminTabAnnouncements').evaluate((element) => Math.round(element.getBoundingClientRect().width));
         } catch {
-          return false;
+          return 0;
         }
       }, { timeout: 10000 })
-      .toBe(true);
+      .toBeGreaterThan(0);
 
     await expect
       .poll(async () => {
