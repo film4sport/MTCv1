@@ -70,20 +70,49 @@ test.describe('Apple Compatibility - Mobile PWA', () => {
 
     const quickActions = page.locator('#screen-home .quick-actions');
     await expect(quickActions).toBeVisible();
-
-    const quickActionCards = page.locator('#screen-home .quick-action');
-    await expect(quickActionCards).toHaveCount(4);
-
-    const metrics = await quickActionCards.evaluateAll((cards) => cards.map((card) => {
-      const rect = card.getBoundingClientRect();
-      return {
-        top: Math.round(rect.top),
-        width: Math.round(rect.width),
-      };
-    }));
-
-    expect(metrics.every((metric) => metric.width >= 140)).toBe(true);
-    expect(new Set(metrics.map((metric) => metric.top)).size).toBe(1);
+    await expect
+      .poll(async () => {
+        try {
+          await forcePwaScreenActive(page, 'home');
+          return await page.evaluate(() => {
+            const cards = Array.from(document.querySelectorAll('#screen-home .quick-action'));
+            return cards.map((card) => {
+              const rect = card.getBoundingClientRect();
+              return {
+                top: Math.round(rect.top),
+                width: Math.round(rect.width),
+              };
+            });
+          });
+        } catch {
+          return [];
+        }
+      }, { timeout: 7000 })
+      .toHaveLength(4);
+    await expect
+      .poll(async () => {
+        try {
+          await forcePwaScreenActive(page, 'home');
+          return await page.evaluate(() => {
+            const cards = Array.from(document.querySelectorAll('#screen-home .quick-action'));
+            const metrics = cards.map((card) => {
+              const rect = card.getBoundingClientRect();
+              return {
+                top: Math.round(rect.top),
+                width: Math.round(rect.width),
+              };
+            });
+            return (
+              metrics.length === 4 &&
+              metrics.every((metric) => metric.width >= 140) &&
+              new Set(metrics.map((metric) => metric.top)).size === 1
+            );
+          });
+        } catch {
+          return false;
+        }
+      }, { timeout: 7000 })
+      .toBe(true);
   });
 
   test('iPad messages stay full-width instead of collapsing into a narrow column', async ({ page }, testInfo) => {
