@@ -1,5 +1,16 @@
 import { NextResponse } from 'next/server';
-import { authenticateMobileRequest, getAdminClient, sanitizeInput, isRateLimited, isValidDate, isValidUUID } from '../auth-helper';
+import {
+  authenticateMobileRequest,
+  getAdminClient,
+  sanitizeInput,
+  isRateLimited,
+  isValidDate,
+  isValidUUID,
+  apiError,
+  successResponse,
+  readJsonObject,
+  findUnknownFields,
+} from '../auth-helper';
 
 /** GET — Fetch upcoming lineups for the user's team */
 export async function GET(request: Request) {
@@ -8,7 +19,7 @@ export async function GET(request: Request) {
 
   const team = authResult.interclubTeam;
   if (team !== 'a' && team !== 'b') {
-    return NextResponse.json({ error: 'Not on a team' }, { status: 403 });
+    return apiError('Not on a team', 403, 'not_on_team');
   }
 
   try {
@@ -22,7 +33,7 @@ export async function GET(request: Request) {
       .gte('match_date', today)
       .order('match_date');
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) return apiError(error.message, 500, 'lineups_fetch_failed');
     if (!lineups || lineups.length === 0) return NextResponse.json([]);
 
     // Fetch entries
@@ -64,7 +75,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(result);
   } catch {
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+    return apiError('Server error', 500, 'server_error');
   }
 }
 
@@ -74,22 +85,27 @@ export async function POST(request: Request) {
   if (authResult instanceof NextResponse) return authResult;
 
   if (!authResult.interclubCaptain && authResult.role !== 'admin') {
-    return NextResponse.json({ error: 'Captain or admin only' }, { status: 403 });
+    return apiError('Captain or admin only', 403, 'captain_or_admin_only');
   }
 
   const team = authResult.interclubTeam;
   if (team !== 'a' && team !== 'b') {
-    return NextResponse.json({ error: 'Not on a team' }, { status: 403 });
+    return apiError('Not on a team', 403, 'not_on_team');
   }
 
   if (isRateLimited(authResult.id)) {
-    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    return apiError('Too many requests', 429, 'rate_limited');
   }
 
   try {
-    const body = await request.json();
+    const body = await readJsonObject(request);
+    if (body instanceof NextResponse) return body;
+    const unknownFields = findUnknownFields(body, ['matchDate', 'matchTime', 'opponent', 'location', 'notes']);
+    if (unknownFields.length > 0) {
+      return apiError(`Unknown field(s): ${unknownFields.join(', ')}`, 400, 'unknown_fields');
+    }
     if (!body.matchDate || !isValidDate(body.matchDate)) {
-      return NextResponse.json({ error: 'Valid match date required (YYYY-MM-DD)' }, { status: 400 });
+      return apiError('Valid match date required (YYYY-MM-DD)', 400, 'invalid_match_date');
     }
 
     const supabase = getAdminClient();
@@ -107,7 +123,7 @@ export async function POST(request: Request) {
       .select('id')
       .single();
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) return apiError(error.message, 500, 'lineup_create_failed');
 
     // Auto-create entries for all team members
     const { data: teamMembers } = await supabase.from('profiles').select('id').eq('interclub_team', team);
@@ -117,9 +133,9 @@ export async function POST(request: Request) {
       );
     }
 
-    return NextResponse.json({ id: lineup.id });
+    return successResponse({ action: 'createLineup', id: lineup.id });
   } catch {
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+    return apiError('Server error', 500, 'server_error');
   }
 }
 
@@ -129,25 +145,33 @@ export async function PATCH(request: Request) {
   if (authResult instanceof NextResponse) return authResult;
 
   try {
-    const body = await request.json();
+    const body = await readJsonObject(request);
+    if (body instanceof NextResponse) return body;
+    const unknownFields = findUnknownFields(body, ['lineupId', 'memberId', 'status', 'position', 'notes']);
+    if (unknownFields.length > 0) {
+      return apiError(`Unknown field(s): ${unknownFields.join(', ')}`, 400, 'unknown_fields');
+    }
     const { lineupId, memberId, status, position, notes } = body;
 
     if (!lineupId || !memberId) {
-      return NextResponse.json({ error: 'lineupId and memberId required' }, { status: 400 });
+      return apiError('lineupId and memberId required', 400, 'missing_required_fields');
+    }
+    if (!isValidUUID(lineupId)) {
+      return apiError('Invalid lineupId format', 400, 'invalid_lineup_id');
     }
     if (!isValidUUID(memberId)) {
-      return NextResponse.json({ error: 'Invalid memberId format' }, { status: 400 });
+      return apiError('Invalid memberId format', 400, 'invalid_member_id');
     }
 
     const validStatuses = ['available', 'unavailable', 'maybe', 'pending'];
     if (status && !validStatuses.includes(status)) {
-      return NextResponse.json({ error: 'Invalid status' }, { status: 400 });
+      return apiError('Invalid status', 400, 'invalid_status');
     }
 
     // Members can only update their own entry; captains can update any
     const isSelf = memberId === authResult.id;
     if (!isSelf && !authResult.interclubCaptain && authResult.role !== 'admin') {
-      return NextResponse.json({ error: 'Can only update your own availability' }, { status: 403 });
+      return apiError('Can only update your own availability', 403, 'self_or_captain_only');
     }
 
     const supabase = getAdminClient();
@@ -162,10 +186,10 @@ export async function PATCH(request: Request) {
       .eq('lineup_id', lineupId)
       .eq('member_id', memberId);
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    return NextResponse.json({ success: true });
+    if (error) return apiError(error.message, 500, 'lineup_update_failed');
+    return successResponse({ action: 'updateLineupEntry' });
   } catch {
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+    return apiError('Server error', 500, 'server_error');
   }
 }
 
@@ -175,23 +199,35 @@ export async function DELETE(request: Request) {
   if (authResult instanceof NextResponse) return authResult;
 
   if (!authResult.interclubCaptain && authResult.role !== 'admin') {
-    return NextResponse.json({ error: 'Captain or admin only' }, { status: 403 });
+    return apiError('Captain or admin only', 403, 'captain_or_admin_only');
   }
 
   try {
-    const { searchParams } = new URL(request.url);
-    const lineupId = searchParams.get('id');
+    let lineupId = new URL(request.url).searchParams.get('id');
+    const contentLength = request.headers.get('content-length');
+    if (!lineupId && contentLength && contentLength !== '0') {
+      const body = await readJsonObject(request);
+      if (body instanceof NextResponse) return body;
+      const unknownFields = findUnknownFields(body, ['id']);
+      if (unknownFields.length > 0) {
+        return apiError(`Unknown field(s): ${unknownFields.join(', ')}`, 400, 'unknown_fields');
+      }
+      if (typeof body.id === 'string') lineupId = body.id;
+    }
     if (!lineupId) {
-      return NextResponse.json({ error: 'Lineup ID required' }, { status: 400 });
+      return apiError('Lineup ID required', 400, 'missing_lineup_id');
+    }
+    if (!isValidUUID(lineupId)) {
+      return apiError('Invalid lineup ID format', 400, 'invalid_lineup_id');
     }
 
     const supabase = getAdminClient();
     // Entries cascade-delete via ON DELETE CASCADE
     const { error } = await supabase.from('match_lineups').delete().eq('id', lineupId);
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) return apiError(error.message, 500, 'lineup_delete_failed');
 
-    return NextResponse.json({ success: true });
+    return successResponse({ action: 'deleteLineup' });
   } catch {
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+    return apiError('Server error', 500, 'server_error');
   }
 }

@@ -1,5 +1,5 @@
 /**
- * Families API — Structure & Validation Tests
+ * Families API - Structure & Validation Tests
  *
  * Tests: route structure, auth, CRUD operations, input validation.
  */
@@ -10,7 +10,7 @@ import { resolve } from 'path';
 const root = resolve(__dirname, '..');
 const content = readFileSync(resolve(root, 'app/api/mobile/families/route.ts'), 'utf-8');
 
-describe('Families API Route — Structure', () => {
+describe('Families API Route - Structure', () => {
   it('exports GET, POST, PATCH, DELETE handlers', () => {
     expect(content).toMatch(/export\s+(async\s+function|const)\s+GET/);
     expect(content).toMatch(/export\s+(async\s+function|const)\s+POST/);
@@ -27,7 +27,16 @@ describe('Families API Route — Structure', () => {
   });
 });
 
-describe('Families API — Input Validation', () => {
+describe('Families API - Input Validation', () => {
+  it('reads JSON bodies through shared object parsing helper', () => {
+    expect(content).toContain('readJsonObject');
+  });
+
+  it('rejects unknown fields per action', () => {
+    expect(content).toContain('findUnknownFields');
+    expect(content).toContain('unknown_fields');
+  });
+
   it('sanitizes member name', () => {
     expect(content).toContain('sanitizeInput');
   });
@@ -37,18 +46,23 @@ describe('Families API — Input Validation', () => {
   });
 });
 
-describe('Families API — Delete Operations', () => {
+describe('Families API - Delete Operations', () => {
   it('supports deleting a family member by ID', () => {
     expect(content).toMatch(/member_id|memberId|familyMemberId/);
   });
 
   it('uses family ownership check before delete', () => {
-    // Should verify user owns the family before allowing delete
     expect(content).toMatch(/primary_user_id|owner|family_id/);
+  });
+
+  it('uses structured success/error helpers for mutations', () => {
+    expect(content).toContain('apiError');
+    expect(content).toContain('successResponse');
+    expect(content).toContain("action: 'deleteMember'");
   });
 });
 
-describe('Families API — Cross-Platform Consistency', () => {
+describe('Families API - Cross-Platform Consistency', () => {
   const storeContent = readFileSync(resolve(root, 'app/dashboard/lib/store.tsx'), 'utf-8');
 
   it('dashboard store tracks familyMembers state', () => {

@@ -1,5 +1,5 @@
 /**
- * Lineups API — Structure & Validation Tests
+ * Lineups API - Structure & Validation Tests
  *
  * Tests: route structure, auth, input validation.
  */
@@ -10,14 +10,15 @@ import { resolve } from 'path';
 const root = resolve(__dirname, '..');
 const content = readFileSync(resolve(root, 'app/api/mobile/lineups/route.ts'), 'utf-8');
 
-describe('Lineups API Route — Structure', () => {
+describe('Lineups API Route - Structure', () => {
   it('exports GET and POST handlers', () => {
     expect(content).toMatch(/export\s+(async\s+function|const)\s+GET/);
     expect(content).toMatch(/export\s+(async\s+function|const)\s+POST/);
   });
 
-  it('exports PATCH handler for lineup updates', () => {
+  it('exports PATCH and DELETE handlers', () => {
     expect(content).toMatch(/export\s+(async\s+function|const)\s+PATCH/);
+    expect(content).toMatch(/export\s+(async\s+function|const)\s+DELETE/);
   });
 
   it('authenticates requests', () => {
@@ -29,13 +30,24 @@ describe('Lineups API Route — Structure', () => {
   });
 });
 
-describe('Lineups API — Input Validation', () => {
+describe('Lineups API - Input Validation', () => {
+  it('reads JSON bodies through shared object parsing helper', () => {
+    expect(content).toContain('readJsonObject');
+  });
+
+  it('rejects unknown fields for mutation bodies', () => {
+    expect(content).toContain('findUnknownFields');
+    expect(content).toContain('unknown_fields');
+  });
+
   it('validates matchDate', () => {
     expect(content).toMatch(/isValidDate|matchDate|match_date/);
   });
 
-  it('validates member IDs with isValidUUID', () => {
+  it('validates lineup and member IDs with isValidUUID', () => {
     expect(content).toContain('isValidUUID');
+    expect(content).toContain('invalid_lineup_id');
+    expect(content).toContain('invalid_member_id');
   });
 
   it('sanitizes input strings', () => {
@@ -43,9 +55,16 @@ describe('Lineups API — Input Validation', () => {
   });
 });
 
-describe('Lineups API — Auth & Roles', () => {
+describe('Lineups API - Auth & Roles', () => {
   it('restricts creation to captain or admin', () => {
-    // Only captains/admins should create lineups
     expect(content).toMatch(/captain|admin/i);
+    expect(content).toContain('captain_or_admin_only');
+  });
+
+  it('uses structured success helpers for mutations', () => {
+    expect(content).toContain('successResponse');
+    expect(content).toContain("action: 'createLineup'");
+    expect(content).toContain("action: 'updateLineupEntry'");
+    expect(content).toContain("action: 'deleteLineup'");
   });
 });

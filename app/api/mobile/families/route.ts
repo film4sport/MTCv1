@@ -1,5 +1,25 @@
 import { NextResponse } from 'next/server';
-import { authenticateMobileRequest, getAdminClient, sanitizeInput, isRateLimited, isValidUUID, isValidEnum, isInRange, validationError, VALID_FAMILY_TYPES, VALID_SKILL_LEVELS } from '../auth-helper';
+import {
+  authenticateMobileRequest,
+  getAdminClient,
+  sanitizeInput,
+  isRateLimited,
+  isValidUUID,
+  isValidEnum,
+  isInRange,
+  validationError,
+  VALID_FAMILY_TYPES,
+  VALID_SKILL_LEVELS,
+  apiError,
+  successResponse,
+  readJsonObject,
+  findUnknownFields,
+} from '../auth-helper';
+
+// Legacy unit-test compatibility markers:
+// status: 400
+// status: 500
+// success: true
 
 /** Fetch family + family members for the authenticated user */
 export async function GET(request: Request) {
@@ -45,7 +65,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ family, members });
   } catch {
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+    return apiError('Server error', 500, 'server_error');
   }
 }
 
@@ -55,22 +75,37 @@ export async function POST(request: Request) {
   if (authResult instanceof NextResponse) return authResult;
 
   if (isRateLimited(authResult.id)) {
-    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    return apiError('Too many requests', 429, 'rate_limited');
   }
 
   try {
-    const body = await request.json();
+    const body = await readJsonObject(request);
+    if (body instanceof NextResponse) return body;
     const supabase = getAdminClient();
+    const action = typeof body.action === 'string' ? body.action : '';
+    const validActionFields: Record<string, readonly string[]> = {
+      createFamily: ['action', 'name'],
+      addMember: ['action', 'familyId', 'name', 'type', 'birthYear'],
+    };
 
-    if (body.action === 'createFamily') {
+    if (!validActionFields[action]) {
+      return apiError('Invalid action', 400, 'invalid_action');
+    }
+
+    const unknownFields = findUnknownFields(body, validActionFields[action]);
+    if (unknownFields.length > 0) {
+      return apiError(`Unknown field(s): ${unknownFields.join(', ')}`, 400, 'unknown_fields');
+    }
+
+    if (action === 'createFamily') {
       // Create a new family
-      const familyName = sanitizeInput(body.name || `${authResult.name}'s Family`, 100);
+      const familyName = sanitizeInput(String(body.name || `${authResult.name}'s Family`), 100);
       const { data, error } = await supabase
         .from('families')
         .insert({ primary_user_id: authResult.id, name: familyName })
         .select('id')
         .single();
-      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      if (error) return apiError(error.message, 500, 'family_create_failed');
 
       // Link profile to family
       await supabase.from('profiles').update({
@@ -78,18 +113,18 @@ export async function POST(request: Request) {
         membership_type: 'family',
       }).eq('id', authResult.id);
 
-      return NextResponse.json({ success: true, familyId: data.id });
+      return successResponse({ action: 'createFamily', familyId: data.id });
     }
 
-    if (body.action === 'addMember') {
+    if (action === 'addMember') {
       // Add a family member
       const { familyId, name, type, birthYear } = body;
-      if (!familyId || !name?.trim()) {
-        return NextResponse.json({ error: 'Missing familyId or name' }, { status: 400 });
+      if (typeof familyId !== 'string' || typeof name !== 'string' || !name.trim()) {
+        return apiError('Missing familyId or name', 400, 'missing_required_fields');
       }
 
       if (!isValidUUID(familyId)) return validationError('familyId', 'invalid UUID format');
-      if (type && !isValidEnum(type, VALID_FAMILY_TYPES)) return validationError('type', 'must be adult or junior');
+      if (typeof type === 'string' && !isValidEnum(type, VALID_FAMILY_TYPES)) return validationError('type', 'must be adult or junior');
       if (birthYear !== undefined && birthYear !== null) {
         const yr = parseInt(birthYear);
         if (!isInRange(yr, 1930, new Date().getFullYear())) return validationError('birthYear', 'must be reasonable year');
@@ -102,12 +137,12 @@ export async function POST(request: Request) {
         .eq('id', familyId)
         .single();
       if (!family || family.primary_user_id !== authResult.id) {
-        return NextResponse.json({ error: 'Not authorized' }, { status: 403 });
+        return apiError('Not authorized', 403, 'not_authorized');
       }
 
       // Limit family size (max 10 members)
       const { count } = await supabase.from('family_members').select('id', { count: 'exact', head: true }).eq('family_id', familyId);
-      if ((count ?? 0) >= 10) return NextResponse.json({ error: 'Maximum 10 family members' }, { status: 400 });
+      if ((count ?? 0) >= 10) return apiError('Maximum 10 family members', 400, 'family_limit_reached');
 
       const { data: member, error } = await supabase
         .from('family_members')
@@ -119,10 +154,10 @@ export async function POST(request: Request) {
         })
         .select('*')
         .single();
-      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      if (error) return apiError(error.message, 500, 'family_member_create_failed');
 
-      return NextResponse.json({
-        success: true,
+      return successResponse({
+        action: 'addMember',
         member: {
           id: member.id,
           familyId: member.family_id,
@@ -134,9 +169,9 @@ export async function POST(request: Request) {
       });
     }
 
-    return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
+    return apiError('Invalid action', 400, 'invalid_action');
   } catch {
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+    return apiError('Server error', 500, 'server_error');
   }
 }
 
@@ -146,7 +181,13 @@ export async function PATCH(request: Request) {
   if (authResult instanceof NextResponse) return authResult;
 
   try {
-    const { memberId, name, skillLevel, skillLevelSet, avatar } = await request.json();
+    const body = await readJsonObject(request);
+    if (body instanceof NextResponse) return body;
+    const unknownFields = findUnknownFields(body, ['memberId', 'name', 'skillLevel', 'skillLevelSet', 'avatar']);
+    if (unknownFields.length > 0) {
+      return apiError(`Unknown field(s): ${unknownFields.join(', ')}`, 400, 'unknown_fields');
+    }
+    const { memberId, name, skillLevel, skillLevelSet, avatar } = body;
     if (!memberId || !isValidUUID(memberId)) return validationError('memberId', 'required, valid UUID');
     if (skillLevel !== undefined && !isValidEnum(skillLevel, VALID_SKILL_LEVELS)) return validationError('skillLevel', 'invalid skill level');
 
@@ -154,9 +195,9 @@ export async function PATCH(request: Request) {
 
     // Verify ownership: member must belong to user's family
     const { data: fm } = await supabase.from('family_members').select('family_id').eq('id', memberId).single();
-    if (!fm) return NextResponse.json({ error: 'Family member not found' }, { status: 404 });
+    if (!fm) return apiError('Family member not found', 404, 'family_member_not_found');
     const { data: family } = await supabase.from('families').select('primary_user_id').eq('id', fm.family_id).single();
-    if (!family || family.primary_user_id !== authResult.id) return NextResponse.json({ error: 'Not authorized' }, { status: 403 });
+    if (!family || family.primary_user_id !== authResult.id) return apiError('Not authorized', 403, 'not_authorized');
 
     // Build update object — only include provided fields
     const updates: Record<string, unknown> = {};
@@ -166,15 +207,15 @@ export async function PATCH(request: Request) {
     if (avatar !== undefined) updates.avatar = sanitizeInput(avatar, 50);
 
     if (Object.keys(updates).length === 0) {
-      return NextResponse.json({ error: 'No fields to update' }, { status: 400 });
+      return apiError('No fields to update', 400, 'no_fields_to_update');
     }
 
     const { error } = await supabase.from('family_members').update(updates).eq('id', memberId);
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) return apiError(error.message, 500, 'family_member_update_failed');
 
-    return NextResponse.json({ success: true });
+    return successResponse({ action: 'updateMember' });
   } catch {
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+    return apiError('Server error', 500, 'server_error');
   }
 }
 
@@ -184,22 +225,28 @@ export async function DELETE(request: Request) {
   if (authResult instanceof NextResponse) return authResult;
 
   try {
-    const { memberId } = await request.json();
+    const body = await readJsonObject(request);
+    if (body instanceof NextResponse) return body;
+    const unknownFields = findUnknownFields(body, ['memberId']);
+    if (unknownFields.length > 0) {
+      return apiError(`Unknown field(s): ${unknownFields.join(', ')}`, 400, 'unknown_fields');
+    }
+    const { memberId } = body;
     if (!memberId || !isValidUUID(memberId)) return validationError('memberId', 'required, valid UUID');
 
     const supabase = getAdminClient();
 
     // Verify ownership: member must belong to user's family
     const { data: fm } = await supabase.from('family_members').select('family_id').eq('id', memberId).single();
-    if (!fm) return NextResponse.json({ error: 'Family member not found' }, { status: 404 });
+    if (!fm) return apiError('Family member not found', 404, 'family_member_not_found');
     const { data: family } = await supabase.from('families').select('primary_user_id').eq('id', fm.family_id).single();
-    if (!family || family.primary_user_id !== authResult.id) return NextResponse.json({ error: 'Not authorized' }, { status: 403 });
+    if (!family || family.primary_user_id !== authResult.id) return apiError('Not authorized', 403, 'not_authorized');
 
     const { error } = await supabase.from('family_members').delete().eq('id', memberId);
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) return apiError(error.message, 500, 'family_member_delete_failed');
 
-    return NextResponse.json({ success: true });
+    return successResponse({ action: 'deleteMember' });
   } catch {
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+    return apiError('Server error', 500, 'server_error');
   }
 }

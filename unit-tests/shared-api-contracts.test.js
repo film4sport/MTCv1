@@ -22,6 +22,8 @@ const eventsRoute = read('app/api/mobile/events/route.ts');
 const notificationsRoute = read('app/api/mobile/notifications/route.ts');
 const courtsRoute = read('app/api/mobile/courts/route.ts');
 const settingsRoute = read('app/api/mobile/settings/route.ts');
+const familiesRoute = read('app/api/mobile/families/route.ts');
+const lineupsRoute = read('app/api/mobile/lineups/route.ts');
 
 describe('Shared API contracts', () => {
   it('members route returns the camelCase fields used across clients', () => {
@@ -89,6 +91,21 @@ describe('Shared API contracts', () => {
     expect(settingsRoute).toContain("return NextResponse.json({ bookings: true, events: true, partners: true, announcements: true, messages: true, programs: true })");
     expect(authJs).toContain("MTC.fn.loadFromAPI('/mobile/settings', 'mtc-club-settings', null)");
     expect(authJs).toContain("MTC.fn.apiRequest('/mobile/settings', {");
+  });
+
+  it('families route returns the family object and camelCase members used by profile switching', () => {
+    expect(familiesRoute).toContain('return NextResponse.json({ family, members })');
+    expect(familiesRoute).toContain('familyId: m.family_id');
+    expect(familiesRoute).toContain('skillLevel: m.skill_level');
+    expect(familiesRoute).toContain('birthYear: m.birth_year');
+    expect(authJs).toContain("MTC.fn.loadFromAPI('/mobile/families', 'mtc-api-families', null)");
+  });
+
+  it('lineups route returns camelCase lineup fields and enriched entry names for captain screens', () => {
+    expect(lineupsRoute).toContain('matchDate: l.match_date');
+    expect(lineupsRoute).toContain('matchTime: l.match_time');
+    expect(lineupsRoute).toContain('memberName: memberMap[e.member_id]?.name || \'Unknown\'');
+    expect(lineupsRoute).toContain('memberSkillLevel: memberMap[e.member_id]?.skill_level');
   });
 
   it('lessons screen still receives the legacy display fields it renders', () => {
