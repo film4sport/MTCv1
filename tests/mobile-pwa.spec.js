@@ -112,11 +112,20 @@ test.describe('Mobile PWA — Login Screen', () => {
       const { visibleWidth, viewportWidth } = await readLoginViewportMetrics(page);
       expect(visibleWidth).toBeLessThanOrEqual(viewportWidth + 1);
     } else {
-      const { bodyWidth, viewportWidth } = await page.evaluate(() => ({
-        bodyWidth: document.body.scrollWidth,
-        viewportWidth: window.innerWidth,
-      }));
-      expect(bodyWidth).toBeLessThanOrEqual(viewportWidth + 1);
+      let metrics;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          metrics = await page.evaluate(() => ({
+            bodyWidth: document.body.scrollWidth,
+            viewportWidth: window.innerWidth,
+          }));
+          break;
+        } catch (error) {
+          if (attempt === 2) throw error;
+          await page.waitForTimeout(300);
+        }
+      }
+      expect(metrics.bodyWidth).toBeLessThanOrEqual(metrics.viewportWidth + 1);
     }
   });
 });
