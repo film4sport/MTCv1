@@ -195,7 +195,22 @@
     var day = e.target.closest('.calendar-day:not(.other-month)');
     if (!day) return;
     var ds = day.getAttribute('data-date');
-    if (ds) showHomeCalendarDate(ds, day);
+    if (ds) {
+      showHomeCalendarDate(ds, day);
+      // Automatically scroll down to the events list
+      setTimeout(function() {
+        var screenEl = document.getElementById('screen-home');
+        var evSection = document.getElementById('homeCalendarEvents');
+        if (screenEl && evSection) {
+          var targetTop = Math.max(0, evSection.offsetTop - screenEl.offsetTop - 20);
+          if (typeof screenEl.scrollTo === 'function') {
+            screenEl.scrollTo({ top: targetTop, behavior: 'smooth' });
+          } else {
+            screenEl.scrollTop = targetTop;
+          }
+        }
+      }, 50);
+    }
   }
 
   // Initialize when DOM is ready

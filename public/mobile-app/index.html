@@ -20,7 +20,7 @@
     if ('serviceWorker' in navigator) {
       caches.keys().then(function(names) {
         names.forEach(function(name) {
-          if (name.indexOf('mtc-court-e355119c') === -1) {
+          if (name.indexOf('mtc-court-ae8e123f') === -1) {
             caches.delete(name);
             console.log('[CacheBust] Deleted old cache:', name);
           }
