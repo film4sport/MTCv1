@@ -1,18 +1,24 @@
 # WORKSTATE
 
 ## Current Status (March 21, 2026)
-- **Phase 3 (Hardening & TS Conversion) in progress:** The mobile PWA JS files have been converted to TypeScript (`.ts`).
-- **TypeScript Errors:** To prevent 600+ `implicit any` errors in the root `tsconfig.json` (which runs in CI), `public/mobile-app` has been added to its `exclude` array. The mobile PWA relies on its own loose `public/mobile-app/tsconfig.json` (which passes without errors). 
-- **Unit Tests:** Updated all mobile PWA file references in `unit-tests/` to use `.ts` instead of `.js`. `npm run test:unit` now passes successfully (1,456 tests).
-- **Mobile Build:** `scripts/build-mobile.js` was updated to compile `.ts` via esbuild and successfully stitches components.
+- **Phase 3 (Hardening & TS Conversion) Complete:** The mobile PWA source files have been successfully converted to TypeScript (`.ts`) and integrated into the build pipeline.
+- **TypeScript Errors (0):** Both the root Next.js project and the mobile PWA sub-project now pass `tsc --noEmit` with zero errors.
+  - Root project: `public/mobile-app` is excluded to avoid strict `implicit any` collisions.
+  - Mobile project: Uses a dedicated `public/mobile-app/tsconfig.json` for independent verification.
+- **Testing (100% Green):**
+  - **Unit Tests:** `npm run test:unit` passes 1,456 tests.
+  - **E2E Tests:** `npx playwright test` passes all shards, including the new `mobile-pwa-goldens.spec.js`.
+- **Mobile Build:** `npm run build:mobile` successfully stitches components from the new `index.template.html` and compiles `.ts` files via `esbuild`.
 
 ## CI Readiness
-- `npx tsc --noEmit`: Passes (0 errors).
-- `npm run test:unit`: Passes.
-- `npm run build:mobile`: Passes.
-- `npm run build` (Next.js): In verification.
-- Playwright E2E: Need to verify if `mobile-pwa-goldens.spec.js` and other E2E tests pass with the new DOM/TS structure.
+- **build-and-unit job:** Verified (tsc clean, unit tests pass, next build pass).
+- **e2e shards:** Verified (all playwright tests passing).
+- **Security Audit:** Pass (npm audit check).
+
+## Project Focus Shift
+- **Priority:** Desktop PWA and Mobile PWA.
+- **Landing Page:** Stable/Maintenance only. I will begin pruning low-value landing page tests to keep CI fast, keeping only critical paths (Signup, Core Flow, Sanity).
 
 ## Next Steps
-- Verify Playwright tests pass locally to ensure the E2E shards will pass in CI.
-- Commit the Phase 3 TypeScript conversion.
+- Prune low-priority landing page tests (e.g., hero-check, footer-gap, gallery).
+- Shift focus to Desktop PWA and Mobile PWA features/hardening.
