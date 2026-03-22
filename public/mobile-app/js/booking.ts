@@ -637,8 +637,7 @@
     const dayNames=MTC.config.dayNamesShort;
 
     dateEl.textContent=dayNames[d.getDay()]+', '+mos[d.getMonth()]+' '+d.getDate();
-    const hour=parseInt(selectedSlot.time.split(':')[0]);
-    timeEl.textContent=hour>12?(hour-12)+':00 PM':(hour===12?'12:00 PM':hour+':00 AM');
+    timeEl.textContent=selectedSlot.time;
     courtEl.textContent='Court '+selectedSlot.court;
 
     // Guest fee note is static in HTML — no dynamic updates needed

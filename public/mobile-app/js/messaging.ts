@@ -27,6 +27,7 @@
   /** Persists all conversations to localStorage */
   MTC.fn.saveConversations = function() {
     MTC.storage.set('mtc-conversations', conversations);
+    MTC.storage.set('mtc-conversation-meta', conversationMetaMap);
   };
   // Backward-compat alias
   window.saveConversations = MTC.fn.saveConversations;
@@ -35,11 +36,15 @@
   /** Restores conversations from localStorage */
   MTC.fn.loadSavedConversations = function() {
     const parsed = MTC.storage.get('mtc-conversations', {});
+    const parsedMeta = MTC.storage.get('mtc-conversation-meta', {});
     let hadCorrupted = false;
     for (const key in parsed) {
       // Skip corrupted entries with numeric keys (array index artifacts)
       if (/^\d+$/.test(key)) { hadCorrupted = true; continue; }
       conversations[key] = parsed[key];
+    }
+    for (const key in parsedMeta) {
+      conversationMetaMap[key] = parsedMeta[key];
     }
     // Clean up corrupted localStorage
     if (hadCorrupted) MTC.fn.saveConversations();

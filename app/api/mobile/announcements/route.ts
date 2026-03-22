@@ -214,7 +214,8 @@ export async function POST(request: Request) {
         .in('user_id', targetMemberIds.length > 0 ? targetMemberIds : ['__none__']);
 
       const preferenceMap = new Map((preferenceRows || []).map(row => [row.user_id, row.announcements]));
-      const optedInMembers = targetMembers.filter(member => preferenceMap.get(member.id) !== false);
+      // Filter out opted-out members and exclude the sender themselves from receiving their own announcement message
+      const optedInMembers = targetMembers.filter(member => preferenceMap.get(member.id) !== false && member.id !== authResult.id);
 
       const now = new Date().toISOString();
       const typeEmoji = announcementType === 'urgent' ? '🔴' : announcementType === 'warning' ? '⚠️' : '📢';
@@ -244,7 +245,7 @@ export async function POST(request: Request) {
       withTimeout(Promise.allSettled(
         optedInMembers.map(async member => {
           await sendAnnouncementInboxMessage(supabase, {
-            fromId: authResult.id,
+            fromId: 'club',
             fromName: senderName,
             toId: member.id,
             toName: member.name || 'Member',

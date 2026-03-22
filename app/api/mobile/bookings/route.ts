@@ -321,8 +321,14 @@ export async function POST(request: Request) {
 
     // ── Validate date (not in past, within 7 days) ────
     const bookDate = new Date(date + 'T00:00:00');
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    
+    // Use Toronto timezone for 'today' calculation so it matches the club's physical location
+    const torontoDateStr = new Intl.DateTimeFormat('en-CA', { 
+      timeZone: 'America/Toronto', 
+      year: 'numeric', month: '2-digit', day: '2-digit' 
+    }).format(new Date());
+    
+    const today = new Date(torontoDateStr + 'T00:00:00');
     const maxDate = new Date(today);
     maxDate.setDate(maxDate.getDate() + BOOKING_RULES.maxAdvanceDays);
 

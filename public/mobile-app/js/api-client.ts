@@ -99,7 +99,8 @@
    * @param {Function} onError - Called on failure
    */
   function createBooking(bookingData, onSuccess, onError) {
-    var userId = MTC.storage.get('mtc-user-email', null);
+    var userData = MTC.storage.get('mtc-user', null);
+    var userId = userData ? userData.id : null;
     if (!userId) {
       if (onError) onError(new Error('Not logged in'));
       if (typeof showToast === 'function') showToast('Please log in to book a court');
@@ -169,7 +170,8 @@
    * @param {Function} onError
    */
   function cancelBooking(bookingId, onSuccess, onError) {
-    var userId = MTC.storage.get('mtc-user-email', null);
+    var userData = MTC.storage.get('mtc-user', null);
+    var userId = userData ? userData.id : null;
     if (!userId) {
       if (onError) onError(new Error('Not logged in'));
       if (typeof showToast === 'function') showToast('Please log in to cancel a booking');
