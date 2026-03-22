@@ -199,35 +199,65 @@
   // PUSH NOTIFICATION TOGGLE
   // ============================================
   function togglePushNotifications(toggleEl) {
-    toggleEl.classList.toggle('active');
-    const isOn = toggleEl.classList.contains('active');
-    pushNotificationsEnabled = isOn;
+    const isCurrentlyOn = toggleEl.classList.contains('active');
+    const isOn = !isCurrentlyOn;
+    
+    // Function to sync both toggles and persist
+    var syncToggles = function(state) {
+      pushNotificationsEnabled = state;
+      const profileToggle = document.getElementById('pushNotifToggle');
+      const settingsToggle = document.getElementById('pushNotifToggleSettings');
 
-    // Sync both toggles (profile + settings)
-    const profileToggle = document.getElementById('pushNotifToggle');
-    const settingsToggle = document.getElementById('pushNotifToggleSettings');
+      if (profileToggle) {
+        if (state) profileToggle.classList.add('active');
+        else profileToggle.classList.remove('active');
+      }
+      if (settingsToggle) {
+        if (state) settingsToggle.classList.add('active');
+        else settingsToggle.classList.remove('active');
+      }
+      saveSettingsToggles();
+    };
 
-    if (profileToggle && profileToggle !== toggleEl) {
-      if (isOn) profileToggle.classList.add('active');
-      else profileToggle.classList.remove('active');
-    }
-    if (settingsToggle && settingsToggle !== toggleEl) {
-      if (isOn) settingsToggle.classList.add('active');
-      else settingsToggle.classList.remove('active');
-    }
-
-    if (!isOn) {
+    if (isOn) {
+      // Attempting to turn ON
+      if ('Notification' in window) {
+        if (Notification.permission === 'granted') {
+          syncToggles(true);
+          showToast('Push notifications enabled');
+          if (typeof registerPushNotifications === 'function') registerPushNotifications();
+        } else if (Notification.permission === 'denied') {
+          syncToggles(false);
+          showToast('Notifications blocked. Please enable in browser settings.', 'error');
+        } else {
+          // Request permission
+          Notification.requestPermission().then(function(permission) {
+            if (permission === 'granted') {
+              syncToggles(true);
+              showToast('Push notifications enabled');
+              if (typeof registerPushNotifications === 'function') registerPushNotifications();
+            } else {
+              syncToggles(false);
+              showToast('Permission denied. Please enable in browser settings.', 'error');
+            }
+          }).catch(function() {
+            syncToggles(false);
+            showToast('Could not request notification permission', 'error');
+          });
+        }
+      } else {
+        syncToggles(false);
+        showToast('Push notifications not supported by this browser', 'error');
+      }
+    } else {
+      // Turning OFF
+      syncToggles(false);
       // Clear all pending timers
       clearAllNotificationTimers();
       // Dismiss any active ones
       activeNotifications.slice().forEach(function(n) { dismissPushNotif(n); });
       showToast('Push notifications disabled');
-    } else {
-      showToast('Push notifications enabled');
     }
-
-    // Persist setting
-    saveSettingsToggles();
   }
 
   let badgePulseInterval = setInterval(pulseNotificationBadge, 15000);

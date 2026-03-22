@@ -266,7 +266,7 @@ export async function POST(request: Request) {
   if (authResult instanceof NextResponse) return authResult;
 
   try {
-    const { eventId } = await request.json();
+    const { eventId, action } = await request.json();
     if (!eventId) {
       return NextResponse.json({ error: 'Missing eventId' }, { status: 400 });
     }
@@ -283,6 +283,7 @@ export async function POST(request: Request) {
         p_event_id: eventId,
         p_user_id: authResult.id,
         p_user_name: userName,
+        p_action: action || null
       })
       .single<EventRsvpToggleResult>();
 

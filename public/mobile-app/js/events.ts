@@ -550,8 +550,8 @@
       showToast('Registration cancelled');
       removeEventFromMyBookings(eventId);
     } else {
-      // Register — only paid/coaching events have spot limits
-      if (event.badge === 'paid' && event.spotsTaken >= event.spotsTotal) {
+      // Register — check spot limits for all events
+      if (event.spotsTotal && event.spotsTaken >= event.spotsTotal) {
         showToast('Sorry, this event is full!');
         return;
       }
@@ -580,7 +580,7 @@
     if (token && typeof MTC.fn.apiRequest === 'function') {
       MTC.fn.apiRequest('/mobile/events', {
         method: 'POST',
-        body: JSON.stringify({ eventId: eventId })
+        body: JSON.stringify({ eventId: eventId, action: isUnrsvp ? 'remove' : 'add' })
       }).then(function(res) {
         if (!res.ok) {
           // Rollback optimistic UI

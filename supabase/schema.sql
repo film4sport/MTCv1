@@ -176,7 +176,8 @@ DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE event_attendees; EXCEP
 create or replace function public.toggle_event_rsvp_atomic(
   p_event_id text,
   p_user_id uuid,
-  p_user_name text
+  p_user_name text,
+  p_action text default null
 )
 returns table (
   action text,
@@ -227,6 +228,12 @@ begin
   for update;
 
   if found then
+    if p_action = 'add' then
+      select count(*) into v_spots_taken from public.event_attendees where event_id = p_event_id;
+      return query select 'added'::text, v_title, v_event_date, v_spots_total, v_spots_taken;
+      return;
+    end if;
+
     delete from public.event_attendees
     where id = v_existing_id;
 
@@ -237,6 +244,12 @@ begin
 
     return query
     select 'removed'::text, v_title, v_event_date, v_spots_total, v_spots_taken;
+    return;
+  end if;
+
+  if p_action = 'remove' then
+    select count(*) into v_spots_taken from public.event_attendees where event_id = p_event_id;
+    return query select 'removed'::text, v_title, v_event_date, v_spots_total, v_spots_taken;
     return;
   end if;
 

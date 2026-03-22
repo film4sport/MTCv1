@@ -19,6 +19,9 @@
 - **Priority:** Desktop PWA and Mobile PWA.
 - **Landing Page:** Stable/Maintenance only. I will begin pruning low-value landing page tests to keep CI fast, keeping only critical paths (Signup, Core Flow, Sanity).
 
-## Next Steps
-- Prune low-priority landing page tests (e.g., hero-check, footer-gap, gallery).
-- Shift focus to Desktop PWA and Mobile PWA features/hardening.
+## Recent Fixes
+- **Viewport Zoom:** Locked `viewport-fit=cover` and `user-scalable=no` to prevent accidental pinch-to-zoom on mobile devices.
+- **RSVP Atomic Toggle:** Hardened `toggle_event_rsvp_atomic` RPC to be idempotent. The API and client now pass explicit `action: add|remove` intents so an out-of-sync client doesn't accidentally cancel a user's registration.
+- **Event Spot Limits:** Removed the confusing `paid` check logic. The client now instantly blocks RSVP to *any* full event without requiring a server round-trip to fail.
+- **Realtime Messaging Sync:** Fixed a bug where a chat screen wouldn't live-update when a new message arrived via Supabase Realtime. `updateConversationsFromAPI` now actively re-renders the current thread if open.
+- **Push Notifications Opt-in:** Updated the Settings toggle to properly invoke the native `Notification.requestPermission()` prompt via explicit user gesture. Note: Browsers (especially iOS Safari) strictly forbid prompting for notifications on initial load/install without a physical tap, so this cannot be fully automated.

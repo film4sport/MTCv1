@@ -996,6 +996,10 @@
     MTC.fn.saveConversations();
     // Re-render conversation list if messages screen is visible
     if (typeof renderConversationsList === 'function') renderConversationsList();
+    // If user is currently viewing a conversation, re-render it to show new messages
+    if (currentConversation && typeof renderMessages === 'function') {
+      renderMessages(currentConversation);
+    }
     // Update message badge on nav bar
     updateMessageBadge();
   };

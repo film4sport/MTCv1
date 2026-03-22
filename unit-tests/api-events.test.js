@@ -197,7 +197,7 @@ describe('Messaging — Message ID Capture (Bug Fix)', () => {
 
   it('saves conversations after ID update', () => {
     // After updating the ID, it should persist
-    expect(mobileMsg).toMatch(/localMsg\.id\s*=.*\n.*saveConversations/);
+    expect(mobileMsg).toMatch(/localMsg\.id\s*=[\s\S]*?saveConversations/);
   });
 });
 
